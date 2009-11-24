@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dialog closable="true" bottom="5" close="removeDialog(this)" columns="1" gap="5" icon="/icons/frontline_home_settings.png" left="5" modal="true" name="homeTabLogoDialog" right="5" text="i18n.hometab.settings" top="5">
+    <checkbox action="homeTabLogoVisibilityChanged(pnImgSource, this.selected)" icon="/icons/visible.png" name="cbHomeTabLogoVisible" text="i18n.common.visible"/>
+    <panel name="pnImgSource" gap="5" weightx="1">
+        <label icon="/icons/image.png" text="i18n.common.image.source"/>
+        <textfield columns="50" name="tfImageSource" weightx="1"/>
+        <button action="showOpenModeFileChooser(tfImageSource)" icon="/icons/browse.png" name="btBrowse" text="i18n.action.browse"/>
+    </panel>
+    <separator/>
+    <panel bottom="8" columns="2" gap="9" halign="center" left="8" right="8" top="8">
+        <button action="saveHomeTabSettings(homeTabLogoDialog)" halign="center" icon="/icons/tick.png" text="i18n.action.save"/>
+        <button action="removeDialog(homeTabLogoDialog)" halign="center" icon="/icons/cross.png" text="i18n.action.cancel"/>
+    </panel>
+</dialog>
