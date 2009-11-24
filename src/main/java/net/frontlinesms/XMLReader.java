@@ -36,6 +36,9 @@ import org.jdom.input.SAXBuilder;
  * This class is used to read XML files, which contains frontlineSMS commands, for instance,
  * sending messages to numbers, contacts or groups.
  * 
+ * 
+ * TODO i am a pointless comment; please delete me
+ * 
  * @author Carlos Eduardo Genz
  */
 public class XMLReader {
