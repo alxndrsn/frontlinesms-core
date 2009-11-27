@@ -3,10 +3,14 @@
  */
 package net.frontlinesms.plugins;
 
+import java.util.Locale;
+import java.util.Map;
+
 import org.springframework.context.ApplicationContext;
 
 import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.i18n.LanguageBundle;
 
 /**
  * Basic interface that all FrontlineSMS plugins must implement.
@@ -35,22 +39,31 @@ public interface PluginController {
 	public Object getTab(UiGeneratorController uiController);
 
 	/**
-	 * Gets the location of the Spring config for this plugin.
-	 * 
-	 * If the config is on the classpath, this should be detailed like:
-	 * <code>classpath:package1/package2/pluginname-spring-hibernate.xml</code>
-	 * 
+	 * <p>Gets the location of the Spring config for this plugin.</p>
+	 * <p>If the config is on the classpath, this should be detailed like:
+	 * <code>classpath:package1/package2/pluginname-spring-hibernate.xml</code></p>
 	 * @return the location of the Spring config for this plugin, or <code>null</code> if none is required.
 	 */
 	public String getSpringConfigPath();
 	
 	/**
-	 * Gets the location of the hibernate config for this plugin.
-	 * 
-	 * If the config is on the classpath, this should be detailed like:
-	 * <code>classpath:package1/package2/pluginname.hibernate.cfg.xml</code>
-	 * 
+	 * <p>Gets the location of the hibernate config for this plugin.</p>
+	 * <p>If the config is on the classpath, this should be detailed like:
+	 * <code>classpath:package1/package2/pluginname.hibernate.cfg.xml</code></p>
 	 * @return the location of the hibernate config for this plugin, or <code>null</code> if none is required.
 	 */
 	public String getHibernateConfigPath();
+
+	/**
+	 * Gets the default language bundle for text strings used in the UI of this plugin.
+	 * @return map of text keys to English translations of strings used in the UI of this plugin
+	 */
+	public Map<String, String> getDefaultTextResource();
+	
+	/**
+	 * Get the language bundle for text string to be used for the UI of this plugin in a particular language.
+	 * @param locale the {@link Locale} of the translation to use
+	 * @return map of text keys to translations of strings used in the UI of this plugin, or null if there is no translation available for this plugin.
+	 */
+	public Map<String, String> getTextResource(Locale locale);
 }
