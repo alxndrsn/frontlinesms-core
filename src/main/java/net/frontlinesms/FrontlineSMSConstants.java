@@ -23,7 +23,9 @@ import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
 // FIXME many of these constants are UI-specific
-@TextResourceKeyOwner(prefix={"ACTION_", "COMMON_", "I18N_", "MENUITEM_", "MESSAGE_", "SENTENCE_", "SMS_MODEM_STATUS_", "TOOLTIP_", 
+@TextResourceKeyOwner(prefix={"ACTION_", "COMMON_", "CONTACTS", "DATEFORMAT_", "I18N_", "MENUITEM_", "MESSAGE_",
+		"SENTENCE_", "SMS_DEVICE_STATUS_", "SMS_MODEM_STATUS_", "TOOLTIP_",
+		// Individual keys
 		"MONTH_KEYS", "UNKNOWN_NAME", "UNKNOWN_NOTES", })
 public final class FrontlineSMSConstants {
 	/** String for displaying the version of the application.  This has 1 substitution variable. */

@@ -6,7 +6,6 @@ package net.frontlinesms.ui.i18n;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
@@ -15,10 +14,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
-import net.frontlinesms.FrontlineSMSConstants;
-import net.frontlinesms.plugins.forms.ui.FormsThinletTabController;
-import net.frontlinesms.ui.*;
 
 import org.jdom.Document;
 import org.jdom.Element;
@@ -39,43 +34,6 @@ public class LanguageChecker {
 		public boolean accept(File file) {
 			return file.isDirectory() || file.getAbsolutePath().endsWith(".xml");
 		}
-	};
-	
-	/** Things that may appear in code to look like i18n keys, but which are not. */
-	private static final String[] IGNORED_KEYS = new String[] {
-		".csv",
-		"frontlinesupport@kiwanja.net",
-		"logs.zip",
-		"mail.kiwanja.net",
-		"org.smslib.handler.CATHandler",
-		"window.height",
-		"window.width",
-		"window.state",
-		"user.home",
-		"view.mode",
-		
-		// Database conf
-		"database.config",
-		"database.name",
-		"database.type",
-		"database.username",
-		"database.password",
-
-		"server.address",
-		"server.password",
-		"server.port",
-		"server.username",
-		
-		"hometab.logo.source",
-		"hometab.logo.visible",
-		"language.filename",
-		
-		"first.time.wizard",
-		"hometab.logo.source",
-		"hometab.logo.visible",
-		
-		"sms.internet.icons",
-		
 	};
 
 //> INSTANCE PROPERTIES
@@ -101,7 +59,7 @@ public class LanguageChecker {
 		// 2. parse the controller classes for i18n strings
 		for(Class<?> controllerClass : uiJavaControllerClasses) {
 			for(Field field : controllerClass.getDeclaredFields()) {
-				addFieldReference(field);
+				addFieldReference(controllerClass, field);
 			}
 		}
 		
@@ -134,13 +92,14 @@ public class LanguageChecker {
 //> INSTANCE HELPER METHODS	
 	/**
 	 * Adds a field reference to this {@link LanguageChecker}.
+	 * @param clazz The class that the field has come from 
 	 * @param field The field
 	 * @throws IllegalArgumentException 
 	 * @throws IllegalAccessException 
 	 */
-	private void addFieldReference(Field field) throws IllegalArgumentException, IllegalAccessException {
+	private void addFieldReference(Class<?> clazz, Field field) throws IllegalArgumentException, IllegalAccessException {
 		field.setAccessible(true);
-		if(shouldProcess(field)) {
+		if(shouldProcess(clazz, field)) {
 			trace("Processing field: " + field.getName());
 			if(field.getType().equals(String.class)) {
 				String fieldValue = field.get(null).toString();
@@ -253,37 +212,27 @@ public class LanguageChecker {
 		if(false) System.out.println(s);
 	}
 	
-	/**
-	 * @param field 
-	 * @return <code>true</code> if the field should be processed
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 */
-	private static final boolean shouldProcess(Field field) throws IllegalArgumentException, IllegalAccessException {
+	private boolean shouldProcess(Class clazz, Field field) throws IllegalArgumentException, IllegalAccessException {
 		if(Modifier.isStatic(field.getModifiers())
 				&& Modifier.isFinal(field.getModifiers())) {
-			if(field.getType().equals(String.class)) {
-				String fieldValue = field.get(null).toString();
-
-				// Check the key is not in the ignore list
-				if(isInIgnoredKeys(fieldValue)) return false;
-				
-				// Not in ignore list, so should be processed
-				return true;
-			} else if(field.getType().equals(String[].class)) {
-				// allow all string arrays
-				return true;
+			boolean prefixMatches = false;
+			for(String possiblePrefix : ((TextResourceKeyOwner) clazz.getAnnotation(TextResourceKeyOwner.class)).prefix()) {
+				if(field.getName().startsWith(possiblePrefix)) {
+					prefixMatches = true;
+					break;
+				}
 			}
-		}
-		// not static final String, so should be ignored
-		return false;
-	}
-
-	/** Check the key is not in the ignore list */
-	private static boolean isInIgnoredKeys(String fieldValue) {
-		for(String ignoreValue : IGNORED_KEYS) {
-			if(fieldValue.equals(ignoreValue)) {
-				return true;
+			
+			if(prefixMatches) {
+				if(field.getType().equals(String.class)) {
+					String fieldValue = field.get(null).toString();
+					
+					// Not in ignore list, so should be processed
+					return true;
+				} else if(field.getType().equals(String[].class)) {
+					// allow all string arrays
+					return true;
+				}
 			}
 		}
 		return false;

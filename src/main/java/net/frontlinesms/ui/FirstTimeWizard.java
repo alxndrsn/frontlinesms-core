@@ -42,7 +42,7 @@ import thinlet.FrameLauncher;
  * @author Alex Anderson
  */
 @SuppressWarnings("serial")
-@TextResourceKeyOwner(prefix="MESSAGE_")
+@TextResourceKeyOwner(prefix={"MESSAGE_", "I18N"})
 public class FirstTimeWizard extends FrontlineUI {
 	
 //> STATIC CONSTANTS

@@ -13,17 +13,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import net.frontlinesms.FrontlineSMSConstants;
-import net.frontlinesms.ui.DateSelecter;
-import net.frontlinesms.ui.FirstTimeWizard;
-import net.frontlinesms.ui.FrontlineUI;
-import net.frontlinesms.ui.HomeTabController;
-import net.frontlinesms.ui.MessagePanelController;
-import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
-import net.frontlinesms.ui.ThinletUiEventHandler;
-import net.frontlinesms.ui.UiGeneratorController;
-import net.frontlinesms.ui.UiGeneratorControllerConstants;
-
 /**
  * Main class for running the language tools from the CommandLine.
  * @author Alex
@@ -35,20 +24,8 @@ public class Main {
 	private static final String OUTPUT_DIRECTORY = "temp/tools/lang";
 	/** Directory of the language files, hardcoded for now */
 	private static final String LANGUAGEBUNDLE_DIRECTORY = "src/main/resources/resources/languages";
-	/** Names of the ui Controller classes, hardcoded for now */
-	private static final Class<?>[] UI_JAVA_CONTROLLER_CLASS_NAMES = {
-		DateSelecter.class,
-		FirstTimeWizard.class,
-		FrontlineSMSConstants.class,
-		FrontlineUI.class,
-		HomeTabController.class,
-		MessagePanelController.class,
-		SmsInternetServiceSettingsHandler.class,
-		UiGeneratorController.class,
-		UiGeneratorControllerConstants.class,
-	};
 	/** Directory of the XML files, hardcoded for now */
-	private static final String UI_XML_LAYOUT_DIRECTORY = "src/main/resources";
+	private static final String UI_XML_LAYOUT_DIRECTORY = "src/main/resources/ui";
 	/** Filter for sorting language files */
 	private static final FileFilter LANGUAGE_FILE_FILTER = new FileFilter() {
 		public boolean accept(File file) {
@@ -120,6 +97,12 @@ public class Main {
 		return classNames;
 	}
 	
+	/**
+	 * Gets the {@link Class} objects for the supplied list of class names.
+	 * @param classNames
+	 * @return A list of classes.
+	 * @throws ClassNotFoundException if there was a problem getting a reference to one of the classes.
+	 */
 	private static Collection<Class<?>> getClasses(Collection<String> classNames) throws ClassNotFoundException {
 		Set<Class<?>> classes = new HashSet<Class<?>>();
 		for(String className : classNames) {
@@ -130,27 +113,9 @@ public class Main {
 	
 	/**
 	 * @param <T>
-	 * @param clazz
-	 * @param potentialSubclasses
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	private static <T> Collection<Class<T>> getSubclasses(Class<T> clazz, Collection<Class<?>> potentialSubclasses) {
-		Set<Class<T>> subclasses = new HashSet<Class<T>>();
-		for (Iterator iterator = potentialSubclasses.iterator(); iterator.hasNext();) {
-			Class<?> potentialSubclass = (Class<?>) iterator.next();
-			if(clazz.isAssignableFrom(potentialSubclass)) {
-				subclasses.add((Class<T>) potentialSubclass);
-			}
-		}
-		return subclasses;
-	}
-	
-	/**
-	 * @param <T>
 	 * @param annotation 
 	 * @param potentialSubclasses
-	 * @return
+	 * @return All classes in the supplied list who have the requested annotation.
 	 */
 	@SuppressWarnings("unchecked")
 	private static <T extends Annotation> Collection<Class<T>> getAnnotatedClasses(Class<T> annotation, Collection<Class<?>> potentialSubclasses) {
@@ -164,14 +129,19 @@ public class Main {
 		return annotated;
 	}
 
+	/**
+	 * Show the usage of the {@link Main} class.
+	 * @param out
+	 */
 	private static void printUsage(PrintStream out) {
 		out.println("FrontlineSMS i18n Tools - USAGE");
 		out.println("TODO");
 	}
 
 	/**
-	 * 
+	 * Print the details of a report
 	 * @param out
+	 * @param checker 
 	 */
 	private static void output(PrintStream out, LanguageChecker checker) {
 		out.println(checker.getClass().getName() + " REPORT START ----------");
