@@ -20,6 +20,7 @@ import net.frontlinesms.smsdevice.SmsModemStatus;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
 import net.frontlinesms.smsdevice.internet.SmsInternetServiceStatus;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
+import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
 import org.apache.log4j.Logger;
 import org.smslib.AbstractATHandler;
@@ -32,6 +33,7 @@ import serial.NoSuchPortException;
  * Event handler for the Phones tab and associated dialogs
  * @author Alex
  */
+@TextResourceKeyOwner(prefix={"COMMON_", "I18N_", "MESSAGE_"})
 public class PhoneTabController implements SmsDeviceEventListener, ThinletUiEventHandler {
 //> STATIC CONSTANTS
 	/** The fully-qualified name of the default {@link CATHandler} class. */

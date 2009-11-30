@@ -11,3 +11,6 @@ bin/
 
 # FrontlineSMS resources bundle - this should be generated at build-time
 src/main/resources/resources.zip
+
+# Temporary working directory
+temp/

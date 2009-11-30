@@ -32,6 +32,7 @@ import net.frontlinesms.arcane.ArcaneDataImporter;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.LanguageBundle;
+import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 import thinlet.FrameLauncher;
 
 /**
@@ -41,6 +42,7 @@ import thinlet.FrameLauncher;
  * @author Alex Anderson
  */
 @SuppressWarnings("serial")
+@TextResourceKeyOwner(prefix="MESSAGE_")
 public class FirstTimeWizard extends FrontlineUI {
 	
 //> STATIC CONSTANTS

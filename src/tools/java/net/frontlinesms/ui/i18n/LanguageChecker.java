@@ -34,35 +34,10 @@ import thinlet.Thinlet;
 public class LanguageChecker {
 	
 //> STATIC CONSTANTS
-	/** Directory to output generated files to */
-	private static final File OUTPUT_DIRECTORY = new File("out");
-	/** Directory of the language files, hardcoded for now */
-	private static final String LANGUAGEBUNDLE_DIRECTORY = "src/main/resources/resources/languages";
-	/** Names of the ui Controller classes, hardcoded for now */
-	private static final Class<?>[] UI_JAVA_CONTROLLER_CLASS_NAMES = {
-		DateSelecter.class,
-		FirstTimeWizard.class,
-		FormsThinletTabController.class,
-		FrontlineSMSConstants.class,
-		FrontlineUI.class,
-		HomeTabController.class,
-		MessagePanelController.class,
-		SmsInternetServiceSettingsHandler.class,
-		UiGeneratorController.class,
-		UiGeneratorControllerConstants.class,
-	};
-	/** Directory of the XML files, hardcoded for now */
-	private static final String UI_XML_LAYOUT_DIRECTORY = "src/main/resources";
 	/** Filter for sorting XML layout files */
 	private static final FileFilter LAYOUT_FILE_FILTER = new FileFilter() {
 		public boolean accept(File file) {
 			return file.isDirectory() || file.getAbsolutePath().endsWith(".xml");
-		}
-	};
-	/** Filter for sorting language files */
-	private static final FileFilter LANGUAGE_FILE_FILTER = new FileFilter() {
-		public boolean accept(File file) {
-			return file.getName().startsWith("frontlineSMS") && file.getName().endsWith(".properties");
 		}
 	};
 	
@@ -122,7 +97,7 @@ public class LanguageChecker {
 	 * @throws IllegalAccessException 
 	 * @throws IllegalArgumentException 
 	 */
-	private LanguageChecker(Class<?>[] uiJavaControllerClasses, File uiXmlLayoutDirectory) throws JDOMException, IOException, IllegalArgumentException, IllegalAccessException {
+	LanguageChecker(Class<?>[] uiJavaControllerClasses, File uiXmlLayoutDirectory) throws JDOMException, IOException, IllegalArgumentException, IllegalAccessException {
 		// 2. parse the controller classes for i18n strings
 		for(Class<?> controllerClass : uiJavaControllerClasses) {
 			for(Field field : controllerClass.getDeclaredFields()) {
@@ -133,40 +108,6 @@ public class LanguageChecker {
 		// 3. parse the XML layout files for i18n strings, making sure to check for non-i18n strings as well
 		extractI18nKeys(uiXmlLayoutDirectory);
 	}
-
-//> MAIN METHOD
-	/**
-	 * Run the checker and produce a report.
-	 * @param args 
-	 * @throws Throwable 
-	 */
-	public static void main(String[] args) throws Throwable {
-		LanguageChecker checker = new LanguageChecker(
-				UI_JAVA_CONTROLLER_CLASS_NAMES,
-				new File(UI_XML_LAYOUT_DIRECTORY));
-		
-		checker.output(System.out);
-		
-		TranslationEmitter emitter = new TranslationEmitter(InternationalisationUtils.getLanguageBundle(new File(LANGUAGEBUNDLE_DIRECTORY, "frontlineSMS.properties")), OUTPUT_DIRECTORY);
-		
-		for(File languageBundle : new File(LANGUAGEBUNDLE_DIRECTORY).listFiles(LANGUAGE_FILE_FILTER)) {
-			I18nReport report = checker.produceReport(languageBundle);
-			report.output(System.out, false);
-			emitter.processBundle(languageBundle, report);
-		}
-	}
-
-	/**
-	 * 
-	 * @param out
-	 */
-	public void output(PrintStream out) {
-		out.println(this.getClass().getName() + " REPORT START ----------");
-		out.println("\tin code: " + this.i18nKeysInCode.size());
-		out.println("\tin XML : " + this.i18nKeysInXml.size());
-		out.println("---------- REPORT START " + this.getClass().getName());
-	}
-
 
 //> ACCESSORS
 	/**
@@ -243,7 +184,7 @@ public class LanguageChecker {
 	 * @throws IllegalArgumentException 
 	 * @throws SecurityException 
 	 */
-	private I18nReport produceReport(File languageBundle) throws SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException {
+	I18nReport produceReport(File languageBundle) throws SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException {
 		I18nReport report = new I18nReport(this, languageBundle);
 		return report;
 	}
@@ -323,13 +264,9 @@ public class LanguageChecker {
 				&& Modifier.isFinal(field.getModifiers())) {
 			if(field.getType().equals(String.class)) {
 				String fieldValue = field.get(null).toString();
-				
+
 				// Check the key is not in the ignore list
-				for(String ignoreValue : IGNORED_KEYS) {
-					if(fieldValue.equals(ignoreValue)) {
-						return false;
-					}
-				}
+				if(isInIgnoredKeys(fieldValue)) return false;
 				
 				// Not in ignore list, so should be processed
 				return true;
@@ -339,6 +276,16 @@ public class LanguageChecker {
 			}
 		}
 		// not static final String, so should be ignored
+		return false;
+	}
+
+	/** Check the key is not in the ignore list */
+	private static boolean isInIgnoredKeys(String fieldValue) {
+		for(String ignoreValue : IGNORED_KEYS) {
+			if(fieldValue.equals(ignoreValue)) {
+				return true;
+			}
+		}
 		return false;
 	}
 }

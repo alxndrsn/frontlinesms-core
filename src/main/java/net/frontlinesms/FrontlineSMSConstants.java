@@ -19,14 +19,12 @@
  */
 package net.frontlinesms;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import net.frontlinesms.data.domain.Contact;
-import net.frontlinesms.ui.i18n.InternationalisationUtils;
+import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
 // FIXME many of these constants are UI-specific
+@TextResourceKeyOwner(prefix={"ACTION_", "COMMON_", "I18N_", "MENUITEM_", "MESSAGE_", "SENTENCE_", "SMS_MODEM_STATUS_", "TOOLTIP_", 
+		"MONTH_KEYS", "UNKNOWN_NAME", "UNKNOWN_NOTES", })
 public final class FrontlineSMSConstants {
 	/** String for displaying the version of the application.  This has 1 substitution variable. */
 	public static final String I18N_APP_VERSION = "application.version";

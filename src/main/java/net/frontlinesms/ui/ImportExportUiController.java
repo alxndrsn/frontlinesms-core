@@ -22,11 +22,13 @@ import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
+import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
 /**
  * UI Methods for Importing and Exporting data from FrontlineSMS.
  * @author Alex
  */
+@TextResourceKeyOwner(prefix="MESSAGE_")
 public class ImportExportUiController implements ThinletUiEventHandler {
 //> STATIC CONSTANTS
 	
