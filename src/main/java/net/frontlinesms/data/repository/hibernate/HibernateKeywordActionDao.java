@@ -35,13 +35,6 @@ public class HibernateKeywordActionDao extends BaseHibernateDao<KeywordAction> i
 		return super.getList(criteria);
 	}
 
-	/** @see KeywordActionDao#getSurveysActions() */
-	public Collection<KeywordAction> getSurveysActions() {
-		DetachedCriteria criteria = super.getCriterion();
-		criteria.add(Restrictions.eq(KeywordAction.Field.TYPE.getFieldName(), KeywordAction.TYPE_SURVEY));
-		return super.getList(criteria);
-	}
-
 	/** @see KeywordActionDao#saveKeywordAction(KeywordAction) */
 	public void saveKeywordAction(KeywordAction action) {
 		super.saveWithoutDuplicateHandling(action);

@@ -36,7 +36,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.mail.MessagingException;
 
@@ -108,8 +107,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/** The INTERNAL NAME of the tab (a thinlet UI component) currently active */
 	private String currentTab;
 	
-	/** Flag indicating whether this instance of UIGeneratorController is using the classic or advanced GUI */
-	private final boolean classicMode;
 	/** The manager of {@link SmsDevice}s */
 	private final SmsDeviceManager phoneManager;
 	/** Manager of {@link EmailAccount}s and {@link EmailSender}s */
@@ -250,8 +247,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		
 		// Load the data mode from the ui.properties file
 		UiProperties uiProperties = UiProperties.getInstance();
-		this.classicMode = uiProperties.isViewModeClassic();
-		LOG.debug("Classic Mode [" + this.classicMode + "]");
 		LOG.debug("Detect Phones [" + detectPhones + "]");
 		
 		try {
@@ -271,48 +266,35 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 					: "");
 			
 			Object tabbedPane = find(COMPONENT_TABBED_PANE);
-			setBoolean(find("menu_tabs"), VISIBLE, !this.classicMode);
+			setBoolean(find("menu_tabs"), VISIBLE, true); // FIXME i doubt this line is necessary.  Previously switched depending if we were using classic or standard view
 			this.phoneTabController = new PhoneTabController(this);
 			this.contactsTabController = new ContactsTabController(this, this.contactDao, this.groupDao);
-			if (this.classicMode) {
-				add(tabbedPane, this.contactsTabController.getTab());
-				add(tabbedPane, loadComponentFromFile(UI_FILE_SURVEY_MANAGER_TAB));
-				add(tabbedPane, loadComponentFromFile(UI_FILE_SURVEY_ANALYST_TAB));
-				addSendTab(tabbedPane);
-				add(tabbedPane, loadComponentFromFile(UI_FILE_MESSAGE_TRACKER_TAB));
-				add(tabbedPane, loadComponentFromFile(UI_FILE_RECEIVE_CONSOLE_TAB));
-				add(tabbedPane, loadComponentFromFile(UI_FILE_REPLY_MANAGER_TAB));
-				add(tabbedPane, phoneTabController.getTab());
-				setText(find(COMPONENT_MENU_SWITCH_MODE), InternationalisationUtils.getI18NString(MENUITEM_SWITCH_TO_ADVANCED_VIEW));
-				currentTab = TAB_GROUP_MANAGER;
-			} else {
-				this.homeTabController = new HomeTabController(this);
-				if (uiProperties.isTabVisible("hometab")) {
-					add(tabbedPane, this.homeTabController.getTab());
-//					addHomeTab(tabbedPane, uiProperties);
-					setSelected(find(COMPONENT_MI_HOME), true);
-				}
-				add(tabbedPane, this.contactsTabController.getTab());
-				if (uiProperties.isTabVisible("keywordstab")) {
-					addKeywordsTab(tabbedPane);
-					setSelected(find(COMPONENT_MI_KEYWORD), true);
-				}
-				addMessagesTab(tabbedPane);
-				if (uiProperties.isTabVisible("emailstab")) {
-					addEmailsTab(tabbedPane);
-					setSelected(find(COMPONENT_MI_EMAIL), true);
-				}
-				add(tabbedPane, phoneTabController.getTab());
-				
-				// Add plugins tabs
-				for(PluginController controller : frontlineController.getPluginControllers()) {
-					addPluginTextResources(controller);
-					add(tabbedPane, controller.getTab(this));
-				}
-				
-				currentTab = TAB_HOME;
-				setText(find(COMPONENT_MENU_SWITCH_MODE), InternationalisationUtils.getI18NString(MENUITEM_SWITCH_TO_CLASSIC_VIEW));
+
+
+			this.homeTabController = new HomeTabController(this);
+			if (uiProperties.isTabVisible("hometab")) {
+				add(tabbedPane, this.homeTabController.getTab());
+				setSelected(find(COMPONENT_MI_HOME), true);
 			}
+			add(tabbedPane, this.contactsTabController.getTab());
+			if (uiProperties.isTabVisible("keywordstab")) {
+				addKeywordsTab(tabbedPane);
+				setSelected(find(COMPONENT_MI_KEYWORD), true);
+			}
+			addMessagesTab(tabbedPane);
+			if (uiProperties.isTabVisible("emailstab")) {
+				addEmailsTab(tabbedPane);
+				setSelected(find(COMPONENT_MI_EMAIL), true);
+			}
+			add(tabbedPane, phoneTabController.getTab());
+			
+			// Add plugins tabs
+			for(PluginController controller : frontlineController.getPluginControllers()) {
+				addPluginTextResources(controller);
+				add(tabbedPane, controller.getTab(this));
+			}
+			
+			currentTab = TAB_HOME;
 
 			statusBarComponent = find(COMPONENT_STATUS_BAR);
 			progressBarComponent = find(COMPONENT_PROGRESS_BAR);
@@ -332,12 +314,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			showReceivedMessagesComponent = find(COMPONENT_RECEIVED_MESSAGES_TOGGLE);
 			showSentMessagesComponent = find(COMPONENT_SENT_MESSAGES_TOGGLE);
 			
-			if (this.classicMode) {
-				deactivate(find(COMPONENT_SURVEY_DETAILS));
-				deactivate(find(COMPONENT_REPLY_MANAGER_DETAILS));
-				replyManager_enableButtons(false);
-			} 
-			
 			// Try to add the emulator number to the contacts
 			try {
 				Contact testContact = new Contact(TEST_NUMBER_NAME, EMULATOR_MSISDN, "", "", "", true);
@@ -346,12 +322,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				LOG.debug("Contact already exists", ex);
 			}
 			
-			if(classicMode) {
-				classicMode_initListsForPaging();
-				this.contactsTabController.refresh();
-			} else {
-				advancedMode_initListsForPaging();
-			}
+			advancedMode_initListsForPaging();
+
 			// Initialise the phone manager, and start auto-detection of connected phones.
 			setStatus(InternationalisationUtils.getI18NString(MESSAGE_INITIALISING_PHONE_MANAGER));
 
@@ -457,97 +429,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_MESSAGE))) putProperty(o, PROPERTY_FIELD, Message.Field.MESSAGE_CONTENT);
 			}
 		}
-	}
-	
-	/**
-	 * Initialises the Classic Mode UI list components to be ready for pagination.
-	 */
-	private final void classicMode_initListsForPaging() {
-		// MESSAGE TRACKER LISTS \\
-		Object pendingPanel = find("messageTracker_pendingMessagePanel");
-		addPaginationToTable(pendingPanel, "messageTracker_refreshPendingMessageList", true);
-		
-		Object failedPanel = find("messageTracker_failedMessagePanel");
-		addPaginationToTable(failedPanel, "messageTracker_refreshFailedMessageList", true);
-		
-		Object contactsListPanel = find("groupManager_contactListPanel");
-		addPaginationToTable(contactsListPanel, "classicMode_refreshContactManager", true);
-
-		Object analystMessagePanel = find("analystMessagesPanel");
-		addPaginationToTable(analystMessagePanel, "surveyAnalystMessagesRefresh", true);
-		
-		Object analystMessagePanel2 = find("analystMessagesPanel_unregistered");
-		addPaginationToTable(analystMessagePanel2, "surveyAnalystMessagesRefresh_unregistered", true);
-		
-		Object receiveConsolePanel = find("receiveConsolePanel");
-		addPaginationToTable(receiveConsolePanel, "updatePages_receiveConsole", true);
-		
-		Object sendConsole_messageListPanel = find("sendConsole_messageListPanel");
-		addPaginationToTable(sendConsole_messageListPanel, "updatePages_sendConsoleMessageList", true);
-	}
-	
-	public void updatePages_sendConsoleMessageList() {
-		Object table = find(COMPONENT_SEND_CONSOLE_MESSAGE_LIST);
-		List<? extends Message> listContents = getListContents(table, Message.class);
-		int count = listContents.size();
-		int pageNumber = getListCurrentPage(table);
-		int listLimit = getListLimit(table);
-		removeAll(table);
-		int fromIndex = (pageNumber - 1) * listLimit;
-		int toIndex = Math.min(fromIndex + listLimit, count);
-		for(Message message : listContents.subList(fromIndex, toIndex)) {
-			add(table, sendConsole_getRow(message));
-		}
-		updatePageNumber(getParent(table), count, pageNumber, listLimit);
-	}
-	
-	public void updatePages_receiveConsole() {
-		Object table = find(COMPONENT_RECEIVE_CONSOLE_MESSAGE_LIST);
-		List<? extends Message> listContents = getListContents(table, Message.class);
-		int count = listContents.size();
-		int pageNumber = getListCurrentPage(table);
-		int listLimit = getListLimit(table);
-		removeAll(table);
-		int fromIndex = (pageNumber - 1) * listLimit;
-		int toIndex = Math.min(fromIndex + listLimit, count);
-		for(Message message : listContents.subList(fromIndex, toIndex)) {
-			add(table, receiveConsole_getRow(message));
-		}
-		updatePageNumber(getParent(table), count, pageNumber, listLimit);
-	}
-
-	public void surveyAnalystMessagesRefresh() {
-		Object table = find(COMPONENT_ANALYST_MESSAGES);
-		List<Message> listContents = getListContents(table, Message.class);
-		int count = listContents.size();
-		int pageNumber = getListCurrentPage(table);
-		int listLimit = getListLimit(table);
-		removeAll(table);
-		int fromIndex = (pageNumber - 1) * listLimit;
-		int toIndex = Math.min(fromIndex + listLimit, count);
-		for(Message message : listContents.subList(fromIndex, toIndex)) {
-			Contact c = contactDao.getFromMsisdn(message.getSenderMsisdn());
-			String displayName;
-			if(c == null) displayName = message.getSenderMsisdn();
-			else displayName = c.getDisplayName();
-			add(table, getAnalystRow(message, displayName));
-		}
-		updatePageNumber(getParent(table), count, pageNumber, listLimit);
-	}
-	public void surveyAnalystMessagesRefresh_unregistered() {
-		Object table = find(COMPONENT_ANALYST_MESSAGES_UNREGISTERED);
-		List<Message> listContents = getListContents(table, Message.class);
-		int count = listContents.size();
-		int pageNumber = getListCurrentPage(table);
-		int listLimit = getListLimit(table);
-		removeAll(table);
-		int fromIndex = (pageNumber - 1) * listLimit;
-		int toIndex = Math.min(fromIndex + listLimit, count);
-		for(Message message : listContents.subList(fromIndex, toIndex)) {
-			String displayName = message.getSenderMsisdn();
-			add(table, getAnalystRow(message, displayName));
-		}
-		updatePageNumber(getParent(table), count, pageNumber, listLimit);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -698,16 +579,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		setMethod(btNext, ATTRIBUTE_ACTION, "nextPage(" + listName + ",pagePanel)", root, this);
 	}
 
-	private void addSendTab(Object tabbedPane) {
-		Object sendTab = loadComponentFromFile(UI_FILE_SEND_CONSOLE_TAB);
-		Object pnSend = find(sendTab, COMPONENT_PN_SEND);
-		MessagePanelController messagePanelController = new MessagePanelController(this);
-		Object pnMessage = messagePanelController.getPanel();
-		add(pnSend, pnMessage, 0);
-		messagePanelController.setSendButtonMethod(this, sendTab, "sendConsole_sendSms(tfMessage, sendConsole_loneRecipient, sendConsole_groupTree, sendConsole_modemList)");
-		add(tabbedPane, sendTab);
-	}
-
 	/**
 	 * Show the message details dialog.
 	 */
@@ -754,154 +625,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		return senderDisplayName;
 	}
 	
-	/** 
-	 * Switch mode from CLASSIC to ADVANCED or vice-versa.
-	 */
-	public void doSwitchMode() {
-		LOG.trace("ENTER");
-		boolean newMode = !this.classicMode;
-		LOG.debug("Mode [" + newMode + "]");
-		savePropertiesBeforeChangingMode(newMode);
-		reloadUI(false);
-		LOG.trace("EXIT");
-	}
-
-	/**
-	 * Request the modem manager to send an SMS message.
-	 * 
-	 * @param messageText The message content to be sent.
-	 * @param sendConsoleLoneRecipient Checkbox specifying whether to send to a specific recipient rather than a whole group.
-	 * @param sendConsoleGroupTree Tree showing all the groups.
-	 * @param sendConsoleHandsetList List of attached and active SMS modems.
-	 */
-	public void sendConsole_sendSms(Object tfMessage, Object sendConsoleLoneRecipient, Object sendConsoleGroupTree, Object sendConsoleHandsetList) {
-		LOG.trace("ENTER");
-		// We need to work out if the user has requested specific handsets for these messages.
-		// If he has, we should send specifically on these handsets, otherwise we should round-
-		// robin.
-		Object selectedHandset = getSelectedItem(sendConsoleHandsetList);
-
-		String messageText = getText(tfMessage);
-		
-		LOG.debug("Message [" + messageText + "]");
-		
-		// If no text has been entered in the relevant field, warn the user rather than sending empty messages.
-		if (messageText.length() == 0) {
-			alert(InternationalisationUtils.getI18NString(MESSAGE_BLANK_TEXT));
-			LOG.trace("EXIT");
-			return;
-		}
-		// Check if the user has selected "Send to Lone Recipient" option.  If this is the case,
-		// the message is only to be sent to the number specified in the lone recipient
-		// textfield.  Obviously if no number has been specified in this field, then we can't
-		// send them a message.  Again, in this case we alert the user to his mistake.
-		if (!isEnabled(sendConsoleGroupTree)) {
-			LOG.debug("User decided to send a message directly to a number.");
-			String toMsisdn = getText(sendConsoleLoneRecipient);
-			LOG.debug("Number [" + toMsisdn + "]");
-			if (toMsisdn.length() == 0) {
-				alert(InternationalisationUtils.getI18NString(MESSAGE_BLANK_PHONE_NUMBER));
-				LOG.trace("EXIT");
-				return;
-			}
-			// It's a one-off message to a single recipient!  If any phones have
-			// been selected from the list, we should send it from the first one.
-			if (selectedHandset == null || getIndex(sendConsoleHandsetList, selectedHandset) == 0) {
-				LOG.debug("User didn't select the desired phone, leaving to frontlineSMS deal with it.");
-				// Here, we have not chosen a specific phone to send to.  In this case, we just
-				// pass it up to the frontline controller to deal with.
-				frontlineController.sendTextMessage(toMsisdn, messageText);
-			} else {
-				LOG.debug("Sending message using phone [" + getDeviceHandler(selectedHandset) + "]");
-				// The message is to be sent to the first selected phone on the handset list.  Once
-				// we have sent the message, we need to disable the "Lone Recipient" form.
-				Message m = Message.createOutgoingMessage(System.currentTimeMillis(), "", toMsisdn, messageText);
-				messageFactory.saveMessage(m);
-				getDeviceHandler(selectedHandset).sendSMS(m);
-				deactivate(sendConsoleLoneRecipient);
-			}
-		} else {
-			// The user has opted to send this message to one or more groups in the Group Tree.
-			// We need to determine the Contacts in the UNION of all selected groups, and send
-			// the message to these contacts.  If no group has been selected, alert the user to
-			// his mistake.
-			Object selectedItem = getSelectedItem(sendConsoleGroupTree);
-			if (selectedItem == null) {
-				alert(InternationalisationUtils.getI18NString(MESSAGE_NO_GROUP_SELECTED));
-				LOG.trace("EXIT");
-				return;
-			}
-			LOG.debug("User decided to send a message to groups.");
-			Set<Contact> toContacts = new HashSet<Contact>();
-			Group toGroup = getGroup(selectedItem);
-			LOG.debug("Getting contacts from Group [" + toGroup.getName() + "]");
-			boolean hasMembers = toGroup.getAllMembersCount() > 0;
-			for (Contact c : toGroup.getAllMembers()) {
-				if (c.isActive()) {
-					LOG.debug("Adding contact [" + c.getName() + "] to the send list.");
-					toContacts.add(c);
-				}
-			}
-			
-			if (toContacts.size() == 0 ) {
-				LOG.debug("No contacts to send, or selected groups contain only dormants.");
-				String key = hasMembers ? MESSAGE_ONLY_DORMANTS : MESSAGE_GROUP_NO_MEMBERS;
-				alert(InternationalisationUtils.getI18NString(key));
-				LOG.trace("EXIT");
-				return;
-			}
-			
-			for (Contact c : toContacts) {
-				// It's a one-off message to a single recipient!  If any phones have
-				// been selected from the list, we should send it from the first one.
-				if (selectedHandset == null || getIndex(sendConsoleHandsetList, selectedHandset) == 0) {
-					LOG.debug("User didn't select the desired phone, leaving to frontlineSMS deal with it.");
-					// Here, we have not chosen a specific phone to send to.  In this case, we just
-					// pass it up to the frontline controller to deal with.
-					frontlineController.sendTextMessage(c.getMsisdn(), messageText);
-				} else {
-					LOG.debug("Sending message using phone [" + getDeviceHandler(selectedHandset) + "]");
-					// The message is to be sent to the first selected phone on the handset list.  Once
-					// we have sent the message, we need to disable the "Lone Recipient" form.
-					Message m = Message.createOutgoingMessage(System.currentTimeMillis(), "", c.getMsisdn(), messageText);
-					messageFactory.saveMessage(m);
-					getDeviceHandler(selectedHandset).sendSMS(m);
-				}
-				
-			}
-		}
-		sendConsole_refreshMessageList();
-		LOG.trace("EXIT");
-	}
-	
-	public void sendConsole_selectionChanged(Object tree) {
-		Object sel = getSelectedItem(tree);
-		Group g = getGroup(sel);
-		numberToSend = 0;
-		TreeSet<Contact> toSend = new TreeSet<Contact>();
-		for (Contact c : g.getAllMembers()) {
-			if (c.isActive()) {
-				toSend.add(c);
-			}
-		}
-		numberToSend = toSend.size();
-		updateCost();
-	}
-
-	/**
-	 * Toggles the lone recipient form's enabled/disabled status on the Send Console.
-	 * 
-	 * @param text The string captured in the group name text field.
-	 * @param groupList The list to be activated or deactivated.
-	 */
-	public void sendConsole_loneRecipientToggle(String text, Object groupList) {
-		if(!text.equals("")) {			
-			deactivate(groupList);
-		} else {
-			activate(groupList);
-		}
-	}
-	
 	/**
 	 * Checks if the supplied group is a real group, or just one of the default groups
 	 * used for visualization.
@@ -910,19 +633,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 */
 	boolean isDefaultGroup(Group group) {
 		return group == this.rootGroup || group == this.ungroupedContacts || group == this.unnamedContacts;
-	}
-
-	/** 
-	 * Refreshes the keyword list on the reply manager. 
-	 */
-	private void replyManager_refreshKeywordList() {
-		Object replyManagerListComponent = find(COMPONENT_REPLY_MANAGER_LIST);
-		removeAll(replyManagerListComponent);
-		for (KeywordAction action : keywordActionDao.getReplyActions()) {
-			add(replyManagerListComponent, getReplyManagerRow(action));
-		}
-		replyManager_enableButtons(getSelectedItems(replyManagerListComponent).length > 0);
-		setEnabled(find(COMPONENT_REPLY_MANAGER_CREATE_BUTTON), true);
 	}
 
 	/** 
@@ -1112,160 +822,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		setIcon(item, Icon.SURVEY);
 		return item;
 	}
-	
-	/**
-	 * This method should be called when the current selection in the Survey Manager's survey list
-	 * changes. This will update the displayed survey details to those of the newly-selected survey.
-	 * @param surveyList
-	 * @param surveyDetails
-	 */
-	public void surveyManager_selectionChanged(Object surveyList, Object surveyDetails) {
-		KeywordAction selectedSurvey = getKeywordAction(getSelectedItem(surveyList));
-		surveyManager_updateSurveyDetails(surveyDetails, selectedSurvey, isEnabled(surveyDetails));
-	}
-
-	/**
-	 * Deactivates the surveyDetails pane on the survey manager.
-	 * @param surveyList
-	 * @param surveyDetails
-	 */
-	public void editSurveyDetails(Object surveyList, Object surveyDetails) {
-		KeywordAction selectedSurvey = getKeywordAction(getSelectedItem(surveyList));
-		surveyManager_updateSurveyDetails(surveyDetails, selectedSurvey, true);
-		requestFocus(find(surveyDetails, COMPONENT_SURVEY_MANAGER_SURVEY_DESCRIPTION));
-	}
-
-	/**
-	 * Deactivates the survey edit window.
-	 * @param surveyDetails
-	 */
-	public void cancelEditSurveyDetails(Object surveyDetails) {
-		surveyManager_updateSurveyDetails(surveyDetails, getKeywordAction(surveyDetails), false);
-	}
 
 	private void addDatePanel(Object dialog) {
 		Object datePanel = loadComponentFromFile(UI_FILE_DATE_PANEL);
 		//Adds to the end of the panel, before the button
 		add(dialog, datePanel, getItems(dialog).length - 2);
-	}
-	
-	/**
-	 * Activates the survey edit window and clears its contents so that a new survey can be entered.
-	 * @param surveyList
-	 * @param surveyDetails
-	 */
-	public void newSurveyDetails(Object surveyList, Object surveyDetails) {
-		surveyManager_updateSurveyDetails(surveyDetails, null, true);
-		requestFocus(find(surveyDetails, COMPONENT_SURVEY_MANAGER_SURVEY_KEYWORD));
-	}
-
-	/**
-	 * Updates the Survey Manager's survey details pane with details of the survey attached to the supplied keyword.
-	 * @param surveyDetails The survey details pane UI component.
-	 * @param keyword The keyword the survey applies to
-	 * @param allowEdit indicates whether the details pane should be enabled for editing
-	 */
-	private void surveyManager_updateSurveyDetails(Object surveyDetails, KeywordAction act, boolean allowEdit) {
-		setAttachedObject(surveyDetails, act);
-		Keyword keyword = act == null ? null : act.getKeyword();
-		setText(find(surveyDetails, COMPONENT_SURVEY_MANAGER_SURVEY_KEYWORD), keyword == null ? "" : keyword.getKeyword());
-		setText(find(surveyDetails, COMPONENT_SURVEY_MANAGER_SURVEY_DESCRIPTION), keyword == null ? "" : keyword.getDescription());
-		
-		setText(find(surveyDetails, COMPONENT_TF_START_DATE), keyword == null ? "" : InternationalisationUtils.getDateFormat().format(act.getStartDate()));
-		
-		Object endDate = find(surveyDetails, COMPONENT_TF_END_DATE);
-		String toSet = "";
-		if (keyword != null) {
-			if (act.getEndDate() == DEFAULT_END_DATE) {
-				toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
-			} else {
-				toSet = InternationalisationUtils.getDateFormat().format(act.getEndDate());
-			}
-		}
-		setText(endDate, toSet);
-		
-		if (allowEdit) {
-			activate(surveyDetails);
-			setEnabled(find(surveyDetails, COMPONENT_SURVEY_MANAGER_SURVEY_KEYWORD), keyword == null);
-			setEnabled(find(COMPONENT_SURVEY_MANAGER_NEW_BUTTON), false);
-			setEnabled(find(COMPONENT_SURVEY_MANAGER_EDIT_BUTTON), false);
-			setEnabled(find(COMPONENT_SURVEY_MANAGER_DELETE_BUTTON), false);
-		} else {
-			deactivate(surveyDetails);
-			setEnabled(find(COMPONENT_SURVEY_MANAGER_NEW_BUTTON), true);
-			setEnabled(find(COMPONENT_SURVEY_MANAGER_EDIT_BUTTON), keyword != null);
-			setEnabled(find(COMPONENT_SURVEY_MANAGER_DELETE_BUTTON), keyword != null);
-		}
-	}
-
-	/**
-	 * Creates a new survey, or update if it already exists.
-	 * 
-	 * @param surveyDetails
-	 * @param live
-	 */
-	public void surveyManager_saveSurveyDetails(Object surveyDetails) {
-		LOG.trace("ENTER");
-		KeywordAction action = getKeywordAction(surveyDetails);
-		String description = getText(find(surveyDetails, COMPONENT_SURVEY_MANAGER_SURVEY_DESCRIPTION));
-		String startDate = getText(find(surveyDetails, COMPONENT_TF_START_DATE));
-		String endDate = getText(find(surveyDetails, COMPONENT_TF_END_DATE));
-		LOG.debug("Description [" + description + "]");
-		LOG.debug("Start Date [" + startDate + "]");
-		LOG.debug("End Date [" + endDate + "]");
-		if (startDate.equals("")) {
-			LOG.debug("No start date set, so we set to [" + InternationalisationUtils.getDefaultStartDate() + "]");
-			startDate = InternationalisationUtils.getDefaultStartDate();
-		}
-		long start;
-		long end;
-		try {
-			Date ds = InternationalisationUtils.parseDate(startDate); 
-			if (!endDate.equals("") && !endDate.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
-				Date de = InternationalisationUtils.parseDate(endDate);
-				if (!Utils.validateDates(ds, de)) {
-					LOG.debug("Start date is not before the end date");
-					alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
-					LOG.trace("EXIT");
-					return;
-				}
-				end = de.getTime();
-			} else {
-				end = DEFAULT_END_DATE;
-			}
-			start = ds.getTime();
-		} catch (ParseException e) {
-			LOG.debug("Wrong format for date", e);
-			alert(InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
-			LOG.trace("EXIT");
-			return;
-		} 
-		if (action == null) {
-			String newWordString = getText(find(surveyDetails, COMPONENT_SURVEY_MANAGER_SURVEY_KEYWORD));
-			Keyword keyword;
-			try {
-				keyword = new Keyword(newWordString, description);
-				this.keywordDao.saveKeyword(keyword);
-			} catch (DuplicateKeyException e) {
-				alert(InternationalisationUtils.getI18NString(MESSAGE_KEYWORD_EXISTS));
-				LOG.trace("EXIT");
-				return;
-			}
-			LOG.debug("Creating survey for keyword [" + newWordString + "]");
-			KeywordAction newKeywordAction = KeywordAction.createSurveyAction(keyword, start, end);
-			keywordActionDao.saveKeywordAction(newKeywordAction);
-		} else {
-			// HAHA they cannae change the keyword!
-			Keyword keyword = action.getKeyword();
-			LOG.debug("Updating keyword [" + keyword.getKeyword() + "]");
-			keyword.setDescription(description);
-			LOG.debug("Updating action [" + action + "]. Setting new values!");
-			action.setStartDate(start);
-			action.setEndDate(end);
-		}
-		surveyManager_refresh();
-		surveyManager_updateSurveyDetails(surveyDetails, null, false);
-		LOG.trace("EXIT");
 	}
 	
 	/**
@@ -1680,18 +1241,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		enableKeywordActionFields(list, find(COMPONENT_KEY_ACT_PANEL));
 	}
 	
-	public void sendConsole_removeMessages() {
-		removeSelectedFromMessageList(find(COMPONENT_SEND_CONSOLE_MESSAGE_LIST));
-	}
-	
-	public void messageTracker_removeMessages() {
-		removeSelectedFromMessageList(find(COMPONENT_MESSAGE_TRACKER_FAILED_MESSAGE_LIST));
-	}
-	
-	public void receiveConsole_removeMessages() {
-		removeSelectedFromMessageList(find(COMPONENT_RECEIVE_CONSOLE_MESSAGE_LIST));
-	}
-	
 	public void messagesTab_removeMessages() {
 		LOG.trace("ENTER");
 		removeConfirmationDialog();
@@ -1724,45 +1273,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				if (numberRemoved > 0) {
 					updateMessageList();
 				}
-				finishProgress(InternationalisationUtils.getI18NString(MESSAGE_MESSAGES_DELETED));
-			}
-		}.start();
-		LOG.trace("EXIT");
-	}
-	
-	/**
-	 * Removes the selected messages and updates the list with the supplied page number afterwards.
-	 * 
-	 * @param pageNumber
-	 * @param resultsPerPage
-	 * @param object
-	 */
-	public void removeSelectedFromMessageList(Object object) {
-		LOG.trace("ENTER");
-		removeConfirmationDialog();
-		setStatus(InternationalisationUtils.getI18NString(MESSAGE_REMOVING_MESSAGES));
-		initProgress();
-		final Object[] selected = getSelectedItems(object);
-		setProgressMax(selected.length);
-		LOG.debug("Starting thread to remove messages...");
-		new Thread(){
-			public void run() {
-				for(Object o : selected) {
-					incProgress();
-					Message toBeRemoved = getMessage(o);
-					LOG.debug("Message [" + toBeRemoved + "]");
-					int status = toBeRemoved.getStatus();
-					if (status != Message.STATUS_PENDING) {
-						LOG.debug("Removing Message [" + toBeRemoved + "] from database.");
-						if (status == Message.STATUS_OUTBOX) {
-							phoneManager.removeFromOutbox(toBeRemoved);
-						}
-						messageFactory.deleteMessage(toBeRemoved);
-					} else {
-						LOG.debug("Message status is [" + toBeRemoved.getStatus() + "], so we do not remove!");
-					}
-				}
-				refreshMessageLists();
 				finishProgress(InternationalisationUtils.getI18NString(MESSAGE_MESSAGES_DELETED));
 			}
 		}.start();
@@ -2059,44 +1569,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			remove(selected);
 		}
 	}
-
-	/**
-	 * Clear the messages tables from survey analyst tab.
-	 */
-	private void cleanSurveyAnalystMessages() {
-		Object fromRegistered = find(COMPONENT_ANALYST_MESSAGES);
-		Object fromUnregistered = find(COMPONENT_ANALYST_MESSAGES_UNREGISTERED);
-		removeAll(fromRegistered);
-		removeAll(fromUnregistered);
-	}
-
-	/**
-	 * Updates the message lists on <b>Survey Analyst</b> tab.
-	 * 
-	 * @param analystKeywordList
-	 */
-	public void updateAnalystMessageLists(Object analystKeywordList) {
-		KeywordAction survey = getKeywordAction(getSelectedItem(analystKeywordList));
-		setEnabled(find("surveyAnalyst_exportButton"), survey != null);
-		Object fromRegistered = find(COMPONENT_ANALYST_MESSAGES);
-		Object fromUnregistered = find(COMPONENT_ANALYST_MESSAGES_UNREGISTERED);
-		List<Message> messages = new ArrayList<Message>();
-		List<Message> messages_unregistered = new ArrayList<Message>();
-		cleanSurveyAnalystMessages();
-		for (Message m : messageFactory.getMessagesForAction(survey)) {
-			Contact sender = contactDao.getFromMsisdn(m.getSenderMsisdn());
-			if (sender != null) {
-				messages.add(m);
-			} else {
-				messages_unregistered.add(m);
-			}
-		}
-		setListContents(fromRegistered, messages);
-		setListContents(fromUnregistered, messages_unregistered);
-
-		surveyAnalystMessagesRefresh();
-		surveyAnalystMessagesRefresh_unregistered();
-	}
 	
 	public void setListContents(Object table, List<? extends Object> listContents) {
 		putProperty(table, "listContents", listContents);		
@@ -2211,27 +1683,13 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 
 	/**
-	 * 
+	 * Refresh the list of phones on {@link UiGeneratorControllerConstants#TAB_ADVANCED_PHONE_MANAGER} .
 	 */
 	void refreshPhonesViews() {
+		// Looks like we don't bother refreshing if the phone list isn't in view
 		if (currentTab.equals(TAB_ADVANCED_PHONE_MANAGER)) {
 			LOG.debug("Refreshing phones tab");
 			this.phoneTabController.refreshPhonesViews();
-		} else if(currentTab.equals(TAB_SEND_CONSOLE)) {
-			LOG.debug("Refreshing send tab (phone list)");
-			sendConsole_refreshModemList();
-		} else if(currentTab.equals(TAB_RECEIVE_CONSOLE)) {
-			receiveConsole_updateConnectedPhones();
-		}
-	}
-	/**
-	 * Updates all message lists, depending on the view mode.
-	 */
-	private void refreshMessageLists() {
-		if (classicMode) {
-			sendConsole_refreshMessageList(false);
-			messageTracker_refresh();
-			receiveConsole_refresh();
 		}
 	}
 
@@ -2374,78 +1832,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 
 	/**
-	 * Method called when some buttons are pressed.
-	 * 
-	 * @param o The object, which was clicked.
-	 */
-	public void onClick(Object o) {
-		LOG.trace("ENTER");
-		String name = getString(o, Thinlet.NAME);
-		LOG.debug("Component [" + name + "]");
-		if (name.equals(COMPONENT_REPLY_MANAGER_LIST)) {
-			Object replyManagerDetails = find(COMPONENT_REPLY_MANAGER_DETAILS);
-			if (isEnabled(replyManagerDetails)) {
-				replyManager_showReplyDetails(getKeywordAction(getSelectedItem(find(COMPONENT_REPLY_MANAGER_LIST))));
-			} else {
-				replyManager_enableButtons(true);
-			}
-		} else if (name.equals(COMPONENT_REPLY_MANAGER_EDIT_BUTTON)) {
-			replyManager_enableButtons(false);
-			replyManager_showReplyDetails(getKeywordAction(getSelectedItem(find(COMPONENT_REPLY_MANAGER_LIST))));
-			Object replyManagerDetails = find(COMPONENT_REPLY_MANAGER_DETAILS);
-			requestFocus(find(replyManagerDetails, COMPONENT_REPLY_MANAGER_REPLY_TEXT));
-		} else if (name.equals(COMPONENT_REPLY_MANAGER_CREATE_BUTTON)) {
-			replyManager_enableButtons(false);
-			replyManager_showReplyDetails(null);
-			Object replyManagerDetails = find(COMPONENT_REPLY_MANAGER_DETAILS);
-			activate(replyManagerDetails);
-			requestFocus(find(replyManagerDetails, COMPONENT_REPLY_MANAGER_KEYWORD));
-		} 
-		LOG.trace("EXIT");
-	}
-	
-	/**
-	 * Removes selected auto-replies.
-	 */
-	public void replyManager_delete() {
-		LOG.trace("ENTER");
-		removeConfirmationDialog();
-		Object replyManager_keywordList = find(COMPONENT_REPLY_MANAGER_LIST);
-		setStatus(InternationalisationUtils.getI18NString(MESSAGE_REMOVING_KEYWORD_ACTIONS));
-		final Object[] selected = getSelectedItems(replyManager_keywordList);
-		initProgress();
-		setProgressMax(selected.length);
-		LOG.debug("Starting thread to remove auto-replies...");
-		new Thread(){
-			public void run() {
-				for (Object o : selected) {
-					incProgress();
-					if (isAttachment(o, KeywordAction.class)) {
-						KeywordAction action = getKeywordAction(o);
-						LOG.debug("Removing action [" + action + "]");
-						keywordActionDao.deleteKeywordAction(action);
-					} 
-				}
-				replyManager_refreshKeywordList();
-				finishProgress(InternationalisationUtils.getI18NString(MESSAGE_KEYWORD_ACTIONS_DELETED));
-			}
-		}.start();
-		LOG.trace("EXIT");
-	}
-
-	/**
-	 * Enables or disables the buttons inside <b>Replies</b> tab.
-	 * 
-	 * @param enabled
-	 */
-	private void replyManager_enableButtons(boolean enabled) {
-		setEnabled(find(COMPONENT_REPLY_MANAGER_CREATE_BUTTON), enabled);
-		setEnabled(find(COMPONENT_REPLY_MANAGER_EDIT_BUTTON), enabled);
-		setEnabled(find(COMPONENT_REPLY_MANAGER_DELETE_BUTTON), enabled);
-		setEnabled(find(COMPONENT_REPLY_MANAGER_EXPORT_BUTTON), enabled);		
-	}
-
-	/**
 	 * Method called when the user first click on the end date textfield and the value is set to undefined.
 	 * 
 	 * @param o
@@ -2454,115 +1840,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		if (getText(o).equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
 			setText(o, "");
 		}
-	}
-	
-	/**
-	 * Shows the supplied auto reply for editing.
-	 * 
-	 * @param action The reply to be edited or null if we are creating a new one.
-	 */
-	private void replyManager_showReplyDetails(KeywordAction action) {
-		Object replyManagerDetails = find(COMPONENT_REPLY_MANAGER_DETAILS);
-		setAttachedObject(replyManagerDetails, action);
-		if (action == null) {
-			deactivate(replyManagerDetails);
-			setText(find(replyManagerDetails, COMPONENT_REPLY_MANAGER_REPLY_TEXT), "");
-			setText(find(replyManagerDetails, COMPONENT_REPLY_MANAGER_KEYWORD), "");
-		} else {
-			Keyword keyword = action.getKeyword();
-			Object keywordTextfield = find(replyManagerDetails, COMPONENT_REPLY_MANAGER_KEYWORD);
-			setText(keywordTextfield, keyword.getKeyword());
-			setText(find(replyManagerDetails, COMPONENT_REPLY_MANAGER_REPLY_TEXT), KeywordAction.KeywordUtils.getReplyText(action, DEMO_SENDER, DEMO_SENDER_MSISDN, DEMO_MESSAGE_TEXT_INCOMING, DEMO_MESSAGE_KEYWORD));
-			activate(replyManagerDetails);
-			deactivate(keywordTextfield);
-		}
-		setText(find(replyManagerDetails, COMPONENT_TF_START_DATE), action == null ? "" : InternationalisationUtils.getDateFormat().format(action.getStartDate()));
-		Object endDate = find(replyManagerDetails, COMPONENT_TF_END_DATE);
-		String toSet = "";
-		if (action != null) {
-			if (action.getEndDate() == DEFAULT_END_DATE) {
-				toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
-			} else {
-				toSet = InternationalisationUtils.getDateFormat().format(action.getEndDate());
-			}
-		}
-		setText(endDate, toSet);
-	}
-
-	/**
-	 * Clean all auto reply details from the panel.
-	 */
-	public void replyManagerDetails_cancel() {
-		replyManager_showReplyDetails(null);
-		replyManager_enableButtons(getSelectedItems(find(COMPONENT_REPLY_MANAGER_LIST)).length > 0);
-		setEnabled(find(COMPONENT_REPLY_MANAGER_CREATE_BUTTON), true);
-	}
-
-	/**
-	 * Method called when the Update button (from <b>Replies</b> tab) is pressed.
-	 * <br> This method updates a reply if there was one being edited or create a new one, based on information entered by the user.
-	 * 
-	 * @param replyManagerDetails
-	 * @param live
-	 */
-	public void replyManagerDetails_update(Object replyManagerDetails) {
-		KeywordAction action = getKeywordAction(replyManagerDetails);
-		String replyText = getText((find(replyManagerDetails, COMPONENT_REPLY_MANAGER_REPLY_TEXT)));
-		String startDate = getText(find(replyManagerDetails, COMPONENT_TF_START_DATE));
-		String endDate = getText(find(replyManagerDetails, COMPONENT_TF_END_DATE));
-		LOG.debug("Reply Text [" + replyText + "]");
-		LOG.debug("Start Date [" + startDate + "]");
-		LOG.debug("End Date [" + endDate + "]");
-		if (startDate.equals("")) {
-			LOG.debug("No start date set, so we set to [" + InternationalisationUtils.getDefaultStartDate() + "]");
-			startDate = InternationalisationUtils.getDefaultStartDate();
-		}
-		long start;
-		long end;
-		try {
-			Date ds = InternationalisationUtils.parseDate(startDate); 
-			if (!endDate.equals("") && !endDate.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
-				Date de = InternationalisationUtils.parseDate(endDate);
-				if (!Utils.validateDates(ds, de)) {
-					LOG.debug("Start date is not before the end date");
-					alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
-					LOG.trace("EXIT");
-					return;
-				}
-				end = de.getTime();
-			} else {
-				end = DEFAULT_END_DATE;
-			}
-			start = ds.getTime();
-		} catch (ParseException e) {
-			LOG.debug("Wrong format for date", e);
-			alert(InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
-			LOG.trace("EXIT");
-			return;
-		} 
-		if (action != null) {
-			LOG.debug("Editing action [" + action + "]. Setting new values!");
-			action.setReplyText(replyText);
-			action.setStartDate(start);
-			action.setEndDate(end);
-		} else {
-			String newWordString = getText(find(replyManagerDetails, COMPONENT_REPLY_MANAGER_KEYWORD));
-			LOG.debug("Creating new auto_reply");
-			try {
-				Keyword keyword = new Keyword(newWordString, "");
-				keywordDao.saveKeyword(keyword);
-				
-				action = KeywordAction.createReplyAction(keyword, replyText, start, end);
-				keywordActionDao.saveKeywordAction(action);
-			} catch (DuplicateKeyException e) {
-				alert(InternationalisationUtils.getI18NString(MESSAGE_KEYWORD_EXISTS));
-				LOG.trace("EXIT");
-				return;
-			}
-		}
-		replyManager_refreshKeywordList();
-		replyManager_showReplyDetails(null);
-		LOG.trace("EXIT");
 	}
 
 	/**
@@ -2770,27 +2047,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		setText(tf, selectedContact.getMsisdn());
 		remove(dialog);
 	}
-	
-	/**
-	 * Sets the phone number of the selected contact.
-	 * 
-	 * @param contactSelecter_contactList
-	 * @param dialog
-	 */
-	public void sendConsole_setLoneRecipientTextfield(Object contactSelecter_contactList, Object dialog) {
-		Object sendConsoleLoneRecipientTextfield = find(COMPONENT_SEND_CONSOLE_LONE_RECIPIENT);
-		Object selectedItem = getSelectedItem(contactSelecter_contactList);
-		if (selectedItem == null) {
-			alert(InternationalisationUtils.getI18NString(MESSAGE_NO_CONTACT_SELECTED));
-			return;
-		}
-		Contact selectedContact = getContact(selectedItem);
-		setText(sendConsoleLoneRecipientTextfield, selectedContact.getMsisdn());
-		remove(dialog);
-		sendConsole_loneRecipientToggle(selectedContact.getMsisdn(), find(COMPONENT_SEND_CONSOLE_GROUP_TREE));
-		numberToSend = 1;
-		updateCost();
-	}
+
 	/**
 	 * Shows the new auto reply action dialog.
 	 * 
@@ -2985,6 +2242,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
      *  4 - Survey
      *  5 - E-mail
      *  6 - External Command
+     *  
+     *  TODO MAKE SURE THAT THIS STILL WORKS - WE HAVE REMOVED THE SURVEY ACTION!!!
      */
 	public void keywordTab_createAction(int index) {
 		switch (index) {
@@ -2999,9 +2258,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			break;
 		case 3:
 			show_newKActionLeaveForm(keywordListComponent);
-			break;
-		case 4:
-			show_newKActionSurveyForm(keywordListComponent);
 			break;
 		case 5:
 			show_newKActionEmailForm(keywordListComponent);
@@ -3037,45 +2293,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 		add(emailForm);
 		LOG.trace("EXIT");
-	}
-	
-	/**
-	 * Shows the new survey action dialog.
-	 * 
-	 * @param keywordList
-	 */
-	public void show_newKActionSurveyForm(Object keywordList) {
-		Keyword keyword = getKeyword(getSelectedItem(keywordList));
-		Object surveyForm = loadComponentFromFile(UI_FILE_NEW_KACTION_SURVEY_FORM);
-		//Adds the date panel to it
-		addDatePanel(surveyForm);
-		setAttachedObject(surveyForm, keyword);
-		add(surveyForm);
-	}
-	
-	/**
-	 * Shows the new survey action dialog for edition purpose.
-	 * 
-	 * @param keywordList
-	 */
-	private void show_newKActionSurveyFormForEdition(KeywordAction action) {
-		Object surveyForm = loadComponentFromFile(UI_FILE_NEW_KACTION_SURVEY_FORM);
-		//Adds the date panel to it
-		addDatePanel(surveyForm);
-		setAttachedObject(surveyForm, action);
-		
-		setText(find(surveyForm, COMPONENT_TF_START_DATE), action == null ? "" : InternationalisationUtils.getDateFormat().format(action.getStartDate()));
-		Object endDate = find(surveyForm, COMPONENT_TF_END_DATE);
-		String toSet = "";
-		if (action != null) {
-			if (action.getEndDate() == DEFAULT_END_DATE) {
-				toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
-			} else {
-				toSet = InternationalisationUtils.getDateFormat().format(action.getEndDate());
-			}
-		}
-		setText(endDate, toSet);
-		add(surveyForm);
 	}
 	
 	/**
@@ -3894,9 +3111,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			case KeywordAction.TYPE_EMAIL:
 				show_newKActionEmailFormForEdition(action);
 				break;
-			case KeywordAction.TYPE_SURVEY:
-				show_newKActionSurveyFormForEdition(action);
-				break;
 		}
 	}
 	
@@ -3977,61 +3191,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 		updateKeywordActionList(action, isNew);
 		remove(replyDialog);
-		LOG.trace("EXIT");
-	}
-
-	/**
-	 * Creates a new survey action.
-	 */
-	public void do_newKActionSurvey(Object surveyDialog) {
-		LOG.trace("ENTER");
-		String startDate = getString(find(surveyDialog, COMPONENT_TF_START_DATE), Thinlet.TEXT);
-		String endDate = getString(find(surveyDialog, COMPONENT_TF_END_DATE), Thinlet.TEXT);
-		LOG.debug("Start Date [" + startDate + "]");
-		LOG.debug("End Date [" + endDate + "]");
-		if (startDate.equals("")) {
-			LOG.debug("No start date set, so we set to [" + InternationalisationUtils.getDefaultStartDate() + "]");
-			startDate = InternationalisationUtils.getDefaultStartDate();
-		}
-		long start;
-		long end;
-		try {
-			Date ds = InternationalisationUtils.parseDate(startDate); 
-			if (!endDate.equals("") && !endDate.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
-				Date de = InternationalisationUtils.parseDate(endDate);
-				if (!Utils.validateDates(ds, de)) {
-					LOG.debug("Start date is not before the end date");
-					alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
-					LOG.trace("EXIT");
-					return;
-				}
-				end = de.getTime();
-			} else {
-				end = DEFAULT_END_DATE;
-			}
-			start = ds.getTime();
-		} catch (ParseException e) {
-			LOG.debug("Wrong format for date", e);
-			alert(InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
-			LOG.trace("EXIT");
-			return;
-		} 
-		boolean isNew = false;
-		KeywordAction action;
-		if (isAttachment(surveyDialog, KeywordAction.class)) {
-			action = getKeywordAction(surveyDialog);
-			LOG.debug("Editing action [" + action + "]. Setting new values!");
-			action.setStartDate(start);
-			action.setEndDate(end);
-		} else {
-			isNew = true;
-			Keyword keyword = getKeyword(surveyDialog);
-			LOG.debug("Creating action for keyword [" + keyword.getKeyword() + "].");
-			action = KeywordAction.createSurveyAction(keyword, start, end);
-			keywordActionDao.saveKeywordAction(action);
-		}
-		updateKeywordActionList(action, isNew);
-		remove(surveyDialog);
 		LOG.trace("EXIT");
 	}
 	
@@ -4394,18 +3553,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	/**
-	 * Writes to the property file the current window size.
-	 */
-	private void savePropertiesBeforeChangingMode(boolean newMode) {
-		UiProperties uiProperties = UiProperties.getInstance();
-		uiProperties.setViewModeClassic(!newMode);
-		uiProperties.setWindowState(frameLauncher.getExtendedState() == Frame.MAXIMIZED_BOTH,
-				frameLauncher.getBounds().width, frameLauncher.getBounds().height);
-		uiProperties.saveToDisk();
-	}
-	
-	
-	/**
 	 * Checks if the object attached to a component is of a specific class.
 	 * @param component
 	 * @param clazz
@@ -4526,30 +3673,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		add(row, createTableCell(Integer.toString(action.getCounter())));
 		return row;
 	}
-	
-	/**
-	 * Creates a row for the supplied keyword.
-	 * 
-	 * @param action
-	 * @return
-	 */
-	private Object surveyManager_getRow(KeywordAction action) {
-		Object surveyRow = createTableRow(action);
-		Keyword keyword = action.getKeyword();
-		if (action.isAlive()) {
-			add(surveyRow, createTableCell(InternationalisationUtils.getI18NString(COMMON_LIVE)));
-		} else {
-			add(surveyRow, createTableCell(InternationalisationUtils.getI18NString(COMMON_DORMANT)));
-		}
-		String key = keyword.getKeyword().length() == 0 ? "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">" : keyword.getKeyword();
-		add(surveyRow, createTableCell(key));
-		add(surveyRow, createTableCell(keyword.getDescription()));
-		add(surveyRow, createTableCell(InternationalisationUtils.getDateFormat().format(action.getStartDate())));
-		if (action.getEndDate() != DEFAULT_END_DATE) add(surveyRow, createTableCell(InternationalisationUtils.getDateFormat().format(action.getEndDate())));
-		else add(surveyRow, createTableCell(InternationalisationUtils.getI18NString(COMMON_UNDEFINED)));
-		add(surveyRow, createTableCell(Integer.toString(action.getCounter())));
-		return surveyRow;
-	}
+
 	/**
 	 * Creates a node for the supplied group, creating nodes for its sub-groups and contacts as well.
 	 * 
@@ -4594,34 +3718,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 		LOG.trace("EXIT");
 		return node;
-	}
-
-	/**
-	 * Deletes the survey list that is selected in the list.  The survey is deleted from the
-	 * system, not just from the UI. 
-	 * @param surveyList
-	 */
-	public void surveyManager_deleteSelected() {
-		removeConfirmationDialog();
-		Object surveyList = find(COMPONENT_SURVEY_LIST);
-		Object selected = getSelectedItem(surveyList);
-		if (selected != null) {
-			KeywordAction surveyAction = getKeywordAction(selected);
-			keywordActionDao.deleteKeywordAction(surveyAction);
-			surveyManager_refresh();
-		}
-	}
-
-	/** 
-	 * Refresh the display of the Survey Manager.
-	 */
-	private void surveyManager_refresh() {
-		Object surveyListComponent = find(COMPONENT_SURVEY_LIST);
-		removeAll(surveyListComponent);
-		for(KeywordAction action : keywordActionDao.getSurveysActions()) {
-			add(surveyListComponent, surveyManager_getRow(action));
-		}
-		surveyManager_updateSurveyDetails(find(COMPONENT_SURVEY_DETAILS), null, false);
 	}
 
 	public void keywordTab_doSave(Object panel) {
@@ -4750,146 +3846,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
         setSelected(find(panel, COMPONENT_CB_LEAVE_GROUP), false);
         setSelectedIndex(find(panel, COMPONENT_CB_GROUPS_TO_LEAVE), 0);
 	}
-	
-	/** 
-	 * Refreshes the display of the Survey Analyst
-	 */
-	private void surveyAnalyst_refresh() {
-		if(classicMode) {
-			Object surveyAnalystKeywordList = find(COMPONENT_ANALYST_KEYWORD_LIST);
-			removeAll(surveyAnalystKeywordList);
-			for (KeywordAction act : keywordActionDao.getSurveysActions()) {
-				add(surveyAnalystKeywordList, createListItem(act));
-			}
-			cleanSurveyAnalystMessages();
-			setEnabled(find("surveyAnalyst_exportButton"), false);
-		}
-	}
-
-	/**
-	 * Updates the message lists inside the <b>Message Tracker</b> tab.
-	 */
-	public void messageTracker_refresh() {
-		messageTracker_refreshPendingMessageList();
-		messageTracker_refreshFailedMessageList();
-	}
-	
-	private static final Integer[] MESSAGE_TRACKER_PENDING_STATUSES = new Integer[]{Message.STATUS_DRAFT, Message.STATUS_OUTBOX, Message.STATUS_PENDING};
-	private static final Integer[] MESSAGE_TRACKER_FAILED_STATUSES = new Integer[]{Message.STATUS_SENT, Message.STATUS_KEEP_TRYING, Message.STATUS_DELIVERED, Message.STATUS_ABORTED, Message.STATUS_UNKNOWN, Message.STATUS_FAILED};
-	
-	/**
-	 * Updates the pending message list inside the <b>Message Tracker</b> tab.
-	 */
-	private void messageTracker_refreshPendingMessageList() {
-		messageTracker_updateMessageList(COMPONENT_MESSAGE_TRACKER_PENDING_MESSAGE_LIST, MESSAGE_TRACKER_PENDING_STATUSES);
-	}
-	
-	/**
-	 * Updates the failed message list inside the <b>Message Tracker</b> tab.
-	 */
-	private void messageTracker_refreshFailedMessageList() {
-		messageTracker_updateMessageList(COMPONENT_MESSAGE_TRACKER_FAILED_MESSAGE_LIST, MESSAGE_TRACKER_FAILED_STATUSES);
-	}
-	
-	private final void messageTracker_updateMessageList(String listComponentName, Integer[] messageStati) {
-		LOG.trace("UiGeneratorController.messageTracker_updateMessageList()");
-		Object messageList = find(listComponentName);
-		removeAll(messageList);
-		int listLimit = getListLimit(messageList);
-		int count = messageFactory.getMessageCount(Message.TYPE_OUTBOUND, messageStati);
-		int currentPage = getListCurrentPage(messageList);
-		setListElementCount(count, messageList);
-		for (Message m : messageFactory.getMessagesForStati(Message.TYPE_OUTBOUND, messageStati,
-							Message.Field.DATE, Order.DESCENDING, (currentPage-1) * listLimit, listLimit)) {
-			add(messageList, messageTracker_getRow(m));
-		}
-		updatePageNumber(getParent(messageList), count, currentPage, listLimit);
-	}
-	
-	/**
-	 * Creates a row for the supplied message for the <b>Message Tracker</b> tab.
-	 * 
-	 * @param action
-	 * @return
-	 */
-	private Object messageTracker_getRow(Message message) {
-		Object row = createTableRow(message);
-
-		String recipientDisplayName = getRecipientDisplayValue(message);
-
-		String senderDisplayName = getSenderDisplayValue(message);
-		
-		add(row, createTableCell(getMessageStatusAsString(message)));
-		add(row, createTableCell(InternationalisationUtils.getDatetimeFormat().format(message.getDate())));
-		add(row, createTableCell(senderDisplayName));
-		add(row, createTableCell(recipientDisplayName));
-		add(row, createTableCell(message.getTextContent()));
-
-		return row;
-	}
-
-	/**
-	 * Updates the received message list inside <b>Receive Console</b> tab.
-	 */
-	public void receiveConsole_refresh() {
-		receiveConsole_updateConnectedPhones();
-		Object receiveConsole_messageList = find(COMPONENT_RECEIVE_CONSOLE_MESSAGE_LIST);
-		List<? extends Message> messages = messageFactory.getMessages(Message.TYPE_RECEIVED, Message.Field.DATE, Order.DESCENDING);
-		setListContents(receiveConsole_messageList, messages);
-		setListPageNumber(1, receiveConsole_messageList);
-		setListElementCount(messages.size(), receiveConsole_messageList);
-		updatePages_receiveConsole();
-	}
-	/**
-	 * Creates a row for the supplied message for the <b>Receive Console</b> tab.
-	 * 
-	 * @param message
-	 * @return
-	 */
-	private Object receiveConsole_getRow(Message message) {
-		Object row = createTableRow(message);
-
-		Contact sender = contactDao.getFromMsisdn(message.getSenderMsisdn());
-
-		String senderDisplayName = null;
-
-		if (sender == null) {
-			senderDisplayName = message.getSenderMsisdn();
-		} else {
-			senderDisplayName = sender.getDisplayName();
-		}
-
-		String recipientDisplayName = getRecipientDisplayValue(message);
-		
-		add(row, createTableCell(InternationalisationUtils.getDatetimeFormat().format(message.getDate())));
-		add(row, createTableCell(senderDisplayName));
-		add(row, createTableCell(recipientDisplayName));
-		add(row, createTableCell(message.getTextContent()));
-
-		return row;
-	}
-
-	/**
-	 * Updates everything on the <b>Send</b> tab.
-	 */
-	private void sendConsole_refresh() {
-		// The send console needs to be updated.  Therefore we need to update:
-		//  - sendConsole_groupTree
-		//  - sendConsole_modemList
-		//  - sendConsole_resultList
-		sendConsole_refreshGroupTree();
-		sendConsole_refreshModemList();
-		sendConsole_refreshMessageList();
-	}
-
-	/**
-	 * Updates the group tree on the <b>Send</b> tab.
-	 */
-	private void sendConsole_refreshGroupTree() {
-		Object sendConsole_groupList = find(COMPONENT_SEND_CONSOLE_GROUP_TREE);
-		removeAll(sendConsole_groupList);
-		add(sendConsole_groupList, getNode(this.rootGroup, true));
-	}
 
 	/**
 	 * @param dev
@@ -4898,42 +3854,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	private boolean isSmsModem(SmsDevice dev) {
 		return dev instanceof SmsModem;
 	}
-	
-	/**
-	 * Updates the phone list on the <b>Send</b> tab.
-	 */
-	private void sendConsole_refreshModemList() {
-		Object sendConsole_modemList = find(COMPONENT_SEND_CONSOLE_MODEM_LIST);
-		int index = getSelectedIndex(sendConsole_modemList);
-		
-		removeAll(sendConsole_modemList);
-		Object row = createTableRow(null);
-		add(row, createTableCell(InternationalisationUtils.getI18NString(COMMON_ALL)));
-		add(sendConsole_modemList, row);
-		for (SmsDevice dev : phoneManager.getAllPhones()) {
-			if (dev.isConnected() && dev.isUseForSending()) 
-				add(sendConsole_modemList, sendConsole_getRow(dev));
-		}
-		
-		setSelectedIndex(sendConsole_modemList, index);
-	}
-	
-	public void sendConsole_refreshMessageList() {
-		sendConsole_refreshMessageList(true);
-	}
-	
-	/**
-	 * Updates the message list on the <b>Send</b> tab.
-	 */
-	private void sendConsole_refreshMessageList(boolean goToFirstPage) {
-		Object sendConsole_messageList = find(COMPONENT_SEND_CONSOLE_MESSAGE_LIST);
-		List<? extends Message> listContents = messageFactory.getMessages(Message.TYPE_OUTBOUND, Message.Field.DATE, Order.DESCENDING);
-		setListContents(sendConsole_messageList, listContents);
-		setListElementCount(listContents.size(), sendConsole_messageList);
-		if(goToFirstPage) setListPageNumber(1, sendConsole_messageList);
-		
-		updatePages_sendConsoleMessageList();
-	}
+
 	/**
 	 * Creates a row for the supplied message for the <b>Send</b> tab.
 	 * 
@@ -5065,9 +3986,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				ret.append(InternationalisationUtils.getI18NString(COMMON_REPLY));
 				ret.append(": ");
 				ret.append(KeywordAction.KeywordUtils.getReplyText(action, DEMO_SENDER, DEMO_SENDER.getMsisdn(), DEMO_MESSAGE_TEXT_INCOMING, DEMO_MESSAGE_KEYWORD));
-				break;
-			case KeywordAction.TYPE_SURVEY:
-				ret.append(InternationalisationUtils.getI18NString(COMMON_SURVEY));
 				break;
 			case KeywordAction.TYPE_EXTERNAL_CMD:
 				if (action.getExternalCommandType() == KeywordAction.EXTERNAL_HTTP_REQUEST) {
@@ -5210,25 +4128,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		add(row, createTableCell(action.getCounter()));
 		return row;
 	}
-	
-	/**
-	 * Creates a Thinlet UI table row with details of a received SMS message
-	 * in the appropriate format for the Survey Analyst.
-	 * @param message
-	 * @param sender
-	 * @return
-	 */
-	private Object getAnalystRow(Message message, String sender) {
-		Object row = createTableRow(message);
-		add(row, createTableCell(InternationalisationUtils.getDatetimeFormat().format(message.getDate())));
-		add(row, createTableCell(sender));
-		Keyword key = getKeyword(getSelectedItem(find(COMPONENT_ANALYST_KEYWORD_LIST)));
-		String content = message.getTextContent();
-		content = content.substring(key.getKeyword().length());
-		if (content.equals("")) content = "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">";
-		add(row, createTableCell(content));
-		return row;
-	}
 
 	/**
 	 * Creates a Thinlet UI table row containing details of an SMS message.
@@ -5326,30 +4225,9 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		if (currentTab.equals(TAB_CONTACT_MANAGER)) {
 			this.contactsTabController.refresh();
 			setStatus(InternationalisationUtils.getI18NString(MESSAGE_CONTACT_MANAGER_LOADED));
-		} else if (currentTab.equals(TAB_SURVEY_MANAGER)) {
-			surveyManager_refresh();
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_SURVEY_MANAGER_LOADED));
-		} else if (currentTab.equals(TAB_SEND_CONSOLE)) {
-			sendConsole_refresh();
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_SEND_CONSOLE_LOADED));
-		} else if (currentTab.equals(TAB_RECEIVE_CONSOLE)) {
-			receiveConsole_refresh();
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGES_LOADED));
 		} else if (currentTab.equals(TAB_ADVANCED_PHONE_MANAGER)) {
 			this.phoneTabController.refreshPhonesViews();
 			setStatus(InternationalisationUtils.getI18NString(MESSAGE_MODEM_LIST_UPDATED));
-		} else if (currentTab.equals(TAB_MESSAGE_TRACKER)) {
-			messageTracker_refresh();
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGES_LOADED));
-		} else if (currentTab.equals(TAB_REPLY_MANAGER)) {
-			replyManager_refreshKeywordList();
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_REPLY_MANAGER_LOADED));
-		} else if (currentTab.equals(TAB_SURVEY_ANALYST)) {
-			surveyAnalyst_refresh();
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_SURVEY_ANALYST_LOADED));
-		} else if (currentTab.equals(TAB_GROUP_MANAGER)) {
-			this.contactsTabController.refresh();
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_GROUP_MANAGER_LOADED));
 		} else if (currentTab.equals(TAB_MESSAGE_HISTORY)) {
 			updateMessageHistoryFilter();
 			setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGES_LOADED));
@@ -5615,20 +4493,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			}
 		}.start();
 	}
-	
-	private void receiveConsole_updateConnectedPhones() {
-		if(classicMode && currentTab.equals(TAB_RECEIVE_CONSOLE)) {
-			Object numberLabel = find("lbReceiveConsoleConnectedPhones");
-			int receivePhones = 0;
-			for (SmsDevice dev : phoneManager.getAllPhones()) {
-				if (isSmsModem(dev)) {
-					SmsModem modem = (SmsModem) dev;
-					if(modem.isUseForReceiving()) ++receivePhones;
-				}
-			}
-			setText(numberLabel, Integer.toString(receivePhones));
-		}
-	}
 
 	/**
 	 * @param numberRemoved
@@ -5701,11 +4565,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/** @return {@link #phoneDetailsManager} */
 	public SmsModemSettingsDao getPhoneDetailsManager() {
 		return phoneDetailsManager;
-	}
-	
-	/** return {@link #classicMode} */
-	public boolean isClassicView() {
-		return this.classicMode;
 	}
 	
 	/** @return Cost set per SMS message */

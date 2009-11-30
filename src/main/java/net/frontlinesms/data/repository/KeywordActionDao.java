@@ -34,12 +34,6 @@ public interface KeywordActionDao {
 	 * @return all {@link KeywordAction} of type {@link KeywordAction#TYPE_REPLY}
 	 */
 	public Collection<KeywordAction> getReplyActions();
-	
-	/**
-	 * Gets the survey action attached to this keyword.
-	 * @return all {@link KeywordAction} of type {@link KeywordAction#TYPE_SURVEY}
-	 */
-	public Collection<KeywordAction> getSurveysActions();
 
 	/**
 	 * Deletes a {@link KeywordAction}.

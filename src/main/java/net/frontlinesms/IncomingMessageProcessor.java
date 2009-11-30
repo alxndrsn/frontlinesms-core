@@ -355,10 +355,6 @@ public class IncomingMessageProcessor extends Thread {
 			LOG.debug("Sending [" + email.getEmailContent() + "] from [" + email.getEmailFrom().getAccountName() + "] to [" + email.getEmailRecipients() + "]");
 			emailServerManager.sendEmail(email);
 			break;
-		case KeywordAction.TYPE_SURVEY:
-			// FIXME the following line should be re-instated once the DAO pattern is finalised:
-			// action.addMessageToAction(incoming);
-			break;
 		}
 		action.incrementCounter();
 		if (uiListener != null) {

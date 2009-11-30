@@ -22,7 +22,6 @@
 			</menu>
 		</menu>
 		<menu text="i18n.menubar.view">
-			<menuitem icon="/icons/change_view.png" name="menu_switchMode" action="doSwitchMode()"/>
 			<menu icon="/icons/tab.png" name="menu_tabs" text="i18n.common.tabs">
 				<checkboxmenuitem action="tabsChanged(this)" name="miHome" icon="/icons/frontline_icon.png" text="i18n.tab.home"/>
 				<checkboxmenuitem action="tabsChanged(this)" name="miKeyword" icon="/icons/keyword.png" text="i18n.tab.keyword.manager"/>

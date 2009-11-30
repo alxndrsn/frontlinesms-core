@@ -83,7 +83,6 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_ALL_MESSAGES = "common.all.messages";
 	public static final String COMMON_CONTACTS = "common.contacts";
 	public static final String COMMON_GROUP = "common.group";
-	public static final String COMMON_SURVEY = "common.survey";
 	public static final String COMMON_REPLY = "common.reply";
 	public static final String COMMON_EXTERNAL_COMMAND = "common.external.command";
 	public static final String COMMON_COMMAND = "common.command";
@@ -154,9 +153,6 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_CONNECTION_OK = "common.connection.ok";
 	public static final String COMMON_DATABASE_CONNECTION_FAILED = "common.db.connection.failed";
 	public static final String COMMON_ATTENTION = "common.attention";
-	
-	public static final String MENUITEM_SWITCH_TO_CLASSIC_VIEW = "menuitem.classic.view";
-	public static final String MENUITEM_SWITCH_TO_ADVANCED_VIEW = "menuitem.advanced.view";
 	
 	public static final String MESSAGE_GROUP_NO_MEMBERS = "message.no.members";
 	public static final String MESSAGE_KEYWORD_EXISTS = "message.keyword.already.exists";
@@ -245,15 +241,11 @@ public final class FrontlineSMSConstants {
 
 	public static final String PROPERTY_FIELD = "field";
 
-	public static final String MESSAGE_GROUP_MANAGER_LOADED = "message.group.manager.loaded";
-	public static final String MESSAGE_SURVEY_ANALYST_LOADED = "message.survey.analyst.loaded";
-	public static final String MESSAGE_REPLY_MANAGER_LOADED = "message.reply.manager.loaded";
 	public static final String MESSAGE_MODEM_LIST_UPDATED = "message.modem.list.loaded";
 	public static final String MESSAGE_MESSAGES_LOADED = "message.messages.loaded";
 	public static final String MESSAGE_KEYWORDS_LOADED = "message.keywords.loaded";
 	public static final String MESSAGE_EMAILS_LOADED = "message.emails.loaded";
 	public static final String MESSAGE_SEND_CONSOLE_LOADED = "message.send.console.loaded";
-	public static final String MESSAGE_SURVEY_MANAGER_LOADED = "message.survey.manager.loaded";
 	public static final String MESSAGE_CONTACT_MANAGER_LOADED = "message.contact.manager.loaded";
 	public static final String MESSAGE_NO_FILE_SELECTED = "message.no.file.selected";
 	public static final String MESSAGE_IMPOSSIBLE_TO_GO_UP_A_DIRECTORY = "message.impossible.to.go.up";
