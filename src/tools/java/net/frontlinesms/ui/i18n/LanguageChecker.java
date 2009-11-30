@@ -161,6 +161,7 @@ public class LanguageChecker {
 	
 	/**
 	 * Produces a report about the specified language bundle with respect to this {@link LanguageChecker}.
+	 * @param baseTextResource the base text resource, or <code>null</code> if we are testing the base text resource or it's translations
 	 * @param languageBundle the language bundle to compare to this {@link LanguageChecker} 
 	 * @return a report
 	 * @throws IllegalAccessException 
@@ -170,8 +171,8 @@ public class LanguageChecker {
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
 	 */
-	I18nReport produceReport(File languageBundle) throws SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException, FileNotFoundException, IOException {
-		I18nReport report = new I18nReport(this, languageBundle);
+	I18nReport produceReport(Map<String, String> baseTextResource, File languageBundle) throws SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException, FileNotFoundException, IOException {
+		I18nReport report = new I18nReport(this, baseTextResource, languageBundle);
 		return report;
 	}
 

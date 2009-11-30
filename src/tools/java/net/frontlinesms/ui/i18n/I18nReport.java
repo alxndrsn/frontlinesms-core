@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.util.Map;
-import java.util.MissingResourceException;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -44,8 +43,9 @@ public class I18nReport {
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
 	 */
-	@SuppressWarnings("unchecked")
-	public I18nReport(LanguageChecker languageChecker, File textResourceFile) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, FileNotFoundException, IOException {
+	public I18nReport(LanguageChecker languageChecker, Map<String, String> baseTextResource, File textResourceFile) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, FileNotFoundException, IOException {
+		boolean isBaseTextResource = baseTextResource == null;
+		
 		this.bundleFileName = textResourceFile.getName();
 		Map<String, String> textResource = InternationalisationUtils.loadTextResources(textResourceFile.getAbsolutePath(), new FileInputStream(textResourceFile));
 		
@@ -55,25 +55,33 @@ public class I18nReport {
 		
 		// 1. Check the keys that are used in code
 		for(String i18nKey : languageChecker.getI18nKeysInCode().keySet()) {
-			try {
-				// Try getting the value from the language bundle
-				textResource.get(i18nKey);
+			if(!isBaseTextResource && baseTextResource.containsKey(i18nKey)) {
+				// Ignore keys which should otherwise be in the default bundle
+				continue;
+			}
+			
+			// Try getting the value from the language bundle
+			if(!textResource.containsKey(i18nKey)) {
+				this.missingCodeKeys.put(i18nKey, languageChecker.getI18nKeysInCode().get(i18nKey));
+			} else {
 				// Remove the key from the bundleKeys so we know if we have any unnecessary ones 
 				bundleKeys.remove(i18nKey);
-			} catch(MissingResourceException ex) {
-				this.missingCodeKeys.put(i18nKey, languageChecker.getI18nKeysInCode().get(i18nKey));
 			}
 		}
 		
 		// 2. Check the keys that are used in XML
 		for(String i18nKey : languageChecker.getI18nKeysInXml().keySet()) {
-			try {
-				// Try getting the value from the language bundle
-				textResource.get(i18nKey);
+			if(!isBaseTextResource && baseTextResource.containsKey(i18nKey)) {
+				// Ignore keys which should otherwise be in the default bundle
+				continue;
+			}
+			
+			// Try getting the value from the language bundle
+			if(!textResource.containsKey(i18nKey)) {
+				this.missingXmlKeys.put(i18nKey, languageChecker.getI18nKeysInXml().get(i18nKey));
+			} else {
 				// Remove the key from the bundleKeys so we know if we have any unnecessary ones 
 				bundleKeys.remove(i18nKey);
-			} catch(MissingResourceException ex) {
-				this.missingXmlKeys.put(i18nKey, languageChecker.getI18nKeysInXml().get(i18nKey));
 			}
 		}
 		

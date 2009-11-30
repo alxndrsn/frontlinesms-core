@@ -10,6 +10,7 @@ import java.io.FilenameFilter;
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -99,12 +100,23 @@ public class Main {
 		File outputDirectory = new File(outputDirectoryPath);
 		
 		outputDirectory.mkdirs();
-		File textResourceFile = new File(languagebundleDirectoryPath, resourceFileBaseName + ".properties");
-		Map<String, String> textResources = InternationalisationUtils.loadTextResources(textResourceFile.getAbsolutePath(), new FileInputStream(textResourceFile));
-		TranslationEmitter emitter = new TranslationEmitter(textResources, outputDirectory);
+		String extraTextResourcePath = languagebundleDirectoryPath + '/' + resourceFileBaseName + ".properties";
+		Map<String, String> extraTextResources = InternationalisationUtils.loadTextResources(extraTextResourcePath, new FileInputStream(extraTextResourcePath));
+		
+		String baseTranslationFileName = "src/main/resources/resources/languages/frontlineSMS.properties";
+		Map<String, String> baseTextResources = null;
+		if(!baseTranslationFileName.equals(extraTextResourcePath)) {
+			baseTextResources = InternationalisationUtils.loadTextResources(baseTranslationFileName, new FileInputStream(baseTranslationFileName));
+			Map<String, String> newMap = new HashMap<String, String>();
+			InternationalisationUtils.mergeMaps(newMap, baseTextResources);
+			InternationalisationUtils.mergeMaps(newMap, extraTextResources);
+			extraTextResources = newMap;
+		}
+		
+		TranslationEmitter emitter = new TranslationEmitter(extraTextResources, outputDirectory);
 		
 		for(File languageBundle : new File(languagebundleDirectoryPath).listFiles(getTextResourceFileFilter(resourceFileBaseName))) {
-			I18nReport report = checker.produceReport(languageBundle);
+			I18nReport report = checker.produceReport(baseTextResources, languageBundle);
 			report.output(System.out, true);
 			emitter.processBundle(languageBundle, report);
 		}	

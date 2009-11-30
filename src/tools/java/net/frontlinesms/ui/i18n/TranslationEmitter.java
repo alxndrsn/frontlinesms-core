@@ -37,7 +37,7 @@ public class TranslationEmitter {
 
 //> INSTANCE PROPERTIES
 	/** The english language bundle to take all missing keys from */
-	private final Map<String, String> defaultLanguageBundle;
+	private final Map<String, String> defaultTextResource;
 	/** Directory to output translations to */
 	private final File outputDirectory;
 
@@ -48,11 +48,11 @@ public class TranslationEmitter {
 //> INSTANCE HELPER METHODS
 
 	/**
-	 * @param languageBundle
+	 * @param textResource
 	 * @param outputDirectory 
 	 */
-	public TranslationEmitter(Map<String, String> languageBundle, File outputDirectory) {
-		this.defaultLanguageBundle = languageBundle;
+	public TranslationEmitter(Map<String, String> textResource, File outputDirectory) {
+		this.defaultTextResource = textResource;
 		this.outputDirectory = outputDirectory;
 	}
 
@@ -87,7 +87,7 @@ public class TranslationEmitter {
 			for(String key : report.getAllMissingKeys()) {
 				String value = TRANSLATION_TODO;
 				try {
-					value += " " + this.defaultLanguageBundle.get(key);
+					value += " " + this.defaultTextResource.get(key);
 					
 				} catch(MissingResourceException ex) { /* ignore missing keys */ }
 				writer.write(key + "=" + value + "\r\n");
