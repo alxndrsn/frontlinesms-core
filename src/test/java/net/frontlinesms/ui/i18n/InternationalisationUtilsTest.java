@@ -8,6 +8,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.TimeZone;
 
 import net.frontlinesms.FrontlineSMSConstants;
@@ -79,6 +80,28 @@ public class InternationalisationUtilsTest extends BaseTestCase {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Test method for {@link InternationalisationUtils#mergeMaps(java.util.Map, java.util.Map)}
+	 */
+	public void testMergeMaps() {
+		HashMap<String, String> destination = new HashMap<String, String>();
+		HashMap<String, String> additionalValue = new HashMap<String, String>();
+		
+		destination.put("i will be there at the end", "still here");
+		
+		additionalValue.put("i have come from 2", "new arrival");
+		
+		destination.put("do not replace me", "original");
+		additionalValue.put("do not replace me", "new value");
+		
+		InternationalisationUtils.mergeMaps(destination, additionalValue);
+		
+		// map contents should be merged into destination, with duplicate keys keeping the values from destination
+		assertEquals(destination.get("i will be there at the end"), "still here");
+		assertEquals(destination.get("i have come from 2"), "new arrival");
+		assertEquals(destination.get("do not replace me"), "original");
 	}
 	
 //> INSTANCE HELPER METHODS

@@ -56,7 +56,7 @@ public interface PluginController {
 
 	/**
 	 * Gets the default language bundle for text strings used in the UI of this plugin.
-	 * @return map of text keys to English translations of strings used in the UI of this plugin
+	 * @return map of text keys to English translations of strings used in the UI of this plugin, or <code>null</code> if no text keys are required for this plugin
 	 */
 	public Map<String, String> getDefaultTextResource();
 	

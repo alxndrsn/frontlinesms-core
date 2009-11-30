@@ -7,16 +7,15 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.context.ApplicationContext;
 
 import net.frontlinesms.FrontlineSMS;
-import net.frontlinesms.Utils;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.listener.IncomingMessageListener;
+import net.frontlinesms.plugins.BasePluginController;
 import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginInitialisationException;
 import net.frontlinesms.plugins.forms.data.domain.Form;
@@ -32,22 +31,18 @@ import net.frontlinesms.plugins.forms.response.FormsResponseDescription;
 import net.frontlinesms.plugins.forms.response.NewFormsResponse;
 import net.frontlinesms.plugins.forms.response.SubmittedDataResponse;
 import net.frontlinesms.plugins.forms.ui.FormsThinletTabController;
-import net.frontlinesms.resources.PropertySet;
-import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.ui.UiGeneratorController;
 
 /**
  * Controller for the FrontlineForms plugin.
  * @author Alex
  */
-public class FormsPluginController implements PluginController, IncomingMessageListener {
+public class FormsPluginController extends BasePluginController implements IncomingMessageListener {
 //> CONSTANTS
 	/** Filename and path of the XML for the FrontlineForms tab. */
 	private static final String XML_FORMS_TAB = "/ui/plugins/forms/formsTab.xml";
 	
 //> INSTANCE PROPERTIES
-	/** Logging object */
-	private Logger log = Utils.getLogger(this.getClass());
 	/** the {@link FrontlineSMS} instance that this plugin is attached to */
 	private FrontlineSMS frontlineController;
 	/** the {@link FormsMessageHandler} for processing incoming and outgoing messages */

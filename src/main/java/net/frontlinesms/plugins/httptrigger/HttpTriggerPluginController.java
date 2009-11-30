@@ -6,7 +6,7 @@ package net.frontlinesms.plugins.httptrigger;
 import org.springframework.context.ApplicationContext;
 
 import net.frontlinesms.FrontlineSMS;
-import net.frontlinesms.plugins.PluginController;
+import net.frontlinesms.plugins.BasePluginController;
 import net.frontlinesms.plugins.PluginInitialisationException;
 import net.frontlinesms.plugins.httptrigger.httplistener.HttpTriggerServer;
 import net.frontlinesms.ui.ThinletUiEventHandler;
@@ -16,13 +16,15 @@ import net.frontlinesms.ui.UiGeneratorController;
  * This plugin controls an HTTP listener for triggering SMS from outside FrontlineSMS.
  * @author Alex
  */
-public class HttpTriggerPluginController implements PluginController, ThinletUiEventHandler, HttpTriggerEventListener {
+public class HttpTriggerPluginController extends BasePluginController implements ThinletUiEventHandler, HttpTriggerEventListener {
 //> STATIC CONSTANTS
 	/** Filename and path of the XML for the HTTP Trigger tab. */
 	private static final String UI_FILE_TAB = "/ui/plugins/httptrigger/httpTriggerTab.xml";
 
 //> INSTANCE PROPERTIES
+	/** The {@link HttpTriggerListener} that is currently running.  This property will be <code>null</code> if no listener is running. */
 	private HttpTriggerListener httpListener;
+	/** Thinlet tab controller for this plugin */
 	private HttpTriggerThinletTabController tabController;
 	/** the {@link FrontlineSMS} instance that this plugin is attached to */
 	private FrontlineSMS frontlineController;
@@ -62,12 +64,17 @@ public class HttpTriggerPluginController implements PluginController, ThinletUiE
 		this.frontlineController = frontlineController;
 	}
 
+	/**
+	 * Start the HTTP listener.  If there is another listener already running, it will be stopped. 
+	 * @param portNumber The port to start listening on
+	 */
 	public void startListener(int portNumber) {
 		this.stopListener();
 		this.httpListener = new HttpTriggerServer(this, portNumber);
 		this.httpListener.start();
 	}
 
+	/** Stop the {@link #httpListener} if it is runnning. */
 	public void stopListener() {
 		if(this.httpListener != null) {
 			this.httpListener.pleaseStop();

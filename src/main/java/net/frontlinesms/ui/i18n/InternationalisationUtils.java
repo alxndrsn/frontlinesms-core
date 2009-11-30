@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.MissingResourceException;
 
 import net.frontlinesms.FrontlineSMSConstants;
@@ -209,7 +210,7 @@ public class InternationalisationUtils {
 	 * @throws IOException 
 	 */
 	public static final LanguageBundle getLanguageBundleFromClasspath(String path) throws IOException {
-		return getLanguageBundle(path, InternationalisationUtils.class.getResourceAsStream(path), CHARSET_UTF8);
+		return getLanguageBundle(path, InternationalisationUtils.class.getResourceAsStream(path));
 	}
 	
 	/**
@@ -222,7 +223,7 @@ public class InternationalisationUtils {
 		FileInputStream fileInputStream = null;
 		try {
 			fileInputStream = new FileInputStream(file);
-			LanguageBundle bundle = getLanguageBundle(file.getName(), fileInputStream, CHARSET_UTF8);
+			LanguageBundle bundle = getLanguageBundle(file.getName(), fileInputStream);
 			LOG.info("Successfully loaded language bundle from file: " + file.getName());
 			LOG.info("Bundle reports filename as: " + bundle.getFilename());
 			LOG.info("Language      : " + bundle.getLanguage());
@@ -253,13 +254,23 @@ public class InternationalisationUtils {
 	 * Loads a {@link LanguageBundle} from an {@link InputStream}, using the specified encoding.
 	 * @param filename
 	 * @param inputStream
-	 * @param charset
 	 * @return the language bundle in the supplied stream
 	 * @throws IOException if there was an error loading the bundle
 	 */
-	private static final LanguageBundle getLanguageBundle(String filename, InputStream inputStream, Charset charset) throws IOException {
+	private static final LanguageBundle getLanguageBundle(String filename, InputStream inputStream) throws IOException {
+		Map<String, String> i18nStrings = loadTextResources(filename, inputStream);
+		return new LanguageBundle(filename, i18nStrings);
+	}
+	
+	/**
+	 * @param identifier ID used when logging problems while loading the text resource
+	 * @param inputStream
+	 * @return map containing map of key-value pairs of text resources
+	 * @throws IOException
+	 */
+	public static final Map<String, String> loadTextResources(String identifier, InputStream inputStream) throws IOException {
 		HashMap<String, String> i18nStrings = new HashMap<String, String>();
-		BufferedReader in = new BufferedReader(new InputStreamReader(inputStream, charset));
+		BufferedReader in = new BufferedReader(new InputStreamReader(inputStream, CHARSET_UTF8));
 		String line;
 		while((line = in.readLine()) != null) {
 			line = line.trim();
@@ -268,7 +279,7 @@ public class InternationalisationUtils {
 				if(splitChar <= 0) {
 					// there's no "key=value" pair on this line, but it does have text on it.  That's
 					// not strictly legal, so we'll log a warning and carry on.
-					LOG.warn("Bad line in language file '" + filename + "': '" + line + "'");
+					LOG.warn("Bad line in language file '" + identifier + "': '" + line + "'");
 				} else {
 					String key = line.substring(0, splitChar);					
 					if(i18nStrings.containsKey(key)) {
@@ -281,8 +292,7 @@ public class InternationalisationUtils {
 				}
 			}
 		}
-		
-		return new LanguageBundle(filename, i18nStrings);
+		return i18nStrings;
 	}
 
 	/**
@@ -342,5 +352,29 @@ public class InternationalisationUtils {
 	 */
 	public static Date parseDate(String date) throws ParseException {
 		return getDateFormat().parse(date);
+	}
+
+	/**
+	 * <p>Merges the source map into the destination.  Values in the destination take precedence - they will not be
+	 * overridden if the same key occurs in both destination and source.</p>
+	 * <p>If a <code>null</code> source is provided, this method does nothing; if a <code>null</code> destination is
+	 * provided, a {@link NullPointerException} will be thrown.
+	 * @param destination 
+	 * @param source 
+	 */
+	public static void mergeMaps(Map<String, String> destination, Map<String, String> source) {
+		assert(destination!=null): "You must provide a destination map to merge into.";
+		
+		// If there is nothing to merge, just return.
+		if(source == null) return;
+		
+		for(String key : source.keySet()) {
+			if(destination.get(key) != null) {
+				// key already present in language bundle - ignoring
+			} else {
+				// this key does not appear in the language bundle, so add it with the value from the map
+				destination.put(key, source.get(key));
+			}
+		}
 	}
 }

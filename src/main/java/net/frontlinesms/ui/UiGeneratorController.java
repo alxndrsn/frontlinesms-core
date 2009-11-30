@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -305,6 +306,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				
 				// Add plugins tabs
 				for(PluginController controller : frontlineController.getPluginControllers()) {
+					addPluginTextResources(controller);
 					add(tabbedPane, controller.getTab(this));
 				}
 				
@@ -392,6 +394,19 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			super.destroy();
 			throw t;
 		}
+	}
+	
+	/**
+	 * Adds the text resources for a {@link PluginController} to {@link UiGeneratorController}'s text resource manager.
+	 * @param controller
+	 */
+	private void addPluginTextResources(PluginController controller) {
+		// Add to the default English bundle
+		InternationalisationUtils.mergeMaps(Thinlet.DEFAULT_ENGLISH_BUNDLE, controller.getDefaultTextResource());
+		
+		// Add to the current language bundle
+		InternationalisationUtils.mergeMaps(FrontlineUI.currentResourceBundle.getProperties(), controller.getTextResource(new Locale(FrontlineUI.currentResourceBundle.getLanguage(), FrontlineUI.currentResourceBundle.getCountry())));
+		setResourceBundle(FrontlineUI.currentResourceBundle.getProperties(), FrontlineUI.currentResourceBundle.isRightToLeft());
 	}
 
 	/**

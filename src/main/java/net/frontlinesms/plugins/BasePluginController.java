@@ -59,20 +59,7 @@ public abstract class BasePluginController implements PluginController {
 	 * @return The text resource, or <code>null</code> if the resource could not be found.
 	 */
 	private Map<String, String> getTextResource(String... nameExtensions) {
-		String directory = this.getClass().getPackage().getName().replace('.', '/');
-		// Construct the name of the .properties file
-		String fileName =  this.getClass().getSimpleName();
-		// Make the first character of the properties file name lower case
-		fileName = fileName.substring(0, 1).toLowerCase() + (fileName.length() > 1 ? fileName.substring(1) : "");
-		
-		// Append any required extensions to the filename
-		for(String extension : nameExtensions) {
-			if(extension != null) {
-				fileName += "_" + extension;
-			}
-		}
-		
-		String resourceFilePath = '/' + directory + '/' + fileName + ".ui.properties";
+		String resourceFilePath = getTextResourcePath(nameExtensions);
 		
 		// Attempt to load the text resource
 		InputStream textResourceInputStream = this.getClass().getResourceAsStream(resourceFilePath);
@@ -87,6 +74,34 @@ public abstract class BasePluginController implements PluginController {
 				return null;
 			}
 		}
+	}
+	
+	private String getTextResourcePath(String... nameExtensions) {
+		String directory = this.getClass().getPackage().getName().replace('.', '/');
+		
+		String resourceFilePath = '/' + directory + '/' + getTextResourceFilename(nameExtensions) + ".properties";
+		
+		return resourceFilePath;
+	}
+	
+	private String getTextResourceFilename(String ... nameExtensions) {
+		// Construct the name of the .properties file
+		String fileName =  this.getClass().getSimpleName();
+		
+		// Add suffix "Text" to file name, BEFORE the language & country suffixes
+		fileName += "Text";
+		
+		// Make the first character of the properties file name lower case
+		fileName = fileName.substring(0, 1).toLowerCase() + (fileName.length() > 1 ? fileName.substring(1) : "");
+		
+		// Append any required extensions to the filename
+		for(String extension : nameExtensions) {
+			if(extension != null) {
+				fileName += "_" + extension;
+			}
+		}
+		
+		return fileName;
 	}
 
 //> STATIC FACTORIES
