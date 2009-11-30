@@ -19,11 +19,19 @@ public class HttpTriggerServer extends Thread implements HttpTriggerListener {
 //> STATIC CONSTANTS
 
 //> INSTANCE PROPERTIES
+	/** The listener for HTTP events */
 	private final HttpTriggerEventListener eventListener;
+	/** The port on which we will listen for incoming HTTP connections */
 	private final int port;
+	/** The Jetty server that will listen for HTTP connections. */
 	private final Server server;
 
 //> CONSTRUCTORS
+	/**
+	 * Create a new {@link HttpTriggerServer}.
+	 * @param eventListener value for {@link #eventListener}
+	 * @param port value for {@link #port}
+	 */
 	public HttpTriggerServer(HttpTriggerEventListener eventListener, int port) {
 		this.port = port;
 		this.eventListener = eventListener;
@@ -38,12 +46,13 @@ public class HttpTriggerServer extends Thread implements HttpTriggerListener {
 	}
 
 //> ACCESSORS
-
+	/** @return {@link #port} */
 	public int getPort() {
 		return this.port;
 	}
 
 //> INSTANCE METHODS
+	/** Start listening. */
 	public void run() {
 		this.eventListener.log("Starting on port: " + this.getPort());
 		try {
@@ -67,6 +76,7 @@ public class HttpTriggerServer extends Thread implements HttpTriggerListener {
 		this.eventListener.log("Listener terminated on port: " + this.getPort());
 	}
 
+	/** Request the server to stop listening. */
 	public void pleaseStop() {
 		this.eventListener.log("Terminating listener on port: " + this.getPort());
 		try {
@@ -80,7 +90,10 @@ public class HttpTriggerServer extends Thread implements HttpTriggerListener {
 //> STATIC FACTORIES
 
 //> STATIC HELPER METHODS
-
+	/**
+	 * Run the server from the commandline
+	 * @param args 
+	 */
 	public static void main(String[] args) {
 		HttpTriggerServer serv = new HttpTriggerServer(new CommandLineTriggerEventListener(), 1440);
 		serv.start();
@@ -109,6 +122,7 @@ class CommandLineTriggerEventListener implements HttpTriggerEventListener {
 		System.out.println("LOG: " + message);
 	}
 
+	/** Handle request to send an SMS. */
 	public void sendSms(String toPhoneNumber, String message) {
 		System.out.println("SEND SMS: to=" + toPhoneNumber + "; message=" + message);
 	}

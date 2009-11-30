@@ -40,11 +40,12 @@ public class HttpTriggerThinletTabController implements ThinletUiEventHandler {
 	/**
 	 * The "start" button has been clicked on the UI.  Try to get the details of the listener
 	 * setup, and start it on the suggested port.
+	 * @param portNumberAsString The port number to connect to, as a String.  This will be ignored if {@link Integer#parseInt(String)} fails on it.
 	 */
 	public void startListener(String portNumberAsString) {
 		int portNumber;
 		try {
-			portNumber = Integer.parseInt(portNumberAsString);
+			portNumber = Integer.parseInt(portNumberAsString.trim());
 		} catch(NumberFormatException ex) {
 			// Port number failed to parse.  Warn the user and do not change the state of the listener 
 			this.uiController.alert("This is not a valid port number."); // FIXME i18n
@@ -62,6 +63,10 @@ public class HttpTriggerThinletTabController implements ThinletUiEventHandler {
 		uiController.setEnabled(getStopButton(), true);
 	}
 	
+	/**
+	 * Tells the {@link #httpTriggerController} to stop the HTTP listener, and changes the
+	 * available UI components as is suitable. 
+	 */
 	public void stopListener() {
 		// Stop the listener
 		this.httpTriggerController.stopListener();
@@ -71,6 +76,12 @@ public class HttpTriggerThinletTabController implements ThinletUiEventHandler {
 		uiController.setEnabled(getStopButton(), false);
 	}
 	
+//> UIGC PASS-THROUGH METHODS
+	/**
+	 * Removes all children of a component.
+	 * @param listComponent The component whose children will be removed
+	 * @see UiGeneratorController#removeAll(Object)
+	 */
 	public void removeAll(Object listComponent) {
 		this.uiController.removeAll(listComponent);
 	}

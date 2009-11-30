@@ -7,6 +7,7 @@ package net.frontlinesms.plugins;
  * Exception thrown when initialising a FrontlineSMS plugin.
  * @author Alex
  */
+@SuppressWarnings("serial")
 public class PluginInitialisationException extends Exception {
 
 	/**

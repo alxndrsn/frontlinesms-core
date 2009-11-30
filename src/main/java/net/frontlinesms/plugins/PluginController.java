@@ -10,7 +10,6 @@ import org.springframework.context.ApplicationContext;
 
 import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.ui.UiGeneratorController;
-import net.frontlinesms.ui.i18n.LanguageBundle;
 
 /**
  * Basic interface that all FrontlineSMS plugins must implement.

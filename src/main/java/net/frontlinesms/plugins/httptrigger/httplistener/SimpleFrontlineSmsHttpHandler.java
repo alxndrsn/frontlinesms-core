@@ -27,10 +27,16 @@ class SimpleFrontlineSmsHttpHandler extends AbstractHandler {
 //> STATIC CONSTANTS
 
 //> INSTANCE PROPERTIES
+	/** The listener for events triggered on the HTTP listener. */
 	private final HttpTriggerEventListener eventListener;
+	/** Handlers for different URL mappings. */
 	private final LinkedList<SimpleUrlRequestHandler> handlers = new LinkedList<SimpleUrlRequestHandler>();
 
 //> CONSTRUCTORS
+	/**
+	 * Create a new {@link SimpleFrontlineSmsHttpHandler}.
+	 * @param eventListener value for {@link #eventListener}.
+	 */
 	SimpleFrontlineSmsHttpHandler(HttpTriggerEventListener eventListener) {
 		this.eventListener = eventListener;
 		
@@ -91,7 +97,7 @@ class SimpleFrontlineSmsHttpHandler extends AbstractHandler {
 	/**
 	 * Process request from the URL.
 	 * @param requestUri 
-	 * @return 
+	 * @return <code>true</code> if the event was processed successfully; <code>false</code> if there was no processor available, or processing failed. 
 	 */
 	private boolean processRequestFromUrl(final HttpURI requestUri) {
 		eventListener.log("Processing request: " + requestUri);
