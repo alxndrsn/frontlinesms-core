@@ -266,7 +266,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 					: "");
 			
 			Object tabbedPane = find(COMPONENT_TABBED_PANE);
-			setBoolean(find("menu_tabs"), VISIBLE, true); // FIXME i doubt this line is necessary.  Previously switched depending if we were using classic or standard view
 			this.phoneTabController = new PhoneTabController(this);
 			this.contactsTabController = new ContactsTabController(this, this.contactDao, this.groupDao);
 
@@ -1513,7 +1512,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/**
 	 * Shows the export wizard dialog, according to the supplied type.
 	 * @param list The list to get selected items from.
-	 * @param type The desired type (0 for Contacts, 1 for Messages and 2 for Keywords) // FIXME these types should be more clearly defined
+	 * @param type The desired type
 	 */
 	public void showExportWizard(Object list, String type){
 		new ImportExportUiController(this, this.contactDao, this.messageFactory, this.keywordDao).showWizard(true, list, type);
@@ -1521,7 +1520,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	/**
 	 * Shows the export wizard dialog, according to the supplied type.
-	 * @param type The desired type (0 for Contacts, 1 for Messages and 2 for Keywords) // FIXME these types should be more clearly defined
+	 * @param type The desired type
 	 */
 	public void showExportWizard(String type){
 		new ImportExportUiController(this, this.contactDao, this.messageFactory, this.keywordDao).showWizard(true, type);
@@ -1530,7 +1529,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/**
 	 * Shows the import wizard dialog, according to the supplied type.
 	 * @param list The list to get selected items from.
-	 * @param type The desired type (0 for Contacts, 1 for Messages and 2 for Keywords) // FIXME these types should be more clearly defined
+	 * @param type The desired type
 	 */
 	public void showImportWizard(Object list, String type){
 		new ImportExportUiController(this, this.contactDao, this.messageFactory, this.keywordDao).showWizard(false, list, type);
@@ -1538,7 +1537,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	/**
 	 * Shows the import wizard dialog, according to the supplied type.
-	 * @param type The desired type (0 for Contacts, 1 for Messages and 2 for Keywords) // FIXME these types should be more clearly defined
+	 * @param type The desired type (0 for Contacts, 1 for Messages and 2 for Keywords)
 	 */
 	public void showImportWizard(String type){
 		new ImportExportUiController(this, this.contactDao, this.messageFactory, this.keywordDao).showWizard(false, type);
@@ -2259,10 +2258,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		case 3:
 			show_newKActionLeaveForm(keywordListComponent);
 			break;
-		case 5:
+		case 4:
 			show_newKActionEmailForm(keywordListComponent);
 			break;
-		case 6:
+		case 5:
 			show_newKActionExternalCmdForm(keywordListComponent);
 			break;
 		}
@@ -2385,21 +2384,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 		return emailForm;
 	}
-	
-	/**
-	 * Shows the sms services accounts (IntelliSMS) settings dialog.
-	 * FIXME confirm this is actually used still
-	 */
-	public void showSmsHttpIntelliSmsServicesSettings() {
-		//TODO Load the accounts from databse
-		Object smsServicesForm = loadComponentFromFile(UI_FILE_SMS_SERVICES_ACCOUNTS_INTELLISMS_SETTINGS_FORM);
-		/*Object table = find(smsServicesForm, COMPONENT_ACCOUNTS_LIST);
-		for (SmsHttpServiceAccount acc : smsHttpServiceAccountFactory.getAllSmsHttpServiceAccounts()) {
-			add(table, getRow(acc));
-		}*/
-		add(smsServicesForm);
-	}
-	
+
 	/**
 	 * Method called when the user changes the task type.
 	 */

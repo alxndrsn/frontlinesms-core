@@ -64,6 +64,7 @@ public class KeywordAction {
 	}
 	
 //> CONSTANTS
+	// TODO could make this an enum rather nicely
 	/** Action: forward the received message to a group */
 	public static final int TYPE_FORWARD = 0;
 	/** Action: add the sender's msisdn to a group */
@@ -73,9 +74,9 @@ public class KeywordAction {
 	/** Reply: send a specified reply to the sender's msisdn */
 	public static final int TYPE_REPLY = 3;
 	/** Action: executes an external command */
-	public static final int TYPE_EXTERNAL_CMD = 5;
+	public static final int TYPE_EXTERNAL_CMD = 4;
 	/** Action: send an e-mail */
-	public static final int TYPE_EMAIL = 6;
+	public static final int TYPE_EMAIL = 5;
 	
 	// FIXME rename these - we can't have two types of types
 	public static final int EXTERNAL_HTTP_REQUEST = 0;
