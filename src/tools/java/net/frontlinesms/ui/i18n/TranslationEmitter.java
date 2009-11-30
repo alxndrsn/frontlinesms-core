@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 import java.util.MissingResourceException;
 
 /**
@@ -36,7 +37,7 @@ public class TranslationEmitter {
 
 //> INSTANCE PROPERTIES
 	/** The english language bundle to take all missing keys from */
-	private final LanguageBundle defaultLanguageBundle;
+	private final Map<String, String> defaultLanguageBundle;
 	/** Directory to output translations to */
 	private final File outputDirectory;
 
@@ -50,7 +51,7 @@ public class TranslationEmitter {
 	 * @param languageBundle
 	 * @param outputDirectory 
 	 */
-	public TranslationEmitter(LanguageBundle languageBundle, File outputDirectory) {
+	public TranslationEmitter(Map<String, String> languageBundle, File outputDirectory) {
 		this.defaultLanguageBundle = languageBundle;
 		this.outputDirectory = outputDirectory;
 	}
@@ -86,7 +87,7 @@ public class TranslationEmitter {
 			for(String key : report.getAllMissingKeys()) {
 				String value = TRANSLATION_TODO;
 				try {
-					value += " " + this.defaultLanguageBundle.getValue(key);
+					value += " " + this.defaultLanguageBundle.get(key);
 					
 				} catch(MissingResourceException ex) { /* ignore missing keys */ }
 				writer.write(key + "=" + value + "\r\n");

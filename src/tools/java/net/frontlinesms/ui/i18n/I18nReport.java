@@ -4,6 +4,9 @@
 package net.frontlinesms.ui.i18n;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -33,28 +36,28 @@ public class I18nReport {
 	/**
 	 * Processes the language bundle and checks it against the checker.
 	 * @param languageChecker 
-	 * @param languageBundleFile 
+	 * @param textResourceFile 
 	 * @throws NoSuchFieldException 
 	 * @throws SecurityException 
 	 * @throws IllegalAccessException 
 	 * @throws IllegalArgumentException 
+	 * @throws IOException 
+	 * @throws FileNotFoundException 
 	 */
 	@SuppressWarnings("unchecked")
-	public I18nReport(LanguageChecker languageChecker, File languageBundleFile) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
-		this.bundleFileName = languageBundleFile.getName();
-		LanguageBundle languageBundle = InternationalisationUtils.getLanguageBundle(languageBundleFile);
+	public I18nReport(LanguageChecker languageChecker, File textResourceFile) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, FileNotFoundException, IOException {
+		this.bundleFileName = textResourceFile.getName();
+		Map<String, String> textResource = InternationalisationUtils.loadTextResources(textResourceFile.getAbsolutePath(), new FileInputStream(textResourceFile));
 		
 		// Get all keys in the bundle
 		Set<String> bundleKeys = new TreeSet<String>();
-		Field bundleKeysField = languageBundle.getClass().getDeclaredField("properties");
-		bundleKeysField.setAccessible(true);
-		bundleKeys.addAll(((Map<String, String>) bundleKeysField.get(languageBundle)).keySet());
+		bundleKeys.addAll(textResource.keySet());
 		
 		// 1. Check the keys that are used in code
 		for(String i18nKey : languageChecker.getI18nKeysInCode().keySet()) {
 			try {
 				// Try getting the value from the language bundle
-				languageBundle.getValue(i18nKey);
+				textResource.get(i18nKey);
 				// Remove the key from the bundleKeys so we know if we have any unnecessary ones 
 				bundleKeys.remove(i18nKey);
 			} catch(MissingResourceException ex) {
@@ -66,7 +69,7 @@ public class I18nReport {
 		for(String i18nKey : languageChecker.getI18nKeysInXml().keySet()) {
 			try {
 				// Try getting the value from the language bundle
-				languageBundle.getValue(i18nKey);
+				textResource.get(i18nKey);
 				// Remove the key from the bundleKeys so we know if we have any unnecessary ones 
 				bundleKeys.remove(i18nKey);
 			} catch(MissingResourceException ex) {

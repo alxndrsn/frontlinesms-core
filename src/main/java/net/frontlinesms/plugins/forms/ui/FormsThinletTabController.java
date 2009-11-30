@@ -27,11 +27,13 @@ import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
+import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
 /**
  * Thinlet controller class for the FrontlineSMS Forms plugin.
  * @author Alex
  */
+@TextResourceKeyOwner(prefix="I18N_")
 public class FormsThinletTabController implements ThinletUiEventHandler {
 //> CONSTANTS
 	/** XML file containing forms pane for viewing results of a form */

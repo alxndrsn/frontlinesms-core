@@ -5,12 +5,14 @@ package net.frontlinesms.ui.i18n;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -34,12 +36,6 @@ public class Main {
 			"src/main/resources/ui/dialog",
 			"src/main/resources/ui/smsdevice",
 			"src/main/resources/ui/wizard",};
-	/** Filter for sorting language files */
-	private static final FileFilter LANGUAGE_FILE_FILTER = new FileFilter() {
-		public boolean accept(File file) {
-			return file.getName().startsWith("frontlineSMS") && file.getName().endsWith(".properties");
-		}
-	};
 	
 //> MAIN METHOD
 	/**
@@ -58,19 +54,19 @@ public class Main {
 		String languagebundleDirectoryPath;
 		String[] uiXmlLayoutDirectories;
 		String outputDirectoryPath = OUTPUT_DIRECTORY;
-		String baseFileName;
+		String resourceFileBaseName;
 		if(args.length == 0) {
 			// Use default values
 			tRKOPackageNames = DEFAULT_TEXTKEYRESOURCE_PACKAGE_NAMES;
 			uiXmlLayoutDirectories = UI_XML_LAYOUT_DIRECTORIES;
 			languagebundleDirectoryPath = LANGUAGEBUNDLE_DIRECTORY;
-			baseFileName = "frontlineSMS";
+			resourceFileBaseName = "frontlineSMS";
 		} else {
 			// Extract values from args
 			tRKOPackageNames = splitArg(args[0]);
 			uiXmlLayoutDirectories = splitArg(args[1]);
 			languagebundleDirectoryPath = args[2];
-			baseFileName = args[3];
+			resourceFileBaseName = args[3];
 			if(args.length > 4) outputDirectoryPath = args[4];
 		}
 
@@ -81,7 +77,7 @@ public class Main {
 		Class<?>[] uiJavaControllerClasses = 
 			//UI_JAVA_CONTROLLER_CLASS_NAMES;
 			tRKOSet.toArray(new Class<?>[0]);
-		doReport(uiJavaControllerClasses, uiXmlLayoutDirectories, languagebundleDirectoryPath, baseFileName, outputDirectoryPath);
+		doReport(uiJavaControllerClasses, uiXmlLayoutDirectories, languagebundleDirectoryPath, resourceFileBaseName, outputDirectoryPath);
 	}
 	
 	/**
@@ -93,7 +89,7 @@ public class Main {
 		return arg.split("\\s");
 	}
 	
-	private static void doReport(Class<?>[] uiJavaControllerClasses, String[] uiXmlLayoutDirectories, String languagebundleDirectoryPath, String baseFileName, String outputDirectoryPath) throws Exception {
+	private static void doReport(Class<?>[] uiJavaControllerClasses, String[] uiXmlLayoutDirectories, String languagebundleDirectoryPath, String resourceFileBaseName, String outputDirectoryPath) throws Exception {
 		LanguageChecker checker = new LanguageChecker(
 				uiJavaControllerClasses,
 				uiXmlLayoutDirectories);
@@ -103,11 +99,13 @@ public class Main {
 		File outputDirectory = new File(outputDirectoryPath);
 		
 		outputDirectory.mkdirs();
-		TranslationEmitter emitter = new TranslationEmitter(InternationalisationUtils.getLanguageBundle(new File(languagebundleDirectoryPath, baseFileName + ".properties")), outputDirectory);
+		File textResourceFile = new File(languagebundleDirectoryPath, resourceFileBaseName + ".properties");
+		Map<String, String> textResources = InternationalisationUtils.loadTextResources(textResourceFile.getAbsolutePath(), new FileInputStream(textResourceFile));
+		TranslationEmitter emitter = new TranslationEmitter(textResources, outputDirectory);
 		
-		for(File languageBundle : new File(languagebundleDirectoryPath).listFiles(LANGUAGE_FILE_FILTER)) {
+		for(File languageBundle : new File(languagebundleDirectoryPath).listFiles(getTextResourceFileFilter(resourceFileBaseName))) {
 			I18nReport report = checker.produceReport(languageBundle);
-			report.output(System.out, false);
+			report.output(System.out, true);
 			emitter.processBundle(languageBundle, report);
 		}	
 	}
@@ -189,15 +187,27 @@ public class Main {
 		out.println("---------- REPORT START " + checker.getClass().getName());
 	}
 
-	//> INSTANCE PROPERTIES
+//> INSTANCE PROPERTIES
 
-	//> CONSTRUCTORS
+//> CONSTRUCTORS
 
-	//> ACCESSORS
+//> ACCESSORS
 
-	//> INSTANCE HELPER METHODS
+//> INSTANCE HELPER METHODS
 
-	//> STATIC FACTORIES
+//> STATIC FACTORIES
 
-	//> STATIC HELPER METHODS
+//> STATIC HELPER METHODS
+	/**
+	 * @param resourceFileBaseName
+	 * @return file filter for getting text resource files
+	 */
+	private static FileFilter getTextResourceFileFilter(final String resourceFileBaseName) {
+		/** Filter for sorting language files */
+		return new FileFilter() {
+			public boolean accept(File file) {
+				return file.getName().startsWith(resourceFileBaseName) && file.getName().endsWith(".properties");
+			}
+		};
+	}
 }

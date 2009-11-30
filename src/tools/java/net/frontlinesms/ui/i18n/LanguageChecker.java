@@ -5,6 +5,7 @@ package net.frontlinesms.ui.i18n;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -166,8 +167,10 @@ public class LanguageChecker {
 	 * @throws NoSuchFieldException 
 	 * @throws IllegalArgumentException 
 	 * @throws SecurityException 
+	 * @throws IOException 
+	 * @throws FileNotFoundException 
 	 */
-	I18nReport produceReport(File languageBundle) throws SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException {
+	I18nReport produceReport(File languageBundle) throws SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException, FileNotFoundException, IOException {
 		I18nReport report = new I18nReport(this, languageBundle);
 		return report;
 	}
@@ -239,7 +242,7 @@ public class LanguageChecker {
 	/**
 	 * @param clazz
 	 * @param field
-	 * @return
+	 * @return <code>true</code> if the field should be processed, <code>false</code> if it should be ignored
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
