@@ -22,7 +22,6 @@ public class UiGeneratorControllerConstants {
 	protected static final String UI_FILE_NEW_KACTION_FORWARD_FORM = "/ui/dialog/newKActionForwardForm.xml";
 	protected static final String UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM = "/ui/dialog/externalCommandDialog.xml";
 	protected static final String UI_FILE_NEW_KACTION_EMAIL_FORM = "/ui/dialog/emailDialog.xml";
-	protected static final String UI_FILE_NEW_KACTION_SURVEY_FORM = "/ui/dialog/surveyDialog.xml";
 	protected static final String UI_FILE_EDIT_KEYWORD_LIST_FORM = "/ui/dialog/editKeywordListDialog.xml";
 	protected static final String UI_FILE_EMAIL_ACCOUNTS_SETTINGS_FORM = "/ui/dialog/emailServerConfigDialog.xml";
 	protected static final String UI_FILE_SMS_SERVICES_ACCOUNTS_SETTINGS_FORM = "/ui/dialog/smsHttpServerConfigDialog.xml";
@@ -49,19 +48,9 @@ public class UiGeneratorControllerConstants {
 	protected static final String UI_FILE_MESSAGES_TAB = "/ui/advanced/messagesTab.xml";
 	protected static final String UI_FILE_EMAILS_TAB = "/ui/advanced/emailsTab.xml";
 	
-	//Classic view
-	protected static final String UI_FILE_SURVEY_MANAGER_TAB = "/ui/classic/surveyManagerTab.xml";
-	protected static final String UI_FILE_SURVEY_ANALYST_TAB = "/ui/classic/surveyAnalystTab.xml";
-	protected static final String UI_FILE_SEND_CONSOLE_TAB = "/ui/classic/sendConsoleTab.xml";
-	protected static final String UI_FILE_MESSAGE_TRACKER_TAB = "/ui/classic/messageTrackerTab.xml";
-	protected static final String UI_FILE_RECEIVE_CONSOLE_TAB = "/ui/classic/receiveConsoleTab.xml";
-	protected static final String UI_FILE_REPLY_MANAGER_TAB = "/ui/classic/replyManagerTab.xml";
-	
 //> TAB NAMES
 	/** The name of the Contact Manager tab */
 	static final String TAB_CONTACT_MANAGER = ":contactManager";
-	/** The name of the Group Manager tab */
-	static final String TAB_GROUP_MANAGER = ":groupManager";
 	/** The name of the Message Log tab */
 	static final String TAB_MESSAGE_HISTORY = ":messageHistory";
 	/** The name of the Email Log tab */
@@ -72,18 +61,6 @@ public class UiGeneratorControllerConstants {
 	static final String TAB_KEYWORD_MANAGER = ":keywordManager";
 	/** The name of the Phone Manager tab in advanced view */
 	static final String TAB_ADVANCED_PHONE_MANAGER = ":advancedPhoneManager";
-	/** The name of the Survey Manager tab */
-	static final String TAB_SURVEY_MANAGER = ":surveyManager";
-	/** The name of the Survey Analyst tab */
-	static final String TAB_SURVEY_ANALYST = ":surveyAnalyst";
-	/** The name of the Send Console tab */
-	static final String TAB_SEND_CONSOLE = ":sendConsole";
-	/** The name of the Receive Console tab */
-	static final String TAB_RECEIVE_CONSOLE = ":receiveConsole";
-	/** The name of the Message Tracker tab */
-	static final String TAB_MESSAGE_TRACKER = ":messageTracker";
-	/** The name of the Reply Manager tab */
-	static final String TAB_REPLY_MANAGER = ":replyManager";
 	
 //> COMPONENT NAMES
 	/** 
@@ -101,7 +78,6 @@ public class UiGeneratorControllerConstants {
 	static final String COMPONENT_MI_HOME = "miHome";
 	static final String COMPONENT_MI_NEW_CONTACT = "miNewContact";
 	static final String COMPONENT_EVENTS_LIST = "eventsList";
-	static final String COMPONENT_SURVEY_MANAGER_NEW_BUTTON = "surveyManager_newButton";
 	static final String COMPONENT_BT_CONTINUE = "btContinue";
 	static final String COMPONENT_CONFIRM_DIALOG = "confirmDialog";
 	static final String COMPONENT_BT_SENDER_NAME = "btSenderName";
@@ -192,10 +168,6 @@ public class UiGeneratorControllerConstants {
 	static final String COMPONENT_EXTERNAL_COMMAND_GROUP_LIST = COMPONENT_GROUP_LIST;
 	static final String COMPONENT_TF_END_DATE = "tfEndDate";
 	static final String COMPONENT_TF_START_DATE = "tfStartDate";
-	static final String COMPONENT_SEND_CONSOLE_MESSAGE_LIST = "sendConsole_messageList";
-	static final String COMPONENT_RECEIVE_CONSOLE_MESSAGE_LIST = "receiveConsole_messageList";
-	static final String COMPONENT_MESSAGE_TRACKER_FAILED_MESSAGE_LIST = "messageTracker_failedMessageList";
-	static final String COMPONENT_MESSAGE_TRACKER_PENDING_MESSAGE_LIST = "messageTracker_pendingMessageList";
 	static final String COMPONENT_RADIO_BUTTON_ACTIVE = "rb_active";
 	static final String COMPONENT_TABBED_PANE = "tabbedPane";
 	static final String COMPONENT_NEW_KEYWORD_FORM_KEYWORD = "newKeywordForm_keyword";
@@ -205,8 +177,6 @@ public class UiGeneratorControllerConstants {
 	static final String COMPONENT_FORWARD_FORM_GROUP_LIST = "forwardForm_groupList";
 	static final String COMPONENT_FORWARD_FORM_TITLE = "forwardForm_title";
 	static final String COMPONENT_FORWARD_FORM_TEXTAREA = "forward";
-	static final String COMPONENT_SEND_CONSOLE_GROUP_TREE = "sendConsole_groupTree";
-	static final String COMPONENT_SEND_CONSOLE_LONE_RECIPIENT = "sendConsole_loneRecipient";
 	static final String COMPONENT_CONTACT_SELECTER_OK_BUTTON = "contactSelecter_okButton";
 	static final String COMPONENT_CONTACT_SELECTER_CONTACT_LIST = "contactSelecter_contactList";
 	static final String COMPONENT_CONTACT_SELECTER_TITLE = "contactSelecter_title";
@@ -214,19 +184,6 @@ public class UiGeneratorControllerConstants {
 	static final String COMPONENT_BUTTON_YES = "btYes";
 	static final String COMPONENT_DELETE_NEW_CONTACT = "deleteNewContact";
 	static final String COMPONENT_LABEL_STATUS = "lbStatus";
-	static final String COMPONENT_SEND_CONSOLE_MODEM_LIST = "sendConsole_modemList";
-	static final String COMPONENT_SURVEY_MANAGER_DELETE_BUTTON = "surveyManager_deleteButton";
-	static final String COMPONENT_SURVEY_MANAGER_EDIT_BUTTON = "surveyManager_editButton";
-	static final String COMPONENT_SURVEY_MANAGER_SURVEY_DESCRIPTION = "surveyManager_surveyDescription";
-	static final String COMPONENT_SURVEY_MANAGER_SURVEY_KEYWORD = "surveyManager_surveyKeyword";
-	static final String COMPONENT_GROUP_MANAGER_CONTACT_DETAILS = "groupManager_contactDetails";
-	static final String COMPONENT_GROUP_MANAGER_DELETE_CONTACTS_BUTTON = "groupManager_deleteContactsButton";
-	static final String COMPONENT_GROUP_MANAGER_SEND_SMS_BUTTON = "groupManager_sendSMSButton";
-	static final String COMPONENT_GROUP_MANAGER_CREATE_NEW_CONTACT = "group_manager_createNewContact";
-	static final String COMPONENT_GROUP_MANAGER_CONTACT_LIST = "groupManager_contactList";
-	static final String COMPONENT_MENU_SWITCH_MODE = "menu_switchMode";
-	static final String COMPONENT_ANALYST_MESSAGES_UNREGISTERED = "analystMessages_unregistered";
-	static final String COMPONENT_ANALYST_MESSAGES = "analystMessages";
 	static final String COMPONENT_MENU_ITEM_VIEW_CONTACT = "viewContact";
 	static final String COMPONENT_HISTORY_MESSAGE_LIST = "history_messageList";
 	static final String COMPONENT_HISTORY_RECEIVED_MESSAGES_TOGGLE = "historyReceivedMessagesToggle";
@@ -243,17 +200,6 @@ public class UiGeneratorControllerConstants {
 	static final String COMPONENT_RECEIVED_MESSAGES_TOGGLE = "receivedMessagesToggle";
 	static final String COMPONENT_SENT_MESSAGES_TOGGLE = "sentMessagesToggle";
 	static final String COMPONENT_KEYWORD_LIST = "keywordList";
-	static final String COMPONENT_SURVEY_LIST = "surveyManager_surveyList";
-	static final String COMPONENT_SURVEY_DETAILS = "surveyManager_surveyDetails";
-	static final String COMPONENT_ANALYST_KEYWORD_LIST = "analystKeywordList";
-	static final String COMPONENT_REPLY_MANAGER_LIST = "replyManager_keywordList";
-	static final String COMPONENT_REPLY_MANAGER_DETAILS = "replyManager_keywordDetails";
-	static final String COMPONENT_REPLY_MANAGER_REPLY_TEXT = "replyManager_replyText";
-	static final String COMPONENT_REPLY_MANAGER_KEYWORD = "replyManager_keyword";
-	static final String COMPONENT_REPLY_MANAGER_EDIT_BUTTON = "replyManager_editButton";
-	static final String COMPONENT_REPLY_MANAGER_EXPORT_BUTTON = "replyManager_exportButton";
-	static final String COMPONENT_REPLY_MANAGER_DELETE_BUTTON = "replyManager_deleteButton";
-	static final String COMPONENT_REPLY_MANAGER_CREATE_BUTTON = "replyManager_createButton";
 	static final String COMPONENT_GROUP_SELECTER_GROUP_LIST = "groupSelecter_groupList";
 	static final String COMPONENT_GROUP_SELECTER_OK_BUTTON = "groupSelecter_okButton";
 	static final String COMPONENT_GROUP_SELECTER_TITLE = "groupSelecter_title";

@@ -15,13 +15,6 @@ final class UiProperties extends PropertySet {
 	private static final String PROPERTYSET_NAME = "ui";
 	
 //> PROPERTY KEYS & VALUES
-	/** Property key (String): set view mode to "New View" or "Classic View" */
-	private static final String KEY_VIEW_MODE = "view.mode";
-	/** Property value for {@link #KEY_VIEW_MODE}: "Classic View" */
-	private static final String VIEW_MODE_CLASSIC = "classic";
-	/** Property value for {@link #KEY_VIEW_MODE}: "New View" */
-	private static final String VIEW_MODE_NEW = "new";
-
 	/** Property key (int): Window Width */
 	private static final String KEY_WINDOW_WIDTH = "window.width";
 	/** Property key (int): Window Height */
@@ -54,30 +47,6 @@ final class UiProperties extends PropertySet {
 	}
 
 //> STATIC ACCESSORS
-	/** @return value for {@link #KEY_VIEW_MODE} */
-	private String getViewMode() {
-		return super.getProperty(KEY_VIEW_MODE);
-	}
-	/**
-	 * @param viewMode new value for the property {@link #KEY_VIEW_MODE}
-	 */
-	public void setViewMode(String viewMode) {
-		super.setProperty(KEY_VIEW_MODE, viewMode);
-	}
-	
-	/**
-	 * Sets the view mode to classic or new view.
-	 * @param classic <code>true</code> if classic view should be used; <code>false</code> for new view.
-	 */
-	public void setViewModeClassic(boolean classic) {
-		setViewMode(classic ? VIEW_MODE_CLASSIC : VIEW_MODE_NEW);
-	}
-	/** @return <code>true</code> if classic view should be used, <code>false</code> if new view should be used. */
-	public boolean isViewModeClassic() {
-		String viewMode = getViewMode();
-		return viewMode != null && viewMode.equalsIgnoreCase(VIEW_MODE_CLASSIC);
-	}
-
 	/**
 	 * Sets the property to make a tab visible or invisible.
 	 * @param tabName The name of the tab.

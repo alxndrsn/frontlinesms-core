@@ -72,8 +72,6 @@ public class KeywordAction {
 	public static final int TYPE_LEAVE = 2;
 	/** Reply: send a specified reply to the sender's msisdn */
 	public static final int TYPE_REPLY = 3;
-	/** Survey: a non-action - doesn't do anything but prevents words from being deleted if there are no other actions attached */
-	public static final int TYPE_SURVEY = 4;
 	/** Action: executes an external command */
 	public static final int TYPE_EXTERNAL_CMD = 5;
 	/** Action: send an e-mail */
@@ -688,18 +686,6 @@ public class KeywordAction {
 		KeywordAction action = new KeywordAction(TYPE_FORWARD, keyword);
 		action.setGroup(group);
 		action.setForwardText(forwardText);
-		action.setStartDate(start);
-		action.setEndDate(end);
-		return action;
-	}
-	
-	/**
-	 * Creates a survey action on this keyword if one does not already exist.
-	 * @param keyword
-	 * @return
-	 */
-	public static KeywordAction createSurveyAction(Keyword keyword, long start, long end) {
-		KeywordAction action = new KeywordAction(TYPE_SURVEY, keyword);
 		action.setStartDate(start);
 		action.setEndDate(end);
 		return action;

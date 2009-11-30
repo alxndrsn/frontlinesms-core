@@ -32,17 +32,6 @@ public class InMemoryKeywordActionDao implements KeywordActionDao {
 		return replies;
 	}
 
-	/** @see KeywordActionDao#getSurveysActions() */
-	public Collection<KeywordAction> getSurveysActions() {
-		HashSet<KeywordAction> replies = new HashSet<KeywordAction>();
-		for(KeywordAction action : this.allActions.toArray(new KeywordAction[0])) {
-			if(action.getType() == KeywordAction.TYPE_SURVEY) {
-				replies.add(action);
-			}
-		}
-		return replies;
-	}
-
 	/** @see KeywordActionDao#saveKeywordAction(KeywordAction) */
 	public void saveKeywordAction(KeywordAction action) {
 		this.allActions.add(action);

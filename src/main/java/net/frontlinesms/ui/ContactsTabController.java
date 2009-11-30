@@ -12,7 +12,6 @@ import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_EXISTENT_CONTACT;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUPS_AND_CONTACTS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUP_ALREADY_EXISTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_IMPOSSIBLE_TO_CREATE_A_GROUP_HERE;
-import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_PHONE_BLANK;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_REMOVING_CONTACTS;
 import static net.frontlinesms.FrontlineSMSConstants.UNKNOWN_NAME;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BUTTON_YES;
@@ -27,7 +26,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTA
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_OTHER_MSISDN;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_DELETE_NEW_CONTACT;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_GROUPS_MENU;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_GROUP_MANAGER_CONTACT_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LABEL_STATUS;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_MENU_ITEM_MSG_HISTORY;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_MENU_ITEM_VIEW_CONTACT;
@@ -314,7 +312,6 @@ public class ContactsTabController implements ThinletUiEventHandler {
 
 	/**
 	 * Shows the new contact dialog. This method affects the advanced mode.
-	 * @param tree 
 	 */
 	public void showNewContactDialog() {
 		Object createDialog = this.uiController.loadComponentFromFile(UI_FILE_CREATE_CONTACT_FORM, this);
@@ -379,19 +376,11 @@ public class ContactsTabController implements ThinletUiEventHandler {
 	 * Adds selected contacts to group.
 	 * 
 	 * @param item The item holding the destination group.
-	 * @param type 
-	 * <li> 0 to get selected items from contact list in the advanced view
-	 * <li> 1 to get selected items from contact list in the classic view
 	 */
-	public void addToGroup(Object item, int type) {
+	public void addToGroup(Object item) {
 		LOG.trace("ENTER");
-		LOG.debug("Type [" + type + "]");
 		Object[] selected = null;
-		if (type == 0) {
-			selected = this.uiController.getSelectedItems(contactListComponent);
-		} else {
-			selected = this.uiController.getSelectedItems(this.uiController.find(COMPONENT_GROUP_MANAGER_CONTACT_LIST));
-		}
+		selected = this.uiController.getSelectedItems(contactListComponent);
 		// Add to the selected groups...
 		Group destination = this.uiController.getGroup(item);
 		// Let's check all the selected items.  Any that are groups should be added to!
@@ -504,92 +493,6 @@ public class ContactsTabController implements ThinletUiEventHandler {
 		LOG.trace("EXIT");
 	}
 	
-	/**
-	 * Saves the new or edited details found in the contact details pane.
-	 * <br><b>This method only affects the classic mode.</b>
-	 * 
-	 * @param contactDetails
-	 */
-	public void saveContactDetails(Object contactDetails) {
-		LOG.trace("ENTER");
-		Object attachment = this.uiController.getAttachedObject(contactDetails);
-		Contact contact = null;
-		Group group = null;
-		if (attachment instanceof Contact) {
-			contact = (Contact)attachment;
-			LOG.debug("Attachment is a contact [" + contact.getName() + "]");
-		} else if (attachment instanceof Group) {
-			group = (Group)attachment;
-			LOG.debug("Attachment is a group [" + group.getName() + "]");
-		}
-
-		// If the user is entering a new Contact, there will be no Contact object
-		// attached to this component.  In this case, we will need to create a contact
-		// and add it to the contacts set.
-		String name = contactDetails_getName(contactDetails);
-		String msisdn = contactDetails_getMobileMsisdn(contactDetails);
-		String otherMsisdn = contactDetails_getOtherMsisdn(contactDetails);
-		String emailAddress = contactDetails_getEmailAddress(contactDetails);
-		String notes = contactDetails_getNotes(contactDetails);
-		boolean isActive = contactDetails_getActive(contactDetails);
-		
-		if (msisdn.equals("")) {
-			this.uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_PHONE_BLANK));
-			LOG.trace("EXIT");
-			return;
-		}
-		
-		try {
-			if (name.equals("")) {
-				name = InternationalisationUtils.getI18NString(UNKNOWN_NAME);
-			}
-			if (contact == null) {
-				LOG.debug("Creating a new contact [" + msisdn + "]");
-				LOG.debug("Contact name [" + name + "]");
-				contact = new Contact(name, msisdn, otherMsisdn, emailAddress, notes, isActive);
-				contactDao.saveContact(contact);
-				group.addDirectMember(contact);
-				this.groupDao.updateGroup(group);
-				updateGroup(group, getNodeForGroup(getGroupTreeComponent(), group));
-				Object contactList = this.uiController.find(COMPONENT_GROUP_MANAGER_CONTACT_LIST);
-				this.uiController.add(contactList, this.uiController.getRow(contact));
-				
-				this.uiController.activate(this.uiController.find("groupManager_contactListPanel"));
-				this.uiController.activate(this.uiController.find("groupManager_groupList"));
-				this.uiController.activate(this.uiController.find("groupManager_toolbar"));
-			} else {
-				// If this is not a new contact, we still need to update all details
-				// that would otherwise be set by the constructor called in the block
-				// above.
-				LOG.debug("Editing contact [" + contact.getName() + "]. Setting new values!");
-				contact.setMsisdn(msisdn);
-				contact.setName(name);
-				contact.setOtherMsisdn(otherMsisdn);
-				contact.setEmailAddress(emailAddress);
-				contact.setNotes(notes);
-				contact.setActive(isActive);
-				Object contactList = this.uiController.find(COMPONENT_GROUP_MANAGER_CONTACT_LIST);
-				int index = -1;
-				for (Object o : this.uiController.getItems(contactList)) {
-					Contact c = this.uiController.getContact(o);
-					if (c.equals(contact)) {
-						index = this.uiController.getIndex(contactList, o);
-						this.uiController.remove(o);
-						break;
-					}
-				}
-				this.uiController.add(contactList, this.uiController.getRow(contact), index);
-			}
-			updateGroup(this.uiController.rootGroup, getNodeForGroup(getGroupTreeComponent(), this.uiController.rootGroup));
-			updateGroup(this.uiController.unnamedContacts, getNodeForGroup(getGroupTreeComponent(), this.uiController.unnamedContacts));
-			updateGroup(this.uiController.ungroupedContacts, getNodeForGroup(getGroupTreeComponent(), this.uiController.ungroupedContacts));
-		} catch(DuplicateKeyException ex) {
-			LOG.debug("There is already a contact with this mobile number - cannot save!", ex);
-			showMergeContactDialog(contact, contactDetails);
-		}
-		LOG.trace("EXIT");
-	}
-
 	public synchronized void contactRemovedFromGroup(Contact contact, Group group) {
 		if (this.uiController.getCurrentTab().equals(TAB_CONTACT_MANAGER)) {
 			removeFromContactList(contact, group);
@@ -620,6 +523,7 @@ public class ContactsTabController implements ThinletUiEventHandler {
 			Contact contact = uiController.getContact(o);
 			LOG.debug("Deleting contact [" + contact.getName() + "]");
 			for (Group g : contact.getGroups()) {
+				// FIXME what should be here?
 			}
 			contactDao.deleteContact(contact);
 		}

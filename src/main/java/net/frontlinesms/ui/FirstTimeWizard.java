@@ -72,18 +72,10 @@ public class FirstTimeWizard extends FrontlineUI {
 	private static final String UI_FILE_LANGUAGE_SELECTION = "/ui/wizard/languageSelect.xml";
 	/** [ui layout file path] The "have you used FrontlineSMS before" page */
 	private static final String UI_FILE_USED_BEFORE = "/ui/wizard/usedBefore.xml";
-	/** [ui layout file path] The view mode selection page */
-	private static final String UI_FILE_MODE_SELECTION = "/ui/wizard/modeSelection.xml";
 	/** [ui layout file path] The data import page */
 	private static final String UI_FILE_IMPORT_DATA = "/ui/wizard/importData.xml";
 	/** [ui layout file path] The final page displayed before the standard FrontlineSMS UI is displayed. */
 	private static final String UI_FILE_START_FORM = "/ui/wizard/startForm.xml";
-	
-//> ICON FILE PATHS
-	/** [icon file path] The advanced view icon */
-	private static final String ICON_ADVANCED = "/icons/wizard/tabAdvanced.png";
-	/** [icon file path] The classic view icon */
-	private static final String ICON_CLASSIC = "/icons/wizard/tabClassic.png";
 	
 //> INSTANCE VARIABLES
 	/** The page from {@link #pages} that we are currently viewing.  This is used for searching. */
@@ -96,8 +88,6 @@ public class FirstTimeWizard extends FrontlineUI {
 	private FrameLauncher frameLauncher;
 	/** The instance of the {@link FrontlineSMS} engine that will be started once the wizard has completed */
 	private FrontlineSMS frontline;
-	/** <code>true</code> if the classic view should be used when the UI is launched; <code>false</code> if the advanced view should be used. */
-	private boolean classicView;
 
 //> CONSTRUCTORS
 	/**
@@ -112,25 +102,7 @@ public class FirstTimeWizard extends FrontlineUI {
 		showLanguageSelection();
 	}
 
-//> UI METHODS	
-	/**
-	 * Method called when user change his option about the application mode.
-	 * @param isAdvanced
-	 */
-	public void modeChanged(boolean isAdvanced) {
-		Object screenshot = find(currentPage, "screenshot");
-		String iconPath = isAdvanced ? ICON_ADVANCED : ICON_CLASSIC;
-		setIcon(screenshot, iconPath);
-	}
-	
-	/**
-	 * Method called when user make the mode selection.
-	 * @param isAdvanced
-	 */
-	public void selectedMode(boolean isAdvanced) {
-		classicView = !isAdvanced;
-		gotoNextPage();
-	}
+//> UI METHODS
 	
 	/**
 	 * Save the selected language
@@ -160,7 +132,6 @@ public class FirstTimeWizard extends FrontlineUI {
 	 * @param yes
 	 */
 	public void selectedUsedBefore(boolean yes) {
-		classicView = false;
 		if(yes) gotoNextPage();
 		else gotoLastPage(); // TODO This behaviour disagrees with javadoc
 	}
@@ -239,10 +210,6 @@ public class FirstTimeWizard extends FrontlineUI {
 		appProperties.setShowWizard(false);
 		appProperties.saveToDisk();
 		
-		UiProperties uiProperties = UiProperties.getInstance();
-		uiProperties.setViewModeClassic(this.classicView);
-		uiProperties.saveToDisk();
-		
 		frameLauncher.dispose();
 		new UiGeneratorController(frontline, true);
 	}
@@ -303,7 +270,6 @@ public class FirstTimeWizard extends FrontlineUI {
 		currentPageIndex = 0;
 		pages.clear();
 		pages.add(loadComponentFromFile(UI_FILE_USED_BEFORE));
-		pages.add(loadComponentFromFile(UI_FILE_MODE_SELECTION));
 		pages.add(loadComponentFromFile(UI_FILE_IMPORT_DATA));
 		pages.add(loadComponentFromFile(UI_FILE_START_FORM));
 	}
