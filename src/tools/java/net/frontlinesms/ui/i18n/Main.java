@@ -32,7 +32,6 @@ public class Main {
 	/** Directory of the XML files, hardcoded for now */
 	private static final String[] UI_XML_LAYOUT_DIRECTORIES = {
 			"src/main/resources/ui/advanced", 
-			"src/main/resources/ui/classic", 
 			"src/main/resources/ui/core",
 			"src/main/resources/ui/dialog",
 			"src/main/resources/ui/smsdevice",
