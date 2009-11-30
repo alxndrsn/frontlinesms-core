@@ -24,8 +24,16 @@ public class Main {
 	private static final String OUTPUT_DIRECTORY = "temp/tools/lang";
 	/** Directory of the language files, hardcoded for now */
 	private static final String LANGUAGEBUNDLE_DIRECTORY = "src/main/resources/resources/languages";
+	/** Java package names containing the {@link TextResourceKeyOwner}s */
+	private static final String[] DEFAULT_TEXTKEYRESOURCE_PACKAGE_NAMES = {"net.frontlinesms", "net.frontlinesms.ui"};
 	/** Directory of the XML files, hardcoded for now */
-	private static final String UI_XML_LAYOUT_DIRECTORY = "src/main/resources/ui";
+	private static final String[] UI_XML_LAYOUT_DIRECTORIES = {
+			"src/main/resources/ui/advanced", 
+			"src/main/resources/ui/classic", 
+			"src/main/resources/ui/core",
+			"src/main/resources/ui/dialog",
+			"src/main/resources/ui/smsdevice",
+			"src/main/resources/ui/wizard",};
 	/** Filter for sorting language files */
 	private static final FileFilter LANGUAGE_FILE_FILTER = new FileFilter() {
 		public boolean accept(File file) {
@@ -39,26 +47,48 @@ public class Main {
 	 * @param args 
 	 * @throws Throwable 
 	 */
-	public static void main(String[] args) throws Throwable {
-		if(args.length > 0 && args[0].equals("--help")) {
+	public static void main(String[] args) throws Exception {
+		if((args.length != 0 && args.length != 3 && args.length != 4)
+				|| args.length > 0 && args[0].equals("--help")) {
 			printUsage(System.out);
 			return;
 		}
 		
+		String[] tRKOPackageNames;
+		String languagebundleDirectoryPath;
+		String[] uiXmlLayoutDirectories;
+		String outputDirectoryPath = OUTPUT_DIRECTORY;
+		if(args.length == 0) {
+			// Use default values
+			uiXmlLayoutDirectories = UI_XML_LAYOUT_DIRECTORIES;
+			languagebundleDirectoryPath = LANGUAGEBUNDLE_DIRECTORY;
+			tRKOPackageNames = DEFAULT_TEXTKEYRESOURCE_PACKAGE_NAMES;
+		} else {
+			// Extract values from args
+			tRKOPackageNames = splitArg(args[0]);
+			uiXmlLayoutDirectories = splitArg(args[1]);
+			languagebundleDirectoryPath = args[2];
+			if(args.length > 3) outputDirectoryPath = args[3];
+		}
+
 		HashSet<Class<?>> tRKOSet = new HashSet<Class<?>>();
-		tRKOSet.addAll(getAnnotatedClasses(TextResourceKeyOwner.class, getClasses(getClassNames("net.frontlinesms"))));
-		tRKOSet.addAll(getAnnotatedClasses(TextResourceKeyOwner.class, getClasses(getClassNames("net.frontlinesms.ui"))));
-		
+		for(String packageName : tRKOPackageNames) {
+			tRKOSet.addAll(getAnnotatedClasses(TextResourceKeyOwner.class, getClasses(getClassNames(packageName))));
+		}
 		Class<?>[] uiJavaControllerClasses = 
 			//UI_JAVA_CONTROLLER_CLASS_NAMES;
 			tRKOSet.toArray(new Class<?>[0]);
-		String uiXmlLayoutDirectory = UI_XML_LAYOUT_DIRECTORY;
-		String outputDirectoryPath = OUTPUT_DIRECTORY;
-		String languagebundleDirectoryPath = LANGUAGEBUNDLE_DIRECTORY;
-		
+		doReport(uiJavaControllerClasses, uiXmlLayoutDirectories, languagebundleDirectoryPath, outputDirectoryPath);
+	}
+	
+	private static String[] splitArg(String arg) {
+		return arg.split("\\s");
+	}
+	
+	private static void doReport(Class<?>[] uiJavaControllerClasses, String[] uiXmlLayoutDirectories, String languagebundleDirectoryPath, String outputDirectoryPath) throws Exception {
 		LanguageChecker checker = new LanguageChecker(
 				uiJavaControllerClasses,
-				new File(uiXmlLayoutDirectory));
+				uiXmlLayoutDirectories);
 		
 		output(System.out, checker);
 		
@@ -71,7 +101,7 @@ public class Main {
 			I18nReport report = checker.produceReport(languageBundle);
 			report.output(System.out, false);
 			emitter.processBundle(languageBundle, report);
-		}
+		}	
 	}
 
 	/**

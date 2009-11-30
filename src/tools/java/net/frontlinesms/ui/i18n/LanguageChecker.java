@@ -49,6 +49,20 @@ public class LanguageChecker {
 //> CONSTRUCTORS
 	/**
 	 * @param uiJavaControllerClasses
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 */
+	private LanguageChecker(Class<?>[] uiJavaControllerClasses) throws IllegalArgumentException, IllegalAccessException {
+		// parse the controller classes for i18n strings
+		for(Class<?> controllerClass : uiJavaControllerClasses) {
+			for(Field field : controllerClass.getDeclaredFields()) {
+				addFieldReference(controllerClass, field);
+			}
+		}		
+	}
+	
+	/**
+	 * @param uiJavaControllerClasses
 	 * @param uiXmlLayoutDirectory
 	 * @throws IOException 
 	 * @throws JDOMException 
@@ -56,15 +70,25 @@ public class LanguageChecker {
 	 * @throws IllegalArgumentException 
 	 */
 	LanguageChecker(Class<?>[] uiJavaControllerClasses, File uiXmlLayoutDirectory) throws JDOMException, IOException, IllegalArgumentException, IllegalAccessException {
-		// 2. parse the controller classes for i18n strings
-		for(Class<?> controllerClass : uiJavaControllerClasses) {
-			for(Field field : controllerClass.getDeclaredFields()) {
-				addFieldReference(controllerClass, field);
-			}
-		}
-		
-		// 3. parse the XML layout files for i18n strings, making sure to check for non-i18n strings as well
+		this(uiJavaControllerClasses);
+		// parse the XML layout files for i18n strings, making sure to check for non-i18n strings as well
 		extractI18nKeys(uiXmlLayoutDirectory);
+	}
+	
+	/**
+	 * @param uiJavaControllerClasses
+	 * @param uiXmlLayoutDirectories
+	 * @throws IOException 
+	 * @throws JDOMException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 */
+	LanguageChecker(Class<?>[] uiJavaControllerClasses, String[] uiXmlLayoutDirectories) throws JDOMException, IOException, IllegalArgumentException, IllegalAccessException {
+		this(uiJavaControllerClasses);
+		for(String uiXmlLayoutDirectory : uiXmlLayoutDirectories) {
+			// parse the XML layout files for i18n strings, making sure to check for non-i18n strings as well
+			extractI18nKeys(new File(uiXmlLayoutDirectory));
+		}
 	}
 
 //> ACCESSORS
@@ -212,27 +236,26 @@ public class LanguageChecker {
 		if(false) System.out.println(s);
 	}
 	
-	private boolean shouldProcess(Class clazz, Field field) throws IllegalArgumentException, IllegalAccessException {
+	/**
+	 * @param clazz
+	 * @param field
+	 * @return
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 */
+	private boolean shouldProcess(Class<?> clazz, Field field) throws IllegalArgumentException, IllegalAccessException {
 		if(Modifier.isStatic(field.getModifiers())
 				&& Modifier.isFinal(field.getModifiers())) {
 			boolean prefixMatches = false;
-			for(String possiblePrefix : ((TextResourceKeyOwner) clazz.getAnnotation(TextResourceKeyOwner.class)).prefix()) {
+			for(String possiblePrefix : clazz.getAnnotation(TextResourceKeyOwner.class).prefix()) {
 				if(field.getName().startsWith(possiblePrefix)) {
 					prefixMatches = true;
 					break;
 				}
 			}
 			
-			if(prefixMatches) {
-				if(field.getType().equals(String.class)) {
-					String fieldValue = field.get(null).toString();
-					
-					// Not in ignore list, so should be processed
-					return true;
-				} else if(field.getType().equals(String[].class)) {
-					// allow all string arrays
-					return true;
-				}
+			if(prefixMatches && (field.getType().equals(String.class) || field.getType().equals(String[].class))) {
+				return true;
 			}
 		}
 		return false;
