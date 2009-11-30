@@ -76,6 +76,11 @@ public abstract class BasePluginController implements PluginController {
 		}
 	}
 	
+	/**
+	 * Gets the path for a text resource bundle.
+	 * @param nameExtensions extensions added to the end of the standard filename.  These will be separated from the base name and each other by underscores.
+	 * @return classpath location of the text resource bundle
+	 */
 	private String getTextResourcePath(String... nameExtensions) {
 		String directory = this.getClass().getPackage().getName().replace('.', '/');
 		
@@ -84,6 +89,11 @@ public abstract class BasePluginController implements PluginController {
 		return resourceFilePath;
 	}
 	
+	/**
+	 * Gets the filename for the text resource bundle.
+	 * @param nameExtensions extensions added to the end of the standard filename.  These will be separated from the base name and each other by underscores.
+	 * @return File name for the text resource bundle
+	 */
 	private String getTextResourceFilename(String ... nameExtensions) {
 		// Construct the name of the .properties file
 		String fileName =  this.getClass().getSimpleName();
