@@ -29,7 +29,6 @@
                     <choice icon="/icons/big_sms_autoForward.png" text="i18n.common.auto.forward"/>
                     <choice icon="/icons/big_group_join.png" text="i18n.action.create.join.group"/>
                     <choice icon="/icons/big_group_leave.png" text="i18n.action.create.leave.group"/>
-                    <choice icon="/icons/big_survey.png" text="i18n.common.survey"/>
                     <choice icon="/icons/big_email.png" text="i18n.action.create.email"/>
                     <choice icon="/icons/big_cmd.png" text="i18n.action.create.external.command"/>
                 </combobox>

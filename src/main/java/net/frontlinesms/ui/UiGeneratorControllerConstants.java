@@ -25,7 +25,6 @@ public class UiGeneratorControllerConstants {
 	protected static final String UI_FILE_EDIT_KEYWORD_LIST_FORM = "/ui/dialog/editKeywordListDialog.xml";
 	protected static final String UI_FILE_EMAIL_ACCOUNTS_SETTINGS_FORM = "/ui/dialog/emailServerConfigDialog.xml";
 	protected static final String UI_FILE_SMS_SERVICES_ACCOUNTS_SETTINGS_FORM = "/ui/dialog/smsHttpServerConfigDialog.xml";
-	protected static final String UI_FILE_SMS_SERVICES_ACCOUNTS_INTELLISMS_SETTINGS_FORM = "/ui/dialog/smsHttpServerIntelliSmsConfigDialog.xml";
 	protected static final String UI_FILE_EXPORT_DIALOG_FORM = "/ui/dialog/exportDialogForm.xml";
 	protected static final String UI_FILE_SMS_HTTP_SERVICE_SETTINGS_FORM = "/ui/dialog/smsHttpServiceSettings.xml";
 	protected static final String UI_FILE_EMAIL_ACCOUNT_FORM = "/ui/dialog/emailAccountSettings.xml";
