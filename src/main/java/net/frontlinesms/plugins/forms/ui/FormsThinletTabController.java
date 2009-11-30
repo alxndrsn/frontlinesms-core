@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
 
 import thinlet.Thinlet;
 
-import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
@@ -55,12 +54,29 @@ public class FormsThinletTabController implements ThinletUiEventHandler {
 	static final String I18N_KEY_FORMS_EDITOR = "forms.editor.title";
 	/** i18n key: "You have not entered a name for this form" */
 	static final String I18N_KEY_MESSAGE_FORM_NAME_BLANK = "forms.editor.name.validation.notset";
-	/** i18n key: "Currency field" */
-	public static final String I18N_KEY_FIELD_CURRENCY = "form.field.currency";
 	/** i18n key: "You will not be able to edit this form again." */
 	private static final String I18N_KEY_CONFIRM_FINALISE = "forms.send.finalise.confirm";
 	/** i18n key: "There are no contacts to notify." */
 	private static final String I18N_KEY_NO_CONTACTS_TO_NOTIFY = "forms.send.nocontacts";
+	/** i18n key: "Form submitter" */
+	public static final String I18N_FORM_SUBMITTER = "form.submitter";
+
+	/** i18n key: "Currency field" */
+	public static final String I18N_FCOMP_CURRENCY = "form.field.currency";
+	public static final String I18N_FCOMP_DROP_DOWN_LIST = "common.dropdownlist";
+	public static final String I18N_FCOMP_MENU_ITEM = "common.menuitem";
+	public static final String I18N_FCOMP_NUMBER = "common.number";
+	public static final String I18N_FCOMP_PASSWORD = "common.password";
+	public static final String I18N_FCOMP_PHONENUMBER = "common.phonenumber";
+	public static final String I18N_FCOMP_RADIO_BUTTON = "common.radiobutton";
+	public static final String I18N_FCOMP_TEXT_AREA = "common.textarea";
+	public static final String I18N_FCOMP_TEXT_FIELD = "common.textfield";
+	public static final String I18N_FCOMP_BUTTON = "common.button";
+	public static final String I18N_FCOMP_CHECKBOX = "common.checkbox";
+	public static final String I18N_FCOMP_CREDITCARD = "common.creditcard";
+	public static final String I18N_FCOMP_TIME = "common.time";
+	public static final String I18N_FCOMP_TRUNCATED_TEXT = "common.truncatedtext";
+	public static final String I18N_FCOMP_WRAPPED_TEXT = "common.wrappedtext";
 	
 //> INSTANCE PROPERTIES
 	/** Logging object */
@@ -602,7 +618,7 @@ public class FormsThinletTabController implements ThinletUiEventHandler {
 		uiController.removeAll(header);
 		if (selected != null) {
 			// FIXME check if this constant can be removed from frontlinesmsconstants class
-			Object column = uiController.createColumn(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SUBMITTER), null);
+			Object column = uiController.createColumn(InternationalisationUtils.getI18NString(I18N_FORM_SUBMITTER), null);
 			uiController.setWidth(column, 100);
 			uiController.setIcon(column, Icon.PHONE_CONNECTED);
 			uiController.add(header, column);

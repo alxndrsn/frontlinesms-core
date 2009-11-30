@@ -26,7 +26,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.TitledBorder;
 
-import net.frontlinesms.FrontlineSMSConstants;
+import net.frontlinesms.plugins.forms.ui.FormsThinletTabController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
@@ -43,7 +43,7 @@ public class TextArea extends FComponent {
 	/** @see FComponent#getDescription() */
 	@Override
 	public String getDescription() {
-		return InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_TEXT_AREA);
+		return InternationalisationUtils.getI18NString(FormsThinletTabController.I18N_FCOMP_TEXT_AREA);
 	}
 
 	/** @see FComponent#getIcon() */

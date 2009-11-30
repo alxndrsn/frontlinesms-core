@@ -27,7 +27,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import net.frontlinesms.FrontlineSMSConstants;
+import net.frontlinesms.plugins.forms.ui.FormsThinletTabController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
@@ -42,7 +42,7 @@ public class WrappedText extends FComponent {
 	/** @see FComponent#getDescription() */
 	@Override
 	public String getDescription() {
-		return InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_WRAPPED_TEXT);
+		return InternationalisationUtils.getI18NString(FormsThinletTabController.I18N_FCOMP_WRAPPED_TEXT);
 	}
 
 	/** @see FComponent#getIcon() */

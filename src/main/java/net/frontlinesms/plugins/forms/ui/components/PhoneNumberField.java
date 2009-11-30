@@ -29,7 +29,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import net.frontlinesms.FrontlineSMSConstants;
+import net.frontlinesms.plugins.forms.ui.FormsThinletTabController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
@@ -41,7 +41,7 @@ public class PhoneNumberField extends FComponent {
 	/** @see FComponent#getDescription() */
 	@Override
 	public String getDescription() {
-		return InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_PHONENUMBER);
+		return InternationalisationUtils.getI18NString(FormsThinletTabController.I18N_FCOMP_PHONENUMBER);
 	}
 
 	/** @see FComponent#getIcon() */

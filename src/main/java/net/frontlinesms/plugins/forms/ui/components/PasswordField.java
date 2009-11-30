@@ -29,7 +29,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 
-import net.frontlinesms.FrontlineSMSConstants;
+import net.frontlinesms.plugins.forms.ui.FormsThinletTabController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
@@ -41,7 +41,7 @@ public class PasswordField extends FComponent {
 	/** @see FComponent#getDescription() */
 	@Override
 	public String getDescription() {
-		return InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_PASSWORD);
+		return InternationalisationUtils.getI18NString(FormsThinletTabController.I18N_FCOMP_PASSWORD);
 	}
 
 	/** @see FComponent#getIcon() */
