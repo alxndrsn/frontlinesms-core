@@ -11,7 +11,7 @@ package net.frontlinesms.ui;
 public class UiGeneratorControllerConstants {
 	
 //> UI FILES
-	protected static final String UI_FILE_HOME = "/ui/frontline.xml";
+	protected static final String UI_FILE_HOME = "/ui/core/frontline.xml";
 	protected static final String UI_FILE_DATE_PANEL = "/ui/dialog/datePanel.xml";
 	protected static final String UI_FILE_PENDING_MESSAGES_FORM = "/ui/dialog/pendingMessagesDialog.xml";
 	protected static final String UI_FILE_COMPOSE_MESSAGE_FORM = "/ui/dialog/composeMessageForm.xml";
