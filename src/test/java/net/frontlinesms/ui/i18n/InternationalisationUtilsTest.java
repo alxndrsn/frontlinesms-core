@@ -56,7 +56,7 @@ public class InternationalisationUtilsTest extends BaseTestCase {
 				String formattedDate = dateFormat.format(testDate);
 				Date parsedDate = dateFormat.parse(formattedDate);
 				
-				assertEquals("Parsed date was incorrect for language '" + bungle.getFilename() + "'",
+				assertEquals("Parsed date was incorrect for language '" + bungle.getFilename() + "' - format='" + formatString + "'",
 						DATEFORMAT_DATE_ONLY.format(testDate),
 						DATEFORMAT_DATE_ONLY.format(parsedDate));
 			}
