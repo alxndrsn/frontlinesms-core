@@ -77,6 +77,16 @@ public class FormsThinletTabController implements ThinletUiEventHandler {
 	public static final String I18N_FCOMP_TIME = "common.time";
 	public static final String I18N_FCOMP_TRUNCATED_TEXT = "common.truncatedtext";
 	public static final String I18N_FCOMP_WRAPPED_TEXT = "common.wrappedtext";
+
+	public static final String COMMON_PALETTE = "common.palette";
+	public static final String COMMON_PREVIEW = "common.preview";
+	public static final String COMMON_PROPERTY = "common.property";
+	public static final String COMMON_VALUE = "common.value";
+	public static final String TOOLTIP_DRAG_TO_REMOVE = "tooltip.drag.to.remove";
+	public static final String TOOLTIP_DRAG_TO_PREVIEW = "tooltip.drag.to.preview";
+	public static final String SENTENCE_DELETE_KEY = "sentence.delete.key";
+	public static final String SENTENCE_UP_KEY = "sentence.up.key";
+	public static final String SENTENCE_DOWN_KEY = "sentence.down.key";
 	
 //> INSTANCE PROPERTIES
 	/** Logging object */

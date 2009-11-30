@@ -33,7 +33,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
-import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.Utils;
 import net.frontlinesms.plugins.forms.ui.components.PaletteComponent;
 import net.frontlinesms.plugins.forms.ui.components.PreviewComponent;
@@ -43,7 +42,6 @@ import net.frontlinesms.ui.SimpleConstraints;
 import net.frontlinesms.ui.SimpleLayout;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
-import static net.frontlinesms.FrontlineSMSConstants.*;
 /**
  * This class represents the UI for palette and preview components.
  * 
@@ -72,14 +70,14 @@ public class DrawingPanel extends JPanel {
 		setLayout(new SimpleLayout());
 		
 		JLabel bin = new JLabel(new ImageIcon(Utils.getImage(Icon.BIN, getClass())));
-		bin.setToolTipText(InternationalisationUtils.getI18NString(TOOLTIP_DRAG_TO_REMOVE));
+		bin.setToolTipText(InternationalisationUtils.getI18NString(FormsThinletTabController.TOOLTIP_DRAG_TO_REMOVE));
 		add(bin, new SimpleConstraints(470, HEIGHT - 40));
 		
-		add(new JLabel(InternationalisationUtils.getI18NString(SENTENCE_DELETE_KEY) + "."),
+		add(new JLabel(InternationalisationUtils.getI18NString(FormsThinletTabController.SENTENCE_DELETE_KEY) + "."),
 				new SimpleConstraints(255, HEIGHT - 47));
-		add(new JLabel(InternationalisationUtils.getI18NString(SENTENCE_UP_KEY) + "."),
+		add(new JLabel(InternationalisationUtils.getI18NString(FormsThinletTabController.SENTENCE_UP_KEY) + "."),
 				new SimpleConstraints(255, HEIGHT - 32));
-		add(new JLabel(InternationalisationUtils.getI18NString(SENTENCE_DOWN_KEY) + "."),
+		add(new JLabel(InternationalisationUtils.getI18NString(FormsThinletTabController.SENTENCE_DOWN_KEY) + "."),
 				new SimpleConstraints(255, HEIGHT - 17));
 		
 		pnPalette = new PalettePanel(dragListener, source);

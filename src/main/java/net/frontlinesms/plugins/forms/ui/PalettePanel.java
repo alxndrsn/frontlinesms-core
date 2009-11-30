@@ -29,7 +29,6 @@ import javax.swing.border.TitledBorder;
 
 import org.apache.log4j.Logger;
 
-import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.Utils;
 import net.frontlinesms.plugins.forms.data.domain.FormField;
 import net.frontlinesms.plugins.forms.data.domain.FormFieldType;
@@ -48,7 +47,7 @@ public class PalettePanel extends JPanel {
 	
 	public PalettePanel(DragListener dragListener, DragSource source) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setBorder(new TitledBorder(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_PALETTE)));
+		setBorder(new TitledBorder(InternationalisationUtils.getI18NString(FormsThinletTabController.COMMON_PALETTE)));
 		for (FormFieldType fieldType : FormFieldType.values()) {
 			Class<? extends FComponent> clazz = FComponent.getComponentClass(fieldType);
 			FComponent c;
@@ -61,7 +60,7 @@ public class PalettePanel extends JPanel {
 				LOG.debug("", e);
 			}
 		}
-		setToolTipText(InternationalisationUtils.getI18NString(FrontlineSMSConstants.TOOLTIP_DRAG_TO_PREVIEW));
+		setToolTipText(InternationalisationUtils.getI18NString(FormsThinletTabController.TOOLTIP_DRAG_TO_PREVIEW));
 	}
 
 	/**

@@ -35,7 +35,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.TitledBorder;
 
-import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.plugins.forms.ui.components.PreviewComponent;
 import net.frontlinesms.plugins.forms.ui.components.VisualForm;
 import net.frontlinesms.ui.SimpleConstraints;
@@ -60,7 +59,7 @@ public class PreviewPanel extends JPanel implements MouseListener, KeyListener {
 	
 	public PreviewPanel(DragListener dragListener, DragSource dragSource) {
 		setLayout(new SimpleLayout());
-		setBorder(new TitledBorder(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_PREVIEW)));
+		setBorder(new TitledBorder(InternationalisationUtils.getI18NString(FormsThinletTabController.COMMON_PREVIEW)));
 		this.addMouseListener(this);
 		this.addKeyListener(this);
 		this.dragListener = dragListener;

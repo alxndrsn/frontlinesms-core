@@ -23,7 +23,6 @@ import java.util.Vector;
 
 import javax.swing.JTable;
 
-import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
@@ -42,8 +41,8 @@ public class PropertiesTable extends JTable {
 	public PropertiesTable() {
 		model = new MyTableModel();
 		columns = new Vector<String>();
-		columns.add(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_PROPERTY));
-		columns.add(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_VALUE));
+		columns.add(InternationalisationUtils.getI18NString(FormsThinletTabController.COMMON_PROPERTY));
+		columns.add(InternationalisationUtils.getI18NString(FormsThinletTabController.COMMON_VALUE));
 		model.setDataVector(data, columns);
 		this.setModel(model);
 		this.getTableHeader().setReorderingAllowed(false);

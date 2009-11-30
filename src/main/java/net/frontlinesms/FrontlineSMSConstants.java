@@ -149,10 +149,6 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_CURRENCY = "common.currency";
 	public static final String COMMON_PROPERTIES = "common.properties";
 	public static final String COMMON_TYPE = "common.type";
-	public static final String COMMON_PALETTE = "common.palette";
-	public static final String COMMON_PREVIEW = "common.preview";
-	public static final String COMMON_PROPERTY = "common.property";
-	public static final String COMMON_VALUE = "common.value";
 	public static final String COMMON_DATABASE_CONFIG = "common.database.config";
 	public static final String COMMON_CONNECTION_FAILED = "common.connection.failed";
 	public static final String COMMON_CONNECTION_OK = "common.connection.ok";
@@ -185,14 +181,9 @@ public final class FrontlineSMSConstants {
 	public static final String MESSAGE_LOGS_SAVED_PLEASE_REPORT = "message.logs.saved.please.report";
 	
 	public static final String SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE = "sentence.select.message.recipient";
-	public static final String SENTENCE_DELETE_KEY = "sentence.delete.key";
-	public static final String SENTENCE_UP_KEY = "sentence.up.key";
-	public static final String SENTENCE_DOWN_KEY = "sentence.down.key";
 	
 	public static final String TOOLTIP_UNNAMED_GROUP = "tooltip.group.unnamed";
 	public static final String TOOLTIP_UNGROUPED_GROUP = "tooltip.group.ungrouped";
-	public static final String TOOLTIP_DRAG_TO_REMOVE = "tooltip.drag.to.remove";
-	public static final String TOOLTIP_DRAG_TO_PREVIEW = "tooltip.drag.to.preview";
 	
 	/** Keys for fetching month names from the language bundle. */
 	public static final String[] MONTH_KEYS = {
