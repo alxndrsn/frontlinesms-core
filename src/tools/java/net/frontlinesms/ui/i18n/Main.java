@@ -45,10 +45,10 @@ public class Main {
 	/**
 	 * Run the checker and produce a report.
 	 * @param args 
-	 * @throws Throwable 
+	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
-		if((args.length != 0 && args.length != 3 && args.length != 4)
+		if((args.length != 0 && args.length != 4 && args.length != 5)
 				|| args.length > 0 && args[0].equals("--help")) {
 			printUsage(System.out);
 			return;
@@ -58,17 +58,20 @@ public class Main {
 		String languagebundleDirectoryPath;
 		String[] uiXmlLayoutDirectories;
 		String outputDirectoryPath = OUTPUT_DIRECTORY;
+		String baseFileName;
 		if(args.length == 0) {
 			// Use default values
+			tRKOPackageNames = DEFAULT_TEXTKEYRESOURCE_PACKAGE_NAMES;
 			uiXmlLayoutDirectories = UI_XML_LAYOUT_DIRECTORIES;
 			languagebundleDirectoryPath = LANGUAGEBUNDLE_DIRECTORY;
-			tRKOPackageNames = DEFAULT_TEXTKEYRESOURCE_PACKAGE_NAMES;
+			baseFileName = "frontlineSMS";
 		} else {
 			// Extract values from args
 			tRKOPackageNames = splitArg(args[0]);
 			uiXmlLayoutDirectories = splitArg(args[1]);
 			languagebundleDirectoryPath = args[2];
-			if(args.length > 3) outputDirectoryPath = args[3];
+			baseFileName = args[3];
+			if(args.length > 4) outputDirectoryPath = args[4];
 		}
 
 		HashSet<Class<?>> tRKOSet = new HashSet<Class<?>>();
@@ -78,14 +81,19 @@ public class Main {
 		Class<?>[] uiJavaControllerClasses = 
 			//UI_JAVA_CONTROLLER_CLASS_NAMES;
 			tRKOSet.toArray(new Class<?>[0]);
-		doReport(uiJavaControllerClasses, uiXmlLayoutDirectories, languagebundleDirectoryPath, outputDirectoryPath);
+		doReport(uiJavaControllerClasses, uiXmlLayoutDirectories, languagebundleDirectoryPath, baseFileName, outputDirectoryPath);
 	}
 	
+	/**
+	 * Splits a single commandline argument value into separate strings.
+	 * @param arg
+	 * @return
+	 */
 	private static String[] splitArg(String arg) {
 		return arg.split("\\s");
 	}
 	
-	private static void doReport(Class<?>[] uiJavaControllerClasses, String[] uiXmlLayoutDirectories, String languagebundleDirectoryPath, String outputDirectoryPath) throws Exception {
+	private static void doReport(Class<?>[] uiJavaControllerClasses, String[] uiXmlLayoutDirectories, String languagebundleDirectoryPath, String baseFileName, String outputDirectoryPath) throws Exception {
 		LanguageChecker checker = new LanguageChecker(
 				uiJavaControllerClasses,
 				uiXmlLayoutDirectories);
@@ -95,7 +103,7 @@ public class Main {
 		File outputDirectory = new File(outputDirectoryPath);
 		
 		outputDirectory.mkdirs();
-		TranslationEmitter emitter = new TranslationEmitter(InternationalisationUtils.getLanguageBundle(new File(languagebundleDirectoryPath, "frontlineSMS.properties")), outputDirectory);
+		TranslationEmitter emitter = new TranslationEmitter(InternationalisationUtils.getLanguageBundle(new File(languagebundleDirectoryPath, baseFileName + ".properties")), outputDirectory);
 		
 		for(File languageBundle : new File(languagebundleDirectoryPath).listFiles(LANGUAGE_FILE_FILTER)) {
 			I18nReport report = checker.produceReport(languageBundle);
@@ -165,7 +173,8 @@ public class Main {
 	 */
 	private static void printUsage(PrintStream out) {
 		out.println("FrontlineSMS i18n Tools - USAGE");
-		out.println("TODO");
+		System.out.println("\tuse with no args for processing FrontlineSMS core");
+		System.out.println("\targs\t <packages containing text key resources> <directories containing thinlet xml layouts> <language bundle directory path> <language resource file basename> <[optional]output directory>");
 	}
 
 	/**
