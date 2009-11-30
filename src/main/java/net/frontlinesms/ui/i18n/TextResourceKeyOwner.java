@@ -19,6 +19,4 @@ import java.lang.annotation.Target;
 public @interface TextResourceKeyOwner {
 	/** The prefix that all text keys start with in a particular {@link TextResourceKeyOwner}. */
 	String[] prefix() default {"I18N_"};
-	/** If set <code>false</code>, this implies that individual text resources will be annotated with {@link TextResourceKey}. */
-	boolean usePrefix() default true;
 }
