@@ -132,7 +132,6 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_SENDER_NAME = "common.message.sender.name";
 	public static final String COMMON_SENDER_NUMBER = "common.message.sender.number";
 	public static final String COMMON_MESSAGE_DATE = "common.message.date";
-	public static final String COMMON_MESSAGE_HISTORY_OF = "common.message.history.of";
 	public static final String COMMON_EDITING_KEYWORD = "common.editing.keyword";
 	public static final String COMMON_UNDEFINED = "common.undefined";
 	public static final String COMMON_HTTP_REQUEST = "common.http.request";

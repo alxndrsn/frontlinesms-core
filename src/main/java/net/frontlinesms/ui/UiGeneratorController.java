@@ -1117,92 +1117,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		messageHistory_selectionChanged();
 	}
 	
-	
-	public void classicMode_refreshMessageHistory() {
-		Object table = find(COMPONENT_HISTORY_MESSAGE_LIST);
-		List<Message> listContents = getListContents(table, Message.class);
-		int count = listContents.size();
-		int pageNumber = getListCurrentPage(table);
-		int listLimit = getListLimit(table);
-		removeAll(table);
-		int fromIndex = (pageNumber - 1) * listLimit;
-		int toIndex = Math.min(fromIndex + listLimit, count);
-		for(Message message : listContents.subList(fromIndex, toIndex)) {
-			add(table, getRow(message));
-		}
-		updatePageNumber(getParent(table), count, pageNumber, listLimit);
-	}
-	
-	public void classicMode_showMessageHistory(Object component) {
-		Contact contact = getContact(getSelectedItem(component));
-		Object messageHistoryDialog = loadComponentFromFile(UI_FILE_HISTORY_FORM);
-		setAttachedObject(messageHistoryDialog, contact);
-		setText(messageHistoryDialog, InternationalisationUtils.getI18NString(COMMON_MESSAGE_HISTORY_OF, contact.getName()));
-		add(messageHistoryDialog);
-
-		addPaginationToTable(find("pnClassicHistory"), "classicMode_refreshMessageHistory", true);
-
-		Object historyList = find(messageHistoryDialog, COMPONENT_HISTORY_MESSAGE_LIST);
-		Object header = get(historyList, ThinletText.HEADER);
-		initMessageTableForSorting(header);
-
-		classicMode_sortMessageHistory(null);
-	}
-
-	
-	public void classicMode_sortMessageHistory(Object toggle) {
-		System.out.println("UiGeneratorController.classicMode_updateMessageHistory()");
-		Object messageHistoryDialog = find("historyDialog");
-		Object historyList = find(messageHistoryDialog, COMPONENT_HISTORY_MESSAGE_LIST);
-		
-		Contact contact = getContact(messageHistoryDialog);
-		
-		Object header = get(historyList, ThinletText.HEADER);
-		System.out.println("header: " + header);
-		Object tableColumn = getSelectedItem(header);
-		System.out.println("tableColumn: " + tableColumn);
-		Message.Field field = null;
-		Order order = Order.DESCENDING;
-		
-		if(tableColumn != null) {
-			field = (Message.Field)getProperty(tableColumn, PROPERTY_FIELD);
-			order = get(tableColumn, ThinletText.SORT).equals(ThinletText.ASCENT) ? Order.ASCENDING : Order.DESCENDING;
-		}
-		System.out.println("field: " + field);
-
-		Object sentToggle = find(messageHistoryDialog, "historySentMessagesToggle");
-		Object receiveToggle = find(messageHistoryDialog, "historyReceivedMessagesToggle");
-		boolean showSent = isSelected(sentToggle);
-		boolean showReceived = isSelected(receiveToggle);
-		if(!showSent && !showReceived) {
-			// They've deselected both!  We should reselect the one they didn't just toggle
-			// as otherwise there is nothing to display :D
-			if(toggle == sentToggle) {
-				setSelected(receiveToggle, true);
-			} else setSelected(sentToggle, true);
-		}
-		int type;
-		if(!showSent) type = Message.TYPE_RECEIVED;
-		else if(!showReceived) type = Message.TYPE_OUTBOUND;
-		else type = Message.TYPE_ALL;
-		
-		List<? extends Message> messages = messageFactory.getMessagesForMsisdn(
-				type,
-				contact.getMsisdn(), 
-				field, 
-				order, 
-				messageHistoryStart, 
-				messageHistoryEnd);
-		setListContents(historyList, messages);
-		setListPageNumber(1, historyList);
-		setListElementCount(messages.size(), historyList);
-		
-		System.out.println("UiGeneratorController.classicMode_showMessageHistory()");
-		System.out.println("\tSet element count: " + messages.size());
-		
-		classicMode_refreshMessageHistory();
-	}
-
 	/**
 	 * UI Method.
 	 * Deletes the keyword that is selected in {@link #keywordListComponent}.
@@ -2354,14 +2268,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			}
 		}
 		removeDialog(dialog);
-	}
-	
-	// TODO implementation-specific methods will be removed
-	public void smsHttpIntelliSms_enableReceiving(Object panel, boolean selected) {
-		setEnabled(panel, selected);
-		for (Object child: getItems(panel)) {
-			setEnabled(child, selected);
-		}
 	}
 	
 	/**
@@ -3636,30 +3542,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 
 	/**
-	 * Creates a row for the supplied keyword action.
-	 * 
-	 * @param action
-	 * @return
-	 */
-	private Object getReplyManagerRow(KeywordAction action) {
-		Object row = createTableRow(action);
-		Keyword keyword = action.getKeyword();
-		if (action.isAlive()) {
-			add(row, createTableCell(InternationalisationUtils.getI18NString(COMMON_LIVE)));
-		} else {
-			add(row, createTableCell(InternationalisationUtils.getI18NString(COMMON_DORMANT)));
-		}
-		String key = keyword.getKeyword().length() == 0 ? "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">" : keyword.getKeyword();
-		add(row, createTableCell(key));
-		add(row, createTableCell(KeywordAction.KeywordUtils.getReplyText(action, DEMO_SENDER, DEMO_SENDER_MSISDN, DEMO_MESSAGE_TEXT_INCOMING, DEMO_MESSAGE_KEYWORD)));
-		add(row, createTableCell(InternationalisationUtils.getDateFormat().format(action.getStartDate())));
-		if (action.getEndDate() != DEFAULT_END_DATE) add(row, createTableCell(InternationalisationUtils.getDateFormat().format(action.getEndDate())));
-		else add(row, createTableCell(InternationalisationUtils.getI18NString(COMMON_UNDEFINED)));
-		add(row, createTableCell(Integer.toString(action.getCounter())));
-		return row;
-	}
-
-	/**
 	 * Creates a node for the supplied group, creating nodes for its sub-groups and contacts as well.
 	 * 
 	 * @param group The group to be put into a node.
@@ -3801,10 +3683,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 		return ret;
 	}
-
-	public void classicMode_enableOptionsMessageList(Object popup, Object list) {
-		setVisible(popup, getSelectedItems(list).length > 0);
-	}
 	
 	private Group keywordSimple_getJoin(Object panel) {
 		Group ret = null;
@@ -3838,28 +3716,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 */
 	private boolean isSmsModem(SmsDevice dev) {
 		return dev instanceof SmsModem;
-	}
-
-	/**
-	 * Creates a row for the supplied message for the <b>Send</b> tab.
-	 * 
-	 * @param message
-	 * @return
-	 */
-	private Object sendConsole_getRow(Message message) {
-		Object row = createTableRow(message);
-
-		String recipientDisplayName = getRecipientDisplayValue(message);
-
-		String senderDisplayName = getSenderDisplayValue(message);
-		
-		add(row, createTableCell(getMessageStatusAsString(message)));
-		add(row, createTableCell(InternationalisationUtils.getDatetimeFormat().format(message.getDate())));
-		add(row, createTableCell(senderDisplayName));
-		add(row, createTableCell(recipientDisplayName));
-		add(row, createTableCell(message.getTextContent()));
-
-		return row;
 	}
 	
 	/**
@@ -3913,30 +3769,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		default:
 			return "(unknown)";
 		}
-	}
-	
-	/**
-	 * Creates a row for the supplied phone for the <b>Send</b> tab.
-	 * 
-	 * @param modem
-	 * @return
-	 */
-	private Object sendConsole_getRow(SmsDevice dev) {
-		Object row = createTableRow(dev);
-
-		if (isSmsModem(dev)) {
-			SmsModem modem = (SmsModem) dev;
-			add(row, createTableCell(modem.getPort()));
-			add(row, createTableCell(Utils.getManufacturerAndModel(modem.getManufacturer(), modem.getModel())));
-			add(row, createTableCell(modem.getMsisdn()));
-		} else {
-			SmsInternetService service = (SmsInternetService) dev;
-			add(row, createTableCell("port?"));
-			add(row, createTableCell(SmsInternetServiceSettingsHandler.getProviderName(service.getClass()) + " - " + service.getIdentifier()));
-			add(row, createTableCell("from msisdn?"));
-		}
-
-		return row;
 	}
 
 	/**

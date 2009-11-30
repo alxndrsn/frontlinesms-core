@@ -30,7 +30,6 @@ public class UiGeneratorControllerConstants {
 	protected static final String UI_FILE_EMAIL_ACCOUNT_FORM = "/ui/dialog/emailAccountSettings.xml";
 	protected static final String UI_FILE_CONNECTION_WARNING_FORM = "/ui/dialog/connectionWarningForm.xml";
 	protected static final String UI_FILE_CONFIRMATION_DIALOG_FORM = "/ui/dialog/confirmationDialog.xml";
-	protected static final String UI_FILE_HISTORY_FORM = "/ui/dialog/historyForm.xml";
 	// FIXME this should probably be abstracted via a getter in UIGC or similar
 	public static final String UI_FILE_PAGE_PANEL = "/ui/dialog/pagePanel.xml";
 	protected static final String UI_FILE_ABOUT_PANEL = "/ui/dialog/about.xml";
@@ -184,7 +183,6 @@ public class UiGeneratorControllerConstants {
 	static final String COMPONENT_DELETE_NEW_CONTACT = "deleteNewContact";
 	static final String COMPONENT_LABEL_STATUS = "lbStatus";
 	static final String COMPONENT_MENU_ITEM_VIEW_CONTACT = "viewContact";
-	static final String COMPONENT_HISTORY_MESSAGE_LIST = "history_messageList";
 	static final String COMPONENT_HISTORY_RECEIVED_MESSAGES_TOGGLE = "historyReceivedMessagesToggle";
 	static final String COMPONENT_HISTORY_SENT_MESSAGES_TOGGLE = "historySentMessagesToggle";
 	static final String COMPONENT_MENU_ITEM_MSG_HISTORY = "msg_history";
