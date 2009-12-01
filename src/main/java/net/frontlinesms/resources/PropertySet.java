@@ -52,7 +52,7 @@ public abstract class PropertySet extends BasePropertySet {
 //> INSTANCE PROPERTIES
 	/** The {@link File} that this {@link PropertySet} is loaded from and saved to. */
 	private final File file;
-	/** Map from property key to value */
+	/** Map from property key to value TODO why does this have its own map, when {@link BasePropertySet} also has one? */
 	private Map<String, String> properties;
 	
 //> INSTANCE METHODS
@@ -126,6 +126,16 @@ public abstract class PropertySet extends BasePropertySet {
 		String value = getProperty(propertyName);
 		if (value == null) return null;
 		else return Boolean.parseBoolean(value);
+	}
+	
+	/**
+	 * Sets the {@link Boolean} value of a property.
+	 * @param propertyName
+	 * @param value
+	 */
+	protected void setPropertyAsBoolean(String propertyName, Boolean value) {
+		if(value == null) setProperty(propertyName, null);
+		else setProperty(propertyName, Boolean.toString(value));
 	}
 	
 	/** @return the property keys in {@link #properties} */

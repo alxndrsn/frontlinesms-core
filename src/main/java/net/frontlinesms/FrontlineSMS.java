@@ -27,6 +27,7 @@ import net.frontlinesms.data.domain.*;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.listener.*;
 import net.frontlinesms.plugins.PluginController;
+import net.frontlinesms.plugins.PluginControllerProperties;
 import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.*;
@@ -76,6 +77,8 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	private static Logger LOG = Utils.getLogger(FrontlineSMS.class);
 	/** SMS device emulator */
 	public static final SmsModem EMULATOR = SmsModem.createEmulator(FrontlineSMSConstants.EMULATOR_MSISDN);
+	
+//> INSTANCE VARIABLES
 
 //> DATA ACCESS OBJECTS
 	/** Data Access Object for {@link Keyword}s */
@@ -104,8 +107,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	private final SmsDeviceManager smsDeviceManager;
 	/** Asynchronous processor of received messages. */
 	private final IncomingMessageProcessor incomingMessageProcessor;
-	/** Plugin controllers available for this. */
-	private final Set<PluginController> pluginControllers = new HashSet<PluginController>();
+	private final PluginManager pluginManager;
 
 //> EVENT LISTENERS
 	/** Listener for email events */
@@ -125,9 +127,6 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		try {
 			// Load the data mode from the app.properties file
 			AppProperties appProperties = AppProperties.getInstance();
-
-			// Load the plugin controllers that are enabled
-			loadPluginControllers();
 			
 			LOG.info("Load Spring/Hibernate application context to initialise DAOs");
 				
@@ -141,6 +140,8 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 			String[] configLocations = getSpringConfigLocations(springExternalConfigPath);
 			ApplicationContext applicationContext = new FileSystemXmlApplicationContext(configLocations, baseApplicationContext);
 			LOG.info("Context loaded successfully.");
+			
+			this.pluginManager = new PluginManager(this, applicationContext);
 			
 			LOG.info("Getting DAOs from application context...");
 			groupDao = (GroupDao) applicationContext.getBean("groupDao");
@@ -184,7 +185,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 
 			initSmsInternetServices();
 			
-			initPluginControllers(applicationContext);
+			this.pluginManager.initPluginControllers();
 
 			LOG.debug("Starting E-mail Manager...");
 			emailServerManager.start();
@@ -228,38 +229,10 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 			}
 		}
 	}
-
-	/**
-	 * Load the plugin controllers that will be used.  N.B. these will not have {@link PluginController#init(FrontlineSMS, ApplicationContext)} called
-	 * until {@link #initPluginControllers(ApplicationContext)} is called.
-	 * 
-	 * This method should only be called from the constructor {@link FrontlineSMS#FrontlineSMS()}.
-	 */
-	@SuppressWarnings("unchecked")
-	private void loadPluginControllers() {
-		LOG.info("Loading plugin controllers....");
-		PluginProperties pluginProperties = PluginProperties.getInstance();
-		for(String pluginClassName : pluginProperties.getPluginClassNames()) {
-			try {
-				boolean loadClass = pluginProperties.isPluginEnabled(pluginClassName);
-				if(loadClass) {
-					LOG.info("Loading plugin of class: " + pluginClassName);
-					Class<? extends PluginController> controllerClass = (Class<? extends PluginController>) Class.forName(pluginClassName);
-					this.pluginControllers.add(controllerClass.newInstance());
-				} else {
-					LOG.info("Not loading plugin of class: " + pluginClassName);
-				}
-			} catch(Throwable t) {
-				LOG.warn("Problem loading plugin controller for class: " + pluginClassName);
-			}
-		}
-		LOG.info("Plugin controllers loaded.");
-	}
+	
 	/**
 	 * Create the configLocations bean for the Hibernate config.
-	 * 
-	 * This method should only be called from within {@link FrontlineSMS#FrontlineSMS()}
-	 * 
+	 * This method should only be called from within {@link FrontlineSMS#FrontlineSMS(DatabaseConnectionTestHandler)}
 	 * @return {@link BeanDefinition} containing details of the hibernate config for the app and its plugins.
 	 */
 	private BeanDefinition createHibernateConfigLocationsBeanDefinition() {
@@ -268,11 +241,14 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		// Add main hibernate config location
 		hibernateConfigList.add("classpath:frontlinesms.hibernate.cfg.xml");
 		// Add hibernate config locations for plugins
-		for(PluginController pluginController : getPluginControllers()) {
-			System.out.println("Processing plugin controller: " + pluginController);
-			String pluginHibernateLocation = pluginController.getHibernateConfigPath();
-			if(pluginHibernateLocation != null) {
-				hibernateConfigList.add(pluginHibernateLocation);
+		for(Class<PluginController> pluginClass : PluginProperties.getInstance().getPluginClasses()) {
+			System.out.println("Processing plugin class: " + pluginClass.getClass());
+			if(pluginClass.isAnnotationPresent(PluginControllerProperties.class)) {
+				PluginControllerProperties properties = pluginClass.getAnnotation(PluginControllerProperties.class);
+				String pluginHibernateLocation = properties.hibernateConfigPath();
+				if(!PluginControllerProperties.NO_VALUE.equals(pluginHibernateLocation)) {
+					hibernateConfigList.add(pluginHibernateLocation);
+				}
 			}
 		}
 		
@@ -287,9 +263,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	
 	/**
 	 * Gets a list of configLocations required for initialising Spring {@link ApplicationContext}.
-	 * 
-	 * This method should only be called from within {@link FrontlineSMS#FrontlineSMS()}
-	 * 
+	 * This method should only be called from within {@link FrontlineSMS#FrontlineSMS(DatabaseConnectionTestHandler)}
 	 * @param externalConfigPath Spring path to the external Spring database config file 
 	 * @return list of configLocations used for initialising {@link ApplicationContext}
 	 */
@@ -302,37 +276,18 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		// Custom Spring configurations
 		configLocations.add("file:" + externalConfigPath);
 		// Add config locations for plugins
-		for(PluginController pluginController : getPluginControllers()) {
-			System.out.println("Processing plugin controller: " + pluginController);
-			String pluginConfigLocation = pluginController.getSpringConfigPath();
-			System.out.println("Adding plugin Spring config location: " + pluginConfigLocation);
-			if(pluginConfigLocation != null) {
-				configLocations.add(pluginConfigLocation);
+		for(Class<PluginController> pluginControllerClass : PluginProperties.getInstance().getPluginClasses()) {
+			if(pluginControllerClass.isAnnotationPresent(PluginControllerProperties.class)) {
+				PluginControllerProperties properties = pluginControllerClass.getAnnotation(PluginControllerProperties.class);
+				String pluginConfigLocation = properties.springConfigLocation();
+				if(!PluginControllerProperties.NO_VALUE.equals(pluginConfigLocation)) {
+					LOG.trace("Adding plugin Spring config location: " + pluginConfigLocation);
+					configLocations.add(pluginConfigLocation);
+				}
 			}
 		}
 		
 		return configLocations.toArray(new String[configLocations.size()]);
-	}
-
-	/**
-	 * Initialise {@link #pluginControllers}.
-	 * 
-	 * This method should only be called from the constructor {@link FrontlineSMS#FrontlineSMS()}.
-	 * 
-	 * @param applicationContext 
-	 */
-	private void initPluginControllers(ApplicationContext applicationContext) {
-		System.out.println("Initialising plugin controllers...");
-		// Enable plugins
-		for(PluginController controller : this.pluginControllers) {
-			try {
-				controller.init(this, applicationContext);
-			} catch(Throwable t) {
-				// There was a problem loading the plugin controller.  Not much we can do, so log it and carry on.
-				LOG.warn("There was a problem loading plugin controller: " + controller, t);
-			}
-		}
-		System.out.println("Plugin controllers initialised.  Count: " + this.pluginControllers.size());
 	}
 	
 	/**
@@ -340,6 +295,12 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	 */
 	public void destroy() {
 		LOG.trace("ENTER");
+		
+		// de-initialise plugin controllers
+		for(PluginController pluginController : this.pluginManager.getPluginControllers()) {
+			pluginController.deinit();
+		}
+		
 		if (smsDeviceManager != null) {
 			LOG.debug("Stopping Phone Manager...");
 			smsDeviceManager.stopRunning();
@@ -464,6 +425,10 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	public EmailServerHandler getEmailServerManager() {
 		return emailServerManager;
 	}
+	/** @return {@link #pluginManager} */
+	public PluginManager getPluginManager() {
+		return pluginManager;
+	}
 	
 	/** @return {@link #uiListener} */
 	public UIListener getUiListener() {
@@ -490,11 +455,6 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		this.emailListener = emailListener;
 	}
 	
-	/** @return {@link #pluginControllers} */
-	public Set<PluginController> getPluginControllers() {
-		return Collections.unmodifiableSet(this.pluginControllers);
-	}
-	
 	/**
 	 * Adds another {@link IncomingMessageListener} to {@link IncomingMessageProcessor}.
 	 * @param incomingMessageListener new {@link IncomingMessageListener}
@@ -502,6 +462,15 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	 */
 	public void addIncomingMessageListener(IncomingMessageListener incomingMessageListener) {
 		this.incomingMessageProcessor.addIncomingMessageListener(incomingMessageListener);
+	}
+	
+	/**
+	 * Removes a {@link IncomingMessageListener} from {@link IncomingMessageProcessor}.
+	 * @param incomingMessageListener {@link IncomingMessageListener} to be removed
+	 * @see IncomingMessageProcessor#removeIncomingMessageListener(IncomingMessageListener)
+	 */
+	public void removeIncomingMessageListener(IncomingMessageListener incomingMessageListener) {
+		this.incomingMessageProcessor.removeIncomingMessageListener(incomingMessageListener);
 	}
 
 	/** @return {@link #smsInternetServiceSettingsDao} */

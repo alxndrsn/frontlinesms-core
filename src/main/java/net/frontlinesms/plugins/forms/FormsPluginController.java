@@ -17,6 +17,7 @@ import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.listener.IncomingMessageListener;
 import net.frontlinesms.plugins.BasePluginController;
 import net.frontlinesms.plugins.PluginController;
+import net.frontlinesms.plugins.PluginControllerProperties;
 import net.frontlinesms.plugins.PluginInitialisationException;
 import net.frontlinesms.plugins.forms.data.domain.Form;
 import net.frontlinesms.plugins.forms.data.domain.FormResponse;
@@ -37,6 +38,9 @@ import net.frontlinesms.ui.UiGeneratorController;
  * Controller for the FrontlineForms plugin.
  * @author Alex
  */
+@PluginControllerProperties(name="Forms", iconPath="/icons/form.png",
+		springConfigLocation="classpath:net/frontlinesms/plugins/forms/frontlineforms-spring-hibernate.xml",
+		hibernateConfigPath="classpath:net/frontlinesms/plugins/forms/frontlineforms.hibernate.cfg.xml")
 public class FormsPluginController extends BasePluginController implements IncomingMessageListener {
 //> CONSTANTS
 	/** Filename and path of the XML for the FrontlineForms tab. */
@@ -53,21 +57,6 @@ public class FormsPluginController extends BasePluginController implements Incom
 	private FormResponseDao formResponseDao;
 	
 //> CONFIG METHODS
-	/** @see PluginController#getSpringConfigPath() */
-	public String getSpringConfigPath() {
-		return "classpath:net/frontlinesms/plugins/forms/frontlineforms-spring-hibernate.xml";
-	}
-	
-	/** @see PluginController#getHibernateConfigPath() */
-	public String getHibernateConfigPath() {
-		return "classpath:net/frontlinesms/plugins/forms/frontlineforms.hibernate.cfg.xml";
-	}
-	
-	/** @see PluginController#getName() */
-	public String getName() {
-		return "Forms";
-	}
-	
 	/** @see PluginController#init(FrontlineSMS, ApplicationContext) */
 	public void init(FrontlineSMS frontlineController, ApplicationContext applicationContext) throws PluginInitialisationException {
 		this.frontlineController = frontlineController;
@@ -84,9 +73,14 @@ public class FormsPluginController extends BasePluginController implements Incom
 			throw new PluginInitialisationException(t);
 		}
 	}
+	
+	/** @see net.frontlinesms.plugins.PluginController#deinit() */
+	public void deinit() {
+		this.frontlineController.removeIncomingMessageListener(this);
+	}
 
-	/** @see PluginController#getTab(UiGeneratorController)  */
-	public Object getTab(UiGeneratorController uiController) {
+	/** @see BasePluginController#initThinletTab(UiGeneratorController)  */
+	public Object initThinletTab(UiGeneratorController uiController) {
 		FormsThinletTabController tabController = new FormsThinletTabController(this, uiController);
 		tabController.setContactDao(this.frontlineController.getContactDao());
 		tabController.setFormsDao(formsDao);

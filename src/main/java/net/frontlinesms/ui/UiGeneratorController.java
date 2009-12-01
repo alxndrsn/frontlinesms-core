@@ -46,6 +46,7 @@ import net.frontlinesms.EmailServerHandler;
 import net.frontlinesms.ErrorUtils;
 import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.FrontlineSMSConstants;
+import net.frontlinesms.PluginManager;
 import net.frontlinesms.Utils;
 import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.*;
@@ -54,6 +55,8 @@ import net.frontlinesms.data.repository.*;
 import net.frontlinesms.listener.EmailListener;
 import net.frontlinesms.listener.UIListener;
 import net.frontlinesms.plugins.PluginController;
+import net.frontlinesms.plugins.PluginControllerProperties;
+import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.*;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
@@ -111,6 +114,9 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	private final SmsDeviceManager phoneManager;
 	/** Manager of {@link EmailAccount}s and {@link EmailSender}s */
 	private final EmailServerHandler emailManager;
+	/** Manager of {@link PluginController}s */
+	private final PluginManager pluginManager;
+	
 	/** Data Access Object for {@link Contact}s */
 	private final ContactDao contactDao;
 	/** Data Access Object for {@link Group}s */
@@ -244,6 +250,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		this.emailAccountFactory = frontlineController.getEmailAccountFactory();
 		this.emailFactory = frontlineController.getEmailDao();
 		this.emailManager = frontlineController.getEmailServerManager();
+		this.pluginManager = frontlineController.getPluginManager();
 		
 		// Load the data mode from the ui.properties file
 		UiProperties uiProperties = UiProperties.getInstance();
@@ -287,8 +294,27 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			}
 			add(tabbedPane, phoneTabController.getTab());
 			
+			// Initialise the plugins menu
+			Object pluginMenu = find("menu_tabs");
+			for(Class<PluginController> pluginClass : PluginProperties.getInstance().getPluginClasses()) {
+				// Try to get an icon from the classpath
+				String pluginName;
+				String iconPath;
+				if(pluginClass.isAnnotationPresent(PluginControllerProperties.class)) {
+					PluginControllerProperties properties = pluginClass.getAnnotation(PluginControllerProperties.class);
+					pluginName = properties.name();
+					iconPath = properties.iconPath();
+				} else {
+					pluginName = pluginClass.getSimpleName();
+					iconPath = '/' + pluginClass.getPackage().getName().replace('.', '/') + '/' + pluginClass.getSimpleName() + ".png";
+				}
+				Object menuItem = createCheckboxMenuitem(iconPath, pluginName, PluginProperties.getInstance().isPluginEnabled(pluginClass));
+				add(pluginMenu, menuItem);
+				setAction(menuItem, "updatePluginEnabled('"+pluginClass.getName()+"', this.selected)", pluginMenu, this);
+			}
+			
 			// Add plugins tabs
-			for(PluginController controller : frontlineController.getPluginControllers()) {
+			for(PluginController controller : this.pluginManager.getPluginControllers()) {
 				addPluginTextResources(controller);
 				add(tabbedPane, controller.getTab(this));
 			}
@@ -364,6 +390,57 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			LOG.error("Problem starting User Interface module.", t);
 			super.destroy();
 			throw t;
+		}
+	}
+	
+	/**
+	 * 
+	 * @param pluginClassName
+	 * @param enabled
+	 */
+	public void updatePluginEnabled(String pluginClassName, boolean enabled) {
+		System.out.println("UiGeneratorController.updatePluginEnabled()");
+		System.out.println("\tclass   : " + pluginClassName);
+		System.out.println("\tenabled : " + enabled);
+
+		Class<PluginController> pluginClass = PluginProperties.getInstance().getPluginClass(pluginClassName);
+		
+		// 1st, check if the plugin is already in the state the user is trying to put it in
+		if(enabled == PluginProperties.getInstance().isPluginEnabled(pluginClassName)) {
+			// The plugin is already in the expected state, so we should do nothing
+			return;
+		} else {
+			if(enabled) {
+				// If we are enabling the plugin, we need to load it, add it to the loaded plugins list, and
+				// finally add its tab to the UI
+				PluginController controller = this.pluginManager.loadPluginController(pluginClassName);
+				this.pluginManager.initPluginController(controller);
+				this.add(find(COMPONENT_TABBED_PANE), controller.getTab(this));
+			} else {
+				// If we are disabling a plugin, we need to remove its tab from the UI, and then discard it
+				// Get the instance of the controller
+				PluginController controller = null;
+				for(PluginController c : this.pluginManager.getPluginControllers()) {
+					if(pluginClass.isInstance(c)) {
+						controller = c;
+						break;
+					}
+				}
+				
+				if(controller == null) {
+					LOG.warn("Attempted to disable plugin controller '" + pluginClassName + "', but it could not be found.");
+					return;
+				}
+				
+				this.remove(controller.getTab(this));
+				
+				controller.deinit();
+				this.pluginManager.unloadPluginController(controller);
+			}
+			
+			// Finally, change the value in the plugin properties file.
+			PluginProperties.getInstance().setPluginEnabled(pluginClassName, enabled);
+			PluginProperties.getInstance().saveToDisk();
 		}
 	}
 	

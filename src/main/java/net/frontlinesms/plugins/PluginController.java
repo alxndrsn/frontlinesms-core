@@ -30,28 +30,16 @@ public interface PluginController {
 	 */
 	public void init(FrontlineSMS frontlineController, ApplicationContext applicationContext) throws PluginInitialisationException;
 	
+	/** Deinitialise the plugin.  This method is called immediately before this plugin instance is discarded. */
+	public void deinit();
+	
 	/**
-	 * Gets the tab for this plugin 
+	 * Gets the tab for this plugin.
+	 * Multiple calls to this method should always return the exact same object (i.e. satisfies == equality). 
 	 * @param uiController {@link UiGeneratorController} instance that will be the parent of this tab.
 	 * @return the tab to display for this plugin
 	 */
 	public Object getTab(UiGeneratorController uiController);
-
-	/**
-	 * <p>Gets the location of the Spring config for this plugin.</p>
-	 * <p>If the config is on the classpath, this should be detailed like:
-	 * <code>classpath:package1/package2/pluginname-spring-hibernate.xml</code></p>
-	 * @return the location of the Spring config for this plugin, or <code>null</code> if none is required.
-	 */
-	public String getSpringConfigPath();
-	
-	/**
-	 * <p>Gets the location of the hibernate config for this plugin.</p>
-	 * <p>If the config is on the classpath, this should be detailed like:
-	 * <code>classpath:package1/package2/pluginname.hibernate.cfg.xml</code></p>
-	 * @return the location of the hibernate config for this plugin, or <code>null</code> if none is required.
-	 */
-	public String getHibernateConfigPath();
 
 	/**
 	 * Gets the default language bundle for text strings used in the UI of this plugin.

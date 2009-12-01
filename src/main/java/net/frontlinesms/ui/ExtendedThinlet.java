@@ -69,6 +69,7 @@ public class ExtendedThinlet extends Thinlet {
 	 * @param clazz
 	 * @return An object of the requested class.
 	 */
+	@SuppressWarnings("unchecked")
 	public <T extends Object> T getAttachedObject(Object component, Class<T> clazz) {
 		return (T) getAttachedObject(component);
 	}
@@ -421,7 +422,7 @@ public class ExtendedThinlet extends Thinlet {
 	 * Creates a textfield with the supplied object name and initial text.
 	 * @param name
 	 * @param initialText
-	 * @return
+	 * @return a Thinlet textfield component
 	 */
 	public final Object createTextfield(String name, String initialText) {
 		Object item = Thinlet.create(TEXTFIELD);
@@ -434,12 +435,38 @@ public class ExtendedThinlet extends Thinlet {
 	 * Creates a passwordfield with the supplied object name and initial text.
 	 * @param name
 	 * @param initialText
-	 * @return
+	 * @return A Thinlet password entry component
 	 */
 	public final Object createPasswordfield(String name, String initialText) {
 		Object item = Thinlet.create(PASSWORDFIELD);
 		setText(item, initialText);
 		setName(item, name);
+		return item;
+	}
+	
+	/**
+	 * @param iconPath The path to the icon for this menu item
+	 * @param text The text for the menuitem
+	 * @return A Thinlet menuitem
+	 */
+	public final Object createMenuitem(String iconPath, String text) {
+		Object item = Thinlet.create(MENUITEM);
+		setIcon(item, iconPath);
+		setText(item, text);
+		return item;
+	}
+	
+	/**
+	 * @param iconPath The path to the icon for this menu item
+	 * @param text The text for the menuitem
+	 * @param checked <code>true</code> if the checkbox is ticked, <code>false</code> otherwise.
+	 * @return A Thinlet menuitem
+	 */
+	public final Object createCheckboxMenuitem(String iconPath, String text, boolean checked) {
+		Object item = Thinlet.create(CHECKBOXMENUITEM);
+		setIcon(item, iconPath);
+		setBoolean(item, SELECTED, checked);
+		setText(item, text);
 		return item;
 	}
 

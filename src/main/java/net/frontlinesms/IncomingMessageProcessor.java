@@ -498,6 +498,14 @@ public class IncomingMessageProcessor extends Thread {
 	void addIncomingMessageListener(IncomingMessageListener incomingMessageListener) {
 		this.incomingMessageListeners.add(incomingMessageListener);
 	}
+	
+	/**
+	 * Removes a {@link IncomingMessageListener} from {@link #incomingMessageListeners}.
+	 * @param incomingMessageListener {@link IncomingMessageListener} to be removed
+	 */
+	void removeIncomingMessageListener(IncomingMessageListener incomingMessageListener) {
+		this.incomingMessageListeners.remove(incomingMessageListener);
+	}
 }
 
 /** Empty interface implemented by items which are put in the {@link IncomingMessageProcessor}'s queue. */

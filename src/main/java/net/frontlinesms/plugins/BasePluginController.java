@@ -3,6 +3,7 @@
  */
 package net.frontlinesms.plugins;
 
+import java.awt.Image;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
@@ -11,10 +12,13 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import net.frontlinesms.Utils;
+import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
- * Base implementation of the {@link PluginController} class.
+ * Base implementation of the {@link PluginController} annotation.
+ * 
+ * Implementers of this class *must* implement the {@link PluginControllerProperties} class.
  * 
  * This class includes default implementation of the text resource loading methods.  These attempt to load text resources
  * in the following way:
@@ -28,10 +32,33 @@ public abstract class BasePluginController implements PluginController {
 //> INSTANCE PROPERTIES
 	/** Logging object for this class */
 	protected final Logger log = Utils.getLogger(this.getClass());
+	/** Lazy-initialized singleton Thinlet Tab component for this instance of this plugin. */
+	private Object thinletTab;
 
 //> CONSTRUCTORS
 
 //> ACCESSORS
+	/** @see net.frontlinesms.plugins.PluginController#getTab(net.frontlinesms.ui.UiGeneratorController) */
+	public synchronized Object getTab(UiGeneratorController uiController) {
+		if(this.thinletTab == null) {
+			this.thinletTab = this.initThinletTab(uiController);
+		}
+		return this.thinletTab;
+	}
+	
+	/**
+	 * Initialise the Thinlet tab component for this plugin instance.
+	 * @param uiController {@link UiGeneratorController} instance that will be the parent of this tab.
+	 * @return a new instance of the thinlet tab component for this plugin.
+	 */
+	protected abstract Object initThinletTab(UiGeneratorController uiController);
+	
+	/** @see PluginController#getName() */
+	public String getName() {
+		assert(this.getClass().isAnnotationPresent(PluginControllerProperties.class)): "Implementers of this class *must* implement the PluginControllerProperties annotation.";
+		return this.getClass().getAnnotation(PluginControllerProperties.class).name();
+	}
+	
 	/** @see net.frontlinesms.plugins.PluginController#getDefaultTextResource() */
 	public Map<String, String> getDefaultTextResource() {
 		Map<String, String> defaultTextResource = getTextResource();
@@ -53,6 +80,11 @@ public abstract class BasePluginController implements PluginController {
 	}
 
 //> INSTANCE HELPER METHODS
+	/** @see net.frontlinesms.plugins.PluginController#getIcon(UiGeneratorController) */
+	public Image getIcon(UiGeneratorController uiController) {
+		return uiController.getIcon(getResourceDirectory() + '/' + this.getClass().getSimpleName() + "Icon.png");
+	}
+	
 	/**
 	 * Gets a text resource file from the classpath.
 	 * @param nameExtensions extensions added to the end of the standard filename.  These will be separated from the base name and each other by underscores.
@@ -77,14 +109,19 @@ public abstract class BasePluginController implements PluginController {
 	}
 	
 	/**
+	 * @return The directory which classpath resources for this plugin will be found at.
+	 */
+	private String getResourceDirectory() {
+		return '/' + this.getClass().getPackage().getName().replace('.', '/');
+	}
+	
+	/**
 	 * Gets the path for a text resource bundle.
 	 * @param nameExtensions extensions added to the end of the standard filename.  These will be separated from the base name and each other by underscores.
 	 * @return classpath location of the text resource bundle
 	 */
 	private String getTextResourcePath(String... nameExtensions) {
-		String directory = this.getClass().getPackage().getName().replace('.', '/');
-		
-		String resourceFilePath = '/' + directory + '/' + getTextResourceFilename(nameExtensions) + ".properties";
+		String resourceFilePath = getResourceDirectory() + '/' + getTextResourceFilename(nameExtensions) + ".properties";
 		
 		return resourceFilePath;
 	}
@@ -100,9 +137,6 @@ public abstract class BasePluginController implements PluginController {
 		
 		// Add suffix "Text" to file name, BEFORE the language & country suffixes
 		fileName += "Text";
-		
-		// Make the first character of the properties file name lower case
-		fileName = fileName.substring(0, 1).toLowerCase() + (fileName.length() > 1 ? fileName.substring(1) : "");
 		
 		// Append any required extensions to the filename
 		for(String extension : nameExtensions) {
