@@ -3597,80 +3597,88 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			LOG.trace("EXIT");
 			return;
 		}
-		String reply;
-		Group join;
-		Group leave;
+		
+		// Get the KeywordAction details
+		String replyText = keywordSimple_getAutoReply(panel);
+		Group joinGroup = keywordSimple_getJoin(panel);
+		Group leaveGroup = keywordSimple_getLeave(panel);
 		
 		// Get the keyword attached to the selected item.  If the "Add Keyword" option is selected,
 		// there will be no keyword attached to it.
+		Keyword keyword = null;
 		Object selectedKeywordItem = getSelectedItem(keywordListComponent);
-		final Keyword keyword = selectedKeywordItem == null ? null : getKeyword(selectedKeywordItem);
+		if(selectedKeywordItem != null) keyword = getKeyword(selectedKeywordItem);
+		
 		if (keyword == null) {
 			//Adding keyword as well as actions
 			String newkeyword = getText(find(panel, COMPONENT_TF_KEYWORD));
 			try {
-				Keyword newKeywordObject = new Keyword(newkeyword, "");
-				this.keywordDao.saveKeyword(newKeywordObject);
+				keyword = new Keyword(newkeyword, "");
+				this.keywordDao.saveKeyword(keyword);
 			} catch (DuplicateKeyException e) {
 				alert(InternationalisationUtils.getI18NString(MESSAGE_KEYWORD_EXISTS));
 				LOG.trace("EXIT");
 				return;
 			}
-			reply = keywordSimple_getAutoReply(panel);
-			join = keywordSimple_getJoin(panel);
-			leave = keywordSimple_getLeave(panel);
 			keywordTab_doClear(panel);
 		} else {
-			//Editing an existent one.
-			reply = keywordSimple_getAutoReply(panel);
-			KeywordAction found = this.keywordActionDao.getAction(keyword, KeywordAction.TYPE_REPLY);
-			if (found != null) {
-				if (reply == null) {
-					keywordActionDao.deleteKeywordAction(found);
+			// Editing an existent keyword.  This keyword may already have actions applied to it, so
+			// we need to check for actions and update them as appropriate.
+			KeywordAction replyAction = this.keywordActionDao.getAction(keyword, KeywordAction.TYPE_REPLY);
+			if (replyAction != null) {
+				if (replyText == null) {
+					// The reply action has been removed
+					keywordActionDao.deleteKeywordAction(replyAction);
 				} else {
-					found.setReplyText(reply);
-					this.keywordActionDao.updateKeywordAction(found);
+					replyAction.setReplyText(replyText);
+					this.keywordActionDao.updateKeywordAction(replyAction);
 					//We set null to don't add it in the end
-					reply = null;
+					replyText = null;
 				}
 			}
-			join = keywordSimple_getJoin(panel);
-			found = this.keywordActionDao.getAction(keyword, KeywordAction.TYPE_JOIN);
-			if (found != null) {
-				if (reply == null) {
-					keywordActionDao.deleteKeywordAction(found);
+			
+			KeywordAction joinAction = this.keywordActionDao.getAction(keyword, KeywordAction.TYPE_JOIN);
+			if (joinAction != null) {
+				if (joinGroup == null) {
+					// Previous join action has been removed, so delete it.
+					keywordActionDao.deleteKeywordAction(joinAction);
 				} else {
-					found.setGroup(join);
-					this.keywordActionDao.updateKeywordAction(found);
-					//We set null to don't add it in the end
-					join = null;
+					// Group to join has been updated
+					joinAction.setGroup(joinGroup);
+					this.keywordActionDao.updateKeywordAction(joinAction);
+					// Join Group has been handled, so unset it.
+					joinGroup = null;
 				}
 			}
-			leave = keywordSimple_getLeave(panel);
-			found = this.keywordActionDao.getAction(keyword, KeywordAction.TYPE_LEAVE);
-			if (found != null) {
-				if (reply == null) {
-					keywordActionDao.deleteKeywordAction(found);
+			
+			KeywordAction leaveAction = this.keywordActionDao.getAction(keyword, KeywordAction.TYPE_LEAVE);
+			if (leaveAction != null) {
+				if (leaveGroup == null) {
+					keywordActionDao.deleteKeywordAction(leaveAction);
 				} else {
-					found.setGroup(leave);
-					this.keywordActionDao.updateKeywordAction(found);
+					leaveAction.setGroup(leaveGroup);
+					this.keywordActionDao.updateKeywordAction(leaveAction);
 					//We set null to don't add it in the end
-					leave = null;
+					leaveGroup = null;
 				}
 			}
 		}
-		if (reply != null) {
-			KeywordAction action = KeywordAction.createReplyAction(keyword, reply, startDate, DEFAULT_END_DATE);
+		
+		// Handle creation of new KeywordActions if required
+		if (replyText != null) {
+			KeywordAction action = KeywordAction.createReplyAction(keyword, replyText, startDate, DEFAULT_END_DATE);
 			keywordActionDao.saveKeywordAction(action);
 		}
-		if (join != null) {
-			KeywordAction action = KeywordAction.createGroupJoinAction(keyword, join, startDate, DEFAULT_END_DATE);
+		if (joinGroup != null) {
+			KeywordAction action = KeywordAction.createGroupJoinAction(keyword, joinGroup, startDate, DEFAULT_END_DATE);
 			keywordActionDao.saveKeywordAction(action);
 		}
-		if (leave != null) {
-			KeywordAction action = KeywordAction.createGroupLeaveAction(keyword, leave, startDate, DEFAULT_END_DATE);
+		if (leaveGroup != null) {
+			KeywordAction action = KeywordAction.createGroupLeaveAction(keyword, leaveGroup, startDate, DEFAULT_END_DATE);
 			keywordActionDao.saveKeywordAction(action);
 		}
+		
+		// Refresh the UI
 		updateKeywordList();
 		setStatus(InternationalisationUtils.getI18NString(MESSAGE_KEYWORD_SAVED));
 		LOG.trace("EXIT");

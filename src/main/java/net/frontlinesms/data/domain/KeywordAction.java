@@ -34,7 +34,9 @@ public class KeywordAction {
 //> ENTITY FIELDS
 	/** Details of the fields that this class has. */
 	public enum Field implements EntityField<KeywordAction> {
+		/** Field name for {@link KeywordAction#type} */
 		TYPE("type"),
+		/** File name for {@link KeywordAction#keyword} */
 		KEYWORD("keyword");
 		/** name of a field */
 		private final String fieldName;
@@ -50,15 +52,17 @@ public class KeywordAction {
 //> CONSTRUCTORS
 	/**
 	 * Default constructor, to be used by hibernate.
-	 * This constructor should not be used in factory methods.
+	 * This constructor should <b>not</b> be used in factory methods.
 	 */
 	KeywordAction() {}
 
 	/**
 	 * Creates a new keyword action and sets the keyword for it. 
+	 * @param type The type of this keyword.
 	 * @param keyword value for {@link #keyword}.
 	 */
 	KeywordAction(int type, Keyword keyword) {
+		assert(keyword!=null): "You must supply a " + Keyword.class.getSimpleName() + " for your new " + getClass().getSimpleName();
 		this.type = type;
 		this.keyword = keyword;
 	}
