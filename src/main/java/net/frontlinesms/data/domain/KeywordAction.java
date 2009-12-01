@@ -430,7 +430,7 @@ public class KeywordAction {
 			String senderDisplayName;
 			if(sender != null) senderDisplayName = sender.getDisplayName();
 			else senderDisplayName = senderMsisdn;
-			return formatText(action.getUnformattedReplyText(), false, action, senderMsisdn, senderDisplayName, incomingMessageText, null);
+			return formatText(action.getUnformattedReplyText(), false, action, senderMsisdn, senderDisplayName, incomingMessageText);
 		}
 		
 		/**
@@ -446,22 +446,25 @@ public class KeywordAction {
 			if(sender != null) senderDisplayName = sender.getDisplayName();
 			else senderDisplayName = senderMsisdn;
 			
-			return formatText(action.getEmailSubject(), false, action, senderMsisdn, senderDisplayName, incomingMessageText, null);
+			return formatText(action.getEmailSubject(), false, action, senderMsisdn, senderDisplayName, incomingMessageText);
 		}
 		
 		/**
 		 * Creates the formatted external command or email for this action from an incoming message.
 		 * 
 		 * If this action is not of TYPE_EXTERNAL_CMD, throws an IllegalStateException.
+		 * @param action 
+		 * @param sender 
 		 * @param senderMsisdn
 		 * @param incomingMessageText
 		 * @return
+		 * @throws IllegalStateException 
 		 */
-		public static final String getExternalCommand(KeywordAction action, Contact sender, String senderMsisdn, String incomingMessageText, int refNo) throws IllegalStateException {
+		public static final String getExternalCommand(KeywordAction action, Contact sender, String senderMsisdn, String incomingMessageText) throws IllegalStateException {
 			String senderDisplayName;
 			if (sender != null) senderDisplayName = sender.getDisplayName();
 			else senderDisplayName = senderMsisdn;
-			return formatText(action.getUnformattedCommand(), true, action, senderMsisdn, senderDisplayName, incomingMessageText, refNo);
+			return formatText(action.getUnformattedCommand(), true, action, senderMsisdn, senderDisplayName, incomingMessageText);
 		}
 		
 		
@@ -491,7 +494,7 @@ public class KeywordAction {
 			String senderDisplayName;
 			if(sender != null) senderDisplayName = sender.getDisplayName();
 			else senderDisplayName = senderMsisdn;
-			return formatText(action.getUnformattedForwardText(), false, action, senderMsisdn, senderDisplayName, incomingMessageText, null);
+			return formatText(action.getUnformattedForwardText(), false, action, senderMsisdn, senderDisplayName, incomingMessageText);
 		}
 		
 		/**
@@ -549,14 +552,11 @@ public class KeywordAction {
 			return null;
 		}
 		
-		static String formatText(String unformattedText, boolean urlEncode, KeywordAction action, String senderMsisdn, String senderDisplayName, String incomingMessageText, Integer refNo) {
+		static String formatText(String unformattedText, boolean urlEncode, KeywordAction action, String senderMsisdn, String senderDisplayName, String incomingMessageText) {
 			String keywordString = action.getKeyword().getKeyword();
 			
 			String keywordInMessage = extractKeyword(incomingMessageText, keywordString);
 			String messageWithoutKeyword = removeKeyword(incomingMessageText, keywordString);
-			
-			String smsReferenceNumber = null;
-			if(refNo != null) smsReferenceNumber = Integer.toString(refNo);
 			
 			if(urlEncode) {
 				senderMsisdn = Utils.urlEncode(senderMsisdn);
@@ -570,7 +570,6 @@ public class KeywordAction {
 					CsvUtils.MARKER_SENDER_NUMBER,		/*->*/ senderMsisdn,
 					CsvUtils.MARKER_KEYWORD_KEY,		/*->*/ keywordInMessage,
 					CsvUtils.MARKER_SENDER_NAME,		/*->*/ senderDisplayName,
-					CsvUtils.MARKER_SMS_ID,			/*->*/ smsReferenceNumber,
 					// N.B. message content should always be substituted last to prevent injection attacks
 					CsvUtils.MARKER_MESSAGE_CONTENT,	/*->*/ messageWithoutKeyword 
 					);

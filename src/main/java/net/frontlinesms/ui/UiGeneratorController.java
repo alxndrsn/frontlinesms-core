@@ -3283,9 +3283,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			case 4:
 				toAdd = CsvUtils.MARKER_COMMAND_RESPONSE;
 				break;
-			case 5:
-				toAdd = CsvUtils.MARKER_SMS_ID;
-				break;
 		}
 		LOG.debug("Setting [" + currentText + toAdd + "] to component [" + textArea + "]");
 		setText(textArea, currentText + toAdd);

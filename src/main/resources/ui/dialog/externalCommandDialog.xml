@@ -14,7 +14,6 @@
             <button action="addConstantToCommand(tfCommand.text, tfCommand, 1)" icon="/icons/phone_number.png" name="btSenderNumber" text="i18n.common.message.sender.number" weightx="1"/>
             <button action="addConstantToCommand(tfCommand.text, tfCommand, 3)" icon="/icons/keyword.png" name="btKeyword" text="i18n.common.keyword" weightx="1"/>
             <button action="addConstantToCommand(tfCommand.text, tfCommand, 2)" icon="/icons/message.png" name="btMsgContent" text="i18n.common.message.content" weightx="1"/>
-            <button action="addConstantToCommand(tfCommand.text, tfCommand, 5)" icon="/icons/sms_key.png" name="btSMSId" text="i18n.common.sms.id" weightx="1"/>
         </panel>
         <separator colspan="2"/>
         <label text="i18n.common.response.type"/>

@@ -78,8 +78,6 @@ public class CsvUtils {
 	public static final String MARKER_KEYWORD_DESCRIPTION = "${keyword_description}";
 	/** [Substitution marker] TODO document what this is */
 	public static final String MARKER_COMMAND_RESPONSE = "${command_response}";
-	/** [Substitution marker] {@link Message#getSmscReference()} */
-	public static final String MARKER_SMS_ID = "${sms_id}";
 	
 //> STATIC CONSTANTS
 	/** Character encoding String for UTF-8 */

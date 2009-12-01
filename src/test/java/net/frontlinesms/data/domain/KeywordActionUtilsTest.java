@@ -18,7 +18,7 @@ public class KeywordActionUtilsTest extends BaseTestCase {
 	private static final KeywordAction KEYWORD_ACTION_SHOUT = createAction("SHOUT");
 	
 	/** An example message format which includes all the different substitutable values. */
-	private static final String COMPREHENSIVE_MESSAGE_FORMAT = "You received a message from ${sender_name} (phone number ${sender_number}).  She said:\n${message_content}\nFor your records, the SMS message reference was: ${sms_id}.";
+	private static final String COMPREHENSIVE_MESSAGE_FORMAT = "You received a message from ${sender_name} (phone number ${sender_number}).  She said:\n${message_content}";
 	
 	/** Test data for checking if keyword is correctly stripped from a string. */
 	private String [][] REMOVE_KEYWORD = {
@@ -60,15 +60,15 @@ public class KeywordActionUtilsTest extends BaseTestCase {
 	/** Test data for checking that data formatting is applied correctly */
 	private static final Object[][] FORMAT_TEXT = {
 		/* formattedText, unformattedText, urlEncode, action, senderMsisdn, senderDisplayName, incomingMessageText, refNo */
-		{"Here is message format that never changes.", "Here is message format that never changes.", true, createAction(""), TEST_MSISDN, TEST_NAME, "Here is the message content.", null},
-		{"Here is message format that never changes.", "Here is message format that never changes.", false, createAction(""), TEST_MSISDN, TEST_NAME, "Here is the message content.", 69},
-		{"Here is message format that never changes.", "Here is message format that never changes.", true, createAction(""), TEST_MSISDN, TEST_NAME, "Here is the message content.", null},
-		{"Here is message format that never changes.", "Here is message format that never changes.", false, createAction(""), TEST_MSISDN, TEST_NAME, "Here is the message content.", 69},
-		{"You received a message from Billy Jean (phone number +447890123456).  She said:\nHello there, billy jean here!  hope u r good!\nFor your records, the SMS message reference was: 69.",
-				COMPREHENSIVE_MESSAGE_FORMAT, false, KEYWORD_ACTION_SHOUT, TEST_MSISDN, TEST_NAME, "SHOUT Hello there, billy jean here!  hope u r good!", 69},
-		{"You received a message from Billy Jean (phone number +447890123456).  She said:\nHello there, billy jean here!  hope u r good!\nFor your records, the SMS message reference was: 71.",
-				COMPREHENSIVE_MESSAGE_FORMAT, false, KEYWORD_ACTION_SHOUT, TEST_MSISDN, TEST_NAME, "SHOUT Hello there, billy jean here!  hope u r good!", 71},
-		{"http://localhost/process/Billy+Jean/%2B447890123456/DOIT/Hello+there%2C+here%27s+the+message+content./69/", "http://localhost/process/${sender_name}/${sender_number}/${keyword}/${message_content}/${sms_id}/", true, createAction("doit"), TEST_MSISDN, TEST_NAME, "DOIT Hello there, here's the message content.", 69},
+		{"Here is message format that never changes.", "Here is message format that never changes.", true, createAction(""), TEST_MSISDN, TEST_NAME, "Here is the message content."},
+		{"Here is message format that never changes.", "Here is message format that never changes.", false, createAction(""), TEST_MSISDN, TEST_NAME, "Here is the message content."},
+		{"Here is message format that never changes.", "Here is message format that never changes.", true, createAction(""), TEST_MSISDN, TEST_NAME, "Here is the message content."},
+		{"Here is message format that never changes.", "Here is message format that never changes.", false, createAction(""), TEST_MSISDN, TEST_NAME, "Here is the message content."},
+		{"You received a message from Billy Jean (phone number +447890123456).  She said:\nHello there, billy jean here!  hope u r good!",
+				COMPREHENSIVE_MESSAGE_FORMAT, false, KEYWORD_ACTION_SHOUT, TEST_MSISDN, TEST_NAME, "SHOUT Hello there, billy jean here!  hope u r good!"},
+		{"You received a message from Billy Jean (phone number +447890123456).  She said:\nHello there, billy jean here!  hope u r good!",
+				COMPREHENSIVE_MESSAGE_FORMAT, false, KEYWORD_ACTION_SHOUT, TEST_MSISDN, TEST_NAME, "SHOUT Hello there, billy jean here!  hope u r good!"},
+		{"http://localhost/process/Billy+Jean/%2B447890123456/DOIT/Hello+there%2C+here%27s+the+message+content./", "http://localhost/process/${sender_name}/${sender_number}/${keyword}/${message_content}/", true, createAction("doit"), TEST_MSISDN, TEST_NAME, "DOIT Hello there, here's the message content."},
 	};
 	
 	/**
@@ -111,8 +111,7 @@ public class KeywordActionUtilsTest extends BaseTestCase {
 			String senderMsisdn = (String) testData[4];
 			String senderDisplayName = (String) testData[5];
 			String incomingMessageText = (String) testData[6];
-			Integer refNo = (Integer) testData[7];
-			testFormatText(expectedText, unformattedText, urlEncode, action, senderMsisdn, senderDisplayName, incomingMessageText, refNo);
+			testFormatText(expectedText, unformattedText, urlEncode, action, senderMsisdn, senderDisplayName, incomingMessageText);
 		}
 	}
 
@@ -127,8 +126,8 @@ public class KeywordActionUtilsTest extends BaseTestCase {
 	 * @param incomingMessageText
 	 * @param refNo
 	 */
-	private void testFormatText(String expectedText, String unformattedText, boolean urlEncode, KeywordAction action, String senderMsisdn, String senderDisplayName, String incomingMessageText, Integer refNo) {
-		String formattedText = KeywordUtils.formatText(unformattedText, urlEncode, action, senderMsisdn, senderDisplayName, incomingMessageText, refNo);
+	private void testFormatText(String expectedText, String unformattedText, boolean urlEncode, KeywordAction action, String senderMsisdn, String senderDisplayName, String incomingMessageText) {
+		String formattedText = KeywordUtils.formatText(unformattedText, urlEncode, action, senderMsisdn, senderDisplayName, incomingMessageText);
 		assertEquals("Formatted text did not appear as expected.", expectedText, formattedText);
 	}
 	

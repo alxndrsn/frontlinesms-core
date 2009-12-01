@@ -153,7 +153,7 @@ public class IncomingMessageProcessor extends Thread {
 								LOG.debug("It's a incoming message [" + incomingMessageText + "]");
 								incoming = Message.createIncomingMessage(incomingMessage.getDate(), incomingSenderMsisdn, receiver.getMsisdn(), incomingMessageText.trim());
 								messageFactory.saveMessage(incoming);
-								handleTextMessage(incoming, incomingMessage.getRefNo());
+								handleTextMessage(incoming);
 							} else {
 								Contact sender = contactDao.getFromMsisdn(incomingSenderMsisdn);
 								if(sender == null) {
@@ -225,7 +225,7 @@ public class IncomingMessageProcessor extends Thread {
 	 * @param incoming
 	 * @param refNo 
 	 */
-	private void handleTextMessage(final Message incoming, final int refNo) {
+	private void handleTextMessage(final Message incoming) {
 		Keyword keyword = keywordDao.getFromMessageText(incoming.getTextContent());
 		if (keyword != null) {
 			LOG.debug("The message contains keyword [" + keyword.getKeyword() + "]");
@@ -243,7 +243,7 @@ public class IncomingMessageProcessor extends Thread {
 						public void run() {
 							for (KeywordAction action : actions) {
 								if (action.isAlive()) {
-									handleIncomingMessageAction_post(action, incoming, refNo);
+									handleIncomingMessageAction_post(action, incoming);
 								}
 							}
 						}
@@ -256,12 +256,10 @@ public class IncomingMessageProcessor extends Thread {
 
 	/**
 	 * Handle relevant incoming message actions AFTER the message has been created with the messageFactory.
-	 * 
 	 * @param action The action to executed.
 	 * @param incoming The incoming message that triggered this action.
-	 * @param refNo message reference number of the incoming text
 	 */
-	private void handleIncomingMessageAction_post(KeywordAction action, Message incoming, int refNo) {
+	private void handleIncomingMessageAction_post(KeywordAction action, Message incoming) {
 		LOG.trace("ENTER");
 		String incomingSenderMsisdn = incoming.getSenderMsisdn();
 		String incomingMessageText = incoming.getTextContent();
@@ -334,7 +332,7 @@ public class IncomingMessageProcessor extends Thread {
 			// Executes a external command
 			LOG.debug("It is an external command action!");
 			try {
-				executeExternalCommand(action, incomingSenderMsisdn, incomingMessageText, refNo);
+				executeExternalCommand(action, incomingSenderMsisdn, incomingMessageText);
 			} catch (IOException e) {
 				LOG.debug("Problem executing external command.", e);
 			} catch (InterruptedException e) {
@@ -370,19 +368,17 @@ public class IncomingMessageProcessor extends Thread {
 	 * @param action
 	 * @param incomingSenderMsisdn 
 	 * @param incomingMessageText 
-	 * @param refNo 
 	 * @throws IOException 
 	 * @throws InterruptedException 
 	 * @throws JDOMException 
 	 */
-	private void executeExternalCommand(KeywordAction action, String incomingSenderMsisdn, String incomingMessageText, int refNo) throws IOException, InterruptedException, JDOMException {
+	private void executeExternalCommand(KeywordAction action, String incomingSenderMsisdn, String incomingMessageText) throws IOException, InterruptedException, JDOMException {
 		LOG.trace("ENTER");
 		String cmd = KeywordAction.KeywordUtils.getExternalCommand(
 				action,
 				contactDao.getFromMsisdn(incomingSenderMsisdn),
 				incomingSenderMsisdn,
-				incomingMessageText,
-				refNo
+				incomingMessageText
 		);
 		LOG.debug("Command to be executed [" + cmd + "]");
 		String response = null;

@@ -130,6 +130,8 @@ public abstract class CMessage {
 	/**
 	 * Returns the message SMSC Reference Number.
 	 * @return The SMSC Ref Number.
+	 * 
+	 * FIXME THIS SHOULD NOT BE AVAILABLE TO {@link CIncomingMessage} as it is not available for SMS-DELIVER TPDUs
 	 */
 	public int getRefNo() {
 		return refNo;
