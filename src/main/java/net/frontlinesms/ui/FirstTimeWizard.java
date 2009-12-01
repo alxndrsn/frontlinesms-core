@@ -269,8 +269,9 @@ public class FirstTimeWizard extends FrontlineUI {
 	private void loadPages() {
 		currentPageIndex = 0;
 		pages.clear();
-		pages.add(loadComponentFromFile(UI_FILE_USED_BEFORE));
-		pages.add(loadComponentFromFile(UI_FILE_IMPORT_DATA));
+		// FIXME we should re-add these 2 pages when the data importer from DbController has been implemented.
+//		pages.add(loadComponentFromFile(UI_FILE_USED_BEFORE));
+//		pages.add(loadComponentFromFile(UI_FILE_IMPORT_DATA));
 		pages.add(loadComponentFromFile(UI_FILE_START_FORM));
 	}
 }
