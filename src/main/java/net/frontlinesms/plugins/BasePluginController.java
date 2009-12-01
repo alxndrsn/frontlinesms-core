@@ -79,12 +79,7 @@ public abstract class BasePluginController implements PluginController {
 		return getTextResource(locale.getLanguage());
 	}
 
-//> INSTANCE HELPER METHODS
-	/** @see net.frontlinesms.plugins.PluginController#getIcon(UiGeneratorController) */
-	public Image getIcon(UiGeneratorController uiController) {
-		return uiController.getIcon(getResourceDirectory() + '/' + this.getClass().getSimpleName() + "Icon.png");
-	}
-	
+//> INSTANCE HELPER METHODS	
 	/**
 	 * Gets a text resource file from the classpath.
 	 * @param nameExtensions extensions added to the end of the standard filename.  These will be separated from the base name and each other by underscores.
