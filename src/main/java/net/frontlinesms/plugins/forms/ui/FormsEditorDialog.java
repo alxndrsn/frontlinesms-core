@@ -19,6 +19,8 @@
  */
 package net.frontlinesms.plugins.forms.ui;
 
+import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Frame;
@@ -36,6 +38,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
@@ -67,12 +70,27 @@ public class FormsEditorDialog extends JDialog {
 	public FormsEditorDialog(Frame owner) {
 		super(owner, "FrontlineSMS - " + InternationalisationUtils.getI18NString(FormsThinletTabController.I18N_KEY_FORMS_EDITOR), true);
 		propertiesTable = new PropertiesTable();
-		getContentPane().setLayout(new SimpleLayout());
+		
+		// Make the content scrollable
+		JPanel topPanel = new JPanel();
+		topPanel.setLayout(new BorderLayout());
+		getContentPane().add(topPanel);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		topPanel.add(scrollPane, BorderLayout.CENTER);
+
+		Container scrollContent = scrollPane.getViewport();
+		JPanel scrollContentPanel = new JPanel();
+		scrollContent.add(scrollContentPanel, new SimpleConstraints(0, 0, 800, 650));
+		
+		Container innerContentPane = scrollContentPanel;
+		SimpleLayout contentPaneLayout = new SimpleLayout();
+		innerContentPane.setLayout(contentPaneLayout);
 		pnDrawing = new DrawingPanel();
-		getContentPane().add(pnDrawing, new SimpleConstraints(0, 0, 500, 580));
+		innerContentPane.add(pnDrawing, new SimpleConstraints(0, 0, 500, 580));
 		JScrollPane sp = new JScrollPane(propertiesTable);
 		sp.setBorder(new TitledBorder(InternationalisationUtils.getI18NString(COMMON_PROPERTIES)));
-		getContentPane().add(sp, new SimpleConstraints(510, 0, 280, 580));
+		innerContentPane.add(sp, new SimpleConstraints(510, 0, 280, 580));
 		
 		tfFormName = new JTextField();
 		tfFormName.addActionListener(new ActionListener() {
@@ -84,8 +102,8 @@ public class FormsEditorDialog extends JDialog {
 		formName.setIcon(new ImageIcon(Utils.getImage("/icons/form.png", getClass())));
 		FontMetrics m = formName.getFontMetrics(formName.getFont());
 		int width = m.stringWidth(formName.getText()) + formName.getIcon().getIconWidth();
-		getContentPane().add(formName, new SimpleConstraints(160, 590));
-		getContentPane().add(tfFormName, new SimpleConstraints(160 + width + 20, 588, 200, null));
+		innerContentPane.add(formName, new SimpleConstraints(160, 590));
+		innerContentPane.add(tfFormName, new SimpleConstraints(160 + width + 20, 588, 200, null));
 		
 		JButton btSave = new JButton(InternationalisationUtils.getI18NString(ACTION_SAVE), new ImageIcon(Utils.getImage("/icons/tick.png", getClass())));
 		btSave.addActionListener(new ActionListener() {
@@ -100,11 +118,11 @@ public class FormsEditorDialog extends JDialog {
 			}
 		});
 		
-		getContentPane().add(btSave, new SimpleConstraints(160 + width + 20 + 200 + 20, 585));
-		getContentPane().add(btCancel, new SimpleConstraints(160 + width + 20 + 200 + 20 + 90, 585));
+		innerContentPane.add(btSave, new SimpleConstraints(160 + width + 20 + 200 + 20, 585));
+		innerContentPane.add(btCancel, new SimpleConstraints(160 + width + 20 + 200 + 20 + 90, 585));
 		
-		this.setResizable(false);
-		this.setSize(800, 650);
+		this.setResizable(true);
+		this.setSize(815, 665);
 		try {
 			// This method is only available in Java6+.  It might be sensible just to ditch
 			// the code altogether, although surely there is a pre-Java6 way to set an icon

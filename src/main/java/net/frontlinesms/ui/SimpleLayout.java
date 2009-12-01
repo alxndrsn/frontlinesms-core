@@ -116,7 +116,7 @@ public class SimpleLayout implements LayoutManager2 {
 			width = Math.max(width, right);
 			
 			int bottom = con.getY();
-			if(con.getWidth() != null) bottom += con.getHeight();
+			if(con.getHeight() != null) bottom += con.getHeight();
 			else bottom += comp.getPreferredSize().getHeight();
 			height = Math.max(height, bottom);
 		}
