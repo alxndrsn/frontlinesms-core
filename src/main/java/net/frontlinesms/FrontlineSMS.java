@@ -242,7 +242,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		hibernateConfigList.add("classpath:frontlinesms.hibernate.cfg.xml");
 		// Add hibernate config locations for plugins
 		for(Class<PluginController> pluginClass : PluginProperties.getInstance().getPluginClasses()) {
-			System.out.println("Processing plugin class: " + pluginClass.getClass());
+			System.out.println("Processing plugin class: " + pluginClass.getName());
 			if(pluginClass.isAnnotationPresent(PluginControllerProperties.class)) {
 				PluginControllerProperties properties = pluginClass.getAnnotation(PluginControllerProperties.class);
 				String pluginHibernateLocation = properties.hibernateConfigPath();
