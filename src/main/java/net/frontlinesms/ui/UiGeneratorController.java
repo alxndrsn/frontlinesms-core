@@ -1339,15 +1339,20 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void enableOptions(Object list, Object popup, Object toolbar) {
 		Object[] selectedItems = getSelectedItems(list);
 		boolean hasSelection = selectedItems.length > 0;
+
+		if(!hasSelection && "emailServerListPopup".equals(getName(popup))) {
+			setVisible(popup, false);
+			return;
+		}
 		
-		if (popup != null) {
+		if (hasSelection && popup != null) {
 			// If nothing is selected, hide the popup menu
 			setBoolean(popup, Thinlet.VISIBLE, hasSelection);
 			
 			Object att = getAttachedObject(selectedItems[0]);
 			// If we are looking at a list of messages, there are certain popup menu items that
 			// should or shouldn't be enabled, depending on the type of messages we have selected.
-			if (hasSelection && att instanceof Message) {
+			if (att instanceof Message) {
 				/** Check to see whether there are any "received messages" selected */
 				boolean receivedMessagesSelected = false;
 				for(Object selectedComponent : selectedItems) {

@@ -6,7 +6,7 @@
             <column icon="/icons/emailAccount_server.png" text="i18n.common.email.account.server" width="200"/>
             <column icon="/icons/emailAccount.png" text="i18n.common.email.account" width="200"/>
         </header>
-        <popupmenu menushown="enableOptions(accountsList, this, this)">
+        <popupmenu menushown="enableOptions(accountsList, this, this)" name="emailServerListPopup">
             <menuitem action="showEmailAccountDialog(accountsList)" icon="/icons/emailAccount_edit.png" text="i18n.action.edit"/>
             <menuitem action="showConfirmationDialog('removeSelectedFromAccountList')" icon="/icons/emailAccount_delete.png" text="i18n.action.delete.selected"/>
         </popupmenu>
