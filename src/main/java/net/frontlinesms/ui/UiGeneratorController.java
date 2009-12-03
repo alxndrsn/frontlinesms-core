@@ -56,6 +56,7 @@ import net.frontlinesms.listener.EmailListener;
 import net.frontlinesms.listener.UIListener;
 import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginControllerProperties;
+import net.frontlinesms.plugins.PluginInitialisationException;
 import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.*;
@@ -411,11 +412,19 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			return;
 		} else {
 			if(enabled) {
-				// If we are enabling the plugin, we need to load it, add it to the loaded plugins list, and
-				// finally add its tab to the UI
-				PluginController controller = this.pluginManager.loadPluginController(pluginClassName);
-				this.pluginManager.initPluginController(controller);
-				this.add(find(COMPONENT_TABBED_PANE), controller.getTab(this));
+				try {
+					// If we are enabling the plugin, we need to load it, add it to the loaded plugins list, and
+					// finally add its tab to the UI
+					PluginController controller = this.pluginManager.loadPluginController(pluginClassName);
+					this.pluginManager.initPluginController(controller);
+					this.add(find(COMPONENT_TABBED_PANE), controller.getTab(this));
+				} catch(Throwable t) {
+					// There was a problem initialising the plugin.  Log this, warn the user, and do
+					// not enable the plugin in the properties.
+					LOG.warn("There was a problem initialising the plugin.", t);
+					// TODO we should probably make this warning for the user slightly more elegant.
+					throw new RuntimeException(t);
+				}
 			} else {
 				// If we are disabling a plugin, we need to remove its tab from the UI, and then discard it
 				// Get the instance of the controller

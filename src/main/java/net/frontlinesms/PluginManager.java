@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationContext;
 
 import net.frontlinesms.data.DatabaseConnectionTestHandler;
 import net.frontlinesms.plugins.PluginController;
+import net.frontlinesms.plugins.PluginInitialisationException;
 import net.frontlinesms.plugins.PluginProperties;
 
 /**
@@ -103,8 +104,19 @@ public class PluginManager {
 	public void initPluginControllers() {
 		System.out.println("Initialising plugin controllers...");
 		// Enable plugins
-		for(PluginController controller : this.pluginControllers) {
-			initPluginController(controller);
+		for(PluginController controller : this.pluginControllers.toArray(new PluginController[0])) {
+			boolean initSuccessful = false;
+			try {
+				initPluginController(controller);
+				initSuccessful = true;
+			} catch(Throwable t) {
+				// There was a problem loading the plugin controller.  Not much we can do, so log it and carry on.
+				log.warn("There was a problem initialising the plugin controller: '" + controller + "'.  Plugin will not be loaded.", t);
+			}
+			
+			if(!initSuccessful) {
+				this.pluginControllers.remove(controller);
+			}
 		}
 		System.out.println("Plugin controllers initialised.  Count: " + this.pluginControllers.size());
 	}
@@ -112,14 +124,10 @@ public class PluginManager {
 	/**
 	 * Attempt to initialise a {@link PluginController}.
 	 * @param controller
+	 * @throws PluginInitialisationException 
 	 */
-	public void initPluginController(PluginController controller) {
-		try {
-			controller.init(this.frontlineController, applicationContext);
-		} catch(Throwable t) {
-			// There was a problem loading the plugin controller.  Not much we can do, so log it and carry on.
-			log.warn("There was a problem loading plugin controller: " + controller, t);
-		}
+	public void initPluginController(PluginController controller) throws PluginInitialisationException {
+		controller.init(this.frontlineController, applicationContext);
 	}
 
 //> INSTANCE HELPER METHODS
