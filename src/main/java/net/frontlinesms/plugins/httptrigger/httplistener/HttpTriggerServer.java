@@ -3,9 +3,11 @@
  */
 package net.frontlinesms.plugins.httptrigger.httplistener;
 
+import net.frontlinesms.Utils;
 import net.frontlinesms.plugins.httptrigger.HttpTriggerEventListener;
 import net.frontlinesms.plugins.httptrigger.HttpTriggerListener;
 
+import org.apache.log4j.Logger;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
@@ -19,6 +21,8 @@ public class HttpTriggerServer extends Thread implements HttpTriggerListener {
 //> STATIC CONSTANTS
 
 //> INSTANCE PROPERTIES
+	/** Logging object */
+	private final Logger log = Utils.getLogger(this.getClass());
 	/** The listener for HTTP events */
 	private final HttpTriggerEventListener eventListener;
 	/** The port on which we will listen for incoming HTTP connections */
@@ -60,14 +64,12 @@ public class HttpTriggerServer extends Thread implements HttpTriggerListener {
 		this.eventListener.log("Starting on port: " + this.getPort());
 		try {
 			server.start();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception ex) {
+			log.warn("Problem starting listener.", ex);
 			try {
 				this.server.stop();
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			} catch (Exception e) {
+				log.info("Problem stopping listener which failed to start.", e);
 			}
 		}
 		try {
@@ -84,9 +86,8 @@ public class HttpTriggerServer extends Thread implements HttpTriggerListener {
 		this.eventListener.log("Terminating listener on port: " + this.getPort());
 		try {
 			this.server.stop();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception ex) {
+			log.warn(ex);
 		}
 	}
 
@@ -107,7 +108,6 @@ public class HttpTriggerServer extends Thread implements HttpTriggerListener {
 			try {
 				Thread.sleep(5000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				running = false;
 			}
