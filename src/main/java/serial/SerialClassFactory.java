@@ -3,6 +3,8 @@
  */
 package serial;
 
+import org.apache.log4j.Logger;
+
 /**
  * Factory class for getting the serial classes.
  * @author Alex
@@ -14,9 +16,11 @@ public class SerialClassFactory {
 	/** Package name for RXTXserial */
 	private static final String PACKAGE_RXTX = "gnu.io";
 	/** Singleton instance of this class */
-	private static SerialClassFactory INSTANCE; 
+	private static SerialClassFactory INSTANCE;
 
 //> INSTANCE PROPERTIES
+	/** Logging object */
+	private final Logger log = Logger.getLogger(this.getClass().getName());
 	/** The name of the package of the serial implementation to use, either {@link #PACKAGE_JAVAXCOMM} or {@value #PACKAGE_RXTX} */
 	private final String serialPackageName;
 
@@ -28,17 +32,17 @@ public class SerialClassFactory {
 	private SerialClassFactory() {
 		String serialPackageName;
 		try {
-			// TODO log that we're trying RXTX
-			/*
-			 * RXTX will throw: class java.lang.UnsatisfiedLinkError :: no rxtxSerial in java.library.path
-			 * if it cannot load.  Hopefully javax.comm will do similar.
-			 */
-			Class.forName(PACKAGE_RXTX + "." + CommPortIdentifier.class.getSimpleName());
-			serialPackageName = PACKAGE_RXTX;
-		} catch(Throwable t) {
-			t.printStackTrace(); // TODO log this instead of printing it
-			// TODO test this package works - it's possible neither does
+			log.info("Attempting to load serial package: " + PACKAGE_JAVAXCOMM);
+			// Javax.Serial will throw: class java.lang.UnsatisfiedLinkError :: no rxtxSerial in java.library.path if it cannot load.
+			Class.forName(PACKAGE_JAVAXCOMM + "." + CommPortIdentifier.class.getSimpleName());
 			serialPackageName = PACKAGE_JAVAXCOMM;
+			log.info("Using serial package: " + PACKAGE_JAVAXCOMM);
+		} catch(Throwable t) {
+			log.warn("Failed to load serial package: " + PACKAGE_JAVAXCOMM, t);
+			// TODO test this package works - it's possible neither does
+			// TODO What should we do if neither package works?  It would certainly be useful to know...
+			serialPackageName = PACKAGE_RXTX;
+			log.info("Using serial package: " + PACKAGE_RXTX);
 		}
 		// TODO log what we have ended up with
 		this.serialPackageName = serialPackageName;
