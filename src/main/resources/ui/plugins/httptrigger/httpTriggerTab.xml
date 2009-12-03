@@ -1,4 +1,4 @@
-<tab icon="/icons/big_export.png" text="i18n.httptrigger.tab.label" name=":httpTrigger">
+<tab icon="/icons/big_export.png" text="HTTP Trigger" name=":httpTrigger">
     <panel bottom="9" columns="2" gap="9" left="9" right="9" top="9" weightx="1" weighty="1">
     	<panel gap="9">
     		<label text="Port"/>
