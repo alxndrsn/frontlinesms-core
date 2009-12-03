@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Required;
 import org.springframework.context.ApplicationContext;
 
 import net.frontlinesms.FrontlineSMS;
-import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.listener.IncomingMessageListener;
@@ -166,24 +165,18 @@ public class FormsPluginController extends BasePluginController implements Incom
 	 * Handles a request of type {@link NewFormRequest}
 	 * @param request
 	 * @param message
-	 * @return a response of type {@link NewFormsResponse}
+	 * @return a response of type {@link NewFormsResponse}, or <code>null</code> if no response should be sent.
 	 */
 	private NewFormsResponse handleNewFormRequest(NewFormRequest request, Message message) {
 		String senderMsisdn = message.getSenderMsisdn();
 		Contact contact = this.frontlineController.getContactDao().getFromMsisdn(senderMsisdn);
 		if(contact == null) {
-			// i18n the contact name
-			contact = new Contact("Unknown Forms Submitter", senderMsisdn, null, null, null, true);
-			try {
-				this.frontlineController.getContactDao().saveContact(contact);
-			} catch(DuplicateKeyException ex) {
-				// Seems like the contact was created by someone else while we were saving him.  Try to
-				// fetch him again
-				contact = this.frontlineController.getContactDao().getFromMsisdn(senderMsisdn);
-			}
+			// This contact is not known, so there cannot be any forms available for him
+			return null;
+		} else {
+			Collection<Form> newForms = this.formsDao.getFormsForUser(contact, ((NewFormRequest)request).getCurrentFormMobileIds());
+			return new NewFormsResponse(contact, newForms);
 		}
-		Collection<Form> newForms = this.formsDao.getFormsForUser(contact, ((NewFormRequest)request).getCurrentFormMobileIds());
-		return new NewFormsResponse(contact, newForms);
 	}
 
 	/**
