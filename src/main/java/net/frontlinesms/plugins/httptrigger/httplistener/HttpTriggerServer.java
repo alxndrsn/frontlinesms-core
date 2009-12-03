@@ -33,6 +33,9 @@ public class HttpTriggerServer extends Thread implements HttpTriggerListener {
 	 * @param port value for {@link #port}
 	 */
 	public HttpTriggerServer(HttpTriggerEventListener eventListener, int port) {
+		// Give this Thread a meaningful name
+		super(HttpTriggerServer.class.getSimpleName() + "; port: " + port);
+		
 		this.port = port;
 		this.eventListener = eventListener;
 		
