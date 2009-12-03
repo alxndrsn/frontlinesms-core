@@ -30,6 +30,9 @@
 		</comments>
   	</license>
   </licenses>
+  
+  <!-- TODO set file encoding for source, properties to UTF-8 - this is rather worrying (when mvn install is run):
+  [WARNING] Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent! -->
 
 	<build>
 		<filters>
