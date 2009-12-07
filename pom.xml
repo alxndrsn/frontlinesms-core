@@ -38,23 +38,6 @@
 	</properties>
 
 	<build>
-		<filters>
-			<filter>src/main/filters/filter.properties</filter>
-		</filters>
-		
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<targetPath>/</targetPath>
-			</resource>
-			<resource>
-				<!-- Included resources that will be filtered. -->
-				<directory>src/filtered/resources</directory>
-				<filtering>true</filtering>
-				<targetPath>/</targetPath>	
-			</resource>
-		</resources>
-		
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
