@@ -39,10 +39,10 @@ public class CATHandler_Mock extends CATHandler {
 	
 	@Override
 	protected int sendMessage(int size, String pdu, String phone, String text) throws IOException, NoResponseException, UnrecognizedHandlerProtocolException {
-		System.out.println("size  : " + size);
-		System.out.println("pdu   : " + pdu);
-		System.out.println("phone : " + phone);
-		System.out.println("text  : " + text);
+		log.trace("size  : " + size);
+		log.trace("pdu   : " + pdu);
+		log.trace("phone : " + phone);
+		log.trace("text  : " + text);
 		return 0;
 	}
 	

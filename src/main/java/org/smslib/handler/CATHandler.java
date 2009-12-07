@@ -270,7 +270,7 @@ public class CATHandler extends AbstractATHandler {
 
 	protected String listMessages(MessageClass messageClass) throws IOException, UnrecognizedHandlerProtocolException, SMSLibDeviceException
 	{
-		System.out.println("CATHandler.listMessages() : " + this.getClass().getSimpleName());
+		if(TRACE) System.out.println("CATHandler.listMessages() : " + this.getClass().getSimpleName());
 		
 		int messageProtocol = srv.getProtocol();
 		switch (messageProtocol) {

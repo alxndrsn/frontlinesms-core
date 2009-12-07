@@ -57,15 +57,15 @@ public class GsmAlphabetTest extends BaseTestCase {
 					myString,
 					cString);
 		} catch(ComparisonFailure c) {
-			System.out.println("cString  : " + cString);
-			System.out.println("myString : " + myString);
-			System.out.println("bytes    : " + new String(bytes));
+			log.debug("cString  : " + cString);
+			log.debug("myString : " + myString);
+			log.debug("bytes    : " + new String(bytes));
 			int minLen = Math.min(cString.length(), myString.length());
 			for (int i = 0; i < minLen; i++) {
 				if(cString.charAt(i)!=myString.charAt(i)) {
-					System.out.println("Naughty Character Found:");
-					System.out.println("  c : " + cString.charAt(i) + "\t" + ((int)cString.charAt(i)));
-					System.out.println("  my: " + myString.charAt(i) + "\t" + ((int)myString.charAt(i)));
+					log.debug("Naughty Character Found:");
+					log.debug("  c : " + cString.charAt(i) + "\t" + ((int)cString.charAt(i)));
+					log.debug("  my: " + myString.charAt(i) + "\t" + ((int)myString.charAt(i)));
 					break;
 				}
 			}

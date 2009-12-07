@@ -10,6 +10,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Arrays;
 
+import org.apache.log4j.Logger;
+
 import junit.framework.TestCase;
 
 /**
@@ -17,6 +19,7 @@ import junit.framework.TestCase;
  * @author Alex
  */
 public class CsvImportTests extends TestCase {
+//> CONSTANTS
 	/** Path to the test resources folder.  TODO should probably get these relative to the current {@link ClassLoader}'s path. */
 	private static final String RESOURCE_PATH = "src/test/resources/net/frontlinesms/csv/";
 
@@ -32,6 +35,10 @@ public class CsvImportTests extends TestCase {
 			return name.endsWith(".fail.csv");
 		}
 	};
+
+//> INSTANCE VARIABLES
+	/** Logging object */
+	private final Logger log = Logger.getLogger(this.getClass());
 	
 	/**
 	 * Get all import test files from /test/net/frontlinesms/csv/import/, and read
@@ -59,7 +66,7 @@ public class CsvImportTests extends TestCase {
 				throw new IllegalArgumentException("No Exception thrown for file: " + importTestFile.getName());
 			} catch (CsvParseException ex) {
 				// Haha, this exception is expected!
-				System.out.println("Testing file: " + importTestFile.getName() + "; got expected exception: " + ex.getMessage());
+				log.trace("Testing file: " + importTestFile.getName() + "; got expected exception: " + ex.getMessage());
 			}
 		}
 	}
@@ -78,7 +85,7 @@ public class CsvImportTests extends TestCase {
 		int lineIndex = -1;
 		while((readLine = CsvUtils.readLine(reader)) != null) {
 			++lineIndex;
-			System.out.println("Readline: " + lineIndex + ": " + toString(readLine));
+			log.trace("Readline: " + lineIndex + ": " + toString(readLine));
 			String[] expectedLine = expectedLines[lineIndex];
 			if(expectedLine.length != readLine.length) throw new IllegalArgumentException("Not enough lines in read line: " + readLine.length + " (read:###\n" + toString(readLine) + "\n###\n" + toString(expectedLine) + "\n###)");
 			for (int i = 0; i < expectedLine.length; i++) {
@@ -90,7 +97,7 @@ public class CsvImportTests extends TestCase {
 							for (int k = 0; k < expected.length(); k++) {
 								char e = expected.charAt(k);
 								char r = read.charAt(k);
-								System.out.println("(" + e + ")" + new Integer(e) + " -> ()" + new Integer(r) + "(" + r + ")");
+								log.trace("(" + e + ")" + new Integer(e) + " -> ()" + new Integer(r) + "(" + r + ")");
 							}
 						}
 					}

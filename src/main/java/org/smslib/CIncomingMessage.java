@@ -97,8 +97,6 @@ public class CIncomingMessage extends CMessage {
 		this.memIndex = memIndex;
 		this.memLocation = memLocation;
 		
-		System.out.println("PDU: " + pdu);
-		
 		try {
 			PduInputStream in = new PduInputStream(pdu);
 			

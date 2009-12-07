@@ -27,7 +27,7 @@ public class CATHandler_Symbian_PiAccess extends CATHandler {
 
 //> INSTANCE PROPERTIES
 	/** Logging object */
-	private CATHandler_Symbian_PiAccess log = this;
+	private Logger log = Logger.getLogger(this.getClass());
 	/** Set containing hashes of the {@link #listMessages(MessageClass)} we have seen */
 	private TreeSet<Integer> listMessagesLinesSeen = new TreeSet<Integer>();
 
@@ -121,7 +121,7 @@ public class CATHandler_Symbian_PiAccess extends CATHandler {
 			throw new UnableToReconnectException("Too many messages read from device.  Please clear device SMS memory manually.");
 		}
 		boolean unseen = this.listMessagesLinesSeen.add(messageLine.hashCode());
-		System.out.println("CATHandler_Symbian_PiAccess.isMessageUnseen() '" + messageLine + "' -> " + unseen);
+		log.debug("CATHandler_Symbian_PiAccess.isMessageUnseen() '" + messageLine + "' -> " + unseen);
 		return unseen;
 	}
 
@@ -142,27 +142,4 @@ public class CATHandler_Symbian_PiAccess extends CATHandler {
 //> STATIC FACTORIES
 
 //> STATIC HELPER METHODS
-	
-//> TEMP LOGGING METHODS
-	/** @return true */
-	public boolean isDebugEnabled() { return true; } 
-	/** Logging method 
-	 * @param message message to log */
-	public void info(String message) {
-		log("INFO", message);
-	}
-	/** Logging method 
-	 * @param message message to log */
-	public void trace(String message) {
-		log("TRACE", message);
-	}
-	/** Logging method 
-	 * @param message message to log */
-	public void debug(String message) {
-		log("DEBUG", message);
-	}
-	/** Logging method */
-	private void log(String level, String message) {
-		System.out.println("[" + level + "| " + Thread.currentThread().getName() + " | " + this.getClass() + "]" + message);
-	}
 }

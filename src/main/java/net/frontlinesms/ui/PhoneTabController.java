@@ -502,24 +502,16 @@ public class PhoneTabController implements SmsDeviceEventListener, ThinletUiEven
 
 			SmsDevice[] smsDevices = phoneManager.getAllPhones().toArray(new SmsDevice[0]);
 			
-			System.out.println();
-			System.out.println("----------");
-			System.out.println("Before sorting: ");
 			for (int i = 0; i < smsDevices.length; i++) {
 				SmsDevice smsDevice = smsDevices[i];
-				System.out.println(i + ":\t" + smsDevice);
 			}
 			
 			// Sort the SmsDevices by port name
 			Arrays.sort(smsDevices, SMS_DEVICE_COMPARATOR);
 
-			System.out.println("----------");
-			System.out.println("After sorting: ");
 			for (int i = 0; i < smsDevices.length; i++) {
 				SmsDevice smsDevice = smsDevices[i];
-				System.out.println(i + ":\t" + smsDevice);
 			}
-			System.out.println("----------");
 			
 			// Add the SmsDevices to the relevant tables
 			for (SmsDevice dev : smsDevices) {

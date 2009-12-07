@@ -183,7 +183,6 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 
 	/** @see MessageDao#getSMSCount(Long, Long) */
 	public int getSMSCount(Long start, Long end) {
-		System.out.println("HibernateMessageDao.getSMSCount()");
 		DetachedCriteria criteria = super.getCriterion();
 		addDateCriteria(criteria, start, end);
 		return super.getCount(criteria);

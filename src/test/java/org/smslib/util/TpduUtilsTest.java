@@ -141,11 +141,11 @@ public class TpduUtilsTest extends BaseTestCase {
 		for(boolean isPorted : bools) {
 			for(String messageText : UCS2_TEXT) {
 				String[] messageParts = TpduUtils.splitText_ucs2(messageText, isPorted);
-				System.out.println("'"+messageText+"'");
+				log.debug("'"+messageText+"'");
 				for (int i = 0; i < messageParts.length; i++) {
-					System.out.println(i + ": " + messageParts[i]);
+					log.debug(i + ": " + messageParts[i]);
 				}
-				System.out.println("---");
+				log.debug("---");
 			}
 		}
 	}
@@ -427,7 +427,7 @@ public class TpduUtilsTest extends BaseTestCase {
 		for(String pdu : SUBMITTED_PDUS) {
 			try {
 				new CIncomingMessage(pdu, 0, "");
-				System.out.println("Decoded ok: " + pdu);
+				log.debug("Decoded ok: " + pdu);
 			} catch (MessageDecodeException ex) {
 				ex.printStackTrace();
 				log.error("There was a problem decoding the PDU: " + pdu, ex);

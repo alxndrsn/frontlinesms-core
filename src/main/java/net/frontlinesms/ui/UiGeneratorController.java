@@ -373,7 +373,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				public void windowClosing(WindowEvent e) {
 					super.windowClosing(e);
 					// Make sure the exit() method is called so that we shut down cleanly
-					System.out.println(".windowClosing()");
+					LOG.trace(".windowClosing()");
 					exit();
 				}
 			});
@@ -400,9 +400,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param enabled
 	 */
 	public void updatePluginEnabled(String pluginClassName, boolean enabled) {
-		System.out.println("UiGeneratorController.updatePluginEnabled()");
-		System.out.println("\tclass   : " + pluginClassName);
-		System.out.println("\tenabled : " + enabled);
+		if(LOG.isTraceEnabled()) {
+			LOG.trace("UiGeneratorController.updatePluginEnabled()");
+			LOG.trace("\tclass   : " + pluginClassName);
+			LOG.trace("\tenabled : " + enabled);
+		}
 
 		Class<PluginController> pluginClass = PluginProperties.getInstance().getPluginClass(pluginClassName);
 		
@@ -1868,9 +1870,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param callbackMethodName
 	 */
 	public void showGroupSelecter(Object actionObject, boolean addDatePanel, String title, String callbackMethodName, ThinletUiEventHandler eventHandler) {
-		System.out.println("UiGeneratorController.showGroupSelecter()");
-		System.out.println("actionObject: " + actionObject);
-		System.out.println("title: " + title);
+		if(LOG.isTraceEnabled()) {
+			LOG.trace("UiGeneratorController.showGroupSelecter()");
+			LOG.trace("actionObject: " + actionObject);
+			LOG.trace("title: " + title);
+		}
 		Object selecter = loadComponentFromFile(UI_FILE_GROUP_SELECTER, eventHandler);
 		//Adds the date panel to it
 		if(addDatePanel) {
@@ -1896,7 +1900,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			add(list, item);
 		}
 		if (addDatePanel && actionObject instanceof KeywordAction) {
-			System.out.println("UiGeneratorController.showGroupSelecter() : ADDING THE DATES COMPONENT.");
+			LOG.trace("UiGeneratorController.showGroupSelecter() : ADDING THE DATES COMPONENT.");
 			KeywordAction action = (KeywordAction) actionObject;
 			setText(find(selecter, COMPONENT_TF_START_DATE), action == null ? "" : InternationalisationUtils.getDateFormat().format(action.getStartDate()));
 			Object endDate = find(selecter, COMPONENT_TF_END_DATE);

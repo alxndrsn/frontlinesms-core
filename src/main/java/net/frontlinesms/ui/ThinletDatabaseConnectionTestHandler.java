@@ -3,6 +3,9 @@
  */
 package net.frontlinesms.ui;
 
+import org.apache.log4j.Logger;
+import net.frontlinesms.Utils;
+
 import thinlet.FrameLauncher;
 import net.frontlinesms.data.DatabaseConnectionFailedException;
 import net.frontlinesms.data.DatabaseConnectionTestHandler;
@@ -22,6 +25,8 @@ public class ThinletDatabaseConnectionTestHandler extends FrontlineUI implements
 //> INSTANCE PROPERTIES
 	/** Lock for {@link #ensureConnected(DatabaseConnectionTester)} while the UI is handling connection. */
 	private final Object CONNECTING_LOCK = new Object();
+	/** Logging object */
+	private final Logger log = Utils.getLogger(this.getClass());
 	/** For {@link #ensureConnected(DatabaseConnectionTester)} to check if it should keep blocking. */
 	private boolean keepBlocking;
 	/** Conneciton tester. */
@@ -74,7 +79,7 @@ public class ThinletDatabaseConnectionTestHandler extends FrontlineUI implements
 //> PUBLIC UI METHODS
 	/** Attempt to reconnect with the current settings. */
 	public void reconnect() {
-		System.out.println("ThinletDatabaseConnectionTestHandler.reconnect() : ENTRY");
+		log.trace("ThinletDatabaseConnectionTestHandler.reconnect() : ENTRY");
 		if(this.connectionTester.checkConnection()) {
 			// We've connected successfully, so wake up the sleeping thread and give control back to it
 			synchronized (CONNECTING_LOCK) {
@@ -83,7 +88,7 @@ public class ThinletDatabaseConnectionTestHandler extends FrontlineUI implements
 			}
 			this.frameLauncher.dispose();
 		}
-		System.out.println("ThinletDatabaseConnectionTestHandler.reconnect() : EXIT");
+		log.trace("ThinletDatabaseConnectionTestHandler.reconnect() : EXIT");
 	}
 
 //> STATIC FACTORIES

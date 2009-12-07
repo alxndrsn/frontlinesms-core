@@ -235,7 +235,7 @@ public class FormsThinletTabController implements ThinletUiEventHandler {
 	 */
 	public void showGroupSelecter(Object formsList) {
 		Form selectedForm = getForm(uiController.getSelectedItem(formsList));
-		System.out.println("FormsThinletTabController.showGroupSelecter() : " + selectedForm);
+		LOG.info("FormsThinletTabController.showGroupSelecter() : " + selectedForm);
 		if(selectedForm != null) {
 			// FIXME i18n
 			uiController.showGroupSelecter(selectedForm, false, "Choose a group", "setSelectedGroup(groupSelecter, groupSelecter_groupList)", this);
@@ -247,11 +247,10 @@ public class FormsThinletTabController implements ThinletUiEventHandler {
 	 * @param groupList
 	 */
 	public void setSelectedGroup(Object groupSelecter, Object groupList) {
-		System.out.println("FormsThinletTabController.setSelectedGroup()");
 		Form form = getForm(groupSelecter);
-		System.out.println("Form: " + form);
+		LOG.info("Form: " + form);
 		Group group = uiController.getGroup(uiController.getSelectedItem(groupList));
-		System.out.println("Group: " + group);
+		LOG.info("Group: " + group);
 		if(group != null) {
 			// Set the permitted group for this form, then save it
 			form.setPermittedGroup(group);

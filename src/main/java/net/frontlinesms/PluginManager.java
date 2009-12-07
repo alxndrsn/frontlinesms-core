@@ -102,7 +102,7 @@ public class PluginManager {
 	 * This method should only be called from the constructor {@link FrontlineSMS#FrontlineSMS(DatabaseConnectionTestHandler)}.
 	 */
 	public void initPluginControllers() {
-		System.out.println("Initialising plugin controllers...");
+		log.info("Initialising plugin controllers...");
 		// Enable plugins
 		for(PluginController controller : this.pluginControllers.toArray(new PluginController[0])) {
 			boolean initSuccessful = false;
@@ -118,7 +118,7 @@ public class PluginManager {
 				this.pluginControllers.remove(controller);
 			}
 		}
-		System.out.println("Plugin controllers initialised.  Count: " + this.pluginControllers.size());
+		log.info("Plugin controllers initialised.  Count: " + this.pluginControllers.size());
 	}
 
 	/**
