@@ -1342,7 +1342,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		Object[] selectedItems = getSelectedItems(list);
 		boolean hasSelection = selectedItems.length > 0;
 
-		if(!hasSelection && "emailServerListPopup".equals(getName(popup))) {
+		if(popup!= null && !hasSelection && "emailServerListPopup".equals(getName(popup))) {
 			setVisible(popup, false);
 			return;
 		}
