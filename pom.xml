@@ -31,8 +31,11 @@
   	</license>
   </licenses>
   
-  <!-- TODO set file encoding for source, properties to UTF-8 - this is rather worrying (when mvn install is run):
-  [WARNING] Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent! -->
+	<properties>
+		<!-- Force Maven to use UTF-8 encoding when copying resources, rather than using the 
+			platform default. -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 
 	<build>
 		<filters>
@@ -51,15 +54,6 @@
 				<targetPath>/</targetPath>	
 			</resource>
 		</resources>
-		
-		<testResources>
-			<testResource>
-				<directory>src/test/resources</directory>
-			</testResource>
-			<testResource>
-				<directory>src/main/resources</directory>
-			</testResource>
-		</testResources>
 		
 		<plugins>
 			<plugin>
