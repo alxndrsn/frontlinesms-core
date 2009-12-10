@@ -85,7 +85,4 @@
 			<scope>runtime</scope>
 		</dependencySet>
 	</dependencySets>
-	
-	<!-- TODO include DLL,jnilib,so for javax.comm and RXTXcomm -->
-	<!-- TODO include .bat,.sh files -->
 </assembly>

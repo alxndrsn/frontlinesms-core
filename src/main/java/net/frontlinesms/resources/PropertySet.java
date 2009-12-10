@@ -116,15 +116,28 @@ public abstract class PropertySet extends BasePropertySet {
 	protected synchronized String getProperty(String propertyName) {
 		return this.properties.get(propertyName);
 	}
-	
+
 	/**
 	 * Gets the {@link Boolean} value of a property.
 	 * @param propertyName
 	 * @return The value of the property as a {@link Boolean} or <code>null</code> if it is not set.
+	 * @deprecated Should use {@link #getPropertyAsBoolean(String, boolean)} instead
 	 */
 	protected Boolean getPropertyAsBoolean(String propertyName) {
 		String value = getProperty(propertyName);
 		if (value == null) return null;
+		else return Boolean.parseBoolean(value);
+	}
+	
+	/**
+	 * Gets the {@link Boolean} value of a property.
+	 * @param propertyName the name of the property
+	 * @param defaultValue the default value for the property, returned if the property is not set
+	 * @return The value of the property as a {@link Boolean} or <code>defaultValue</code> if it is not set.
+	 */
+	protected Boolean getPropertyAsBoolean(String propertyName, boolean defaultValue) {
+		String value = getProperty(propertyName);
+		if (value == null) return defaultValue;
 		else return Boolean.parseBoolean(value);
 	}
 	

@@ -40,8 +40,7 @@ public class PluginProperties extends PropertySet {
 	 * @return <code>true</code> if the plugin is explicitly enabled; <code>false</code> otherwise.
 	 */
 	public boolean isPluginEnabled(Class<PluginController> pluginClass) {
-		Boolean enabled = super.getPropertyAsBoolean(pluginClass.getName());
-		return enabled != null && enabled.booleanValue();
+		return super.getPropertyAsBoolean(pluginClass.getName(), false);
 	}
 	
 	/**
