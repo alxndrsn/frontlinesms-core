@@ -4,6 +4,7 @@
 	<artifactId>frontlinesms</artifactId>
 	<name>FrontlineSMS</name>
 	<version>1.6.07</version>
+	<description>FrontlineSMS core application</description>
 	<licenses>
 		<license>
 			<name>GNU Lesser General Public License v3 or later</name>
@@ -33,6 +34,11 @@
 	
 	<repositories>
 		<repository>
+			<id>cleone.net.repo</id>
+			<name>Temporary FrontlineSMS repository on cleone.net</name>
+			<url>http://m2repo.cleone.net</url>
+		</repository>
+		<repository>
 			<id>maven-repository-1</id>
 			<url>http://repo1.maven.org/maven2</url>
 		</repository>
@@ -45,11 +51,6 @@
 			<id>codehaus-release-repo</id>
 			<name>Codehaus Release Repo</name>
 			<url>http://repository.codehaus.org</url>
-		</repository>
-		<repository>
-			<id>cleone.net.repo</id>
-			<name>Temporary FrontlineSMS repository on cleone.net</name>
-			<url>http://m2repo.cleone.net</url>
 		</repository>
 	</repositories>
 	
