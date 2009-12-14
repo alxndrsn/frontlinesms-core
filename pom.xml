@@ -289,7 +289,7 @@
 		<dependency>
 			<groupId>net.frontlinesms.plugins</groupId>
 			<artifactId>frontlinesms-plugin-forms</artifactId>
-			<version>0.02.00</version>
+			<version>0.02.01</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
