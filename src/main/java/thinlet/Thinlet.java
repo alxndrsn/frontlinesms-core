@@ -92,7 +92,7 @@ public class Thinlet extends Container implements Runnable, Serializable, Thinle
 	
 	// FIXME why are there 4 different i18n bundles here?  Presumably there should be max. 2!
 	private transient Map<String, String> resourcebundle; // for internationalization
-	public static Map<String, String> DEFAULT_ENGLISH_BUNDLE; // for internationalization
+	public static Map<String, String> DEFAULT_ENGLISH_BUNDLE; // for internationalization // This appears to be the default used, but langResourceDefault is probably a better name
 	private static Map<String, String> langResource = null; // for I18N
 	private static Map<String, String> langResourceDefault = null; // for I18N
 	
@@ -6246,6 +6246,8 @@ public class Thinlet extends Container implements Runnable, Serializable, Thinle
 			String i18nKey = key.substring(5);
 			try {
 				value = resourcebundle.get(i18nKey);
+				// TODO this exception throwing behaviour should actually be included in the bundle itself
+				if(value == null) throw new RuntimeException("Value not found for key: " + i18nKey); // TODO This should actually throw a MissingResourceException
 			} catch (RuntimeException e) {
 				if (Thinlet.DEFAULT_ENGLISH_BUNDLE == null) {
 					throw new RuntimeException("Default bundle not set.");
