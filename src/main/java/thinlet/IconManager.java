@@ -59,27 +59,19 @@ public class IconManager {
 	 * @return the loaded image or null
 	 */
 	private Image getIcon(String path, boolean preload) {
-		System.out.println("IconManager.getIcon(path=\"" + path + ")\"");
 		if ((path == null) || (path.length() == 0)) {
 			return null;
 		}
 		Image image = null;
 		try {
 			URL url = getClass().getResource(path); //ClassLoader.getSystemResource(path)
-			System.out.println("Got URL of image: " + url);
 			if (url != null) { // contributed by Stefan Matthias Aust
-				System.out.println("Getting image using Toolkit.getDefaultToolkit().getImage(url)...");
 				image = Toolkit.getDefaultToolkit().getImage(url);
-				System.out.println("Got image: " + image);
 			}
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
+		} catch (Throwable e) {}
 		if (image == null) {
 			try {
-				System.out.println("Getting image using getClass().getResourceAsStream(path)...");
 				InputStream is = getClass().getResourceAsStream(path);
-				System.out.println("Got inputStream: " + is);
 				if (is != null) {
 					byte[] data = new byte[is.available()];
 					is.read(data, 0, data.length);
@@ -87,13 +79,9 @@ public class IconManager {
 					is.close();
 				}
 				else { // contributed by Wolf Paulus
-					System.out.println("Getting image using: Toolkit.getDefaultToolkit().getImage(new URL(path))...");
 					image = Toolkit.getDefaultToolkit().getImage(new URL(path));
-					System.out.println("Got image: " + image);
 				}
-			} catch (Throwable e) {
-				e.printStackTrace();
-			}
+			} catch (Throwable e) {}
 		}
 		if (preload && (image != null)) {
 			MediaTracker mediatracker = new MediaTracker(this.thinlet);
