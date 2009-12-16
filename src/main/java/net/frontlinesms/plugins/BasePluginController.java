@@ -11,6 +11,8 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import thinlet.IconManager;
+
 import net.frontlinesms.Utils;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -88,15 +90,45 @@ public abstract class BasePluginController implements PluginController {
 	private Map<String, String> getTextResource(String... nameExtensions) {
 		String resourceFilePath = getTextResourcePath(nameExtensions);
 		
-		// Attempt to load the text resource
+		// Attempt to load the text resource using relative path with local classloader
+		System.out.println("Fetching text resource using this.getClass().getResourceAsStream(" + resourceFilePath + ")...");
 		InputStream textResourceInputStream = this.getClass().getResourceAsStream(resourceFilePath);
+		System.out.println("Got stream: " + textResourceInputStream);
+		
 		if(textResourceInputStream == null) {
+			// Attempt to load the text resource using relative path with IconManager's classloader
+			System.out.println("Fetching text resource using IconManager.class.getResourceAsStream(" + resourceFilePath + ")...");
+			textResourceInputStream = IconManager.class.getResourceAsStream(resourceFilePath);
+			System.out.println("Got stream: " + textResourceInputStream);
+		}
+		
+		if(textResourceInputStream == null) {
+			// Attempt to load the text resource using absolute path
+			resourceFilePath = getResourceDirectory() + '/' + resourceFilePath;
+			System.out.println("Fetching text resource using this.getClass().getResourceAsStream(" + resourceFilePath + ")...");
+			textResourceInputStream = this.getClass().getResourceAsStream(resourceFilePath);
+			System.out.println("Got stream: " + textResourceInputStream);
+		}
+		
+		if(textResourceInputStream == null) {
+			// Attempt to load the text resource using absolute path
+			resourceFilePath = getResourceDirectory() + '/' + resourceFilePath;
+			System.out.println("Fetching text resource using IconManager.class.getResourceAsStream(" + resourceFilePath + ")...");
+			textResourceInputStream = IconManager.class.getResourceAsStream(resourceFilePath);
+			System.out.println("Got stream: " + textResourceInputStream);
+		}
+		
+		if(textResourceInputStream == null) {
+			System.out.println("(textResourceInputStream == null); returning null.");
 			// Resource could not be found, so return null
 			return null;
 		} else {
 			try {
+				System.out.println("Returning text resource: InternationalisationUtils.loadTextResources(resourceFilePath, textResourceInputStream)");
 				return InternationalisationUtils.loadTextResources(resourceFilePath, textResourceInputStream);
 			} catch (IOException ex) {
+				ex.printStackTrace();
+				System.out.println("Exception thrown loading text resource; returning null.");
 				log.info("There was a problem loading language bundle from " + resourceFilePath, ex);
 				return null;
 			}
@@ -116,7 +148,7 @@ public abstract class BasePluginController implements PluginController {
 	 * @return classpath location of the text resource bundle
 	 */
 	private String getTextResourcePath(String... nameExtensions) {
-		String resourceFilePath = getResourceDirectory() + '/' + getTextResourceFilename(nameExtensions) + ".properties";
+		String resourceFilePath = /*getResourceDirectory() + '/' +*/ getTextResourceFilename(nameExtensions) + ".properties";
 		
 		return resourceFilePath;
 	}
