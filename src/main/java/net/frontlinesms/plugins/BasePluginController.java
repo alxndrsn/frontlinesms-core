@@ -91,35 +91,9 @@ public abstract class BasePluginController implements PluginController {
 		String resourceFilePath = getTextResourcePath(nameExtensions);
 		
 		// Attempt to load the text resource using relative path with local classloader
-		System.out.println("Fetching text resource using this.getClass().getResourceAsStream(" + resourceFilePath + ")...");
 		InputStream textResourceInputStream = this.getClass().getResourceAsStream(resourceFilePath);
-		System.out.println("Got stream: " + textResourceInputStream);
 		
 		if(textResourceInputStream == null) {
-			// Attempt to load the text resource using relative path with IconManager's classloader
-			System.out.println("Fetching text resource using IconManager.class.getResourceAsStream(" + resourceFilePath + ")...");
-			textResourceInputStream = IconManager.class.getResourceAsStream(resourceFilePath);
-			System.out.println("Got stream: " + textResourceInputStream);
-		}
-		
-		if(textResourceInputStream == null) {
-			// Attempt to load the text resource using absolute path
-			resourceFilePath = getResourceDirectory() + '/' + resourceFilePath;
-			System.out.println("Fetching text resource using this.getClass().getResourceAsStream(" + resourceFilePath + ")...");
-			textResourceInputStream = this.getClass().getResourceAsStream(resourceFilePath);
-			System.out.println("Got stream: " + textResourceInputStream);
-		}
-		
-		if(textResourceInputStream == null) {
-			// Attempt to load the text resource using absolute path
-			resourceFilePath = getResourceDirectory() + '/' + resourceFilePath;
-			System.out.println("Fetching text resource using IconManager.class.getResourceAsStream(" + resourceFilePath + ")...");
-			textResourceInputStream = IconManager.class.getResourceAsStream(resourceFilePath);
-			System.out.println("Got stream: " + textResourceInputStream);
-		}
-		
-		if(textResourceInputStream == null) {
-			System.out.println("(textResourceInputStream == null); returning null.");
 			// Resource could not be found, so return null
 			return null;
 		} else {
@@ -133,13 +107,6 @@ public abstract class BasePluginController implements PluginController {
 				return null;
 			}
 		}
-	}
-	
-	/**
-	 * @return The directory which classpath resources for this plugin will be found at.
-	 */
-	private String getResourceDirectory() {
-		return '/' + this.getClass().getPackage().getName().replace('.', '/');
 	}
 	
 	/**

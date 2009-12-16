@@ -418,6 +418,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 					// If we are enabling the plugin, we need to load it, add it to the loaded plugins list, and
 					// finally add its tab to the UI
 					PluginController controller = this.pluginManager.loadPluginController(pluginClassName);
+					addPluginTextResources(controller);
 					this.pluginManager.initPluginController(controller);
 					this.add(find(COMPONENT_TABBED_PANE), controller.getTab(this));
 				} catch(Throwable t) {
@@ -464,8 +465,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		InternationalisationUtils.mergeMaps(Thinlet.DEFAULT_ENGLISH_BUNDLE, controller.getDefaultTextResource());
 		
 		// Add to the current language bundle
-		InternationalisationUtils.mergeMaps(FrontlineUI.currentResourceBundle.getProperties(), controller.getTextResource(new Locale(FrontlineUI.currentResourceBundle.getLanguage(), FrontlineUI.currentResourceBundle.getCountry())));
-		setResourceBundle(FrontlineUI.currentResourceBundle.getProperties(), FrontlineUI.currentResourceBundle.isRightToLeft());
+		LanguageBundle currentResourceBundle = FrontlineUI.currentResourceBundle;
+		Locale locale = new Locale(currentResourceBundle.getLanguageCode(), currentResourceBundle.getCountry());
+		InternationalisationUtils.mergeMaps(currentResourceBundle.getProperties(), controller.getTextResource(locale));
+		setResourceBundle(currentResourceBundle.getProperties(), currentResourceBundle.isRightToLeft());
 	}
 
 	/**
@@ -4240,7 +4243,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	private void addLanguageMenu(Object menu) {
 		for(LanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
 			Object menuitem = create(MENUITEM);
-			setText(menuitem, languageBundle.getLanguage());
+			setText(menuitem, languageBundle.getLanguageName());
 			setIcon(menuitem, getFlagIcon(languageBundle));
 			setMethod(menuitem, ATTRIBUTE_ACTION, "changeLanguage(this)", menu, this);
 			

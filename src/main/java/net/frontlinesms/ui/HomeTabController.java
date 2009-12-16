@@ -200,10 +200,12 @@ public class HomeTabController implements ThinletUiEventHandler {
 		Object fastLanguageSwitch = uiController.find(this.tabComponent, "fastLanguageSwitch");
 		int shown = 0;
 		for (LanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
+			// Don't show the flag for the current language
+			if(languageBundle.equals(FrontlineUI.currentResourceBundle)) continue;
 			if(++shown > 10) break;
 			Object button = uiController.createButton("", "changeLanguage(this)", this.tabComponent);
 			uiController.setIcon(button, uiController.getFlagIcon(languageBundle));
-			uiController.setString(button, "tooltip", languageBundle.getLanguage());
+			uiController.setString(button, "tooltip", languageBundle.getLanguageName());
 			uiController.setWeight(button, 1, 0);
 			uiController.setChoice(button, "type", "link");
 			uiController.setAttachedObject(button, languageBundle.getFilename());

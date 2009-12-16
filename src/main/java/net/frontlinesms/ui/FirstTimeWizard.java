@@ -226,7 +226,7 @@ public class FirstTimeWizard extends FrontlineUI {
 		Object language = loadComponentFromFile(UI_FILE_LANGUAGE_SELECTION);
 		Object languagesList = find(language, COMPONENT_LANGUAGES_LIST);
 		for (LanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
-			Object item = createListItem(languageBundle.getLanguage(), languageBundle.getFilename());
+			Object item = createListItem(languageBundle.getLanguageName(), languageBundle.getFilename());
 			setIcon(item, getFlagIcon(languageBundle));
 			int index = -1;
 			if (languageBundle.getCountry().equals(COUNTRY_GB)) {

@@ -226,7 +226,8 @@ public class InternationalisationUtils {
 			LanguageBundle bundle = getLanguageBundle(file.getName(), fileInputStream);
 			LOG.info("Successfully loaded language bundle from file: " + file.getName());
 			LOG.info("Bundle reports filename as: " + bundle.getFilename());
-			LOG.info("Language      : " + bundle.getLanguage());
+			LOG.info("Language Name : " + bundle.getLanguageName());
+			LOG.info("Language Code : " + bundle.getLanguageCode());
 			LOG.info("Country       : " + bundle.getCountry());
 			LOG.info("Right-To-Left : " + bundle.isRightToLeft());
 			return bundle;

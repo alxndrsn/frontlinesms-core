@@ -96,8 +96,13 @@ public class LanguageBundle {
 	}
 	
 	/** @return the name of this language bundle */
-	public String getLanguage() {
+	public String getLanguageName() {
 		return getValue(KEY_LANGUAGE_NAME);
+	}
+
+	/** @return the ISO-???? code relating to this language */
+	public String getLanguageCode() {
+		return getValue(KEY_LANGUAGE_CODE);
 	}
 	
 	/** @return <code>true</code> if this language is displayed right-to-left; <code>false</code> otherwise */
@@ -155,7 +160,7 @@ public class LanguageBundle {
 	
 	/** @return the font that this language should be displayed with, or <code>null</code> if no font is specified or could be found */
 	public Font getFont() {
-		LOG.trace("Loading font for language: " + this.getLanguage());
+		LOG.trace("Loading font for language: " + this.getLanguageName());
 		String[] fontNames = getFontNames();
 		if(fontNames == null) {
 			LOG.trace("No font requested.");
@@ -179,4 +184,33 @@ public class LanguageBundle {
 		LOG.trace("No font found.  Returning null.");
 		return null;
 	}
+
+//> GENERATED CODE
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((filename == null) ? 0 : filename.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		LanguageBundle other = (LanguageBundle) obj;
+		if (filename == null) {
+			if (other.filename != null)
+				return false;
+		} else if (!filename.equals(other.filename))
+			return false;
+		return true;
+	}
+	
+
 }
