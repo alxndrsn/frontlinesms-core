@@ -3,15 +3,12 @@
  */
 package net.frontlinesms.plugins;
 
-import java.awt.Image;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-
-import thinlet.IconManager;
 
 import net.frontlinesms.Utils;
 import net.frontlinesms.ui.UiGeneratorController;
@@ -98,11 +95,8 @@ public abstract class BasePluginController implements PluginController {
 			return null;
 		} else {
 			try {
-				System.out.println("Returning text resource: InternationalisationUtils.loadTextResources(resourceFilePath, textResourceInputStream)");
 				return InternationalisationUtils.loadTextResources(resourceFilePath, textResourceInputStream);
 			} catch (IOException ex) {
-				ex.printStackTrace();
-				System.out.println("Exception thrown loading text resource; returning null.");
 				log.info("There was a problem loading language bundle from " + resourceFilePath, ex);
 				return null;
 			}
@@ -115,8 +109,7 @@ public abstract class BasePluginController implements PluginController {
 	 * @return classpath location of the text resource bundle
 	 */
 	private String getTextResourcePath(String... nameExtensions) {
-		String resourceFilePath = /*getResourceDirectory() + '/' +*/ getTextResourceFilename(nameExtensions) + ".properties";
-		
+		String resourceFilePath = getTextResourceFilename(nameExtensions) + ".properties";
 		return resourceFilePath;
 	}
 	
