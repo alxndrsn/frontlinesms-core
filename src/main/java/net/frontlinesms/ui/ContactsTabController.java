@@ -217,11 +217,7 @@ public class ContactsTabController implements ThinletUiEventHandler {
 				this.uiController.setText(menuItem, InternationalisationUtils.getI18NString(COMMON_GROUP) + "'" + g.getName() + "'");
 				this.uiController.setIcon(menuItem, Icon.GROUP);
 				this.uiController.setAttachedObject(menuItem, g);
-				if (list.equals(contactListComponent)) {
-					this.uiController.setAction(menuItem, "addToGroup(this, 0)", menu, this);
-				} else {
-					this.uiController.setAction(menuItem, "addToGroup(this, 1)", menu, this);
-				}
+				this.uiController.setAction(menuItem, "addToGroup(this)", menu, this);
 				this.uiController.add(menu, menuItem);
 			}
 			this.uiController.setVisible(menu, allGroups.size() != 0);
