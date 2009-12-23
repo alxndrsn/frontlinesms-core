@@ -1,0 +1,55 @@
+<tab icon="/icons/big_export.png" text="Translation" name=":translation">
+    <panel bottom="9" columns="2" gap="9" left="9" right="9" top="9" weightx="1" weighty="1">
+    	<label icon="/icons/header/translation.png" valign="top" />
+       	<splitpane weighty="1" weightx="1" rowspan="2" orientation="horizontal">
+			<panel gap="8" weightx="2" weighty="2" columns="1">
+	    		<label text="Language"/>
+	    		<list name="lsLanguages" action="languageSelectionChanged" selection="single" weighty="1" weightx="1"/>
+			</panel>
+			<tabbedpane action="tabChanged" name="tpTranslations" weightx="1" weighty="1">
+				<tab text="All" name="tbAll">
+					<panel gap="8" columns="1" weightx="1" weighty="1">
+						<table selection="multiple" name="tbAllTranslations" weightx="1" weighty="1">
+							<header>
+								<column text="Key"/>
+								<column text="English"/>
+								<column name="clCurrentLanguage"/>
+							</header>
+						</table>
+						<panel gap="8" halign="right">
+							<button text="Edit" action="editText(tbAllTranslations)"/>
+							<button text="Delete" action="deleteText(tbAllTranslations)"/>
+						</panel>
+					</panel>
+				</tab>
+				<tab text="Missing" name="tbMissing">
+					<table selection="multiple" name="tbMissingTranslations">
+						<header>
+							<column text="Key"/>
+							<column text="English"/>
+							<column name="clCurrentLanguage"/>
+						</header>
+					</table>
+					<panel gap="8">
+						<button text="Edit" action="editText(tbMissingTranslations)"/>
+						<button text="Delete" action="deleteText(tbMissingTranslations)"/>
+					</panel>
+				</tab>
+				<tab text="Extra" name="tbExtra">
+					<table selection="multiple" name="tbExtraTranslations">
+						<header>
+							<column text="Key"/>
+							<column text="English"/>
+							<column name="clCurrentLanguage"/>
+						</header>
+					</table>
+					<panel gap="8">
+						<button text="Edit" action="editText(tbExtraTranslations)"/>
+						<button text="Delete" action="deleteText(tbExtraTranslations)"/>
+					</panel>
+				</tab>
+			</tabbedpane>
+		</splitpane>
+   		<button tooltip="i18n.tooltip.click.for.help" valign="bottom" action="showHelpPage('translation.htm')" icon="/icons/big_help.png" type="link"/>
+	</panel>
+</tab>
