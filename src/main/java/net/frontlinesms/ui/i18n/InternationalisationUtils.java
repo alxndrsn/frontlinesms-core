@@ -204,6 +204,15 @@ public class InternationalisationUtils {
 	
 //> LANGUAGE BUNDLE LOADING METHODS
 	/**
+	 * Loads the default, english {@link LanguageBundle} from the classpath
+	 * @return the default English {@link LanguageBundle}
+	 * @throws IOException If there was a problem loading the default language bundle.  // TODO this should probably throw a runtimeexception of some sort
+	 */
+	public static final LanguageBundle getDefaultLanguageBundle() throws IOException {
+		return getLanguageBundleFromClasspath("/resources/languages/frontlineSMS.properties");
+	}
+	
+	/**
 	 * Loads a {@link LanguageBundle} from the classpath. 
 	 * @param path
 	 * @return the language bundle at the specified location

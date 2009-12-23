@@ -4,6 +4,7 @@
 package net.frontlinesms.plugins;
 
 import net.frontlinesms.Utils;
+import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 
 import org.apache.log4j.Logger;
@@ -12,7 +13,7 @@ import org.apache.log4j.Logger;
  * Common base for tab controllers for plugins.
  * @author alex
  */
-public abstract class BasePluginThinletTabController<ControllerClass extends PluginController> {
+public abstract class BasePluginThinletTabController<ControllerClass extends PluginController> implements ThinletUiEventHandler {
 
 //> INSTANCE PROPERTIES
 	/** Logging object */

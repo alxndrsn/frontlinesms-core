@@ -74,7 +74,7 @@ public class DesktopLauncher {
 
 			// This should always get the English bundle, as other languages are only included in
 			// resources.zip rather than in the resources/languages directory
-			LanguageBundle englishBundle = InternationalisationUtils.getLanguageBundleFromClasspath("/resources/languages/frontlineSMS.properties");
+			LanguageBundle englishBundle = InternationalisationUtils.getDefaultLanguageBundle();
 			Thinlet.DEFAULT_ENGLISH_BUNDLE = englishBundle.getProperties();
 
 			boolean showWizard = appProperties.isShowWizard();

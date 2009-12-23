@@ -56,7 +56,6 @@ import net.frontlinesms.listener.EmailListener;
 import net.frontlinesms.listener.UIListener;
 import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginControllerProperties;
-import net.frontlinesms.plugins.PluginInitialisationException;
 import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.*;
