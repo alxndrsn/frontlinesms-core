@@ -34,22 +34,22 @@ public abstract class BasePluginController implements PluginController {
 	/** Lazy-initialized singleton Thinlet Tab component for this instance of this plugin. */
 	private Object thinletTab;
 	/**
-	 * The {@link Object#hashCode()} of the {@link UiGeneratorController} used to {@link #initThinletTab(UiGeneratorController)}
+	 * The instance of {@link UiGeneratorController} used to {@link #initThinletTab(UiGeneratorController)}
 	 * the current value of {@link #thinletTab}.  This is used to check whether the {@link UiGeneratorController} passed to
 	 * {@link #getTab(UiGeneratorController)} is the same instance that was used to create the tab in the first place.  If the
 	 * {@link UiGeneratorController} has changed, the tab will be discarded and this value reset.
-	 * This variable should be ignored if {@link #thinletTab} is not set.
 	 */
-	private int uiGCHash;
+	private UiGeneratorController tabUiController;
 
 //> CONSTRUCTORS
 
 //> ACCESSORS
 	/** @see net.frontlinesms.plugins.PluginController#getTab(net.frontlinesms.ui.UiGeneratorController) */
 	public synchronized Object getTab(UiGeneratorController uiController) {
-		int newUiGCHash = uiController.hashCode();
-		if(this.thinletTab == null || this.uiGCHash!=newUiGCHash) {
-			this.uiGCHash = newUiGCHash;
+		// N.B. we are deliberately checking the references of the UiGeneratorController here, rather
+		// than .equals() as we just want to know if it is the same instance.
+		if(this.thinletTab == null || this.tabUiController!=uiController) {
+			this.tabUiController = uiController;
 			this.thinletTab = this.initThinletTab(uiController);
 		}
 		return this.thinletTab;
