@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationContext;
 
 import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.plugins.BasePluginController;
+import net.frontlinesms.plugins.PluginControllerProperties;
 import net.frontlinesms.plugins.PluginInitialisationException;
 import net.frontlinesms.ui.UiGeneratorController;
 
@@ -14,6 +15,7 @@ import net.frontlinesms.ui.UiGeneratorController;
  * @author alexanderson
  *
  */
+@PluginControllerProperties(name="Translate", iconPath="/icons/translate.png", springConfigLocation=PluginControllerProperties.NO_VALUE, hibernateConfigPath=PluginControllerProperties.NO_VALUE)
 public class TranslationPluginController extends BasePluginController {
 //> STATIC CONSTANTS
 	/** Filename and path of the XML for the HTTP Trigger tab. */
