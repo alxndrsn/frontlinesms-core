@@ -7,7 +7,7 @@
 	    		<list name="lsLanguages" action="languageSelectionChanged" selection="single" weighty="1" weightx="1"/>
 			</panel>
 			<tabbedpane action="tabChanged" name="tpTranslations" weightx="1" weighty="1">
-				<tab text="All" name="tbAll">
+				<tab text="i18n.translations.all" name="tbAll">
 					<panel gap="8" columns="1" weightx="1" weighty="1">
 						<table selection="multiple" name="tbAllTranslations" weightx="1" weighty="1">
 							<header>
@@ -17,12 +17,12 @@
 							</header>
 						</table>
 						<panel gap="8" halign="right">
-							<button text="Edit" action="editText(tbAllTranslations)"/>
-							<button text="Delete" action="deleteText(tbAllTranslations)"/>
+							<button text="i18n.action.edit" icon="/icons/edit.png" action="editText(tbAllTranslations)"/>
+							<button text="i18n.action.delete" icon="/icons/delete.png" action="deleteText(tbAllTranslations)"/>
 						</panel>
 					</panel>
 				</tab>
-				<tab text="Missing" name="tbMissing">
+				<tab text="i18n.translations.missing" name="tbMissing">
 					<table selection="multiple" name="tbMissingTranslations">
 						<header>
 							<column text="Key"/>
@@ -31,11 +31,11 @@
 						</header>
 					</table>
 					<panel gap="8">
-						<button text="Edit" action="editText(tbMissingTranslations)"/>
-						<button text="Delete" action="deleteText(tbMissingTranslations)"/>
+						<button text="i18n.action.edit" icon="/icons/edit.png" action="editText(tbMissingTranslations)"/>
+						<button text="i18n.action.delete" icon="/icons/delete.png" action="deleteText(tbMissingTranslations)"/>
 					</panel>
 				</tab>
-				<tab text="Extra" name="tbExtra">
+				<tab text="i18n.translations.extra" name="tbExtra">
 					<table selection="multiple" name="tbExtraTranslations">
 						<header>
 							<column text="Key"/>
@@ -44,8 +44,8 @@
 						</header>
 					</table>
 					<panel gap="8">
-						<button text="Edit" action="editText(tbExtraTranslations)"/>
-						<button text="Delete" action="deleteText(tbExtraTranslations)"/>
+						<button text="i18n.action.edit" icon="/icons/edit.png" action="editText(tbExtraTranslations)"/>
+						<button text="i18n.action.delete" icon="/icons/delete.png" action="deleteText(tbExtraTranslations)"/>
 					</panel>
 				</tab>
 			</tabbedpane>

@@ -33,14 +33,31 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	}
 	public void editText(Object table) {
 		System.out.println("TranslationThinletTabController.editText()");
+		String textKey = getSelectedTextKey(table);
 	}
+	
 	public void deleteText(Object table) {
-		System.out
-				.println("TranslationThinletTabController.languageSelectionChanged()");
+		System.out.println("TranslationThinletTabController.languageSelectionChanged()");
+		String textKey = getSelectedTextKey(table);
+		if(textKey != null) {
+			uiController.showConfirmationDialog("deleteTextKey('" + textKey + "')", this);
+		}
 	}
 	public void languageSelectionChanged() {
 		System.out.println("TranslationThinletTabController.languageSelectionChanged()");
 		refreshTables();
+	}
+	
+	/**
+	 * Return the text key selected in the table, or <code>null</code> if none is selected.
+	 * @param table
+	 * @return
+	 */
+	private String getSelectedTextKey(Object table) {
+		Object selectedItem = uiController.getSelectedItem(table);
+		if(selectedItem == null) return null;
+		String selectedKey = uiController.getAttachedObject(selectedItem, String.class);
+		return selectedKey;
 	}
 	
 	private void refreshTables() {
