@@ -2,9 +2,9 @@
 	<panel bottom="9" gap="9" left="9" right="9" top="9" weightx="1" weighty="1">
 	    <panel columns="1" gap="5">
 	        <label name="lbHomeTabLogo" icon="/icons/frontlineSMS_logo.png"/>
-	        <panel gap="7">
-	            <label font="bold" icon="/icons/language.png" text="i18n.common.switch.language"/>
-	            <panel gap="10" top="3" name="fastLanguageSwitch">
+	        <panel gap="7" columns="2">
+	            <label font="bold" icon="/icons/language.png" text="i18n.common.switch.language" valign="top"/>
+	            <panel gap="10" bottom="3" name="fastLanguageSwitch" columns="10">
 	            	<!-- This should be populated at runtime -->
 	            </panel>
 	        </panel>
