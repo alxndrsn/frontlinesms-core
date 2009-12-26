@@ -36,6 +36,8 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	 * For each {@link TranslationView}, this map will contain all rows that could be shown, even those which are currently filtered out.
 	 */
 	private Map<TranslationView, List<Object>> translationTableRows;
+	/** The dialog used for editing a translation.  When the dialog is not visible, this should be <code>null</code>. */
+	private Object editDialog;
 
 //> CONSTRUCTORS
 	protected TranslationThinletTabController(TranslationPluginController pluginController, UiGeneratorController uiController) {
@@ -56,15 +58,53 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	public void editText() {
 		System.out.println("TranslationThinletTabController.editText()");
 		String textKey = getSelectedTextKey(this.visibleTab);
+		String defaultValue = "";
+		try { defaultValue = getDefaultLanguageBundle().getValue(textKey); } catch(MissingResourceException ex) {};
+		
+		LanguageBundle selectedLanguageBundle = getSelectedLanguageBundle();
+		String localValue = "";
+		try { localValue = selectedLanguageBundle.getValue(textKey); } catch(MissingResourceException ex) {};
+		
+		// Load the dialog
+		this.editDialog = uiController.loadComponentFromFile(UI_FILE_TRANSLATE_DIALOG, this);
+		uiController.setText(uiController.find(this.editDialog, "lbLocalTranslation"), selectedLanguageBundle.getLanguageName());
+		
+		// Initialize textfield values
+		uiController.setText(uiController.find(this.editDialog, "tfKey"), textKey);
+		uiController.setText(uiController.find(this.editDialog, "tfDefault"), defaultValue);
+		uiController.setText(uiController.find(this.editDialog, "tfLocal"), localValue);
+	
+		// Display the dialog
+		uiController.add(this.editDialog);
 	}
 	
-	public void deleteText() {
+	public void confirmDeleteText() {
 		System.out.println("TranslationThinletTabController.languageSelectionChanged()");
 		String textKey = getSelectedTextKey(this.visibleTab);
 		if(textKey != null) {
 			uiController.showConfirmationDialog("deleteTextKey('" + textKey + "')", this);
 		}
+		removeEditDialog();
 	}
+	
+	public void deleteText(String textKey) {
+		LanguageBundle lang = this.getSelectedLanguageBundle();
+		lang.getProperties().remove(textKey);
+		// TODO save language bundle to disk
+	}
+	
+	public void saveText(String textKey, String textValue) {
+		LanguageBundle lang = this.getSelectedLanguageBundle();
+		lang.getProperties().put(textKey, textValue);
+		// TODO save language bundle to disk
+		removeEditDialog();
+	}
+	
+	public void removeEditDialog() {
+		uiController.remove(this.editDialog);
+		this.editDialog = null;
+	}
+	
 	public void languageSelectionChanged() {
 		System.out.println("TranslationThinletTabController.languageSelectionChanged()");
 		refreshTables();
@@ -129,7 +169,6 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	private void refreshTables() {
 		LanguageBundle lang = getSelectedLanguageBundle();
 		LanguageBundle defaultLang = getDefaultLanguageBundle();
-		String filterText = this.getFilterText();
 		
 		this.translationTableRows = new HashMap<TranslationView, List<Object>>();
 		
@@ -184,9 +223,16 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		uiController.setText(uiController.find(table, "clCurrentLanguage"), getSelectedLanguageBundle().getLanguageName());
 		filterTable(view);
 	}
-	
+	/**
+	 * Creates a Thinlet table row for a translation.  The first column value, i.e. 
+	 * the translation key, is attached, to the row, as well as appearing in the first
+	 * column.
+	 * @param columnValues
+	 * @return
+	 */
 	private Object createTableRow(String... columnValues) {
-		Object row = uiController.createTableRow(null);
+		assert(columnValues.length > 0) : "The translation key should be provided as the first column value.";
+		Object row = uiController.createTableRow(columnValues[0]);
 		for(String col : columnValues) {
 			uiController.add(row, uiController.createTableCell(col));
 		}

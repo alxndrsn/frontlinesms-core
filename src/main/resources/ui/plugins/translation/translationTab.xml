@@ -13,7 +13,7 @@
 				<tabbedpane action="tabChanged(this.selected)" name="tpTranslations" weightx="1" weighty="1" colspan="2">
 					<tab text="i18n.translations.all" name="tbAll">
 						<panel gap="8" columns="1" weightx="1" weighty="1">
-							<table selection="multiple" name="tbAllTranslations" weightx="1" weighty="1">
+							<table selection="multiple" name="tbAllTranslations" weightx="1" weighty="1" perform="editText">
 								<header>
 									<column text="Key"/>
 									<column text="English"/>
@@ -23,7 +23,7 @@
 						</panel>
 					</tab>
 					<tab text="i18n.translations.missing" name="tbMissing">
-						<table selection="multiple" name="tbMissingTranslations">
+						<table selection="multiple" name="tbMissingTranslations" perform="editText">
 							<header>
 								<column text="Key"/>
 								<column text="English"/>
@@ -32,7 +32,7 @@
 						</table>
 					</tab>
 					<tab text="i18n.translations.extra" name="tbExtra">
-						<table selection="multiple" name="tbExtraTranslations">
+						<table selection="multiple" name="tbExtraTranslations" perform="editText">
 							<header>
 								<column text="Key"/>
 								<column text="English"/>
@@ -43,7 +43,7 @@
 				</tabbedpane>
 				<panel gap="8" colspan="2" halign="right">
 					<button text="i18n.action.edit" icon="/icons/edit.png" action="editText"/>
-					<button text="i18n.action.delete" icon="/icons/delete.png" action="deleteText"/>
+					<button text="i18n.action.delete" icon="/icons/delete.png" action="confirmDeleteText"/>
 				</panel>
 			</panel>
 		</splitpane>
