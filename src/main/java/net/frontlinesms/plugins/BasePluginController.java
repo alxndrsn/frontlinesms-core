@@ -33,20 +33,33 @@ public abstract class BasePluginController implements PluginController {
 	protected final Logger log = Utils.getLogger(this.getClass());
 	/** Lazy-initialized singleton Thinlet Tab component for this instance of this plugin. */
 	private Object thinletTab;
+	/**
+	 * The instance of {@link UiGeneratorController} used to {@link #initThinletTab(UiGeneratorController)}
+	 * the current value of {@link #thinletTab}.  This is used to check whether the {@link UiGeneratorController} passed to
+	 * {@link #getTab(UiGeneratorController)} is the same instance that was used to create the tab in the first place.  If the
+	 * {@link UiGeneratorController} has changed, the tab will be discarded and this value reset.
+	 */
+	private UiGeneratorController tabUiController;
 
 //> CONSTRUCTORS
 
 //> ACCESSORS
 	/** @see net.frontlinesms.plugins.PluginController#getTab(net.frontlinesms.ui.UiGeneratorController) */
 	public synchronized Object getTab(UiGeneratorController uiController) {
-		if(this.thinletTab == null) {
+		// N.B. we are deliberately checking the references of the UiGeneratorController here, rather
+		// than .equals() as we just want to know if it is the same instance.
+		if(this.thinletTab == null || this.tabUiController!=uiController) {
+			this.tabUiController = uiController;
 			this.thinletTab = this.initThinletTab(uiController);
 		}
 		return this.thinletTab;
 	}
 	
 	/**
-	 * Initialise the Thinlet tab component for this plugin instance.
+	 * Initialise the Thinlet tab component for this plugin instance.  This method should ONLY initialise
+	 * the visible UI.  The tab itself can be discarded and re-initialised at any time by the
+	 * {@link BasePluginController}.  Notably this will happen when the display language of the UI is
+	 * changed. 
 	 * @param uiController {@link UiGeneratorController} instance that will be the parent of this tab.
 	 * @return a new instance of the thinlet tab component for this plugin.
 	 */
