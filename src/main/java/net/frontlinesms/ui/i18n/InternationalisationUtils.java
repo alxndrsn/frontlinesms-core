@@ -21,13 +21,10 @@ package net.frontlinesms.ui.i18n;
  
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
-import java.nio.charset.UnsupportedCharsetException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -209,17 +206,7 @@ public class InternationalisationUtils {
 	 * @throws IOException If there was a problem loading the default language bundle.  // TODO this should probably throw a runtimeexception of some sort
 	 */
 	public static final LanguageBundle getDefaultLanguageBundle() throws IOException {
-		return getLanguageBundleFromClasspath("/resources/languages/frontlineSMS.properties");
-	}
-	
-	/**
-	 * Loads a {@link LanguageBundle} from the classpath. 
-	 * @param path
-	 * @return the language bundle at the specified location
-	 * @throws IOException 
-	 */
-	public static final LanguageBundle getLanguageBundleFromClasspath(String path) throws IOException {
-		return getLanguageBundle(path, InternationalisationUtils.class.getResourceAsStream(path));
+		return ClasspathLanguageBundle.create("/resources/languages/frontlineSMS.properties");
 	}
 	
 	/**
@@ -228,48 +215,20 @@ public class InternationalisationUtils {
 	 * @param file
 	 * @return The loaded bundle, or NULL if the bundle could not be loaded.
 	 */
-	public static final LanguageBundle getLanguageBundle(File file) {
-		FileInputStream fileInputStream = null;
+	public static final FileLanguageBundle getLanguageBundle(File file) {
 		try {
-			fileInputStream = new FileInputStream(file);
-			LanguageBundle bundle = getLanguageBundle(file.getName(), fileInputStream);
+			FileLanguageBundle bundle = FileLanguageBundle.create(file);
 			LOG.info("Successfully loaded language bundle from file: " + file.getName());
-			LOG.info("Bundle reports filename as: " + bundle.getFilename());
+			LOG.info("Bundle reports filename as: " + bundle.getFile().getAbsolutePath());
 			LOG.info("Language Name : " + bundle.getLanguageName());
 			LOG.info("Language Code : " + bundle.getLanguageCode());
 			LOG.info("Country       : " + bundle.getCountry());
 			LOG.info("Right-To-Left : " + bundle.isRightToLeft());
 			return bundle;
-		} catch(IllegalCharsetNameException ex) {
-			throw new IllegalStateException("UTF-8 must be supported by all JVMs.");
-		} catch(UnsupportedCharsetException ex) {
-			throw new IllegalStateException("UTF-8 must be supported by all JVMs.");
 		} catch(Exception ex) {
 			LOG.error("Problem reading language file: " + file.getName(), ex);
 			return null;
-		} finally {
-			// Close all streams
-			if(fileInputStream != null) {
-				try {
-					fileInputStream.close();
-				} catch(Exception ex) {
-					// nothing we can do, so just log the error
-					LOG.warn("Exception thrown closing stream.", ex);
-				} 
-			}
 		}
-	}
-	
-	/**
-	 * Loads a {@link LanguageBundle} from an {@link InputStream}, using the specified encoding.
-	 * @param filename
-	 * @param inputStream
-	 * @return the language bundle in the supplied stream
-	 * @throws IOException if there was an error loading the bundle
-	 */
-	private static final LanguageBundle getLanguageBundle(String filename, InputStream inputStream) throws IOException {
-		Map<String, String> i18nStrings = loadTextResources(filename, inputStream);
-		return new LanguageBundle(filename, i18nStrings);
 	}
 	
 	/**
@@ -309,13 +268,13 @@ public class InternationalisationUtils {
 	 * Loads all language bundles from within and without the JAR
 	 * @return all language bundles from within and without the JAR
 	 */
-	public static Collection<LanguageBundle> getLanguageBundles() {
-		ArrayList<LanguageBundle> bundles = new ArrayList<LanguageBundle>();
+	public static Collection<FileLanguageBundle> getLanguageBundles() {
+		ArrayList<FileLanguageBundle> bundles = new ArrayList<FileLanguageBundle>();
 		File langDir = new File(getLanguageDirectoryPath());
 		if(!langDir.exists() || !langDir.isDirectory()) throw new IllegalArgumentException("Could not find resources directory: " + langDir.getAbsolutePath());
 		
 		for (File file : langDir.listFiles()) {
-			LanguageBundle bungle = getLanguageBundle(file);
+			FileLanguageBundle bungle = getLanguageBundle(file);
 			if(bungle != null) {
 				bundles.add(bungle);
 			}
@@ -324,7 +283,7 @@ public class InternationalisationUtils {
 	}
 	
 	/** @return path of the directory in which language bundles are located. */
-	public static final String getLanguageDirectoryPath() {
+	private static final String getLanguageDirectoryPath() {
 		return ResourceUtils.getConfigDirectoryPath() + "languages" + File.separatorChar;
 	}
 

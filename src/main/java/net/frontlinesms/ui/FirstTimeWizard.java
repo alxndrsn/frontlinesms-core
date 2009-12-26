@@ -30,6 +30,7 @@ import net.frontlinesms.AppProperties;
 import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.arcane.ArcaneDataImporter;
 import net.frontlinesms.resources.ResourceUtils;
+import net.frontlinesms.ui.i18n.FileLanguageBundle;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.LanguageBundle;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
@@ -70,10 +71,6 @@ public class FirstTimeWizard extends FrontlineUI {
 //> UI LAYOUT FILE PATHS
 	/** [ui layout file path] The language selection page */
 	private static final String UI_FILE_LANGUAGE_SELECTION = "/ui/wizard/languageSelect.xml";
-	/** [ui layout file path] The "have you used FrontlineSMS before" page */
-	private static final String UI_FILE_USED_BEFORE = "/ui/wizard/usedBefore.xml";
-	/** [ui layout file path] The data import page */
-	private static final String UI_FILE_IMPORT_DATA = "/ui/wizard/importData.xml";
 	/** [ui layout file path] The final page displayed before the standard FrontlineSMS UI is displayed. */
 	private static final String UI_FILE_START_FORM = "/ui/wizard/startForm.xml";
 	
@@ -113,7 +110,7 @@ public class FirstTimeWizard extends FrontlineUI {
 		AppProperties appProperties = AppProperties.getInstance();
 		String filename = getAttachedObject(sel).toString();
 		appProperties.setLanguageFilename(filename);
-		LanguageBundle languageBundle = InternationalisationUtils.getLanguageBundle(new File(ResourceUtils.getConfigDirectoryPath() + "languages/" + filename));
+		LanguageBundle languageBundle = InternationalisationUtils.getLanguageBundle(new File(filename));
 		FrontlineUI.currentResourceBundle = languageBundle;
 		setResourceBundle(languageBundle.getProperties(), languageBundle.isRightToLeft());
 		Font font = languageBundle.getFont();
@@ -225,8 +222,8 @@ public class FirstTimeWizard extends FrontlineUI {
 	private void showLanguageSelection() {
 		Object language = loadComponentFromFile(UI_FILE_LANGUAGE_SELECTION);
 		Object languagesList = find(language, COMPONENT_LANGUAGES_LIST);
-		for (LanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
-			Object item = createListItem(languageBundle.getLanguageName(), languageBundle.getFilename());
+		for (FileLanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
+			Object item = createListItem(languageBundle.getLanguageName(), languageBundle.getFile().getAbsolutePath());
 			setIcon(item, getFlagIcon(languageBundle));
 			int index = -1;
 			if (languageBundle.getCountry().equals(COUNTRY_GB)) {

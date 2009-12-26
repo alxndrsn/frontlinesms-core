@@ -15,8 +15,8 @@ import org.apache.log4j.Logger;
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.domain.Contact;
+import net.frontlinesms.ui.i18n.FileLanguageBundle;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
-import net.frontlinesms.ui.i18n.LanguageBundle;
 
 /**
  * Event handler for the Home tab and associated dialogs
@@ -198,7 +198,7 @@ public class HomeTabController implements ThinletUiEventHandler {
 		refreshLogoVisibility();
 		
 		Object fastLanguageSwitch = uiController.find(this.tabComponent, "fastLanguageSwitch");
-		for (LanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
+		for (FileLanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
 			// Don't show the flag for the current language
 			if(languageBundle.equals(FrontlineUI.currentResourceBundle)) continue;
 			
@@ -207,7 +207,7 @@ public class HomeTabController implements ThinletUiEventHandler {
 			uiController.setString(button, "tooltip", languageBundle.getLanguageName());
 			uiController.setWeight(button, 1, 0);
 			uiController.setChoice(button, "type", "link");
-			uiController.setAttachedObject(button, languageBundle.getFilename());
+			uiController.setAttachedObject(button, languageBundle.getFile().getAbsolutePath());
 			uiController.add(fastLanguageSwitch, button);
 		}
 	}

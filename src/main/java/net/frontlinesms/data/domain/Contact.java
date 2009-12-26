@@ -67,6 +67,7 @@ public class Contact {
 	
 //> INSTANCE PROPERTIES
 	/** Unique id for this entity.  This is for hibernate usage. */
+	@SuppressWarnings("unused")
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name=COLUMN_ID,unique=true,nullable=false,updatable=false)
 	private long id;
@@ -279,7 +280,6 @@ public class Contact {
 		result = prime * result + (active ? 1231 : 1237);
 		result = prime * result
 				+ ((emailAddress == null) ? 0 : emailAddress.hashCode());
-		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + ((phoneNumber == null) ? 0 : phoneNumber.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((notes == null) ? 0 : notes.hashCode());
@@ -304,8 +304,6 @@ public class Contact {
 			if (other.emailAddress != null)
 				return false;
 		} else if (!emailAddress.equals(other.emailAddress))
-			return false;
-		if (id != other.id)
 			return false;
 		if (phoneNumber == null) {
 			if (other.phoneNumber != null)

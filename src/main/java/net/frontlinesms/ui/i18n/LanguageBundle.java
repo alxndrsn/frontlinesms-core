@@ -34,7 +34,7 @@ import net.frontlinesms.Utils;
  * Bundle of translations for a language, and associated properties.
  * @author Alex
  */
-public class LanguageBundle {	
+public abstract class LanguageBundle {	
 //> CONSTANTS
 	/** Key used to extract the language's ISO 639-1 code. */
 	public static final String KEY_LANGUAGE_CODE = "bundle.language";
@@ -53,8 +53,6 @@ public class LanguageBundle {
 //> INSTANCE PROPERTIES
 	/** Map of i18n string keys to internationalised strings. */
 	private final Map<String, String> properties;
-	/** The filename that this bundle was loaded from. */
-	private final String filename;
 	
 //> CONSTRUCTORS
 	/**
@@ -62,9 +60,8 @@ public class LanguageBundle {
 	 * @param filename
 	 * @param properties
 	 */
-	LanguageBundle(String filename, Map<String, String> properties) {
+	LanguageBundle(Map<String, String> properties) {
 		this.properties = properties;
-		this.filename = filename;
 
 		checkRequiredProperty(KEY_LANGUAGE_CODE);
 		checkRequiredProperty(KEY_LANGUAGE_NAME);
@@ -85,10 +82,10 @@ public class LanguageBundle {
 	}
 	
 //> ACCESSORS
-	/** @return the filename that this bundle is stored in */
-	public String getFilename() {
-		return filename;
-	}
+	/**
+	 * @return a String identifier uniquely detailing where this {@link LanguageBundle} was loaded from.
+	 */
+	abstract String getIdentifier();
 	
 	/** @return the ISO-???? country code relating to the language in this bundle */
 	public String getCountry() {
@@ -122,7 +119,7 @@ public class LanguageBundle {
 	public String getValue(String key) {
 		String value = properties.get(key);
 		if(value == null) {
-			throw new MissingResourceException("Requested resource not found in language bundle '" + filename + "'", LanguageBundle.class.getName(), key);
+			throw new MissingResourceException("Requested resource not found in language bundle '" + getIdentifier() + "'", LanguageBundle.class.getName(), key);
 		}
 		return value;
 	}
@@ -191,7 +188,7 @@ public class LanguageBundle {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
-				+ ((filename == null) ? 0 : filename.hashCode());
+				+ ((getIdentifier() == null) ? 0 : getIdentifier().hashCode());
 		return result;
 	}
 
@@ -204,10 +201,10 @@ public class LanguageBundle {
 		if (getClass() != obj.getClass())
 			return false;
 		LanguageBundle other = (LanguageBundle) obj;
-		if (filename == null) {
-			if (other.filename != null)
+		if (getIdentifier() == null) {
+			if (other.getIdentifier() != null)
 				return false;
-		} else if (!filename.equals(other.filename))
+		} else if (!getIdentifier().equals(other.getIdentifier()))
 			return false;
 		return true;
 	}

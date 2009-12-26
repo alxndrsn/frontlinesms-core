@@ -160,7 +160,6 @@ public class EmailAccount {
 				* result
 				+ ((accountServerPort == null) ? 0 : accountServerPort
 						.hashCode());
-		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + (useSsl ? 1231 : 1237);
 		return result;
 	}
@@ -194,8 +193,6 @@ public class EmailAccount {
 			if (other.accountServerPort != null)
 				return false;
 		} else if (!accountServerPort.equals(other.accountServerPort))
-			return false;
-		if (id != other.id)
 			return false;
 		if (useSsl != other.useSsl)
 			return false;

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<dialog closable="true" close="removeEditDialog" bottom="10" columns="2" gap="8" icon="/icons/translate.png" left="10" modal="true" name="dgTranslate" right="10" text="i18n.translate.dialog.title" top="10">
-	<label text="i18n.translate.key"/>
+<dialog closable="true" close="removeEditDialog" bottom="10" columns="2" gap="8" icon="/icons/translate.png" left="10" modal="true" name="dgTranslate" right="10" text="i18n.plugin.translate.dialog.title" top="10">
+	<label text="i18n.plugin.translate.translation.key"/>
 	<textfield name="tfKey" columns="30" enabled="false"/>
 	
 	<label text="English"/>
@@ -10,7 +10,7 @@
 	<textfield name="tfLocal" columns="30"/>
 	
 	<panel halign="center" gap="8" colspan="2">
-		<button text="i18n.common.action.save" action="saveText(tfKey.text, tfLocal.text)" icon="/icons/save.png"/> 
-		<button text="i18n.common.action.cancel" action="removeEditDialog" icon="/icons/cancel.png"/>
+		<button text="i18n.action.save" action="saveText(tfKey.text, tfLocal.text)" icon="/icons/tick.png"/> 
+		<button text="i18n.action.cancel" action="removeEditDialog" icon="/icons/cross.png"/>
 	</panel> 
 </dialog>

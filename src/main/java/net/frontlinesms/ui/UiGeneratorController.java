@@ -60,6 +60,7 @@ import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.*;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
+import net.frontlinesms.ui.i18n.FileLanguageBundle;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.LanguageBundle;
 
@@ -230,14 +231,14 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		AppProperties appProperties = AppProperties.getInstance();
 		String currentLanguageFile = appProperties.getLanguageFilename();
 		if (currentLanguageFile != null) {
-			LanguageBundle languageBundle = InternationalisationUtils.getLanguageBundle(new File(InternationalisationUtils.getLanguageDirectoryPath() + currentLanguageFile));
+			LanguageBundle languageBundle = InternationalisationUtils.getLanguageBundle(new File(currentLanguageFile));
 			FrontlineUI.currentResourceBundle = languageBundle;
 			setResourceBundle(languageBundle.getProperties(), languageBundle.isRightToLeft());
 			Font requestedFont = languageBundle.getFont();
 			if(requestedFont != null) {
 				setFont(new Font(requestedFont.getName(), getFont().getStyle(), getFont().getSize()));
 			}
-			LOG.debug("Loaded language from file: " + ResourceUtils.getConfigDirectoryPath() + "languages/" + currentLanguageFile);
+			LOG.debug("Loaded language from file: " + currentLanguageFile);
 		}
 		
 		this.phoneManager = frontlineController.getSmsDeviceManager();
@@ -631,35 +632,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		add(tabbedPane, messagesTab);
 	}
 
-	/**
-	 * Sets up a table for pagination, including adding the page controls, setting the
-	 * page-turn methods etc.
-	 * @param tableContainer The parent container of the table component to be paginated.
-	 * @param listMethod The method to call when the list's page is turned.
-	 * @param rightAlign Choose whether the controls are right or left aligned WRT the table
-	 */
-	private final void addPaginationToTable(Object tableContainer, String listMethod, boolean rightAlign) {
-		Object pagePanel = loadComponentFromFile(UI_FILE_PAGE_PANEL);
-		Object placeholder = find(tableContainer, "pageControlsPanel");
-		int index = getIndex(getParent(placeholder), placeholder);
-		if(rightAlign) setChoice(pagePanel, "halign", "right");
-		add(getParent(placeholder), pagePanel, index);
-		remove(placeholder);
-		// Find the table to paginate
-		Object table = null;
-		for(Object o : getItems(tableContainer)) {
-			if(getClass(o).equals("table")) table = o;
-		}
-		// If we've found the table, apply the pagination controls to it.
-		if(table != null) {
-			setListLimit(table);
-			setListPageNumber(1, table);
-			setMethod(table, listMethod);
-			String listName = getString(table, "name");
-			setPageMethods(tableContainer, listName, pagePanel);
-		}
-	}
-
 	// FIXME this could be private if it wasn't used in forms tab.  Should probably be abstracted
 	public void setPageMethods(Object root, String listName, Object pagePanel) {
 		Object btPrev = find(pagePanel, COMPONENT_BT_PREVIOUS_PAGE);
@@ -894,21 +866,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	private Object createComboBoxChoice(Group g) {
 		Object item = createComboboxChoice(g.getName(), g);
 		setIcon(item, Icon.GROUP);
-		return item;
-	}
-
-	private Object createListItem(KeywordAction survey) {
-		String start = InternationalisationUtils.getDateFormat().format(new Date(survey.getStartDate()));
-		String end = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
-		if (survey.getEndDate() != DEFAULT_END_DATE) {
-			end = InternationalisationUtils.getDateFormat().format(new Date(survey.getEndDate()));
-		} 
-		String key = survey.getKeyword().getKeyword().length() == 0 ? "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">" : survey.getKeyword().getKeyword();
-		Object item = createListItem(
-				key
-				+ " (" + start + " - " + end + ")",
-				survey);
-		setIcon(item, Icon.SURVEY);
 		return item;
 	}
 
@@ -3587,15 +3544,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public Group getGroup(Object component) {
 		return (Group) getAttachedObject(component);
 	}
-	/**
-	 * Gets the PhoneHandler instance attached to the supplied component.
-	 * 
-	 * @param component
-	 * @return The PhoneHandler instance.
-	 */
-	private SmsDevice getDeviceHandler(Object component) {
-		return (SmsDevice) getAttachedObject(component);
-	}
 
 	/**
 	 * Returns the keyword attached to the supplied component.
@@ -3810,14 +3758,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
         setSelectedIndex(find(panel, COMPONENT_CB_GROUPS_TO_JOIN), 0);
         setSelected(find(panel, COMPONENT_CB_LEAVE_GROUP), false);
         setSelectedIndex(find(panel, COMPONENT_CB_GROUPS_TO_LEAVE), 0);
-	}
-
-	/**
-	 * @param dev
-	 * @return
-	 */
-	private boolean isSmsModem(SmsDevice dev) {
-		return dev instanceof SmsModem;
 	}
 	
 	/**
@@ -4240,13 +4180,13 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	private void addLanguageMenu(Object menu) {
-		for(LanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
+		for(FileLanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
 			Object menuitem = create(MENUITEM);
 			setText(menuitem, languageBundle.getLanguageName());
 			setIcon(menuitem, getFlagIcon(languageBundle));
 			setMethod(menuitem, ATTRIBUTE_ACTION, "changeLanguage(this)", menu, this);
 			
-			setAttachedObject(menuitem, languageBundle.getFilename());
+			setAttachedObject(menuitem, languageBundle.getFile().getAbsolutePath());
 			add(menu, menuitem);
 		}
 	}

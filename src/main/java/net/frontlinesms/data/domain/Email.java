@@ -74,6 +74,7 @@ public class Email {
 	
 //> CONSTANTS
 	/** Unique id for this entity.  This is for hibernate usage. */
+	@SuppressWarnings("unused")
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(unique=true,nullable=false,updatable=false)
 	private long id;
@@ -231,7 +232,6 @@ public class Email {
 		int result = 1;
 		result = prime * result + ((content == null) ? 0 : content.hashCode());
 		result = prime * result + ((date == null) ? 0 : date.hashCode());
-		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result
 				+ ((recipients == null) ? 0 : recipients.hashCode());
 		result = prime * result + ((sender == null) ? 0 : sender.hashCode());
@@ -259,8 +259,6 @@ public class Email {
 			if (other.date != null)
 				return false;
 		} else if (!date.equals(other.date))
-			return false;
-		if (id != other.id)
 			return false;
 		if (recipients == null) {
 			if (other.recipients != null)

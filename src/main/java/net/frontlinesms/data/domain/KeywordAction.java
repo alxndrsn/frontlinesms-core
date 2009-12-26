@@ -715,7 +715,6 @@ public class KeywordAction {
 		result = prime * result + externalCommandResponseActionType;
 		result = prime * result + externalCommandResponseType;
 		result = prime * result + externalCommandType;
-		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + ((keyword == null) ? 0 : keyword.hashCode());
 		result = prime * result + (int) (startDate ^ (startDate >>> 32));
 		result = prime * result + type;
@@ -763,8 +762,6 @@ public class KeywordAction {
 		if (externalCommandResponseType != other.externalCommandResponseType)
 			return false;
 		if (externalCommandType != other.externalCommandType)
-			return false;
-		if (id != other.id)
 			return false;
 		if (keyword == null) {
 			if (other.keyword != null)

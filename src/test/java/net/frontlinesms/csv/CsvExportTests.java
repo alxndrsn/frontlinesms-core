@@ -10,7 +10,7 @@ import thinlet.Thinlet;
 
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.junit.BaseTestCase;
-import net.frontlinesms.ui.i18n.InternationalisationUtils;
+import net.frontlinesms.ui.i18n.ClasspathLanguageBundle;
 import net.frontlinesms.ui.i18n.LanguageBundle;
 
 /**
@@ -49,7 +49,7 @@ public class CsvExportTests extends BaseTestCase {
 		contacts.add(new Contact("Richard E. Grant", "+44852774", "+1800-RICH-ARDE", "", "\"What a piece of work is a man!\"", true));
 
 		// Make sure the English i18n bundle is available to provision the export column names
-		LanguageBundle englishBundle = InternationalisationUtils.getLanguageBundleFromClasspath("/resources/languages/frontlineSMS.properties");
+		LanguageBundle englishBundle = ClasspathLanguageBundle.create("/resources/languages/frontlineSMS.properties");
 		Thinlet.DEFAULT_ENGLISH_BUNDLE = englishBundle.getProperties();
 		
 		File generatedFile = super.getOutputFile(this.getClass().getSimpleName() + ".contacts.csv");

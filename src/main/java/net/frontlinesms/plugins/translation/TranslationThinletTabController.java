@@ -17,6 +17,7 @@ import thinlet.Thinlet;
 
 import net.frontlinesms.plugins.BasePluginThinletTabController;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.i18n.FileLanguageBundle;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.LanguageBundle;
 
@@ -38,6 +39,8 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	private Map<TranslationView, List<Object>> translationTableRows;
 	/** The dialog used for editing a translation.  When the dialog is not visible, this should be <code>null</code>. */
 	private Object editDialog;
+	/** The localized language file which we are currently editing/working on. */
+	FileLanguageBundle selectedLanguageFile;
 
 //> CONSTRUCTORS
 	protected TranslationThinletTabController(TranslationPluginController pluginController, UiGeneratorController uiController) {
@@ -87,16 +90,18 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		removeEditDialog();
 	}
 	
-	public void deleteText(String textKey) {
-		LanguageBundle lang = this.getSelectedLanguageBundle();
+	public void deleteText(String textKey) throws IOException {
+		FileLanguageBundle lang = this.getSelectedLanguageBundle();
 		lang.getProperties().remove(textKey);
-		// TODO save language bundle to disk
+		// save language bundle to disk
+		lang.saveToDisk();
 	}
 	
-	public void saveText(String textKey, String textValue) {
-		LanguageBundle lang = this.getSelectedLanguageBundle();
+	public void saveText(String textKey, String textValue) throws IOException {
+		FileLanguageBundle lang = this.getSelectedLanguageBundle();
 		lang.getProperties().put(textKey, textValue);
-		// TODO save language bundle to disk
+		// save language bundle to disk
+		lang.saveToDisk();
 		removeEditDialog();
 	}
 	
@@ -245,8 +250,8 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		// Refresh language list
 		Object languageList = getLanguageList();
 		super.removeAll(languageList);
-		for (LanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
-			Object item = uiController.createListItem(languageBundle.getLanguageName(), languageBundle.getFilename());
+		for (FileLanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
+			Object item = uiController.createListItem(languageBundle.getLanguageName(), languageBundle.getFile().getAbsolutePath());
 			uiController.setIcon(item, uiController.getFlagIcon(languageBundle));
 			int index = -1;
 			if (languageBundle.getCountry().equals("gb")) {
@@ -261,10 +266,14 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		return super.find("lsLanguages");
 	}
 	
-	private LanguageBundle getSelectedLanguageBundle() {
-		String languageFilename = uiController.getAttachedObject(uiController.getSelectedItem(getLanguageList()), String.class);
-		File languageFile = new File(InternationalisationUtils.getLanguageDirectoryPath() + languageFilename);
-		return InternationalisationUtils.getLanguageBundle(languageFile);
+	private synchronized FileLanguageBundle getSelectedLanguageBundle() {
+		String languageFilePath = uiController.getAttachedObject(uiController.getSelectedItem(getLanguageList()), String.class);
+		if(selectedLanguageFile == null
+				|| languageFilePath != selectedLanguageFile.getFile().getAbsolutePath()) {
+			File languageFile = new File(languageFilePath);
+			selectedLanguageFile = InternationalisationUtils.getLanguageBundle(languageFile);
+		}
+		return selectedLanguageFile;
 	}
 	
 	private LanguageBundle getDefaultLanguageBundle() {

@@ -21,6 +21,7 @@ import net.frontlinesms.smsdevice.properties.*;
 public class SmsInternetServiceSettings {
 //> INSTANCE PROPERTIES
 	/** Unique id for this entity.  This is for hibernate usage. */
+	@SuppressWarnings("unused")
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY) @Column(unique=true,nullable=false,updatable=false)
 	private long id;
 	/** The name of the class of the {@link SmsInternetService} these settings apply to. */
@@ -90,7 +91,7 @@ public class SmsInternetServiceSettings {
 		else if (value instanceof OptionalSection) stringValue = Boolean.toString(((OptionalSection)value).getValue());
 		else if (value instanceof Enum<?>) stringValue = ((Enum<?>)value).name();
 		else if (value instanceof PhoneSection) stringValue = ((PhoneSection)value).getValue();
-		else if (value instanceof OptionalRadioSection) {
+		else if (value instanceof OptionalRadioSection<?>) {
 			OptionalRadioSection<?> ors = (OptionalRadioSection<?>) value;
 			stringValue = ors.getValue().name();
 		}
@@ -151,7 +152,6 @@ public class SmsInternetServiceSettings {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime
 				* result
 				+ ((serviceClassName == null) ? 0 : serviceClassName.hashCode());
@@ -168,8 +168,6 @@ public class SmsInternetServiceSettings {
 		if (getClass() != obj.getClass())
 			return false;
 		SmsInternetServiceSettings other = (SmsInternetServiceSettings) obj;
-		if (id != other.id)
-			return false;
 		if (serviceClassName == null) {
 			if (other.serviceClassName != null)
 				return false;

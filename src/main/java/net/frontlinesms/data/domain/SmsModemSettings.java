@@ -80,7 +80,6 @@ public class SmsModemSettings {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (deleteMessagesAfterReceiving ? 1231 : 1237);
-		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + ((serial == null) ? 0 : serial.hashCode());
 		result = prime * result + (useDeliveryReports ? 1231 : 1237);
 		result = prime * result + (useForReceiving ? 1231 : 1237);
@@ -99,8 +98,6 @@ public class SmsModemSettings {
 			return false;
 		SmsModemSettings other = (SmsModemSettings) obj;
 		if (deleteMessagesAfterReceiving != other.deleteMessagesAfterReceiving)
-			return false;
-		if (id != other.id)
 			return false;
 		if (serial == null) {
 			if (other.serial != null)

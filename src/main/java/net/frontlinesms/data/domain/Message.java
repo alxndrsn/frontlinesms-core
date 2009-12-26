@@ -398,7 +398,6 @@ public class Message {
 		result = prime * result + (int) (date ^ (date >>> 32));
 		result = prime * result + (int) (dispatchDate ^ (dispatchDate >>> 32));
 		result = prime * result + Arrays.hashCode(binaryMessageContent);
-		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result
 				+ ((textMessageContent == null) ? 0 : textMessageContent.hashCode());
 		result = prime * result
@@ -429,8 +428,6 @@ public class Message {
 		if (dispatchDate != other.dispatchDate)
 			return false;
 		if (!Arrays.equals(binaryMessageContent, other.binaryMessageContent))
-			return false;
-		if (id != other.id)
 			return false;
 		if (textMessageContent == null) {
 			if (other.textMessageContent != null)
