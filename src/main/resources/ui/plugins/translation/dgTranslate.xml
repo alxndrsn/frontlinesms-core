@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dialog closable="true" close="removeDialog(this)" bottom="10" columns="2" gap="8" icon="/icons/translate.png" left="10" modal="true" name="userDetailsDialog" right="10" text="i18n.user.details.dialog.title" top="10">
+	<label text="i18n.translate.key"/>
+	<textfield name="tfKey" columns="30" enabled="false"/>
+	
+	<label text="English"/>
+	<textfield name="tfDefault" columns="30" enabled="false"/>
+	
+	<label name="lbLocalTranslation"/>
+	<textfield name="tfKey" columns="30"/>
+	
+	<button text="i18n.common.save"/> 
+	<button text="i18n.common.cancel"/> 
+</dialog>

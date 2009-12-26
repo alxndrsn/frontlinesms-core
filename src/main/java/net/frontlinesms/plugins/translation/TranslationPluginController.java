@@ -18,7 +18,7 @@ import net.frontlinesms.ui.UiGeneratorController;
 @PluginControllerProperties(name="Translate", iconPath="/icons/translate.png", springConfigLocation=PluginControllerProperties.NO_VALUE, hibernateConfigPath=PluginControllerProperties.NO_VALUE)
 public class TranslationPluginController extends BasePluginController {
 //> STATIC CONSTANTS
-	/** Filename and path of the XML for the HTTP Trigger tab. */
+	/** Filename and path of the XML for the translation tab. */
 	private static final String UI_FILE_TAB = "/ui/plugins/translation/translationTab.xml";
 	
 //> INSTANCE METHODS

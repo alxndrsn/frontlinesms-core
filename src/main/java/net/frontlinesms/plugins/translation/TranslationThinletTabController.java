@@ -5,8 +5,15 @@ package net.frontlinesms.plugins.translation;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.Set;
 import java.util.Map.Entry;
+
+import thinlet.Thinlet;
 
 import net.frontlinesms.plugins.BasePluginThinletTabController;
 import net.frontlinesms.ui.UiGeneratorController;
@@ -17,6 +24,18 @@ import net.frontlinesms.ui.i18n.LanguageBundle;
  * @author alex
  */
 public class TranslationThinletTabController extends BasePluginThinletTabController<TranslationPluginController> {
+//> STATIC CONSTANTS
+	/** Filename and path of the XML for the HTTP Trigger tab. */
+	private static final String UI_FILE_TRANSLATE_DIALOG = "/ui/plugins/translation/dgTranslate.xml";
+
+//> INSTANCE VARIABLES
+	/** Current view in the translations tables tabs */
+	TranslationView visibleTab;
+	/**
+	 * List of all translation rows in each translation table.
+	 * For each {@link TranslationView}, this map will contain all rows that could be shown, even those which are currently filtered out.
+	 */
+	private Map<TranslationView, List<Object>> translationTableRows;
 
 //> CONSTRUCTORS
 	protected TranslationThinletTabController(TranslationPluginController pluginController, UiGeneratorController uiController) {
@@ -24,21 +43,24 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	}
 
 	public void init() {
+		this.visibleTab = TranslationView.ALL;
 		refreshLanguageList();
 	}
 
 //> UI METHODS
-	public void tabChanged() {
+	public void tabChanged(int selectedTabIndex) {
 		System.out.println("TranslationThinletTabController.tabChanged()");
+		this.visibleTab = TranslationView.getFromTabIndex(selectedTabIndex);
 	}
-	public void editText(Object table) {
+
+	public void editText() {
 		System.out.println("TranslationThinletTabController.editText()");
-		String textKey = getSelectedTextKey(table);
+		String textKey = getSelectedTextKey(this.visibleTab);
 	}
 	
-	public void deleteText(Object table) {
+	public void deleteText() {
 		System.out.println("TranslationThinletTabController.languageSelectionChanged()");
-		String textKey = getSelectedTextKey(table);
+		String textKey = getSelectedTextKey(this.visibleTab);
 		if(textKey != null) {
 			uiController.showConfirmationDialog("deleteTextKey('" + textKey + "')", this);
 		}
@@ -46,6 +68,50 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	public void languageSelectionChanged() {
 		System.out.println("TranslationThinletTabController.languageSelectionChanged()");
 		refreshTables();
+		uiController.setEnabled(getFilterTextfield(), true);
+	}
+	public void filterTranslations(String filterText) {
+		System.out.println("TranslationThinletTabController.filterTranslations(" + filterText + ")");
+		filterTable(TranslationView.ALL);
+		filterTable(TranslationView.MISSING);
+		filterTable(TranslationView.EXTRA);
+	}
+	
+//>
+	/**
+	 * Filter the elements of a translation table, hiding all rows that do not match the filter text
+	 * and showing all that do.
+	 */
+	private void filterTable(TranslationView view) {
+		Object table = find(view.getTableName());
+		String filterText = getFilterText();
+		uiController.removeAll(table);
+		for(Object tableRow : this.translationTableRows.get(view)) {
+			boolean show = rowMatches(tableRow, filterText);
+			if(show) {
+				uiController.add(table, tableRow);
+			}
+		}
+	}
+
+	/**
+	 * Check if any column in the given table row matches our filter text.
+	 * @param row Thinlet ROW element.
+	 * @param filterText Text to filter with
+	 * @return <code>true</code> if the filter text is contained in any column in the supplied row; <code>false</code> otherwise.
+	 */
+	private boolean rowMatches(Object row, String filterText) {
+		assert(Thinlet.getClass(row).equals(Thinlet.ROW)) : "This method is only applicable to Thinlet <row/> components.";
+		if(filterText.length() == 0) {
+			// If the filter text is empty, there is no need to check - it will match everything!
+			return true;
+		}
+		for(Object col : uiController.getItems(row)) {
+			if(uiController.getText(col).contains(filterText)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
@@ -53,8 +119,8 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	 * @param table
 	 * @return
 	 */
-	private String getSelectedTextKey(Object table) {
-		Object selectedItem = uiController.getSelectedItem(table);
+	private String getSelectedTextKey(TranslationView view) {
+		Object selectedItem = uiController.getSelectedItem(find(view.getTableName()));
 		if(selectedItem == null) return null;
 		String selectedKey = uiController.getAttachedObject(selectedItem, String.class);
 		return selectedKey;
@@ -63,11 +129,12 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	private void refreshTables() {
 		LanguageBundle lang = getSelectedLanguageBundle();
 		LanguageBundle defaultLang = getDefaultLanguageBundle();
+		String filterText = this.getFilterText();
 		
-		// TODO Populate the "all" table
-		Object allTable = find("tbAllTranslations");
-		removeAll(allTable);
-		uiController.setText(uiController.find(allTable, "clCurrentLanguage"), lang.getLanguageName());
+		this.translationTableRows = new HashMap<TranslationView, List<Object>>();
+		
+		// Generate the "all" table rows
+		ArrayList<Object> allRows = new ArrayList<Object>(defaultLang.getProperties().size());
 		for(Entry<String, String> defaultEntry : defaultLang.getProperties().entrySet()) {
 			String key = defaultEntry.getKey();
 			String langValue = null;
@@ -77,35 +144,45 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 				langValue = "";
 			}
 			Object tableRow = createTableRow(key, defaultEntry.getValue(), langValue);
-			uiController.add(allTable, tableRow);
+			allRows.add(tableRow);
 		}
+		this.translationTableRows.put(TranslationView.ALL, allRows);
 		
 		LanguageBundleComparison comp = new LanguageBundleComparison(defaultLang, lang);
 		boolean isDefaultLang = lang.equals(defaultLang);
-		uiController.setEnabled(find("tbMissing"), !isDefaultLang);
-		uiController.setEnabled(find("tbExtra"), !isDefaultLang);
+		uiController.setEnabled(find(TranslationView.MISSING.getTabName()), !isDefaultLang);
+		uiController.setEnabled(find(TranslationView.EXTRA.getTabName()), !isDefaultLang);
 		if(isDefaultLang) {
 			// Select the 'all' tab if we are viewing default bundle, as the others are disabled 
-			uiController.setSelected(find("tbAll"), true);
+			uiController.setSelected(find(TranslationView.ALL.getTabName()), true);
 		} else {
 			// populate and enable the missing table
-			Object missingTable = find("tbMissingTranslations");
-			removeAll(missingTable);
-			uiController.setText(uiController.find(missingTable, "clCurrentLanguage"), lang.getLanguageName());
-			for(String key : comp.getKeysIn1Only()) {
+			Set<String> missingKeys = comp.getKeysIn1Only();
+			ArrayList<Object> missingRows = new ArrayList<Object>(missingKeys.size());
+			for(String key : missingKeys) {
 				Object tableRow = createTableRow(key, comp.get1(key), "");
-				uiController.add(missingTable, tableRow);
+				missingRows.add(tableRow);
 			}
+			this.translationTableRows.put(TranslationView.MISSING, missingRows);
 
 			// populate and enable the extra table
-			Object extraTable = find("tbExtraTranslations");
-			removeAll(extraTable);
-			uiController.setText(uiController.find(extraTable, "clCurrentLanguage"), lang.getLanguageName());
-			for(String key : comp.getKeysIn2Only()) {
+			Set<String> extraKeys = comp.getKeysIn2Only();
+			ArrayList<Object> extraRows = new ArrayList<Object>(extraKeys.size());
+			for(String key : extraKeys) {
 				Object tableRow = createTableRow(key, "", comp.get2(key));
-				uiController.add(extraTable, tableRow);
+				extraRows.add(tableRow);
 			}
+			this.translationTableRows.put(TranslationView.EXTRA, extraRows);
 		}
+		initTable(TranslationView.ALL);
+		initTable(TranslationView.MISSING);
+		initTable(TranslationView.EXTRA);
+	}
+	
+	private void initTable(TranslationView view) {
+		Object table = find(view.getTableName());
+		uiController.setText(uiController.find(table, "clCurrentLanguage"), getSelectedLanguageBundle().getLanguageName());
+		filterTable(view);
 	}
 	
 	private Object createTableRow(String... columnValues) {
@@ -150,5 +227,54 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		} catch (IOException e) {
 			throw new IllegalStateException("There was a problem loading the default language bundle.");
 		}
+	}
+
+	private String getFilterText() {
+		return uiController.getText(getFilterTextfield());
+	}
+
+	private Object getFilterTextfield() {
+		return find("tfTranslationFilter");
+	}
+}
+
+enum TranslationView {
+	ALL("tbAll", 0, "tbAllTranslations"),
+	MISSING("tbMissing", 1, "tbMissingTranslations"),
+	EXTRA("tbExtra", 2, "tbExtraTranslations");
+	
+	private final String tabName;
+	private final int tabIndex;
+	private final String tableName;
+	
+//> CONSTRUCTOR
+	private TranslationView(String tabName, int tabIndex, String tableName) {
+		this.tabName = tabName;
+		this.tabIndex = tabIndex;
+		this.tableName = tableName;
+	}
+
+//> ACCESSORS
+	public String getTabName() {
+		return tabName;
+	}
+
+	public int getTabIndex() {
+		return tabIndex;
+	}
+
+	public String getTableName() {
+		return tableName;
+	}
+	
+//> STATIC METHODS
+	static TranslationView getFromTabIndex(int tabIndex) {
+		for(TranslationView view : TranslationView.values()) {
+			if(view.getTabIndex() == tabIndex) {
+				return view;
+			}
+		}
+		// No match was found
+		return null;
 	}
 }

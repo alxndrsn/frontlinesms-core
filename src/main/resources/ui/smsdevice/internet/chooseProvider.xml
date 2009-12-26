@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <dialog icon="/icons/sms_http.png" closable="true" bottom="10" close="removeDialog(this)" columns="1" gap="8" left="10" modal="true" name="pnSmsInternetServiceSettings" right="10" top="10" text="i18n.smsdevice.internet.settings" width="320" height="300">
 	<label text="i18n.smsdevice.internet.provider.select"/>
 	<list action="selectionChanged(this, pnButtons)" perform="configureNewService(lsProviders)" name="lsProviders" weightx="1" weighty="1" colspan="2"/>

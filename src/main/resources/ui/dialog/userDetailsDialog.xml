@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <dialog closable="true" close="removeDialog(this)" bottom="10" columns="2" gap="8" icon="/icons/survey.png" left="10" modal="true" name="userDetailsDialog" right="10" text="i18n.user.details.dialog.title" top="10">
 	<label text="i18n.user.details.name"/>
 	<textfield name="tfName" columns="30"/>
