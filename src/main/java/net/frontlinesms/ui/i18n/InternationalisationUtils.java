@@ -61,7 +61,7 @@ public class InternationalisationUtils {
 	
 //> GENERAL i18n HELP METHODS
 	/** The default characterset, UTF-8.  This must be available for every JVM. */
-	private static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
+	static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
 	
 //>
 	/**

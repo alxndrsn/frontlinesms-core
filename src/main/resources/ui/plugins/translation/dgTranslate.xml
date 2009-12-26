@@ -7,7 +7,7 @@
 	<textfield name="tfDefault" columns="30" enabled="false"/>
 	
 	<label name="lbLocalTranslation"/>
-	<textfield name="tfLocal" columns="30"/>
+	<textfield name="tfLocal" columns="30" perform="saveText(tfKey.text, tfLocal.text)"/>
 	
 	<panel halign="center" gap="8" colspan="2">
 		<button text="i18n.action.save" action="saveText(tfKey.text, tfLocal.text)" icon="/icons/tick.png"/> 

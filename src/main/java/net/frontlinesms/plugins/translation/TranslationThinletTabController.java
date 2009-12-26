@@ -85,7 +85,7 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		System.out.println("TranslationThinletTabController.languageSelectionChanged()");
 		String textKey = getSelectedTextKey(this.visibleTab);
 		if(textKey != null) {
-			uiController.showConfirmationDialog("deleteTextKey('" + textKey + "')", this);
+			uiController.showConfirmationDialog("deleteText('" + textKey + "')", this);
 		}
 		removeEditDialog();
 	}
@@ -102,6 +102,10 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		lang.getProperties().put(textKey, textValue);
 		// save language bundle to disk
 		lang.saveToDisk();
+		
+		// Update the table
+		setSelectedTextValue(this.visibleTab, textValue);
+		
 		removeEditDialog();
 	}
 	
@@ -169,6 +173,13 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		if(selectedItem == null) return null;
 		String selectedKey = uiController.getAttachedObject(selectedItem, String.class);
 		return selectedKey;
+	}
+	
+	private void setSelectedTextValue(TranslationView view, String value) {
+		Object selectedItem = uiController.getSelectedItem(find(view.getTableName()));
+		assert(selectedItem != null) : "Should not attempt to update the selected text item if none is selected";
+		Object textColumn = uiController.getItem(selectedItem, 2);
+		uiController.setText(textColumn, value);
 	}
 	
 	private void refreshTables() {

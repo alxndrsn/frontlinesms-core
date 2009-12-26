@@ -13,7 +13,6 @@ import net.frontlinesms.ui.UiGeneratorController;
 
 /**
  * @author alexanderson
- *
  */
 @PluginControllerProperties(name="Translate", iconPath="/icons/translate.png", springConfigLocation=PluginControllerProperties.NO_VALUE, hibernateConfigPath=PluginControllerProperties.NO_VALUE)
 public class TranslationPluginController extends BasePluginController {

@@ -5,12 +5,16 @@ package net.frontlinesms.ui.i18n;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
 import net.frontlinesms.Utils;
+import net.frontlinesms.resources.properties.PropsFileLayout;
 
 /**
  * A {@link LanguageBundle} loaded from a file.
@@ -43,8 +47,20 @@ public class FileLanguageBundle extends LanguageBundle {
 	
 //> INSTANCE METHODS
 	public void saveToDisk() throws IOException {
-		// TODO please implement this method
-		throw new RuntimeException("This method is not yet implemented!");
+		PropsFileLayout layout = PropsFileLayout.create(this.getFile());
+		FileOutputStream fos = null;
+		OutputStreamWriter osw = null;
+		PrintWriter pw = null;
+		try {
+			fos = new FileOutputStream(this.getFile());
+			osw = new OutputStreamWriter(fos, InternationalisationUtils.CHARSET_UTF8);
+			pw = new PrintWriter(osw);
+			layout.format(pw, this.getProperties(), true);
+		} finally {
+			if(pw != null) try { pw.close(); } catch(Exception ex) {}
+			if(osw != null) try { osw.close(); } catch(Exception ex) {}
+			if(fos != null) try { fos.close(); } catch(Exception ex) {}
+		}
 	}
 
 //> STATIC FACTORIES
