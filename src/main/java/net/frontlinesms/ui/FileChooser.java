@@ -22,11 +22,16 @@ import thinlet.Thinlet;
 public class FileChooser implements ThinletUiEventHandler {
 //> UI FILES
 	/** Thinlet UI layout File: file choosing dialog */
-	protected static final String UI_FILE_FILE_CHOOSER_FORM = "/ui/dialog/fileChooserForm.xml";
+	private static final String UI_FILE_FILE_CHOOSER_FORM = "/ui/core/util/dgFileChooser.xml";
 	
 //> UI COMPONENTS
 	private static final String COMPONENT_FILE_CHOOSER_LIST = "fileChooser_list";
 	private static final String COMPONENT_LABEL_DIRECTORY = "lbDirectory";
+	
+//> CONSTANTS
+	public static final String PROPERTY_TYPE = "type";
+	public static final String DIALOG_MODE_OPEN = "open";
+	public static final String DIALOG_MODE_SAVE = "save";
 	
 //> INSTANCE PROPERTIES
 	private Logger log = Utils.getLogger(this.getClass());
@@ -55,7 +60,7 @@ public class FileChooser implements ThinletUiEventHandler {
 			if (f.isDirectory()) {
 				log.debug("Selected directory [" + f.getAbsolutePath() + "]");
 				addFilesToList(f, fileList, dialog);
-			} else if (ui.getProperty(dialog, FrontlineSMSConstants.PROPERTY_TYPE).equals(FrontlineSMSConstants.OPEN_MODE)) {
+			} else if (ui.getProperty(dialog, PROPERTY_TYPE).equals(DIALOG_MODE_OPEN)) {
 				log.debug("Selected file [" + f.getAbsolutePath() + "]");
 				//This is the selected file.
 				//TODO Should call the method to execute the import action.
@@ -82,6 +87,33 @@ public class FileChooser implements ThinletUiEventHandler {
 		ui.setText(tfFilename, "");
 	}
 	
+	private void addFilesToList(String title, File parent, File[] children, Object list, Object dialog) {
+		log.trace("ENTER");
+		ui.removeAll(list);
+		ui.setAttachedObject(list, parent);
+		ui.setText(ui.find(dialog, COMPONENT_LABEL_DIRECTORY), title);
+		LinkedList<File> files = new LinkedList<File>();
+		for (File f : children) {
+			files.add(f);
+		}
+		Collections.sort(files, new Utils.FileComparator());
+		for (File child : files) {
+			if (child.isDirectory() || (!child.isDirectory() && ui.getProperty(dialog, PROPERTY_TYPE).equals(DIALOG_MODE_OPEN))) {
+				Object item = ui.createListItem(child.getName(), child);
+				ui.setAttachedObject(item, child);
+				if (child.isDirectory()) {
+					if(log.isDebugEnabled()) log.debug("Directory [" + child.getAbsolutePath() + "]");
+					ui.setIcon(item, Icon.FOLDER_CLOSED);
+				} else {
+					if(log.isDebugEnabled()) log.debug("File [" + child.getAbsolutePath() + "]");
+					ui.setIcon(item, Icon.FILE);
+				}
+				ui.add(list, item);
+			}
+		}
+		log.trace("EXIT");
+	}
+	
 	/**
 	 * Adds the files under the desired directory to the file list in the file chooser dialog.
 	 * @param parent 
@@ -90,29 +122,8 @@ public class FileChooser implements ThinletUiEventHandler {
 	 */
 	public void addFilesToList(File parent, Object list, Object dialog) {
 		log.trace("ENTER");
-		log.debug("Adding files under [" + parent.getAbsolutePath() + "]");
-		ui.removeAll(list);
-		ui.setAttachedObject(list, parent);
-		ui.setText(ui.find(dialog, COMPONENT_LABEL_DIRECTORY), parent.getAbsolutePath());
-		LinkedList<File> files = new LinkedList<File>();
-		for (File f : parent.listFiles()) {
-			files.add(f);
-		}
-		Collections.sort(files, new Utils.FileComparator());
-		for (File child : files) {
-			if (child.isDirectory() || (!child.isDirectory() && ui.getProperty(dialog, FrontlineSMSConstants.PROPERTY_TYPE).equals(FrontlineSMSConstants.OPEN_MODE))) {
-				Object item = ui.createListItem(child.getName(), child);
-				ui.setAttachedObject(item, child);
-				if (child.isDirectory()) {
-					log.debug("Directory [" + child.getAbsolutePath() + "]");
-					ui.setIcon(item, Icon.FOLDER_CLOSED);
-				} else {
-					log.debug("File [" + child.getAbsolutePath() + "]");
-					ui.setIcon(item, Icon.FILE);
-				}
-				ui.add(list, item);
-			}
-		}
+		if(log.isDebugEnabled()) log.debug("Adding files under [" + parent.getAbsolutePath() + "]");
+		addFilesToList(parent.getAbsolutePath(), parent, parent.listFiles(), list, dialog);
 		log.trace("EXIT");
 	}
 
@@ -122,12 +133,29 @@ public class FileChooser implements ThinletUiEventHandler {
 	 * @param dialog 
 	 */
 	public void goUp(Object list, Object dialog) {
-		Object file = ui.getAttachedObject(list);
-		File fileInDisk = (File) file;
-		if (fileInDisk.getParent() == null) {
+		Object fileAttachment = ui.getAttachedObject(list);
+		if(fileAttachment == null) {
+			// If the file is null, then we are looking at the disk drives available, and cannot go higher
 			ui.alert(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_IMPOSSIBLE_TO_GO_UP_A_DIRECTORY));
+			return;
 		} else {
-			addFilesToList(fileInDisk.getParentFile(), list, dialog);
+			File file = (File) fileAttachment;
+			File parent = file.getParentFile();
+			if(parent != null) {
+				// This is a normal directory, so display the contents of it
+				addFilesToList(parent, list, dialog);
+			} else {
+				// If this file has no parents, then we should show the disk drives.  If there
+				// is only a single root called '/', we can assume we're on a *nix system and
+				// that browsing this root will not be useful.
+				File[] roots = File.listRoots();
+				if(roots.length == 0
+						|| (roots.length == 1 && roots[0].getAbsolutePath().equals("/"))) {
+					ui.alert(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_IMPOSSIBLE_TO_GO_UP_A_DIRECTORY));
+				} else {
+					addFilesToList("", null, roots, list, dialog);
+				}
+			}
 		}
 	}
 	
@@ -138,7 +166,7 @@ public class FileChooser implements ThinletUiEventHandler {
 	 * @param textFieldToBeSet The text field whose value should be sert to the chosen file
 	 */
 	public void showSaveModeFileChooser(Object textFieldToBeSet) {
-		showFileChooser(textFieldToBeSet, FrontlineSMSConstants.SAVE_MODE);
+		showFileChooser(textFieldToBeSet, DIALOG_MODE_SAVE);
 	}
 	
 	/**
@@ -148,17 +176,17 @@ public class FileChooser implements ThinletUiEventHandler {
 	 * @param textFieldToBeSet The text field whose value should be sert to the chosen file
 	 */
 	public void showOpenModeFileChooser(Object textFieldToBeSet) {
-		showFileChooser(textFieldToBeSet, FrontlineSMSConstants.OPEN_MODE);
+		showFileChooser(textFieldToBeSet, DIALOG_MODE_OPEN);
 	}
 	/**
 	 * This method opens a fileChooser, showing directories and files.
 	 * @param textFieldToBeSet The text field whose value should be sert to the chosen file
-	 * @param fileMode either {@link FrontlineSMSConstants#OPEN_MODE} or {@link FrontlineSMSConstants#SAVE_MODE}
+	 * @param fileMode either {@link #DIALOG_MODE_OPEN} or {@link #DIALOG_MODE_SAVE}
 	 */
 	private void showFileChooser(Object textFieldToBeSet, String fileMode) {
 		Object fileChooserDialog = ui.loadComponentFromFile(UI_FILE_FILE_CHOOSER_FORM, this);
 		ui.setAttachedObject(fileChooserDialog, textFieldToBeSet);
-		ui.putProperty(fileChooserDialog, FrontlineSMSConstants.PROPERTY_TYPE, fileMode);
+		ui.putProperty(fileChooserDialog, PROPERTY_TYPE, fileMode);
 		addFilesToList(new File(ResourceUtils.getUserHome()), ui.find(fileChooserDialog, COMPONENT_FILE_CHOOSER_LIST), fileChooserDialog);
 		ui.add(fileChooserDialog);
 	}
@@ -178,7 +206,7 @@ public class FileChooser implements ThinletUiEventHandler {
 			selected = ui.getAttachedObject(selected);
 		}
 		File sel = (File) selected;
-		if (ui.getProperty(dialog, FrontlineSMSConstants.PROPERTY_TYPE).equals(FrontlineSMSConstants.SAVE_MODE)) {	
+		if (ui.getProperty(dialog, PROPERTY_TYPE).equals(DIALOG_MODE_SAVE)) {	
 			String filePath = sel.getAbsolutePath();
 			if (!filePath.endsWith(File.separator)) {
 				filePath += File.separator;

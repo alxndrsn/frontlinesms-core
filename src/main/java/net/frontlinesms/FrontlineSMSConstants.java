@@ -278,9 +278,6 @@ public final class FrontlineSMSConstants {
 	public static final String MESSAGE_STARTING = "message.starting";
 	
 	public static final String DEFAULT_GROUPS_DELIMITER = ", ";
-	public static final String PROPERTY_TYPE = "type";
-	public static final String OPEN_MODE = "open";
-	public static final String SAVE_MODE = "save";
 
 	public static final String DEMO_SENDER_NAME = "<senderName>";
 	public static final String DEMO_SENDER_MSISDN = "<senderPhoneNumber>";
