@@ -20,18 +20,15 @@
 package net.frontlinesms.ui;
 
 import java.awt.Image;
-import java.io.File;
-import java.util.Collections;
-import java.util.LinkedList;
 
-import net.frontlinesms.*;
-import net.frontlinesms.resources.ResourceUtils;
-import net.frontlinesms.ui.i18n.InternationalisationUtils;
+import net.frontlinesms.ErrorUtils;
+import net.frontlinesms.FrontlineSMS;
+import net.frontlinesms.Utils;
 import net.frontlinesms.ui.i18n.LanguageBundle;
 
 import org.apache.log4j.Logger;
 
-import thinlet.*;
+import thinlet.FrameLauncher;
 
 /**
  * Base UI used for FrontlineSMS.
@@ -39,23 +36,17 @@ import thinlet.*;
 @SuppressWarnings("serial")
 public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEventHandler {
 	
-//> CONSTANTS
-	/** Logging object */
-	private static Logger LOG = Utils.getLogger(FrontlineUI.class);
-	
 //> UI DEFINITION FILES
 	/** Thinlet UI layout File: alert popup box */
 	protected static final String UI_FILE_ALERT = "/ui/dialog/alert.xml";
-	/** Thinlet UI layout File: file choosing dialog */
-	protected static final String UI_FILE_FILE_CHOOSER_FORM = "/ui/dialog/fileChooserForm.xml";
 
 //> UI COMPONENTS
-	private static final String COMPONENT_FILE_CHOOSER_LIST = "fileChooser_list";
-	private static final String COMPONENT_LABEL_DIRECTORY = "lbDirectory";
 	/** Component of {@link #UI_FILE_ALERT} which contains the message to display */
 	private static final String COMPONENT_ALERT_MESSAGE = "alertMessage";
 	
 //> INSTANCE PROPERTIES
+	/** Logging object */
+	protected final Logger log = Utils.getLogger(this.getClass());
 	/** The language bundle currently in use */
 	public static LanguageBundle currentResourceBundle;
 	/** Frame launcher that this UI instance is displayed within.  We need to keep a handle on it so that we can dispose of it when we quit or change UI modes. */
@@ -96,14 +87,14 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	 * @return thinlet component loaded from the file
 	 */
 	public Object loadComponentFromFile(String filename, ThinletUiEventHandler thinletEventHandler) {
-		LOG.trace("ENTER");
+		log.trace("ENTER");
 		try {
-			LOG.debug("Filename [" + filename + "]");
-			LOG.trace("EXIT");
+			log.debug("Filename [" + filename + "]");
+			log.trace("EXIT");
 			return parse(filename, thinletEventHandler);
 		} catch(Throwable t) {
-			LOG.error("Error parsing file [" + filename + "]", t);
-			LOG.trace("EXIT");
+			log.error("Error parsing file [" + filename + "]", t);
+			log.trace("EXIT");
 			throw new RuntimeException(t);
 		}
 	}
@@ -115,7 +106,7 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	 * @param textFieldToBeSet The text field whose value should be sert to the chosen file
 	 */
 	public void showSaveModeFileChooser(Object textFieldToBeSet) {
-		showFileChooser(textFieldToBeSet, FrontlineSMSConstants.SAVE_MODE);
+		new FileChooser(this).showSaveModeFileChooser(textFieldToBeSet);
 	}
 	
 	/**
@@ -125,68 +116,7 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	 * @param textFieldToBeSet The text field whose value should be sert to the chosen file
 	 */
 	public void showOpenModeFileChooser(Object textFieldToBeSet) {
-		showFileChooser(textFieldToBeSet, FrontlineSMSConstants.OPEN_MODE);
-	}
-	/**
-	 * This method opens a fileChooser, showing directories and files.
-	 * @param textFieldToBeSet The text field whose value should be sert to the chosen file
-	 * @param fileMode either {@link FrontlineSMSConstants#OPEN_MODE} or {@link FrontlineSMSConstants#SAVE_MODE}
-	 */
-	private void showFileChooser(Object textFieldToBeSet, String fileMode) {
-		Object fileChooserDialog = loadComponentFromFile(UI_FILE_FILE_CHOOSER_FORM);
-		setAttachedObject(fileChooserDialog, textFieldToBeSet);
-		putProperty(fileChooserDialog, FrontlineSMSConstants.PROPERTY_TYPE, fileMode);
-		addFilesToList(new File(ResourceUtils.getUserHome()), find(fileChooserDialog, COMPONENT_FILE_CHOOSER_LIST), fileChooserDialog);
-		add(fileChooserDialog);
-	}
-	
-	/**
-	 * Adds the files under the desired directory to the file list in the file chooser dialog.
-	 * @param parent 
-	 * @param list 
-	 * @param dialog 
-	 */
-	public void addFilesToList(File parent, Object list, Object dialog) {
-		LOG.trace("ENTER");
-		LOG.debug("Adding files under [" + parent.getAbsolutePath() + "]");
-		removeAll(list);
-		setAttachedObject(list, parent);
-		setText(find(dialog, COMPONENT_LABEL_DIRECTORY), parent.getAbsolutePath());
-		LinkedList<File> files = new LinkedList<File>();
-		for (File f : parent.listFiles()) {
-			files.add(f);
-		}
-		Collections.sort(files, new Utils.FileComparator());
-		for (File child : files) {
-			if (child.isDirectory() || (!child.isDirectory() && getProperty(dialog, FrontlineSMSConstants.PROPERTY_TYPE).equals(FrontlineSMSConstants.OPEN_MODE))) {
-				Object item = createListItem(child.getName(), child);
-				setAttachedObject(item, child);
-				if (child.isDirectory()) {
-					LOG.debug("Directory [" + child.getAbsolutePath() + "]");
-					setIcon(item, Icon.FOLDER_CLOSED);
-				} else {
-					LOG.debug("File [" + child.getAbsolutePath() + "]");
-					setIcon(item, Icon.FILE);
-				}
-				add(list, item);
-			}
-		}
-		LOG.trace("EXIT");
-	}
-	
-	/**
-	 * Go up a directory, if possible, and show its files in the list.
-	 * @param list 
-	 * @param dialog 
-	 */
-	public void goUp(Object list, Object dialog) {
-		Object file = getAttachedObject(list);
-		File fileInDisk = (File) file;
-		if (fileInDisk.getParent() == null) {
-			alert(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_IMPOSSIBLE_TO_GO_UP_A_DIRECTORY));
-		} else {
-			addFilesToList(fileInDisk.getParentFile(), list, dialog);
-		}
+		new FileChooser(this).showOpenModeFileChooser(textFieldToBeSet);
 	}
 
 	/**
@@ -209,85 +139,6 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	}
 	
 	/**
-	 * Handles the double-click action in the file chooser list. Double-clicking
-	 * in a directory means to get into it. However, double-clicking a file during an
-	 * import action, means to select it as the desired file.
-	 * @param fileList 
-	 * @param dialog 
-	 */
-	public void fileList_doubleClicked(Object fileList, Object dialog) {
-		LOG.trace("ENTER");
-		Object selected = getSelectedItem(fileList);
-		Object file = getAttachedObject(selected);
-		if (file instanceof File) {
-			File f = (File) file;
-			if (f.isDirectory()) {
-				LOG.debug("Selected directory [" + f.getAbsolutePath() + "]");
-				addFilesToList(f, fileList, dialog);
-			} else if (getProperty(dialog, FrontlineSMSConstants.PROPERTY_TYPE).equals(FrontlineSMSConstants.OPEN_MODE)) {
-				LOG.debug("Selected file [" + f.getAbsolutePath() + "]");
-				//This is the selected file.
-				//TODO Should call the method to execute the import action.
-				setText(getAttachedObject(dialog), f.getAbsolutePath());
-				remove(dialog);
-			}
-		}
-		LOG.trace("EXIT");
-	}
-	
-
-	/**
-	 * Enters the selected directory and show its files in the list.
-	 * @param tfFilename 
-	 * @param list 
-	 * @param dialog 
-	 */
-	public void goToDir(Object tfFilename, Object list, Object dialog) {
-		File file = new File(getString(tfFilename, Thinlet.TEXT));
-		if (!file.exists()) {
-			alert(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_DIRECTORY_NOT_FOUND));
-		} else {
-			addFilesToList(file, list, dialog);
-		}
-		setText(tfFilename, "");
-	}
-	
-	/**
-	 * Method called when the user finishes to browse files and select one to be the export file.
-	 * @param list 
-	 * @param dialog 
-	 * @param filename 
-	 */
-	public void doSelection(Object list, Object dialog, String filename) {
-		LOG.trace("ENTER");
-		Object selected = getSelectedItem(list);
-		if (selected == null) {
-			selected = getAttachedObject(list);
-		} else {
-			selected = getAttachedObject(selected);
-		}
-		File sel = (File) selected;
-		if (getProperty(dialog, FrontlineSMSConstants.PROPERTY_TYPE).equals(FrontlineSMSConstants.SAVE_MODE)) {	
-			String filePath = sel.getAbsolutePath();
-			if (!filePath.endsWith(File.separator)) {
-				filePath += File.separator;
-			}
-			LOG.debug("Selected Directory [" + filePath + "]");
-			setText(getAttachedObject(dialog), filePath + filename);
-		} else {
-			if (selected == null) {
-				alert(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_NO_FILE_SELECTED));
-				LOG.trace("EXIT");
-				return;
-			}
-			//This is the selected file.
-			setText(getAttachedObject(dialog), sel.getAbsolutePath());
-		}
-		remove(dialog);
-		LOG.trace("EXIT");
-	}
-	
-	/**
 	 * Opens a link in the system browser
 	 * @param url the url to open
 	 * @see Utils#openExternalBrowser(String)
@@ -301,8 +152,7 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	 * @param page The name of the help manual page, including file extension.
 	 */
 	public void showHelpPage(String page) {
-		String url = "help" + File.separatorChar
-			+ page;
+		String url = "help/" + page;
 		Utils.openExternalBrowser(url);
 	}
 	
@@ -311,7 +161,7 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	 */
 	@Override
 	protected void handleException(Throwable throwable) {
-		LOG.error("Unhandled exception from thinlet.", throwable);
+		log.error("Unhandled exception from thinlet.", throwable);
 		ErrorUtils.showErrorDialog("Unexpected error", "There was an unexpected error.", throwable, false);
 	}
 	
@@ -336,7 +186,7 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 			}
 			
 		} catch(Throwable t) {
-			LOG.error("Unable to reload frontlineSMS.", t);
+			log.error("Unable to reload frontlineSMS.", t);
 		}
 	}
 	
