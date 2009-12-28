@@ -13,8 +13,8 @@ public final class AppProperties extends PropertySet {
 //> STATIC CONSTANTS
 	
 //> PROPERTY STRINGS
-	/** Property key (String): the filename of the language file */
-	private static final String KEY_LANGUAGE_FILENAME = "language.filename";
+	/** Property key (String): the file of the language file */
+	private static final String KEY_LANGUAGE_FILE_PATH = "language.file.path";
 	/** Property key (boolean): show the first time wizard or not */
 	private static final String KEY_SHOW_WIZARD = "first.time.wizard";
 	/** Property key (String): the version of the application last time it was run */
@@ -40,11 +40,11 @@ public final class AppProperties extends PropertySet {
 //> ACCESSORS
 	/** @return the name of the language filename */
 	public String getLanguageFilename() {
-		return super.getProperty(KEY_LANGUAGE_FILENAME);
+		return super.getProperty(KEY_LANGUAGE_FILE_PATH);
 	}
 	/** @param filename the name of the language filename */
 	public void setLanguageFilename(String filename) {
-		super.setProperty(KEY_LANGUAGE_FILENAME, filename);
+		super.setProperty(KEY_LANGUAGE_FILE_PATH, filename);
 	}
 	/** @return <code>true</code> if first time wizard should be shown; <code>false</code> otherwise */
 	public boolean isShowWizard() {
