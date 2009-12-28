@@ -39,7 +39,7 @@ public final class AppProperties extends PropertySet {
 
 //> ACCESSORS
 	/** @return the name of the language filename */
-	public String getLanguageFilename() {
+	public String getLanguageFilePath() {
 		return super.getProperty(KEY_LANGUAGE_FILE_PATH);
 	}
 	/** @param filename the name of the language filename */
@@ -48,8 +48,8 @@ public final class AppProperties extends PropertySet {
 	}
 	/** @return <code>true</code> if first time wizard should be shown; <code>false</code> otherwise */
 	public boolean isShowWizard() {
-		Boolean showWizard = super.getPropertyAsBoolean(KEY_SHOW_WIZARD);
-		return showWizard == null || showWizard;
+		boolean showWizard = super.getPropertyAsBoolean(KEY_SHOW_WIZARD, true);
+		return showWizard;
 	}
 	/** @param showWizard <code>true</code> if the wizard should be shown, <code>false</code> otherwise */
 	public void setShowWizard(boolean showWizard) {

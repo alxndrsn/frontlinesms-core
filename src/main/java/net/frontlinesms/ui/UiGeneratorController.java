@@ -466,9 +466,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		
 		// Add to the current language bundle
 		LanguageBundle currentResourceBundle = FrontlineUI.currentResourceBundle;
-		Locale locale = new Locale(currentResourceBundle.getLanguageCode(), currentResourceBundle.getCountry());
-		InternationalisationUtils.mergeMaps(currentResourceBundle.getProperties(), controller.getTextResource(locale));
-		setResourceBundle(currentResourceBundle.getProperties(), currentResourceBundle.isRightToLeft());
+		if(currentResourceBundle != null) {
+			Locale locale = new Locale(currentResourceBundle.getLanguageCode(), currentResourceBundle.getCountry());
+			InternationalisationUtils.mergeMaps(currentResourceBundle.getProperties(), controller.getTextResource(locale));
+			setResourceBundle(currentResourceBundle.getProperties(), currentResourceBundle.isRightToLeft());
+		}
 	}
 
 	/**
