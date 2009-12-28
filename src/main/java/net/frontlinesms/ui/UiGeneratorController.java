@@ -229,7 +229,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		
 		// Load the requested language file.
 		AppProperties appProperties = AppProperties.getInstance();
-		String currentLanguageFile = appProperties.getLanguageFilename();
+		String currentLanguageFile = appProperties.getLanguageFilePath();
 		if (currentLanguageFile != null) {
 			LanguageBundle languageBundle = InternationalisationUtils.getLanguageBundle(new File(currentLanguageFile));
 			FrontlineUI.currentResourceBundle = languageBundle;
