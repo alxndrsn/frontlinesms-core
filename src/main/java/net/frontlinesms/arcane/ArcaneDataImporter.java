@@ -49,7 +49,9 @@ public class ArcaneDataImporter {
 			for(ArcaneContact arcaneContact : mrBundle.getContacts()) {
 				Contact contact = contactDao.getFromMsisdn(arcaneContact.getMsisdn());
 				if(contact == null) {
-					contact = new Contact(arcaneContact.getName(), arcaneContact.getMsisdn(), "", "", arcaneContact.getNotes(), arcaneContact.isActive());
+					String contactName = arcaneContact.getName();
+					if(contactName == null) contactName = "";
+					contact = new Contact(contactName, arcaneContact.getMsisdn(), "", "", arcaneContact.getNotes(), arcaneContact.isActive());
 					contactDao.saveContact(contact);
 				}
 				Group newGroup = extractGroup(arcaneContact);
@@ -98,7 +100,9 @@ public class ArcaneDataImporter {
 			for(ArcaneContact arcaneContact : mrBundle.getContacts()) {
 				Contact contact = contactDao.getFromMsisdn(arcaneContact.getMsisdn());
 				if(contact == null) {
-					contact = new Contact(arcaneContact.getName(), arcaneContact.getMsisdn(), "", "", arcaneContact.getNotes(), arcaneContact.isActive());
+					String contactName = arcaneContact.getName();
+					if(contactName == null) contactName = "";
+					contact = new Contact(contactName, arcaneContact.getMsisdn(), "", "", arcaneContact.getNotes(), arcaneContact.isActive());
 					contactDao.saveContact(contact);
 				}
 			}

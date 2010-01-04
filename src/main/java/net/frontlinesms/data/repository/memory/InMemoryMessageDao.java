@@ -156,8 +156,8 @@ public class InMemoryMessageDao implements MessageDao {
 					&& message.getDate() <= end) {
 				for(Group g : groups) {
 					for(Contact c : g.getDirectMembers()) {
-						if(c.getMsisdn().equals(message.getSenderMsisdn())
-								|| c.getMsisdn().equals(message.getRecipientMsisdn())) {
+						if(c.getPhoneNumber().equals(message.getSenderMsisdn())
+								|| c.getPhoneNumber().equals(message.getRecipientMsisdn())) {
 							sortedMessages.put(getSortObject(sortBy, message), message);
 						}
 					}
@@ -268,7 +268,7 @@ public class InMemoryMessageDao implements MessageDao {
 		HashSet<String> memberPhoneNumbers = new HashSet<String>();
 		for(Group g : groups) {
 			for(Contact c : g.getAllMembers()) {
-				memberPhoneNumbers.add(c.getMsisdn());
+				memberPhoneNumbers.add(c.getPhoneNumber());
 			}
 		}
 		int count = 0;

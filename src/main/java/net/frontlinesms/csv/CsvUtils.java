@@ -56,9 +56,9 @@ public class CsvUtils {
 	public static final String MARKER_MESSAGE_DATE = "${message_date}";
 	/** [Substitution marker] {@link Contact#getName()} */
 	public static final String MARKER_CONTACT_NAME = "${contact_name}";
-	/** [Substitution marker] {@link Contact#getMsisdn()} */
+	/** [Substitution marker] {@link Contact#getPhoneNumber()} */
 	public static final String MARKER_CONTACT_PHONE = "${contact_phone}";
-	/** [Substitution marker] {@link Contact#getOtherMsisdn()} */
+	/** [Substitution marker] {@link Contact#getOtherPhoneNumber()} */
 	public static final String MARKER_CONTACT_OTHER_PHONE = "${contact_other_phone}";
 	/** [Substitution marker] {@link Contact#getEmailAddress()} */
 	public static final String MARKER_CONTACT_EMAIL = "${contact_email}";

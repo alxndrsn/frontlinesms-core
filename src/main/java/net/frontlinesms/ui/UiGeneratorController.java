@@ -960,11 +960,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				if(filterClass == Contact.class) {
 					// Contact selected
 					Contact c = getContact(selectedItem);
-					for (Message m : messageFactory.getMessagesForMsisdn(messageType, c.getMsisdn(), field, order, messageHistoryStart, messageHistoryEnd, (pageNumber - 1) * limit, limit)) {
+					for (Message m : messageFactory.getMessagesForMsisdn(messageType, c.getPhoneNumber(), field, order, messageHistoryStart, messageHistoryEnd, (pageNumber - 1) * limit, limit)) {
 						add(messageListComponent, getRow(m));
 					}
-					count = messageFactory.getMessageCountForMsisdn(messageType, c.getMsisdn(), messageHistoryStart, messageHistoryEnd);
-					numberToSend = messageFactory.getSMSCountForMsisdn(c.getMsisdn(), messageHistoryStart, messageHistoryEnd);
+					count = messageFactory.getMessageCountForMsisdn(messageType, c.getPhoneNumber(), messageHistoryStart, messageHistoryEnd);
+					numberToSend = messageFactory.getSMSCountForMsisdn(c.getPhoneNumber(), messageHistoryStart, messageHistoryEnd);
 				} else if(filterClass == Group.class) {
 					// A Group was selected
 					List<Group> groups = new ArrayList<Group>();
@@ -1640,7 +1640,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				// TODO check this is necessary
 			} else if(attachedObject instanceof Contact) {
 				Contact c = (Contact)attachedObject;
-				frontlineController.sendTextMessage(c.getMsisdn(), messageText);
+				frontlineController.sendTextMessage(c.getPhoneNumber(), messageText);
 			} else if(attachedObject instanceof String) {
 				// Attached object is a phone number
 				frontlineController.sendTextMessage((String)attachedObject, messageText);
@@ -1675,8 +1675,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				if (isSelected(find(messageTab, COMPONENT_CB_CONTACTS))) {
 					Contact c = getContact(sel);
 					LOG.debug("Contact selected [" + c.getName() + "]");
-					if (message.getSenderMsisdn().endsWith(c.getMsisdn()) 
-							|| message.getRecipientMsisdn().endsWith(c.getMsisdn())) {
+					if (message.getSenderMsisdn().endsWith(c.getPhoneNumber()) 
+							|| message.getRecipientMsisdn().endsWith(c.getPhoneNumber())) {
 						toAdd = true;
 					}
 				} else if (isSelected(find(messageTab, COMPONENT_CB_GROUPS))) {
@@ -1994,7 +1994,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			return;
 		}
 		Contact selectedContact = getContact(selectedItem);
-		setText(tf, selectedContact.getMsisdn());
+		setText(tf, selectedContact.getPhoneNumber());
 		remove(dialog);
 	}
 	
@@ -2013,7 +2013,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			return;
 		}
 		Contact selectedContact = getContact(selectedItem);
-		setText(tf, selectedContact.getMsisdn());
+		setText(tf, selectedContact.getPhoneNumber());
 		remove(dialog);
 	}
 
@@ -3826,7 +3826,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			case KeywordAction.TYPE_FORWARD:
 				ret.append(InternationalisationUtils.getI18NString(ACTION_FORWARD));
 				ret.append(": \"");
-				ret.append(KeywordAction.KeywordUtils.getForwardText(action, DEMO_SENDER, DEMO_SENDER.getMsisdn(), action.getKeyword().getKeyword() +  DEMO_MESSAGE_TEXT_INCOMING));
+				ret.append(KeywordAction.KeywordUtils.getForwardText(action, DEMO_SENDER, DEMO_SENDER.getPhoneNumber(), action.getKeyword().getKeyword() +  DEMO_MESSAGE_TEXT_INCOMING));
 				ret.append("\" ");
 				ret.append(InternationalisationUtils.getI18NString(COMMON_TO_GROUP));
 				ret.append(": \"");
@@ -3846,7 +3846,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			case KeywordAction.TYPE_REPLY:
 				ret.append(InternationalisationUtils.getI18NString(COMMON_REPLY));
 				ret.append(": ");
-				ret.append(KeywordAction.KeywordUtils.getReplyText(action, DEMO_SENDER, DEMO_SENDER.getMsisdn(), DEMO_MESSAGE_TEXT_INCOMING, DEMO_MESSAGE_KEYWORD));
+				ret.append(KeywordAction.KeywordUtils.getReplyText(action, DEMO_SENDER, DEMO_SENDER.getPhoneNumber(), DEMO_MESSAGE_TEXT_INCOMING, DEMO_MESSAGE_KEYWORD));
 				break;
 			case KeywordAction.TYPE_EXTERNAL_CMD:
 				if (action.getExternalCommandType() == KeywordAction.EXTERNAL_HTTP_REQUEST) {
@@ -3858,7 +3858,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			case KeywordAction.TYPE_EMAIL:
 				ret.append(InternationalisationUtils.getI18NString(COMMON_E_MAIL));
 				ret.append(": ");
-				ret.append(KeywordAction.KeywordUtils.getReplyText(action, DEMO_SENDER, DEMO_SENDER.getMsisdn(), action.getKeyword().getKeyword() + DEMO_MESSAGE_TEXT_INCOMING, DEMO_MESSAGE_KEYWORD));
+				ret.append(KeywordAction.KeywordUtils.getReplyText(action, DEMO_SENDER, DEMO_SENDER.getPhoneNumber(), action.getKeyword().getKeyword() + DEMO_MESSAGE_TEXT_INCOMING, DEMO_MESSAGE_KEYWORD));
 				break;
 		}
 		return ret.toString();
@@ -3890,7 +3890,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @return
 	 */
 	private Object createListItem(Contact contact) {
-		Object listItem = createListItem(contact.getName() + " (" + contact.getMsisdn() + ")", contact);
+		Object listItem = createListItem(contact.getName() + " (" + contact.getPhoneNumber() + ")", contact);
 		setIcon(listItem, Icon.CONTACT);
 		return listItem;
 	}
@@ -3930,7 +3930,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		String name = contact.getName();
 		add(row, createTableCell(name));
 
-		add(row, createTableCell(contact.getMsisdn()));
+		add(row, createTableCell(contact.getPhoneNumber()));
 		add(row, createTableCell(contact.getEmailAddress()));
 		String groups = Utils.contactGroupsAsString(contact, DEFAULT_GROUPS_DELIMITER);
 		add(row, createTableCell(groups));

@@ -506,7 +506,7 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 			return;
 		}
 		Contact selectedContact = controller.getContact(selectedItem);
-		controller.setText(textField, selectedContact.getMsisdn());
+		controller.setText(textField, selectedContact.getPhoneNumber());
 		removeDialog(dialog);
 	}
 

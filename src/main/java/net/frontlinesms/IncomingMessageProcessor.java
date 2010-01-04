@@ -158,7 +158,7 @@ public class IncomingMessageProcessor extends Thread {
 								Contact sender = contactDao.getFromMsisdn(incomingSenderMsisdn);
 								if(sender == null) {
 									try {
-										sender = new Contact(null, incomingSenderMsisdn, null, null, null, true);
+										sender = new Contact("", incomingSenderMsisdn, null, null, null, true);
 										contactDao.saveContact(sender);
 									} catch (DuplicateKeyException ex) {
 										LOG.error(ex);
@@ -272,7 +272,7 @@ public class IncomingMessageProcessor extends Thread {
 			for (Contact contact : action.getGroup().getDirectMembers()) {
 				if (contact.isActive()) {
 					LOG.debug("Sending to [" + contact.getName() + "]");
-					frontlineSms.sendTextMessage(contact.getMsisdn(), KeywordAction.KeywordUtils.personaliseMessage(contact, forwardedMessageText));
+					frontlineSms.sendTextMessage(contact.getPhoneNumber(), KeywordAction.KeywordUtils.personaliseMessage(contact, forwardedMessageText));
 				}
 			}
 			break;
@@ -284,11 +284,11 @@ public class IncomingMessageProcessor extends Thread {
 			Contact contact = contactDao.getFromMsisdn(incomingSenderMsisdn);
 			try {
 				if (contact == null) {
-					contact = new Contact(null, incomingSenderMsisdn, null, null, null, true);
+					contact = new Contact("", incomingSenderMsisdn, null, null, null, true);
 					contactDao.saveContact(contact);
 				}
 				Group group = action.getGroup();
-				LOG.debug("Adding contact [" + contact.getName() + "], Number [" + contact.getMsisdn() + "] to Group [" + group.getName() + "]");
+				LOG.debug("Adding contact [" + contact.getName() + "], Number [" + contact.getPhoneNumber() + "] to Group [" + group.getName() + "]");
 				boolean contactAdded = group.addDirectMember(contact);
 				if(contactAdded) {
 					groupDao.updateGroup(group);
@@ -422,7 +422,7 @@ public class IncomingMessageProcessor extends Thread {
 					for (String contact : msg.getToContacts()) {
 						Contact c = contactDao.getContactByName(contact);
 						if (c!= null && c.isActive()) {
-							msg.addNumber(c.getMsisdn());
+							msg.addNumber(c.getPhoneNumber());
 						}
 					}
 					//Groups
@@ -431,7 +431,7 @@ public class IncomingMessageProcessor extends Thread {
 						if (g != null) {
 							for (Contact c : g.getDirectMembers()) {
 								if (c.isActive()) {
-									msg.addNumber(c.getMsisdn());
+									msg.addNumber(c.getPhoneNumber());
 								}
 							}
 						}
@@ -482,12 +482,12 @@ public class IncomingMessageProcessor extends Thread {
 			for (Contact contact : fwd.getDirectMembers()) {
 				if (contact.isActive()) {
 					if (responseActionType != KeywordAction.EXTERNAL_REPLY_AND_FORWARD 
-							|| !contact.getMsisdn().equalsIgnoreCase(incomingSenderMsisdn)) {
+							|| !contact.getPhoneNumber().equalsIgnoreCase(incomingSenderMsisdn)) {
 						//If we have already replied to the sender and he/she is on the group to forward
 						//so we don't send the message again.
 						LOG.debug("Sending to contact [" + contact.getName() + "]");
 					}
-					frontlineSms.sendTextMessage(contact.getMsisdn(), message);
+					frontlineSms.sendTextMessage(contact.getPhoneNumber(), message);
 				}
 			}
 		}

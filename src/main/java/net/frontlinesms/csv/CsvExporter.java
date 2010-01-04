@@ -163,7 +163,7 @@ public class CsvExporter {
 	
 				if (c != null) {
 					name = c.getName();
-					otherPhone = c.getOtherMsisdn();
+					otherPhone = c.getOtherPhoneNumber();
 					email = c.getEmailAddress();
 					notes = c.getNotes();
 				}
@@ -214,8 +214,8 @@ public class CsvExporter {
 			for (Contact contact : contacts) {
 				CsvUtils.writeLine(out, contactFormat, 
 					CsvUtils.MARKER_CONTACT_NAME, contact.getName(),
-					CsvUtils.MARKER_CONTACT_PHONE, contact.getMsisdn(),
-					CsvUtils.MARKER_CONTACT_OTHER_PHONE, contact.getOtherMsisdn(),
+					CsvUtils.MARKER_CONTACT_PHONE, contact.getPhoneNumber(),
+					CsvUtils.MARKER_CONTACT_OTHER_PHONE, contact.getOtherPhoneNumber(),
 					CsvUtils.MARKER_CONTACT_EMAIL, contact.getEmailAddress(),
 					CsvUtils.MARKER_CONTACT_STATUS, Boolean.toString(contact.isActive()),
 					CsvUtils.MARKER_CONTACT_NOTES, contact.getNotes(),
@@ -283,7 +283,7 @@ public class CsvExporter {
 	
 						if (c != null) {
 							name = c.getName();
-							otherPhone = c.getOtherMsisdn();
+							otherPhone = c.getOtherPhoneNumber();
 							email = c.getEmailAddress();
 							notes = c.getNotes();
 						}

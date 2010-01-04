@@ -73,14 +73,14 @@ public class Contact {
 	private long id;
 	
 	/** Name of this contact */
-	@Column(nullable=true, name=FIELD_NAME)
+	@Column(nullable=false, name=FIELD_NAME)
 	private String name;
 	
 	/** Phone number of this contact.  It should be unique within the system, but may be changed. */
 	@Column(unique=true, nullable=true, updatable=true, name=FIELD_PHONE_NUMBER)
 	private String phoneNumber;
 	
-	private String otherMsisdn;
+	private String otherPhoneNumber;
 	private String emailAddress;
 	private String notes;
 	private boolean active;
@@ -96,16 +96,17 @@ public class Contact {
 	/**
 	 * Creates a contact with the specified attributes.
 	 * @param name The name of the new Contact
-	 * @param msisdn The msisdn (phone number) of the new contact.
-	 * @param otherPhoneNumber 
-	 * @param emailAddress 
-	 * @param notes 
-	 * @param active 
+	 * @param phoneNumber The phone number of the new contact
+	 * @param otherPhoneNumber value for {@link #otherPhoneNumber}
+	 * @param emailAddress the email address of the new contact
+	 * @param notes value for {@link #notes}
+	 * @param active value for {@link #active}
 	 */
-	public Contact(String name, String msisdn, String otherPhoneNumber, String emailAddress, String notes, boolean active) {
+	public Contact(String name, String phoneNumber, String otherPhoneNumber, String emailAddress, String notes, boolean active) {
+		assert(name!=null) : "Cannot assign a null name to a contact.";
 		this.name = name;
-		this.phoneNumber = msisdn;
-		this.otherMsisdn = otherPhoneNumber;
+		this.phoneNumber = phoneNumber;
+		this.otherPhoneNumber = otherPhoneNumber;
 		this.emailAddress = emailAddress;
 		this.notes = notes;
 		this.active = active;
@@ -118,13 +119,10 @@ public class Contact {
 	 */
 	public String getDisplayName() {
 		if(this.name != null) return this.name;
-		else return this.getMsisdn();
+		else return this.getPhoneNumber();
 	}
 	
-	/**
-	 * Get this contact's name.
-	 * @return {@link #name}
-	 */
+	/** @return this contact's name */
 	public String getName() {
 		return this.name;
 	}
@@ -141,24 +139,24 @@ public class Contact {
 	 * Gets this contact's phone number as a String.
 	 * @return {@link #phoneNumber}
 	 */
-	public String getMsisdn() {
+	public String getPhoneNumber() {
 		return this.phoneNumber;
 	}
 	
 	/**
 	 * Gets this contact's other contact phone number as a String.
-	 * @return {@link #otherMsisdn}
+	 * @return {@link #otherPhoneNumber}
 	 */
-	public String getOtherMsisdn() {
-		return this.otherMsisdn;
+	public String getOtherPhoneNumber() {
+		return this.otherPhoneNumber;
 	}
 	
 	/**
 	 * Sets this contact's other phone number.
-	 * @param msisdn
+	 * @param phoneNumber
 	 */
-	public void setOtherMsisdn(String msisdn) {
-		this.otherMsisdn = msisdn;
+	public void setOtherPhoneNumber(String phoneNumber) {
+		this.otherPhoneNumber = phoneNumber;
 	}
 	
 	/**
@@ -196,12 +194,12 @@ public class Contact {
 	/**
 	 * Sets this contact's phone number.  This should be a phone number in international
 	 * format with leading '+'.
-	 * @param msisdn The contact's new phone number.
+	 * @param phoneNumber The contact's new phone number.
 	 * @throws NumberFormatException If the supplied number is not a valid international phone number.
 	 * @throws DuplicateKeyException If there is already a contact with the supplied number.
 	 */
-	public void setMsisdn(String msisdn) throws NumberFormatException, DuplicateKeyException {
-		this.phoneNumber = msisdn;
+	public void setPhoneNumber(String phoneNumber) throws NumberFormatException, DuplicateKeyException {
+		this.phoneNumber = phoneNumber;
 	}
 	
 	/**
@@ -267,7 +265,7 @@ public class Contact {
 				"name=" + this.name + ";"+
 				"phoneNumber=" + this.phoneNumber + ";"+
 				"emailAddress=" + this.emailAddress + ";"+
-				"otherMsisdn=" + this.otherMsisdn + ";"+
+				"otherPhoneNumber=" + this.otherPhoneNumber + ";"+
 				"notes=" + this.notes +
 				"]";
 	}
@@ -284,7 +282,7 @@ public class Contact {
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((notes == null) ? 0 : notes.hashCode());
 		result = prime * result
-				+ ((otherMsisdn == null) ? 0 : otherMsisdn.hashCode());
+				+ ((otherPhoneNumber == null) ? 0 : otherPhoneNumber.hashCode());
 		return result;
 	}
 
@@ -320,10 +318,10 @@ public class Contact {
 				return false;
 		} else if (!notes.equals(other.notes))
 			return false;
-		if (otherMsisdn == null) {
-			if (other.otherMsisdn != null)
+		if (otherPhoneNumber == null) {
+			if (other.otherPhoneNumber != null)
 				return false;
-		} else if (!otherMsisdn.equals(other.otherMsisdn))
+		} else if (!otherPhoneNumber.equals(other.otherPhoneNumber))
 			return false;
 		return true;
 	}

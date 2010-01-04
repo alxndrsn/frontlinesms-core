@@ -39,7 +39,6 @@ public final class FrontlineSMSConstants {
 	public static final String USE_DATABASE = "db";
 	
 	public static final String UNKNOWN_NOTES = "sentence.contact.added.automatically";
-	public static final String UNKNOWN_NAME = "common.unnamed.contact";
 
 	public static final String DEFAULT_START_PAGE = "0";
 

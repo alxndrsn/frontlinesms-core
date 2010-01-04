@@ -59,7 +59,7 @@ public class InMemoryContactDao implements ContactDao {
 	/** @see ContactDao#getFromMsisdn(String) */
 	public Contact getFromMsisdn(String msisdn) {
 		for(Contact c : allContacts.values()) {
-			if(msisdn.equals(c.getMsisdn())) {
+			if(msisdn.equals(c.getPhoneNumber())) {
 				return c;
 			}
 		}
@@ -73,10 +73,10 @@ public class InMemoryContactDao implements ContactDao {
 
 	/** @see ContactDao#saveContact(Contact) */
 	public void saveContact(Contact contact) throws DuplicateKeyException {
-		if(allContacts.containsKey(contact.getMsisdn())) {
+		if(allContacts.containsKey(contact.getPhoneNumber())) {
 			throw new DuplicateKeyException();
 		} else {
-			allContacts.put(contact.getMsisdn(), contact);
+			allContacts.put(contact.getPhoneNumber(), contact);
 		}
 	}
 	
@@ -85,12 +85,12 @@ public class InMemoryContactDao implements ContactDao {
 		for(Group g : contact.getGroups()) {
 			g.removeContact(contact);
 		}
-		allContacts.remove(contact.getMsisdn());
+		allContacts.remove(contact.getPhoneNumber());
 	}
 	
 	/** @see ContactDao#updateContact(Contact) */
 	public void updateContact(Contact contact) throws DuplicateKeyException {
-		Contact contactWithThisMsisdn = allContacts.get(contact.getMsisdn());
+		Contact contactWithThisMsisdn = allContacts.get(contact.getPhoneNumber());
 		if(contactWithThisMsisdn == contact) {
 			// no worries, do nothing
 		} else if(contactWithThisMsisdn == null) {
@@ -106,7 +106,7 @@ public class InMemoryContactDao implements ContactDao {
 				throw new IllegalStateException("Trying to update unsaved contact.");
 			}
 			allContacts.remove(oldMsisdn);
-			allContacts.put(contact.getMsisdn(), contact);
+			allContacts.put(contact.getPhoneNumber(), contact);
 		} else {
 			throw new DuplicateKeyException();
 		}

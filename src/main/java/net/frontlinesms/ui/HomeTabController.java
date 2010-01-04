@@ -139,7 +139,7 @@ public class HomeTabController implements ThinletUiEventHandler {
 			return;
 		}
 		Contact selectedContact = uiController.getContact(selectedItem);
-		uiController.setText(tfRecipient, selectedContact.getMsisdn());
+		uiController.setText(tfRecipient, selectedContact.getPhoneNumber());
 		uiController.remove(dialog);
 		uiController.numberToSend = 1;
 		uiController.updateCost();

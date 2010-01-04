@@ -13,7 +13,6 @@ import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUPS_AND_CONTACTS
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUP_ALREADY_EXISTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_IMPOSSIBLE_TO_CREATE_A_GROUP_HERE;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_REMOVING_CONTACTS;
-import static net.frontlinesms.FrontlineSMSConstants.UNKNOWN_NAME;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BUTTON_YES;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_DORMANT;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_EMAIL_ADDRESS;
@@ -285,13 +284,9 @@ public class ContactsTabController implements ThinletUiEventHandler {
 		Object createDialog = this.uiController.loadComponentFromFile(UI_FILE_CREATE_CONTACT_FORM, this);
 		this.uiController.setAttachedObject(createDialog, contact);
 		if (contact != null) {
-			String name = "";
-			if (!contact.getName().equals(InternationalisationUtils.getI18NString(UNKNOWN_NAME))) {
-				name = contact.getName();
-			}
-			contactDetails_setName(createDialog, name);
-			contactDetails_setMobileMsisdn(createDialog, contact.getMsisdn());
-			contactDetails_setOtherMsisdn(createDialog, contact.getOtherMsisdn());
+			contactDetails_setName(createDialog, contact.getName());
+			contactDetails_setMobileMsisdn(createDialog, contact.getPhoneNumber());
+			contactDetails_setOtherMsisdn(createDialog, contact.getOtherPhoneNumber());
 			contactDetails_setEmailAddress(createDialog, contact.getEmailAddress());
 			contactDetails_setNotes(createDialog, contact.getNotes());
 			contactDetails_setActive(createDialog, contact.isActive());
@@ -459,7 +454,6 @@ public class ContactsTabController implements ThinletUiEventHandler {
 		boolean isActive = contactDetails_getActive(contactDetailsDialog);
 		
 		try {
-			if (name.equals("")) name = InternationalisationUtils.getI18NString(UNKNOWN_NAME);
 			if (contact == null) {
 				LOG.debug("Creating a new contact [" + name + ", " + msisdn + "]");
 				contact = new Contact(name, msisdn, otherMsisdn, emailAddress, notes, isActive);
@@ -469,9 +463,9 @@ public class ContactsTabController implements ThinletUiEventHandler {
 				// that would otherwise be set by the constructor called in the block
 				// above.
 				LOG.debug("Editing contact [" + contact.getName() + "]. Setting new values!");
-				contact.setMsisdn(msisdn);
+				contact.setPhoneNumber(msisdn);
 				contact.setName(name);
-				contact.setOtherMsisdn(otherMsisdn);
+				contact.setOtherPhoneNumber(otherMsisdn);
 				contact.setEmailAddress(emailAddress);
 				contact.setNotes(notes);
 				contact.setActive(isActive);
@@ -597,12 +591,12 @@ public class ContactsTabController implements ThinletUiEventHandler {
 			//Root group selected
 			//Show everyone
 			for (Contact c : contactDao.getAllContacts()) {
-				toBeShown.put(c.getMsisdn(), c);
+				toBeShown.put(c.getPhoneNumber(), c);
 			}
 		} else {
 			for (Object o : this.uiController.getSelectedItems(tree)) {
 				for(Contact c : this.uiController.getGroup(o).getAllMembers()) {
-					toBeShown.put(c.getMsisdn(), c);
+					toBeShown.put(c.getPhoneNumber(), c);
 				}
 			}
 		}
