@@ -543,6 +543,14 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		setMethod(messageListComponent, "updateMessageList");
 	}
 
+	/**
+	 * Sets the ACTION attribute on a Thinlet UI component.
+	 * FIXME this method is misnamed, and its behaviour appears to be bad - why is it swallowing exceptions?
+	 * FIXME It is also unclear
+	 * @param component
+	 * @param methodName
+	 * @deprecated please use {@link #setAction(Object, String, Object, Object)} instead
+	 */
 	public void setMethod(Object component, String methodName) {
 		LOG.trace("ENTER");
 		LOG.debug("Method [" + methodName + "]");

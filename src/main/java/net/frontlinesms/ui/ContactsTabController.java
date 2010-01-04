@@ -736,7 +736,7 @@ public class ContactsTabController implements ThinletUiEventHandler {
 		}
 	}
 	/** Repopulates the contact list according to the current filter. */
-	private void updateContactList() {
+	public void updateContactList() {
 		// To repopulate the contact list, we must first locate it and remove the current
 		// contents.  Once we've done that, work out what should now be displayed in it,
 		// and add them all.
@@ -872,7 +872,7 @@ public class ContactsTabController implements ThinletUiEventHandler {
 		//Current page
 		this.uiController.setListPageNumber(1, contactListComponent);
 		//Actions
-		this.uiController.setMethod(contactListComponent, "updateContactList");
+		this.uiController.setAction(contactListComponent, "updateContactList", this.tabComponent, this);
 	}
 
 //> STATIC FACTORIES
