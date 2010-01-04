@@ -73,7 +73,7 @@ public class Contact {
 	private long id;
 	
 	/** Name of this contact */
-	@Column(nullable=false, name=FIELD_NAME)
+	@Column(nullable=true, name=FIELD_NAME)
 	private String name;
 	
 	/** Phone number of this contact.  It should be unique within the system, but may be changed. */

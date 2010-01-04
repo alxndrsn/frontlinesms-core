@@ -66,6 +66,11 @@ public abstract class ReusableContactDaoTest extends ReusableTestCase<Contact> {
 		assertEquals(1, dao.getUnnamedContacts().size());
 		assertEquals(2, dao.getUngroupedContacts().size());
 		
+		Contact nullName = new Contact(null, "1234578", null, null, null, true);
+		dao.saveContact(nullName);
+		assertEquals(2, dao.getUnnamedContacts().size());
+		assertEquals(3, dao.getUngroupedContacts().size());
+		
 		// Test delete
 		dao.deleteContact(noName);
 		assertEquals(1, dao.getUnnamedContacts().size());
