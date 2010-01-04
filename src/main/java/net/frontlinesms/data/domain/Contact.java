@@ -103,7 +103,6 @@ public class Contact {
 	 * @param active value for {@link #active}
 	 */
 	public Contact(String name, String phoneNumber, String otherPhoneNumber, String emailAddress, String notes, boolean active) {
-		assert(name!=null) : "Cannot assign a null name to a contact.";
 		this.name = name;
 		this.phoneNumber = phoneNumber;
 		this.otherPhoneNumber = otherPhoneNumber;

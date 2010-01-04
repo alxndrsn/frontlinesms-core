@@ -284,11 +284,11 @@ public class ContactsTabController implements ThinletUiEventHandler {
 		Object createDialog = this.uiController.loadComponentFromFile(UI_FILE_CREATE_CONTACT_FORM, this);
 		this.uiController.setAttachedObject(createDialog, contact);
 		if (contact != null) {
-			contactDetails_setName(createDialog, contact.getName());
-			contactDetails_setMobileMsisdn(createDialog, contact.getPhoneNumber());
-			contactDetails_setOtherMsisdn(createDialog, contact.getOtherPhoneNumber());
-			contactDetails_setEmailAddress(createDialog, contact.getEmailAddress());
-			contactDetails_setNotes(createDialog, contact.getNotes());
+			setText(createDialog, COMPONENT_CONTACT_NAME, contact.getName());
+			setText(createDialog, COMPONENT_CONTACT_MOBILE_MSISDN, contact.getPhoneNumber());
+			setText(createDialog, COMPONENT_CONTACT_OTHER_MSISDN, contact.getOtherPhoneNumber());
+			setText(createDialog, COMPONENT_CONTACT_EMAIL_ADDRESS, contact.getEmailAddress());
+			setText(createDialog, COMPONENT_CONTACT_NOTES, contact.getNotes());
 			contactDetails_setActive(createDialog, contact.isActive());
 
 			Object groupList = this.uiController.find(createDialog, COMPONENT_NEW_CONTACT_GROUP_LIST);
@@ -446,11 +446,11 @@ public class ContactsTabController implements ThinletUiEventHandler {
 			contact = (Contact)attachment;
 			LOG.debug("Attachment is a contact [" + contact.getName() + "]");
 		}
-		String name = contactDetails_getName(contactDetailsDialog);
-		String msisdn = contactDetails_getMobileMsisdn(contactDetailsDialog);
-		String otherMsisdn = contactDetails_getOtherMsisdn(contactDetailsDialog);
-		String emailAddress = contactDetails_getEmailAddress(contactDetailsDialog);
-		String notes = contactDetails_getNotes(contactDetailsDialog);
+		String name = getText(contactDetailsDialog, COMPONENT_CONTACT_NAME);
+		String msisdn = getText(contactDetailsDialog, COMPONENT_CONTACT_MOBILE_MSISDN);
+		String otherMsisdn = getText(contactDetailsDialog, COMPONENT_CONTACT_OTHER_MSISDN);
+		String emailAddress = getText(contactDetailsDialog, COMPONENT_CONTACT_EMAIL_ADDRESS);
+		String notes = getText(contactDetailsDialog, COMPONENT_CONTACT_NOTES);
 		boolean isActive = contactDetails_getActive(contactDetailsDialog);
 		
 		try {
@@ -659,49 +659,28 @@ public class ContactsTabController implements ThinletUiEventHandler {
 		Object node = getNodeForGroup(groupListComponent, group); //Only advanced mode
 		updateGroup(group, node);
 	}
+	
 	/**
-	 * Set the current name component.
-	 * @param contactDetails
-	 * @param name
+	 * Finds a child component by name, and then sets its text value.
+	 * @param parentComponent The parent component to search within
+	 * @param componentName The name of the child component
+	 * @param value the value to set the child's TEXT attribute to
 	 */
-	private void contactDetails_setName(Object contactDetails, String name) {
-		this.uiController.setText(this.uiController.find(contactDetails, COMPONENT_CONTACT_NAME), name);
+	private void setText(Object parentComponent, String componentName, String value) {
+		if(value == null) value = "";
+		this.uiController.setText(this.uiController.find(parentComponent, componentName), value);
 	}
-
+	
 	/**
-	 * Set the current phone number component.
-	 * @param contactDetails
-	 * @param msisdn
+	 * Finds a child component by name, and gets its text value.
+	 * @param parentComponent The parent component to search within
+	 * @param componentName The name of the child component
+	 * @return the text attribute of the child
 	 */
-	private void contactDetails_setMobileMsisdn(Object contactDetails, String msisdn) {
-		this.uiController.setText(this.uiController.find(contactDetails, COMPONENT_CONTACT_MOBILE_MSISDN), msisdn);
+	private String getText(Object parentComponent, String componentName) {
+		return this.uiController.getText(this.uiController.find(parentComponent, componentName));
 	}
-
-	/**
-	 * Set the current other phone number component.
-	 * @param contactDetails
-	 * @param msisdn
-	 */
-	private void contactDetails_setOtherMsisdn(Object contactDetails, String msisdn) {
-		this.uiController.setText(this.uiController.find(contactDetails, COMPONENT_CONTACT_OTHER_MSISDN), msisdn);
-	}
-
-	/**
-	 * Set the current email address component.
-	 * @param contactDetails
-	 * @param emailAddress
-	 */
-	private void contactDetails_setEmailAddress(Object contactDetails, String emailAddress) {
-		this.uiController.setText(this.uiController.find(contactDetails, COMPONENT_CONTACT_EMAIL_ADDRESS), emailAddress);
-	}
-	/**
-	 * Set the current notes component.
-	 * @param contactDetails
-	 * @param notes
-	 */
-	private void contactDetails_setNotes(Object contactDetails, String notes) {
-		this.uiController.setText(this.uiController.find(contactDetails, COMPONENT_CONTACT_NOTES), notes);
-	}
+	
 	/**
 	 * Set the current state of the active/dormant component.
 	 * @param contactDetails
@@ -717,46 +696,11 @@ public class ContactsTabController implements ThinletUiEventHandler {
 		}
 	}
 	/**
-	 * @param contactDetails
+	 * @param contactDetails contact details dialog
 	 * @return the current state of the active component 
 	 */
 	private boolean contactDetails_getActive(Object contactDetails) {
 		return this.uiController.isSelected(this.uiController.find(contactDetails, COMPONENT_RADIO_BUTTON_ACTIVE));
-	}
-	/**
-	 * @param contactDetails
-	 * @return the displayed name for a contact on the Contact Manager's Contact Details section
-	 */
-	private String contactDetails_getName(Object contactDetails) {
-		return this.uiController.getText(this.uiController.find(contactDetails, COMPONENT_CONTACT_NAME));
-	}
-	/**
-	 * @param contactDetails
-	 * @return the displayed msisdn for a contact on the Contact Manager's Contact Details section
-	 */
-	private String contactDetails_getMobileMsisdn(Object contactDetails) {
-		return this.uiController.getText(this.uiController.find(contactDetails, COMPONENT_CONTACT_MOBILE_MSISDN));
-	}
-	/**
-	 * @param contactDetails
-	 * @return the displayed alternate msisdn for a contact on the Contact Manager's Contact Details section
-	 */
-	private String contactDetails_getOtherMsisdn(Object contactDetails) {
-		return this.uiController.getText(this.uiController.find(contactDetails, COMPONENT_CONTACT_OTHER_MSISDN));
-	}
-	/**
-	 * @param contactDetails
-	 * @return the displayed email for a contact on the Contact Manager's Contact Details section
-	 */
-	private String contactDetails_getEmailAddress(Object contactDetails) {
-		return this.uiController.getText(this.uiController.find(contactDetails, COMPONENT_CONTACT_EMAIL_ADDRESS));
-	}
-	/**
-	 * @param contactDetails
-	 * @return the displayed notes for a contact on the Contact Manager's Contact Details section
-	 */
-	private String contactDetails_getNotes(Object contactDetails) {
-		return this.uiController.getText(this.uiController.find(contactDetails, COMPONENT_CONTACT_NOTES));
 	}
 	private void removeFromContactList(Contact contact, Group group) {
 		List<Group> selectedGroupsFromTree = new ArrayList<Group>();
