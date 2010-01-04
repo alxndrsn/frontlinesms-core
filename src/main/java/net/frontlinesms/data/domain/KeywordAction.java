@@ -118,28 +118,20 @@ public class KeywordAction {
 	private int externalCommandResponseActionType;
 	
 //> ACCESSOR METHODS
-	/**
-	 * Gets the type of this instance of KeywordAction.
-	 * @return {@link #type}
-	 */
+	/** @return {@link #type} */
 	public int getType() {
 		return this.type;
 	}
 	
-	/**
-	 * Gets the external command type of this instance of KeywordAction.
-	 * @return
-	 */
+	/** @return the external command type */
 	public int getExternalCommandType() {
+		assert(type==TYPE_EXTERNAL_CMD) : "This method cannot be called on an action of type " + type;
 		return this.externalCommandType;
 	}
 	
-	/**
-	 * Gets the external command response type of this instance of KeywordAction.
-	 * @return
-	 */
+	/** @return the external command response type */
 	public int getExternalCommandResponseType() {
-		if(getType() != TYPE_EXTERNAL_CMD) throw new IllegalStateException("Cannot get command response from type: " + getType());
+		assert(type==TYPE_EXTERNAL_CMD) : "Cannot get command response from type: " + type;
 		return externalCommandResponseType;
 	}
 	
@@ -148,7 +140,7 @@ public class KeywordAction {
 	 * @param type new value for {@link #externalCommandResponseType}
 	 */
 	public void setExternalCommandResponseType(int type) {
-		if(getType() != TYPE_EXTERNAL_CMD) throw new IllegalStateException("Cannot set command response from type: " + getType());
+		assert(type==TYPE_EXTERNAL_CMD) : "Cannot set command response from type: " + type;
 		this.externalCommandResponseType = type;
 	}
 	
@@ -157,7 +149,7 @@ public class KeywordAction {
 	 * @return
 	 */
 	public int getCommandResponseActionType() {
-		if(getType() != TYPE_EXTERNAL_CMD) throw new IllegalStateException("Cannot get command response action from type: " + getType());
+		assert(type==TYPE_EXTERNAL_CMD) : "Cannot get command response action from type: " + type;
 		return externalCommandResponseActionType;
 	}
 	
@@ -166,25 +158,21 @@ public class KeywordAction {
 	 * @param type
 	 */
 	public void setCommandResponseActionType(int type) {
-		if(getType() != TYPE_EXTERNAL_CMD) throw new IllegalStateException("Cannot get command response action from type: " + getType());
+		assert(type==TYPE_EXTERNAL_CMD) : "Cannot get command response action from type: " + type;
 		this.externalCommandResponseActionType = type;
 	}
 	
-	/**
-	 * Sets the external command type of this instance of KeywordAction.
-	 * @param type
-	 */
+	/** @param type new value for {@link #externalCommandType} */
 	public void setExternalCommandType(int type) {
 		this.externalCommandType = type;
 	}
 	
-	/**
-	 * Gets the state of this instance of KeywordAction.
-	 * @return {@link #alive}
+	/** 
+	 * @param time The time that this action was triggered
+	 * @return <code>true</code> if the current date is within {@link #startDate} and {@link #endDate}; <code>false</code> otherwise.
 	 */
-	public boolean isAlive() {
-		long now = System.currentTimeMillis();
-		return now >= this.startDate && now <= this.endDate;
+	public boolean isAlive(long time) {
+		return time >= this.startDate && time <= this.endDate;
 	}
 	
 	/**
@@ -200,7 +188,7 @@ public class KeywordAction {
 	 * @return {@link #emailRecipients}
 	 */
 	public String getEmailRecipients() {
-		if(this.type != TYPE_EMAIL) throw new IllegalStateException("Cannot get email recipients from action of type: " + type);
+		assert(this.type==TYPE_EMAIL) : "Cannot get email recipients from action of type: " + type;
 		return this.emailRecipients;
 	}
 	
@@ -209,40 +197,28 @@ public class KeywordAction {
 	 * @return {@link #emailSubject} 
 	 */
 	public String getEmailSubject() {
-		if(this.type != TYPE_EMAIL) throw new IllegalStateException("Cannot get email subject from action of type: " + type);
+		assert(this.type==TYPE_EMAIL) : "Cannot get email subject from action of type: " + type;
 		return this.emailSubject;
 	}
 	
-	/**
-	 * Gets this action end date.
-	 * @return {@link #endDate}
-	 */
+	/** @return {@link #endDate} */
 	public long getEndDate() {
 		return this.endDate;
 	}
 	
-	/**
-	 * Sets this action start date.
-	 * @param date new value for {@link #startDate} 
-	 */
+	/** @param date new value for {@link #startDate} */
 	public void setStartDate(long date) {
 		this.startDate = date;
 	}
 	
-	/**
-	 * Sets this action end date.
-	 * @param date new value for {@link #endDate} 
-	 */
+	/** @param date new value for {@link #endDate} */
 	public void setEndDate(long date) {
 		this.endDate = date;
 	}
 	
-	/**
-	 * Sets the group of this instance of KeywordAction.
-	 * @param group new value for {@link #group}
-	 */
+	/** @param group new value for {@link #group} */
 	public void setGroup(Group group) {
-		if (!hasGroup()) throw new IllegalStateException("Cannot get group from action of type: " + type);
+		assert(hasGroup()) : "Cannot set group from action of type: " + type;
 		this.group = group;
 	}
 	
@@ -262,94 +238,63 @@ public class KeywordAction {
 	 * @param recipients new value for {@link #emailRecipients}
 	 */
 	public void setEmailRecipients(String recipients) {
-		if(this.type != TYPE_EMAIL) throw new IllegalStateException("Cannot set email recipients from action of type: " + type);
+		assert(this.type==TYPE_EMAIL) : "Cannot set email recipients from action of type: " + type;
 		this.emailRecipients = recipients;
 	}
 	
-	/**
-	 * Sets the email subject of this instance of KeywordAction.
-	 * @param subject new value for {@link #emailSubject}
-	 */
+	/** @param subject new value for {@link #emailSubject} of {@link #TYPE_EMAIL} */
 	public void setEmailSubject(String subject) {
-		if(this.type != TYPE_EMAIL) throw new IllegalStateException("Cannot set email subject from action of type: " + type);
+		assert(this.type==TYPE_EMAIL) : "Cannot set email subject from action of type: " + type;
 		this.emailSubject = subject;
 	}
 	
-	/**
-	 * Sets the email account of this instance of KeywordAction.
-	 * @param emailAccount new value for {@link #emailAccount} 
-	 */
+	/** @param emailAccount new value for {@link #emailAccount} of {@link #TYPE_EMAIL} */
 	public void setEmailAccount(EmailAccount emailAccount) {
-		if(this.type != TYPE_EMAIL) throw new IllegalStateException("Cannot get group from action of type: " + type);
+		assert(this.type==TYPE_EMAIL) : "Cannot get group from action of type: " + type;
 		this.emailAccount = emailAccount;
 	}
 	
-	/**
-	 * Sets the forward text of this instance of KeywordAction.
-	 * @param text new value for {@link #forwardText}
-	 */
+	/** @param text new value for {@link #commandString} of a {@link #TYPE_FORWARD} */
 	public void setForwardText(String text) {
-		if (type != TYPE_FORWARD) throw new IllegalStateException("Cannot get forward text from action of type: " + type);
+		assert(type==TYPE_FORWARD) : "Cannot get forward text from action of type: " + type;
 		this.commandString = text;
 	}
 	
-	/**
-	 * Sets the command text of this instance of KeywordAction.
-	 * @param commandText new value for {@link #commandText}
-	 */
+	/** @param commandText new value for {@link #commandString} */
 	public void setCommandText(String commandText) {
 		this.commandString = commandText;
 	}
 	
-	/**
-	 * Sets the command line of this instance of KeywordAction.
-	 * @param commandLine new value for {@link #commandLine}
-	 */
+	/** @param commandLine new value for {@link #externalCommand} */
 	public void setCommandLine(String commandLine) {
 		this.externalCommand = commandLine;
 	}
 	
-	/**
-	 * Gets how many times this action was executed.
-	 * @return {@link #counter}
-	 */
+	/** @return how many times this action was executed */
 	public int getCounter() {
 		return this.counter;
 	}
 	
-	/**
-	 * Increments how many times this action was executed.
-	 */
+	/** Increments how many times this action was executed. */
 	public void incrementCounter() {
 		++counter;
 	}
 	
-	/**
-	 * Gets the group related to this keyword action, or throws an exception if this
-	 * type of action does not have groups associated with it.
-	 * @return {@link #group}
-	 */
+	/** @return the group related to this keyword action */
 	public Group getGroup() {
-		if(!hasGroup()) throw new IllegalStateException("Cannot get group from action of type: " + type);
+		assert(hasGroup()) : "Cannot get group from action of type: " + type;
 		return this.group;
 	}
 
-	/**
-	 * Gets the email account related to this keyword action, or throws an exception if this
-	 * type of action does not have email account associated with it.
-	 * @return {@link #emailAccount}
-	 */
+	/** @return the email account related to this keyword action */
 	public EmailAccount getEmailAccount() {
-		if(this.type != TYPE_EMAIL) throw new IllegalStateException("Cannot get group from action of type: " + type);
+		assert(this.type==TYPE_EMAIL) : "Cannot get group from action of type: " + type;
 		return this.emailAccount;
 	}
 	
-	/**
-	 * Gets the reply text for this action (if it is of TYPE_REPLY or TYPE_EMAIL).
-	 * @return {@link #unformattedReplyText}
-	 */
+	/** @return {@link #unformattedReplyText} the reply text for this action (if it is of TYPE_REPLY or TYPE_EMAIL) */
 	public String getUnformattedReplyText() {
-		if(type != TYPE_REPLY && type != TYPE_EMAIL) throw new IllegalStateException("Cannot get reply text from action of type: " + type);
+		assert(type==TYPE_REPLY || type==TYPE_EMAIL) : "Cannot get reply text from action of type: " + type;
 		return this.commandString;
 	}
 	
@@ -358,32 +303,25 @@ public class KeywordAction {
 	 * @param replyText new value for {@link #replyText}
 	 */
 	public void setReplyText(String replyText) {
-		if(type != TYPE_REPLY && type != TYPE_EMAIL) throw new IllegalStateException("Cannot set reply text from action of type: " + type);
+		assert(type==TYPE_REPLY || type==TYPE_EMAIL) : "Cannot set reply text from action of type: " + type;
 		this.commandString = replyText;
 	}
 	
-	/**
-	 * Gets the forward text for this action (if it is of TYPE_FORWARD).
-	 * @return
-	 */
+	/** @return the forward text for this action (if it is of TYPE_FORWARD). */
 	public String getUnformattedForwardText() {
-		if(type != TYPE_FORWARD) throw new IllegalStateException("Cannot get forward text from action of type: " + type);
+		assert(type==TYPE_FORWARD) : "Cannot get forward text from action of type: " + type;
 		return this.commandString;
 	}
 	
-	/**
-	 * Gets the command text for this action (if it is of TYPE_EXTERNAL_CMD).
-	 */
+	/** @return the command text for this action (if it is of TYPE_EXTERNAL_CMD). */
 	public String getUnformattedCommandText() {
-		if(getType() != TYPE_EXTERNAL_CMD) throw new IllegalStateException("Cannot get command text from type: " + getType());
+		assert(type==TYPE_EXTERNAL_CMD) : "Cannot get command text from type: " + type;
 		return this.commandString;
 	}
 	
-	/**
-	 * Gets the command line for this action (if it is of TYPE_EXTERNAL_CMD).
-	 */
+	/** @return the command line for this action (if it is of TYPE_EXTERNAL_CMD). */
 	public String getUnformattedCommand() {
-		if(getType() != TYPE_EXTERNAL_CMD) throw new IllegalStateException("Cannot get command from type: " + getType());
+		assert(type==TYPE_EXTERNAL_CMD) : "Cannot get command from type: " + type;
 		return this.externalCommand;
 	}
 	
@@ -426,7 +364,7 @@ public class KeywordAction {
 		 * @return
 		 * TODO remove incomingKeyword parameter
 		 */
-		public static final String getReplyText(KeywordAction action, Contact sender, String senderMsisdn, String incomingMessageText, String incomingKeyword) throws IllegalStateException {
+		public static final String getReplyText(KeywordAction action, Contact sender, String senderMsisdn, String incomingMessageText, String incomingKeyword)  {
 			String senderDisplayName;
 			if(sender != null) senderDisplayName = sender.getDisplayName();
 			else senderDisplayName = senderMsisdn;
@@ -458,9 +396,8 @@ public class KeywordAction {
 		 * @param senderMsisdn
 		 * @param incomingMessageText
 		 * @return
-		 * @throws IllegalStateException 
 		 */
-		public static final String getExternalCommand(KeywordAction action, Contact sender, String senderMsisdn, String incomingMessageText) throws IllegalStateException {
+		public static final String getExternalCommand(KeywordAction action, Contact sender, String senderMsisdn, String incomingMessageText) {
 			String senderDisplayName;
 			if (sender != null) senderDisplayName = sender.getDisplayName();
 			else senderDisplayName = senderMsisdn;
@@ -477,7 +414,7 @@ public class KeywordAction {
 		 * @return
 		 * @throws IllegalStateException
 		 */
-		public static final String getExternalCommandReplyMessage(KeywordAction action, String response) throws IllegalStateException {
+		public static final String getExternalCommandReplyMessage(KeywordAction action, String response) {
 			return KeywordUtils.getFormattedCommandReply(action, response);
 		}
 		
@@ -490,7 +427,7 @@ public class KeywordAction {
 		 * @param incomingMessageText The text of the received message.
 		 * @return
 		 */
-		public static final String getForwardText(KeywordAction action, Contact sender, String senderMsisdn, String incomingMessageText) throws IllegalStateException {
+		public static final String getForwardText(KeywordAction action, Contact sender, String senderMsisdn, String incomingMessageText) {
 			String senderDisplayName;
 			if(sender != null) senderDisplayName = sender.getDisplayName();
 			else senderDisplayName = senderMsisdn;
@@ -620,7 +557,7 @@ public class KeywordAction {
 	 * @param keyword The keyword that triggers this action
 	 * @param commandLine The command to be executed
 	 * @param commandType 
-	 * <li> HTTP request  
+	 * <li> HTTP request
 	 * <li> Command line execution.
 	 * @param responseType 
 	 * <li> Plain Text 
@@ -704,7 +641,6 @@ public class KeywordAction {
 		result = prime * result + commandInteger;
 		result = prime * result
 				+ ((commandString == null) ? 0 : commandString.hashCode());
-		result = prime * result + counter;
 		result = prime * result
 				+ ((emailRecipients == null) ? 0 : emailRecipients.hashCode());
 		result = prime * result
@@ -737,8 +673,6 @@ public class KeywordAction {
 			if (other.commandString != null)
 				return false;
 		} else if (!commandString.equals(other.commandString))
-			return false;
-		if (counter != other.counter)
 			return false;
 		if (emailRecipients == null) {
 			if (other.emailRecipients != null)

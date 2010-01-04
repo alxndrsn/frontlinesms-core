@@ -3983,7 +3983,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			add(row, createTableCell(InternationalisationUtils.getI18NString(COMMON_UNDEFINED)));
 		}
 		cell = createTableCell("");
-		setIcon(cell, action.isAlive() ? Icon.TICK : Icon.CANCEL);
+		setIcon(cell, action.isAlive(System.currentTimeMillis()) ? Icon.TICK : Icon.CANCEL);
 		setChoice(cell, ALIGNMENT, CENTER);
 		add(row, cell);
 		add(row, createTableCell(action.getCounter()));

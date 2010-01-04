@@ -223,7 +223,6 @@ public class IncomingMessageProcessor extends Thread {
 	/**
 	 * Processes keyword actions for a text message.
 	 * @param incoming
-	 * @param refNo 
 	 */
 	private void handleTextMessage(final Message incoming) {
 		Keyword keyword = keywordDao.getFromMessageText(incoming.getTextContent());
@@ -239,10 +238,11 @@ public class IncomingMessageProcessor extends Thread {
 				//If we found a contact, he/she needs to be allowed to execute the action.
 				if (contact == null || contact.isActive()) {
 					// TODO why are we creating new threads here?  Looks like a bad idea; why is it necessary?
+					final long triggerTime = System.currentTimeMillis();
 					new Thread() {
 						public void run() {
 							for (KeywordAction action : actions) {
-								if (action.isAlive()) {
+								if (action.isAlive(triggerTime)) {
 									handleIncomingMessageAction_post(action, incoming);
 								}
 							}
@@ -354,7 +354,10 @@ public class IncomingMessageProcessor extends Thread {
 			emailServerManager.sendEmail(email);
 			break;
 		}
+		
 		action.incrementCounter();
+		this.keywordActionDao.updateKeywordAction(action);
+		
 		if (uiListener != null) {
 			uiListener.keywordActionExecuted(action);
 		}
