@@ -10,39 +10,52 @@ import net.frontlinesms.junit.ReusableTestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import junit.framework.TestCase;
-
 /**
  * Base test class for testing {@link KeywordDao}
  * @author Alex
  */
 public abstract class ReusableKeywordDaoTest extends ReusableTestCase<Keyword> {
+//> STATIC CONSTANTS
+	/** The description applied to the blank keyword created in {@link #setDao(KeywordDao)} */
 	private static final String BLANK_KEYWORD_DESCRIPTION = "The blank keyword.";
-	/** Instance of this DAO implementation we are testing. */
-	private KeywordDao dao;
+	
+//> INSTANCE VARIABLES
 	/** Logging object */
 	private final Log log = LogFactory.getLog(getClass());
-
+	/** Instance of this DAO implementation we are testing. */
+	private KeywordDao dao;
+	/** The blank keyword that should be saved in {@link #dao} by {@link #setDao(KeywordDao)} */
+	private Keyword blankKeyword;
+	
+//> ACCESSORS
+	/**
+	 * @param dao value for {@link #dao}
+	 * @throws DuplicateKeyException if there is already a blank keyword in the DAO
+	 */
 	public void setDao(KeywordDao dao) throws DuplicateKeyException {
-		
-		System.out.println("ReusableKeywordDaoTest.setDao()");
-		
 		this.dao = dao;
-		dao.saveKeyword(new Keyword("", BLANK_KEYWORD_DESCRIPTION));
+		this.blankKeyword = new Keyword("", BLANK_KEYWORD_DESCRIPTION);
+		dao.saveKeyword(this.blankKeyword);
 	}
 	
+//> SET-UP / TEAR-DOWN METHODS
+	/** @see net.frontlinesms.junit.ReusableTestCase#tearDown() */
 	@Override
 	public void tearDown() throws Exception {
 		// Delete all keywords
 		for(Keyword k : this.dao.getAllKeywords()) {
 			this.dao.deleteKeyword(k);
 		}
+		
+		// Discard instance variables
 		this.dao = null;
+		this.blankKeyword = null;
 	}
 	
+//> TEST METHODS
 	/**
 	 * Test everything all at once!
-	 * @throws DuplicateKeyException 
+	 * @throws DuplicateKeyException if there was a problem creating a keyword required by this test
 	 */
 	public void test() throws DuplicateKeyException {
 		// Confirm that the blank keyword exists
@@ -63,11 +76,20 @@ public abstract class ReusableKeywordDaoTest extends ReusableTestCase<Keyword> {
 		assertEquals(2, dao.getAllKeywords().size());
 	}
 	
-	
+	/**
+	 * Test that creation of duplicate keywords fails in the expected manner.
+	 * @throws DuplicateKeyException if there was a problem creating a keyword required by this test
+	 */
 	public void testDuplicates() throws DuplicateKeyException {
 		try {
 			dao.saveKeyword(new Keyword("", BLANK_KEYWORD_DESCRIPTION));
 			fail("Duplicate keyword was successfully saved.  This should not be allowed.");
+		} catch(DuplicateKeyException ex) {}
+		
+		try {
+			Keyword newKeyword = new Keyword("", "different description");
+			dao.saveKeyword(newKeyword);
+			fail("Duplicate keyword ('" + newKeyword.getKeyword() + "':\"" + newKeyword.getDescription() + "\") was successfully saved.  This should not be allowed.");
 		} catch(DuplicateKeyException ex) {}
 		
 		dao.saveKeyword(new Keyword("one", ""));
@@ -75,8 +97,46 @@ public abstract class ReusableKeywordDaoTest extends ReusableTestCase<Keyword> {
 			dao.saveKeyword(new Keyword("one", ""));
 			fail("Duplicate keyword was successfully saved.  This should not be allowed.");
 		} catch(DuplicateKeyException ex) { /* expected */ }
+		try {
+			dao.saveKeyword(new Keyword("one", "different description"));
+			fail("Duplicate keyword was successfully saved.  This should not be allowed.");
+		} catch(DuplicateKeyException ex) { /* expected */ }
 	}
 	
+	/**
+	 * Tests matching to the BLANK keyword
+	 * @throws DuplicateKeyException if there was a problem creating a keyword required by this test
+	 */
+	public void testBlankKeywordMatching() throws DuplicateKeyException {
+		// Set up the test data - a blank keyword to match, and another keyword to avoid
+		Keyword blankKeyword = dao.getFromMessageText("");
+		// Check we have got the blank keyword successfully
+		assertEquals("", blankKeyword.getKeyword());
+		assertEquals(BLANK_KEYWORD_DESCRIPTION, blankKeyword.getDescription());
+		
+		Keyword avoidKeyword = new Keyword("a", "");
+		dao.saveKeyword(avoidKeyword);
+		
+		// Check a blank message matches BLANK
+		testKeywordMatching(blankKeyword, "");
+
+		// Check an empty message matches BLANK
+		testKeywordMatching(blankKeyword, " ");
+		testKeywordMatching(blankKeyword, "\r\n");
+
+		// Check a random message matches BLANK
+		testKeywordMatching(blankKeyword, "zxcvb");
+		testKeywordMatching(blankKeyword, "zxcvb nm");
+		
+		// Check some things which should NOT match BLANK
+		testKeywordMatching(avoidKeyword, "a");
+		testKeywordMatching(avoidKeyword, "a non-blank message");
+		testKeywordMatching(blankKeyword, "ablank");
+	}
+	
+	/**
+	 * @throws DuplicateKeyException if there was a problem creating a keyword required by this test
+	 */
 	public void testKeywordMatching() throws DuplicateKeyException {
 		Keyword keyword1 = new Keyword("one", "");
 		dao.saveKeyword(keyword1);
@@ -138,10 +198,11 @@ public abstract class ReusableKeywordDaoTest extends ReusableTestCase<Keyword> {
 		testKeywordMatching(keyword1ax, "ONe A x is the keyword that we seek");
 		
 		// Test no match
-		testKeywordMatching(null, "my one two three is a four five six");
+		testKeywordMatching(blankKeyword, "my one two three is a four five six");
 	}
 	
-	private void testKeywordMatching(Keyword expected, String messageText) {
-		assertEquals("Incorrect keyword retrieved for message text: '" + messageText + "'", expected, dao.getFromMessageText(messageText));
+	private void testKeywordMatching(Keyword expectedKeyword, String messageText) {
+		Keyword fetchedKeyword = dao.getFromMessageText(messageText);
+		assertEquals("Incorrect keyword retrieved for message text: '" + messageText + "'", expectedKeyword, fetchedKeyword);
 	}
 }

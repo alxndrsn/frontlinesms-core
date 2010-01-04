@@ -16,4 +16,9 @@ public class InMemoryKeywordDaoTest extends ReusableKeywordDaoTest {
 	protected void setUp() throws Exception {
 		super.setDao(new InMemoryKeywordDao());
 	}
+	
+	@Override
+	public void tearDown() throws Exception {
+		super.tearDown();
+	}
 }

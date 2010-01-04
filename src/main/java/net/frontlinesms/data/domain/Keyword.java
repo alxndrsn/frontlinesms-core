@@ -128,6 +128,22 @@ public class Keyword {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+	
+	/** @return human-readable description of this keyword */
+	@Override
+	public String toString() {
+		StringBuilder bob = new StringBuilder();
+		bob.append(this.getClass().getSimpleName());
+		bob.append(':');
+		bob.append('\'');
+		bob.append(this.getKeyword());
+		bob.append('\'');
+		bob.append(':');
+		bob.append('\"');
+		bob.append(this.getDescription());
+		bob.append('\"');
+		return bob.toString();
+	}
 
 //> GENERATED CODE
 	/** @see java.lang.Object#hashCode() */
@@ -135,8 +151,6 @@ public class Keyword {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((description == null) ? 0 : description.hashCode());
 		result = prime * result + ((keyword == null) ? 0 : keyword.hashCode());
 		return result;
 	}
@@ -151,11 +165,6 @@ public class Keyword {
 		if (getClass() != obj.getClass())
 			return false;
 		Keyword other = (Keyword) obj;
-		if (description == null) {
-			if (other.description != null)
-				return false;
-		} else if (!description.equals(other.description))
-			return false;
 		if (keyword == null) {
 			if (other.keyword != null)
 				return false;

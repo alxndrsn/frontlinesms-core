@@ -44,8 +44,11 @@ public class InMemoryKeywordDao implements KeywordDao {
 	}
 
 	/** @see net.frontlinesms.data.repository.KeywordDao#getFromMessageText(java.lang.String) */
-	public Keyword getFromMessageText(String messageText) {
+	public synchronized Keyword getFromMessageText(String messageText) {
 		Keyword matchingKeyword = null;
+		Keyword blankKeyword = null;
+		// Trim the message text - leading and trailing whitespace are not relevant to keyword matching
+		messageText = messageText.trim();
 		for(Keyword k : this.allKeywords) {
 			// Check if this keyword matches the message text
 			if(k.matches(messageText)) {
@@ -55,7 +58,17 @@ public class InMemoryKeywordDao implements KeywordDao {
 					matchingKeyword = k;
 				}
 			}
+			
+			if(k.getKeyword().equals("")) {
+				// Cached the blank keyword in case we need to return it
+				blankKeyword = k;
+			}
 		}
+		
+		if(matchingKeyword == null) {
+			matchingKeyword = blankKeyword;
+		}
+		
 		return matchingKeyword;
 	}
 
@@ -70,9 +83,11 @@ public class InMemoryKeywordDao implements KeywordDao {
 	}
 
 	/** @see KeywordDao#saveKeyword(Keyword) */
-	public void saveKeyword(Keyword keyword) throws DuplicateKeyException {
-		if(!this.allKeywords.add(keyword)) {
+	public synchronized void saveKeyword(Keyword keyword) throws DuplicateKeyException {
+		if(this.allKeywords.contains(keyword)) {
+			// This keyword already exists, so throw a DuplicateKeyException
 			throw new DuplicateKeyException();
 		}
+		this.allKeywords.add(keyword);
 	}
 }

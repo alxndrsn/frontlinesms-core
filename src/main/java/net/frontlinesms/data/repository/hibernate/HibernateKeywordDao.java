@@ -5,12 +5,10 @@ package net.frontlinesms.data.repository.hibernate;
 
 import java.util.List;
 
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 
 import net.frontlinesms.data.DuplicateKeyException;
-import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.repository.KeywordDao;
 
@@ -39,9 +37,13 @@ public class HibernateKeywordDao extends BaseHibernateDao<Keyword> implements Ke
 		return super.getAll(startIndex, limit);
 	}
 
-	/** @see KeywordDao#getFromMessageText(String)
-	 * FIXME Get hibernate to do the keyword sorting and selection for us. */
+	/** @see KeywordDao#getFromMessageText(String) */
 	public Keyword getFromMessageText(String messageText) {
+		/*
+		 * FIXME Get hibernate to do the keyword sorting and selection for us.
+		 * As a simple solution, could we create a query which searches for all keywords which match the first
+		 * 0-N words in the message text, order them by keyword character length, and return the top result?
+		 */
 		messageText = messageText.trim().toUpperCase();
 		List<Keyword> results = super.getAll();
 		if(results.size() == 0) return null;
@@ -52,6 +54,14 @@ public class HibernateKeywordDao extends BaseHibernateDao<Keyword> implements Ke
 				longest = k;
 			}
 		}
+		
+		if(longest == null) {
+			// If no keyword has been fetched, return the blank keyword
+			DetachedCriteria crit = super.getCriterion();
+			crit.add(Restrictions.eq(Keyword.Field.KEYWORD.getFieldName(), ""));
+			longest = super.getUnique(crit);
+		}
+		
 		return longest;
 	}
 

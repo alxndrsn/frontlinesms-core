@@ -33,6 +33,10 @@ public class HibernateKeywordDaoTest extends HibernateTestCase {
 	public void testKeywordMatching() throws DuplicateKeyException {
 		test.testKeywordMatching();
 	}
+	/** @see ReusableKeywordDaoTest#testBlankKeywordMatching() */
+	public void testBlankKeywordMatching() throws DuplicateKeyException {
+		test.testBlankKeywordMatching();
+	}
 
 //> TEST SETUP/TEARDOWN
 	/** @see net.frontlinesms.junit.HibernateTestCase#doTearDown() */
