@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <panel bottom="5" columns="1" gap="10" left="5" name="pnKeywordActionsSimple" right="5" top="5" weightx="1" weighty="1">
     <panel icon="/icons/keywordAction.png" text="i18n.common.keyword.actions" border="true" bottom="5" columns="2" gap="20" left="5" right="5" top="5" weightx="1">
         <label icon="/icons/keyword.png" text="i18n.sentence.all.incoming.messages"/>

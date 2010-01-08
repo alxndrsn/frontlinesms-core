@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <panel bottom="5" columns="2" gap="5" left="5" name="pnContactInfo" right="5" top="5" weightx="1" weighty="1">
     <checkbox icon="/icons/user.png" name="cbName" selected="true" text="i18n.common.name"/>
     <checkbox icon="/icons/phone_number.png" name="cbPhone" selected="true" text="i18n.common.phone.number"/>

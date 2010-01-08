@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <dialog closable="true" columns="1" bottom="10" close="removeDialog(this)" gap="8" left="10" modal="true" name="pnSmsInternetServiceConfigure" right="10" top="10" text="i18n.smsdevice.internet.configure.title">
 	<panel name="pnConfigFields" columns="2" gap="8"/>
 	<panel name="pnButtons" columns="2" gap="8" halign="center">

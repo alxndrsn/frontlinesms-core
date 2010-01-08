@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <panel bottom="10" columns="1" gap="10" left="10" right="10" top="10">
     <panel name="pnInfo" columns="1" gap="6" weightx="1">
         <label icon="/icons/help.png" text="i18n.sentence.want.to.import.data"/>

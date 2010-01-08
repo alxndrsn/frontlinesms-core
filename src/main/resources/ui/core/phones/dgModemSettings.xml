@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <dialog closable="true" close="removeDialog(this)" bottom="7" columns="2" gap="7" icon="/icons/phone_edit.png" left="7" modal="true" name="phoneSettingsDialog" right="7" top="7">
 	<checkbox text="i18n.common.phone.dont.use" name="rbPhoneDetailsDisable" group="myGroup" action="phoneManagerDetailsUse(phoneSettingsDialog, this)"/>
 	<button tooltip="i18n.tooltip.click.for.help" halign="right" action="showHelpPage('phonemanager.htm')" icon="/icons/help.png" type="link"/>

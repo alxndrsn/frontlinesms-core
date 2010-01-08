@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <dialog closable="true" close="removeDialog(this)" modal="true" bottom="5" columns="3" gap="5" icon="/icons/export.png" left="5" name="exportDialog" right="5" text="i18n.common.csv.export" top="5">
     <label text="i18n.common.filename"/>
     <textfield columns="50" name="tfFilename" perform="do_export(exportDialog, tfFilename.text)" weightx="2"/>

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <tab text="i18n.tab.home" icon="/icons/big_home.png" name=":home">
 	<panel bottom="9" gap="9" left="9" right="9" top="9" weightx="1" weighty="1">
 	    <panel columns="1" gap="5">

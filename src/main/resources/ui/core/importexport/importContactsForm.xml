@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <dialog closable="true" bottom="5" close="removeDialog(this)" columns="3" font="bold" gap="5" icon="/icons/importContacts.png" left="5" modal="true" name="importContactsDialog" right="5" text="i18n.common.import" top="5">
     <panel bottom="5" columns="1" gap="5" left="5" right="5" top="5" weightx="1" weighty="1">
         <panel bottom="3" colspan="2" gap="5" top="3">

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <dialog closable="true" bottom="10" close="removeDialog(this)" columns="2" gap="10" icon="/icons/sms_details.png" left="10" modal="true" name="messageDialog" resizable="true" right="10" text="i18n.common.message.details" top="10">
     <label icon="/icons/status.png" text="i18n.common.status"/>
     <textfield editable="false" name="tfStatus" weightx="1"/>

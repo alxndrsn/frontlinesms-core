@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <tab text="i18n.tab.email" icon="/icons/big_email.png" name=":emailLog">
 	<panel name="pnEmail" bottom="9" columns="2" gap="9" left="9" right="9" top="9">
 		<label valign="top" icon="/icons/header/emailHistory.png" rowspan="3"/>

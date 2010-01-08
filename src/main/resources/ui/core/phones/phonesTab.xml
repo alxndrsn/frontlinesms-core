@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <tab text="i18n.tab.phone.manager" icon="/icons/big_phone.png" name=":advancedPhoneManager">
 	<panel columns="4" top="9" bottom="9" left="9" right="9" gap="9">
 		<label rowspan="4" valign="top" icon="/icons/header/phoneManager.png"/>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <dialog closable="true" close="removeDialog(this)" bottom="5" columns="1" gap="5" icon="/icons/status_problem.png" left="5" name="connectionWarning" right="5" text="i18n.common.attention" top="5">
     <label text="i18n.sentence.impossible.to.connect"/>
     <label text="i18n.sentence.would.you.like.to.create.account"/>

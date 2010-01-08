@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <desktop>
     <tabbedpane background="0xffffff">
     	<tab background="0xffffff" icon="/icons/database_warning.png" text="i18n.common.attention">

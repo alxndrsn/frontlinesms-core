@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <panel gap="5">
     <label text="i18n.sentence.you.can.include"/>
     <button icon="/icons/user_sender.png" name="btSenderName" text="i18n.common.sender.name"/>

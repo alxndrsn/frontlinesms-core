@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <dialog closable="true" close="removeDialog(this)" name="editListDialog" bottom="10" columns="3" gap="10" height="500" left="10" modal="true" right="10" top="10" width="700">
     <panel columns="2" gap="10" weightx="1" weighty="1">
         <label icon="/icons/users.png" text="i18n.common.contacts"/>

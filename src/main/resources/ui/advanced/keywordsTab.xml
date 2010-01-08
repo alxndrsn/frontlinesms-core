@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <tab text="i18n.tab.keyword.manager" icon="/icons/big_keyword.png" name=":keywordManager">
 	<panel bottom="9" columns="2" gap="9" left="9" right="9" top="9" weightx="1" weighty="1">
 	    <label icon="/icons/header/keywordManager.png" valign="top"/>
