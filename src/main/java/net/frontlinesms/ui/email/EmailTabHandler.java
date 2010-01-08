@@ -251,7 +251,7 @@ public class EmailTabHandler implements ThinletUiEventHandler {
 	 * @see UiGeneratorController#showHelpPage(String)
 	 */
 	public void showHelpPage(String page) {
-		this.ui .showHelpPage(page);
+		this.ui.showHelpPage(page);
 	}
 	
 //> UI HELPER METHODS

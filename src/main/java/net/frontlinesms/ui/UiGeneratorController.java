@@ -1701,7 +1701,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Shows the email accounts settings dialog.
 	 */
 	public void showEmailAccountsSettings() {
-		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this);
+		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this, this.emailAccountDao);
 		add(emailAccountDialogHandler.getDialog());
 	}
 
@@ -1903,37 +1903,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 		setText(endDate, toSet);
 		add(forwardForm);
-	}
-	
-	public void showEmailAccountDialog(Object list) {
-		Object selected = getSelectedItem(list);
-		if (selected != null) {
-			EmailAccount acc = (EmailAccount) getAttachedObject(selected);
-			showEmailAccountDialog(acc);
-		}
-	}
-	
-	/**
-	 * Event fired when the view phone details action is chosen.
-	 */
-	public void showEmailAccountDialog(EmailAccount acc) {
-		Object settingsDialog = loadComponentFromFile(UI_FILE_EMAIL_ACCOUNT_FORM);
-		setText(settingsDialog, InternationalisationUtils.getI18NString(COMMON_EDITING_EMAIL_ACCOUNT, acc.getAccountName()));
-		
-		Object tfServer = find(settingsDialog, COMPONENT_TF_MAIL_SERVER);
-		Object tfAccountName = find(settingsDialog, COMPONENT_TF_ACCOUNT);
-		Object tfPassword = find(settingsDialog, COMPONENT_TF_ACCOUNT_PASS);
-		Object cbUseSSL = find(settingsDialog, COMPONENT_CB_USE_SSL);
-		Object tfPort = find(settingsDialog, COMPONENT_TF_ACCOUNT_SERVER_PORT);
-		
-		setText(tfServer, acc.getAccountServer());
-		setText(tfAccountName, acc.getAccountName());
-		setText(tfPassword, acc.getAccountPassword());
-		setSelected(cbUseSSL, acc.useSsl());
-		setText(tfPort, String.valueOf(acc.getAccountServerPort()));
-		
-		setAttachedObject(settingsDialog, acc);
-		add(settingsDialog);
 	}
 
 	/**

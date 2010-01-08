@@ -3,9 +3,9 @@
  */
 package net.frontlinesms.ui.email;
 
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_EDITING_EMAIL_ACCOUNT;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_ACCOUNT_NAME_ALREADY_EXISTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_ACCOUNT_NAME_BLANK;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_ACCOUNTS_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_USE_SSL;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_ACCOUNT;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_ACCOUNT_PASS;
@@ -31,7 +31,11 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
 public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 //> UI LAYOUT FILES
 	public static final String UI_FILE_EMAIL_ACCOUNTS_SETTINGS_FORM = "/ui/core/email/dgServerConfig.xml";
-	public static final String UI_FILE_CONNECTION_WARNING_FORM = "/ui/core/email/connectionWarningForm.xml";	
+	public static final String UI_FILE_CONNECTION_WARNING_FORM = "/ui/core/email/dgConnectionWarning.xml";
+	public static final String UI_FILE_EMAIL_ACCOUNT_FORM = "/ui/core/email/dgAccountSettings.xml";
+	
+//> UI COMPONENT NAMES
+	public static final String COMPONENT_ACCOUNTS_LIST = "accountsList";	
 
 //> INSTANCE PROPERTIES
 	/** Logger */
@@ -42,8 +46,9 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 	
 	private Object dialogComponent;
 	
-	public EmailAccountDialogHandler(UiGeneratorController ui) {
+	public EmailAccountDialogHandler(UiGeneratorController ui, EmailAccountDao emailAccountDao) {
 		this.ui = ui;
+		this.emailAccountDao = emailAccountDao;
 	}
 	
 	public Object getDialog() {
@@ -204,6 +209,63 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 		LOG.trace("EXIT");
 	}
 	
+	public void showEmailAccountDialog(Object list) {
+		Object selected = ui.getSelectedItem(list);
+		if (selected != null) {
+			EmailAccount acc = (EmailAccount) ui.getAttachedObject(selected);
+			showEmailAccountDialog(acc);
+		}
+	}
+	
+	/**
+	 * Enables or disables menu options in a List Component's popup list
+	 * and toolbar.  These enablements are based on whether any items in
+	 * the list are selected, and if they are, on the nature of these
+	 * items.
+	 * @param list 
+	 * @param popup 
+	 * @param toolbar
+	 * 
+	 * TODO check where this is used, and make sure there is no dead code
+	 */
+	public void enableOptions(Object list, Object popup, Object toolbar) {
+		Object[] selectedItems = ui.getSelectedItems(list);
+		boolean hasSelection = selectedItems.length > 0;
+
+		if(popup!= null && !hasSelection && "emailServerListPopup".equals(ui.getName(popup))) {
+			ui.setVisible(popup, false);
+			return;
+		}
+		
+		if (hasSelection && popup != null) {
+			// If nothing is selected, hide the popup menu
+			ui.setVisible(popup, hasSelection);
+		}
+		
+		if (toolbar != null && !toolbar.equals(popup)) {
+			for (Object o : ui.getItems(toolbar)) {
+				ui.setEnabled(o, hasSelection);
+			}
+		}
+	}
+
+//> UI PASSTHROUGH METHODS
+	/** @see UiGeneratorController#showConfirmationDialog(String, Object) */
+	public void showConfirmationDialog(String methodToBeCalled) {
+		this.ui.showConfirmationDialog(methodToBeCalled, this);
+	}
+	/**
+	 * @param page page to show
+	 * @see UiGeneratorController#showHelpPage(String)
+	 */
+	public void showHelpPage(String page) {
+		this.ui.showHelpPage(page);
+	}
+	/** @see UiGeneratorController#removeDialog(Object) */
+	public void removeDialog(Object dialog) {
+		this.ui.removeDialog(dialog);
+	}
+	
 //> UI HELPER METHODS
 	/**
 	 * Find a UI component within the {@link #dialogComponent}.
@@ -220,5 +282,28 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 		ui.setText(ui.find(accountDialog, COMPONENT_TF_ACCOUNT_PASS), "");
 		ui.setText(ui.find(accountDialog, COMPONENT_TF_ACCOUNT_SERVER_PORT), "");
 		ui.setSelected(ui.find(accountDialog, COMPONENT_CB_USE_SSL), true);
+	}
+	
+	/**
+	 * Event fired when the view phone details action is chosen.
+	 */
+	private void showEmailAccountDialog(EmailAccount acc) {
+		Object settingsDialog = ui.loadComponentFromFile(UI_FILE_EMAIL_ACCOUNT_FORM, this);
+		ui.setText(settingsDialog, InternationalisationUtils.getI18NString(COMMON_EDITING_EMAIL_ACCOUNT, acc.getAccountName()));
+		
+		Object tfServer = ui.find(settingsDialog, COMPONENT_TF_MAIL_SERVER);
+		Object tfAccountName = ui.find(settingsDialog, COMPONENT_TF_ACCOUNT);
+		Object tfPassword = ui.find(settingsDialog, COMPONENT_TF_ACCOUNT_PASS);
+		Object cbUseSSL = ui.find(settingsDialog, COMPONENT_CB_USE_SSL);
+		Object tfPort = ui.find(settingsDialog, COMPONENT_TF_ACCOUNT_SERVER_PORT);
+		
+		ui.setText(tfServer, acc.getAccountServer());
+		ui.setText(tfAccountName, acc.getAccountName());
+		ui.setText(tfPassword, acc.getAccountPassword());
+		ui.setSelected(cbUseSSL, acc.useSsl());
+		ui.setText(tfPort, String.valueOf(acc.getAccountServerPort()));
+		
+		ui.setAttachedObject(settingsDialog, acc);
+		ui.add(settingsDialog);
 	}
 }
