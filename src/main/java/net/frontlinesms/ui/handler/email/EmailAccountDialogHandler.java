@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui.email;
+package net.frontlinesms.ui.handler.email;
 
 import org.apache.log4j.Logger;
 

@@ -58,8 +58,13 @@ import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.*;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
-import net.frontlinesms.ui.email.EmailAccountDialogHandler;
-import net.frontlinesms.ui.email.EmailTabHandler;
+import net.frontlinesms.ui.handler.ContactsTabHandler;
+import net.frontlinesms.ui.handler.HomeTabHandler;
+import net.frontlinesms.ui.handler.PhoneTabHandler;
+import net.frontlinesms.ui.handler.email.EmailAccountDialogHandler;
+import net.frontlinesms.ui.handler.email.EmailTabHandler;
+import net.frontlinesms.ui.handler.messages.MessageHistoryTabHandler;
+import net.frontlinesms.ui.handler.messages.MessagePanelHandler;
 import net.frontlinesms.ui.i18n.FileLanguageBundle;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.LanguageBundle;
@@ -85,7 +90,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.*;
  * favoured, and so this should be done where possible.
  * 
  * We're now in the process of separating this class into smaller classes which control separate,
- * modular parts of the UI, e.g. the {@link HomeTabController}.
+ * modular parts of the UI, e.g. the {@link HomeTabHandler}.
  * 
  * @author Alex Anderson 
  * <li> alex(at)masabi(dot)com
@@ -129,13 +134,13 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	private final EmailAccountDao emailAccountDao;
 
 	/** Controller of the home tab. */
-	private final HomeTabController homeTabController;
+	private final HomeTabHandler homeTabController;
 	/** Controller of the phones tab. */
-	private final PhoneTabController phoneTabController;
+	private final PhoneTabHandler phoneTabController;
 	/** Controller of the contacts tab. */
-	private final ContactsTabController contactsTabController;
+	private final ContactsTabHandler contactsTabController;
 	/** Controller of the message tab. */
-	private final MessageHistoryTabController messageTabController;
+	private final MessageHistoryTabHandler messageTabController;
 	/** Handler for the email tab. */
 	private final EmailTabHandler emailTabHandler;
 	
@@ -261,13 +266,13 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 					: "");
 			
 			Object tabbedPane = find(COMPONENT_TABBED_PANE);
-			this.phoneTabController = new PhoneTabController(this);
-			this.contactsTabController = new ContactsTabController(this, this.contactDao, this.groupDao);
-			this.messageTabController = new MessageHistoryTabController(this, contactDao, keywordDao, messageFactory);
+			this.phoneTabController = new PhoneTabHandler(this);
+			this.contactsTabController = new ContactsTabHandler(this, this.contactDao, this.groupDao);
+			this.messageTabController = new MessageHistoryTabHandler(this, contactDao, keywordDao, messageFactory);
 			this.emailTabHandler = new EmailTabHandler(this, this.frontlineController);
 
 
-			this.homeTabController = new HomeTabController(this);
+			this.homeTabController = new HomeTabHandler(this);
 			if (uiProperties.isTabVisible("hometab")) {
 				add(tabbedPane, this.homeTabController.getTab());
 				setSelected(find(COMPONENT_MI_HOME), true);
@@ -457,7 +462,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		keywordListComponent = find(COMPONENT_KEYWORD_LIST);
 	}
 	
-	/** Pass throught to method in the {@link HomeTabController}. */
+	/** Pass throught to method in the {@link HomeTabHandler}. */
 	public void showHomeTabSettings() {
 		this.homeTabController.showHomeTabSettings();
 	}
@@ -536,7 +541,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param message
 	 * @return This will be the name of the contact who received the message, or the recipient's phone number if they are not a contact.
 	 */
-	String getRecipientDisplayValue(Message message) {
+	public String getRecipientDisplayValue(Message message) {
 		Contact recipient = contactDao.getFromMsisdn(message.getRecipientMsisdn());
 		String recipientDisplayName = recipient != null ? recipient.getDisplayName() : message.getRecipientMsisdn();
 		return recipientDisplayName;
@@ -548,7 +553,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @return This will be the name of the contact who sent the message, or the sender's phone number if they are not a contact.
 	 * @deprecated should be moved to message tab cont
 	 */
-	String getSenderDisplayValue(Message message) {
+	public String getSenderDisplayValue(Message message) {
 		Contact sender = contactDao.getFromMsisdn(message.getSenderMsisdn());
 		String senderDisplayName = sender != null ? sender.getDisplayName() : message.getSenderMsisdn();
 		return senderDisplayName;
@@ -560,7 +565,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param group
 	 * @return <code>true</code> if the supplied {@link Group} is one of the synthetic groups; <code>false</code> otherwise. 
 	 */
-	boolean isDefaultGroup(Group group) {
+	public boolean isDefaultGroup(Group group) {
 		return group == this.rootGroup || group == this.ungroupedContacts || group == this.unnamedContacts;
 	}
 
@@ -749,7 +754,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param selected
 	 * @param groupListComponent
 	 */
-	void setSelected(Object selected, Object groupListComponent) {
+	public void setSelectedGC(Object selected, Object groupListComponent) {
 		for (Object o : getItems(groupListComponent)) {
 			if (selected != null) {
 				if (isAttachment(selected, Group.class) && isAttachment(o, Group.class)) {
@@ -769,7 +774,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 					}
 				}
 			}
-			setSelected(selected, o);
+			setSelectedGC(selected, o);
 		}
 	}
 	
@@ -812,7 +817,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		return count;
 	}
 
-	void getGroupsRecursivelyUp(List<Group> groups, Group g) {
+	public void getGroupsRecursivelyUp(List<Group> groups, Group g) {
 		groups.add(g);
 		Group parent = g.getParent();
 		if (!parent.equals(this.rootGroup)) {
@@ -820,7 +825,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 	}
 	
-	void getGroupsRecursivelyDown(List<Group> groups, Group g) {
+	public void getGroupsRecursivelyDown(List<Group> groups, Group g) {
 		groups.add(g);
 		for (Group subGroup : g.getDirectSubGroups()) {
 			getGroupsRecursivelyDown(groups, subGroup);
@@ -1146,7 +1151,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			}
 		}
 		
-		MessagePanelController messagePanelController = new MessagePanelController(this);
+		MessagePanelHandler messagePanelController = new MessagePanelHandler(this);
 		// We need to add the message panel to the dialog before setting the send button method
 		add(dialog, messagePanelController.getPanel());
 		messagePanelController.setSendButtonMethod(this, dialog, "sendMessage(composeMessageDialog, composeMessage_to, tfMessage)");
@@ -1422,7 +1427,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		// reply to.
 		Object autoReplyForm = loadComponentFromFile(UI_FILE_NEW_KACTION_REPLY_FORM);
 		
-		Object pnMessage = new MessagePanelController(this).getPanel();
+		Object pnMessage = new MessagePanelHandler(this).getPanel();
 		// FIX 0000542 FIXME this comment is not useful - what is the fix?  or more importantly, what is the function of this code?
 		Object pnBottom = find(pnMessage, COMPONENT_PN_BOTTOM);
 		remove(getItem(pnBottom, 0));
@@ -1454,7 +1459,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		// reply to.
 		Object autoReplyForm = loadComponentFromFile(UI_FILE_NEW_KACTION_REPLY_FORM);
 		
-		MessagePanelController messagePanelController = new MessagePanelController(this);
+		MessagePanelHandler messagePanelController = new MessagePanelHandler(this);
 		Object pnMessage = messagePanelController.getPanel();
 		// FIX 0000542
 		Object pnBottom = find(pnMessage, COMPONENT_PN_BOTTOM);
@@ -2457,52 +2462,9 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/**
 	 * Method called when an event is fired and should be added to the event list on the home tab.
 	 * @param newEvent New instance of {@link Event} to be added to the list.
-	 * TODO this should be handled by the {@link HomeTabController}
 	 */
 	public void newEvent(Event newEvent) {
-		// TODO addition of the item to the event list should be done in the HomeTabController
-		Object eventListComponent = find(COMPONENT_EVENTS_LIST);
-		if(eventListComponent != null) {
-			if (getItems(eventListComponent).length >= HomeTabController.EVENTS_LIMIT) {
-				remove(getItem(eventListComponent, 0));
-			}
-			add(eventListComponent, getRow(newEvent));
-		}
-	}
-	
-	private Object getRow(Event newEvent) {
-		Object row = createTableRow(newEvent);
-		String icon = null;
-		switch(newEvent.getType()) {
-		case Event.TYPE_INCOMING_MESSAGE:
-			icon = Icon.SMS_RECEIVE;
-			break;
-		case Event.TYPE_OUTGOING_MESSAGE:
-			icon = Icon.SMS_SEND;
-			break;
-		case Event.TYPE_OUTGOING_MESSAGE_FAILED:
-			icon = Icon.SMS_SEND_FAILURE;
-			break;
-		case Event.TYPE_OUTGOING_EMAIL:
-			icon = Icon.EMAIL_SEND;
-			break;
-		case Event.TYPE_PHONE_CONNECTED:
-			icon = Icon.PHONE_CONNECTED;
-			break;
-		case Event.TYPE_SMS_INTERNET_SERVICE_CONNECTED:
-			icon = Icon.SMS_INTERNET_SERVICE_CONNECTED;
-			break;
-		case Event.TYPE_SMS_INTERNET_SERVICE_RECEIVING_FAILED:
-			icon = Icon.SMS_INTERNET_SERVICE_RECEIVING_FAILED;
-			break;
-		}
-		
-		Object cell = createTableCell("");
-		setIcon(cell, icon);
-		add(row, cell);
-		add(row, createTableCell(newEvent.getDescription()));
-		add(row, createTableCell(InternationalisationUtils.getDatetimeFormat().format(newEvent.getTime())));
-		return row;
+		this.homeTabController.newEvent(newEvent);
 	}
 
 	/**
@@ -2698,7 +2660,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param clazz
 	 * @return
 	 */
-	boolean isAttachment(Object component, Class<?> clazz) {
+	public boolean isAttachment(Object component, Class<?> clazz) {
 		Object object = getAttachedObject(component);
 		return object != null && object.getClass().equals(clazz);
 	}
@@ -2709,7 +2671,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param component
 	 * @return The Message instance.
 	 */
-	Message getMessage(Object component) {
+	public Message getMessage(Object component) {
 		return (Message) getAttachedObject(component);
 	}
 
@@ -2749,7 +2711,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param component
 	 * @return
 	 */
-	Keyword getKeyword(Object component) {
+	public Keyword getKeyword(Object component) {
 		Object obj = getAttachedObject(component);
 		if (obj instanceof Keyword) return (Keyword)obj;
 		else if (obj instanceof KeywordAction) return ((KeywordAction)obj).getKeyword();
@@ -2775,7 +2737,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param selected
 	 * @return
 	 */
-	Group getGroupFromSelectedNode(Object selected) {
+	public Group getGroupFromSelectedNode(Object selected) {
 		while (selected != null && !isAttachment(selected, Group.class)) selected = getParent(selected);
 		if (selected == null) return null;
 		return getGroup(selected);
@@ -3070,7 +3032,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param keyword
 	 * @return
 	 */
-	Object createListItem(Keyword keyword) {
+	public Object createListItem(Keyword keyword) {
 		String key = keyword.getKeyword().length() == 0 ? "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">" : keyword.getKeyword();
 		Object listItem = createListItem(
 				key,
@@ -3085,7 +3047,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param contact
 	 * @return
 	 */
-	Object createListItem(Contact contact) {
+	public Object createListItem(Contact contact) {
 		Object listItem = createListItem(contact.getName() + " (" + contact.getPhoneNumber() + ")", contact);
 		setIcon(listItem, Icon.CONTACT);
 		return listItem;
@@ -3096,7 +3058,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param contact
 	 * @return
 	 */
-	Object getRow(Contact contact) {
+	public Object getRow(Contact contact) {
 		Object row = createTableRow(contact);
 		
 		Object cell = createTableCell("");
@@ -3176,7 +3138,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param message
 	 * @return
 	 */
-	Object getRow(Message message) {
+	public Object getRow(Message message) {
 		Object row = createTableRow(message);
 
 		String icon;
@@ -3530,6 +3492,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 
 //> ACCESSORS
+	/** @return {@link #frontlineController} */
+	public FrontlineSMS getFrontlineController() {
+		return super.frontlineController;
+	}
 	/** @return {@link #phoneManager} */
 	public SmsDeviceManager getPhoneManager() {
 		return this.phoneManager;
@@ -3558,6 +3524,14 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/** @return {@link #rootGroup} */
 	public Group getRootGroup() {
 		return this.rootGroup;
+	}
+	
+	public Group getUnnamedContacts() {
+		return unnamedContacts;
+	}
+	
+	public Group getUngroupedContacts() {
+		return ungroupedContacts;
 	}
 
 	/** @return the {@link Frame} attached to this thinlet window */

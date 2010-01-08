@@ -303,7 +303,7 @@ public class ExtendedThinlet extends Thinlet {
 	 * @param attachedObject
 	 * @return
 	 */
-	protected final Object createComboboxChoice(String text, Object attachedObject) {
+	public final Object createComboboxChoice(String text, Object attachedObject) {
 		Object item = Thinlet.create(CHOICE);
 		setString(item, TEXT, text);
 		setAttachedObject(item, attachedObject);

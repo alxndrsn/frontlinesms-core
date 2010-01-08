@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui;
+package net.frontlinesms.ui.handler;
 
 // TODO remove static imports
 import static net.frontlinesms.FrontlineSMSConstants.ACTION_ADD_TO_GROUP;
@@ -51,6 +51,9 @@ import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;
+import net.frontlinesms.ui.Icon;
+import net.frontlinesms.ui.ThinletUiEventHandler;
+import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 import org.apache.log4j.Logger;
@@ -61,7 +64,7 @@ import thinlet.Thinlet;
  * Event handler for the Contacts tab and associated dialogs.
  * @author Alex
  */
-public class ContactsTabController implements ThinletUiEventHandler {
+public class ContactsTabHandler implements ThinletUiEventHandler {
 //> STATIC CONSTANTS
 	/** UI XML File Path: the Home Tab itself */
 	private static final String UI_FILE_CONTACTS_TAB = "/ui/core/contacts/contactsTab.xml";
@@ -97,7 +100,7 @@ public class ContactsTabController implements ThinletUiEventHandler {
 	 * @param contactDao {@link #contactDao}
 	 * @param groupDao {@link #groupDao}
 	 */
-	public ContactsTabController(UiGeneratorController uiController, ContactDao contactDao, GroupDao groupDao) {
+	public ContactsTabHandler(UiGeneratorController uiController, ContactDao contactDao, GroupDao groupDao) {
 		this.uiController = uiController;
 		this.contactDao = contactDao;
 		this.groupDao = groupDao;
@@ -257,7 +260,7 @@ public class ContactsTabController implements ThinletUiEventHandler {
 				}
 				
 				if (COMPONENT_NEW_GROUP.equals(name)) {
-					this.uiController.setVisible(o, g!=this.uiController.unnamedContacts && g!=this.uiController.ungroupedContacts);
+					this.uiController.setVisible(o, g!=this.uiController.getUnnamedContacts() && g!=this.uiController.getUngroupedContacts());
 				}
 			}
 		}
@@ -565,7 +568,7 @@ public class ContactsTabController implements ThinletUiEventHandler {
 	 */
 	private Object getNodeForGroup(Object component, Group group) {
 		if(group == null) {
-			group = this.uiController.rootGroup;
+			group = this.uiController.getRootGroup();
 		}
 		Object ret = null;
 		for (Object o : this.uiController.getItems(component)) {
@@ -626,10 +629,10 @@ public class ContactsTabController implements ThinletUiEventHandler {
 			String parentGroupName = selectedParentGroup == null ? "null" : selectedParentGroup.getName();
 			LOG.debug("Parent group [" + parentGroupName + "]");
 		}
-		if(selectedParentGroup == this.uiController.rootGroup) {
+		if(selectedParentGroup == this.uiController.getRootGroup()) {
 			selectedParentGroup = null;
 		}
-		if (selectedParentGroup == this.uiController.unnamedContacts || selectedParentGroup == this.uiController.ungroupedContacts) {
+		if (selectedParentGroup == this.uiController.getUnnamedContacts() || selectedParentGroup == this.uiController.getUngroupedContacts()) {
 			this.uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_IMPOSSIBLE_TO_CREATE_A_GROUP_HERE));
 			if (dialog != null) this.uiController.remove(dialog);
 			return;
@@ -768,9 +771,9 @@ public class ContactsTabController implements ThinletUiEventHandler {
 		Object selected = this.uiController.getSelectedItem(groupListComponent);
 		
 		this.uiController.removeAll(groupListComponent);
-		this.uiController.add(groupListComponent, this.uiController.getNode(this.uiController.rootGroup, true));
+		this.uiController.add(groupListComponent, this.uiController.getNode(this.uiController.getRootGroup(), true));
 
-		this.uiController.setSelected(selected, groupListComponent);
+		this.uiController.setSelectedGC(selected, groupListComponent);
 		
 		updateContactList();
 	}
@@ -783,7 +786,7 @@ public class ContactsTabController implements ThinletUiEventHandler {
 	}
 	
 //> EVENT HANDLER METHODS
-	void addToContactList(Contact contact, Group group) {
+	public void addToContactList(Contact contact, Group group) {
 		List<Group> selectedGroupsFromTree = new ArrayList<Group>();
 		for (Object o : this.uiController.getSelectedItems(groupListComponent)) {
 			Group g = this.uiController.getGroup(o);

@@ -9,7 +9,7 @@ import net.frontlinesms.resources.PropertySet;
  * Wrapper class for UI properties file.
  * @author Alex
  */
-final class UiProperties extends PropertySet {
+public final class UiProperties extends PropertySet {
 //> STATIC CONSTANTS
 	/** The name of the {@link PropertySet} which these properties are loaded from and saved in. */
 	private static final String PROPERTYSET_NAME = "ui";

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui;
+package net.frontlinesms.ui.handler.messages;
 
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_ALL_MESSAGES;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_DATE;
@@ -27,7 +27,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RECEI
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_SENT_MESSAGES_TOGGLE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_END_DATE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_START_DATE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.UI_FILE_MSG_DETAILS_FORM;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.UI_FILE_PAGE_PANEL;
 
 import java.text.ParseException;
@@ -49,15 +48,20 @@ import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
+import net.frontlinesms.ui.Icon;
+import net.frontlinesms.ui.ThinletUiEventHandler;
+import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.UiProperties;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
  * @author aga
  */
-public class MessageHistoryTabController implements ThinletUiEventHandler {
+public class MessageHistoryTabHandler implements ThinletUiEventHandler {
 	
 //> CONSTANTS
 	private static final String UI_FILE_MESSAGES_TAB = "/ui/core/messages/messagesTab.xml";
+	public static final String UI_FILE_MSG_DETAILS_FORM = "/ui/core/messages/dgMessageDetails.xml";
 	/** Number of milliseconds in a day */
 	private static final long MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
 	
@@ -92,7 +96,7 @@ public class MessageHistoryTabController implements ThinletUiEventHandler {
 	 * @param keywordDao value for {@link #keywordDao}
 	 * @param messageDao value for {@link #messageDao}
 	 */
-	public MessageHistoryTabController(UiGeneratorController ui, ContactDao contactDao, KeywordDao keywordDao, MessageDao messageDao) {
+	public MessageHistoryTabHandler(UiGeneratorController ui, ContactDao contactDao, KeywordDao keywordDao, MessageDao messageDao) {
 		this.ui = ui;
 		
 		this.contactDao = contactDao;
@@ -200,7 +204,7 @@ public class MessageHistoryTabController implements ThinletUiEventHandler {
 	}
 	
 	/** @deprecated this should be private */
-	void updateMessageHistoryCost() {
+	public void updateMessageHistoryCost() {
 		LOG.trace("ENTRY");
 		
 		ui.setText(find(COMPONENT_LB_MSGS_NUMBER), String.valueOf(numberToSend));		
@@ -529,7 +533,7 @@ public class MessageHistoryTabController implements ThinletUiEventHandler {
 				toBeReSent.setRetriesRemaining(Message.MAX_RETRIES);
 				ui.getPhoneManager().sendSMS(toBeReSent);
 			} else if (status == Message.STATUS_DELIVERED || status == Message.STATUS_SENT) {
-				ui.frontlineController.sendTextMessage(toBeReSent.getRecipientMsisdn(), toBeReSent.getTextContent());
+				ui.getFrontlineController().sendTextMessage(toBeReSent.getRecipientMsisdn(), toBeReSent.getTextContent());
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui;
+package net.frontlinesms.ui.handler;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -19,6 +19,11 @@ import net.frontlinesms.smsdevice.SmsModem;
 import net.frontlinesms.smsdevice.SmsModemStatus;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
 import net.frontlinesms.smsdevice.internet.SmsInternetServiceStatus;
+import net.frontlinesms.ui.Event;
+import net.frontlinesms.ui.Icon;
+import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
+import net.frontlinesms.ui.ThinletUiEventHandler;
+import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
@@ -34,7 +39,7 @@ import serial.NoSuchPortException;
  * @author Alex
  */
 @TextResourceKeyOwner(prefix={"COMMON_", "I18N_", "MESSAGE_"})
-public class PhoneTabController implements SmsDeviceEventListener, ThinletUiEventHandler {
+public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHandler {
 //> STATIC CONSTANTS
 	/** The fully-qualified name of the default {@link CATHandler} class. */
 	private static final String DEFAULT_CAT_HANDLER_CLASS_NAME = CATHandler.class.getName();
@@ -115,7 +120,7 @@ public class PhoneTabController implements SmsDeviceEventListener, ThinletUiEven
 	 * Create a new instance of this class.
 	 * @param uiController value for {@link #uiController}
 	 */
-	public PhoneTabController(UiGeneratorController uiController) {
+	public PhoneTabHandler(UiGeneratorController uiController) {
 		this.uiController = uiController;
 		this.phoneManager = uiController.getPhoneManager();
 		this.phoneDetailsManager = uiController.getPhoneDetailsManager();

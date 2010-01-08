@@ -31,7 +31,6 @@ public class UiGeneratorControllerConstants {
 	public static final String UI_FILE_PAGE_PANEL = "/ui/dialog/pagePanel.xml";
 	public static final String UI_FILE_ABOUT_PANEL = "/ui/dialog/about.xml";
 	public static final String UI_FILE_SENDER_NAME_PANEL = "/ui/dialog/senderNamePanel.xml";
-	public static final String UI_FILE_MSG_DETAILS_FORM = "/ui/dialog/messageDetailsDialog.xml";
 	public static final String UI_FILE_INCOMING_NUMBER_SETTINGS_FORM = "/ui/dialog/incomingNumberSettingsDialog.xml";
 	public static final String UI_FILE_USER_DETAILS_DIALOG = "/ui/dialog/userDetailsDialog.xml";
 	

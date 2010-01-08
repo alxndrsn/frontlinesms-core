@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui.email;
+package net.frontlinesms.ui.handler.email;
 
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_CONTENT;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_DATE;

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui;
+package net.frontlinesms.ui.handler.messages;
 
 // TODO Remove static imports
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_CONTACT_SELECTED;
@@ -18,6 +18,10 @@ import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Message;
+import net.frontlinesms.ui.Icon;
+import net.frontlinesms.ui.ThinletUiEventHandler;
+import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.UiProperties;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 import org.apache.log4j.Logger;
@@ -27,10 +31,10 @@ import org.smslib.util.GsmAlphabet;
  * Controller for a panel which allows sending of text SMS messages
  * @author Alex
  */
-public class MessagePanelController implements ThinletUiEventHandler {
+public class MessagePanelHandler implements ThinletUiEventHandler {
 //> STATIC CONSTANTS
 	/** UI XML File Path: the panel containing the messaging controls */
-	protected static final String UI_FILE_MESSAGE_PANEL = "/ui/dialog/messagePanel.xml";
+	protected static final String UI_FILE_MESSAGE_PANEL = "/ui/core/messages/pnComposeMessage.xml";
 	
 //> THINLET COMPONENTS
 	/** Thinlet component name: Button to send message */
@@ -50,7 +54,7 @@ public class MessagePanelController implements ThinletUiEventHandler {
 	/**
 	 * @param uiController
 	 */
-	public MessagePanelController(UiGeneratorController uiController) {
+	public MessagePanelHandler(UiGeneratorController uiController) {
 		this.uiController = uiController;
 		this.messagePanel = uiController.loadComponentFromFile(UI_FILE_MESSAGE_PANEL, this);
 	}
@@ -83,7 +87,7 @@ public class MessagePanelController implements ThinletUiEventHandler {
 			uiController.alert(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_BLANK_PHONE_NUMBER));
 			return;
 		} 
-		this.uiController.frontlineController.sendTextMessage(recipient, message);
+		this.uiController.getFrontlineController().sendTextMessage(recipient, message);
 		clearMessageComponent();
 	}
 	
