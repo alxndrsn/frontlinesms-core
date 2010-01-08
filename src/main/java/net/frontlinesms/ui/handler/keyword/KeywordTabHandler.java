@@ -76,8 +76,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import thinlet.Thinlet;
 
 import net.frontlinesms.FrontlineSMS;
@@ -108,11 +106,11 @@ public class KeywordTabHandler extends BaseTabHandler {
 	public static final String UI_FILE_KEYWORDS_TAB = "/ui/core/keyword/keywordsTab.xml";
 	public static final String UI_FILE_KEYWORDS_SIMPLE_VIEW = "/ui/core/keyword/pnSimpleView.xml";
 	public static final String UI_FILE_KEYWORDS_ADVANCED_VIEW = "/ui/core/keyword/pnAdvancedView.xml";
-	public static final String UI_FILE_NEW_KEYWORD_FORM = "/ui/dialog/newKeywordForm.xml";
-	public static final String UI_FILE_NEW_KACTION_REPLY_FORM = "/ui/dialog/newKActionReplyForm.xml";
-	public static final String UI_FILE_NEW_KACTION_FORWARD_FORM = "/ui/dialog/newKActionForwardForm.xml";
-	public static final String UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM = "/ui/dialog/externalCommandDialog.xml";
-	public static final String UI_FILE_NEW_KACTION_EMAIL_FORM = "/ui/dialog/emailDialog.xml";
+	public static final String UI_FILE_NEW_KEYWORD_FORM = "/ui/core/keyword/newKeywordForm.xml";
+	public static final String UI_FILE_NEW_KACTION_REPLY_FORM = "/ui/core/keyword/newKActionReplyForm.xml";
+	public static final String UI_FILE_NEW_KACTION_FORWARD_FORM = "/ui/core/keyword/newKActionForwardForm.xml";
+	public static final String UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM = "/ui/core/keyword/externalCommandDialog.xml";
+	public static final String UI_FILE_NEW_KACTION_EMAIL_FORM = "/ui/core/keyword/dgEmailKAction.xml";
 
 	private EmailAccountDao emailAccountDao;
 	private GroupDao groupDao;
@@ -1645,5 +1643,11 @@ public class KeywordTabHandler extends BaseTabHandler {
 	/** Show the email account settings dialog. */
 	public void showEmailAccountsSettings() {
 		this.ui.showEmailAccountsSettings();
+	}
+	public void activate(Object component) {
+		this.ui.activate(component);
+	}
+	public void deactivate(Object component) {
+		this.ui.deactivate(component);
 	}
 }
