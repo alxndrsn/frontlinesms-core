@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <panel columns="1" gap="3" left="3" bottom="3" right="3" weightx="1" weighty="1">
 	<menubar weightx="1" name="menubar">
 		<menu text="i18n.menubar.file">
