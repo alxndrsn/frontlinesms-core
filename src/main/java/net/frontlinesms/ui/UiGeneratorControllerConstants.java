@@ -17,11 +17,6 @@ public class UiGeneratorControllerConstants {
 	public static final String UI_FILE_COMPOSE_MESSAGE_FORM = "/ui/dialog/composeMessageForm.xml";
 	public static final String UI_FILE_GROUP_SELECTER = "/ui/dialog/groupSelecter.xml";
 	public static final String UI_FILE_CONTACT_SELECTER = "/ui/dialog/contactSelecter.xml";
-	public static final String UI_FILE_NEW_KEYWORD_FORM = "/ui/dialog/newKeywordForm.xml";
-	public static final String UI_FILE_NEW_KACTION_REPLY_FORM = "/ui/dialog/newKActionReplyForm.xml";
-	public static final String UI_FILE_NEW_KACTION_FORWARD_FORM = "/ui/dialog/newKActionForwardForm.xml";
-	public static final String UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM = "/ui/dialog/externalCommandDialog.xml";
-	public static final String UI_FILE_NEW_KACTION_EMAIL_FORM = "/ui/dialog/emailDialog.xml";
 	public static final String UI_FILE_EDIT_KEYWORD_LIST_FORM = "/ui/dialog/editKeywordListDialog.xml";
 	public static final String UI_FILE_SMS_SERVICES_ACCOUNTS_SETTINGS_FORM = "/ui/dialog/smsHttpServerConfigDialog.xml";
 	public static final String UI_FILE_EXPORT_DIALOG_FORM = "/ui/dialog/exportDialogForm.xml";

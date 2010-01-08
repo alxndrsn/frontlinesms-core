@@ -1078,13 +1078,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	/**
-	 * Method invoked when the user decides to send a mail specifically to one contact.
-	 */
-	public void selectMailRecipient(Object dialog) {
-		showContactSelecter(InternationalisationUtils.getI18NString(SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "mail_setRecipient(contactSelecter_contactList, contactSelecter)", dialog);
-	}
-	
-	/**
 	 * Sets the phone number of the selected contact.
 	 * 
 	 * @param contactSelecter_contactList

@@ -23,6 +23,7 @@ import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_GROUP_CREATED_BY
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_GROUP_SELECTED_TO_FWD;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_START_DATE_AFTER_END;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_WRONG_FORMAT_DATE;
+import static net.frontlinesms.FrontlineSMSConstants.SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_ACTION_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_CLEAR;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_SAVE;
@@ -67,14 +68,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_ME
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_RECIPIENT;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_START_DATE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_SUBJECT;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_HOME;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_KEYWORD_MANAGER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.UI_FILE_GROUP_SELECTER;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.UI_FILE_NEW_KACTION_EMAIL_FORM;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.UI_FILE_NEW_KACTION_FORWARD_FORM;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.UI_FILE_NEW_KACTION_REPLY_FORM;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.UI_FILE_NEW_KEYWORD_FORM;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.UI_FILE_SENDER_NAME_PANEL;
 
 import java.text.ParseException;
@@ -114,6 +108,11 @@ public class KeywordTabHandler extends BaseTabHandler {
 	public static final String UI_FILE_KEYWORDS_TAB = "/ui/core/keyword/keywordsTab.xml";
 	public static final String UI_FILE_KEYWORDS_SIMPLE_VIEW = "/ui/core/keyword/pnSimpleView.xml";
 	public static final String UI_FILE_KEYWORDS_ADVANCED_VIEW = "/ui/core/keyword/pnAdvancedView.xml";
+	public static final String UI_FILE_NEW_KEYWORD_FORM = "/ui/dialog/newKeywordForm.xml";
+	public static final String UI_FILE_NEW_KACTION_REPLY_FORM = "/ui/dialog/newKActionReplyForm.xml";
+	public static final String UI_FILE_NEW_KACTION_FORWARD_FORM = "/ui/dialog/newKActionForwardForm.xml";
+	public static final String UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM = "/ui/dialog/externalCommandDialog.xml";
+	public static final String UI_FILE_NEW_KACTION_EMAIL_FORM = "/ui/dialog/emailDialog.xml";
 
 	private EmailAccountDao emailAccountDao;
 	private GroupDao groupDao;
@@ -933,6 +932,13 @@ public class KeywordTabHandler extends BaseTabHandler {
 	}
 	
 	/**
+	 * Method invoked when the user decides to send a mail specifically to one contact.
+	 */
+	public void selectMailRecipient(Object dialog) {
+		ui.showContactSelecter(InternationalisationUtils.getI18NString(SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "mail_setRecipient(contactSelecter_contactList, contactSelecter)", dialog, this);
+	}
+	
+	/**
 	 * Creates a new auto reply action.
 	 */
 	public void do_newKActionReply(Object replyDialog, String replyText) {
@@ -1635,5 +1641,9 @@ public class KeywordTabHandler extends BaseTabHandler {
 	 */
 	public void setText(Object component, String value) {
 		this.ui.setText(component, value);
+	}
+	/** Show the email account settings dialog. */
+	public void showEmailAccountsSettings() {
+		this.ui.showEmailAccountsSettings();
 	}
 }
