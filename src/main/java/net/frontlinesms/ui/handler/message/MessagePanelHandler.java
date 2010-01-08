@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui.handler.messages;
+package net.frontlinesms.ui.handler.message;
 
 // TODO Remove static imports
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_CONTACT_SELECTED;
