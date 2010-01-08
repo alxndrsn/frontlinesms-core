@@ -39,24 +39,6 @@ public class ReplyActionDialogHandler extends BaseActionDialogHandler {
 	
 	public void init(Keyword keyword) {
 		sharedInit(keyword, null);
-		
-//		Object pnMessage = new MessagePanelHandler(this.ui).getPanel();
-//		// FIX 0000542 FIXME this comment is not useful - what is the fix?  or more importantly, what is the function of this code?
-//		Object pnBottom = ui.find(pnMessage, COMPONENT_PN_BOTTOM);
-//		ui.remove(ui.getItem(pnBottom, 0));
-//		Object senderPanel = ui.loadComponentFromFile(UI_FILE_SENDER_NAME_PANEL, this);
-//		ui.add(pnBottom, senderPanel, 0);
-//		ui.add(dialogComponent, pnMessage, ui.getItems(dialogComponent).length - 3);
-//		ui.setAction(ui.find(senderPanel, COMPONENT_BT_SENDER_NAME), "addConstantToCommand(tfMessage.text, tfMessage, 0)", dialogComponent, this);
-//		ui.setAction(ui.find(senderPanel, "btSenderNumber"), "addConstantToCommand(tfMessage.text, tfMessage, 1)", dialogComponent, this);
-//		// FIX 0000542 FIXME this comment is not useful - what is the fix?  or more importantly, what is the function of this code?
-//		ui.setAction(ui.find(dialogComponent, COMPONENT_BT_SAVE), "do_newKActionReply(autoReplyForm, tfMessage.text)", dialogComponent, this);
-//
-//		//Adds the date panel to it
-//		ui.addDatePanel(dialogComponent);
-//		ui.setAttachedObject(dialogComponent, keyword);
-
-//		numberToSend = 1;
 	}
 	
 	private void sharedInit(Object attachment, String replyText) {
@@ -94,25 +76,6 @@ public class ReplyActionDialogHandler extends BaseActionDialogHandler {
 
 	public void init(KeywordAction action) {
 		sharedInit(action, action.getUnformattedReplyText());
-		
-//		MessagePanelHandler messagePanelController = new MessagePanelHandler(this.ui);
-//		Object pnMessage = messagePanelController.getPanel();
-//		// FIX 0000542
-//		Object pnBottom = ui.find(pnMessage, COMPONENT_PN_BOTTOM);
-//		ui.remove(ui.getItem(pnBottom, 0));
-//		Object senderPanel = ui.loadComponentFromFile(UI_FILE_SENDER_NAME_PANEL, this);
-//		ui.add(pnBottom, senderPanel, 0);
-//		ui.add(this.dialogComponent, pnMessage, ui.getItems(this.dialogComponent).length - 3);
-//		ui.setAction(ui.find(senderPanel, COMPONENT_BT_SENDER_NAME), "addConstantToCommand(tfMessage.text, tfMessage, 0)", this.dialogComponent, this);
-//		ui.setAction(ui.find(senderPanel, "btSenderNumber"), "addConstantToCommand(tfMessage.text, tfMessage, 1)", this.dialogComponent, this);
-//		// FIX 0000542
-//		
-//		//Adds the date panel to it
-//		ui.addDatePanel(this.dialogComponent);
-//		
-//		ui.setAction(ui.find(this.dialogComponent, COMPONENT_BT_SAVE), "do_newKActionReply(autoReplyForm, tfMessage.text)", this.dialogComponent, this);
-//		
-//		ui.setAttachedObject(this.dialogComponent, action);
 		
 		ui.setText(ui.find(this.dialogComponent, COMPONENT_TF_MESSAGE), action.getUnformattedReplyText());
 		
