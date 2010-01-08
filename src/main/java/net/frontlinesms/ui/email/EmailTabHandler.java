@@ -12,10 +12,6 @@ import static net.frontlinesms.FrontlineSMSConstants.COMMON_SUBJECT;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_EMAILS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_REMOVING_EMAILS;
 import static net.frontlinesms.FrontlineSMSConstants.PROPERTY_FIELD;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_ACCOUNTS_LIST;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_EMAILS_TOOLBAR;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_EMAIL_LIST;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_EMAIL;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_EMAIL_LOG;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.UI_FILE_PAGE_PANEL;
 
@@ -43,8 +39,13 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  *
  */
 public class EmailTabHandler implements ThinletUiEventHandler {
-//> UI FILES
+//> UI LAYOUT FILES
 	public static final String UI_FILE_EMAILS_TAB = "/ui/core/email/emailsTab.xml";
+	
+//> UI COMPONENT NAMES
+	public static final String COMPONENT_EMAIL_LIST = "emailList";
+	public static final String COMPONENT_PN_EMAIL = "pnEmail";
+	public static final String COMPONENT_EMAILS_TOOLBAR = "emails_toolbar";
 	
 //> INSTANCE PROPERTIES
 	/** Logging object */
@@ -66,7 +67,6 @@ public class EmailTabHandler implements ThinletUiEventHandler {
 		
 		this.emailManager = frontlineController.getEmailServerManager();
 		this.emailDao = frontlineController.getEmailDao();
-		this.emailAccountDao = frontlineController.getEmailAccountFactory();
 	}
 	
 //> ACCESSORS
@@ -189,24 +189,6 @@ public class EmailTabHandler implements ThinletUiEventHandler {
 				emailManager.sendEmail(newEmail);
 			}
 		}
-	}
-	
-	/**
-	 * Removes the selected accounts.
-	 */
-	public void removeSelectedFromAccountList() {
-		LOG.trace("ENTER");
-		ui.removeConfirmationDialog();
-		Object list = find(COMPONENT_ACCOUNTS_LIST);
-		Object[] selected = ui.getSelectedItems(list);
-		for (Object o : selected) {
-			EmailAccount acc = ui.getAttachedObject(o, EmailAccount.class);
-			LOG.debug("Removing Account [" + acc.getAccountName() + "]");
-			emailManager.serverRemoved(acc);
-			emailAccountDao.deleteEmailAccount(acc);
-			ui.remove(o);
-		}
-		LOG.trace("EXIT");
 	}
 	
 	/**

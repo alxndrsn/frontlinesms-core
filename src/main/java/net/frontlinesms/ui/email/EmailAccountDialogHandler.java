@@ -3,18 +3,11 @@
  */
 package net.frontlinesms.ui.email;
 
-import static net.frontlinesms.FrontlineSMSConstants.COMMON_EDITING_EMAIL_ACCOUNT;
-import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_ACCOUNT_NAME_ALREADY_EXISTS;
-import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_ACCOUNT_NAME_BLANK;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_USE_SSL;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_ACCOUNT;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_ACCOUNT_PASS;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_ACCOUNT_SERVER_PORT;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_MAIL_SERVER;
-
 import org.apache.log4j.Logger;
 
 import net.frontlinesms.EmailSender;
+import net.frontlinesms.EmailServerHandler;
+import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.EmailAccount;
@@ -35,7 +28,17 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 	public static final String UI_FILE_EMAIL_ACCOUNT_FORM = "/ui/core/email/dgAccountSettings.xml";
 	
 //> UI COMPONENT NAMES
-	public static final String COMPONENT_ACCOUNTS_LIST = "accountsList";	
+	public static final String COMPONENT_ACCOUNTS_LIST = "accountsList";
+	public static final String COMPONENT_TF_ACCOUNT = "tfAccount";
+	public static final String COMPONENT_TF_ACCOUNT_PASS = "tfAccountPass";
+	public static final String COMPONENT_TF_ACCOUNT_SERVER_PORT = "tfPort";
+	public static final String COMPONENT_TF_MAIL_SERVER = "tfMailServer";
+	public static final String COMPONENT_CB_USE_SSL = "cbUseSSL";
+	
+//> I18N TEXT KEYS
+	public static final String COMMON_EDITING_EMAIL_ACCOUNT = "common.editing.email.account";
+	public static final String MESSAGE_ACCOUNT_NAME_BLANK = "message.account.name.blank";
+	public static final String MESSAGE_ACCOUNT_NAME_ALREADY_EXISTS = "message.account.already.exists";
 
 //> INSTANCE PROPERTIES
 	/** Logger */
@@ -43,12 +46,15 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 	
 	private UiGeneratorController ui;
 	private EmailAccountDao emailAccountDao;
+	/** Manager of {@link EmailAccount}s and {@link EmailSender}s */
+	private EmailServerHandler emailManager;
 	
 	private Object dialogComponent;
 	
-	public EmailAccountDialogHandler(UiGeneratorController ui, EmailAccountDao emailAccountDao) {
+	public EmailAccountDialogHandler(UiGeneratorController ui, FrontlineSMS frontlineController) {
 		this.ui = ui;
-		this.emailAccountDao = emailAccountDao;
+		this.emailAccountDao = frontlineController.getEmailAccountFactory();
+		this.emailManager = frontlineController.getEmailServerManager();
 	}
 	
 	public Object getDialog() {
@@ -247,6 +253,24 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 				ui.setEnabled(o, hasSelection);
 			}
 		}
+	}
+	
+	/**
+	 * Removes the selected accounts.
+	 */
+	public void removeSelectedFromAccountList() {
+		LOG.trace("ENTER");
+		ui.removeConfirmationDialog();
+		Object list = find(COMPONENT_ACCOUNTS_LIST);
+		Object[] selected = ui.getSelectedItems(list);
+		for (Object o : selected) {
+			EmailAccount acc = ui.getAttachedObject(o, EmailAccount.class);
+			LOG.debug("Removing Account [" + acc.getAccountName() + "]");
+			emailManager.serverRemoved(acc);
+			emailAccountDao.deleteEmailAccount(acc);
+			ui.remove(o);
+		}
+		LOG.trace("EXIT");
 	}
 
 //> UI PASSTHROUGH METHODS

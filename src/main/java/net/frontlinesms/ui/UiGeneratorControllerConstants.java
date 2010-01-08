@@ -83,7 +83,6 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_CONTACT_MANAGER_CONTACT_FILTER = "contactManager_contactFilter";
 	public static final String COMPONENT_LB_PAGE_NUMBER = "lbPageNumber";
 	public static final String COMPONENT_LB_NUMBER_OF_PAGES = "lbNumberOfPages";
-	public static final String COMPONENT_EMAILS_TOOLBAR = "emails_toolbar";
 	public static final String COMPONENT_BT_NEXT_PAGE = "btNextPage";
 	public static final String COMPONENT_BT_PREVIOUS_PAGE = "btPreviousPage";
 	public static final String COMPONENT_PN_MESSAGE_LIST = "pnMessageList";
@@ -91,7 +90,6 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_PN_FILTER = "pnFilter";
 	public static final String COMPONENT_MI_SEND_SMS = "miSendSMS";
 	public static final String COMPONENT_NEW_GROUP = "newGroup";
-	public static final String COMPONENT_PN_EMAIL = "pnEmail";
 	public static final String COMPONENT_PN_BOTTOM = "pnBottom";
 	public static final String COMPONENT_PN_CONTACTS = "pnContacts";
 	public static final String COMPONENT_TF_COST_PER_SMS = "tfCostPerSMS";
@@ -136,16 +134,10 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_CONTACT_LIST = "contactList";
 	public static final String COMPONENT_LIST = "list";
 	public static final String COMPONENT_PENDING_LIST = "pendingList";
-	public static final String COMPONENT_EMAIL_LIST = "emailList";
 	public static final String COMPONENT_BT_DELETE = "btDelete";
 	public static final String COMPONENT_MI_DELETE = "miDelete";
 	public static final String COMPONENT_MI_EDIT = "miEdit";
 	public static final String COMPONENT_KEY_PANEL = "keyPanel";
-	public static final String COMPONENT_CB_USE_SSL = "cbUseSSL";
-	public static final String COMPONENT_TF_ACCOUNT_PASS = "tfAccountPass";
-	public static final String COMPONENT_TF_ACCOUNT_SERVER_PORT = "tfPort";
-	public static final String COMPONENT_TF_ACCOUNT = "tfAccount";
-	public static final String COMPONENT_TF_MAIL_SERVER = "tfMailServer";
 	public static final String COMPONENT_TF_SUBJECT = "tfSubject";
 	public static final String COMPONENT_TF_RECIPIENT = "tfRecipient";
 	public static final String COMPONENT_MAIL_LIST = "accountsList";

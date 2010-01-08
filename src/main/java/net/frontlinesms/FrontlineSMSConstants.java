@@ -141,7 +141,6 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_CONTACTS_IN_GROUP = "common.contacts.in.group";
 	public static final String COMMON_KEYWORD_ACTIONS_OF = "common.keyword.actions.of";
 	public static final String COMMON_EDITING_SMS_SERVICE = "common.edting.sms.service";
-	public static final String COMMON_EDITING_EMAIL_ACCOUNT = "common.editing.email.account";
 	public static final String COMMON_BLANK = "common.blank";
 	public static final String COMMON_CURRENCY = "common.currency";
 	public static final String COMMON_PROPERTIES = "common.properties";
@@ -159,8 +158,6 @@ public final class FrontlineSMSConstants {
 	public static final String MESSAGE_KEYWORD_BLANK = "message.keyword.blank";
 	public static final String MESSAGE_CONTACT_IS_ALREADY_LISTED = "message.contact.is.already.listed";
 	public static final String MESSAGE_GROUP_IS_ALREADY_LISTED = "message.group.is.already.listed";
-	public static final String MESSAGE_ACCOUNT_NAME_BLANK = "message.account.name.blank";
-	public static final String MESSAGE_ACCOUNT_NAME_ALREADY_EXISTS = "message.account.already.exists";
 	public static final String MESSAGE_FAILED_TO_CONNECT = "message.failed.to.connect";
 	public static final String MESSAGE_CONTINUING_TO_SEARCH_FOR_HIGHER_SPEED = "message.continuing.to.search.for.higher.speed";
 	public static final String MESSAGE_READY_TO_CONNECT = "message.ready.to.connect";
