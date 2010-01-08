@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -42,7 +41,6 @@ import javax.mail.MessagingException;
 import net.frontlinesms.AppProperties;
 import net.frontlinesms.BuildProperties;
 import net.frontlinesms.EmailSender;
-import net.frontlinesms.EmailServerHandler;
 import net.frontlinesms.ErrorUtils;
 import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.FrontlineSMSConstants;
@@ -60,6 +58,8 @@ import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.*;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
+import net.frontlinesms.ui.email.EmailAccountDialogHandler;
+import net.frontlinesms.ui.email.EmailTabHandler;
 import net.frontlinesms.ui.i18n.FileLanguageBundle;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.LanguageBundle;
@@ -68,7 +68,6 @@ import org.apache.log4j.Logger;
 
 import thinlet.FrameLauncher;
 import thinlet.Thinlet;
-import thinlet.ThinletText;
 
 // FIXME should not be using static imports
 import static net.frontlinesms.FrontlineSMSConstants.*;
@@ -111,8 +110,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	/** The manager of {@link SmsDevice}s */
 	private final SmsDeviceManager phoneManager;
-	/** Manager of {@link EmailAccount}s and {@link EmailSender}s */
-	private final EmailServerHandler emailManager;
 	/** Manager of {@link PluginController}s */
 	private final PluginManager pluginManager;
 	
@@ -129,18 +126,18 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/** Data Access Object for {@link SmsModemSettings}s */
 	private final SmsModemSettingsDao phoneDetailsManager;
 	/** Data Access Object for {@link EmailAccount}s */
-	private final EmailAccountDao emailAccountFactory;
-	/** Data Access Object for {@link Email}s */
-	private final EmailDao emailFactory;
-	
+	private final EmailAccountDao emailAccountDao;
+
+	/** Controller of the home tab. */
+	private final HomeTabController homeTabController;
 	/** Controller of the phones tab. */
 	private final PhoneTabController phoneTabController;
 	/** Controller of the contacts tab. */
 	private final ContactsTabController contactsTabController;
 	/** Controller of the message tab. */
 	private final MessageHistoryTabController messageTabController;
-	/** Controller of the home tab. */
-	private HomeTabController homeTabController;
+	/** Handler for the email tab. */
+	private final EmailTabHandler emailTabHandler;
 	
 	// FIXME these should probably move to the contacts tab controller
 	/** Fake group: The root group, of which all other top-level groups are children.  The name of this group specified in the constructor will not be used due to overridden {@link Group#getName()}. */
@@ -202,7 +199,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/** Thinlet UI Component: status bar at the bottom of the window */
 	private final Object statusBarComponent;
 	private Object keywordListComponent;
-	private Object emailListComponent;
 	private final Object progressBarComponent;
 
 	/** Appears to be the in-focus item on the email tab. */
@@ -239,9 +235,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		this.keywordDao = frontlineController.getKeywordDao();
 		this.keywordActionDao = frontlineController.getKeywordActionDao();
 		this.phoneDetailsManager = frontlineController.getSmsModemSettingsDao();
-		this.emailAccountFactory = frontlineController.getEmailAccountFactory();
-		this.emailFactory = frontlineController.getEmailDao();
-		this.emailManager = frontlineController.getEmailServerManager();
+		this.emailAccountDao = frontlineController.getEmailAccountFactory();
 		this.pluginManager = frontlineController.getPluginManager();
 		
 		// Load the data mode from the ui.properties file
@@ -270,6 +264,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			this.phoneTabController = new PhoneTabController(this);
 			this.contactsTabController = new ContactsTabController(this, this.contactDao, this.groupDao);
 			this.messageTabController = new MessageHistoryTabController(this, contactDao, keywordDao, messageFactory);
+			this.emailTabHandler = new EmailTabHandler(this, this.frontlineController);
 
 
 			this.homeTabController = new HomeTabController(this);
@@ -286,7 +281,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				add(tabbedPane, this.messageTabController.getTab());
 			}
 			if (uiProperties.isTabVisible("emailstab")) {
-				addEmailsTab(tabbedPane);
+				add(tabbedPane, this.emailTabHandler.getTab());
 				setSelected(find(COMPONENT_MI_EMAIL), true);
 			}
 			add(tabbedPane, phoneTabController.getTab());
@@ -319,10 +314,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			currentTab = TAB_HOME;
 
 			progressBarComponent = find(COMPONENT_PROGRESS_BAR);
-			
-			// Set the types for the email list columns...
-			Object header = Thinlet.get(emailListComponent, ThinletText.HEADER);
-			initEmailTableForSorting(header);
 			
 			// Try to add the emulator number to the contacts
 			try {
@@ -470,25 +461,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void showHomeTabSettings() {
 		this.homeTabController.showHomeTabSettings();
 	}
-
-	/**
-	 * @param header
-	 */
-	private void initEmailTableForSorting(Object header) {
-		for (Object o : getItems(header)) {
-			String text = getString(o, Thinlet.TEXT);
-			// Here, the FIELD property is set on each column of the message table.  These field objects are
-			// then used for easy sorting of the message table.
-			if (text != null) {
-				if (text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_STATUS))) putProperty(o, PROPERTY_FIELD, Email.Field.STATUS);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_DATE))) putProperty(o, PROPERTY_FIELD, Email.Field.DATE);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_SENDER))) putProperty(o, PROPERTY_FIELD, Email.Field.FROM);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_RECIPIENT))) putProperty(o, PROPERTY_FIELD, Email.Field.TO);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_CONTENT))) putProperty(o, PROPERTY_FIELD, Email.Field.EMAIL_CONTENT);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_SUBJECT))) putProperty(o, PROPERTY_FIELD, Email.Field.SUBJECT);
-			}
-		}
-	}
 	
 	@SuppressWarnings("unchecked")
 	public <T extends Object> List<T> getListContents(Object table, Class<T> clazz) {
@@ -549,29 +521,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		int pageNumber = (Integer) getProperty(list, PROPERTY_CURRENT_PAGE);
 		putProperty(list, PROPERTY_CURRENT_PAGE, pageNumber - 1);
 		executeAction(getMethod(list));
-	}
-	
-	private void addEmailsTab(Object tabbedPane) {
-		int index = 4;
-		if (find(TAB_HOME) == null) index--;
-		if (find(TAB_KEYWORD_MANAGER) == null) index--;
-		Object emailTab = loadComponentFromFile(UI_FILE_EMAILS_TAB);
-		Object pnEmail = find(emailTab, COMPONENT_PN_EMAIL);
-		
-		// Add the paging panel
-		// TODO this should be done with placeholder + call to addPagination
-		Object pagePanel = loadComponentFromFile(UI_FILE_PAGE_PANEL);
-		setChoice(pagePanel, HALIGN, RIGHT);
-		add(pnEmail, pagePanel, 2);
-		setPageMethods(pnEmail, COMPONENT_EMAIL_LIST, pagePanel);
-
-		add(tabbedPane, emailTab, index);
-		
-		emailListComponent = find(COMPONENT_EMAIL_LIST);
-		setListLimit(emailListComponent);
-		setListPageNumber(1, emailListComponent);
-		setListElementCount(emailFactory.getEmailCount(), emailListComponent);
-		setMethod(emailListComponent, "updateEmailList");
 	}
 
 	// FIXME this could be private if it wasn't used in forms tab.  Should probably be abstracted
@@ -824,26 +773,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 	}
 	
-	/**
-	 * Update the email list inside the email log tab.
-	 * This only works for advanced mode.
-	 */
-	public void updateEmailList() {
-		Object header = get(emailListComponent, ThinletText.HEADER);
-		Object tableColumn = getSelectedItem(header);
-		Email.Field field = null;
-		Order order = Order.DESCENDING;
-		if (tableColumn != null) {
-			field = (Email.Field) getProperty(tableColumn, PROPERTY_FIELD);
-			order = get(tableColumn, ThinletText.SORT).equals(ThinletText.ASCENT) ? Order.ASCENDING : Order.DESCENDING;
-		}
-		int limit = getListLimit(emailListComponent);
-		int pageNumber = getListCurrentPage(emailListComponent);
-		Collection<Email> emails = emailFactory.getEmailsWithLimit(field, order, (pageNumber - 1) * limit, limit);
-		updateEmailList(emails, emailListComponent);
-	}
-
-	
 	public int getListCurrentPage(Object list) {
 		int pageNumber = (Integer) getProperty(list, PROPERTY_CURRENT_PAGE);
 		return pageNumber;
@@ -944,47 +873,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		remove(selected);
 		enableKeywordActionFields(list, find(COMPONENT_KEY_ACT_PANEL));
 	}
-
-	/**
-	 * Removes the selected emails
-	 */
-	public void removeSelectedFromEmailList() {
-		LOG.trace("ENTER");
-		removeConfirmationDialog();
-		setStatus(InternationalisationUtils.getI18NString(MESSAGE_REMOVING_EMAILS));
-		initProgress();
-		final Object[] selected = getSelectedItems(emailListComponent);
-		setProgressMax(selected.length);
-		LOG.debug("Starting thread to remove e-mails...");
-		new Thread(){
-			public void run() {
-				int numberRemoved = 0;
-				for (Object o : selected) {
-					incProgress();
-					Email toBeRemoved = getEmail(o);
-					LOG.debug("E-mail [" + toBeRemoved + "]");
-					int status = toBeRemoved.getStatus();
-					if (status != Email.STATUS_PENDING 
-							&& status != Email.STATUS_RETRYING) {
-						LOG.debug("Removing from database..");
-						if (status == Email.STATUS_OUTBOX) {
-							emailManager.removeFromOutbox(toBeRemoved);
-						}
-						emailFactory.deleteEmail(toBeRemoved);
-						numberRemoved++;
-					} else {
-						LOG.debug("E-mail status is [" + toBeRemoved.getStatus() + "]. Do not remove...");
-					}
-				}
-				updatePageAfterDeletion(numberRemoved, emailListComponent);
-				if (numberRemoved > 0) {
-					updateEmailList();
-				}
-				finishProgress(InternationalisationUtils.getI18NString(MESSAGE_EMAILS_DELETED));
-			}
-		}.start();
-		LOG.trace("EXIT");
-	}
 	
 	public void setListElementCount(int count, Object list) {
 		putProperty(list, PROPERTY_COUNT, count);
@@ -1001,7 +889,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * items.
 	 * @param list 
 	 * @param popup 
-	 * @param toolbar 
+	 * @param toolbar
+	 * @deprecated this method should be separated out for the different things it applies to 
 	 */
 	public void enableOptions(Object list, Object popup, Object toolbar) {
 		Object[] selectedItems = getSelectedItems(list);
@@ -1046,46 +935,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			}
 		}
 	}
-	
-	/**
-	 * Re-Sends the selected emails
-	 */
-	public void resendSelectedFromEmailList() {
-		Object[] selected = getSelectedItems(emailListComponent);
-		for (Object o : selected) {
-			Email toBeReSent = getEmail(o);
-			int status = toBeReSent.getStatus();
-			if (status == Email.STATUS_FAILED) {
-				emailManager.sendEmail(toBeReSent);
-			} else if (status == Email.STATUS_SENT ) {
-				Email newEmail = new Email(toBeReSent.getEmailFrom(), toBeReSent.getEmailRecipients(), toBeReSent.getEmailSubject(), toBeReSent.getEmailContent());
-				emailFactory.saveEmail(newEmail);
-				emailManager.sendEmail(newEmail);
-			}
-		}
-	}
 
 	public int getListLimit(Object list) {
 		int limit = (Integer) getProperty(list, PROPERTY_ENTRIES_PER_PAGE);
 		return limit;
-	}
-	
-	/**
-	 * Removes the selected accounts.
-	 */
-	public void removeSelectedFromAccountList() {
-		LOG.trace("ENTER");
-		removeConfirmationDialog();
-		Object list = find(COMPONENT_ACCOUNTS_LIST);
-		Object[] selected = getSelectedItems(list);
-		for (Object o : selected) {
-			EmailAccount acc = (EmailAccount) getAttachedObject(o);
-			LOG.debug("Removing Account [" + acc.getAccountName() + "]");
-			emailManager.serverRemoved(acc);
-			emailAccountFactory.deleteEmailAccount(acc);
-			remove(o);
-		}
-		LOG.trace("EXIT");
 	}
 	
 	/** If the confirmation dialog exists, remove it */
@@ -1139,7 +992,9 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		setInteger(progressBarComponent, Thinlet.MINIMUM, 0);
 	}
 	
-	/** Shows a general dialog asking the user to confirm his action. */
+	/** Shows a general dialog asking the user to confirm his action.
+	 * @deprecated this should not be called without the event handler specified.  still here because ui calls it for keyword tab
+	 */
 	public void showConfirmationDialog(String methodToBeCalled){
 		showConfirmationDialog(methodToBeCalled, this);
 	}
@@ -1352,7 +1207,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * 
 	 * @param status
 	 */
-	synchronized void setStatus(String status) {
+	public synchronized void setStatus(String status) {
 		LOG.debug("Status Text [" + status + "]");
 		setString(statusBarComponent, TEXT, status);
 	}
@@ -1792,7 +1647,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		//Adds the date panel to it
 		addDatePanel(emailForm);
 		Object list = find(emailForm, COMPONENT_MAIL_LIST);
-		for (EmailAccount acc : emailAccountFactory.getAllEmailAccounts()) {
+		for (EmailAccount acc : emailAccountDao.getAllEmailAccounts()) {
 			LOG.debug("Adding existent e-mail account [" + acc.getAccountName() + "] to list");
 			Object item = createListItem(acc.getAccountName(), acc);
 			setIcon(item, Icon.SERVER);
@@ -1813,7 +1668,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		addDatePanel(emailForm);
 		setAttachedObject(emailForm, action);
 		Object list = find(emailForm, COMPONENT_MAIL_LIST);
-		for (EmailAccount acc : emailAccountFactory.getAllEmailAccounts()) {
+		for (EmailAccount acc : emailAccountDao.getAllEmailAccounts()) {
 			LOG.debug("Adding existent e-mail account [" + acc.getAccountName() + "] to list");
 			Object item = createListItem(acc.getAccountName(), acc);
 			setIcon(item, Icon.SERVER);
@@ -1846,43 +1701,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Shows the email accounts settings dialog.
 	 */
 	public void showEmailAccountsSettings() {
-		Object emailForm = getEmailAccountForm();
-		add(emailForm);
-	}
-	
-	public void finishEmailManagement(Object dialog) {
-		Object att = getAttachedObject(dialog);
-		if (att != null) {
-			Object list = find(att, COMPONENT_ACCOUNTS_LIST);
-			removeAll(list);
-			for (EmailAccount acc : emailAccountFactory.getAllEmailAccounts()) {
-				Object item = createListItem(acc.getAccountName(), acc);
-				setIcon(item, Icon.SERVER);
-				add(list, item);
-			}
-		}
-		removeDialog(dialog);
-	}
-	
-	/**
-	 * Shows the email accounts settings dialog.
-	 */
-	public void showEmailAccountsSettings(Object dialog) {
-		Object emailForm = getEmailAccountForm();
-		setAttachedObject(emailForm, dialog);
-		add(emailForm);
-	}
-
-	/**
-	 * @return
-	 */
-	private Object getEmailAccountForm() {
-		Object emailForm = loadComponentFromFile(UI_FILE_EMAIL_ACCOUNTS_SETTINGS_FORM);
-		Object table = find(emailForm, COMPONENT_ACCOUNTS_LIST);
-		for (EmailAccount acc : emailAccountFactory.getAllEmailAccounts()) {
-			add(table, getRow(acc));
-		}
-		return emailForm;
+		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this);
+		add(emailAccountDialogHandler.getDialog());
 	}
 
 	/**
@@ -1925,136 +1745,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			throw new RuntimeException(e);
 		}
 		LOG.trace("EXIT");
-	}
-	
-	/**
-	 * This method is called when the save button is pressed in the new mail account dialog. 
-	 
-	 * @param dialog
-	 */
-	public void saveEmailAccount(Object dialog) {
-		LOG.trace("ENTER");
-		String server = getText(find(dialog, COMPONENT_TF_MAIL_SERVER));
-		String accountName = getText(find(dialog, COMPONENT_TF_ACCOUNT));
-		String password = getText(find(dialog, COMPONENT_TF_ACCOUNT_PASS));
-		boolean useSSL = isSelected(find(dialog, COMPONENT_CB_USE_SSL));
-		String portAsString = getText(find(dialog, COMPONENT_TF_ACCOUNT_SERVER_PORT));
-		
-		int serverPort;
-		try {
-			serverPort = Integer.parseInt(portAsString);
-		} catch (NumberFormatException e1) {
-			if (useSSL) serverPort = EmailAccount.DEFAULT_SMTPS_PORT;
-			else serverPort = EmailAccount.DEFAULT_SMTP_PORT;
-		}
-		
-		Object table = find(dialog, COMPONENT_ACCOUNTS_LIST);
-		
-		LOG.debug("Server [" + server + "]");
-		LOG.debug("Account [" + accountName + "]");
-		LOG.debug("Account Server Port [" + serverPort + "]");
-		LOG.debug("SSL [" + useSSL + "]");
-		
-		if (accountName.equals("")) {
-			alert(InternationalisationUtils.getI18NString(MESSAGE_ACCOUNT_NAME_BLANK));
-			LOG.trace("EXIT");
-			return;
-		}
-		
-		try {
-			Object att = getAttachedObject(dialog);
-			if (att == null || !(att instanceof EmailAccount)) {
-				LOG.debug("Testing connection to [" + server + "]");
-				if (EmailSender.testConnection(server, accountName, serverPort, password, useSSL)) {
-					LOG.debug("Connection was successful, creating account [" + accountName + "]");
-					EmailAccount account = new EmailAccount(accountName, server, serverPort, password, useSSL);
-					emailAccountFactory.saveEmailAccount(account);
-					add(table, getRow(account));
-					cleanEmailAccountFields(dialog);
-				} else {
-					LOG.debug("Connection failed.");
-					Object connectWarning = loadComponentFromFile(UI_FILE_CONNECTION_WARNING_FORM);
-					setAttachedObject(connectWarning, dialog);
-					add(connectWarning);
-				}
-			} else if (att instanceof EmailAccount) {
-				EmailAccount acc = (EmailAccount) att;
-				acc.setAccountName(accountName);
-				acc.setAccountPassword(password);
-				acc.setAccountServer(server);
-				acc.setUseSSL(useSSL);
-				acc.setAccountServerPort(serverPort);
-				
-				Object tableToAdd = find(find("emailConfigDialog"), COMPONENT_ACCOUNTS_LIST);
-				int index = getSelectedIndex(tableToAdd);
-				remove(getSelectedItem(tableToAdd));
-				add(tableToAdd, getRow(acc), index);
-				
-				setSelectedIndex(tableToAdd, index);
-				
-				removeDialog(dialog);
-			}
-			
-		} catch (DuplicateKeyException e) {
-			LOG.debug(InternationalisationUtils.getI18NString(MESSAGE_ACCOUNT_NAME_ALREADY_EXISTS), e);
-			alert(InternationalisationUtils.getI18NString(MESSAGE_ACCOUNT_NAME_ALREADY_EXISTS));
-		}
-		LOG.trace("EXIT");
-	}
-	
-	/**
-	 * After failing to connect to the email server, the user has an option to
-	 * create the account anyway. This method handles this action. 
-	 * 
-	 * @param currentDialog
-	 */
-	public void createAccount(Object currentDialog) {
-		LOG.trace("ENTER");
-		removeDialog(currentDialog);
-		LOG.debug("Creating account anyway!");
-		Object accountDialog = getAttachedObject(currentDialog);
-		String server = getText(find(accountDialog, COMPONENT_TF_MAIL_SERVER));
-		String accountName = getText(find(accountDialog, COMPONENT_TF_ACCOUNT));
-		String password = getText(find(accountDialog, COMPONENT_TF_ACCOUNT_PASS));
-		boolean useSSL = isSelected(find(accountDialog, COMPONENT_CB_USE_SSL));
-		String portAsString = getText(find(accountDialog, COMPONENT_TF_ACCOUNT_SERVER_PORT));
-		
-		int serverPort;
-		try {
-			serverPort = Integer.parseInt(portAsString);
-		} catch (NumberFormatException e1) {
-			if (useSSL) serverPort = EmailAccount.DEFAULT_SMTPS_PORT;
-			else serverPort = EmailAccount.DEFAULT_SMTP_PORT;
-		}
-		
-		Object table = find(accountDialog, COMPONENT_ACCOUNTS_LIST);
-		
-		LOG.debug("Server Name [" + server + "]");
-		LOG.debug("Account Name [" + accountName + "]");
-		LOG.debug("Account Server Port [" + serverPort + "]");
-		LOG.debug("SSL [" + useSSL + "]");
-		EmailAccount acc;
-		try {
-			acc = new EmailAccount(accountName, server, serverPort, password, useSSL);
-			emailAccountFactory.saveEmailAccount(acc);
-		} catch (DuplicateKeyException e) {
-			LOG.debug("Account already exists", e);
-			alert(InternationalisationUtils.getI18NString(MESSAGE_ACCOUNT_NAME_ALREADY_EXISTS));
-			LOG.trace("EXIT");
-			return;
-		}
-		LOG.debug("Account [" + acc.getAccountName() + "] created!");
-		add(table, getRow(acc));
-		cleanEmailAccountFields(accountDialog);
-		LOG.trace("EXIT");
-	}
-
-	private void cleanEmailAccountFields(Object accountDialog) {
-		setText(find(accountDialog, COMPONENT_TF_MAIL_SERVER), "");
-		setText(find(accountDialog, COMPONENT_TF_ACCOUNT), "");
-		setText(find(accountDialog, COMPONENT_TF_ACCOUNT_PASS), "");
-		setText(find(accountDialog, COMPONENT_TF_ACCOUNT_SERVER_PORT), "");
-		setSelected(find(accountDialog, COMPONENT_CB_USE_SSL), true);
 	}
 	
 	/**
@@ -3060,7 +2750,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param component
 	 * @return The Email instance.
 	 */
-	private Email getEmail(Object component) {
+	public Email getEmail(Object component) {
 		return (Email) getAttachedObject(component);
 	}
 	
@@ -3431,21 +3121,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		setIcon(listItem, Icon.CONTACT);
 		return listItem;
 	}
-
-	/**
-	 * Repopulates a UI list with details of a list of emails.
-	 */
-	private void updateEmailList(Collection<Email> emails, Object emailListComponent) {
-		removeAll(emailListComponent);
-		
-		for (Email email : emails) {
-			Object row = getRow(email);
-			add(emailListComponent, row);
-		}
-				
-		updatePageNumber(emailListComponent, find(TAB_EMAIL_LOG));
-		enableOptions(emailListComponent, null, find(COMPONENT_EMAILS_TOOLBAR));
-	}
 	
 	/**
 	 * Creates a Thinlet UI table row containing details of a contact.
@@ -3558,7 +3233,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param message
 	 * @return
 	 */
-	private Object getRow(EmailAccount acc) {
+	public Object getRow(EmailAccount acc) {
 		Object row = createTableRow(acc);
 
 		Object iconCell = createTableCell("");
@@ -3593,7 +3268,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param email
 	 * @return
 	 */
-	private Object getRow(Email email) {
+	public Object getRow(Email email) {
 		Object row = createTableRow(email);
 
 		add(row, createTableCell(getEmailStatusAsString(email)));
@@ -3633,7 +3308,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			updateKeywordList();
 			setStatus(InternationalisationUtils.getI18NString(MESSAGE_KEYWORDS_LOADED));
 		} else if (currentTab.equals(TAB_EMAIL_LOG)) {
-			updateEmailList();
+			this.emailTabHandler.refresh();
 			setStatus(InternationalisationUtils.getI18NString(MESSAGE_EMAILS_LOADED));
 		}
 		LOG.trace("EXIT");
@@ -3643,30 +3318,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		LOG.trace("ENTER");
 		LOG.debug("E-mail [" + email.getEmailContent() + "], Status [" + email.getStatus() + "]");
 		if (currentTab.equals(TAB_EMAIL_LOG)) {
-			LOG.debug("Refreshing e-mail list");
-			int index = -1;
-			for (int i = 0; i < getItems(emailListComponent).length; i++) {
-				Email e = getEmail(getItem(emailListComponent, i));
-				if (e.equals(email)) {
-					index = i;
-					break;
-				}
-			}
-			if (index != -1) {
-				//Updating
-				remove(getItem(emailListComponent, index));
-				add(emailListComponent, getRow(email), index);
-			} else {
-				int limit = getListLimit(emailListComponent);
-				//Adding
-				if (getItems(emailListComponent).length < limit && email.getStatus() == Email.STATUS_OUTBOX) {
-					add(emailListComponent, getRow(email));
-				}
-				if (email.getStatus() == Email.STATUS_OUTBOX) {
-					setListElementCount(getListElementCount(emailListComponent) + 1, emailListComponent);
-				}
-				updatePageNumber(emailListComponent, find(TAB_EMAIL_LOG));
-			}
+			this.emailTabHandler.outgoingEmailEvent(sender, email);
 		}
 		if (email.getStatus() == Email.STATUS_SENT) {
 			newEvent(new Event(Event.TYPE_OUTGOING_EMAIL, InternationalisationUtils.getI18NString(COMMON_E_MAIL) + ": " + email.getEmailContent()));
@@ -3769,7 +3421,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				addKeywordsTab(tabbedPane);
 				tabName = "keywordstab";
 			} else if (name.equals(COMPONENT_MI_EMAIL)) {
-				addEmailsTab(tabbedPane);
+				add(tabbedPane, this.emailTabHandler.getTab());
 				tabName = "emailstab";
 			}
 		} else {
@@ -3864,27 +3516,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				}
 			}
 		}.start();
-	}
-
-	/**
-	 * @param numberRemoved
-	 */
-	private void updatePageAfterDeletion(int numberRemoved, Object list) {
-		int limit = getListLimit(list);
-		int count = getListElementCount(list);
-		if (numberRemoved == getItems(list).length) {
-			int page = getListCurrentPage(list);
-			int pages = count / limit;
-			if ((count % limit) != 0) {
-				pages++;
-			}
-			if (page == pages && page != 1) {
-				//Last page
-				page--;
-				setListPageNumber(page, list);
-			} 
-		}
-		setListElementCount(count - numberRemoved, list);
 	}
 
 	/**

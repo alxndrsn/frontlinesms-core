@@ -74,7 +74,7 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	 * @param filename path of the UI XML file to load from
 	 * @return thinlet component loaded from the file
 	 */
-	protected Object loadComponentFromFile(String filename) {
+	public Object loadComponentFromFile(String filename) {
 		return loadComponentFromFile(filename, this);
 	}
 	

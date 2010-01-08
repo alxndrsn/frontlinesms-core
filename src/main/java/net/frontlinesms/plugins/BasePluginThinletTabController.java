@@ -12,16 +12,17 @@ import org.apache.log4j.Logger;
 /**
  * Common base for tab controllers for plugins.
  * @author alex
+ * @param <ControllerClass> The class of the {@link PluginController} which this tab handler is attached to
  */
 public abstract class BasePluginThinletTabController<ControllerClass extends PluginController> implements ThinletUiEventHandler {
 
 //> INSTANCE PROPERTIES
 	/** Logging object */
-	protected final Logger LOG = Utils.getLogger(this.getClass());
+	protected final Logger log = Utils.getLogger(this.getClass());
 	/** The {@link PluginController} that owns this class. */
 	private final ControllerClass pluginController;
 	/** The {@link UiGeneratorController} that shows the tab. */
-	protected final UiGeneratorController uiController;
+	protected final UiGeneratorController ui;
 	
 	/** The thinlet component containing the tab. */
 	private Object tabComponent;
@@ -34,7 +35,7 @@ public abstract class BasePluginThinletTabController<ControllerClass extends Plu
 	 */
 	protected BasePluginThinletTabController(ControllerClass pluginController, UiGeneratorController uiController) {
 		this.pluginController = pluginController;
-		this.uiController = uiController;
+		this.ui = uiController;
 	}
 	
 //> ACCESSORS
@@ -59,29 +60,29 @@ public abstract class BasePluginThinletTabController<ControllerClass extends Plu
 //> UI CONVENIENCE METHODS
 	/** @return the named ui component in the current tab, or <code>null</code> if none could be found. */
 	protected Object find(String componentName) {
-		return this.uiController.find(this.tabComponent, componentName);
+		return this.ui.find(this.tabComponent, componentName);
 	}
 	
 
 //> PASS-THROUGH METHODS TO UI CONTROLLER
 	/** @see UiGeneratorController#showHelpPage(String) */
 	public void showHelpPage(String page) {
-		uiController.showHelpPage(page);
+		ui.showHelpPage(page);
 	}
 	
 	/** @see UiGeneratorController#showConfirmationDialog(String) */
 	public void showConfirmationDialog(String methodToBeCalled) {
-		this.uiController.showConfirmationDialog(methodToBeCalled, this);
+		this.ui.showConfirmationDialog(methodToBeCalled, this);
 	}
 	
 	/** @see UiGeneratorController#groupList_expansionChanged(Object) */
 	public void groupList_expansionChanged(Object groupList) {
-		this.uiController.groupList_expansionChanged(groupList);
+		this.ui.groupList_expansionChanged(groupList);
 	}
 	
 	/** @see UiGeneratorController#removeDialog(Object) */
 	public void removeDialog(Object dialog) {
-		this.uiController.removeDialog(dialog);
+		this.ui.removeDialog(dialog);
 	}
 	
 	/**
@@ -90,6 +91,6 @@ public abstract class BasePluginThinletTabController<ControllerClass extends Plu
 	 * @see UiGeneratorController#removeAll(Object)
 	 */
 	public void removeAll(Object listComponent) {
-		this.uiController.removeAll(listComponent);
+		this.ui.removeAll(listComponent);
 	}
 }

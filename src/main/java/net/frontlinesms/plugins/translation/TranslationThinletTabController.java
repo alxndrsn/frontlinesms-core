@@ -69,23 +69,23 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		try { localValue = selectedLanguageBundle.getValue(textKey); } catch(MissingResourceException ex) {};
 		
 		// Load the dialog
-		this.editDialog = uiController.loadComponentFromFile(UI_FILE_TRANSLATE_DIALOG, this);
-		uiController.setText(uiController.find(this.editDialog, "lbLocalTranslation"), selectedLanguageBundle.getLanguageName());
+		this.editDialog = ui.loadComponentFromFile(UI_FILE_TRANSLATE_DIALOG, this);
+		ui.setText(ui.find(this.editDialog, "lbLocalTranslation"), selectedLanguageBundle.getLanguageName());
 		
 		// Initialize textfield values
-		uiController.setText(uiController.find(this.editDialog, "tfKey"), textKey);
-		uiController.setText(uiController.find(this.editDialog, "tfDefault"), defaultValue);
-		uiController.setText(uiController.find(this.editDialog, "tfLocal"), localValue);
+		ui.setText(ui.find(this.editDialog, "tfKey"), textKey);
+		ui.setText(ui.find(this.editDialog, "tfDefault"), defaultValue);
+		ui.setText(ui.find(this.editDialog, "tfLocal"), localValue);
 	
 		// Display the dialog
-		uiController.add(this.editDialog);
+		ui.add(this.editDialog);
 	}
 	
 	public void confirmDeleteText() {
 		System.out.println("TranslationThinletTabController.languageSelectionChanged()");
 		String textKey = getSelectedTextKey(this.visibleTab);
 		if(textKey != null) {
-			uiController.showConfirmationDialog("deleteText('" + textKey + "')", this);
+			ui.showConfirmationDialog("deleteText('" + textKey + "')", this);
 		}
 		removeEditDialog();
 	}
@@ -110,14 +110,14 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	}
 	
 	public void removeEditDialog() {
-		uiController.remove(this.editDialog);
+		ui.remove(this.editDialog);
 		this.editDialog = null;
 	}
 	
 	public void languageSelectionChanged() {
 		System.out.println("TranslationThinletTabController.languageSelectionChanged()");
 		refreshTables();
-		uiController.setEnabled(getFilterTextfield(), true);
+		ui.setEnabled(getFilterTextfield(), true);
 	}
 	public void filterTranslations(String filterText) {
 		System.out.println("TranslationThinletTabController.filterTranslations(" + filterText + ")");
@@ -134,11 +134,11 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	private void filterTable(TranslationView view) {
 		Object table = find(view.getTableName());
 		String filterText = getFilterText();
-		uiController.removeAll(table);
+		ui.removeAll(table);
 		for(Object tableRow : this.translationTableRows.get(view)) {
 			boolean show = rowMatches(tableRow, filterText);
 			if(show) {
-				uiController.add(table, tableRow);
+				ui.add(table, tableRow);
 			}
 		}
 	}
@@ -155,8 +155,8 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 			// If the filter text is empty, there is no need to check - it will match everything!
 			return true;
 		}
-		for(Object col : uiController.getItems(row)) {
-			if(uiController.getText(col).contains(filterText)) {
+		for(Object col : ui.getItems(row)) {
+			if(ui.getText(col).contains(filterText)) {
 				return true;
 			}
 		}
@@ -169,17 +169,17 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	 * @return
 	 */
 	private String getSelectedTextKey(TranslationView view) {
-		Object selectedItem = uiController.getSelectedItem(find(view.getTableName()));
+		Object selectedItem = ui.getSelectedItem(find(view.getTableName()));
 		if(selectedItem == null) return null;
-		String selectedKey = uiController.getAttachedObject(selectedItem, String.class);
+		String selectedKey = ui.getAttachedObject(selectedItem, String.class);
 		return selectedKey;
 	}
 	
 	private void setSelectedTextValue(TranslationView view, String value) {
-		Object selectedItem = uiController.getSelectedItem(find(view.getTableName()));
+		Object selectedItem = ui.getSelectedItem(find(view.getTableName()));
 		assert(selectedItem != null) : "Should not attempt to update the selected text item if none is selected";
-		Object textColumn = uiController.getItem(selectedItem, 2);
-		uiController.setText(textColumn, value);
+		Object textColumn = ui.getItem(selectedItem, 2);
+		ui.setText(textColumn, value);
 	}
 	
 	private void refreshTables() {
@@ -205,11 +205,11 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		
 		LanguageBundleComparison comp = new LanguageBundleComparison(defaultLang, lang);
 		boolean isDefaultLang = lang.equals(defaultLang);
-		uiController.setEnabled(find(TranslationView.MISSING.getTabName()), !isDefaultLang);
-		uiController.setEnabled(find(TranslationView.EXTRA.getTabName()), !isDefaultLang);
+		ui.setEnabled(find(TranslationView.MISSING.getTabName()), !isDefaultLang);
+		ui.setEnabled(find(TranslationView.EXTRA.getTabName()), !isDefaultLang);
 		if(isDefaultLang) {
 			// Select the 'all' tab if we are viewing default bundle, as the others are disabled 
-			uiController.setSelected(find(TranslationView.ALL.getTabName()), true);
+			ui.setSelected(find(TranslationView.ALL.getTabName()), true);
 		} else {
 			// populate and enable the missing table
 			Set<String> missingKeys = comp.getKeysIn1Only();
@@ -236,7 +236,7 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	
 	private void initTable(TranslationView view) {
 		Object table = find(view.getTableName());
-		uiController.setText(uiController.find(table, "clCurrentLanguage"), getSelectedLanguageBundle().getLanguageName());
+		ui.setText(ui.find(table, "clCurrentLanguage"), getSelectedLanguageBundle().getLanguageName());
 		filterTable(view);
 	}
 	/**
@@ -248,9 +248,9 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	 */
 	private Object createTableRow(String... columnValues) {
 		assert(columnValues.length > 0) : "The translation key should be provided as the first column value.";
-		Object row = uiController.createTableRow(columnValues[0]);
+		Object row = ui.createTableRow(columnValues[0]);
 		for(String col : columnValues) {
-			uiController.add(row, uiController.createTableCell(col));
+			ui.add(row, ui.createTableCell(col));
 		}
 		return row;
 	}
@@ -262,13 +262,13 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		Object languageList = getLanguageList();
 		super.removeAll(languageList);
 		for (FileLanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
-			Object item = uiController.createListItem(languageBundle.getLanguageName(), languageBundle.getFile().getAbsolutePath());
-			uiController.setIcon(item, uiController.getFlagIcon(languageBundle));
+			Object item = ui.createListItem(languageBundle.getLanguageName(), languageBundle.getFile().getAbsolutePath());
+			ui.setIcon(item, ui.getFlagIcon(languageBundle));
 			int index = -1;
 			if (languageBundle.getCountry().equals("gb")) {
 				index = 0;
 			}
-			uiController.add(languageList, item, index);
+			ui.add(languageList, item, index);
 		}
 	}
 	
@@ -278,7 +278,7 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	}
 	
 	private synchronized FileLanguageBundle getSelectedLanguageBundle() {
-		String languageFilePath = uiController.getAttachedObject(uiController.getSelectedItem(getLanguageList()), String.class);
+		String languageFilePath = ui.getAttachedObject(ui.getSelectedItem(getLanguageList()), String.class);
 		if(selectedLanguageFile == null
 				|| languageFilePath != selectedLanguageFile.getFile().getAbsolutePath()) {
 			File languageFile = new File(languageFilePath);
@@ -296,7 +296,7 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	}
 
 	private String getFilterText() {
-		return uiController.getText(getFilterTextfield());
+		return ui.getText(getFilterTextfield());
 	}
 
 	private Object getFilterTextfield() {

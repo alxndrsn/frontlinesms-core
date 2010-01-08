@@ -101,7 +101,7 @@ public class MessageHistoryTabController implements ThinletUiEventHandler {
 	}
 
 //> ACCESSORS
-	/** @return {@link #tabComponent} */
+	/** @return a newly-initialised instance of the tab */
 	public Object getTab() {
 		initialiseTab();
 		return this.tabComponent;
@@ -647,7 +647,7 @@ public class MessageHistoryTabController implements ThinletUiEventHandler {
 	}
 	/** @see UiGeneratorController#showConfirmationDialog(String) */
 	public void showConfirmationDialog(String methodToBeCalled) {
-		this.ui.showConfirmationDialog(methodToBeCalled);
+		this.ui.showConfirmationDialog(methodToBeCalled, this);
 	}
 	/** @see UiGeneratorController#enableOptions(Object, Object, Object) */
 	public void enableOptions(Object list, Object popup, Object toolbar) {
