@@ -265,7 +265,6 @@ public class ContactsTabController implements ThinletUiEventHandler {
 	
 	/**
 	 * Shows the new group dialog.
-	 * 
 	 * @param groupList
 	 */
 	public void showNewGroupDialog(Object groupList) {
@@ -473,7 +472,7 @@ public class ContactsTabController implements ThinletUiEventHandler {
 			}
 
 			// Refresh the Contacts tab, and make sure that the group and contact who were previously selected are still selected
-			updateGroupList();
+			updateContactList();
 		} catch(DuplicateKeyException ex) {
 			LOG.debug("There is already a contact with this mobile number - cannot save!", ex);
 			showMergeContactDialog(contact, contactDetailsDialog);
@@ -846,12 +845,12 @@ public class ContactsTabController implements ThinletUiEventHandler {
 		this.uiController.showConfirmationDialog(methodToBeCalled, this);
 	}
 	/**
-	 * Shows the export wizard dialog, according to the supplied type.
+	 * Shows the export wizard dialog for exporting contacts.
 	 * @param list The list to get selected items from.
 	 * @param type the name of the type to export
 	 */
-	public void showExportWizard(Object list, String type) {
-		this.uiController.showExportWizard(list, type); // TODO We could hard-code this type here - we'll always be exporting contacts from here.
+	public void showExportWizard(Object list) {
+		this.uiController.showExportWizard(list, "contacts");
 	}
 
 //> INSTANCE HELPER METHODS

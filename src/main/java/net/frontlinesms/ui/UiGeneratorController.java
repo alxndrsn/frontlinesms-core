@@ -101,8 +101,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public static final int DEFAULT_HEIGHT = 768;
 	/** Default width of the Thinlet frame launcher */
 	public static final int DEFAULT_WIDTH = 1024;
-	/** Number of milliseconds in a day */
-	private static final long MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
 
 //> INSTANCE PROPERTIES
 	/** Logging object */
@@ -139,6 +137,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	private final PhoneTabController phoneTabController;
 	/** Controller of the contacts tab. */
 	private final ContactsTabController contactsTabController;
+	/** Controller of the message tab. */
+	private final MessageHistoryTabController messageTabController;
 	/** Controller of the home tab. */
 	private HomeTabController homeTabController;
 	
@@ -197,22 +197,13 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 
 	/** The number of people the current SMS will be sent to
 	 * TODO this is a very strange variable to have.  This should be replaced with context-specific tracking of the number of messages to be sent. */
-	public int numberToSend = 1;
+	private int numberToSend = 1;
 	
-	/** Start date of the message history, or <code>null</code> if none has been set. */
-	private Long messageHistoryStart;
-	/** End date of the message history, or <code>null</code> if none has been set. */
-	private Long messageHistoryEnd;
-	
-	private final Object messageListComponent;
-	private final Object showSentMessagesComponent;
-	private final Object showReceivedMessagesComponent;
 	/** Thinlet UI Component: status bar at the bottom of the window */
 	private final Object statusBarComponent;
 	private Object keywordListComponent;
 	private Object emailListComponent;
 	private final Object progressBarComponent;
-	private final Object filterListComponent;
 
 	/** Appears to be the in-focus item on the email tab. */
 	private Object emailTabFocusOwner;
@@ -259,6 +250,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		
 		try {
 			add(loadComponentFromFile(UI_FILE_HOME));
+			statusBarComponent = find(COMPONENT_STATUS_BAR);
+			setStatus(InternationalisationUtils.getI18NString(MESSAGE_STARTING));
 			
 			// Find the languages submenu, and add all present language packs to it
 			addLanguageMenu(find("menu_language"));
@@ -276,6 +269,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			Object tabbedPane = find(COMPONENT_TABBED_PANE);
 			this.phoneTabController = new PhoneTabController(this);
 			this.contactsTabController = new ContactsTabController(this, this.contactDao, this.groupDao);
+			this.messageTabController = new MessageHistoryTabController(this, contactDao, keywordDao, messageFactory);
 
 
 			this.homeTabController = new HomeTabController(this);
@@ -288,7 +282,9 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				addKeywordsTab(tabbedPane);
 				setSelected(find(COMPONENT_MI_KEYWORD), true);
 			}
-			addMessagesTab(tabbedPane);
+			if(uiProperties.isTabVisible("messagetab")) {
+				add(tabbedPane, this.messageTabController.getTab());
+			}
 			if (uiProperties.isTabVisible("emailstab")) {
 				addEmailsTab(tabbedPane);
 				setSelected(find(COMPONENT_MI_EMAIL), true);
@@ -322,23 +318,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			
 			currentTab = TAB_HOME;
 
-			statusBarComponent = find(COMPONENT_STATUS_BAR);
 			progressBarComponent = find(COMPONENT_PROGRESS_BAR);
-
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_STARTING));
-			messageListComponent = find(COMPONENT_MESSAGE_LIST);
-			filterListComponent = find(COMPONENT_FILTER_LIST);
-			
-			// Set the types for the message list columns...
-			Object header = get(messageListComponent, ThinletText.HEADER);
-			initMessageTableForSorting(header);
 			
 			// Set the types for the email list columns...
-			header = get(emailListComponent, ThinletText.HEADER);
+			Object header = Thinlet.get(emailListComponent, ThinletText.HEADER);
 			initEmailTableForSorting(header);
-			
-			showReceivedMessagesComponent = find(COMPONENT_RECEIVED_MESSAGES_TOGGLE);
-			showSentMessagesComponent = find(COMPONENT_SENT_MESSAGES_TOGGLE);
 			
 			// Try to add the emulator number to the contacts
 			try {
@@ -348,8 +332,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				LOG.debug("Contact already exists", ex);
 			}
 			
-			advancedMode_initListsForPaging();
-
 			// Initialise the phone manager, and start auto-detection of connected phones.
 			setStatus(InternationalisationUtils.getI18NString(MESSAGE_INITIALISING_PHONE_MANAGER));
 
@@ -507,40 +489,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			}
 		}
 	}
-
-	private void initMessageTableForSorting(Object header) {
-		for (Object o : getItems(header)) {
-			String text = getString(o, Thinlet.TEXT);
-			// Here, the FIELD property is set on each column of the message table.  These field objects are
-			// then used for easy sorting of the message table.
-			if(text != null) {
-				if (text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_STATUS))) putProperty(o, PROPERTY_FIELD, Message.Field.STATUS);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_DATE))) putProperty(o, PROPERTY_FIELD, Message.Field.DATE);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_SENDER))) putProperty(o, PROPERTY_FIELD, Message.Field.SENDER_MSISDN);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_RECIPIENT))) putProperty(o, PROPERTY_FIELD, Message.Field.RECIPIENT_MSISDN);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_MESSAGE))) putProperty(o, PROPERTY_FIELD, Message.Field.MESSAGE_CONTENT);
-			}
-		}
-	}
 	
 	@SuppressWarnings("unchecked")
 	public <T extends Object> List<T> getListContents(Object table, Class<T> clazz) {
 		return (List<T>)getProperty(table, "listContents");
-	}
-	
-	private void advancedMode_initListsForPaging() {
-		//Entries per page
-		setListLimit(messageListComponent);
-		setListLimit(filterListComponent);
-		//Current page
-		setListPageNumber(1, messageListComponent);
-		setListPageNumber(1, filterListComponent);
-		//Count
-		//setListElementCount(1, messageListComponent);
-		setListElementCount(contactDao.getAllContacts().size(), filterListComponent);
-		//Actions
-		setMethod(filterListComponent, "updateMessageHistoryFilter");
-		setMethod(messageListComponent, "updateMessageList");
 	}
 
 	/**
@@ -621,26 +573,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		setListElementCount(emailFactory.getEmailCount(), emailListComponent);
 		setMethod(emailListComponent, "updateEmailList");
 	}
-	
-	private void addMessagesTab(Object tabbedPane) {
-		Object messagesTab = loadComponentFromFile(UI_FILE_MESSAGES_TAB);
-		Object pnBottom = find(messagesTab, COMPONENT_PN_BOTTOM);
-		Object pnFilter = find(messagesTab, COMPONENT_PN_FILTER);
-		String listName = COMPONENT_MESSAGE_LIST;
-		Object pagePanel = loadComponentFromFile(UI_FILE_PAGE_PANEL);
-		add(pnBottom, pagePanel, 0);
-		setPageMethods(find(messagesTab, COMPONENT_PN_MESSAGE_LIST), listName, pagePanel);
-		pagePanel = loadComponentFromFile(UI_FILE_PAGE_PANEL);
-		listName = COMPONENT_FILTER_LIST;
-		add(pnFilter, pagePanel);
-		setPageMethods(pnFilter, listName, pagePanel);
-		
-		//Date
-		setMethod(find(messagesTab, COMPONENT_TF_START_DATE), "messageHistory_dateChanged");
-		setMethod(find(messagesTab, COMPONENT_TF_END_DATE), "messageHistory_dateChanged");
-		
-		add(tabbedPane, messagesTab);
-	}
 
 	// FIXME this could be private if it wasn't used in forms tab.  Should probably be abstracted
 	public void setPageMethods(Object root, String listName, Object pagePanel) {
@@ -651,35 +583,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 
 	/**
-	 * Show the message details dialog.
-	 */
-	public void showMessageDetails(Object list) {
-		Object selected = getSelectedItem(list);
-		if (selected != null) {
-			Message message = getMessage(selected);
-			Object details = loadComponentFromFile(UI_FILE_MSG_DETAILS_FORM);
-			String senderDisplayName = getSenderDisplayValue(message);
-			String recipientDisplayName = getRecipientDisplayValue(message);
-			String status = getMessageStatusAsString(message);
-			String date = InternationalisationUtils.getDatetimeFormat().format(message.getDate());
-			String content = message.getTextContent();
-			
-			setText(find(details, "tfStatus"), status);
-			setText(find(details, "tfSender"), senderDisplayName);
-			setText(find(details, "tfRecipient"), recipientDisplayName);
-			setText(find(details, "tfDate"), date);
-			setText(find(details, "tfContent"), content);
-			
-			add(details);
-		}
-	}
-
-	/**
 	 * Gets the string to display for the recipient of a message.
 	 * @param message
 	 * @return This will be the name of the contact who received the message, or the recipient's phone number if they are not a contact.
 	 */
-	private String getRecipientDisplayValue(Message message) {
+	String getRecipientDisplayValue(Message message) {
 		Contact recipient = contactDao.getFromMsisdn(message.getRecipientMsisdn());
 		String recipientDisplayName = recipient != null ? recipient.getDisplayName() : message.getRecipientMsisdn();
 		return recipientDisplayName;
@@ -689,8 +597,9 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Gets the string to display for the sender of a message.
 	 * @param message
 	 * @return This will be the name of the contact who sent the message, or the sender's phone number if they are not a contact.
+	 * @deprecated should be moved to message tab cont
 	 */
-	private String getSenderDisplayValue(Message message) {
+	String getSenderDisplayValue(Message message) {
 		Contact sender = contactDao.getFromMsisdn(message.getSenderMsisdn());
 		String senderDisplayName = sender != null ? sender.getDisplayName() : message.getSenderMsisdn();
 		return senderDisplayName;
@@ -914,141 +823,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			setSelected(selected, o);
 		}
 	}
-
-	/**
-	 * Update the message list inside the message log tab.
-	 * This only works for advanced mode.
-	 */
-	@SuppressWarnings("unchecked")
-	public void updateMessageList() {
-		Object messageHistoryTab = find(currentTab);
-		Class filterClass = getMessageHistoryFilterType(messageHistoryTab);
-		Object filterList;
-		if(filterClass == Group.class) {
-			filterList = find("messageHistory_groupList");
-		} else filterList = filterListComponent;
-		Object selectedItem = getSelectedItem(filterList);
-
-		removeAll(messageListComponent);
-		int count = 0;
-		if (selectedItem == null) {
-			//Nothing selected
-			setListPageNumber(1, messageListComponent);
-			numberToSend = 0;
-		} else {
-			int messageType;
-			boolean showSentMessages = isSelected(showSentMessagesComponent);
-			boolean showReceivedMessages = isSelected(showReceivedMessagesComponent);
-			if (showSentMessages && showReceivedMessages) { 
-				messageType = Message.TYPE_ALL;
-			} else if (showSentMessages) {
-				messageType = Message.TYPE_OUTBOUND;
-			} else messageType = Message.TYPE_RECEIVED;
-			Object header = get(messageListComponent, ThinletText.HEADER);
-			Object tableColumn = getSelectedItem(header);
-			Message.Field field = Message.Field.DATE;
-			Order order = Order.DESCENDING;
-			if (tableColumn != null) {
-				field = (Message.Field) getProperty(tableColumn, PROPERTY_FIELD);
-				order = get(tableColumn, ThinletText.SORT).equals(ThinletText.ASCENT) ? Order.ASCENDING : Order.DESCENDING;
-			}
-			int limit = getListLimit(messageListComponent);
-			int pageNumber = getListCurrentPage(messageListComponent);
-			//ALL messages
-			int selectedIndex = getSelectedIndex(filterList);
-			if (selectedIndex == 0) {
-
-				List<Message> allMessages = messageFactory.getAllMessages(messageType, field, order, messageHistoryStart, messageHistoryEnd, (pageNumber - 1) * limit, limit);
-				for (Message m : allMessages) {
-					add(messageListComponent, getRow(m));
-				}
-				count = messageFactory.getMessageCount(messageType, messageHistoryStart, messageHistoryEnd);
-				numberToSend = messageFactory.getSMSCount(messageHistoryStart, messageHistoryEnd);
-			} else {
-				if(filterClass == Contact.class) {
-					// Contact selected
-					Contact c = getContact(selectedItem);
-					for (Message m : messageFactory.getMessagesForMsisdn(messageType, c.getPhoneNumber(), field, order, messageHistoryStart, messageHistoryEnd, (pageNumber - 1) * limit, limit)) {
-						add(messageListComponent, getRow(m));
-					}
-					count = messageFactory.getMessageCountForMsisdn(messageType, c.getPhoneNumber(), messageHistoryStart, messageHistoryEnd);
-					numberToSend = messageFactory.getSMSCountForMsisdn(c.getPhoneNumber(), messageHistoryStart, messageHistoryEnd);
-				} else if(filterClass == Group.class) {
-					// A Group was selected
-					List<Group> groups = new ArrayList<Group>();
-					getGroupsRecursivelyDown(groups, getGroup(selectedItem));
-					for (Message m : messageFactory.getMessagesForGroups(messageType, groups, field, order, messageHistoryStart, messageHistoryEnd, (pageNumber - 1) * limit, limit)) {
-						add(messageListComponent, getRow(m));
-					}
-					count = messageFactory.getMessageCountForGroups(messageType, groups, messageHistoryStart, messageHistoryEnd);
-					numberToSend = messageFactory.getSMSCountForGroups(groups, messageHistoryStart, messageHistoryEnd);
-				} else /* (filterClass == Keyword.class) */ {
-					// Keyword Selected
-					Keyword k = getKeyword(selectedItem);
-					for (Message m : messageFactory.getMessagesForKeyword(messageType, k, field, order, messageHistoryStart, messageHistoryEnd, (pageNumber - 1) * limit, limit)) {
-						add(messageListComponent, getRow(m));
-					}
-					count = messageFactory.getMessageCount(messageType, k, messageHistoryStart, messageHistoryEnd);
-					numberToSend = messageFactory.getSMSCountForKeyword(k, messageHistoryStart, messageHistoryEnd);
-				}
-			}
-		}
-		setListElementCount(count, messageListComponent);
-		updatePageNumber(messageListComponent, getParent(messageListComponent));
-		updateMessageHistoryCost();
-		setEnabled(messageListComponent, selectedItem != null && getItems(messageListComponent).length > 0);
-	}
-
-	/**
-	 * Update the message history filter.
-	 */
-	private void updateMessageHistoryFilter() {
-		// Filter List specific stuff can be moved into contacts section.
-		removeAll(filterListComponent);
-		
-		Object allMessages = createListItem(InternationalisationUtils.getI18NString(COMMON_ALL_MESSAGES), null);
-		setIcon(allMessages, Icon.SMS_HISTORY);
-		add(filterListComponent, allMessages);
-
-		Object groupListComponent = find("messageHistory_groupList");
-		Class<?> filterClass = getMessageHistoryFilterType(find(currentTab));
-		if (filterClass == Contact.class) {
-			//Contacts
-			int limit = getListLimit(filterListComponent);
-			int pageNumber = getListCurrentPage(filterListComponent);
-			setListElementCount(contactDao.getContactCount(), filterListComponent);
-			for (Contact c : contactDao.getAllContacts((pageNumber - 1) * limit, limit)) {
-				add(filterListComponent, createListItem(c));
-			}
-		} else if (filterClass == Group.class) {
-			// Populate GROUPS tree
-			removeAll(groupListComponent);
-			add(groupListComponent, getNode(this.rootGroup, true));
-		} else {
-			//Keywords
-			setListElementCount(keywordDao.getTotalKeywordCount(), filterListComponent);
-			for (Keyword k : keywordDao.getAllKeywords()) {
-				add(filterListComponent, createListItem(k));
-			}
-		}
-		setBoolean(filterListComponent, VISIBLE, filterClass != Group.class);
-		setBoolean(groupListComponent, VISIBLE, filterClass == Group.class);
-		// Group tree and contact list doesn't need paging, so hide the paging controls. 
-		setBoolean(find(getParent(filterListComponent), "pagePanel"), VISIBLE, filterClass == Contact.class);
-
-		updatePageNumber(filterListComponent, getParent(filterListComponent));
-		updateMessageList();
-	}
-	
-	/**
-	 * Gets the selected filter type for the message history, i.e. Contact, Group or Keyword.
-	 * @return {@link Contact}, {@link Group} or {@link Keyword}, depending which is set for the message filter.
-	 */
-	private Class<?> getMessageHistoryFilterType(Object messageHistoryTab) {
-		if(isSelected(find(messageHistoryTab, COMPONENT_CB_CONTACTS))) return Contact.class;
-		else if(isSelected(find(messageHistoryTab, COMPONENT_CB_GROUPS))) return Group.class;
-		else return Keyword.class;
-	}
 	
 	/**
 	 * Update the email list inside the email log tab.
@@ -1109,7 +883,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		return count;
 	}
 
-	private void getGroupsRecursivelyUp(List<Group> groups, Group g) {
+	void getGroupsRecursivelyUp(List<Group> groups, Group g) {
 		groups.add(g);
 		Group parent = g.getParent();
 		if (!parent.equals(this.rootGroup)) {
@@ -1117,7 +891,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 	}
 	
-	private void getGroupsRecursivelyDown(List<Group> groups, Group g) {
+	void getGroupsRecursivelyDown(List<Group> groups, Group g) {
 		groups.add(g);
 		for (Group subGroup : g.getDirectSubGroups()) {
 			getGroupsRecursivelyDown(groups, subGroup);
@@ -1130,48 +904,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 */
 	public void showMessageHistory(Object component) {
 		Object attachment = getAttachedObject(getSelectedItem(component));
-		
-		boolean isGroup = attachment instanceof Group;
-		boolean isContact = attachment instanceof Contact;
-		boolean isKeyword = attachment instanceof Keyword;
-
 		changeTab(TAB_MESSAGE_HISTORY);
-		
-		// Select the correct radio option
-		setSelected(find("cbContacts"), isContact);
-		setSelected(find("cbGroups"), isGroup);
-		setSelected(find("cbKeywords"), isKeyword);
-		messageHistory_filterChanged();
-		
-		Object list = null;
-		// Calculate page number
-		if(isGroup) {
-			// Turn the page to the correct one for this group.
-			// FIXME what if the results per page is changed for the history table?
-			list = find("messageHistory_groupList");
-//			pageNumber = groupFactory.getPageNumber((Group)attachment, getListLimit(list));
-		} else if(isContact) {
-			list = filterListComponent;
-			int pageNumber = contactDao.getPageNumber((Contact)attachment, getListLimit(list));
-			setListPageNumber(pageNumber, list);
-		} else if(isKeyword) {
-			list = filterListComponent;
-			int pageNumber = keywordDao.getPageNumber((Keyword)attachment, getListLimit(list));
-			setListPageNumber(pageNumber, list);
-		}
-		updateMessageHistoryFilter();
-		
-		// Find which list item should be selected
-		boolean recurse = TREE.equals(getClass(list));
-		Object next = getNextItem(list, get(list, ":comp"), recurse);
-		while(next != null && !getAttachedObject(next).equals(attachment)) {
-			next = getNextItem(list, next, recurse);
-		}
-		// Little fix for groups - it seems that getNextItem doesn't return the root of the
-		// tree, so we never get a positive match.
-		if(next == null) next = getItem(list, 0);
-		setSelectedItem(list, next);
-		messageHistory_selectionChanged();
+		this.messageTabController.showMessageHistory(component);
 	}
 	
 	/**
@@ -1209,44 +943,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		this.keywordActionDao.deleteKeywordAction(keyAction);
 		remove(selected);
 		enableKeywordActionFields(list, find(COMPONENT_KEY_ACT_PANEL));
-	}
-	
-	public void messagesTab_removeMessages() {
-		LOG.trace("ENTER");
-		removeConfirmationDialog();
-		setStatus(InternationalisationUtils.getI18NString(MESSAGE_REMOVING_MESSAGES));
-		initProgress();
-		final Object[] selected = getSelectedItems(messageListComponent);
-		setProgressMax(selected.length);
-		LOG.debug("Starting thread to remove messages...");
-		new Thread(){
-			public void run() {
-				int numberRemoved = 0;
-				for(Object o : selected) {
-					incProgress();
-					Message toBeRemoved = getMessage(o);
-					LOG.debug("Message [" + toBeRemoved + "]");
-					int status = toBeRemoved.getStatus();
-					if (status != Message.STATUS_PENDING) {
-						LOG.debug("Removing Message [" + toBeRemoved + "] from database.");
-						if (status == Message.STATUS_OUTBOX) {
-							phoneManager.removeFromOutbox(toBeRemoved);
-						}
-						numberToSend -= toBeRemoved.getNumberOfSMS();
-						messageFactory.deleteMessage(toBeRemoved);
-						numberRemoved++;
-					} else {
-						LOG.debug("Message status is [" + toBeRemoved.getStatus() + "], so we do not remove!");
-					}
-				}
-				updatePageAfterDeletion(numberRemoved, messageListComponent);
-				if (numberRemoved > 0) {
-					updateMessageList();
-				}
-				finishProgress(InternationalisationUtils.getI18NString(MESSAGE_MESSAGES_DELETED));
-			}
-		}.start();
-		LOG.trace("EXIT");
 	}
 
 	/**
@@ -1347,28 +1043,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		if (toolbar != null && !toolbar.equals(popup)) {
 			for (Object o : getItems(toolbar)) {
 				setEnabled(o, hasSelection);
-			}
-		}
-	}
-	
-	/**
-	 * Re-Sends the selected messages and updates the list with the supplied page number afterwards.
-	 * 
-	 * @param pageNumber
-	 * @param resultsPerPage
-	 * @param object
-	 */
-	public void resendSelectedFromMessageList(Object object) {
-		Object[] selected = getSelectedItems(object);
-		for (Object o : selected) {
-			Message toBeReSent = getMessage(o);
-			int status = toBeReSent.getStatus();
-			if (status == Message.STATUS_FAILED) {
-				toBeReSent.setSenderMsisdn("");
-				toBeReSent.setRetriesRemaining(Message.MAX_RETRIES);
-				phoneManager.sendSMS(toBeReSent);
-			} else if (status == Message.STATUS_DELIVERED || status == Message.STATUS_SENT) {
-				frontlineController.sendTextMessage(toBeReSent.getRecipientMsisdn(), toBeReSent.getTextContent());
 			}
 		}
 	}
@@ -1548,12 +1222,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void setListContents(Object table, List<? extends Object> listContents) {
 		putProperty(table, "listContents", listContents);		
 	}
-
-	public void messageHistory_enableSend(Object popUp, boolean isKeyword) {
-		boolean toSet = getSelectedIndex(filterListComponent) > 0;
-		toSet = toSet && !isKeyword;
-		setBoolean(popUp, VISIBLE, toSet);
-	}
 	
 	/**
 	 * Shows the compose message dialog, populating the list with the selection of the 
@@ -1666,144 +1334,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			LOG.debug("Refreshing phones tab");
 			this.phoneTabController.refreshPhonesViews();
 		}
-	}
-
-	private void addMessageToList(Message message) {
-		LOG.trace("ENTER");
-		LOG.debug("Message [" + message + "]");
-		Object messageTab = find(currentTab);
-		Object sel = getSelectedItem(filterListComponent);
-		boolean sent = isSelected(showSentMessagesComponent);
-		boolean received = isSelected(showReceivedMessagesComponent);
-		if (sel != null && ((sent && message.getType() == Message.TYPE_OUTBOUND) || (received && message.getType() == Message.TYPE_RECEIVED))) {
-			boolean toAdd = false;
-			if (getSelectedIndex(filterListComponent) == 0) {
-				toAdd = true;
-			} else {
-				if (isSelected(find(messageTab, COMPONENT_CB_CONTACTS))) {
-					Contact c = getContact(sel);
-					LOG.debug("Contact selected [" + c.getName() + "]");
-					if (message.getSenderMsisdn().endsWith(c.getPhoneNumber()) 
-							|| message.getRecipientMsisdn().endsWith(c.getPhoneNumber())) {
-						toAdd = true;
-					}
-				} else if (isSelected(find(messageTab, COMPONENT_CB_GROUPS))) {
-					Group g = getGroup(sel);
-					LOG.debug("Group selected [" + g.getName() + "]");
-					if (g.equals(this.rootGroup)) {
-						toAdd = true;
-					} else {
-						List<Group> groups = new ArrayList<Group>();
-						getGroupsRecursivelyUp(groups, g);
-						Contact sender = contactDao.getFromMsisdn(message.getSenderMsisdn());
-						Contact receiver = contactDao.getFromMsisdn(message.getRecipientMsisdn());
-						for (Group gg : groups) {
-							if ( (sender != null && sender.isMemberOf(gg)) 
-									|| (receiver != null && receiver.isMemberOf(gg))) {
-								toAdd = true;
-								break;
-							}
-						}
-					}
-				} else {
-					Keyword selected = getKeyword(sel);
-					LOG.debug("Keyword selected [" + selected.getKeyword() + "]");
-					Keyword keyword = keywordDao.getFromMessageText(message.getTextContent());
-					toAdd = selected.equals(keyword);
-				}
-			}
-			if (toAdd) {
-				LOG.debug("Time to try to add this message to list...");
-				if (getItems(messageListComponent).length < getListLimit(messageListComponent)) {
-					LOG.debug("There's space! Adding...");
-					add(messageListComponent, getRow(message));
-					setEnabled(messageListComponent, true);
-					if (message.getType() == Message.TYPE_OUTBOUND) {
-						numberToSend += message.getNumberOfSMS();
-						updateMessageHistoryCost();
-					}
-				}
-				if (message.getStatus() == Message.STATUS_OUTBOX) {
-					setListElementCount(getListElementCount(messageListComponent) + 1, messageListComponent);
-				}
-				updatePageNumber(messageListComponent, getParent(messageListComponent));
-			}
-		}
-		LOG.trace("EXIT");
-	}
-
-	public void messageHistory_dateChanged() {
-		Object messagesTab = find(currentTab);
-		Object tfStart = find(messagesTab, COMPONENT_TF_START_DATE);
-		Object tfEnd = find(messagesTab, COMPONENT_TF_END_DATE);
-		
-		String startDate = getText(tfStart);
-		String endDate = getText(tfEnd);
-		
-		Long newStart = messageHistoryStart;
-		Long newEnd = messageHistoryEnd;
-		
-		try {
-			Date s = InternationalisationUtils.parseDate(startDate);
-			newStart = s.getTime();
-		} catch (ParseException e1) {
-			newStart = null;
-		}
-		
-		try {
-			Date e = InternationalisationUtils.parseDate(endDate);
-			newEnd = e.getTime() + MILLIS_PER_DAY;
-		} catch (ParseException e) {
-			newEnd = null;
-		}
-		
-		if (newStart != messageHistoryStart 
-				|| newEnd != messageHistoryEnd) {
-			messageHistoryStart = newStart;
-			messageHistoryEnd = newEnd;
-			updateMessageList();
-		}
-	}
-	
-	private void updateMessageHistoryCost() {
-		Object messageTab = find(currentTab);
-		setText(find(messageTab, COMPONENT_LB_MSGS_NUMBER), String.valueOf(numberToSend));		
-		setText(find(messageTab, COMPONENT_LB_COST), InternationalisationUtils.formatCurrency(this.getCostPerSms() * numberToSend));
-	}
-
-	/**
-	 * Method called when there is a change in the selection of Sent and Received messages.
-	 * 
-	 * @param checkbox
-	 * @param list
-	 */
-	public void toggleMessageListOptions(Object checkbox, Object list) {
-		Object showSentMessagesComponent;
-		Object showReceivedMessagesComponent;
-		if (list.equals(messageListComponent)) {
-			showSentMessagesComponent = this.showSentMessagesComponent;
-			showReceivedMessagesComponent = this.showReceivedMessagesComponent;
-		} else {
-			showSentMessagesComponent = find(COMPONENT_HISTORY_SENT_MESSAGES_TOGGLE);
-			showReceivedMessagesComponent = find(COMPONENT_HISTORY_RECEIVED_MESSAGES_TOGGLE);
-		}
-		boolean showSentMessages = isSelected(showSentMessagesComponent);
-		boolean showReceivedMessages = isSelected(showReceivedMessagesComponent);
-
-		// One needs to be on, so if both have just been switched off, we need to turn the other back on.
-		if (!showSentMessages && !showReceivedMessages) {
-			if(checkbox == showSentMessagesComponent) {
-				setSelected(showReceivedMessagesComponent, true);
-			}
-			else {
-				setSelected(showSentMessagesComponent, true);
-			}
-		}
-		if (list.equals(messageListComponent)) {
-			setListPageNumber(1, list);
-			updateMessageList();
-		}
-		
 	}
 
 	/**
@@ -3247,9 +2777,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Presumably this should be part of the messaging panel controller 
 	 */
 	public void updateCost() {
-		if (currentTab.equals(TAB_MESSAGE_HISTORY)) {
-			updateMessageHistoryCost();
-		}
+		// TODO everything relying on message cost should be updated when this is changed
+		this.messageTabController.updateMessageHistoryCost();
 	}
 
 	// FIXME fire this on textfield lostFocus or textfield execution (<return> pressed)
@@ -3521,7 +3050,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param component
 	 * @return The Message instance.
 	 */
-	private Message getMessage(Object component) {
+	Message getMessage(Object component) {
 		return (Message) getAttachedObject(component);
 	}
 
@@ -3561,7 +3090,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param component
 	 * @return
 	 */
-	private Keyword getKeyword(Object component) {
+	Keyword getKeyword(Object component) {
 		Object obj = getAttachedObject(component);
 		if (obj instanceof Keyword) return (Keyword)obj;
 		else if (obj instanceof KeywordAction) return ((KeywordAction)obj).getKeyword();
@@ -3882,7 +3411,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param keyword
 	 * @return
 	 */
-	private Object createListItem(Keyword keyword) {
+	Object createListItem(Keyword keyword) {
 		String key = keyword.getKeyword().length() == 0 ? "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">" : keyword.getKeyword();
 		Object listItem = createListItem(
 				key,
@@ -3897,7 +3426,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param contact
 	 * @return
 	 */
-	private Object createListItem(Contact contact) {
+	Object createListItem(Contact contact) {
 		Object listItem = createListItem(contact.getName() + " (" + contact.getPhoneNumber() + ")", contact);
 		setIcon(listItem, Icon.CONTACT);
 		return listItem;
@@ -4003,7 +3532,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param message
 	 * @return
 	 */
-	private Object getRow(Message message) {
+	Object getRow(Message message) {
 		Object row = createTableRow(message);
 
 		String icon;
@@ -4098,7 +3627,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			this.phoneTabController.refreshPhonesViews();
 			setStatus(InternationalisationUtils.getI18NString(MESSAGE_MODEM_LIST_UPDATED));
 		} else if (currentTab.equals(TAB_MESSAGE_HISTORY)) {
-			updateMessageHistoryFilter();
+			this.messageTabController.refresh();
 			setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGES_LOADED));
 		} else if (currentTab.equals(TAB_KEYWORD_MANAGER)) {
 			updateKeywordList();
@@ -4149,17 +3678,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		this.contactsTabController.addToContactList(contact, group);
 	}
 
-	public void messageHistory_filterChanged() {
-		setListPageNumber(1, filterListComponent);
-		setListElementCount(1, filterListComponent);
-		updateMessageHistoryFilter();
-	}
-	
-	public void messageHistory_selectionChanged() {
-		setListPageNumber(1, messageListComponent);
-		updateMessageList();
-	}
-
 	public synchronized void keywordActionExecuted(KeywordAction action) {
 		if (currentTab.equals(TAB_KEYWORD_MANAGER)) {
 			Object keyTab = find(currentTab);
@@ -4208,36 +3726,21 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		add(about);
 	}
 
-	public synchronized void incomingMessageEvent(Message message) {
+	public void incomingMessageEvent(Message message) {
 		LOG.trace("ENTER");
 		if (currentTab.equals(TAB_MESSAGE_HISTORY)) {
-			addMessageToList(message);
+			this.messageTabController.incomingMessageEvent(message);
 		}
 		newEvent(new Event(Event.TYPE_INCOMING_MESSAGE, InternationalisationUtils.getI18NString(COMMON_MESSAGE) + ": " + message.getTextContent()));
 		setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGE_RECEIVED));
 		LOG.trace("EXIT");
 	}
 
-	public synchronized void outgoingMessageEvent(Message message) {
+	public void outgoingMessageEvent(Message message) {
 		LOG.trace("ENTER");
 		LOG.debug("Message [" + message.getTextContent() + "], Status [" + message.getStatus() + "]");
 		if (currentTab.equals(TAB_MESSAGE_HISTORY)) {
-			LOG.debug("Refreshing message list");
-			int index = -1;
-			for (int i = 0; i < getItems(messageListComponent).length; i++) {
-				Message e = getMessage(getItem(messageListComponent, i));
-				if (e.equals(message)) {
-					index = i;
-					remove(getItem(messageListComponent, i));
-					break;
-				}
-			}
-			if (index != -1) {
-				//Updating
-				add(messageListComponent, getRow(message), index);
-			} else {
-				addMessageToList(message);
-			}
+			this.messageTabController.outgoingMessageEvent(message);
 		} 
 		if (message.getStatus() == Message.STATUS_SENT) {
 			newEvent(new Event(Event.TYPE_OUTGOING_MESSAGE, InternationalisationUtils.getI18NString(COMMON_MESSAGE) + ": " + message.getTextContent()));
@@ -4437,7 +3940,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	/** @return Cost set per SMS message */
-	public double getCostPerSms() {
+	private double getCostPerSms() {
 		return UiProperties.getInstance().getCostPerSms();
 	}
 	/** @param costPerSMS new value for {@link #costPerSMS} */

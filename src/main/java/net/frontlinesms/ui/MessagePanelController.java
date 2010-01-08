@@ -43,6 +43,8 @@ public class MessagePanelController implements ThinletUiEventHandler {
 	private final UiGeneratorController uiController;
 	/** The parent component */
 	private final Object messagePanel;
+	/** The number of people the current SMS will be sent to */
+	private int numberToSend = 1;
 
 //> CONSTRUCTORS
 	/**
@@ -53,19 +55,23 @@ public class MessagePanelController implements ThinletUiEventHandler {
 		this.messagePanel = uiController.loadComponentFromFile(UI_FILE_MESSAGE_PANEL, this);
 	}
 
+//> ACCESSORS
 	/** @return {@link #messagePanel} */
 	public Object getPanel() {
 		return this.messagePanel;
 	}
-
-//> ACCESSORS
+	
+	private double getCostPerSms() {
+		return UiProperties.getInstance().getCostPerSms();
+	}
+	
+//> THINLET UI METHODS
 	/** Sets the method called by the send button at the bottom of the compose message panel */
 	public void setSendButtonMethod(ThinletUiEventHandler eventHandler, Object rootComponent, String methodCall) {
 		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
 		uiController.setAction(sendButton, methodCall, rootComponent, eventHandler);
 	}
 	
-//> THINLET UI METHODS
 	/**
 	 * Extract message details from the controls in the panel, and send an SMS.
 	 */
@@ -147,7 +153,7 @@ public class MessagePanelController implements ThinletUiEventHandler {
 			if (numberOfMsgs >= 2) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS);
 			if (numberOfMsgs >= 3) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS);
 			
-			double value = numberOfMsgs * uiController.getCostPerSms() * uiController.numberToSend;
+			double value = numberOfMsgs * this.getCostPerSms() * this.numberToSend;
 			uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(value));
 		}
 	}
@@ -168,7 +174,7 @@ public class MessagePanelController implements ThinletUiEventHandler {
 		Contact selectedContact = uiController.getContact(selectedItem);
 		uiController.setText(tfRecipient, selectedContact.getPhoneNumber());
 		uiController.remove(dialog);
-		uiController.numberToSend = 1;
+		this.numberToSend = 1;
 		uiController.updateCost();
 	}
 

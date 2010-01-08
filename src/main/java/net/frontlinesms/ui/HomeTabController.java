@@ -49,6 +49,8 @@ public class HomeTabController implements ThinletUiEventHandler {
 	private final UiGeneratorController uiController;
 	/** The UI tab component */
 	private final Object tabComponent;
+	/** The number of people the current SMS will be sent to */
+	private int numberToSend = 1;
 
 //> CONSTRUCTORS
 	/**
@@ -141,7 +143,7 @@ public class HomeTabController implements ThinletUiEventHandler {
 		Contact selectedContact = uiController.getContact(selectedItem);
 		uiController.setText(tfRecipient, selectedContact.getPhoneNumber());
 		uiController.remove(dialog);
-		uiController.numberToSend = 1;
+		this.numberToSend = 1;
 		uiController.updateCost();
 	}
 
