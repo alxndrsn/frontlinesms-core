@@ -870,8 +870,6 @@ public class ContactsTabController implements ThinletUiEventHandler {
 		this.uiController.setListLimit(contactListComponent);
 		//Current page
 		this.uiController.setListPageNumber(1, contactListComponent);
-		//Actions
-		this.uiController.setAction(contactListComponent, "updateContactList", this.tabComponent, this);
 	}
 
 //> STATIC FACTORIES
