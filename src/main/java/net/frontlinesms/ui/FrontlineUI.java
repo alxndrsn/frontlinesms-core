@@ -38,7 +38,7 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	
 //> UI DEFINITION FILES
 	/** Thinlet UI layout File: alert popup box */
-	protected static final String UI_FILE_ALERT = "/ui/dialog/alert.xml";
+	protected static final String UI_FILE_ALERT = "/ui/core/util/dgAlert.xml";
 
 //> UI COMPONENTS
 	/** Component of {@link #UI_FILE_ALERT} which contains the message to display */
