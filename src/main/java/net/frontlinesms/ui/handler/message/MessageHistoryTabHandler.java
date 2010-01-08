@@ -52,12 +52,13 @@ import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiProperties;
+import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
  * @author aga
  */
-public class MessageHistoryTabHandler implements ThinletUiEventHandler {
+public class MessageHistoryTabHandler extends BaseTabHandler {
 	
 //> CONSTANTS
 	private static final String UI_FILE_MESSAGES_TAB = "/ui/core/messages/messagesTab.xml";
@@ -68,13 +69,9 @@ public class MessageHistoryTabHandler implements ThinletUiEventHandler {
 //> INSTANCE METHODS
 	private final Logger LOG = Utils.getLogger(this.getClass());
 	
-	private UiGeneratorController ui;
-	
 	private ContactDao contactDao;
 	private KeywordDao keywordDao;
 	private MessageDao messageDao;
-	
-	private Object tabComponent;
 	
 	private Object messageListComponent;
 	private Object showSentMessagesComponent;
@@ -97,52 +94,93 @@ public class MessageHistoryTabHandler implements ThinletUiEventHandler {
 	 * @param messageDao value for {@link #messageDao}
 	 */
 	public MessageHistoryTabHandler(UiGeneratorController ui, ContactDao contactDao, KeywordDao keywordDao, MessageDao messageDao) {
-		this.ui = ui;
-		
+		super(ui);
 		this.contactDao = contactDao;
 		this.keywordDao = keywordDao;
 		this.messageDao = messageDao;
 	}
 
 //> ACCESSORS
-	/** @return a newly-initialised instance of the tab */
-	public Object getTab() {
-		initialiseTab();
-		return this.tabComponent;
-	}
-
 	/** Refresh the view. */
 	public void refresh() {
 		updateMessageHistoryFilter();
 	}
+	
+	/**
+	 * Shows the message history for the selected contact or group.
+	 * @param component group list or contact list
+	 */
+	public void doShowMessageHistory(Object component) {
+		Object attachment = ui.getAttachedObject(ui.getSelectedItem(component));
+		
+		boolean isGroup = attachment instanceof Group;
+		boolean isContact = attachment instanceof Contact;
+		boolean isKeyword = attachment instanceof Keyword;
+		
+		// Select the correct radio option
+		ui.setSelected(find("cbContacts"), isContact);
+		ui.setSelected(find("cbGroups"), isGroup);
+		ui.setSelected(find("cbKeywords"), isKeyword);
+		messageHistory_filterChanged();
+		
+		Object list = null;
+		// Calculate page number
+		if(isGroup) {
+			// Turn the page to the correct one for this group.
+			// FIXME what if the results per page is changed for the history table?
+			list = find("messageHistory_groupList");
+//			pageNumber = groupFactory.getPageNumber((Group)attachment, getListLimit(list));
+		} else if(isContact) {
+			list = filterListComponent;
+			int pageNumber = contactDao.getPageNumber((Contact)attachment, ui.getListLimit(list));
+			ui.setListPageNumber(pageNumber, list);
+		} else if(isKeyword) {
+			list = filterListComponent;
+			int pageNumber = keywordDao.getPageNumber((Keyword)attachment, ui.getListLimit(list));
+			ui.setListPageNumber(pageNumber, list);
+		}
+		updateMessageHistoryFilter();
+		
+		// Find which list item should be selected
+		boolean recurse = Thinlet.TREE.equals(Thinlet.getClass(list));
+		Object next = ui.getNextItem(list, Thinlet.get(list, ":comp"), recurse);
+		while(next != null && !ui.getAttachedObject(next).equals(attachment)) {
+			next = ui.getNextItem(list, next, recurse);
+		}
+		// Little fix for groups - it seems that getNextItem doesn't return the root of the
+		// tree, so we never get a positive match.
+		if(next == null) next = ui.getItem(list, 0);
+		ui.setSelectedItem(list, next);
+		messageHistory_selectionChanged();
+	}
 
 //> INSTANCE HELPER METHODS
 	/** Initialise the tab */
-	private void initialiseTab() {
+	protected Object initialiseTab() {
 		LOG.trace("ENTRY");
 
-		this.tabComponent = ui.loadComponentFromFile(UI_FILE_MESSAGES_TAB, this);
+		Object tabComponent = ui.loadComponentFromFile(UI_FILE_MESSAGES_TAB, this);
 		
-		Object pnBottom = find(COMPONENT_PN_BOTTOM);
-		Object pnFilter = find(COMPONENT_PN_FILTER);
+		Object pnBottom = ui.find(tabComponent, COMPONENT_PN_BOTTOM);
+		Object pnFilter = ui.find(tabComponent, COMPONENT_PN_FILTER);
 		String listName = COMPONENT_MESSAGE_LIST;
 		Object pagePanel = ui.loadComponentFromFile(UI_FILE_PAGE_PANEL);
 		ui.add(pnBottom, pagePanel, 0);
-		ui.setPageMethods(find(COMPONENT_PN_MESSAGE_LIST), listName, pagePanel);
+		ui.setPageMethods(ui.find(tabComponent, COMPONENT_PN_MESSAGE_LIST), listName, pagePanel);
 		pagePanel = ui.loadComponentFromFile(UI_FILE_PAGE_PANEL);
 		listName = COMPONENT_FILTER_LIST;
 		ui.add(pnFilter, pagePanel);
 		ui.setPageMethods(pnFilter, listName, pagePanel);
 
-		messageListComponent = find(COMPONENT_MESSAGE_LIST);
-		filterListComponent = find(COMPONENT_FILTER_LIST);
+		messageListComponent = ui.find(tabComponent, COMPONENT_MESSAGE_LIST);
+		filterListComponent = ui.find(tabComponent, COMPONENT_FILTER_LIST);
 		
 		// Set the types for the message list columns...
 		Object header = Thinlet.get(messageListComponent, ThinletText.HEADER);
 		initMessageTableForSorting(header);
 		
-		showReceivedMessagesComponent = find(COMPONENT_RECEIVED_MESSAGES_TOGGLE);
-		showSentMessagesComponent = find(COMPONENT_SENT_MESSAGES_TOGGLE);
+		showReceivedMessagesComponent = ui.find(tabComponent, COMPONENT_RECEIVED_MESSAGES_TOGGLE);
+		showSentMessagesComponent = ui.find(tabComponent, COMPONENT_SENT_MESSAGES_TOGGLE);
 		
 		// initListsForPaging
 		//Entries per page
@@ -156,6 +194,7 @@ public class MessageHistoryTabHandler implements ThinletUiEventHandler {
 		ui.setListElementCount(contactDao.getAllContacts().size(), filterListComponent);
 		
 		LOG.trace("EXIT");
+		return tabComponent;
 	}
 	
 //> PUBLIC UI METHODS
@@ -411,54 +450,6 @@ public class MessageHistoryTabHandler implements ThinletUiEventHandler {
 		updateMessageList();
 	}
 	
-	/**
-	 * Shows the message history for the selected contact or group.
-	 * @param component group list or contact list
-	 */
-	public void showMessageHistory(Object component) {
-		Object attachment = ui.getAttachedObject(ui.getSelectedItem(component));
-		
-		boolean isGroup = attachment instanceof Group;
-		boolean isContact = attachment instanceof Contact;
-		boolean isKeyword = attachment instanceof Keyword;
-		
-		// Select the correct radio option
-		ui.setSelected(find("cbContacts"), isContact);
-		ui.setSelected(find("cbGroups"), isGroup);
-		ui.setSelected(find("cbKeywords"), isKeyword);
-		messageHistory_filterChanged();
-		
-		Object list = null;
-		// Calculate page number
-		if(isGroup) {
-			// Turn the page to the correct one for this group.
-			// FIXME what if the results per page is changed for the history table?
-			list = find("messageHistory_groupList");
-//			pageNumber = groupFactory.getPageNumber((Group)attachment, getListLimit(list));
-		} else if(isContact) {
-			list = filterListComponent;
-			int pageNumber = contactDao.getPageNumber((Contact)attachment, ui.getListLimit(list));
-			ui.setListPageNumber(pageNumber, list);
-		} else if(isKeyword) {
-			list = filterListComponent;
-			int pageNumber = keywordDao.getPageNumber((Keyword)attachment, ui.getListLimit(list));
-			ui.setListPageNumber(pageNumber, list);
-		}
-		updateMessageHistoryFilter();
-		
-		// Find which list item should be selected
-		boolean recurse = Thinlet.TREE.equals(Thinlet.getClass(list));
-		Object next = ui.getNextItem(list, Thinlet.get(list, ":comp"), recurse);
-		while(next != null && !ui.getAttachedObject(next).equals(attachment)) {
-			next = ui.getNextItem(list, next, recurse);
-		}
-		// Little fix for groups - it seems that getNextItem doesn't return the root of the
-		// tree, so we never get a positive match.
-		if(next == null) next = ui.getItem(list, 0);
-		ui.setSelectedItem(list, next);
-		messageHistory_selectionChanged();
-	}
-	
 	public void messagesTab_removeMessages() {
 		LOG.trace("ENTER");
 		
@@ -554,15 +545,6 @@ public class MessageHistoryTabHandler implements ThinletUiEventHandler {
 		}
 	}
 
-	/**
-	 * Find a UI component within the {@link #tabComponent}.
-	 * @param componentName the name of the UI component
-	 * @return the ui component, or <code>null</code> if it could not be found
-	 */
-	private Object find(String componentName) {
-		return ui.find(this.tabComponent, componentName);
-	}
-
 	private void addMessageToList(Message message) {
 		LOG.trace("ENTER");
 		LOG.debug("Message [" + message + "]");
@@ -649,20 +631,8 @@ public class MessageHistoryTabHandler implements ThinletUiEventHandler {
 	public void showDateSelecter(Object textField) {
 		this.ui.showDateSelecter(textField);
 	}
-	/** @see UiGeneratorController#showConfirmationDialog(String) */
-	public void showConfirmationDialog(String methodToBeCalled) {
-		this.ui.showConfirmationDialog(methodToBeCalled, this);
-	}
 	/** @see UiGeneratorController#enableOptions(Object, Object, Object) */
 	public void enableOptions(Object list, Object popup, Object toolbar) {
 		this.ui.enableOptions(list, popup, toolbar);
-	}
-	/** @see UiGeneratorController#showHelpPage(String) */
-	public void showHelpPage(String page) {
-		this.ui.showHelpPage(page);
-	}
-	/** @see UiGeneratorController#removeDialog(Object) */
-	public void removeDialog(Object dialog) {
-		this.ui.removeDialog(dialog);
 	}
 }

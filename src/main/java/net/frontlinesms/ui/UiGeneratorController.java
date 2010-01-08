@@ -63,6 +63,7 @@ import net.frontlinesms.ui.handler.HomeTabHandler;
 import net.frontlinesms.ui.handler.PhoneTabHandler;
 import net.frontlinesms.ui.handler.email.EmailAccountDialogHandler;
 import net.frontlinesms.ui.handler.email.EmailTabHandler;
+import net.frontlinesms.ui.handler.keyword.KeywordTabHandler;
 import net.frontlinesms.ui.handler.message.MessageHistoryTabHandler;
 import net.frontlinesms.ui.handler.message.MessagePanelHandler;
 import net.frontlinesms.ui.i18n.FileLanguageBundle;
@@ -139,6 +140,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	private final PhoneTabHandler phoneTabController;
 	/** Controller of the contacts tab. */
 	private final ContactsTabHandler contactsTabController;
+	/** Controller of the keywords tab. */
+	private final KeywordTabHandler keywordTabHandler;
 	/** Controller of the message tab. */
 	private final MessageHistoryTabHandler messageTabController;
 	/** Handler for the email tab. */
@@ -203,11 +206,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	/** Thinlet UI Component: status bar at the bottom of the window */
 	private final Object statusBarComponent;
-	private Object keywordListComponent;
 	private final Object progressBarComponent;
-
-	/** Appears to be the in-focus item on the email tab. */
-	private Object emailTabFocusOwner;
 	
 	/**
 	 * Creates a new instance of the UI Controller.
@@ -266,20 +265,32 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 					: "");
 			
 			Object tabbedPane = find(COMPONENT_TABBED_PANE);
+			
 			this.phoneTabController = new PhoneTabHandler(this);
+			this.phoneTabController.init();
+			
 			this.contactsTabController = new ContactsTabHandler(this, this.contactDao, this.groupDao);
+			this.contactsTabController.init();
+			
 			this.messageTabController = new MessageHistoryTabHandler(this, contactDao, keywordDao, messageFactory);
+			this.messageTabController.init();
+			
 			this.emailTabHandler = new EmailTabHandler(this, this.frontlineController);
-
+			this.emailTabHandler.init();
+			
+			this.keywordTabHandler = new KeywordTabHandler(this, this.frontlineController);
+			this.keywordTabHandler.init();
 
 			this.homeTabController = new HomeTabHandler(this);
+			this.homeTabController.init();
+			
 			if (uiProperties.isTabVisible("hometab")) {
 				add(tabbedPane, this.homeTabController.getTab());
 				setSelected(find(COMPONENT_MI_HOME), true);
 			}
 			add(tabbedPane, this.contactsTabController.getTab());
 			if (uiProperties.isTabVisible("keywordstab")) {
-				addKeywordsTab(tabbedPane);
+				add(tabbedPane, this.keywordTabHandler.getTab());
 				setSelected(find(COMPONENT_MI_KEYWORD), true);
 			}
 			if(uiProperties.isTabVisible("messagetab")) {
@@ -450,17 +461,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			setResourceBundle(currentResourceBundle.getProperties(), currentResourceBundle.isRightToLeft());
 		}
 	}
-
-	/**
-	 * Adds the keywords tab.
-	 * @param tabbedPane the pane to add the keywords into
-	 */
-	private void addKeywordsTab(Object tabbedPane) {
-		int index = 2;
-		if (find(TAB_HOME) == null) index--;
-		add(tabbedPane, loadComponentFromFile(UI_FILE_KEYWORDS_TAB), index);
-		keywordListComponent = find(COMPONENT_KEYWORD_LIST);
-	}
 	
 	/** Pass throught to method in the {@link HomeTabHandler}. */
 	public void showHomeTabSettings() {
@@ -569,180 +569,13 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		return group == this.rootGroup || group == this.ungroupedContacts || group == this.unnamedContacts;
 	}
 
-	/** 
-	 * In advanced mode, updates the list of keywords in the Keyword Manager.  
-	 * <br>Has no effect in classic mode.
-	 */
-	private void updateKeywordList() {
-		int selectedIndex = getSelectedIndex(keywordListComponent);
-		removeAll(keywordListComponent);
-		Object newKeyword = createListItem(InternationalisationUtils.getI18NString(ACTION_ADD_KEYWORD), null);
-		setIcon(newKeyword, Icon.KEYWORD_NEW);
-		add(keywordListComponent, newKeyword);
-		for(Keyword keyword : keywordDao.getAllKeywords()) {
-			add(keywordListComponent, createListItem(keyword));
-		}
-		if (selectedIndex >= getItems(keywordListComponent).length || selectedIndex == -1) {
-			selectedIndex = 0;
-		}
-		setSelectedIndex(keywordListComponent, selectedIndex);
-		showSelectedKeyword();
-	}
-
-	public void keywordShowAdvancedView() {
-		Object divider = find(find(TAB_KEYWORD_MANAGER), COMPONENT_KEYWORDS_DIVIDER);
-		if (getItems(divider).length >= 2) {
-			remove(getItems(divider)[getItems(divider).length - 1]);
-		}
-		Object panel = loadComponentFromFile(UI_FILE_KEYWORDS_ADVANCED_VIEW);
-		Object table = find(panel, COMPONENT_ACTION_LIST);
-		Keyword keyword = getKeyword(getSelectedItem(keywordListComponent));
-		String key = keyword.getKeyword().length() == 0 ? "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">" : keyword.getKeyword();
-		setText(panel, InternationalisationUtils.getI18NString(COMMON_KEYWORD_ACTIONS_OF, key));
-		for (KeywordAction action : this.keywordActionDao.getActions(keyword)) {
-			add(table, getRow(action));
-		}
-		enableKeywordActionFields(table, find(panel, COMPONENT_KEY_ACT_PANEL));
-		add(divider, panel);
-	}
-	
-	public void autoReplyChanged(String reply, Object cbAutoReply) {
-		setSelected(cbAutoReply, reply.length() > 0);
-	}
-	
-	public void showSelectedKeyword() {
-		int index = getSelectedIndex(keywordListComponent);
-		Object selected = getSelectedItem(keywordListComponent);
-		Object divider = find(find(TAB_KEYWORD_MANAGER), COMPONENT_KEYWORDS_DIVIDER);
-		if (getItems(divider).length >= 2) {
-			remove(getItems(divider)[getItems(divider).length - 1]);
-		}
-		if (index == 0) {
-			//Add keyword selected
-			Object panel = loadComponentFromFile(UI_FILE_KEYWORDS_SIMPLE_VIEW);
-			fillGroups(panel);
-			Object btSave = find(panel, COMPONENT_BT_SAVE);
-			setText(btSave, InternationalisationUtils.getI18NString(ACTION_CREATE));
-			setBoolean(find(panel,COMPONENT_PN_TIP), VISIBLE, false);
-			add(divider, panel);
-		} else if (index > 0) {
-			//An existent keyword is selected, let's check if it is simple or advanced.
-			Keyword keyword = (Keyword) getAttachedObject(selected);
-			Collection<KeywordAction> actions = this.keywordActionDao.getActions(keyword);
-			boolean simple = actions.size() <= 3;
-			if (simple) {
-				int previousType = -1;
-				for (KeywordAction action : actions) {
-					int type = action.getType();
-					if (type != KeywordAction.TYPE_REPLY
-							&& type != KeywordAction.TYPE_JOIN
-							&& type != KeywordAction.TYPE_LEAVE) {
-						simple = false;
-						break;
-					}
-					
-					if (action.getEndDate() != DEFAULT_END_DATE) {
-						simple = false;
-						break;
-					}
-					
-					if (type == previousType) {
-						simple = false;
-						break;
-					}
-					
-					previousType = type;
-				}
-			}
-			if (simple) {
-				Object panel = loadComponentFromFile(UI_FILE_KEYWORDS_SIMPLE_VIEW);
-				//Fill every field
-				fillGroups(panel);
-				Object tfKeyword = find(panel, COMPONENT_TF_KEYWORD);
-				setEnabled(tfKeyword, false);
-				String key = keyword.getKeyword().length() == 0 ? "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">" : keyword.getKeyword();
-				setText(tfKeyword, key);
-				for (KeywordAction action : actions) {
-					int type = action.getType();
-					if (type == KeywordAction.TYPE_REPLY) {
-						Object cbReply = find(panel, COMPONENT_CB_AUTO_REPLY);
-						Object tfReply = find(panel, COMPONENT_TF_AUTO_REPLY);
-						setSelected(cbReply, true);
-						setText(tfReply, action.getUnformattedReplyText());
-					} else if (type == KeywordAction.TYPE_JOIN) {
-						Object checkboxJoin = find(panel, COMPONENT_CB_JOIN_GROUP);
-						Object cbJoinGroup = find(panel, COMPONENT_CB_GROUPS_TO_JOIN);
-						for (int i = 0; i < getItems(cbJoinGroup).length; i++) {
-							Group g = (Group) getAttachedObject(getItems(cbJoinGroup)[i]);
-							if (g.equals(action.getGroup())) {
-								setInteger(cbJoinGroup, SELECTED, i);
-								break;
-							}
-						}
-						setSelected(checkboxJoin, true);
-					} else if (type == KeywordAction.TYPE_LEAVE) {
-						Object checkboxLeave = find(panel, COMPONENT_CB_LEAVE_GROUP);
-						Object cbLeaveGroup = find(panel, COMPONENT_CB_GROUPS_TO_LEAVE);
-						for (int i = 0; i < getItems(cbLeaveGroup).length; i++) {
-							Group g = (Group) getAttachedObject(getItems(cbLeaveGroup)[i]);
-							if (g.equals(action.getGroup())) {
-								setInteger(cbLeaveGroup, SELECTED, i);
-								break;
-							}
-						}
-						setSelected(checkboxLeave, true);
-					}
-				}
-				
-				setBoolean(find(panel, COMPONENT_BT_CLEAR), VISIBLE, false);
-				add(divider, panel);
-			} else {
-				Object panel = loadComponentFromFile(UI_FILE_KEYWORDS_ADVANCED_VIEW);
-				Object table = find(panel, COMPONENT_ACTION_LIST);
-				String key = keyword.getKeyword().length() == 0 ? "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">" : keyword.getKeyword();
-				setText(panel, InternationalisationUtils.getI18NString(COMMON_KEYWORD_ACTIONS_OF, key));
-				//Fill every field
-				for (KeywordAction action : actions) {
-					add(table, getRow(action));
-				}
-				add(divider, panel);
-				enableKeywordActionFields(table, find(panel, COMPONENT_KEY_ACT_PANEL));
-			}
-		}
-		enableKeywordFields(find(find(TAB_KEYWORD_MANAGER), COMPONENT_KEY_PANEL));
-	}
-	
-	
-	
-	private void fillGroups(Object panel) {
-		Object cbJoin = find(panel, COMPONENT_CB_GROUPS_TO_JOIN);
-		Object cbLeave = find(panel, COMPONENT_CB_GROUPS_TO_LEAVE);
-		Object cbJoinGroup = find(panel, COMPONENT_CB_JOIN_GROUP);
-		Object cbLeaveGroup = find(panel, COMPONENT_CB_LEAVE_GROUP);
-		List<Group> groups = this.groupDao.getAllGroups();
-		for (Group g : groups) {
-			Object item = createComboBoxChoice(g);
-			add(cbJoin, item);
-			add(cbLeave, item);
-		}
-		if (groups.size() == 0) {
-			setEnabled(cbJoinGroup, false);
-			setEnabled(cbJoin, false);
-			setEnabled(cbLeaveGroup , false);
-			setEnabled(cbLeave, false);
-		} else {
-			setSelectedIndex(cbJoin, 0);
-			setSelectedIndex(cbLeave, 0);
-		}
-	}
-
-	private Object createComboBoxChoice(Group g) {
+	public Object createComboBoxChoice(Group g) {
 		Object item = createComboboxChoice(g.getName(), g);
 		setIcon(item, Icon.GROUP);
 		return item;
 	}
 
-	private void addDatePanel(Object dialog) {
+	public void addDatePanel(Object dialog) {
 		Object datePanel = loadComponentFromFile(UI_FILE_DATE_PANEL);
 		//Adds to the end of the panel, before the button
 		add(dialog, datePanel, getItems(dialog).length - 2);
@@ -839,44 +672,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void showMessageHistory(Object component) {
 		Object attachment = getAttachedObject(getSelectedItem(component));
 		changeTab(TAB_MESSAGE_HISTORY);
-		this.messageTabController.showMessageHistory(component);
-	}
-	
-	/**
-	 * UI Method.
-	 * Deletes the keyword that is selected in {@link #keywordListComponent}.
-	 */
-	public void removeSelectedFromKeywordList() {
-		// Get the selected keyword
-		Object selected = getSelectedItem(keywordListComponent);
-		Keyword keyword = getAttachedObject(selected, Keyword.class);
-		
-		// Delete attached actions, and then delete they keyword
-		for(KeywordAction action : this.keywordActionDao.getActions(keyword)) {
-			this.keywordActionDao.deleteKeywordAction(action);
-		}
-		this.keywordDao.deleteKeyword(keyword);
-
-		// Now update the UI - remove the selected item and set a new selected item
-		remove(selected);
-		setSelectedIndex(keywordListComponent, 0);
-		showSelectedKeyword();
-
-		// Finally, remove the "confirm delete" dialog
-		removeConfirmationDialog();
-	}
-
-	/**
-	 * Removes selected keyword action.
-	 */
-	public void removeSelectedFromKeywordActionsList() {
-		removeConfirmationDialog();
-		Object list = find(COMPONENT_ACTION_LIST);
-		Object selected = getSelectedItem(list);
-		KeywordAction keyAction = (KeywordAction) getAttachedObject(selected);
-		this.keywordActionDao.deleteKeywordAction(keyAction);
-		remove(selected);
-		enableKeywordActionFields(list, find(COMPONENT_KEY_ACT_PANEL));
+		this.messageTabController.doShowMessageHistory(component);
 	}
 	
 	public void setListElementCount(int count, Object list) {
@@ -1192,7 +988,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		// Looks like we don't bother refreshing if the phone list isn't in view
 		if (currentTab.equals(TAB_ADVANCED_PHONE_MANAGER)) {
 			LOG.debug("Refreshing phones tab");
-			this.phoneTabController.refreshPhonesViews();
+			this.phoneTabController.refresh();
 		}
 	}
 
@@ -1215,66 +1011,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public synchronized void setStatus(String status) {
 		LOG.debug("Status Text [" + status + "]");
 		setString(statusBarComponent, TEXT, status);
-	}
-
-	/** @see #showGroupSelecter(Object, String, String, Object) */
-	private void showGroupSelecter(Object actionObject, String title, String callbackMethodName) {
-		showGroupSelecter(actionObject, false, title, callbackMethodName, this);
-	}
-	
-	/**
-	 * Shows the group selecter dialog, which is used for JOIN/LEAVE group actions.
-	 * @param actionObject The object to be edited, or null if we are creating one.
-	 * @param title
-	 * @param callbackMethodName
-	 */
-	public void showGroupSelecter(Object actionObject, boolean addDatePanel, String title, String callbackMethodName, ThinletUiEventHandler eventHandler) {
-		if(LOG.isTraceEnabled()) {
-			LOG.trace("UiGeneratorController.showGroupSelecter()");
-			LOG.trace("actionObject: " + actionObject);
-			LOG.trace("title: " + title);
-		}
-		Object selecter = loadComponentFromFile(UI_FILE_GROUP_SELECTER, eventHandler);
-		//Adds the date panel to it
-		if(addDatePanel) {
-			addDatePanel(selecter);
-		}
-		setAttachedObject(selecter, actionObject);
-		setText(find(selecter, COMPONENT_GROUP_SELECTER_TITLE), title);
-		Object list = find(selecter, COMPONENT_GROUP_SELECTER_GROUP_LIST);
-		List<Group> userGroups = this.groupDao.getAllGroups();
-		if (userGroups.size() == 0) {
-			alert(InternationalisationUtils.getI18NString(MESSAGE_NO_GROUP_CREATED_BY_USERS));
-			return;
-		}
-		for (Group g : userGroups) {
-			Object item = createListItem(g.getName(), g);
-			setIcon(item, Icon.GROUP);
-			if (actionObject instanceof KeywordAction) {
-				KeywordAction action = (KeywordAction) actionObject;
-				if (g.getName().equals(action.getGroup().getName())) {
-					setSelected(item, true);
-				}
-			}
-			add(list, item);
-		}
-		if (addDatePanel && actionObject instanceof KeywordAction) {
-			LOG.trace("UiGeneratorController.showGroupSelecter() : ADDING THE DATES COMPONENT.");
-			KeywordAction action = (KeywordAction) actionObject;
-			setText(find(selecter, COMPONENT_TF_START_DATE), action == null ? "" : InternationalisationUtils.getDateFormat().format(action.getStartDate()));
-			Object endDate = find(selecter, COMPONENT_TF_END_DATE);
-			String toSet = "";
-			if (action != null) {
-				if (action.getEndDate() == DEFAULT_END_DATE) {
-					toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
-				} else {
-					toSet = InternationalisationUtils.getDateFormat().format(action.getEndDate());
-				}
-			}
-			setText(endDate, toSet);
-		}
-		setMethod(find(selecter, COMPONENT_GROUP_SELECTER_OK_BUTTON), ATTRIBUTE_ACTION, callbackMethodName, selecter, eventHandler);
-		add(selecter);
 	}
 	
 	/**
@@ -1416,293 +1152,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 
 	/**
-	 * Shows the new auto reply action dialog.
-	 * 
-	 * @param keywordList
-	 */
-	public void show_newKActionReplyForm(Object keywordList) {
-		// Load the reply form from file.  We then attach the keyword we're working on to
-		// the form so that it can be retrieved later for actioning.  Also, we can set the
-		// title of the loaded form to remind the user which keyword they are adding a
-		// reply to.
-		Object autoReplyForm = loadComponentFromFile(UI_FILE_NEW_KACTION_REPLY_FORM);
-		
-		Object pnMessage = new MessagePanelHandler(this).getPanel();
-		// FIX 0000542 FIXME this comment is not useful - what is the fix?  or more importantly, what is the function of this code?
-		Object pnBottom = find(pnMessage, COMPONENT_PN_BOTTOM);
-		remove(getItem(pnBottom, 0));
-		Object senderPanel = loadComponentFromFile(UI_FILE_SENDER_NAME_PANEL);
-		add(pnBottom, senderPanel, 0);
-		add(autoReplyForm, pnMessage, getItems(autoReplyForm).length - 3);
-		setMethod(find(senderPanel, COMPONENT_BT_SENDER_NAME), ATTRIBUTE_ACTION, "addConstantToCommand(tfMessage.text, tfMessage, 0)", autoReplyForm, this);
-		setMethod(find(senderPanel, "btSenderNumber"), ATTRIBUTE_ACTION, "addConstantToCommand(tfMessage.text, tfMessage, 1)", autoReplyForm, this);
-		// FIX 0000542 FIXME this comment is not useful - what is the fix?  or more importantly, what is the function of this code?
-		setMethod(find(autoReplyForm, COMPONENT_BT_SAVE), ATTRIBUTE_ACTION, "do_newKActionReply(autoReplyForm, tfMessage.text)", autoReplyForm, this);
-
-		//Adds the date panel to it
-		addDatePanel(autoReplyForm);
-		Keyword keyword = getKeyword(getSelectedItem(keywordList));
-		setAttachedObject(autoReplyForm, keyword);
-		add(autoReplyForm);
-		numberToSend = 1;
-	}
-
-	/**
-	 * Shows the new auto reply action dialog for editing purpose.
-	 * 
-	 * @param action
-	 */
-	private void show_newKActionReplyFormForEdition(KeywordAction action) {
-		// Load the reply form from file.  We then attach the keyword we're working on to
-		// the form so that it can be retrieved later for actioning.  Also, we can set the
-		// title of the loaded form to remind the user which keyword they are adding a
-		// reply to.
-		Object autoReplyForm = loadComponentFromFile(UI_FILE_NEW_KACTION_REPLY_FORM);
-		
-		MessagePanelHandler messagePanelController = new MessagePanelHandler(this);
-		Object pnMessage = messagePanelController.getPanel();
-		// FIX 0000542
-		Object pnBottom = find(pnMessage, COMPONENT_PN_BOTTOM);
-		remove(getItem(pnBottom, 0));
-		Object senderPanel = loadComponentFromFile(UI_FILE_SENDER_NAME_PANEL);
-		add(pnBottom, senderPanel, 0);
-		add(autoReplyForm, pnMessage, getItems(autoReplyForm).length - 3);
-		setMethod(find(senderPanel, COMPONENT_BT_SENDER_NAME), ATTRIBUTE_ACTION, "addConstantToCommand(tfMessage.text, tfMessage, 0)", autoReplyForm, this);
-		setMethod(find(senderPanel, "btSenderNumber"), ATTRIBUTE_ACTION, "addConstantToCommand(tfMessage.text, tfMessage, 1)", autoReplyForm, this);
-		// FIX 0000542
-		
-		//Adds the date panel to it
-		addDatePanel(autoReplyForm);
-		
-		setMethod(find(autoReplyForm, COMPONENT_BT_SAVE), ATTRIBUTE_ACTION, "do_newKActionReply(autoReplyForm, tfMessage.text)", autoReplyForm, this);
-		
-		setAttachedObject(autoReplyForm, action);
-		
-		setText(find(autoReplyForm, COMPONENT_TF_MESSAGE), action.getUnformattedReplyText());
-		messagePanelController.messageChanged(action.getUnformattedReplyText());
-		
-		setText(find(autoReplyForm, COMPONENT_TF_START_DATE), action == null ? "" : InternationalisationUtils.getDateFormat().format(action.getStartDate()));
-		Object endDate = find(autoReplyForm, COMPONENT_TF_END_DATE);
-		String toSet = "";
-		if (action != null) {
-			if (action.getEndDate() == DEFAULT_END_DATE) {
-				toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
-			} else {
-				toSet = InternationalisationUtils.getDateFormat().format(action.getEndDate());
-			}
-		}
-		setText(endDate, toSet);
-		add(autoReplyForm);
-		numberToSend = 1;
-	}
-	
-	/**
-	 * Event fired when the popup menu (in the keyword manager tab) is shown.
-	 * If there is no keyword listed in the tree, the only option allowed is
-	 * to create one. Otherwise, all components are allowed.
-	 */
-	public void enableKeywordFields(Object component) {
-		LOG.trace("ENTER");
-		int selected = getSelectedIndex(keywordListComponent);
-		String field = getClass(component) == PANEL ? Thinlet.ENABLED : Thinlet.VISIBLE;
-		if (selected <= 0) {
-			LOG.debug("Nothing selected, so we only allow keyword creation.");
-			for (Object o : getItems(component)) {
-				String name = getString(o, Thinlet.NAME);
-				if (name == null)
-					continue;
-				if (!name.equals(COMPONENT_MENU_ITEM_CREATE)) {
-					setBoolean(o, field, false);
-				} else {
-					setBoolean(o, field, true);
-				}
-			}
-		} else {
-			//Keyword selected
-			for (Object o : getItems(component)) {
-				setBoolean(o, field, true);
-			}
-		}
-		LOG.trace("EXIT");
-	}
-
-	/**
-	 * Event fired when the popup menu (in the keyword manager tab) is shown.
-	 * If there is no keyword action listed in the table, the only option allowed is
-	 * to create one. Otherwise, all components are allowed.
-	 */
-	public void enableKeywordActionFields(Object table, Object component) {
-		LOG.trace("ENTER");
-		int selected = getSelectedIndex(table);
-		String field = getClass(component) == PANEL ? Thinlet.ENABLED : Thinlet.VISIBLE;
-		if (selected < 0) {
-			LOG.debug("Nothing selected, so we only allow keyword action creation.");
-			for (Object o : getItems(component)) {
-				String name = getString(o, Thinlet.NAME);
-				if (name == null)
-					continue;
-				if (!name.equals(COMPONENT_MENU_ITEM_CREATE)
-						&& !name.equals(COMPONENT_CB_ACTION_TYPE)) {
-					setBoolean(o, field, false);
-				} else {
-					setBoolean(o, field, true);
-				}
-			}
-		} else {
-			//Keyword action selected
-			for (Object o : getItems(component)) {
-				setBoolean(o, field, true);
-			}
-		}
-		LOG.trace("EXIT");
-	}
-	
-	/**
-	 * Shows the new join group action dialog.
-	 * 
-	 * @param keywordList
-	 */
-	public void show_newKActionJoinForm(Object keywordList) {
-		Keyword keyword = getKeyword(getSelectedItem(keywordList));
-		showGroupSelecter(keyword, InternationalisationUtils.getI18NString(COMMON_KEYWORD) + " \"" + keyword.getKeyword() + "\" " + InternationalisationUtils.getI18NString(COMMON_AUTO_JOIN_GROUP) + ":", "do_newKActionJoin(groupSelecter, groupSelecter_groupList)");
-	}
-	
-	/**
-	 * Shows the new leave group action dialog.
-	 * 
-	 * @param keywordList
-	 */
-	public void show_newKActionLeaveForm(Object keywordList) {
-		Keyword keyword = getKeyword(getSelectedItem(keywordList));
-		showGroupSelecter(keyword, InternationalisationUtils.getI18NString(COMMON_KEYWORD) + " \"" + keyword.getKeyword() + "\" " + InternationalisationUtils.getI18NString(COMMON_AUTO_LEAVE_GROUP) + ":", "do_newKActionLeave(groupSelecter, groupSelecter_groupList)");
-	}
-	/**
-	 * Shows the new external command action dialog.
-	 * 
-	 * @param keywordList
-	 */
-	public void show_newKActionExternalCmdForm(Object keywordList) {
-		LOG.trace("ENTER");
-		Keyword keyword = getKeyword(getSelectedItem(keywordList));
-		LOG.debug("External command for keyword [" + keyword.getKeyword() + "]");
-		Object externalCmdForm = loadComponentFromFile(UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM);
-		//Adds the date panel to it
-		addDatePanel(externalCmdForm);
-		setAttachedObject(externalCmdForm, keyword);
-		Object list = find(externalCmdForm, COMPONENT_EXTERNAL_COMMAND_GROUP_LIST);
-		List<Group> userGroups = this.groupDao.getAllGroups();
-		for (Group g : userGroups) {
-			LOG.debug("Adding group [" + g.getName() + "] to list");
-			Object item = createListItem(g.getName(), g);
-			setIcon(item, Icon.GROUP);
-			add(list, item);
-		}
-		add(externalCmdForm);
-		LOG.trace("EXIT");
-	}
-	
-	/**
-     *  0 - Auto Reply
-     *  1 - Auto Forward
-     *  2 - Join Group
-     *  3 - Leave Group
-     *  4 - Survey
-     *  5 - E-mail
-     *  6 - External Command
-     *  
-     *  TODO MAKE SURE THAT THIS STILL WORKS - WE HAVE REMOVED THE SURVEY ACTION!!!
-     */
-	public void keywordTab_createAction(int index) {
-		switch (index) {
-		case 0:
-			show_newKActionReplyForm(keywordListComponent);
-			break;
-		case 1:
-			show_newKActionForwardForm(keywordListComponent);
-			break;
-		case 2:
-			show_newKActionJoinForm(keywordListComponent);
-			break;
-		case 3:
-			show_newKActionLeaveForm(keywordListComponent);
-			break;
-		case 4:
-			show_newKActionEmailForm(keywordListComponent);
-			break;
-		case 5:
-			show_newKActionExternalCmdForm(keywordListComponent);
-			break;
-		}
-	}
-	
-	public void keywordTab_newAction(Object combo) {
-		keywordTab_createAction(getSelectedIndex(combo));
-	}
-	
-	/**
-	 * Shows the new email action dialog.
-	 * 
-	 * @param keywordList
-	 */
-	public void show_newKActionEmailForm(Object keywordList) {
-		LOG.trace("ENTER");
-		Keyword keyword = getKeyword(getSelectedItem(keywordList));
-		Object emailForm = loadComponentFromFile(UI_FILE_NEW_KACTION_EMAIL_FORM);
-		setAttachedObject(emailForm, keyword);
-		//Adds the date panel to it
-		addDatePanel(emailForm);
-		Object list = find(emailForm, COMPONENT_MAIL_LIST);
-		for (EmailAccount acc : emailAccountDao.getAllEmailAccounts()) {
-			LOG.debug("Adding existent e-mail account [" + acc.getAccountName() + "] to list");
-			Object item = createListItem(acc.getAccountName(), acc);
-			setIcon(item, Icon.SERVER);
-			add(list, item);
-		}
-		add(emailForm);
-		LOG.trace("EXIT");
-	}
-	
-	/**
-	 * Shows the new email action dialog.
-	 * 
-	 * @param keywordList
-	 */
-	private void show_newKActionEmailFormForEdition(KeywordAction action) {
-		Object emailForm = loadComponentFromFile(UI_FILE_NEW_KACTION_EMAIL_FORM);
-		//Adds the date panel to it
-		addDatePanel(emailForm);
-		setAttachedObject(emailForm, action);
-		Object list = find(emailForm, COMPONENT_MAIL_LIST);
-		for (EmailAccount acc : emailAccountDao.getAllEmailAccounts()) {
-			LOG.debug("Adding existent e-mail account [" + acc.getAccountName() + "] to list");
-			Object item = createListItem(acc.getAccountName(), acc);
-			setIcon(item, Icon.SERVER);
-			add(list, item);
-			if (acc.equals(action.getEmailAccount())) {
-				LOG.debug("Selecting the current account for this e-mail [" + acc.getAccountName() + "]");
-				setSelected(item, true);
-			}
-		}
-		setText(find(emailForm, COMPONENT_TF_SUBJECT), action.getEmailSubject());
-		setText(find(emailForm, COMPONENT_TF_MESSAGE), action.getUnformattedReplyText());
-		setText(find(emailForm, COMPONENT_TF_RECIPIENT), action.getEmailRecipients());
-		
-		setText(find(emailForm, COMPONENT_TF_START_DATE), action == null ? "" : InternationalisationUtils.getDateFormat().format(action.getStartDate()));
-		Object endDate = find(emailForm, COMPONENT_TF_END_DATE);
-		String toSet = "";
-		if (action != null) {
-			if (action.getEndDate() == DEFAULT_END_DATE) {
-				toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
-			} else {
-				toSet = InternationalisationUtils.getDateFormat().format(action.getEndDate());
-			}
-		}
-		setText(endDate, toSet);
-		add(emailForm);
-		LOG.trace("EXIT");
-	}
-
-	/**
 	 * Shows the email accounts settings dialog.
 	 */
 	public void showEmailAccountsSettings() {
@@ -1751,164 +1200,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 		LOG.trace("EXIT");
 	}
-	
-	/**
-	 * Shows the new external command action dialog for edition.
-	 * 
-	 * @param keywordList
-	 */
-	private void show_newKActionExternalCmdFormForEdition(KeywordAction action) {
-		LOG.trace("ENTER");
-		Object externalCmdForm = loadComponentFromFile(UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM);
-		//Adds the date panel to it
-		addDatePanel(externalCmdForm);
-		Object list = find(externalCmdForm, COMPONENT_EXTERNAL_COMMAND_GROUP_LIST);
-		List<Group> userGroups = this.groupDao.getAllGroups();
-		for (Group g : userGroups) {
-			LOG.debug("Adding group [" + g.getName() + "] to list");
-			Object item = createListItem(g.getName(), g);
-			setIcon(item, Icon.GROUP);
-			add(list, item);
-		}
-		setAttachedObject(externalCmdForm, action);
-		//COMMAND TYPE
-		setSelected(find(externalCmdForm, COMPONENT_RB_TYPE_HTTP), action.getExternalCommandType() == KeywordAction.EXTERNAL_HTTP_REQUEST);
-		setSelected(find(externalCmdForm, COMPONENT_RB_TYPE_COMMAND_LINE), action.getExternalCommandType() == KeywordAction.EXTERNAL_COMMAND_LINE);
-		
-		//COMMAND
-		setText(find(externalCmdForm, COMPONENT_TF_COMMAND), action.getUnformattedCommand());
-		
-		Object pnResponse = find(externalCmdForm, COMPONENT_PN_RESPONSE);
-		//RESPONSE TYPE
-		if (action.getExternalCommandResponseType() == KeywordAction.EXTERNAL_RESPONSE_PLAIN_TEXT) {
-			LOG.debug("Setting up dialog for PLAIN TEXT response.");
-			setSelected(find(externalCmdForm, COMPONENT_RB_PLAIN_TEXT), true);
-			setSelected(find(externalCmdForm, COMPONENT_RB_FRONTLINE_COMMANDS), false);
-			setSelected(find(externalCmdForm, COMPONENT_RB_NO_RESPONSE), false);
-			
-			activate(pnResponse);
-			deactivate(list);
-			//RESPONSE PANEL
-			setText(find(externalCmdForm, COMPONENT_TF_MESSAGE), action.getUnformattedCommandText());
-			int responseActionType = action.getCommandResponseActionType();
-			setSelected(find(externalCmdForm, COMPONENT_CB_AUTO_REPLY),
-						responseActionType == KeywordAction.TYPE_REPLY || responseActionType == KeywordAction.EXTERNAL_REPLY_AND_FORWARD);
-		
-			if (responseActionType == KeywordAction.TYPE_FORWARD || responseActionType == KeywordAction.EXTERNAL_REPLY_AND_FORWARD) {
-				setSelected(find(externalCmdForm, COMPONENT_CB_FORWARD), true);
-				activate(list);
-				//Select group
-				Group g = action.getGroup();
-				for (Object item : getItems(list)) {
-					Group it = getGroup(item);
-					if (it.equals(g)) {
-						LOG.debug("Selecting group [" + g.getName() + "].");
-						setSelected(item, true);
-						break;
-					}
-				}
-			}
-		} else if (action.getExternalCommandResponseType() == KeywordAction.EXTERNAL_RESPONSE_LIST_COMMANDS) {
-			LOG.debug("Setting up dialog for LIST COMMANDS response.");
-			setSelected(find(externalCmdForm, COMPONENT_RB_PLAIN_TEXT), false);
-			setSelected(find(externalCmdForm, COMPONENT_RB_FRONTLINE_COMMANDS), true);
-			setSelected(find(externalCmdForm, COMPONENT_RB_NO_RESPONSE), false);
-			deactivate(pnResponse);
-		} else {
-			LOG.debug("Setting up dialog for NO response.");
-			setSelected(find(externalCmdForm, COMPONENT_RB_PLAIN_TEXT), false);
-			setSelected(find(externalCmdForm, COMPONENT_RB_FRONTLINE_COMMANDS), false);
-			setSelected(find(externalCmdForm, COMPONENT_RB_NO_RESPONSE), true);
-			deactivate(pnResponse);
-		}
-		
-		//START and END dates
-		setString(find(externalCmdForm, COMPONENT_TF_START_DATE), TEXT, InternationalisationUtils.getDateFormat().format(action.getStartDate()));
-		Object endDate = find(externalCmdForm, COMPONENT_TF_END_DATE);
-		String toSet = "";
-		if (action.getEndDate() == DEFAULT_END_DATE) {
-			toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
-		} else {
-			toSet = InternationalisationUtils.getDateFormat().format(action.getEndDate());
-		}
-		setText(endDate, toSet);
-		add(externalCmdForm);
-		LOG.trace("EXIT");
-	}
-	
-	/**
-	 * Activates or deactivates the supplied panel according to user selection.
-	 * 
-	 * @param list
-	 * @param selected
-	 */
-	public void controlExternalCommandResponseType(Object list, boolean selected) {
-		if (selected) {
-			activate(list);
-		} else {
-			deactivate(list);
-		}
-	}
-	
-	/**
-	 * Shows the new forward message action dialog.
-	 * 
-	 * @param keywordList
-	 */
-	public void show_newKActionForwardForm(Object keywordList) {
-		Keyword keyword = getKeyword(getSelectedItem(keywordList));
-		Object forwardForm = loadComponentFromFile(UI_FILE_NEW_KACTION_FORWARD_FORM);
-		//Adds the date panel to it
-		addDatePanel(forwardForm);
-		setAttachedObject(forwardForm, keyword);
-		setText(find(forwardForm, COMPONENT_FORWARD_FORM_TITLE), InternationalisationUtils.getI18NString(COMMON_AUTO_FORWARD_FOR_KEYWORD) + " '" + keyword.getKeyword() + "' " + InternationalisationUtils.getI18NString(COMMON_TO_GROUP) + ":");
-		Object list = find(forwardForm, COMPONENT_FORWARD_FORM_GROUP_LIST);
-		List<Group> userGroups = this.groupDao.getAllGroups();
-		for (Group g : userGroups) {
-			Object item = createListItem(g.getName(), g);
-			setIcon(item, Icon.GROUP);
-			add(list, item);
-		}
-		add(forwardForm);
-	}
-
-	/**
-	 * Shows the forward message action dialog for editing purpose.
-	 * 
-	 * @param action
-	 */
-	private void show_newKActionForwardFormForEdition(KeywordAction action) {
-		Keyword keyword = action.getKeyword();
-		Object forwardForm = loadComponentFromFile(UI_FILE_NEW_KACTION_FORWARD_FORM);
-		//Adds the date panel to it
-		addDatePanel(forwardForm);
-		setAttachedObject(forwardForm, action);
-		setString(find(forwardForm, COMPONENT_FORWARD_FORM_TITLE), TEXT, InternationalisationUtils.getI18NString(COMMON_AUTO_FORWARD_FOR_KEYWORD) + " '" + keyword.getKeyword() + "' " + InternationalisationUtils.getI18NString(COMMON_TO_GROUP) + ":");
-		Object list = find(forwardForm, COMPONENT_FORWARD_FORM_GROUP_LIST);
-		List<Group> userGroups = this.groupDao.getAllGroups();
-		for (Group g : userGroups) {
-			Object item = createListItem(g.getName(), g);
-			setIcon(item, Icon.GROUP);
-			if (g.getName().equals(action.getGroup().getName())) {
-				setSelected(item, true);
-			}
-			add(list, item);
-		}
-		setText(find(forwardForm, COMPONENT_FORWARD_FORM_TEXTAREA), action.getUnformattedForwardText());
-		
-		setText(find(forwardForm, COMPONENT_TF_START_DATE), action == null ? "" : InternationalisationUtils.getDateFormat().format(action.getStartDate()));
-		Object endDate = find(forwardForm, COMPONENT_TF_END_DATE);
-		String toSet = "";
-		if (action != null) {
-			if (action.getEndDate() == DEFAULT_END_DATE) {
-				toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
-			} else {
-				toSet = InternationalisationUtils.getDateFormat().format(action.getEndDate());
-			}
-		}
-		setText(endDate, toSet);
-		add(forwardForm);
-	}
 
 	/**
 	 * This method is used to show an export dialog, where the user can select the
@@ -1919,522 +1210,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		Object exportDialog = loadComponentFromFile(UI_FILE_EXPORT_DIALOG_FORM);
 		setAttachedObject(exportDialog, name);
 		add(exportDialog);
-	}
-	
-	/**
-	 * Creates a new forward message action.
-	 */
-	public void do_newKActionForward(Object forwardDialog, Object groupList, String forwardText) {
-		LOG.trace("ENTER");
-		Group group = getGroup(getSelectedItem(groupList));
-		if (group != null) {
-			String startDate = getString(find(forwardDialog, COMPONENT_TF_START_DATE), Thinlet.TEXT);
-			String endDate = getString(find(forwardDialog, COMPONENT_TF_END_DATE), Thinlet.TEXT);
-			LOG.debug("Start Date [" + startDate + "]");
-			LOG.debug("End Date [" + endDate + "]");
-			if (startDate.equals("")) {
-				LOG.debug("No start date set, so we set to [" + InternationalisationUtils.getDefaultStartDate() + "]");
-				startDate = InternationalisationUtils.getDefaultStartDate();
-			}
-			long start;
-			long end;
-			try {
-				Date ds = InternationalisationUtils.parseDate(startDate); 
-				if (!endDate.equals("") && !endDate.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
-					Date de = InternationalisationUtils.parseDate(endDate);
-					if (!Utils.validateDates(ds, de)) {
-						LOG.debug("Start date is not before the end date");
-						alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
-						LOG.trace("EXIT");
-						return;
-					}
-					end = de.getTime();
-				} else {
-					end = DEFAULT_END_DATE;
-				}
-				start = ds.getTime();
-			} catch (ParseException e) {
-				LOG.debug("Wrong format for date", e);
-				alert(InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
-				LOG.trace("EXIT");
-				return;
-			} 
-			KeywordAction action;
-			boolean isNew = false;
-			if (isAttachment(forwardDialog, KeywordAction.class)) {
-				action = getKeywordAction(forwardDialog);
-				LOG.debug("Editing action [" + action + "]. Setting new values!");
-				action.setGroup(group);
-				action.setForwardText(forwardText);
-				action.setStartDate(start);
-				action.setEndDate(end);
-			} else {
-				isNew = true;
-				Keyword keyword = getKeyword(forwardDialog);
-				LOG.debug("Creating action for keyword [" + keyword.getKeyword() + "]");
-				action = KeywordAction.createForwardAction(keyword, group, forwardText, start, end);
-				keywordActionDao.saveKeywordAction(action);
-			}
-			updateKeywordActionList(action, isNew);
-			remove(forwardDialog);
-		} else {
-			alert(InternationalisationUtils.getI18NString(MESSAGE_NO_GROUP_SELECTED_TO_FWD));
-		}
-		LOG.trace("EXIT");
-	}
-
-	/**
-	 * Creates a email message action.
-	 */
-	public void do_newKActionEmail(Object mailDialog, Object mailList) {
-		LOG.trace("ENTER");
-		String message = getText(find(mailDialog, COMPONENT_TF_MESSAGE));
-		String recipients = getText(find(mailDialog, COMPONENT_TF_RECIPIENT));
-		String subject = getText(find(mailDialog, COMPONENT_TF_SUBJECT));
-		LOG.debug("Message [" + message + "]");
-		LOG.debug("Recipients [" + recipients + "]");
-		LOG.debug("Subject [" + subject + "]");
-		if (recipients.equals("") || recipients.equals(";")) {
-			LOG.debug("No valid recipients.");
-			alert(InternationalisationUtils.getI18NString(MESSAGE_BLANK_RECIPIENTS));
-			return;
-		}
-		EmailAccount account = (EmailAccount) getAttachedObject(getSelectedItem(mailList));
-		if (account == null) {
-			LOG.debug("No account selected to send the e-mail from.");
-			alert(InternationalisationUtils.getI18NString(MESSAGE_NO_ACCOUNT_SELECTED_TO_SEND_FROM));
-			return;
-		}
-		LOG.debug("Account [" + account.getAccountName() + "]");
-		String startDate = getString(find(mailDialog, COMPONENT_TF_START_DATE), Thinlet.TEXT);
-		String endDate = getString(find(mailDialog, COMPONENT_TF_END_DATE), Thinlet.TEXT);
-		LOG.debug("Start Date [" + startDate + "]");
-		LOG.debug("End Date [" + endDate + "]");
-		if (startDate.equals("")) {
-			LOG.debug("No start date set, so we set to [" + InternationalisationUtils.getDefaultStartDate() + "]");
-			startDate = InternationalisationUtils.getDefaultStartDate();
-		}
-		long start;
-		long end;
-		try {
-			Date ds = InternationalisationUtils.parseDate(startDate); 
-			if (!endDate.equals("") && !endDate.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
-				Date de = InternationalisationUtils.parseDate(endDate);
-				if (!Utils.validateDates(ds, de)) {
-					LOG.debug("Start date is not before the end date");
-					alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
-					LOG.trace("EXIT");
-					return;
-				}
-				end = de.getTime();
-			} else {
-				end = DEFAULT_END_DATE;
-			}
-			start = ds.getTime();
-		} catch (ParseException e) {
-			LOG.debug("Wrong format for date", e);
-			alert(InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
-			LOG.trace("EXIT");
-			return;
-		} 
-		KeywordAction action = null;
-		boolean isNew = false;
-		if (isAttachment(mailDialog, KeywordAction.class)) {
-			action = getKeywordAction(mailDialog);
-			LOG.debug("We are editing action [" + action + "]. Setting new values.");
-			action.setEmailAccount(account);
-			action.setReplyText(message);
-			action.setEmailRecipients(recipients);
-			action.setEmailSubject(subject);
-			action.setStartDate(start);
-			action.setEndDate(end);
-		} else {
-			isNew = true;
-			Keyword keyword = getKeyword(mailDialog);
-			LOG.debug("Creating new action  for keyword[" + keyword.getKeyword() + "].");
-			action = KeywordAction.createEmailAction(keyword, message, account, recipients, subject,start, end);
-			keywordActionDao.saveKeywordAction(action);
-		}
-		updateKeywordActionList(action, isNew);
-		remove(mailDialog);
-		LOG.trace("EXIT");
-	}
-	
-	private void updateKeywordActionList(KeywordAction action, boolean isNew) {
-		Object table = find(COMPONENT_ACTION_LIST);
-		if (isNew) {
-			add(table, getRow(action));
-		} else {
-			int index = -1;
-			for (Object o : getItems(table)) {
-				KeywordAction a = getKeywordAction(o);
-				if (a.equals(action)) {
-					index = getIndex(table, o);
-					remove(o);
-				}
-			}
-			add(table, getRow(action), index);
-		}
-	}
-
-	/**
-	 * Creates a new forward message action.
-	 */
-	public void do_newKActionExternalCommand(Object externalCommandDialog) {
-		LOG.trace("ENTER");
-		String startDate = getString(find(externalCommandDialog, COMPONENT_TF_START_DATE), Thinlet.TEXT);
-		String endDate = getString(find(externalCommandDialog, COMPONENT_TF_END_DATE), Thinlet.TEXT);
-		LOG.debug("Start Date [" + startDate + "]");
-		LOG.debug("End Date [" + endDate + "]");
-		if (startDate.equals("")) {
-			LOG.debug("No start date set, so we set to [" + InternationalisationUtils.getDefaultStartDate() + "]");
-			startDate = InternationalisationUtils.getDefaultStartDate();
-		}
-		long start;
-		long end;
-		try {
-			Date ds = InternationalisationUtils.parseDate(startDate); 
-			if (!endDate.equals("") && !endDate.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
-				Date de = InternationalisationUtils.parseDate(endDate);
-				if (!Utils.validateDates(ds, de)) {
-					LOG.debug("Start date is not before the end date");
-					alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
-					LOG.trace("EXIT");
-					return;
-				}
-				end = de.getTime();
-			} else {
-				end = DEFAULT_END_DATE;
-			}
-			start = ds.getTime();
-		} catch (ParseException e) {
-			LOG.debug("Wrong format for date", e);
-			alert(InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
-			LOG.trace("EXIT");
-			return;
-		} 
-		int commandType = isSelected(find(externalCommandDialog, COMPONENT_RB_TYPE_HTTP)) ? KeywordAction.EXTERNAL_HTTP_REQUEST : KeywordAction.EXTERNAL_COMMAND_LINE;
-		String commandLine = getText(find(externalCommandDialog, COMPONENT_TF_COMMAND));
-		int responseType = KeywordAction.EXTERNAL_RESPONSE_DONT_WAIT;
-		if (isSelected(find(externalCommandDialog, COMPONENT_RB_PLAIN_TEXT))) {
-			responseType = KeywordAction.EXTERNAL_RESPONSE_PLAIN_TEXT;
-		} else if (isSelected(find(externalCommandDialog, COMPONENT_RB_FRONTLINE_COMMANDS))) {
-			responseType = KeywordAction.EXTERNAL_RESPONSE_LIST_COMMANDS;
-		}
-		
-		LOG.debug("Command type [" + commandType + "]");
-		LOG.debug("Command [" + commandLine + "]");
-		LOG.debug("Response type [" + responseType + "]");
-		
-		Group group = null;
-		String message = null;
-		int responseActionType = KeywordAction.EXTERNAL_DO_NOTHING; 
-		if (responseType == KeywordAction.EXTERNAL_RESPONSE_PLAIN_TEXT) {
-			boolean reply = isSelected(find(externalCommandDialog, COMPONENT_CB_AUTO_REPLY));
-			boolean fwd = isSelected(find(externalCommandDialog, COMPONENT_CB_FORWARD));
-			
-			if (reply && fwd) {
-				responseActionType = KeywordAction.EXTERNAL_REPLY_AND_FORWARD;
-			} else if (reply) {
-				responseActionType = KeywordAction.TYPE_REPLY;
-			} else if (fwd) {
-				responseActionType = KeywordAction.TYPE_FORWARD;
-			}
-			LOG.debug("Response Action type [" + responseActionType + "]");
-			if (responseActionType == KeywordAction.TYPE_REPLY 
-					|| responseActionType == KeywordAction.TYPE_FORWARD
-					|| responseActionType == KeywordAction.EXTERNAL_REPLY_AND_FORWARD) {
-				message = getText(find(externalCommandDialog, COMPONENT_TF_MESSAGE));
-				LOG.debug("Message [" + message + "]");
-			}
-			if (responseActionType == KeywordAction.TYPE_FORWARD 
-					|| responseActionType == KeywordAction.EXTERNAL_REPLY_AND_FORWARD) {
-				group = getGroup(getSelectedItem(find(externalCommandDialog, COMPONENT_EXTERNAL_COMMAND_GROUP_LIST)));
-				if (group == null) {
-					LOG.debug("No group selected to forward");
-					alert(InternationalisationUtils.getI18NString(MESSAGE_NO_GROUP_SELECTED_TO_FWD));
-					LOG.trace("EXIT");
-					return;
-				}
-				LOG.debug("Group [" + group.getName() + "]");
-			}
-		}
-		KeywordAction action = null;
-		boolean isNew = false;
-		if (isAttachment(externalCommandDialog, KeywordAction.class)) {
-			//Editing
-			action = getKeywordAction(externalCommandDialog);
-			LOG.debug("We are editing action [" + action + "]. Setting new values.");
-			if (group != null) {
-				action.setGroup(group);
-			}
-			action.setCommandLine(commandLine);
-			action.setExternalCommandType(commandType);
-			action.setExternalCommandResponseType(responseType);
-			action.setCommandResponseActionType(responseActionType);
-			action.setCommandText(message);
-			action.setStartDate(start);
-			action.setEndDate(end);
-			keywordActionDao.updateKeywordAction(action);
-		} else {
-			isNew = true;
-			Keyword keyword = getKeyword(externalCommandDialog);
-			LOG.debug("Creating new keyword action for keyword [" + keyword.getKeyword() + "]");
-			action = KeywordAction.createExternalCommandAction(
-					keyword,
-					commandLine,
-					commandType,
-					responseType,
-					responseActionType,
-					message,
-					group,
-					start,
-					end
-			);
-			keywordActionDao.saveKeywordAction(action);
-		}
-		updateKeywordActionList(action, isNew);
-		remove(externalCommandDialog);
-		LOG.trace("EXIT");
-	}
-	
-	/**
-	 * Method called when the user has selected the edit option inside the Keywords tab.
-	 * 
-	 * @param tree
-	 */
-	public void keywordManager_edit(Object tree) {
-		LOG.trace("ENTER");
-		Object selectedObj = getSelectedItem(tree);
-		if (isAttachment(selectedObj, KeywordAction.class)) {
-			//KEYWORD ACTION EDITION
-			KeywordAction action = getKeywordAction(selectedObj);
-			LOG.debug("Editing keyword action [" + action + "]");
-			showActionEditDialog(action);
-		} else {
-			Keyword keyword = getKeyword(selectedObj);
-			//KEYWORD EDITION
-			LOG.debug("Editing keyword [" + keyword.getKeyword() + "]");
-			showKeywordDialogForEdition(keyword);
-		} 
-		LOG.trace("EXIT");
-	}
-	
-	/**
-	 * Method called when the user has finished to edit a keyword.
-	 * 
-	 * @param dialog The dialog, which is holding the current reference to the keyword being edited.
-	 * @param desc The new description for the keyword.
-	 */
-	public void finishKeywordEdition(Object dialog, String desc) {
-		LOG.trace("ENTER");
-		Keyword key = getKeyword(dialog);
-		LOG.debug("New description [" + desc + "] for keyword [" + key.getKeyword() + "]");
-		key.setDescription(desc);
-		removeDialog(dialog);
-		LOG.trace("EXIT");
-	}
-	
-	/**
-	 * This method invokes the correct edit dialog according to the supplied action type.
-	 * 
-	 * @param action
-	 */
-	private void showActionEditDialog(KeywordAction action) {
-		switch (action.getType()) {
-			case KeywordAction.TYPE_FORWARD:
-				show_newKActionForwardFormForEdition(action);
-				break;
-			case KeywordAction.TYPE_JOIN: 
-				showGroupSelecter(action, InternationalisationUtils.getI18NString(COMMON_KEYWORD) + " \"" + action.getKeyword().getKeyword()+ "\" " + InternationalisationUtils.getI18NString(COMMON_AUTO_LEAVE_GROUP) + ":", "do_newKActionJoin(groupSelecter, groupSelecter_groupList)");
-				break;
-			case KeywordAction.TYPE_LEAVE: 
-				showGroupSelecter(action, InternationalisationUtils.getI18NString(COMMON_KEYWORD) + " \"" + action.getKeyword().getKeyword()+ "\" " + InternationalisationUtils.getI18NString(COMMON_AUTO_LEAVE_GROUP) + ":", "do_newKActionLeave(groupSelecter, groupSelecter_groupList)");
-				break;
-			case KeywordAction.TYPE_REPLY:
-				show_newKActionReplyFormForEdition(action);
-				break;
-			case KeywordAction.TYPE_EXTERNAL_CMD:
-				show_newKActionExternalCmdFormForEdition(action);
-				break;
-			case KeywordAction.TYPE_EMAIL:
-				show_newKActionEmailFormForEdition(action);
-				break;
-		}
-	}
-	
-	/**
-	 * Shows the keyword dialog for edit purpose.
-	 * 
-	 * @param keyword The object to be edited.
-	 */
-	private void showKeywordDialogForEdition(Keyword keyword) {
-		String key = keyword.getKeyword().length() == 0 ? "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">" : keyword.getKeyword();
-		String title = InternationalisationUtils.getI18NString(COMMON_EDITING_KEYWORD, key);
-		Object keywordForm = loadComponentFromFile(UI_FILE_NEW_KEYWORD_FORM);
-		setAttachedObject(keywordForm, keyword);
-		setString(find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_TITLE), TEXT, title);
-		// Pre-populate the keyword textfield with currently-selected keyword string so that
-		// a sub-keyword can easily be created.  Append a space to save the user from having
-		// to do it!
-		Object textField = find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_KEYWORD);
-		Object textFieldDescription = find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_DESCRIPTION);
-		setString(textField, TEXT, key);
-		setBoolean(textField, Thinlet.ENABLED, false);
-		if (keyword.getDescription() != null) 
-			setText(textFieldDescription, keyword.getDescription());
-		String method = "finishKeywordEdition(newKeywordForm, newKeywordForm_description.text)";
-		setMethod(find(keywordForm, COMPONENT_NEW_KEYWORD_BUTTON_DONE), Thinlet.ATTRIBUTE_ACTION, method, keywordForm, this);
-		add(keywordForm);
-	}
-	/**
-	 * Creates a new auto reply action.
-	 */
-	public void do_newKActionReply(Object replyDialog, String replyText) {
-		LOG.trace("ENTER");
-		String startDate = getString(find(replyDialog, COMPONENT_TF_START_DATE), Thinlet.TEXT);
-		String endDate = getString(find(replyDialog, COMPONENT_TF_END_DATE), Thinlet.TEXT);
-		LOG.debug("Start Date [" + startDate + "]");
-		LOG.debug("End Date [" + endDate + "]");
-		if (startDate.equals("")) {
-			LOG.debug("No start date set, so we set to [" + InternationalisationUtils.getDefaultStartDate() + "]");
-			startDate = InternationalisationUtils.getDefaultStartDate();
-		}
-		long start;
-		long end;
-		try {
-			Date ds = InternationalisationUtils.parseDate(startDate); 
-			if (!endDate.equals("") && !endDate.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
-				Date de = InternationalisationUtils.parseDate(endDate);
-				if (!Utils.validateDates(ds, de)) {
-					LOG.debug("Start date is not before the end date");
-					alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
-					LOG.trace("EXIT");
-					return;
-				}
-				end = de.getTime();
-			} else {
-				end = DEFAULT_END_DATE;
-			}
-			start = ds.getTime();
-		} catch (ParseException e) {
-			LOG.debug("Wrong format for date", e);
-			alert(InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
-			LOG.trace("EXIT");
-			return;
-		} 
-		boolean isNew = false;
-		KeywordAction action;
-		if (isAttachment(replyDialog, KeywordAction.class)) {
-			action = getKeywordAction(replyDialog);
-			LOG.debug("Editing action [" + action + "]. Setting new values!");
-			action.setReplyText(replyText);
-			action.setStartDate(start);
-			action.setEndDate(end);
-		} else {
-			isNew = true;
-			Keyword keyword = getKeyword(replyDialog);
-			LOG.debug("Creating action for keyword [" + keyword.getKeyword() + "].");
-			action = KeywordAction.createReplyAction(keyword, replyText, start, end);
-			keywordActionDao.saveKeywordAction(action);
-		}
-		updateKeywordActionList(action, isNew);
-		remove(replyDialog);
-		LOG.trace("EXIT");
-	}
-	
-	/**
-	 * Adds the $sender to the text, allowing the user to forward the sender.
-	 */
-	public void addSenderToForwardMessage(String currentText, Object textArea) {
-		setText(textArea, currentText + ' ' + CsvUtils.MARKER_SENDER_NAME);
-	}
-
-	/**
-	 * Adds the $content to the text, allowing the user to forward the message content.
-	 */
-	public void addMsgContentToForwardMessage(String currentText, Object textArea) {
-		setText(textArea, currentText + ' ' + CsvUtils.MARKER_MESSAGE_CONTENT);
-	}
-	/**
-	 * Creates a new join group action.
-	 */
-	public void do_newKActionJoin(Object groupSelecterDialog, Object groupList) {
-		createActionLeaveOrJoin(groupSelecterDialog, groupList, true);
-	}
-
-	/**
-	 * Creates an action to leave or join group, according to supplied information.
-	 * 
-	 * @param groupSelecterDialog
-	 * @param groupList
-	 * @param join
-	 */
-	private void createActionLeaveOrJoin(Object groupSelecterDialog,
-			Object groupList, boolean join) {
-		LOG.trace("ENTER");
-		LOG.debug("Join [" + join + "]");
-		Group group = getGroup(getSelectedItem(groupList));
-		if (group == null) {
-			LOG.debug("No group selected");
-			alert(InternationalisationUtils.getI18NString(MESSAGE_NO_GROUP_SELECTED_TO_FWD));
-			LOG.trace("EXIT");
-			return;
-		}
-		String startDate = getString(find(groupSelecterDialog, COMPONENT_TF_START_DATE), Thinlet.TEXT);
-		String endDate = getString(find(groupSelecterDialog, COMPONENT_TF_END_DATE), Thinlet.TEXT);
-		LOG.debug("Start Date [" + startDate + "]");
-		LOG.debug("End Date [" + endDate + "]");
-		if (startDate.equals("")) {
-			LOG.debug("No start date set, so we set to [" + InternationalisationUtils.getDefaultStartDate() + "]");
-			startDate = InternationalisationUtils.getDefaultStartDate();
-		}
-		long start;
-		long end;
-		try {
-			Date ds = InternationalisationUtils.parseDate(startDate); 
-			if (!endDate.equals("") && !endDate.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
-				Date de = InternationalisationUtils.parseDate(endDate);
-				if (!Utils.validateDates(ds, de)) {
-					LOG.debug("Start date is not before the end date");
-					alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
-					LOG.trace("EXIT");
-					return;
-				}
-				end = de.getTime();
-			} else {
-				end = DEFAULT_END_DATE;
-			}
-			start = ds.getTime();
-		} catch (ParseException e) {
-			LOG.debug("Wrong format for date", e);
-			alert(InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
-			LOG.trace("EXIT");
-			return;
-		} 
-		KeywordAction action;
-		boolean isNew = false;;
-		if (isAttachment(groupSelecterDialog, KeywordAction.class)) {
-			action = getKeywordAction(groupSelecterDialog);
-			LOG.debug("Editing action [" + action + "]. Setting new values!");
-			action.setGroup(group);
-			action.setStartDate(start);
-			action.setEndDate(end);
-		} else {
-			isNew  = true;
-			Keyword keyword = getKeyword(groupSelecterDialog);
-			LOG.debug("Creating action for keyword [" + keyword.getKeyword() + "].");
-			if (join) {
-				action = KeywordAction.createGroupJoinAction(keyword, group, start, end);
-				keywordActionDao.saveKeywordAction(action);
-			} else {
-				action = KeywordAction.createGroupLeaveAction(keyword, group, start, end);
-				keywordActionDao.saveKeywordAction(action);
-			}
-		}
-		updateKeywordActionList(action, isNew);
-		remove(groupSelecterDialog);
-		LOG.trace("EXIT");
 	}
 	
 	/*
@@ -2466,56 +1241,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void newEvent(Event newEvent) {
 		this.homeTabController.newEvent(newEvent);
 	}
-
-	/**
-	 * Adds a constant substitution marker to the text of an email action's text area (a thinlet component).
-	 * 
-	 * @param type The index of the constant that should be inserted
-	 * <li> 0 for Sender name
-	 * <li> 1 for Sender number
-	 * <li> 2 for Message Content
-	 * <li> 3 for Keyword
-	 * <li> 4 for Command Response
-	 * <li> 5 for SMS id
-	 */
-	public void addConstantToCommand(String currentText, Object textArea, int type) {
-		LOG.trace("ENTER");
-		String toAdd = "";
-		switch (type) {
-			case 0:
-				toAdd = CsvUtils.MARKER_SENDER_NAME;
-				break;
-			case 1:
-				toAdd = CsvUtils.MARKER_SENDER_NUMBER;
-				break;
-			case 2:
-				toAdd = CsvUtils.MARKER_MESSAGE_CONTENT;
-				break;
-			case 3:
-				toAdd = CsvUtils.MARKER_KEYWORD_KEY;
-				break;
-			case 4:
-				toAdd = CsvUtils.MARKER_COMMAND_RESPONSE;
-				break;
-		}
-		LOG.debug("Setting [" + currentText + toAdd + "] to component [" + textArea + "]");
-		setText(textArea, currentText + toAdd);
-		setFocus(textArea);
-		LOG.trace("EXIT");
-	}
-
-	public void setEmailFocusOwner(Object obj) {
-		emailTabFocusOwner = obj;
-	}
-	
-	public void addConstantToEmailDialog(Object tfSubject, Object tfMessage, int type) {
-		Object toSet = tfMessage;
-		Object focused = emailTabFocusOwner;
-		if (focused.equals(tfSubject)) {
-			toSet = tfSubject;
-		}
-		addConstantToCommand(getText(toSet), toSet, type);
-	}
 	
 	/**
 	 * Method invoked when the status for actions changes.
@@ -2537,66 +1262,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				setText(endTextField, InternationalisationUtils.getDefaultStartDate());
 			}
 		}
-	}
-	/**
-	 * Creates a new leave group action.
-	 */
-	public void do_newKActionLeave(Object groupSelecterDialog, Object groupList) {
-		createActionLeaveOrJoin(groupSelecterDialog, groupList, false);
-	}
-
-	/**
-	 * Shows the new keyword dialog.
-	 * 
-	 * @param keywordList
-	 */
-	public void show_createKeywordForm(Object keywordList) {
-		showNewKeywordForm(getKeyword(getSelectedItem(keywordList)));
-	}
-
-	/**
-	 * Create a new keyword with the supplied information (newKeyword and description).
-	 * 
-	 * @param formPanel The panel to be removed from the application.
-	 * @param newKeyword The desired keyword.
-	 * @param description The description for this new keyword.
-	 */
-	public void do_createKeyword(Object formPanel, String newKeyword, String description) {
-		LOG.trace("ENTER");
-		LOG.debug("Creating keyword [" + newKeyword + "] with description [" + description + "]");
-		try {
-			// Trim the keyword to remove trailing and leading whitespace
-			newKeyword = newKeyword.trim();
-			// Remove any double-spaces within the keyword
-			newKeyword = newKeyword.replaceAll("\\s+", " ");
-			
-			Keyword keyword = new Keyword(newKeyword, description);
-			this.keywordDao.saveKeyword(keyword);
-		} catch (DuplicateKeyException e) {
-			alert(InternationalisationUtils.getI18NString(MESSAGE_KEYWORD_EXISTS));
-			LOG.trace("EXIT");
-			return;
-		}
-		updateKeywordList();
-		remove(formPanel);
-		LOG.trace("EXIT");
-	}
-
-	/**
-	 * Shows the new keyword dialog.
-	 * 
-	 * @param keyword
-	 */
-	private void showNewKeywordForm(Keyword keyword) {
-		String title = "Create new keyword.";
-		Object keywordForm = loadComponentFromFile(UI_FILE_NEW_KEYWORD_FORM);
-		setAttachedObject(keywordForm, keyword);
-		setString(find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_TITLE), TEXT, title);
-		// Pre-populate the keyword textfield with currently-selected keyword string so that
-		// a sub-keyword can easily be created.  Append a space to save the user from having
-		// to do it!
-		if (keyword != null) setString(find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_KEYWORD), TEXT, keyword.getKeyword() + ' ');
-		add(keywordForm);
 	}
 
 	public boolean hasSomethingToDoBeforeExit() {
@@ -2724,7 +1389,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param component
 	 * @return
 	 */
-	KeywordAction getKeywordAction(Object component) {
+	public KeywordAction getKeywordAction(Object component) {
 		Object obj = getAttachedObject(component);
 		if (obj == null) return null;
 		else if (obj instanceof KeywordAction) {
@@ -2787,137 +1452,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 		LOG.trace("EXIT");
 		return node;
-	}
-
-	public void keywordTab_doSave(Object panel) {
-		LOG.trace("ENTER");
-		long startDate;
-		try {
-			startDate = InternationalisationUtils.parseDate(InternationalisationUtils.getDefaultStartDate()).getTime();
-		} catch (ParseException e) {
-			LOG.debug("We never should get this", e);
-			LOG.trace("EXIT");
-			return;
-		}
-		
-		// Get the KeywordAction details
-		String replyText = keywordSimple_getAutoReply(panel);
-		Group joinGroup = keywordSimple_getJoin(panel);
-		Group leaveGroup = keywordSimple_getLeave(panel);
-		
-		// Get the keyword attached to the selected item.  If the "Add Keyword" option is selected,
-		// there will be no keyword attached to it.
-		Keyword keyword = null;
-		Object selectedKeywordItem = getSelectedItem(keywordListComponent);
-		if(selectedKeywordItem != null) keyword = getKeyword(selectedKeywordItem);
-		
-		if (keyword == null) {
-			//Adding keyword as well as actions
-			String newkeyword = getText(find(panel, COMPONENT_TF_KEYWORD));
-			try {
-				keyword = new Keyword(newkeyword, "");
-				this.keywordDao.saveKeyword(keyword);
-			} catch (DuplicateKeyException e) {
-				alert(InternationalisationUtils.getI18NString(MESSAGE_KEYWORD_EXISTS));
-				LOG.trace("EXIT");
-				return;
-			}
-			keywordTab_doClear(panel);
-		} else {
-			// Editing an existent keyword.  This keyword may already have actions applied to it, so
-			// we need to check for actions and update them as appropriate.
-			KeywordAction replyAction = this.keywordActionDao.getAction(keyword, KeywordAction.TYPE_REPLY);
-			if (replyAction != null) {
-				if (replyText == null) {
-					// The reply action has been removed
-					keywordActionDao.deleteKeywordAction(replyAction);
-				} else {
-					replyAction.setReplyText(replyText);
-					this.keywordActionDao.updateKeywordAction(replyAction);
-					//We set null to don't add it in the end
-					replyText = null;
-				}
-			}
-			
-			KeywordAction joinAction = this.keywordActionDao.getAction(keyword, KeywordAction.TYPE_JOIN);
-			if (joinAction != null) {
-				if (joinGroup == null) {
-					// Previous join action has been removed, so delete it.
-					keywordActionDao.deleteKeywordAction(joinAction);
-				} else {
-					// Group to join has been updated
-					joinAction.setGroup(joinGroup);
-					this.keywordActionDao.updateKeywordAction(joinAction);
-					// Join Group has been handled, so unset it.
-					joinGroup = null;
-				}
-			}
-			
-			KeywordAction leaveAction = this.keywordActionDao.getAction(keyword, KeywordAction.TYPE_LEAVE);
-			if (leaveAction != null) {
-				if (leaveGroup == null) {
-					keywordActionDao.deleteKeywordAction(leaveAction);
-				} else {
-					leaveAction.setGroup(leaveGroup);
-					this.keywordActionDao.updateKeywordAction(leaveAction);
-					//We set null to don't add it in the end
-					leaveGroup = null;
-				}
-			}
-		}
-		
-		// Handle creation of new KeywordActions if required
-		if (replyText != null) {
-			KeywordAction action = KeywordAction.createReplyAction(keyword, replyText, startDate, DEFAULT_END_DATE);
-			keywordActionDao.saveKeywordAction(action);
-		}
-		if (joinGroup != null) {
-			KeywordAction action = KeywordAction.createGroupJoinAction(keyword, joinGroup, startDate, DEFAULT_END_DATE);
-			keywordActionDao.saveKeywordAction(action);
-		}
-		if (leaveGroup != null) {
-			KeywordAction action = KeywordAction.createGroupLeaveAction(keyword, leaveGroup, startDate, DEFAULT_END_DATE);
-			keywordActionDao.saveKeywordAction(action);
-		}
-		
-		// Refresh the UI
-		updateKeywordList();
-		setStatus(InternationalisationUtils.getI18NString(MESSAGE_KEYWORD_SAVED));
-		LOG.trace("EXIT");
-	}
-	
-	private String keywordSimple_getAutoReply(Object panel) {
-		String ret = null;
-		if (isSelected(find(panel, COMPONENT_CB_AUTO_REPLY))) {
-			ret = getText(find(panel, COMPONENT_TF_AUTO_REPLY));
-		}
-		return ret;
-	}
-	
-	private Group keywordSimple_getJoin(Object panel) {
-		Group ret = null;
-		if (isSelected(find(panel, COMPONENT_CB_JOIN_GROUP))) {
-			ret = (Group) getAttachedObject(getSelectedItem(find(panel, COMPONENT_CB_GROUPS_TO_JOIN)));
-		}
-		return ret;
-	}
-	
-	private Group keywordSimple_getLeave(Object panel) {
-		Group ret = null;
-		if (isSelected(find(panel, COMPONENT_CB_LEAVE_GROUP))) {
-			ret = (Group) getAttachedObject(getSelectedItem(find(panel, COMPONENT_CB_GROUPS_TO_LEAVE)));
-		}
-		return ret;
-	}
-	
-	public void keywordTab_doClear(Object panel) {
-		setText(find(panel, COMPONENT_TF_KEYWORD), "");
-        setSelected(find(panel, COMPONENT_CB_AUTO_REPLY), false);
-        setText(find(panel, COMPONENT_TF_AUTO_REPLY), "");
-        setSelected(find(panel, COMPONENT_CB_JOIN_GROUP), false);
-        setSelectedIndex(find(panel, COMPONENT_CB_GROUPS_TO_JOIN), 0);
-        setSelected(find(panel, COMPONENT_CB_LEAVE_GROUP), false);
-        setSelectedIndex(find(panel, COMPONENT_CB_GROUPS_TO_LEAVE), 0);
 	}
 	
 	/**
@@ -3085,7 +1619,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param contact
 	 * @return
 	 */
-	private Object getRow(KeywordAction action) {
+	public Object getRow(KeywordAction action) {
 		Object row = createTableRow(action);
 		String icon;
 		switch(action.getType()) {
@@ -3230,13 +1764,13 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			this.contactsTabController.refresh();
 			setStatus(InternationalisationUtils.getI18NString(MESSAGE_CONTACT_MANAGER_LOADED));
 		} else if (currentTab.equals(TAB_ADVANCED_PHONE_MANAGER)) {
-			this.phoneTabController.refreshPhonesViews();
+			this.phoneTabController.refresh();
 			setStatus(InternationalisationUtils.getI18NString(MESSAGE_MODEM_LIST_UPDATED));
 		} else if (currentTab.equals(TAB_MESSAGE_HISTORY)) {
 			this.messageTabController.refresh();
 			setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGES_LOADED));
 		} else if (currentTab.equals(TAB_KEYWORD_MANAGER)) {
-			updateKeywordList();
+			this.keywordTabHandler.refresh();
 			setStatus(InternationalisationUtils.getI18NString(MESSAGE_KEYWORDS_LOADED));
 		} else if (currentTab.equals(TAB_EMAIL_LOG)) {
 			this.emailTabHandler.refresh();
@@ -3349,7 +1883,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				add(tabbedPane, this.homeTabController.getTab(), 0);
 				tabName = "hometab";
 			} else if (name.equals(COMPONENT_MI_KEYWORD)) {
-				addKeywordsTab(tabbedPane);
+				add(tabbedPane, this.keywordTabHandler.getTab());
 				tabName = "keywordstab";
 			} else if (name.equals(COMPONENT_MI_EMAIL)) {
 				add(tabbedPane, this.emailTabHandler.getTab());

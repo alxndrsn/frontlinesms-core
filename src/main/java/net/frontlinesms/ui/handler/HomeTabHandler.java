@@ -32,7 +32,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * Event handler for the Home tab and associated dialogs
  * @author Alex
  */
-public class HomeTabHandler implements ThinletUiEventHandler {
+public class HomeTabHandler extends BaseTabHandler {
 //> STATIC CONSTANTS
 	/** Limit of the number of events to be displayed on the home screen */
 	static final int EVENTS_LIMIT = 30;
@@ -53,33 +53,16 @@ public class HomeTabHandler implements ThinletUiEventHandler {
 
 
 //> INSTANCE PROPERTIES
-	/** Logging object */
-	private final Logger log = Utils.getLogger(this.getClass());
-	/** The {@link UiGeneratorController} that shows the tab. */
-	private final UiGeneratorController ui;
-	/** The UI tab component */
-	private final Object tabComponent;
 	/** The number of people the current SMS will be sent to */
 	private int numberToSend = 1;
 
 //> CONSTRUCTORS
 	/**
 	 * Create a new instance of this class.
-	 * @param uiController value for {@link #ui}
+	 * @param ui value for {@link #ui}
 	 */
-	public HomeTabHandler(UiGeneratorController uiController) {
-		this.ui = uiController;
-		this.tabComponent = uiController.loadComponentFromFile(UI_FILE_HOME_TAB, this);
-	}
-
-//> ACCESSORS
-	/**
-	 * Load the home tab from the XML, and initialise relevant fields.
-	 * @return a newly-initialised instance of the home tab
-	 */
-	public Object getTab() {
-		initialiseTab();
-		return this.tabComponent;
+	public HomeTabHandler(UiGeneratorController ui) {
+		super(ui);
 	}
 
 //> UI METHODS
@@ -117,7 +100,7 @@ public class HomeTabHandler implements ThinletUiEventHandler {
 		uiProperties.saveToDisk();
 
 		// Update visibility of logo
-		refreshLogoVisibility();
+		refreshLogoVisibility(getTab());
 		
 		ui.remove(panel);
 		log.trace("EXIT");
@@ -144,7 +127,7 @@ public class HomeTabHandler implements ThinletUiEventHandler {
 	 * @param dialog
 	 */
 	public void setRecipientTextfield(Object contactSelecter_contactList, Object dialog) {
-		Object tfRecipient = ui.find(this.tabComponent, UiGeneratorControllerConstants.COMPONENT_TF_RECIPIENT);
+		Object tfRecipient = ui.find(this.getTab(), UiGeneratorControllerConstants.COMPONENT_TF_RECIPIENT);
 		Object selectedItem = ui.getSelectedItem(contactSelecter_contactList);
 		if (selectedItem == null) {
 			ui.alert(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_NO_CONTACT_SELECTED));
@@ -170,25 +153,11 @@ public class HomeTabHandler implements ThinletUiEventHandler {
 	
 //> UI PASSTHRU METHODS TO UiGC
 	/**
-	 * @param page The file name of the help page
-	 * @see UiGeneratorController#showHelpPage(String)
-	 */
-	public void showHelpPage(String page) {
-		this.ui.showHelpPage(page);
-	}
-	/**
 	 * @param component Component whose contents are to be removed
 	 * @see UiGeneratorController#removeAll()
 	 */
 	public void removeAll(Object component) {
 		this.ui.removeAll(component);
-	}
-	/**
-	 * @param component The component to remove
-	 * @see UiGeneratorController#removeDialog(Object)
-	 */
-	public void removeDialog(Object component) {
-		this.ui.removeDialog(component);
 	}
 	/**
 	 * @param component
@@ -202,19 +171,21 @@ public class HomeTabHandler implements ThinletUiEventHandler {
 	/**
 	 * Refresh the contents of the tab.
 	 */
-	private void initialiseTab() {
-		Object pnSend = ui.find(this.tabComponent, UiGeneratorControllerConstants.COMPONENT_PN_SEND);
+	protected Object initialiseTab() {
+		Object tabComponent = ui.loadComponentFromFile(UI_FILE_HOME_TAB, this);
+		
+		Object pnSend = ui.find(tabComponent, UiGeneratorControllerConstants.COMPONENT_PN_SEND);
 		Object pnMessage = new MessagePanelHandler(this.ui).getPanel();
 		ui.add(pnSend, pnMessage);
 		
-		refreshLogoVisibility();
+		refreshLogoVisibility(tabComponent);
 		
-		Object fastLanguageSwitch = ui.find(this.tabComponent, "fastLanguageSwitch");
+		Object fastLanguageSwitch = ui.find(tabComponent, "fastLanguageSwitch");
 		for (FileLanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
 			// Don't show the flag for the current language
 			if(languageBundle.equals(FrontlineUI.currentResourceBundle)) continue;
 			
-			Object button = ui.createButton("", "changeLanguage(this)", this.tabComponent);
+			Object button = ui.createButton("", "changeLanguage(this)", tabComponent);
 			ui.setIcon(button, ui.getFlagIcon(languageBundle));
 			ui.setString(button, "tooltip", languageBundle.getLanguageName());
 			ui.setWeight(button, 1, 0);
@@ -222,13 +193,18 @@ public class HomeTabHandler implements ThinletUiEventHandler {
 			ui.setAttachedObject(button, languageBundle.getFile().getAbsolutePath());
 			ui.add(fastLanguageSwitch, button);
 		}
+		
+		return tabComponent;
 	}
+	
+	public void refresh() { /* No refresh required */ }
 	
 	/**
 	 * Update the visibility of the logo.
+	 * @param tabComponent The tab component.  This is passed in, as this method can be called form {@link #initialiseTab()}, in which case {@link #getTab()} will return null.
 	 */
-	private void refreshLogoVisibility() {
-		Object lbLogo = ui.find(this.tabComponent, COMPONENT_LB_HOME_TAB_LOGO);
+	private void refreshLogoVisibility(Object tabComponent) {
+		Object lbLogo = ui.find(tabComponent, COMPONENT_LB_HOME_TAB_LOGO);
 		if (!UiProperties.getInstance().isHometabLogoVisible()) {
 			Image noIcon = null;
 			ui.setIcon(lbLogo, noIcon);
@@ -254,10 +230,6 @@ public class HomeTabHandler implements ThinletUiEventHandler {
 	}
 
 //> UI HELPER METHODS
-	private Object find(String componentName) {
-		return this.ui.find(this.tabComponent, componentName);
-	}
-	
 	private Object getRow(Event newEvent) {
 		Object row = ui.createTableRow(newEvent);
 		String icon = null;

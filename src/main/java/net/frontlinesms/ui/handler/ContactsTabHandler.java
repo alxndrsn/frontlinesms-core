@@ -52,7 +52,6 @@ import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.ui.Icon;
-import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
@@ -64,7 +63,7 @@ import thinlet.Thinlet;
  * Event handler for the Contacts tab and associated dialogs.
  * @author Alex
  */
-public class ContactsTabHandler implements ThinletUiEventHandler {
+public class ContactsTabHandler extends BaseTabHandler {
 //> STATIC CONSTANTS
 	/** UI XML File Path: the Home Tab itself */
 	private static final String UI_FILE_CONTACTS_TAB = "/ui/core/contacts/contactsTab.xml";
@@ -76,10 +75,6 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 //> INSTANCE PROPERTIES
 	/** Logging object */
 	private final Logger LOG = Utils.getLogger(this.getClass()); // FIXME rename to log
-	/** The {@link UiGeneratorController} that shows the tab. */
-	private final UiGeneratorController uiController;
-	/** The UI tab component */
-	private final Object tabComponent;
 	
 //> DATA ACCESS OBJECTS
 	/** Data access object for {@link Group}s */
@@ -96,28 +91,17 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 //> CONSTRUCTORS
 	/**
 	 * Create a new instance of this class.
-	 * @param uiController value for {@link #uiController}
+	 * @param ui value for {@link #ui}
 	 * @param contactDao {@link #contactDao}
 	 * @param groupDao {@link #groupDao}
 	 */
-	public ContactsTabHandler(UiGeneratorController uiController, ContactDao contactDao, GroupDao groupDao) {
-		this.uiController = uiController;
+	public ContactsTabHandler(UiGeneratorController ui, ContactDao contactDao, GroupDao groupDao) {
+		super(ui);
 		this.contactDao = contactDao;
 		this.groupDao = groupDao;
-		
-		this.tabComponent = uiController.loadComponentFromFile(UI_FILE_CONTACTS_TAB, this);
 	}
 
 //> ACCESSORS
-	/**
-	 * Load the home tab from the XML, and initialise relevant fields.
-	 * @return a newly-initialised instance of the home tab
-	 */
-	public Object getTab() {
-		initialiseTab();
-		return this.tabComponent;
-	}
-	
 	/** Refreshes the data displayed in the tab. */
 	public void refresh() {
 		updateGroupList();
@@ -131,12 +115,12 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 */
 	public void showDeleteOptionDialog(Object list) {
 		LOG.trace("ENTER");
-		Object selected = this.uiController.getSelectedItem(list);
+		Object selected = this.ui.getSelectedItem(list);
 		if (selected != null) {
-			Group g = this.uiController.getGroup(selected);
-			if (!this.uiController.isDefaultGroup(g)) {
-				Object deleteDialog = uiController.loadComponentFromFile(UI_FILE_DELETE_OPTION_DIALOG_FORM, this);
-				uiController.add(deleteDialog);
+			Group g = this.ui.getGroup(selected);
+			if (!this.ui.isDefaultGroup(g)) {
+				Object deleteDialog = ui.loadComponentFromFile(UI_FILE_DELETE_OPTION_DIALOG_FORM, this);
+				ui.add(deleteDialog);
 			}
 		}
 		LOG.trace("EXIT");
@@ -150,18 +134,18 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 */
 	public void selectionChanged(Object tree, Object panel) {
 		LOG.trace("ENTER");
-		this.uiController.setText(this.uiController.find(COMPONENT_CONTACT_MANAGER_CONTACT_FILTER), "");
-		this.uiController.setListPageNumber(1, contactListComponent);
+		this.ui.setText(this.ui.find(COMPONENT_CONTACT_MANAGER_CONTACT_FILTER), "");
+		this.ui.setListPageNumber(1, contactListComponent);
 		//FIX Mantis entry 0000499
-		Group g = this.uiController.getGroup(this.uiController.getSelectedItem(tree));
+		Group g = this.ui.getGroup(this.ui.getSelectedItem(tree));
 		String toSet = InternationalisationUtils.getI18NString(COMMON_CONTACTS_IN_GROUP, g.getName());
-		this.uiController.setText(panel, toSet);
+		this.ui.setText(panel, toSet);
 		
-		Object deleteButton = this.uiController.find(this.uiController.getParent(tree), "deleteButton");
-		this.uiController.setEnabled(deleteButton, !this.uiController.isDefaultGroup(g));
+		Object deleteButton = this.ui.find(this.ui.getParent(tree), "deleteButton");
+		this.ui.setEnabled(deleteButton, !this.ui.isDefaultGroup(g));
 		
-		Object sms = this.uiController.find(this.uiController.getParent(tree), "sendSMSButtonGroupSide");
-		this.uiController.setEnabled(sms, g != null);
+		Object sms = this.ui.find(this.ui.getParent(tree), "sendSMSButtonGroupSide");
+		this.ui.setEnabled(sms, g != null);
 		
 		updateContactList();
 		LOG.trace("EXIT");
@@ -173,9 +157,9 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 * @param list
 	 */
 	public void showContactDetails(Object list) {
-		Object selected = this.uiController.getSelectedItem(list);
-		if (this.uiController.isAttachment(selected, Contact.class)) {
-			showContactDetails(this.uiController.getContact(selected));
+		Object selected = this.ui.getSelectedItem(list);
+		if (this.ui.isAttachment(selected, Contact.class)) {
+			showContactDetails(this.ui.getContact(selected));
 		}
 	}
 	
@@ -186,81 +170,81 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 * @param list
 	 */
 	public void populateGroups(Object popUp, Object list) {
-		Object[] selectedItems = this.uiController.getSelectedItems(list);
-		this.uiController.setVisible(popUp, this.uiController.getSelectedItems(list).length > 0);
+		Object[] selectedItems = this.ui.getSelectedItems(list);
+		this.ui.setVisible(popUp, this.ui.getSelectedItems(list).length > 0);
 		if (selectedItems.length == 0) {
 			//Nothing selected
 			boolean none = true;
-			for (Object o : this.uiController.getItems(popUp)) {
-				if (this.uiController.getName(o).equals(COMPONENT_NEW_GROUP)
-						|| this.uiController.getName(o).equals("miNewContact")) {
-					this.uiController.setVisible(o, true);
+			for (Object o : this.ui.getItems(popUp)) {
+				if (this.ui.getName(o).equals(COMPONENT_NEW_GROUP)
+						|| this.ui.getName(o).equals("miNewContact")) {
+					this.ui.setVisible(o, true);
 					none = false;
 				} else {
-					this.uiController.setVisible(o, false);
+					this.ui.setVisible(o, false);
 				}
 			}
-			this.uiController.setVisible(popUp, !none);
-		} else if (this.uiController.getAttachedObject(selectedItems[0]) instanceof Contact) {
-			for (Object o : this.uiController.getItems(popUp)) {
-				String name = this.uiController.getName(o);
+			this.ui.setVisible(popUp, !none);
+		} else if (this.ui.getAttachedObject(selectedItems[0]) instanceof Contact) {
+			for (Object o : this.ui.getItems(popUp)) {
+				String name = this.ui.getName(o);
 				if (name.equals(COMPONENT_MENU_ITEM_MSG_HISTORY) 
 						|| name.equals(COMPONENT_MENU_ITEM_VIEW_CONTACT)) {
-					this.uiController.setVisible(o, this.uiController.getSelectedItems(list).length == 1);
+					this.ui.setVisible(o, this.ui.getSelectedItems(list).length == 1);
 				} else if (!name.equals(COMPONENT_GROUPS_MENU)) {
-					this.uiController.setVisible(o, true);
+					this.ui.setVisible(o, true);
 				}
 			}
-			Object menu = this.uiController.find(popUp, COMPONENT_GROUPS_MENU);
-			this.uiController.removeAll(menu);
+			Object menu = this.ui.find(popUp, COMPONENT_GROUPS_MENU);
+			this.ui.removeAll(menu);
 			List<Group> allGroups = this.groupDao.getAllGroups();
 			for (Group g : allGroups) {
 				Object menuItem = Thinlet.create(Thinlet.MENUITEM);
-				this.uiController.setText(menuItem, InternationalisationUtils.getI18NString(COMMON_GROUP) + "'" + g.getName() + "'");
-				this.uiController.setIcon(menuItem, Icon.GROUP);
-				this.uiController.setAttachedObject(menuItem, g);
-				this.uiController.setAction(menuItem, "addToGroup(this)", menu, this);
-				this.uiController.add(menu, menuItem);
+				this.ui.setText(menuItem, InternationalisationUtils.getI18NString(COMMON_GROUP) + "'" + g.getName() + "'");
+				this.ui.setIcon(menuItem, Icon.GROUP);
+				this.ui.setAttachedObject(menuItem, g);
+				this.ui.setAction(menuItem, "addToGroup(this)", menu, this);
+				this.ui.add(menu, menuItem);
 			}
-			this.uiController.setVisible(menu, allGroups.size() != 0);
+			this.ui.setVisible(menu, allGroups.size() != 0);
 			String menuName = InternationalisationUtils.getI18NString(ACTION_ADD_TO_GROUP);
-			this.uiController.setText(menu, menuName);
+			this.ui.setText(menu, menuName);
 			
-			Object menuRemove = this.uiController.find(popUp, "groupsMenuRemove");
+			Object menuRemove = this.ui.find(popUp, "groupsMenuRemove");
 			if (menuRemove != null) {
-				Contact c = this.uiController.getContact(this.uiController.getSelectedItem(list));
-				this.uiController.removeAll(menuRemove);
+				Contact c = this.ui.getContact(this.ui.getSelectedItem(list));
+				this.ui.removeAll(menuRemove);
 				Collection<Group> groups = c.getGroups();
 				for (Group g : groups) {
 					Object menuItem = Thinlet.create(Thinlet.MENUITEM);
-					this.uiController.setText(menuItem, g.getName());
-					this.uiController.setIcon(menuItem, Icon.GROUP);
-					this.uiController.setAttachedObject(menuItem, g);
-					this.uiController.setAction(menuItem, "removeFromGroup(this)", menuRemove, this);
-					this.uiController.add(menuRemove, menuItem);
+					this.ui.setText(menuItem, g.getName());
+					this.ui.setIcon(menuItem, Icon.GROUP);
+					this.ui.setAttachedObject(menuItem, g);
+					this.ui.setAction(menuItem, "removeFromGroup(this)", menuRemove, this);
+					this.ui.add(menuRemove, menuItem);
 				}
-				this.uiController.setEnabled(menuRemove, groups.size() != 0);
+				this.ui.setEnabled(menuRemove, groups.size() != 0);
 			}
 		} else {
-			Group g = this.uiController.getGroup(this.uiController.getSelectedItem(list));
+			Group g = this.ui.getGroup(this.ui.getSelectedItem(list));
 			//GROUPS OR BOTH
-			for (Object o : this.uiController.getItems(popUp)) {
-				String name = this.uiController.getName(o);
+			for (Object o : this.ui.getItems(popUp)) {
+				String name = this.ui.getName(o);
 				if (COMPONENT_NEW_GROUP.equals(name) 
 						|| COMPONENT_MI_SEND_SMS.equals(name)
 						|| COMPONENT_MI_DELETE.equals(name)
 						|| COMPONENT_MENU_ITEM_MSG_HISTORY.equals(name)
 						|| "miNewContact".equals(name)) {
-					this.uiController.setVisible(o, true);
+					this.ui.setVisible(o, true);
 				} else {
-					this.uiController.setVisible(o, false);
+					this.ui.setVisible(o, false);
 				}
 				if (COMPONENT_MI_DELETE.equals(name)) {
-					this.uiController.setVisible(o, !this.uiController.isDefaultGroup(g));
+					this.ui.setVisible(o, !this.ui.isDefaultGroup(g));
 				}
 				
 				if (COMPONENT_NEW_GROUP.equals(name)) {
-					this.uiController.setVisible(o, g!=this.uiController.getUnnamedContacts() && g!=this.uiController.getUngroupedContacts());
+					this.ui.setVisible(o, g!=this.ui.getUnnamedContacts() && g!=this.ui.getUngroupedContacts());
 				}
 			}
 		}
@@ -271,9 +255,9 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 * @param groupList
 	 */
 	public void showNewGroupDialog(Object groupList) {
-		Object newGroupForm = this.uiController.loadComponentFromFile(UI_FILE_NEW_GROUP_FORM, this);
-		this.uiController.setAttachedObject(newGroupForm, this.uiController.getGroupFromSelectedNode(this.uiController.getSelectedItem(groupList)));
-		this.uiController.add(newGroupForm);
+		Object newGroupForm = this.ui.loadComponentFromFile(UI_FILE_NEW_GROUP_FORM, this);
+		this.ui.setAttachedObject(newGroupForm, this.ui.getGroupFromSelectedNode(this.ui.getSelectedItem(groupList)));
+		this.ui.add(newGroupForm);
 	}
 
 	/**
@@ -283,8 +267,8 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 * @param contact 
 	 */
 	private void showContactDetails(Contact contact) {
-		Object createDialog = this.uiController.loadComponentFromFile(UI_FILE_CREATE_CONTACT_FORM, this);
-		this.uiController.setAttachedObject(createDialog, contact);
+		Object createDialog = this.ui.loadComponentFromFile(UI_FILE_CREATE_CONTACT_FORM, this);
+		this.ui.setAttachedObject(createDialog, contact);
 		if (contact != null) {
 			setText(createDialog, COMPONENT_CONTACT_NAME, contact.getName());
 			setText(createDialog, COMPONENT_CONTACT_MOBILE_MSISDN, contact.getPhoneNumber());
@@ -293,31 +277,31 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 			setText(createDialog, COMPONENT_CONTACT_NOTES, contact.getNotes());
 			contactDetails_setActive(createDialog, contact.isActive());
 
-			Object groupList = this.uiController.find(createDialog, COMPONENT_NEW_CONTACT_GROUP_LIST);
+			Object groupList = this.ui.find(createDialog, COMPONENT_NEW_CONTACT_GROUP_LIST);
 			for (Group g : contact.getGroups()) {
-				Object item = this.uiController.createListItem(g.getName(), g);
-				this.uiController.setIcon(item, Icon.GROUP);
-				this.uiController.add(groupList, item);
+				Object item = this.ui.createListItem(g.getName(), g);
+				this.ui.setIcon(item, Icon.GROUP);
+				this.ui.add(groupList, item);
 			}
 		}
-		this.uiController.add(createDialog);
+		this.ui.add(createDialog);
 	}
 
 	/**
 	 * Shows the new contact dialog. This method affects the advanced mode.
 	 */
 	public void showNewContactDialog() {
-		Object createDialog = this.uiController.loadComponentFromFile(UI_FILE_CREATE_CONTACT_FORM, this);
-		Object list = this.uiController.find(createDialog, COMPONENT_NEW_CONTACT_GROUP_LIST);
-		Group sel = this.uiController.getGroup(this.uiController.getSelectedItem(this.groupListComponent));
+		Object createDialog = this.ui.loadComponentFromFile(UI_FILE_CREATE_CONTACT_FORM, this);
+		Object list = this.ui.find(createDialog, COMPONENT_NEW_CONTACT_GROUP_LIST);
+		Group sel = this.ui.getGroup(this.ui.getSelectedItem(this.groupListComponent));
 		List<Group> allGroups = this.groupDao.getAllGroups();
 		for (Group g : allGroups) {
-			Object item = this.uiController.createListItem(g.getName(), g);
-			this.uiController.setIcon(item, Icon.GROUP);
-			this.uiController.setSelected(item, g.equals(sel));
-			this.uiController.add(list, item);
+			Object item = this.ui.createListItem(g.getName(), g);
+			this.ui.setIcon(item, Icon.GROUP);
+			this.ui.setSelected(item, g.equals(sel));
+			this.ui.add(list, item);
 		}
-		this.uiController.add(createDialog);
+		this.ui.add(createDialog);
 	}
 
 	/**
@@ -328,14 +312,14 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	public void filterContacts(String contactFilter) {
 		// We set the contactFilter variable.  When updateContactList is called, the contactFilter
 		// variable will be used to select a subsection of the relevant contacts.
-		this.uiController.setListPageNumber(1, contactListComponent);
+		this.ui.setListPageNumber(1, contactListComponent);
 		
 		if (contactFilter.length() == 0) {
 			updateContactList();
 			return;
 		}
 		
-		this.uiController.removeAll(contactListComponent);
+		this.ui.removeAll(contactListComponent);
 		
 		LinkedHashMap<String, Contact> contacts = getContactsFromSelectedGroups(groupListComponent);
 		
@@ -345,13 +329,13 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 			//FIX 0000501
 			for (String names : con.getName().split("\\s")) {
 				if (pattern.matcher(names.toLowerCase()).matches()) {
-					this.uiController.add(contactListComponent, this.uiController.getRow(con));
+					this.ui.add(contactListComponent, this.ui.getRow(con));
 					break;
 				}
 			}
 		}
-		this.uiController.setListElementCount(1, contactListComponent);
-		this.uiController.updatePageNumber(contactListComponent, this.uiController.find(TAB_CONTACT_MANAGER));
+		this.ui.setListElementCount(1, contactListComponent);
+		this.ui.updatePageNumber(contactListComponent, this.ui.find(TAB_CONTACT_MANAGER));
 	}
 
 	/**
@@ -359,10 +343,10 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 * @param contactList
 	 */
 	public void enabledButtonsAfterSelection(Object contactList) {
-		boolean enabled = this.uiController.getSelectedItems(contactList).length > 0;
-		this.uiController.setEnabled(this.uiController.find(COMPONENT_DELETE_NEW_CONTACT), enabled);
-		this.uiController.setEnabled(this.uiController.find(COMPONENT_VIEW_CONTACT_BUTTON), enabled);
-		this.uiController.setEnabled(this.uiController.find(COMPONENT_SEND_SMS_BUTTON), enabled);
+		boolean enabled = this.ui.getSelectedItems(contactList).length > 0;
+		this.ui.setEnabled(this.ui.find(COMPONENT_DELETE_NEW_CONTACT), enabled);
+		this.ui.setEnabled(this.ui.find(COMPONENT_VIEW_CONTACT_BUTTON), enabled);
+		this.ui.setEnabled(this.ui.find(COMPONENT_SEND_SMS_BUTTON), enabled);
 	}
 
 	/**
@@ -373,13 +357,13 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	public void addToGroup(Object item) {
 		LOG.trace("ENTER");
 		Object[] selected = null;
-		selected = this.uiController.getSelectedItems(contactListComponent);
+		selected = this.ui.getSelectedItems(contactListComponent);
 		// Add to the selected groups...
-		Group destination = this.uiController.getGroup(item);
+		Group destination = this.ui.getGroup(item);
 		// Let's check all the selected items.  Any that are groups should be added to!
 		for (Object component : selected) {
-			if (this.uiController.isAttachment(component, Contact.class)) {
-				Contact contact = this.uiController.getContact(component);
+			if (this.ui.isAttachment(component, Contact.class)) {
+				Contact contact = this.ui.getContact(component);
 				LOG.debug("Adding Contact [" + contact.getName() + "] to [" + destination + "]");
 				if(destination.addDirectMember(contact)) {
 					groupDao.updateGroup(destination);
@@ -399,20 +383,20 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	public void removeSelectedFromGroupList(final Object button, Object dialog) {
 		LOG.trace("ENTER");
 		final Object[] selected;
-		selected = this.uiController.getSelectedItems(groupListComponent);
+		selected = this.ui.getSelectedItems(groupListComponent);
 		if (dialog != null) {
-			this.uiController.removeDialog(dialog);
+			this.ui.removeDialog(dialog);
 		}
 		for (Object o : selected) {
-			Group group = uiController.getGroupFromSelectedNode(o);
-			if(!uiController.isDefaultGroup(group)) {
+			Group group = ui.getGroupFromSelectedNode(o);
+			if(!ui.isDefaultGroup(group)) {
 				boolean removeContactsAlso = false;
 				if (button != null) {
-					removeContactsAlso = uiController.getName(button).equals(COMPONENT_BUTTON_YES);
+					removeContactsAlso = ui.getName(button).equals(COMPONENT_BUTTON_YES);
 				}
 				LOG.debug("Selected Group [" + group.getName() + "]");
 				LOG.debug("Remove Contacts from database [" + removeContactsAlso + "]");
-				if (!uiController.isDefaultGroup(group)) {
+				if (!ui.isDefaultGroup(group)) {
 					//Inside a default group
 					LOG.debug("Removing group [" + group.getName() + "] from database");
 					groupDao.deleteGroup(group, removeContactsAlso);
@@ -427,9 +411,9 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 				}
 			}
 		}
-		Object sms = uiController.find(uiController.getParent(groupListComponent), "sendSMSButtonGroupSide");
-		uiController.setEnabled(sms, uiController.getSelectedItems(groupListComponent).length > 0);
-		uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_GROUPS_AND_CONTACTS_DELETED));
+		Object sms = ui.find(ui.getParent(groupListComponent), "sendSMSButtonGroupSide");
+		ui.setEnabled(sms, ui.getSelectedItems(groupListComponent).length > 0);
+		ui.alert(InternationalisationUtils.getI18NString(MESSAGE_GROUPS_AND_CONTACTS_DELETED));
 		refresh();
 		LOG.trace("EXIT");
 	}
@@ -442,7 +426,7 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 */
 	public void saveContactDetailsAdvancedView(Object contactDetailsDialog) {
 		LOG.trace("ENTER");
-		Object attachment = this.uiController.getAttachedObject(contactDetailsDialog);
+		Object attachment = this.ui.getAttachedObject(contactDetailsDialog);
 		Contact contact = null;
 		if (attachment != null) {
 			contact = (Contact)attachment;
@@ -480,13 +464,13 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 			LOG.debug("There is already a contact with this mobile number - cannot save!", ex);
 			showMergeContactDialog(contact, contactDetailsDialog);
 		} finally {
-			this.uiController.removeDialog(contactDetailsDialog);
+			this.ui.removeDialog(contactDetailsDialog);
 		}
 		LOG.trace("EXIT");
 	}
 	
 	public synchronized void contactRemovedFromGroup(Contact contact, Group group) {
-		if (this.uiController.getCurrentTab().equals(TAB_CONTACT_MANAGER)) {
+		if (this.ui.getCurrentTab().equals(TAB_CONTACT_MANAGER)) {
 			removeFromContactList(contact, group);
 			updateTree(group);
 		}
@@ -497,8 +481,8 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 * @param selectedGroup A set of thinlet components with group members attached to them.
 	 */
 	public void removeFromGroup(Object selectedGroup) {
-		Group g = this.uiController.getGroup(selectedGroup);
-		Contact c = this.uiController.getContact(this.uiController.getSelectedItem(contactListComponent));
+		Group g = this.ui.getGroup(selectedGroup);
+		Contact c = this.ui.getContact(this.ui.getSelectedItem(contactListComponent));
 		if(g.removeContact(c)) {
 			this.groupDao.updateGroup(g);
 		}
@@ -508,18 +492,18 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	/** Removes the selected contacts of the supplied contact list component. */
 	public void deleteSelectedContacts() {
 		LOG.trace("ENTER");
-		this.uiController.removeConfirmationDialog();
-		this.uiController.setStatus(InternationalisationUtils.getI18NString(MESSAGE_REMOVING_CONTACTS));
-		final Object[] selected = this.uiController.getSelectedItems(contactListComponent);
+		this.ui.removeConfirmationDialog();
+		this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_REMOVING_CONTACTS));
+		final Object[] selected = this.ui.getSelectedItems(contactListComponent);
 		for (Object o : selected) {
-			Contact contact = uiController.getContact(o);
+			Contact contact = ui.getContact(o);
 			LOG.debug("Deleting contact [" + contact.getName() + "]");
 			for (Group g : contact.getGroups()) {
 				// FIXME what should be here?
 			}
 			contactDao.deleteContact(contact);
 		}
-		uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_CONTACTS_DELETED));
+		ui.alert(InternationalisationUtils.getI18NString(MESSAGE_CONTACTS_DELETED));
 		refresh();
 		LOG.trace("EXIT");
 	}
@@ -533,7 +517,7 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	public void createNewGroup(String newGroupName, Object dialog) {
 		// The selected parent group should be attached to this dialog.  Get it,
 		// create the new group, update the group list and then remove the dialog.
-		Group selectedParentGroup = this.uiController.getGroup(dialog);
+		Group selectedParentGroup = this.ui.getGroup(dialog);
 		doGroupCreation(newGroupName, dialog, selectedParentGroup);		
 	}
 
@@ -544,22 +528,15 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 */
 	public void updateIconActive(Object radioButton, Object label) {
 		String icon;
-		if (this.uiController.getName(radioButton).equals(COMPONENT_RADIO_BUTTON_ACTIVE)) {
+		if (this.ui.getName(radioButton).equals(COMPONENT_RADIO_BUTTON_ACTIVE)) {
 			icon = Icon.ACTIVE;
 		} else {
 			icon = Icon.DORMANT;
 		}
-		this.uiController.setIcon(label, icon);
+		this.ui.setIcon(label, icon);
 	}
 	
 //> PRIVATE UI HELPER METHODS
-	/**
-	 * @param name The name of the component to find
-	 * @return a thinlet compoenent within {@link #tabComponent}.
-	 */
-	private Object find(String name) {
-		return this.uiController.find(this.tabComponent, name);
-	}
 	/**
 	 * Gets the node we are currently displaying for a group.
 	 * @param component
@@ -568,11 +545,11 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 */
 	private Object getNodeForGroup(Object component, Group group) {
 		if(group == null) {
-			group = this.uiController.getRootGroup();
+			group = this.ui.getRootGroup();
 		}
 		Object ret = null;
-		for (Object o : this.uiController.getItems(component)) {
-			Group g = this.uiController.getGroup(o);
+		for (Object o : this.ui.getItems(component)) {
+			Group g = this.ui.getGroup(o);
 			if (g.equals(group)) {
 				ret = o;
 				break;
@@ -589,15 +566,15 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 */
 	private LinkedHashMap<String, Contact> getContactsFromSelectedGroups(Object tree) {
 		LinkedHashMap<String, Contact> toBeShown = new LinkedHashMap<String, Contact>();
-		if (this.uiController.isSelected(this.uiController.getItems(tree)[0])) {
+		if (this.ui.isSelected(this.ui.getItems(tree)[0])) {
 			//Root group selected
 			//Show everyone
 			for (Contact c : contactDao.getAllContacts()) {
 				toBeShown.put(c.getPhoneNumber(), c);
 			}
 		} else {
-			for (Object o : this.uiController.getSelectedItems(tree)) {
-				for(Contact c : this.uiController.getGroup(o).getAllMembers()) {
+			for (Object o : this.ui.getSelectedItems(tree)) {
+				for(Contact c : this.ui.getGroup(o).getAllMembers()) {
 					toBeShown.put(c.getPhoneNumber(), c);
 				}
 			}
@@ -614,7 +591,7 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 * TODO if we work out a good-looking way of doing this, we should implement it.  Currently this just warns the user that a contact with this number already exists.
 	 */
 	private void showMergeContactDialog(Contact oldContact, Object createContactForm) { // FIXME remove arguments from this method
-		this.uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_EXISTENT_CONTACT));
+		this.ui.alert(InternationalisationUtils.getI18NString(MESSAGE_EXISTENT_CONTACT));
 	}
 	/**
 	 * Creates a group with the supplied name and inside the supplied parent .
@@ -629,12 +606,12 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 			String parentGroupName = selectedParentGroup == null ? "null" : selectedParentGroup.getName();
 			LOG.debug("Parent group [" + parentGroupName + "]");
 		}
-		if(selectedParentGroup == this.uiController.getRootGroup()) {
+		if(selectedParentGroup == this.ui.getRootGroup()) {
 			selectedParentGroup = null;
 		}
-		if (selectedParentGroup == this.uiController.getUnnamedContacts() || selectedParentGroup == this.uiController.getUngroupedContacts()) {
-			this.uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_IMPOSSIBLE_TO_CREATE_A_GROUP_HERE));
-			if (dialog != null) this.uiController.remove(dialog);
+		if (selectedParentGroup == this.ui.getUnnamedContacts() || selectedParentGroup == this.ui.getUngroupedContacts()) {
+			this.ui.alert(InternationalisationUtils.getI18NString(MESSAGE_IMPOSSIBLE_TO_CREATE_A_GROUP_HERE));
+			if (dialog != null) this.ui.remove(dialog);
 			return;
 		}
 		LOG.debug("Group Name [" + newGroupName + "]");
@@ -647,13 +624,13 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 			// Now we've saved the group, add it to the groups tree displayed in the contacts manager
 			Object groupListComponent = getGroupTreeComponent();
 			Object parentNode = getNodeForGroup(groupListComponent, selectedParentGroup);
-			this.uiController.add(parentNode, this.uiController.getNode(g, true));
+			this.ui.add(parentNode, this.ui.getNode(g, true));
 			
-			if (dialog != null) this.uiController.remove(dialog);
+			if (dialog != null) this.ui.remove(dialog);
 			LOG.debug("Group created successfully!");
 		} catch (DuplicateKeyException e) {
 			LOG.debug("A group with this name already exists.", e);
-			this.uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_GROUP_ALREADY_EXISTS));
+			this.ui.alert(InternationalisationUtils.getI18NString(MESSAGE_GROUP_ALREADY_EXISTS));
 		}
 		LOG.trace("EXIT");
 	}
@@ -670,7 +647,7 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 */
 	private void setText(Object parentComponent, String componentName, String value) {
 		if(value == null) value = "";
-		this.uiController.setText(this.uiController.find(parentComponent, componentName), value);
+		this.ui.setText(this.ui.find(parentComponent, componentName), value);
 	}
 	
 	/**
@@ -680,7 +657,7 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 * @return the text attribute of the child
 	 */
 	private String getText(Object parentComponent, String componentName) {
-		return this.uiController.getText(this.uiController.find(parentComponent, componentName));
+		return this.ui.getText(this.ui.find(parentComponent, componentName));
 	}
 	
 	/**
@@ -689,12 +666,12 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 * @param active
 	 */
 	private void contactDetails_setActive(Object contactDetails, boolean active) {
-		this.uiController.setSelected(this.uiController.find(contactDetails, COMPONENT_RADIO_BUTTON_ACTIVE), active);
-		this.uiController.setSelected(this.uiController.find(contactDetails, COMPONENT_CONTACT_DORMANT), !active);
+		this.ui.setSelected(this.ui.find(contactDetails, COMPONENT_RADIO_BUTTON_ACTIVE), active);
+		this.ui.setSelected(this.ui.find(contactDetails, COMPONENT_CONTACT_DORMANT), !active);
 		if (active) {
-			this.uiController.setIcon(this.uiController.find(contactDetails, COMPONENT_LABEL_STATUS), Icon.ACTIVE);
+			this.ui.setIcon(this.ui.find(contactDetails, COMPONENT_LABEL_STATUS), Icon.ACTIVE);
 		} else {
-			this.uiController.setIcon(this.uiController.find(contactDetails, COMPONENT_LABEL_STATUS), Icon.DORMANT);
+			this.ui.setIcon(this.ui.find(contactDetails, COMPONENT_LABEL_STATUS), Icon.DORMANT);
 		}
 	}
 	/**
@@ -702,27 +679,27 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 * @return the current state of the active component 
 	 */
 	private boolean contactDetails_getActive(Object contactDetails) {
-		return this.uiController.isSelected(this.uiController.find(contactDetails, COMPONENT_RADIO_BUTTON_ACTIVE));
+		return this.ui.isSelected(this.ui.find(contactDetails, COMPONENT_RADIO_BUTTON_ACTIVE));
 	}
 	private void removeFromContactList(Contact contact, Group group) {
 		List<Group> selectedGroupsFromTree = new ArrayList<Group>();
-		for (Object o : this.uiController.getSelectedItems(groupListComponent)) {
-			Group g = this.uiController.getGroup(o);
+		for (Object o : this.ui.getSelectedItems(groupListComponent)) {
+			Group g = this.ui.getGroup(o);
 			selectedGroupsFromTree.add(g);
 		}
 		
 		if (selectedGroupsFromTree.contains(group)) {
-			for (Object o : this.uiController.getItems(contactListComponent)) {
-				Contact c = this.uiController.getContact(o);
+			for (Object o : this.ui.getItems(contactListComponent)) {
+				Contact c = this.ui.getContact(o);
 				if (c.equals(contact)) {
-					this.uiController.remove(o);
+					this.ui.remove(o);
 					break;
 				}
 			}
-			int limit = this.uiController.getListLimit(contactListComponent);
-			int count = this.uiController.getListElementCount(contactListComponent);
-			if (this.uiController.getItems(contactListComponent).length == 1) {
-				int page = this.uiController.getListCurrentPage(contactListComponent);
+			int limit = this.ui.getListLimit(contactListComponent);
+			int count = this.ui.getListElementCount(contactListComponent);
+			if (this.ui.getItems(contactListComponent).length == 1) {
+				int page = this.ui.getListCurrentPage(contactListComponent);
 				int pages = count / limit;
 				if ((count % limit) != 0) {
 					pages++;
@@ -730,10 +707,10 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 				if (page == pages && page != 1) {
 					//Last page
 					page--;
-					this.uiController.setListPageNumber(page, contactListComponent);
+					this.ui.setListPageNumber(page, contactListComponent);
 				} 
 			}
-			this.uiController.setListElementCount(this.uiController.getListElementCount(contactListComponent) - 1, contactListComponent);
+			this.ui.setListElementCount(this.ui.getListElementCount(contactListComponent) - 1, contactListComponent);
 			updateContactList();
 		}
 	}
@@ -742,24 +719,24 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 		// To repopulate the contact list, we must first locate it and remove the current
 		// contents.  Once we've done that, work out what should now be displayed in it,
 		// and add them all.
-		this.uiController.removeAll(contactListComponent);
+		this.ui.removeAll(contactListComponent);
 		// If we have only selected one of the 'system' groups, we need to disable the
 		// delete button - it's not possible to delete the root group, and the other 2
 		// special groups.
-		Group group = this.uiController.getGroup(this.uiController.getSelectedItem(groupListComponent));
+		Group group = this.ui.getGroup(this.ui.getSelectedItem(groupListComponent));
 		
 		if (group != null) {
-			int limit = this.uiController.getListLimit(contactListComponent);
-			int pageNumber = this.uiController.getListCurrentPage(contactListComponent);
+			int limit = this.ui.getListLimit(contactListComponent);
+			int pageNumber = this.ui.getListCurrentPage(contactListComponent);
 			List<? extends Contact> contacts = group.getAllMembers((pageNumber - 1) * limit, limit);
 
 			int count = group.getAllMembersCount();
-			this.uiController.setListElementCount(count, contactListComponent);
+			this.ui.setListElementCount(count, contactListComponent);
 
 			for (Contact con : contacts) {
-				this.uiController.add(contactListComponent, this.uiController.getRow(con));
+				this.ui.add(contactListComponent, this.ui.getRow(con));
 			}
-			this.uiController.updatePageNumber(contactListComponent, this.uiController.find(TAB_CONTACT_MANAGER));
+			this.ui.updatePageNumber(contactListComponent, this.ui.find(TAB_CONTACT_MANAGER));
 			enabledButtonsAfterSelection(contactListComponent);
 		}
 	}
@@ -768,56 +745,48 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	private void updateGroupList() {
 		Object groupListComponent = getGroupTreeComponent();
 		
-		Object selected = this.uiController.getSelectedItem(groupListComponent);
+		Object selected = this.ui.getSelectedItem(groupListComponent);
 		
-		this.uiController.removeAll(groupListComponent);
-		this.uiController.add(groupListComponent, this.uiController.getNode(this.uiController.getRootGroup(), true));
+		this.ui.removeAll(groupListComponent);
+		this.ui.add(groupListComponent, this.ui.getNode(this.ui.getRootGroup(), true));
 
-		this.uiController.setSelectedGC(selected, groupListComponent);
+		this.ui.setSelectedGC(selected, groupListComponent);
 		
 		updateContactList();
 	}
 
 	private void updateGroup(Group group, Object node) {
-		if (this.uiController.getBoolean(node, Thinlet.EXPANDED) && group.hasDescendants())
-			this.uiController.setIcon(node, Icon.FOLDER_OPEN);
+		if (this.ui.getBoolean(node, Thinlet.EXPANDED) && group.hasDescendants())
+			this.ui.setIcon(node, Icon.FOLDER_OPEN);
 		else 
-			this.uiController.setIcon(node, Icon.FOLDER_CLOSED);
+			this.ui.setIcon(node, Icon.FOLDER_CLOSED);
 	}
 	
 //> EVENT HANDLER METHODS
 	public void addToContactList(Contact contact, Group group) {
 		List<Group> selectedGroupsFromTree = new ArrayList<Group>();
-		for (Object o : this.uiController.getSelectedItems(groupListComponent)) {
-			Group g = this.uiController.getGroup(o);
+		for (Object o : this.ui.getSelectedItems(groupListComponent)) {
+			Group g = this.ui.getGroup(o);
 			selectedGroupsFromTree.add(g);
 		}
 		
 		if (selectedGroupsFromTree.contains(group)) {
-			int limit = this.uiController.getListLimit(contactListComponent);
+			int limit = this.ui.getListLimit(contactListComponent);
 			//Adding
-			if (this.uiController.getItems(contactListComponent).length < limit) {
-				this.uiController.add(contactListComponent, this.uiController.getRow(contact));
+			if (this.ui.getItems(contactListComponent).length < limit) {
+				this.ui.add(contactListComponent, this.ui.getRow(contact));
 			}
-			this.uiController.setListElementCount(this.uiController.getListElementCount(contactListComponent) + 1, contactListComponent);
-			this.uiController.updatePageNumber(contactListComponent, this.uiController.find(TAB_CONTACT_MANAGER));
+			this.ui.setListElementCount(this.ui.getListElementCount(contactListComponent) + 1, contactListComponent);
+			this.ui.updatePageNumber(contactListComponent, this.ui.find(TAB_CONTACT_MANAGER));
 		}
 		
 		updateTree(group);
 	}
 	
 //> UI PASS-THROUGH METHODS TO UiGC
-	/**
-	 * Remove the supplied dialog from view.
-	 * @param dialog the dialog to remove
-	 * @see UiGeneratorController#removeDialog(Object)
-	 */
-	public void removeDialog(Object dialog) {
-		this.uiController.removeDialog(dialog);
-	}
 	/** @see UiGeneratorController#groupList_expansionChanged(Object) */
 	public void groupList_expansionChanged(Object groupList) {
-		this.uiController.groupList_expansionChanged(groupList);
+		this.ui.groupList_expansionChanged(groupList);
 	}
 	/**
 	 * Shows the compose message dialog, populating the list with the selection of the 
@@ -825,27 +794,7 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 * @param list
 	 */
 	public void show_composeMessageForm(Object list) {
-		this.uiController.show_composeMessageForm(list);
-	}
-	/**
-	 * Shows the message history for the selected contact or group.
-	 * @param component group list or contact list
-	 */
-	public void showMessageHistory(Object component) {
-		this.uiController.showMessageHistory(component);
-	}
-	/**
-	 * @param page The file name of the help page
-	 * @see UiGeneratorController#showHelpPage(String)
-	 */
-	public void showHelpPage(String page) {
-		this.uiController.showHelpPage(page);
-	}
-	/** Shows a general dialog asking the user to confirm his action. 
-	 * @param methodToBeCalled The name and optionally the signature of the method to be called 
-	 * @see UiGeneratorController#showConfirmationDialog(String) */
-	public void showConfirmationDialog(String methodToBeCalled){
-		this.uiController.showConfirmationDialog(methodToBeCalled, this);
+		this.ui.show_composeMessageForm(list);
 	}
 	/**
 	 * Shows the export wizard dialog for exporting contacts.
@@ -853,26 +802,30 @@ public class ContactsTabHandler implements ThinletUiEventHandler {
 	 * @param type the name of the type to export
 	 */
 	public void showExportWizard(Object list) {
-		this.uiController.showExportWizard(list, "contacts");
+		this.ui.showExportWizard(list, "contacts");
 	}
 
 //> INSTANCE HELPER METHODS
 	/** Initialise dynamic contents of the tab component. */
-	private void initialiseTab() {
-		Object pnContacts = this.uiController.find(this.tabComponent, COMPONENT_PN_CONTACTS);
+	protected Object initialiseTab() {
+		Object tabComponent = ui.loadComponentFromFile(UI_FILE_CONTACTS_TAB, this);
+		
+		Object pnContacts = this.ui.find(tabComponent, COMPONENT_PN_CONTACTS);
 		String listName = COMPONENT_CONTACT_MANAGER_CONTACT_LIST;
-		Object pagePanel = uiController.loadComponentFromFile(UI_FILE_PAGE_PANEL, this);
-		uiController.add(pnContacts, pagePanel, 0);
-		uiController.setPageMethods(pnContacts, listName, pagePanel);
+		Object pagePanel = ui.loadComponentFromFile(UI_FILE_PAGE_PANEL, this);
+		ui.add(pnContacts, pagePanel, 0);
+		ui.setPageMethods(pnContacts, listName, pagePanel);
 		
 		// Cache Thinlet UI components
-		groupListComponent = this.find(COMPONENT_CONTACT_MANAGER_GROUP_TREE);
-		contactListComponent = this.find(COMPONENT_CONTACT_MANAGER_CONTACT_LIST);
+		groupListComponent = this.ui.find(tabComponent, COMPONENT_CONTACT_MANAGER_GROUP_TREE);
+		contactListComponent = this.ui.find(tabComponent, COMPONENT_CONTACT_MANAGER_CONTACT_LIST);
 
 		//Entries per page
-		this.uiController.setListLimit(contactListComponent);
+		this.ui.setListLimit(contactListComponent);
 		//Current page
-		this.uiController.setListPageNumber(1, contactListComponent);
+		this.ui.setListPageNumber(1, contactListComponent);
+		
+		return tabComponent;
 	}
 
 //> STATIC FACTORIES

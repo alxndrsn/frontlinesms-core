@@ -139,7 +139,7 @@ public class ImportExportUiController implements ThinletUiEventHandler {
 	/** Marks whether we are importing or exporting.  <code>true</code> indicates export, <code>false</code> indicates import. */
 	private boolean export;
 	/** The type of object we are dealing with, one of {@link #TYPE_CONTACT}, {@link #TYPE_KEYWORD}, {@link #TYPE_MESSAGE}. */
-	private String type;
+	private String type; // TODO can change this from String to Class for added safety
 	/** The objects we are exporting - a selection of thinlet components with attached {@link Contact}s, {@link Keyword}s or {@link Message}s */
 	private Object attachedObject;
 

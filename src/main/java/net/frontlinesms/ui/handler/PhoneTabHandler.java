@@ -22,7 +22,6 @@ import net.frontlinesms.smsdevice.internet.SmsInternetServiceStatus;
 import net.frontlinesms.ui.Event;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
-import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
@@ -39,7 +38,7 @@ import serial.NoSuchPortException;
  * @author Alex
  */
 @TextResourceKeyOwner(prefix={"COMMON_", "I18N_", "MESSAGE_"})
-public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHandler {
+public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventListener {
 //> STATIC CONSTANTS
 	/** The fully-qualified name of the default {@link CATHandler} class. */
 	private static final String DEFAULT_CAT_HANDLER_CLASS_NAME = CATHandler.class.getName();
@@ -102,43 +101,33 @@ public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHa
 	private static final String COMPONENT_PHONE_MANAGER_MODEM_LIST_ERROR = "phoneManager_modemListError";
 
 //> INSTANCE PROPERTIES
-	/** Logging object */
-	private final Logger log = Utils.getLogger(this.getClass());
 	/** Object to synchronize on before updating the phones list.  This is to prevent the list being rewritten by two different sources at the same time. */
 	private final Object PHONES_LIST_SYNCH_OBJECT = new Object();
-	/** The {@link UiGeneratorController} that shows the tab. */
-	private final UiGeneratorController uiController;
 	/** The manager of {@link SmsDevice}s */
 	private final SmsDeviceManager phoneManager;
 	/** Data Access Object for {@link SmsModemSettings}s */
 	private final SmsModemSettingsDao phoneDetailsManager;
-	/** The UI tab component */
-	private final Object tabComponent;
 
 //> CONSTRUCTORS
 	/**
 	 * Create a new instance of this class.
-	 * @param uiController value for {@link #uiController}
+	 * @param uiController value for {@link #ui}
 	 */
-	public PhoneTabHandler(UiGeneratorController uiController) {
-		this.uiController = uiController;
-		this.phoneManager = uiController.getPhoneManager();
-		this.phoneDetailsManager = uiController.getPhoneDetailsManager();
-		this.tabComponent = uiController.loadComponentFromFile(UI_FILE_PHONES_TAB, this);
+	public PhoneTabHandler(UiGeneratorController ui) {
+		super(ui);
+		this.phoneManager = ui.getPhoneManager();
+		this.phoneDetailsManager = ui.getPhoneDetailsManager();
+	}
+	
+	@Override
+	protected Object initialiseTab() {
+		return ui.loadComponentFromFile(UI_FILE_PHONES_TAB, this);
 	}
 
 //> ACCESSORS
-	/**
-	 * Load the home tab from the XML, and initialise relevant fields.
-	 * @return a newly-initialised instance of the home tab
-	 */
-	public Object getTab() {
-		return this.tabComponent;
-	}
-	
 	/** @return the compoenent containing the list of connected devices */
 	private Object getModemListComponent() {
-		return uiController.find(this.tabComponent, COMPONENT_PHONE_MANAGER_MODEM_LIST);
+		return ui.find(this.getTab(), COMPONENT_PHONE_MANAGER_MODEM_LIST);
 	}
 	
 //> THINLET UI METHODS
@@ -148,15 +137,15 @@ public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHa
 	 * @param list the thinlet UI list containing details of the devices
 	 */
 	public void showPhoneSettingsDialog(Object list) {
-		Object selected = uiController.getSelectedItem(list);
+		Object selected = ui.getSelectedItem(list);
 		if (selected != null) {
-			SmsDevice selectedPhone = uiController.getAttachedObject(selected, SmsDevice.class);
+			SmsDevice selectedPhone = ui.getAttachedObject(selected, SmsDevice.class);
 			if (selectedPhone instanceof SmsModem) {
 				if (!((SmsModem) selectedPhone).isDisconnecting())
 					showPhoneSettingsDialog((SmsModem) selectedPhone, false);
 			} else {
 				// Http service.
-				SmsInternetServiceSettingsHandler serviceHandler = new SmsInternetServiceSettingsHandler(this.uiController);
+				SmsInternetServiceSettingsHandler serviceHandler = new SmsInternetServiceSettingsHandler(this.ui);
 				serviceHandler.showConfigureService((SmsInternetService) selectedPhone, null);
 			}
 		}
@@ -168,41 +157,41 @@ public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHa
 	 * @param isNewPhone <code>true</code> TODO <if this phone has previously connected (i.e. not first time it has connected)> OR <if this phone has just connected (e.g. may have connected before, but not today)> 
 	 */
 	public void showPhoneSettingsDialog(SmsModem phone, boolean isNewPhone) {
-		Object phoneSettingsDialog = this.uiController.loadComponentFromFile(UI_FILE_MODEM_SETTINGS_DIALOG, this);
-		this.uiController.setText(phoneSettingsDialog, InternationalisationUtils.getI18NString(COMMON_SETTINGS_FOR_PHONE) + " '" + phone.getModel() + "'");
+		Object phoneSettingsDialog = this.ui.loadComponentFromFile(UI_FILE_MODEM_SETTINGS_DIALOG, this);
+		this.ui.setText(phoneSettingsDialog, InternationalisationUtils.getI18NString(COMMON_SETTINGS_FOR_PHONE) + " '" + phone.getModel() + "'");
 		
 		if(!isNewPhone) {
 			boolean useForSending = phone.isUseForSending();
 			boolean useForReceiving = phone.isUseForReceiving();
 			
 			if(useForSending || useForReceiving) {
-				this.uiController.setSelected(this.uiController.find(phoneSettingsDialog, COMPONENT_PHONE_SENDING), useForSending);
-				Object cbDeliveryReports = this.uiController.find(phoneSettingsDialog, COMPONENT_PHONE_DELIVERY_REPORTS);
-				uiController.setEnabled(cbDeliveryReports, useForSending);
-				uiController.setSelected(cbDeliveryReports, phone.isUseDeliveryReports());
-				uiController.setSelected(this.uiController.find(phoneSettingsDialog, COMPONENT_PHONE_RECEIVING), useForReceiving);
-				Object cbDeleteMessages = this.uiController.find(phoneSettingsDialog, COMPONENT_PHONE_DELETE);
-				this.uiController.setEnabled(cbDeleteMessages, useForReceiving);
-				this.uiController.setSelected(cbDeleteMessages, phone.isDeleteMessagesAfterReceiving());
+				this.ui.setSelected(this.ui.find(phoneSettingsDialog, COMPONENT_PHONE_SENDING), useForSending);
+				Object cbDeliveryReports = this.ui.find(phoneSettingsDialog, COMPONENT_PHONE_DELIVERY_REPORTS);
+				ui.setEnabled(cbDeliveryReports, useForSending);
+				ui.setSelected(cbDeliveryReports, phone.isUseDeliveryReports());
+				ui.setSelected(this.ui.find(phoneSettingsDialog, COMPONENT_PHONE_RECEIVING), useForReceiving);
+				Object cbDeleteMessages = this.ui.find(phoneSettingsDialog, COMPONENT_PHONE_DELETE);
+				this.ui.setEnabled(cbDeleteMessages, useForReceiving);
+				this.ui.setSelected(cbDeleteMessages, phone.isDeleteMessagesAfterReceiving());
 			} else {
-				uiController.setSelected(uiController.find(phoneSettingsDialog, "rbPhoneDetailsDisable"), true);
-				uiController.setSelected(uiController.find(phoneSettingsDialog, COMPONENT_RB_PHONE_DETAILS_ENABLE), false);
-				uiController.deactivate(uiController.find(phoneSettingsDialog, COMPONENT_PN_PHONE_SETTINGS));
+				ui.setSelected(ui.find(phoneSettingsDialog, "rbPhoneDetailsDisable"), true);
+				ui.setSelected(ui.find(phoneSettingsDialog, COMPONENT_RB_PHONE_DETAILS_ENABLE), false);
+				ui.deactivate(ui.find(phoneSettingsDialog, COMPONENT_PN_PHONE_SETTINGS));
 			}
 		}
 		
 		if(!phone.supportsReceive()) {
 			// If this phone does not support SMS receiving, we need to pass this info onto
 			// the user.  We also want to gray out the options for receiving.
-			uiController.setEnabled(uiController.find(phoneSettingsDialog, COMPONENT_PHONE_RECEIVING), false);
-			uiController.setEnabled(uiController.find(phoneSettingsDialog, COMPONENT_PHONE_DELETE), false);
+			ui.setEnabled(ui.find(phoneSettingsDialog, COMPONENT_PHONE_RECEIVING), false);
+			ui.setEnabled(ui.find(phoneSettingsDialog, COMPONENT_PHONE_DELETE), false);
 		} else {
 			// No error, so remove the error message.
-			uiController.remove(uiController.find(phoneSettingsDialog, "lbReceiveNotSupported"));
+			ui.remove(ui.find(phoneSettingsDialog, "lbReceiveNotSupported"));
 		}
 		
-		uiController.setAttachedObject(phoneSettingsDialog, phone);
-		uiController.add(phoneSettingsDialog);
+		ui.setAttachedObject(phoneSettingsDialog, phone);
+		ui.add(phoneSettingsDialog);
 	}
 	
 	/**
@@ -213,7 +202,7 @@ public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHa
 	 * @param menuItem
 	 */
 	public void editPhoneEnabled(Object list, Object menuItem) {
-		uiController.setVisible(menuItem, uiController.getSelectedItem(list) != null);
+		ui.setVisible(menuItem, ui.getSelectedItem(list) != null);
 	}
 
 	/**
@@ -221,9 +210,9 @@ public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHa
 	 * @param list The list of connected {@link SmsDevice}s in the Phones tab.
 	 */
 	public void disconnectFromSelected(Object list) {
-		SmsDevice dev = uiController.getAttachedObject(uiController.getSelectedItem(list), SmsDevice.class); 
+		SmsDevice dev = ui.getAttachedObject(ui.getSelectedItem(list), SmsDevice.class); 
 		phoneManager.disconnect(dev);
-		refreshPhonesViews();
+		refresh();
 	}
 	
 	/**
@@ -231,13 +220,13 @@ public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHa
 	 * @param list The list of ports which are currently being probed for connected {@link SmsDevice}s.
 	 */
 	public void stopDetection(Object list) {
-		SmsDevice dev = uiController.getAttachedObject(uiController.getSelectedItem(list), SmsDevice.class);
+		SmsDevice dev = ui.getAttachedObject(ui.getSelectedItem(list), SmsDevice.class);
 		if (dev instanceof SmsModem) {
 			SmsModem modem = (SmsModem) dev;
 			phoneManager.stopDetection(modem.getPort());
 			
 		}
-		refreshPhonesViews();
+		refresh();
 	}
 	
 	/**
@@ -247,20 +236,20 @@ public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHa
 	 * @param list
 	 */
 	public void phoneManager_enabledFields(Object popUp, Object list) {
-		Object selected = uiController.getSelectedItem(list);
+		Object selected = ui.getSelectedItem(list);
 		if (selected == null) {
-			uiController.setVisible(popUp, false);
+			ui.setVisible(popUp, false);
 		} else {
-			SmsDevice dev = uiController.getAttachedObject(selected, SmsDevice.class);
+			SmsDevice dev = ui.getAttachedObject(selected, SmsDevice.class);
 			if (dev instanceof SmsModem) {
 				SmsModem modem = (SmsModem) dev;
-				uiController.setVisible(uiController.find(popUp, "miEditPhone"), false);
-				uiController.setVisible(uiController.find(popUp, "miAutoConnect"), !modem.isDetecting() && !modem.isTryToConnect());
-				uiController.setVisible(uiController.find(popUp, "miManualConnection"), !modem.isDetecting() && !modem.isTryToConnect());
-				uiController.setVisible(uiController.find(popUp, "miCancelDetection"), modem.isDetecting());
+				ui.setVisible(ui.find(popUp, "miEditPhone"), false);
+				ui.setVisible(ui.find(popUp, "miAutoConnect"), !modem.isDetecting() && !modem.isTryToConnect());
+				ui.setVisible(ui.find(popUp, "miManualConnection"), !modem.isDetecting() && !modem.isTryToConnect());
+				ui.setVisible(ui.find(popUp, "miCancelDetection"), modem.isDetecting());
 			} else {
-				for (Object o : uiController.getItems(popUp)) {
-					uiController.setVisible(o, uiController.getName(o).equals("miEditPhone") || uiController.getName(o).equals("miAutoConnect"));
+				for (Object o : ui.getItems(popUp)) {
+					ui.setVisible(o, ui.getName(o).equals("miEditPhone") || ui.getName(o).equals("miAutoConnect"));
 				}
 			}
 		}
@@ -271,8 +260,8 @@ public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHa
 	 * unconnected handsets.
 	 */
 	public void connectToSelectedPhoneHandler() {
-		Object modemListError = uiController.find(COMPONENT_PHONE_MANAGER_MODEM_LIST_ERROR);
-		SmsDevice selectedPhoneHandler = uiController.getAttachedObject(uiController.getSelectedItem(modemListError), SmsDevice.class);
+		Object modemListError = ui.find(COMPONENT_PHONE_MANAGER_MODEM_LIST_ERROR);
+		SmsDevice selectedPhoneHandler = ui.getAttachedObject(ui.getSelectedItem(modemListError), SmsDevice.class);
 		if(selectedPhoneHandler != null) {
 			if (selectedPhoneHandler instanceof SmsModem) {
 				SmsModem modem = (SmsModem) selectedPhoneHandler;
@@ -292,34 +281,34 @@ public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHa
 	 * @param list TODO what is this list, and why is it necessary?  Could surely just find it
 	 */
 	public void showPhoneConfigDialog(Object list) {
-		Object configDialog = uiController.loadComponentFromFile(UI_FILE_MODEM_MANUAL_CONFIG_DIALOG, this);
+		Object configDialog = ui.loadComponentFromFile(UI_FILE_MODEM_MANUAL_CONFIG_DIALOG, this);
 		
-		Object portList = uiController.find(configDialog, "lbPortName");
+		Object portList = ui.find(configDialog, "lbPortName");
 		Enumeration<CommPortIdentifier> commPortEnumeration = CommUtils.getPortIdentifiers();
 		while (commPortEnumeration.hasMoreElements()) {
 			CommPortIdentifier commPortIdentifier = commPortEnumeration.nextElement();
-			uiController.add(portList, uiController.createComboboxChoice(commPortIdentifier.getName(), null));
+			ui.add(portList, ui.createComboboxChoice(commPortIdentifier.getName(), null));
 		}
 		
-		Object handlerList = uiController.find(configDialog, "lbCATHandlers");
+		Object handlerList = ui.find(configDialog, "lbCATHandlers");
 		int trimLength = DEFAULT_CAT_HANDLER_CLASS_NAME.length() + 1;
 		
 		for (Class<? extends AbstractATHandler> handler : AbstractATHandler.getHandlers()) {
 			String handlerName = handler.getName();
 			if(handlerName.equals(DEFAULT_CAT_HANDLER_CLASS_NAME)) handlerName = "<default>";
 			else handlerName = handlerName.substring(trimLength);
-			uiController.add(handlerList, uiController.createComboboxChoice(handlerName, handler));
+			ui.add(handlerList, ui.createComboboxChoice(handlerName, handler));
 		}
 		
-		Object selected = uiController.getSelectedItem(list);
-		SmsDevice selectedPhone = uiController.getAttachedObject(selected, SmsDevice.class);
+		Object selected = ui.getSelectedItem(list);
+		SmsDevice selectedPhone = ui.getAttachedObject(selected, SmsDevice.class);
 		if (selectedPhone instanceof SmsModem) {
 			SmsModem modem = (SmsModem) selectedPhone;
-			uiController.setText(uiController.find(configDialog,"lbPortName"), modem.getPort());
-			uiController.setText(uiController.find(configDialog,"lbBaudRate"), String.valueOf(modem.getBaudRate()));
+			ui.setText(ui.find(configDialog,"lbPortName"), modem.getPort());
+			ui.setText(ui.find(configDialog,"lbBaudRate"), String.valueOf(modem.getBaudRate()));
 		}
 		
-		uiController.add(configDialog);
+		ui.add(configDialog);
 	}
 	
 	/**
@@ -327,26 +316,26 @@ public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHa
 	 * @param phoneConfigDialog
 	 */
 	public void connectToPhone(Object phoneConfigDialog) {
-		String baudRateAsString = uiController.getText(uiController.find(phoneConfigDialog,"lbBaudRate"));
-		String requestedPortName = uiController.getText(uiController.find(phoneConfigDialog,"lbPortName"));
+		String baudRateAsString = ui.getText(ui.find(phoneConfigDialog,"lbBaudRate"));
+		String requestedPortName = ui.getText(ui.find(phoneConfigDialog,"lbPortName"));
 		if (!phoneManager.hasPhoneConnected(requestedPortName)) {
 			try {
-				String preferredCATHandler = uiController.getText(uiController.find(phoneConfigDialog,"lbCATHandlers"));
+				String preferredCATHandler = ui.getText(ui.find(phoneConfigDialog,"lbCATHandlers"));
 				if(phoneManager.requestConnect(
 						requestedPortName,
 						Integer.parseInt(baudRateAsString),
 						preferredCATHandler)) {
-					uiController.remove(phoneConfigDialog);
+					ui.remove(phoneConfigDialog);
 				} else {
-					uiController.alert(InternationalisationUtils.getI18NString(I18N_PORT_IN_USE));
+					ui.alert(InternationalisationUtils.getI18NString(I18N_PORT_IN_USE));
 				}
 			} catch (NumberFormatException e) {
-				uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_INVALID_BAUD_RATE, baudRateAsString));
+				ui.alert(InternationalisationUtils.getI18NString(MESSAGE_INVALID_BAUD_RATE, baudRateAsString));
 			} catch (NoSuchPortException e) {
-				uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_PORT_NOT_FOUND, requestedPortName));
+				ui.alert(InternationalisationUtils.getI18NString(MESSAGE_PORT_NOT_FOUND, requestedPortName));
 			}
 		} else {
-			uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_PORT_ALREADY_CONNECTED, requestedPortName));
+			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_PORT_ALREADY_CONNECTED, requestedPortName));
 		}
 	}
 
@@ -368,7 +357,7 @@ public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHa
 		// Handle modems first
 		if (device instanceof SmsModem) {
 			SmsModem activeDevice = (SmsModem) device;
-			uiController.setStatus(InternationalisationUtils.getI18NString(MESSAGE_PHONE) + ": " + activeDevice.getPort() + ' ' + getSmsDeviceStatusAsString(device));
+			ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_PHONE) + ": " + activeDevice.getPort() + ' ' + getSmsDeviceStatusAsString(device));
 			if (deviceStatus.equals(SmsModemStatus.CONNECTED)) {
 				log.debug("Phone is connected. Try to read details from database!");
 				String serial = activeDevice.getSerial();
@@ -389,43 +378,43 @@ public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHa
 					}
 				}
 
-				uiController.newEvent(new Event(Event.TYPE_PHONE_CONNECTED, InternationalisationUtils.getI18NString(COMMON_PHONE_CONNECTED) + ": " + activeDevice.getModel()));
+				ui.newEvent(new Event(Event.TYPE_PHONE_CONNECTED, InternationalisationUtils.getI18NString(COMMON_PHONE_CONNECTED) + ": " + activeDevice.getModel()));
 			}
 		} else {
 			SmsInternetService service = (SmsInternetService) device;
 			// TODO document why newEvent is called here, and why it is only called for certain statuses.
 			if (deviceStatus.equals(SmsInternetServiceStatus.CONNECTED)) {
-				uiController.newEvent(new Event(
+				ui.newEvent(new Event(
 						Event.TYPE_SMS_INTERNET_SERVICE_CONNECTED,
 						InternationalisationUtils.getI18NString(COMMON_SMS_INTERNET_SERVICE_CONNECTED) 
 						+ ": " + SmsInternetServiceSettingsHandler.getProviderName(service.getClass()) + " - " + service.getIdentifier()));
 			} else if (deviceStatus.equals(SmsInternetServiceStatus.RECEIVING_FAILED)) {
-				uiController.newEvent(new Event(
+				ui.newEvent(new Event(
 						Event.TYPE_SMS_INTERNET_SERVICE_RECEIVING_FAILED,
 						SmsInternetServiceSettingsHandler.getProviderName(service.getClass()) + " - " + service.getIdentifier()
 						+ ": " + InternationalisationUtils.getI18NString(COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED)));
 			}
 		}
-		refreshPhonesViews();
+		refresh();
 		log.trace("EXIT");
 	}
 	
 	public void phoneManagerDetailsUse(Object phoneSettingsDialog, Object radioButton) {
-		Object pnPhoneSettings = uiController.find(phoneSettingsDialog, COMPONENT_PN_PHONE_SETTINGS);
-		if(COMPONENT_RB_PHONE_DETAILS_ENABLE.equals(uiController.getName(radioButton))) {
-			uiController.activate(pnPhoneSettings);
+		Object pnPhoneSettings = ui.find(phoneSettingsDialog, COMPONENT_PN_PHONE_SETTINGS);
+		if(COMPONENT_RB_PHONE_DETAILS_ENABLE.equals(ui.getName(radioButton))) {
+			ui.activate(pnPhoneSettings);
 			// If this phone does not support SMS receiving, we need to pass this info onto
 			// the user.  We also want to gray out the options for receiving.
-			SmsModem modem = uiController.getAttachedObject(phoneSettingsDialog, SmsModem.class);
+			SmsModem modem = ui.getAttachedObject(phoneSettingsDialog, SmsModem.class);
 			if(!modem.supportsReceive()) {
-				uiController.setEnabled(uiController.find(pnPhoneSettings, COMPONENT_PHONE_RECEIVING), false);
-				uiController.setEnabled(uiController.find(pnPhoneSettings, COMPONENT_PHONE_DELETE), false);
+				ui.setEnabled(ui.find(pnPhoneSettings, COMPONENT_PHONE_RECEIVING), false);
+				ui.setEnabled(ui.find(pnPhoneSettings, COMPONENT_PHONE_DELETE), false);
 			}
-		} else uiController.deactivate(pnPhoneSettings);
+		} else ui.deactivate(pnPhoneSettings);
 	}
 	
 	public void phoneManagerDetailsCheckboxChanged(Object checkbox) {
-		uiController.setEnabled(uiController.getNextItem(uiController.getParent(checkbox), checkbox, false), uiController.isSelected(checkbox));
+		ui.setEnabled(ui.getNextItem(ui.getParent(checkbox), checkbox, false), ui.isSelected(checkbox));
 	}
 	
 	/**
@@ -433,18 +422,18 @@ public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHa
 	 * of the phone to the database.
 	 */
 	public void updatePhoneDetails(Object dialog) {
-		SmsModem phone = uiController.getAttachedObject(dialog, SmsModem.class);
+		SmsModem phone = ui.getAttachedObject(dialog, SmsModem.class);
 		String serial = phone.getSerial();
 
 		boolean useForSending;
 		boolean useDeliveryReports;
 		boolean useForReceiving;
 		boolean deleteMessagesAfterReceiving;
-		if(uiController.isSelected(uiController.find(dialog, COMPONENT_RB_PHONE_DETAILS_ENABLE))) {
-			useForSending = uiController.isSelected(uiController.find(dialog, COMPONENT_PHONE_SENDING));
-			useDeliveryReports = uiController.isSelected(uiController.find(dialog, COMPONENT_PHONE_DELIVERY_REPORTS));
-			useForReceiving = uiController.isSelected(uiController.find(dialog, COMPONENT_PHONE_RECEIVING));
-			deleteMessagesAfterReceiving = uiController.isSelected(uiController.find(dialog, COMPONENT_PHONE_DELETE));
+		if(ui.isSelected(ui.find(dialog, COMPONENT_RB_PHONE_DETAILS_ENABLE))) {
+			useForSending = ui.isSelected(ui.find(dialog, COMPONENT_PHONE_SENDING));
+			useDeliveryReports = ui.isSelected(ui.find(dialog, COMPONENT_PHONE_DELIVERY_REPORTS));
+			useForReceiving = ui.isSelected(ui.find(dialog, COMPONENT_PHONE_RECEIVING));
+			deleteMessagesAfterReceiving = ui.isSelected(ui.find(dialog, COMPONENT_PHONE_DELETE));
 		} else {
 			useForSending = false;
 			useDeliveryReports = false;
@@ -476,34 +465,25 @@ public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHa
 		
 		// Phone settings may have changed.  As we're now displaying these on the table, we
 		// need to update the table.
-		refreshPhonesViews();
+		refresh();
 		
 		removeDialog(dialog);
-	}
-	
-//> UI PASSTHROUGH METHODS
-	/**
-	 * @param page page to show
-	 * @see UiGeneratorController#showHelpPage(String)
-	 */
-	public void showHelpPage(String page) {
-		this.uiController.showHelpPage(page);
 	}
 
 //> INSTANCE HELPER METHODS
 	/** 
 	 * Refreshes the list of PhoneHandlers displayed on the PhoneManager tab.
 	 */
-	public void refreshPhonesViews() {
+	public void refresh() {
 		synchronized (PHONES_LIST_SYNCH_OBJECT) {
-			Object modemListError = uiController.find(COMPONENT_PHONE_MANAGER_MODEM_LIST_ERROR);
+			Object modemListError = ui.find(COMPONENT_PHONE_MANAGER_MODEM_LIST_ERROR);
 			// cache the selected item so we can reselect it when we've finished!
-			int index = uiController.getSelectedIndex(modemListError);
+			int index = ui.getSelectedIndex(modemListError);
 			
-			int indexTop = uiController.getSelectedIndex(getModemListComponent());
+			int indexTop = ui.getSelectedIndex(getModemListComponent());
 			
-			uiController.removeAll(getModemListComponent());
-			uiController.removeAll(modemListError);
+			ui.removeAll(getModemListComponent());
+			ui.removeAll(modemListError);
 
 			SmsDevice[] smsDevices = phoneManager.getAllPhones().toArray(new SmsDevice[0]);
 			
@@ -521,14 +501,14 @@ public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHa
 			// Add the SmsDevices to the relevant tables
 			for (SmsDevice dev : smsDevices) {
 				if (dev.isConnected()) {
-					uiController.add(getModemListComponent(), getTableRow(dev, true));
+					ui.add(getModemListComponent(), getTableRow(dev, true));
 				} else {
-					uiController.add(modemListError, getTableRow(dev, false));
+					ui.add(modemListError, getTableRow(dev, false));
 				}
 			}
 
-			uiController.setSelectedIndex(getModemListComponent(), indexTop);
-			uiController.setSelectedIndex(modemListError, index);
+			ui.setSelectedIndex(getModemListComponent(), indexTop);
+			ui.setSelectedIndex(modemListError, index);
 		}
 	}
 	
@@ -541,7 +521,7 @@ public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHa
 	 * @return Thinlet table row component detailing the supplied device.
 	 */
 	private Object getTableRow(SmsDevice dev, boolean isConnected) {
-		Object row = uiController.createTableRow(dev);
+		Object row = ui.createTableRow(dev);
 
 // FIXME these now share getMsisdn() code.
 		String statusString, fromMsisdn, makeAndModel, serial, port, baudRate;
@@ -580,33 +560,23 @@ public class PhoneTabHandler implements SmsDeviceEventListener, ThinletUiEventHa
 		}
 
 		// Add "status cell" - "traffic light" showing how functional the device is
-		Object statusCell = uiController.createTableCell("");
-		uiController.setIcon(statusCell, icon);
-		uiController.add(row, statusCell);
+		Object statusCell = ui.createTableCell("");
+		ui.setIcon(statusCell, icon);
+		ui.add(row, statusCell);
 
-		uiController.table_addCells(row, new String[]{port, baudRate, fromMsisdn, makeAndModel, serial});
+		ui.table_addCells(row, new String[]{port, baudRate, fromMsisdn, makeAndModel, serial});
 		
 		if (isConnected) {
-			Object useForSendingCell = uiController.createTableCell("");
-			if (dev.isUseForSending()) uiController.setIcon(useForSendingCell, Icon.TICK);
-			uiController.add(row, useForSendingCell);
-			Object useForReceiveCell = uiController.createTableCell("");
-			if (dev.isUseForReceiving()) uiController.setIcon(useForReceiveCell, Icon.TICK);
-			uiController.add(row, useForReceiveCell);
+			Object useForSendingCell = ui.createTableCell("");
+			if (dev.isUseForSending()) ui.setIcon(useForSendingCell, Icon.TICK);
+			ui.add(row, useForSendingCell);
+			Object useForReceiveCell = ui.createTableCell("");
+			if (dev.isUseForReceiving()) ui.setIcon(useForReceiveCell, Icon.TICK);
+			ui.add(row, useForReceiveCell);
 		}
-		uiController.add(row, uiController.createTableCell(statusString));
+		ui.add(row, ui.createTableCell(statusString));
 		
 		return row;
-	}
-	
-//> UI PASSTHROUGH METHODS
-	/**
-	 * Removes a dialog from the UI
-	 * @param dialog dialog to remove 
-	 * @see UiGeneratorController#removeDialog(Object)
-	 */
-	public void removeDialog(Object dialog) {
-		this.uiController.removeDialog(dialog);
 	}
 
 //> STATIC FACTORIES

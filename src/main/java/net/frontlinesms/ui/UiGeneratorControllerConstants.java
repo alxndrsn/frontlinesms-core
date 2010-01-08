@@ -34,11 +34,6 @@ public class UiGeneratorControllerConstants {
 	public static final String UI_FILE_INCOMING_NUMBER_SETTINGS_FORM = "/ui/dialog/incomingNumberSettingsDialog.xml";
 	public static final String UI_FILE_USER_DETAILS_DIALOG = "/ui/dialog/userDetailsDialog.xml";
 	
-	//keyword panel
-	public static final String UI_FILE_KEYWORDS_TAB = "/ui/advanced/keywordsTab.xml";
-	public static final String UI_FILE_KEYWORDS_SIMPLE_VIEW = "/ui/advanced/keywordSimpleView.xml";
-	public static final String UI_FILE_KEYWORDS_ADVANCED_VIEW = "/ui/advanced/keywordAdvancedView.xml";
-	
 	public static final String UI_FILE_MESSAGES_TAB = "/ui/advanced/messagesTab.xml";
 	
 //> TAB NAMES

@@ -32,13 +32,14 @@ import net.frontlinesms.data.repository.EmailAccountDao;
 import net.frontlinesms.data.repository.EmailDao;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
  * @author aga
  *
  */
-public class EmailTabHandler implements ThinletUiEventHandler {
+public class EmailTabHandler extends BaseTabHandler {
 //> UI LAYOUT FILES
 	public static final String UI_FILE_EMAILS_TAB = "/ui/core/email/emailsTab.xml";
 	
@@ -48,10 +49,6 @@ public class EmailTabHandler implements ThinletUiEventHandler {
 	public static final String COMPONENT_EMAILS_TOOLBAR = "emails_toolbar";
 	
 //> INSTANCE PROPERTIES
-	/** Logging object */
-	private Logger LOG = Utils.getLogger(this.getClass());
-	
-	private UiGeneratorController ui;
 	/** Manager of {@link EmailAccount}s and {@link EmailSender}s */
 	private EmailServerHandler emailManager;
 	private EmailDao emailDao;
@@ -63,25 +60,20 @@ public class EmailTabHandler implements ThinletUiEventHandler {
 	
 //> CONSTRUCTORS
 	public EmailTabHandler(UiGeneratorController ui, FrontlineSMS frontlineController) {
-		this.ui = ui;
-		
+		super(ui);
 		this.emailManager = frontlineController.getEmailServerManager();
 		this.emailDao = frontlineController.getEmailDao();
 	}
 	
-//> ACCESSORS
-	public Object getTab() {
-		initialiseTab();
-		return this.tabComponent;
-	}
-	
+//> ACCESSORS	
 	public void refresh() {
 		updateEmailList();
 	}
 	
-	private void initialiseTab() {
-		this.tabComponent = ui.loadComponentFromFile(UI_FILE_EMAILS_TAB, this);
-		Object pnEmail = find(COMPONENT_PN_EMAIL);
+	protected Object initialiseTab() {
+		Object tabComponent = ui.loadComponentFromFile(UI_FILE_EMAILS_TAB, this);
+		
+		Object pnEmail = ui.find(tabComponent, COMPONENT_PN_EMAIL);
 		
 		// Add the paging panel
 		// TODO this should be done with placeholder + call to addPagination
@@ -90,7 +82,7 @@ public class EmailTabHandler implements ThinletUiEventHandler {
 		ui.add(pnEmail, pagePanel, 2);
 		ui.setPageMethods(pnEmail, COMPONENT_EMAIL_LIST, pagePanel);
 		
-		emailListComponent = find(COMPONENT_EMAIL_LIST);
+		emailListComponent = ui.find(tabComponent, COMPONENT_EMAIL_LIST);
 		ui.setListLimit(emailListComponent);
 		ui.setListPageNumber(1, emailListComponent);
 		ui.setListElementCount(emailDao.getEmailCount(), emailListComponent);
@@ -99,6 +91,8 @@ public class EmailTabHandler implements ThinletUiEventHandler {
 		// Set the types for the email list columns...
 		Object header = Thinlet.get(emailListComponent, ThinletText.HEADER);
 		initEmailTableForSorting(header);
+		
+		return tabComponent;
 	}
 
 	/**
@@ -125,25 +119,25 @@ public class EmailTabHandler implements ThinletUiEventHandler {
 	 * Removes the selected emails
 	 */
 	public void removeSelectedFromEmailList() {
-		LOG.trace("ENTER");
+		log.trace("ENTER");
 		ui.removeConfirmationDialog();
 		ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_REMOVING_EMAILS));
 		final Object[] selected = ui.getSelectedItems(emailListComponent);
 		int numberRemoved = 0;
 		for (Object o : selected) {
 			Email toBeRemoved = ui.getEmail(o);
-			LOG.debug("E-mail [" + toBeRemoved + "]");
+			log.debug("E-mail [" + toBeRemoved + "]");
 			int status = toBeRemoved.getStatus();
 			if (status != Email.STATUS_PENDING 
 					&& status != Email.STATUS_RETRYING) {
-				LOG.debug("Removing from database..");
+				log.debug("Removing from database..");
 				if (status == Email.STATUS_OUTBOX) {
 					emailManager.removeFromOutbox(toBeRemoved);
 				}
 				emailDao.deleteEmail(toBeRemoved);
 				numberRemoved++;
 			} else {
-				LOG.debug("E-mail status is [" + toBeRemoved.getStatus() + "]. Do not remove...");
+				log.debug("E-mail status is [" + toBeRemoved.getStatus() + "]. Do not remove...");
 			}
 		}
 		updatePageAfterDeletion(numberRemoved, emailListComponent);
@@ -151,7 +145,7 @@ public class EmailTabHandler implements ThinletUiEventHandler {
 			updateEmailList();
 		}
 		ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_EMAILS_DELETED));
-		LOG.trace("EXIT");
+		log.trace("EXIT");
 	}
 	
 	/**
@@ -223,29 +217,7 @@ public class EmailTabHandler implements ThinletUiEventHandler {
 		}
 	}
 	
-//> UI PASSTHROUGH METHODS
-	/** @see UiGeneratorController#showConfirmationDialog(String, Object) */
-	public void showConfirmationDialog(String methodToBeCalled) {
-		this.ui.showConfirmationDialog(methodToBeCalled, this);
-	}
-	/**
-	 * @param page page to show
-	 * @see UiGeneratorController#showHelpPage(String)
-	 */
-	public void showHelpPage(String page) {
-		this.ui.showHelpPage(page);
-	}
-	
 //> UI HELPER METHODS
-	/**
-	 * Find a UI component within the {@link #tabComponent}.
-	 * @param componentName the name of the UI component
-	 * @return the ui component, or <code>null</code> if it could not be found
-	 */
-	private Object find(String componentName) {
-		return ui.find(this.tabComponent, componentName);
-	}
-
 	/**
 	 * Repopulates a UI list with details of a list of emails.
 	 */
@@ -284,7 +256,7 @@ public class EmailTabHandler implements ThinletUiEventHandler {
 	
 //> LISTENER EVENT METHODS
 	public synchronized void outgoingEmailEvent(EmailSender sender, Email email) {
-		LOG.debug("Refreshing e-mail list");
+		log.debug("Refreshing e-mail list");
 		int index = -1;
 		for (int i = 0; i < ui.getItems(emailListComponent).length; i++) {
 			Email e = ui.getEmail(ui.getItem(emailListComponent, i));
