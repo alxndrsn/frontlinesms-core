@@ -107,7 +107,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 	public static final String UI_FILE_KEYWORDS_SIMPLE_VIEW = "/ui/core/keyword/pnSimpleView.xml";
 	public static final String UI_FILE_KEYWORDS_ADVANCED_VIEW = "/ui/core/keyword/pnAdvancedView.xml";
 	public static final String UI_FILE_NEW_KEYWORD_FORM = "/ui/core/keyword/newKeywordForm.xml";
-	public static final String UI_FILE_NEW_KACTION_REPLY_FORM = "/ui/core/keyword/newKActionReplyForm.xml";
 	public static final String UI_FILE_NEW_KACTION_FORWARD_FORM = "/ui/core/keyword/newKActionForwardForm.xml";
 	public static final String UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM = "/ui/core/keyword/externalCommandDialog.xml";
 	public static final String UI_FILE_NEW_KACTION_EMAIL_FORM = "/ui/core/keyword/dgEmailKAction.xml";
@@ -118,9 +117,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 	private KeywordActionDao keywordActionDao;
 
 	private Object keywordListComponent;
-
-	/** Appears to be the in-focus item on the email tab. */
-	private Object emailTabFocusOwner;
 	
 	/** The number of people the current SMS will be sent to */
 	private int numberToSend = 1;
@@ -168,56 +164,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 	 */
 	public void addMsgContentToForwardMessage(String currentText, Object textArea) {
 		ui.setText(textArea, currentText + ' ' + CsvUtils.MARKER_MESSAGE_CONTENT);
-	}
-
-	/**
-	 * Adds a constant substitution marker to the text of an email action's text area (a thinlet component).
-	 * 
-	 * @param type The index of the constant that should be inserted
-	 * <li> 0 for Sender name
-	 * <li> 1 for Sender number
-	 * <li> 2 for Message Content
-	 * <li> 3 for Keyword
-	 * <li> 4 for Command Response
-	 * <li> 5 for SMS id
-	 */
-	public void addConstantToCommand(String currentText, Object textArea, int type) {
-		log.trace("ENTER");
-		String toAdd = "";
-		switch (type) {
-			case 0:
-				toAdd = CsvUtils.MARKER_SENDER_NAME;
-				break;
-			case 1:
-				toAdd = CsvUtils.MARKER_SENDER_NUMBER;
-				break;
-			case 2:
-				toAdd = CsvUtils.MARKER_MESSAGE_CONTENT;
-				break;
-			case 3:
-				toAdd = CsvUtils.MARKER_KEYWORD_KEY;
-				break;
-			case 4:
-				toAdd = CsvUtils.MARKER_COMMAND_RESPONSE;
-				break;
-		}
-		log.debug("Setting [" + currentText + toAdd + "] to component [" + textArea + "]");
-		ui.setText(textArea, currentText + toAdd);
-		ui.setFocus(textArea);
-		log.trace("EXIT");
-	}
-
-	public void setEmailFocusOwner(Object obj) {
-		emailTabFocusOwner = obj;
-	}
-	
-	public void addConstantToEmailDialog(Object tfSubject, Object tfMessage, int type) {
-		Object toSet = tfMessage;
-		Object focused = emailTabFocusOwner;
-		if (focused.equals(tfSubject)) {
-			toSet = tfSubject;
-		}
-		addConstantToCommand(ui.getText(toSet), toSet, type);
 	}
 	
 	/**
@@ -282,30 +228,9 @@ public class KeywordTabHandler extends BaseTabHandler {
 	 * @param keywordList
 	 */
 	public void show_newKActionReplyForm(Object keywordList) {
-		// Load the reply form from file.  We then attach the keyword we're working on to
-		// the form so that it can be retrieved later for actioning.  Also, we can set the
-		// title of the loaded form to remind the user which keyword they are adding a
-		// reply to.
-		Object autoReplyForm = ui.loadComponentFromFile(UI_FILE_NEW_KACTION_REPLY_FORM, this);
-		
-		Object pnMessage = new MessagePanelHandler(this.ui).getPanel();
-		// FIX 0000542 FIXME this comment is not useful - what is the fix?  or more importantly, what is the function of this code?
-		Object pnBottom = ui.find(pnMessage, COMPONENT_PN_BOTTOM);
-		ui.remove(ui.getItem(pnBottom, 0));
-		Object senderPanel = ui.loadComponentFromFile(UI_FILE_SENDER_NAME_PANEL, this);
-		ui.add(pnBottom, senderPanel, 0);
-		ui.add(autoReplyForm, pnMessage, ui.getItems(autoReplyForm).length - 3);
-		ui.setAction(ui.find(senderPanel, COMPONENT_BT_SENDER_NAME), "addConstantToCommand(tfMessage.text, tfMessage, 0)", autoReplyForm, this);
-		ui.setAction(ui.find(senderPanel, "btSenderNumber"), "addConstantToCommand(tfMessage.text, tfMessage, 1)", autoReplyForm, this);
-		// FIX 0000542 FIXME this comment is not useful - what is the fix?  or more importantly, what is the function of this code?
-		ui.setAction(ui.find(autoReplyForm, COMPONENT_BT_SAVE), "do_newKActionReply(autoReplyForm, tfMessage.text)", autoReplyForm, this);
-
-		//Adds the date panel to it
-		ui.addDatePanel(autoReplyForm);
-		Keyword keyword = ui.getKeyword(ui.getSelectedItem(keywordList));
-		ui.setAttachedObject(autoReplyForm, keyword);
-		ui.add(autoReplyForm);
-		numberToSend = 1;
+		ReplyActionDialogHandler replyActionDialogHandler = new ReplyActionDialogHandler(ui, this);
+		replyActionDialogHandler.init(ui.getKeyword(ui.getSelectedItem(keywordList)));
+		replyActionDialogHandler.show();
 	}
 	
 	/**
@@ -935,62 +860,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 	public void selectMailRecipient(Object dialog) {
 		ui.showContactSelecter(InternationalisationUtils.getI18NString(SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "mail_setRecipient(contactSelecter_contactList, contactSelecter)", dialog, this);
 	}
-	
-	/**
-	 * Creates a new auto reply action.
-	 */
-	public void do_newKActionReply(Object replyDialog, String replyText) {
-		log.trace("ENTER");
-		String startDate = ui.getText(ui.find(replyDialog, COMPONENT_TF_START_DATE));
-		String endDate = ui.getText(ui.find(replyDialog, COMPONENT_TF_END_DATE));
-		log.debug("Start Date [" + startDate + "]");
-		log.debug("End Date [" + endDate + "]");
-		if (startDate.equals("")) {
-			log.debug("No start date set, so we set to [" + InternationalisationUtils.getDefaultStartDate() + "]");
-			startDate = InternationalisationUtils.getDefaultStartDate();
-		}
-		long start;
-		long end;
-		try {
-			Date ds = InternationalisationUtils.parseDate(startDate); 
-			if (!endDate.equals("") && !endDate.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
-				Date de = InternationalisationUtils.parseDate(endDate);
-				if (!Utils.validateDates(ds, de)) {
-					log.debug("Start date is not before the end date");
-					ui.alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
-					log.trace("EXIT");
-					return;
-				}
-				end = de.getTime();
-			} else {
-				end = DEFAULT_END_DATE;
-			}
-			start = ds.getTime();
-		} catch (ParseException e) {
-			log.debug("Wrong format for date", e);
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
-			log.trace("EXIT");
-			return;
-		} 
-		boolean isNew = false;
-		KeywordAction action;
-		if (ui.isAttachment(replyDialog, KeywordAction.class)) {
-			action = ui.getKeywordAction(replyDialog);
-			log.debug("Editing action [" + action + "]. Setting new values!");
-			action.setReplyText(replyText);
-			action.setStartDate(start);
-			action.setEndDate(end);
-		} else {
-			isNew = true;
-			Keyword keyword = ui.getKeyword(replyDialog);
-			log.debug("Creating action for keyword [" + keyword.getKeyword() + "].");
-			action = KeywordAction.createReplyAction(keyword, replyText, start, end);
-			keywordActionDao.saveKeywordAction(action);
-		}
-		updateKeywordActionList(action, isNew);
-		ui.remove(replyDialog);
-		log.trace("EXIT");
-	}
 
 	/**
 	 * Creates a new join group action.
@@ -1289,6 +1158,13 @@ public class KeywordTabHandler extends BaseTabHandler {
 		ui.add(keywordForm);
 	}
 	
+	void updateKeywordActionList_(KeywordAction action, boolean isNew) {
+		if(isNew) {
+			keywordActionDao.saveKeywordAction(action);
+		}
+		updateKeywordActionList(action, isNew);
+	}
+	
 	private void updateKeywordActionList(KeywordAction action, boolean isNew) {
 		Object table = find(COMPONENT_ACTION_LIST);
 		if (isNew) {
@@ -1350,47 +1226,9 @@ public class KeywordTabHandler extends BaseTabHandler {
 	 * @param action
 	 */
 	private void show_newKActionReplyFormForEdition(KeywordAction action) {
-		// Load the reply form from file.  We then attach the keyword we're working on to
-		// the form so that it can be retrieved later for actioning.  Also, we can set the
-		// title of the loaded form to remind the user which keyword they are adding a
-		// reply to.
-		Object autoReplyForm = ui.loadComponentFromFile(UI_FILE_NEW_KACTION_REPLY_FORM, this);
-		
-		MessagePanelHandler messagePanelController = new MessagePanelHandler(this.ui);
-		Object pnMessage = messagePanelController.getPanel();
-		// FIX 0000542
-		Object pnBottom = ui.find(pnMessage, COMPONENT_PN_BOTTOM);
-		ui.remove(ui.getItem(pnBottom, 0));
-		Object senderPanel = ui.loadComponentFromFile(UI_FILE_SENDER_NAME_PANEL, this);
-		ui.add(pnBottom, senderPanel, 0);
-		ui.add(autoReplyForm, pnMessage, ui.getItems(autoReplyForm).length - 3);
-		ui.setAction(ui.find(senderPanel, COMPONENT_BT_SENDER_NAME), "addConstantToCommand(tfMessage.text, tfMessage, 0)", autoReplyForm, this);
-		ui.setAction(ui.find(senderPanel, "btSenderNumber"), "addConstantToCommand(tfMessage.text, tfMessage, 1)", autoReplyForm, this);
-		// FIX 0000542
-		
-		//Adds the date panel to it
-		ui.addDatePanel(autoReplyForm);
-		
-		ui.setAction(ui.find(autoReplyForm, COMPONENT_BT_SAVE), "do_newKActionReply(autoReplyForm, tfMessage.text)", autoReplyForm, this);
-		
-		ui.setAttachedObject(autoReplyForm, action);
-		
-		ui.setText(ui.find(autoReplyForm, COMPONENT_TF_MESSAGE), action.getUnformattedReplyText());
-		messagePanelController.messageChanged(action.getUnformattedReplyText());
-		
-		ui.setText(ui.find(autoReplyForm, COMPONENT_TF_START_DATE), action == null ? "" : InternationalisationUtils.getDateFormat().format(action.getStartDate()));
-		Object endDate = ui.find(autoReplyForm, COMPONENT_TF_END_DATE);
-		String toSet = "";
-		if (action != null) {
-			if (action.getEndDate() == DEFAULT_END_DATE) {
-				toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
-			} else {
-				toSet = InternationalisationUtils.getDateFormat().format(action.getEndDate());
-			}
-		}
-		ui.setText(endDate, toSet);
-		ui.add(autoReplyForm);
-		numberToSend = 1;
+		ReplyActionDialogHandler dialog = new ReplyActionDialogHandler(ui, this);
+		dialog.init(action);
+		dialog.show();
 	}
 	
 	/**
