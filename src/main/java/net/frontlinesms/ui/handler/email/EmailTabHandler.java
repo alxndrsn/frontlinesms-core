@@ -9,96 +9,137 @@ import static net.frontlinesms.FrontlineSMSConstants.COMMON_RECIPIENT;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_SENDER;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_STATUS;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_SUBJECT;
-import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_EMAILS_DELETED;
-import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_REMOVING_EMAILS;
 import static net.frontlinesms.FrontlineSMSConstants.PROPERTY_FIELD;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_EMAIL_LOG;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.UI_FILE_PAGE_PANEL;
 
-import java.util.Collection;
-
-import org.apache.log4j.Logger;
+import java.util.List;
 
 import thinlet.Thinlet;
 import thinlet.ThinletText;
 import net.frontlinesms.EmailSender;
 import net.frontlinesms.EmailServerHandler;
 import net.frontlinesms.FrontlineSMS;
-import net.frontlinesms.Utils;
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Email;
 import net.frontlinesms.data.domain.EmailAccount;
+import net.frontlinesms.data.domain.Email.Field;
 import net.frontlinesms.data.repository.EmailAccountDao;
 import net.frontlinesms.data.repository.EmailDao;
-import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BaseTabHandler;
+import net.frontlinesms.ui.handler.ComponentPagingHandler;
+import net.frontlinesms.ui.handler.PagedComponentItemProvider;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
  * @author aga
  *
  */
-public class EmailTabHandler extends BaseTabHandler {
+public class EmailTabHandler extends BaseTabHandler implements PagedComponentItemProvider {
 //> UI LAYOUT FILES
+	/** Thinlet XML Layout file for the email tab */
 	public static final String UI_FILE_EMAILS_TAB = "/ui/core/email/emailsTab.xml";
 	
 //> UI COMPONENT NAMES
 	public static final String COMPONENT_EMAIL_LIST = "emailList";
 	public static final String COMPONENT_PN_EMAIL = "pnEmail";
 	public static final String COMPONENT_EMAILS_TOOLBAR = "emails_toolbar";
+
+	public static final String MESSAGE_EMAILS_DELETED = "message.emails.deleted";
+	public static final String MESSAGE_REMOVING_EMAILS = "message.removing.emails";
 	
 //> INSTANCE PROPERTIES
 	/** Manager of {@link EmailAccount}s and {@link EmailSender}s */
 	private EmailServerHandler emailManager;
+	/** DAO for {@link Email}s */
 	private EmailDao emailDao;
+	/** DAO for {@link EmailAccount}s */
 	private EmailAccountDao emailAccountDao;
 	
+	/** Thinlet UI Tab component */
 	private Object tabComponent;
-	
+	/** Thinlet UI Component: list of emails */
 	private Object emailListComponent;
+	/** Paging handler for {@link #emailListComponent} */
+	private ComponentPagingHandler emailListPager;
 	
 //> CONSTRUCTORS
+	/** 
+	 * Create a new {@link EmailTabHandler} tied to the specified UI and frontline controller. 
+	 * @param ui 
+	 * @param frontlineController
+	 */
 	public EmailTabHandler(UiGeneratorController ui, FrontlineSMS frontlineController) {
 		super(ui);
 		this.emailManager = frontlineController.getEmailServerManager();
 		this.emailDao = frontlineController.getEmailDao();
 	}
 	
-//> ACCESSORS	
+//> ACCESSORS
+	/** Refresh the view */
 	public void refresh() {
-		updateEmailList();
+		this.emailListPager.refresh();
 	}
 	
+	/** @see BaseTabHandler#init() */
 	protected Object initialiseTab() {
 		Object tabComponent = ui.loadComponentFromFile(UI_FILE_EMAILS_TAB, this);
 		
-		Object pnEmail = ui.find(tabComponent, COMPONENT_PN_EMAIL);
-		
-		// Add the paging panel
-		// TODO this should be done with placeholder + call to addPagination
-		Object pagePanel = ui.loadComponentFromFile(UI_FILE_PAGE_PANEL);
-		ui.setChoice(pagePanel, Thinlet.HALIGN, Thinlet.RIGHT);
-		ui.add(pnEmail, pagePanel, 2);
-		ui.setPageMethods(pnEmail, COMPONENT_EMAIL_LIST, pagePanel);
-		
 		emailListComponent = ui.find(tabComponent, COMPONENT_EMAIL_LIST);
-		ui.setListLimit(emailListComponent);
-		ui.setListPageNumber(1, emailListComponent);
-		ui.setListElementCount(emailDao.getEmailCount(), emailListComponent);
-		ui.setMethod(emailListComponent, "updateEmailList"); // FIXME i rather suspect this should not be set like this
+		this.emailListPager = new ComponentPagingHandler(this.ui, this, this.emailListComponent);
+		Object pnEmail = ui.find(tabComponent, COMPONENT_PN_EMAIL);
+		ui.add(pnEmail, this.emailListPager.getPanel(), 2);
 		
 		// Set the types for the email list columns...
-		Object header = Thinlet.get(emailListComponent, ThinletText.HEADER);
-		initEmailTableForSorting(header);
+		initEmailTableForSorting();
 		
 		return tabComponent;
 	}
+	
+//> PAGING METHODS
+	/** @see PagedComponentItemProvider#getListItems(Object, int, int) */
+	public Object[] getListItems(Object list, int startIndex, int limit) {
+		if(list == this.emailListComponent) {
+			List<Email> emails = this.emailDao.getEmailsWithLimit(getSortField(), getSortOrder(), startIndex, limit);
+			Object[] components = new Object[emails.size()];
+			for (int i=0; i<components.length; ++i) {
+				Email email = emails.get(i);
+				components[i] = ui.getRow(email);
+			}
+			return components;
+		} else throw new IllegalStateException();
+	}
+	/** @return the order to sort emails in {@link #emailListComponent} */
+	private Order getSortOrder() {
+		Object header = Thinlet.get(emailListComponent, ThinletText.HEADER);
+		Object tableColumn = ui.getSelectedItem(header);
+		Order order = Order.DESCENDING;
+		if (tableColumn != null) {
+			order = Thinlet.get(tableColumn, ThinletText.SORT).equals(ThinletText.ASCENT) ? Order.ASCENDING : Order.DESCENDING;
+		}
+		return order;
+	}
+	/** @return the column to sort emails in {@link #emailListComponent} by */
+	private Field getSortField() {
+		Object header = Thinlet.get(emailListComponent, ThinletText.HEADER);
+		Object tableColumn = ui.getSelectedItem(header);
+		Email.Field field = null;
+		if (tableColumn != null) {
+			field = (Email.Field) ui.getProperty(tableColumn, PROPERTY_FIELD);
+		}
+		return field;
+	}
+	/** @see PagedComponentItemProvider#getTotalListItemCount(Object) */
+	public int getTotalListItemCount(Object list) {
+		if(list == this.emailListComponent) {
+			return this.emailDao.getEmailCount();
+		} else throw new IllegalStateException();
+	}
+	
+//>
 
-	/**
-	 * @param header
-	 */
-	private void initEmailTableForSorting(Object header) {
+	/** Set up the email table's columns to allow easy sorting */
+	private void initEmailTableForSorting() {
+		Object header = Thinlet.get(emailListComponent, ThinletText.HEADER);
 		for (Object o : ui.getItems(header)) {
 			String text = ui.getString(o, Thinlet.TEXT);
 			// Here, the FIELD property is set on each column of the message table.  These field objects are
@@ -148,28 +189,13 @@ public class EmailTabHandler extends BaseTabHandler {
 		log.trace("EXIT");
 	}
 	
-	/**
-	 * Update the email list inside the email log tab.
-	 * This only works for advanced mode.
-	 */
+	/** Update the email list inside the email log tab. */
 	public void updateEmailList() {
-		Object header = Thinlet.get(emailListComponent, ThinletText.HEADER);
-		Object tableColumn = ui.getSelectedItem(header);
-		Email.Field field = null;
-		Order order = Order.DESCENDING;
-		if (tableColumn != null) {
-			field = (Email.Field) ui.getProperty(tableColumn, PROPERTY_FIELD);
-			order = Thinlet.get(tableColumn, ThinletText.SORT).equals(ThinletText.ASCENT) ? Order.ASCENDING : Order.DESCENDING;
-		}
-		int limit = ui.getListLimit(emailListComponent);
-		int pageNumber = ui.getListCurrentPage(emailListComponent);
-		Collection<Email> emails = emailDao.getEmailsWithLimit(field, order, (pageNumber - 1) * limit, limit);
-		updateEmailList(emails, emailListComponent);
+		this.emailListPager.refresh();
+		enableOptions(emailListComponent, null, find(COMPONENT_EMAILS_TOOLBAR));
 	}
 	
-	/**
-	 * Re-Sends the selected emails
-	 */
+	/** Re-Sends the selected emails */
 	public void resendSelectedFromEmailList() {
 		Object[] selected = ui.getSelectedItems(emailListComponent);
 		for (Object o : selected) {
@@ -219,39 +245,14 @@ public class EmailTabHandler extends BaseTabHandler {
 	
 //> UI HELPER METHODS
 	/**
-	 * Repopulates a UI list with details of a list of emails.
-	 */
-	private void updateEmailList(Collection<Email> emails, Object emailListComponent) {
-		ui.removeAll(emailListComponent);
-		
-		for (Email email : emails) {
-			Object row = ui.getRow(email);
-			ui.add(emailListComponent, row);
-		}
-				
-		ui.updatePageNumber(emailListComponent, find(TAB_EMAIL_LOG));
-		enableOptions(emailListComponent, null, find(COMPONENT_EMAILS_TOOLBAR));
-	}
-
-	/**
 	 * @param numberRemoved
 	 */
 	private void updatePageAfterDeletion(int numberRemoved, Object list) {
-		int limit = ui.getListLimit(list);
-		int count = ui.getListElementCount(list);
+		int limit = this.emailListPager.getMaxItemsPerPage();
+		int count = ui.getItems(this.emailListComponent).length;
 		if (numberRemoved == ui.getItems(list).length) {
-			int page = ui.getListCurrentPage(list);
-			int pages = count / limit;
-			if ((count % limit) != 0) {
-				pages++;
-			}
-			if (page == pages && page != 1) {
-				//Last page
-				page--;
-				ui.setListPageNumber(page, list);
-			} 
+			// TODO possibly turn back a page
 		}
-		ui.setListElementCount(count - numberRemoved, list);
 	}
 	
 //> LISTENER EVENT METHODS
@@ -270,15 +271,11 @@ public class EmailTabHandler extends BaseTabHandler {
 			ui.remove(ui.getItem(emailListComponent, index));
 			ui.add(emailListComponent, ui.getRow(email), index);
 		} else {
-			int limit = ui.getListLimit(emailListComponent);
+			int limit = this.emailListPager.getMaxItemsPerPage();
 			//Adding
 			if (ui.getItems(emailListComponent).length < limit && email.getStatus() == Email.STATUS_OUTBOX) {
 				ui.add(emailListComponent, ui.getRow(email));
 			}
-			if (email.getStatus() == Email.STATUS_OUTBOX) {
-				ui.setListElementCount(ui.getListElementCount(emailListComponent) + 1, emailListComponent);
-			}
-			ui.updatePageNumber(emailListComponent, find(TAB_EMAIL_LOG));
 		}
 	}
 	

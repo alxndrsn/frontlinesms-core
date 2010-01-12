@@ -260,9 +260,7 @@ public final class FrontlineSMSConstants {
 	public static final String MESSAGE_GROUP_ALREADY_EXISTS = "message.group.already.exists";
 	public static final String MESSAGE_IMPOSSIBLE_TO_CREATE_A_GROUP_HERE = "message.impossible.to.create.group.here";
 	public static final String MESSAGE_MESSAGES_DELETED = "message.messages.deleted";
-	public static final String MESSAGE_EMAILS_DELETED = "message.emails.deleted";
 	public static final String MESSAGE_REMOVING_MESSAGES = "message.removing.messages";
-	public static final String MESSAGE_REMOVING_EMAILS = "message.removing.emails";
 	public static final String MESSAGE_GROUPS_AND_CONTACTS_DELETED = "message.group.and.contacts.deleted";
 	public static final String MESSAGE_EXISTENT_CONTACT = "message.contact.already.exists";
 	public static final String MESSAGE_PHONE_BLANK = "message.phone.number.blank";

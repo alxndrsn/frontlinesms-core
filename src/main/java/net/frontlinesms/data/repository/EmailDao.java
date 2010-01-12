@@ -20,6 +20,7 @@
 package net.frontlinesms.data.repository;
 
 import java.util.Collection;
+import java.util.List;
 
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.*;
@@ -39,7 +40,7 @@ public interface EmailDao {
 	 * @param limit the maximum number of emails to recover
 	 * @return all emails within the specified range
 	 */
-	public Collection<Email> getEmailsWithLimit(Email.Field sortBy, Order order, int startIndex, int limit);
+	public List<Email> getEmailsWithLimit(Email.Field sortBy, Order order, int startIndex, int limit);
 	
 	/**
 	 * Gets all emails wihtin a specified range

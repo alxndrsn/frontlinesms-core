@@ -4,6 +4,7 @@
 package net.frontlinesms.data.repository.hibernate;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
@@ -46,7 +47,7 @@ public class HibernateEmailDao extends BaseHibernateDao<Email> implements EmailD
 	}
 
 	/** @see EmailDao#getEmailsWithLimit(Email.Field, net.frontlinesms.data.Order, int, int) */
-	public Collection<Email> getEmailsWithLimit(Field sortBy, Order order, int startIndex, int limit) {
+	public List<Email> getEmailsWithLimit(Field sortBy, Order order, int startIndex, int limit) {
 		DetachedCriteria criteria = super.getSortCriterion(sortBy, order);
 		return super.getList(criteria, startIndex, limit);
 	}

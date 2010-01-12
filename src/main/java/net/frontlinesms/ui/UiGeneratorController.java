@@ -465,7 +465,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param methodName
 	 * @deprecated please use {@link #setAction(Object, String, Object, Object)} instead
 	 */
-	public void setMethod(Object component, String methodName) {
+	private void setMethod(Object component, String methodName) {
 		LOG.trace("ENTER");
 		LOG.debug("Method [" + methodName + "]");
 		try {
@@ -482,17 +482,17 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Sets the maximum number of items that should be displayed per-page of a paged list.
 	 * @param list a Thinlet list component
 	 */
-	public void setListLimit(Object list) {
+	private void setListLimit(Object list) {
 		putProperty(list, PROPERTY_ENTRIES_PER_PAGE, RESULTS_PER_PAGE_DEFAULT);
 	}
 
-	public void nextPage(Object list, Object panel) {
+	private void nextPage(Object list, Object panel) {
 		int pageNumber = (Integer) getProperty(list, PROPERTY_CURRENT_PAGE);
 		putProperty(list, PROPERTY_CURRENT_PAGE, pageNumber + 1);
 		executeAction(getMethod(list));
 	}
 	
-	public Method getMethod(Object list) {
+	private Method getMethod(Object list) {
 		return (Method) getProperty(list, PROPERTY_ACTION);
 	}
 
@@ -502,7 +502,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * and otherwise is duplicating functionality already present in Thinlet.
 	 * @param method
 	 */
-	public void executeAction(Method method) {
+	private void executeAction(Method method) {
 		LOG.trace("ENTER");
 		LOG.debug("Invoking method [" + method + "]");
 		try {
@@ -517,14 +517,14 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		LOG.trace("EXIT");
 	}
 
-	public void previousPage(Object list, Object panel) {
+	private void previousPage(Object list, Object panel) {
 		int pageNumber = (Integer) getProperty(list, PROPERTY_CURRENT_PAGE);
 		putProperty(list, PROPERTY_CURRENT_PAGE, pageNumber - 1);
 		executeAction(getMethod(list));
 	}
 
 	// FIXME this could be private if it wasn't used in forms tab.  Should probably be abstracted
-	public void setPageMethods(Object root, String listName, Object pagePanel) {
+	private void setPageMethods(Object root, String listName, Object pagePanel) {
 		Object btPrev = find(pagePanel, COMPONENT_BT_PREVIOUS_PAGE);
 		Object btNext = find(pagePanel, COMPONENT_BT_NEXT_PAGE);
 		setMethod(btPrev, ATTRIBUTE_ACTION, "previousPage(" + listName + ",pagePanel)", root, this);
@@ -605,12 +605,12 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 	}
 	
-	public int getListCurrentPage(Object list) {
+	private int getListCurrentPage(Object list) {
 		int pageNumber = (Integer) getProperty(list, PROPERTY_CURRENT_PAGE);
 		return pageNumber;
 	}
 
-	public void updatePageNumber(Object list, Object panel) {
+	private void updatePageNumber(Object list, Object panel) {
 		int pageNumber = getListCurrentPage(list);
 		int limit = getListLimit(list);
 		int count = getListElementCount(list);
@@ -639,7 +639,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		setEnabled(find(panel, COMPONENT_BT_NEXT_PAGE), pageNumber != pages);
 	}
 
-	public int getListElementCount(Object list) {
+	private int getListElementCount(Object list) {
 		int count = (Integer) getProperty(list, PROPERTY_COUNT);
 		return count;
 	}
@@ -669,15 +669,15 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		this.messageTabController.doShowMessageHistory(component);
 	}
 	
-	public void setListElementCount(int count, Object list) {
+	private void setListElementCount(int count, Object list) {
 		putProperty(list, PROPERTY_COUNT, count);
 	}
 
-	public void setListPageNumber(int page, Object list) {
+	private void setListPageNumber(int page, Object list) {
 		putProperty(list, PROPERTY_CURRENT_PAGE, page);
 	}
 
-	public int getListLimit(Object list) {
+	private int getListLimit(Object list) {
 		int limit = (Integer) getProperty(list, PROPERTY_ENTRIES_PER_PAGE);
 		return limit;
 	}
