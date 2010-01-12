@@ -92,4 +92,18 @@ public interface ContactDao {
 	
 	/** @return all contacts who do not have a name set for them */
 	public Collection<Contact> getUnnamedContacts();
+
+	/**
+	 * @param contactNameFilter A contact's name, or any part of it 
+	 * @param start The first contact to return
+	 * @param limit the maximum number of contacts to return
+	 * @return all contacts whose names match the filter
+	 */
+	public List<Contact> getContactsFilteredByName(String contactNameFilter, int start, int limit);
+	
+	/** 
+	 * @param contactNameFilter A contact's name, or any part of it
+	 * @return count of all contacts whose names match the filter
+	 */
+	public int getContactsFilteredByNameCount(String contactNameFilter);
 }

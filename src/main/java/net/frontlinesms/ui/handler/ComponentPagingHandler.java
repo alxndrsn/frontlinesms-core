@@ -23,9 +23,9 @@ public class ComponentPagingHandler implements ThinletUiEventHandler {
 	/** UI Component name for  */
 	private static final String COMPONENT_BT_PREVIOUS_PAGE = "btPreviousPage";
 	/** UI Component name for  */
-	public static final String COMPONENT_LB_PAGE_NUMBER = "lbPageNumber";
+	private static final String COMPONENT_LB_PAGE_NUMBER = "lbPageNumber";
 	/** UI Component name for  */
-	public static final String COMPONENT_LB_NUMBER_OF_PAGES = "lbNumberOfPages";
+	private static final String COMPONENT_LB_NUMBER_OF_PAGES = "lbNumberOfPages";
 	
 	/** The default value for the number of items per page. */
 	private static final int ITEMS_PER_PAGE_DEFAULT = 100;
@@ -115,10 +115,8 @@ public class ComponentPagingHandler implements ThinletUiEventHandler {
 	}
 	
 //> UI HELPER METHODS
-	/**
-	 * Update the page count internally, and that displayed.
-	 */
-	private synchronized void updatePageCount() {
+	/** Update the page count internally, and that displayed. */
+	private void updatePageCount() {
 		// Update the page count etc.
 		this.totalListItems = this.itemProvider.getTotalListItemCount(this.list);
 		this.totalPages = (int) Math.ceil(((double)this.totalListItems) / this.maxItemsPerPage);
@@ -133,14 +131,12 @@ public class ComponentPagingHandler implements ThinletUiEventHandler {
 		ui.setText(ui.find(this.panel, "lbPageNumber"),
 				InternationalisationUtils.getI18NString(I18N_KEY_PAGES_X_OF_Y,
 						Integer.toString(this.currentPage + 1),
-						Integer.toString(this.totalPages)));
+						Integer.toString(Math.max(1, this.totalPages))));
 		ui.setEnabled(ui.find(panel, COMPONENT_BT_PREVIOUS_PAGE), this.currentPage > 0);
 		ui.setEnabled(ui.find(panel, COMPONENT_BT_NEXT_PAGE), this.currentPage < this.totalPages - 1);
 	}
 	
-	/**
-	 * Load the list items for the {@link #currentPage} and display them.
-	 */
+	/** Load the list items for the {@link #currentPage} and display them. */
 	private synchronized void refreshList() {
 		updatePageCount();
 		

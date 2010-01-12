@@ -135,4 +135,26 @@ public class InMemoryContactDao implements ContactDao {
 		}
 		return ungrouped;
 	}
+
+	public List<Contact> getContactsFilteredByName(String contactNameFilter,
+			int start, int limit) {
+		contactNameFilter = contactNameFilter.toLowerCase();
+		ArrayList<Contact> matching = new ArrayList<Contact>();
+		for(Contact c : this.allContacts.values()) {
+			if(c.getName().toLowerCase().contains(contactNameFilter)) {
+				matching.add(c);
+			}
+		}
+		return matching.subList(start, Math.min(matching.size(), limit));
+	}
+
+	public int getContactsFilteredByNameCount(String contactNameFilter) {
+		ArrayList<Contact> matching = new ArrayList<Contact>();
+		for(Contact c : this.allContacts.values()) {
+			if(c.getName().contains(contactNameFilter)) {
+				matching.add(c);
+			}
+		}
+		return matching.size();
+	}
 }

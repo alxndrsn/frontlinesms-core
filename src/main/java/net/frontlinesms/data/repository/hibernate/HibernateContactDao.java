@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 
 import net.frontlinesms.data.DuplicateKeyException;
@@ -51,6 +52,22 @@ public class HibernateContactDao extends BaseHibernateDao<Contact> implements Co
 		DetachedCriteria criteria = super.getCriterion();
 		criteria.add(Restrictions.eq(Field.NAME.getFieldName(), name));
 		return super.getUnique(criteria);
+	}
+	
+	public int getContactsFilteredByNameCount(String contactNameFilter) {
+		DetachedCriteria criteria = getNameFilterCriteria(contactNameFilter);
+		return super.getCount(criteria);
+	}
+	
+	public List<Contact> getContactsFilteredByName(String contactNameFilter, int start, int limit) {
+		DetachedCriteria criteria = getNameFilterCriteria(contactNameFilter);
+		return super.getList(criteria, start, limit);
+	}
+
+	private DetachedCriteria getNameFilterCriteria(String contactNameFilter) {
+		DetachedCriteria criteria = super.getCriterion();
+		criteria.add(Restrictions.ilike(Contact.Field.NAME.getFieldName(), contactNameFilter + '%'));
+		return criteria;
 	}
 
 	/** @see ContactDao#getContactCount() */

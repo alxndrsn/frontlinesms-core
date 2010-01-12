@@ -1979,6 +1979,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 
 	public void contactRemovedFromGroup(Contact contact, Group group) {
-		this.contactsTabController.contactRemovedFromGroup(contact, group);
+		if(this.currentTab.equals(TAB_CONTACT_MANAGER)) {
+			// TODO perhaps update the contact manager to remove the contact from the group, if it is currently relevant
+		}
 	}
 }

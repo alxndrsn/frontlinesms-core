@@ -36,14 +36,11 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_CO
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RADIO_BUTTON_ACTIVE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_SEND_SMS_BUTTON;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_VIEW_CONTACT_BUTTON;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_CONTACT_MANAGER;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.UI_FILE_PAGE_PANEL;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.DuplicateKeyException;
@@ -63,7 +60,7 @@ import thinlet.Thinlet;
  * Event handler for the Contacts tab and associated dialogs.
  * @author Alex
  */
-public class ContactsTabHandler extends BaseTabHandler {
+public class ContactsTabHandler extends BaseTabHandler implements PagedComponentItemProvider {
 //> STATIC CONSTANTS
 	/** UI XML File Path: the Home Tab itself */
 	private static final String UI_FILE_CONTACTS_TAB = "/ui/core/contacts/contactsTab.xml";
@@ -87,6 +84,11 @@ public class ContactsTabHandler extends BaseTabHandler {
 	private Object groupListComponent;
 	/** UI Component component: contact list.  This is cached here to save searching for it later. */
 	private Object contactListComponent;
+	
+	/** Handler for paging of {@link #contactListComponent} */
+	private ComponentPagingHandler contactListPager;
+	/** String to filter the contacts by */
+	private String contactNameFilter;
 
 //> CONSTRUCTORS
 	/**
@@ -105,6 +107,32 @@ public class ContactsTabHandler extends BaseTabHandler {
 	/** Refreshes the data displayed in the tab. */
 	public void refresh() {
 		updateGroupList();
+	}
+	
+//> PAGING METHODS
+	public Object[] getListItems(Object list, int start, int limit) {
+		if(list == this.contactListComponent) {
+			List<Contact> contacts = (this.contactNameFilter == null || this.contactNameFilter.length() == 0) 
+					? this.contactDao.getAllContacts(start, limit)
+					: this.contactDao.getContactsFilteredByName(this.contactNameFilter, start, limit);
+			return toThinletComponents(contacts);
+		} else throw new IllegalStateException();
+	};
+	private Object[] toThinletComponents(List<Contact> contacts) {
+		Object[] components = new Object[contacts.size()];
+		for (int i = 0; i < components.length; i++) {
+			Contact c = contacts.get(i);
+			components[i] = ui.getRow(c);
+		}
+		return components;
+	}
+	public int getTotalListItemCount(Object list) {
+		if(list == this.contactListComponent) {
+			int count = (this.contactNameFilter == null || this.contactNameFilter.length() == 0) 
+					? this.contactDao.getContactCount()
+					: this.contactDao.getContactsFilteredByNameCount(this.contactNameFilter);
+			return count;
+		} else throw new IllegalStateException();
 	}
 
 //> UI METHODS
@@ -135,8 +163,7 @@ public class ContactsTabHandler extends BaseTabHandler {
 	public void selectionChanged(Object tree, Object panel) {
 		LOG.trace("ENTER");
 		this.ui.setText(this.ui.find(COMPONENT_CONTACT_MANAGER_CONTACT_FILTER), "");
-		this.ui.setListPageNumber(1, contactListComponent);
-		//FIX Mantis entry 0000499
+
 		Group g = this.ui.getGroup(this.ui.getSelectedItem(tree));
 		String toSet = InternationalisationUtils.getI18NString(COMMON_CONTACTS_IN_GROUP, g.getName());
 		this.ui.setText(panel, toSet);
@@ -304,38 +331,18 @@ public class ContactsTabHandler extends BaseTabHandler {
 		this.ui.add(createDialog);
 	}
 
+	/** Updates the list of contacts with the new filter. */
+	public void filterContacts() {
+		updateContactList();
+	}
+
 	/**
-	 * Applies a text filter to the contact list and updates the list.
-	 * 
+	 * Applies a text filter to the contact list.  The list is not updated until {@link #filterContacts()}
+	 * is called.
 	 * @param contactFilter The new filter.
-	 */
-	public void filterContacts(String contactFilter) {
-		// We set the contactFilter variable.  When updateContactList is called, the contactFilter
-		// variable will be used to select a subsection of the relevant contacts.
-		this.ui.setListPageNumber(1, contactListComponent);
-		
-		if (contactFilter.length() == 0) {
-			updateContactList();
-			return;
-		}
-		
-		this.ui.removeAll(contactListComponent);
-		
-		LinkedHashMap<String, Contact> contacts = getContactsFromSelectedGroups(groupListComponent);
-		
-		Pattern pattern = Pattern.compile("(" + Pattern.quote(contactFilter.toLowerCase()) + ").*");
-		for (String key : contacts.keySet()) {
-			Contact con = contacts.get(key);
-			//FIX 0000501
-			for (String names : con.getName().split("\\s")) {
-				if (pattern.matcher(names.toLowerCase()).matches()) {
-					this.ui.add(contactListComponent, this.ui.getRow(con));
-					break;
-				}
-			}
-		}
-		this.ui.setListElementCount(1, contactListComponent);
-		this.ui.updatePageNumber(contactListComponent, this.ui.find(TAB_CONTACT_MANAGER));
+	 */	
+	public void setContactFilter(String contactFilter) {
+		this.contactNameFilter = contactFilter;
 	}
 
 	/**
@@ -467,13 +474,6 @@ public class ContactsTabHandler extends BaseTabHandler {
 			this.ui.removeDialog(contactDetailsDialog);
 		}
 		LOG.trace("EXIT");
-	}
-	
-	public synchronized void contactRemovedFromGroup(Contact contact, Group group) {
-		if (this.ui.getCurrentTab().equals(TAB_CONTACT_MANAGER)) {
-			removeFromContactList(contact, group);
-			updateTree(group);
-		}
 	}
 
 	/**
@@ -681,64 +681,12 @@ public class ContactsTabHandler extends BaseTabHandler {
 	private boolean contactDetails_getActive(Object contactDetails) {
 		return this.ui.isSelected(this.ui.find(contactDetails, COMPONENT_RADIO_BUTTON_ACTIVE));
 	}
-	private void removeFromContactList(Contact contact, Group group) {
-		List<Group> selectedGroupsFromTree = new ArrayList<Group>();
-		for (Object o : this.ui.getSelectedItems(groupListComponent)) {
-			Group g = this.ui.getGroup(o);
-			selectedGroupsFromTree.add(g);
-		}
-		
-		if (selectedGroupsFromTree.contains(group)) {
-			for (Object o : this.ui.getItems(contactListComponent)) {
-				Contact c = this.ui.getContact(o);
-				if (c.equals(contact)) {
-					this.ui.remove(o);
-					break;
-				}
-			}
-			int limit = this.ui.getListLimit(contactListComponent);
-			int count = this.ui.getListElementCount(contactListComponent);
-			if (this.ui.getItems(contactListComponent).length == 1) {
-				int page = this.ui.getListCurrentPage(contactListComponent);
-				int pages = count / limit;
-				if ((count % limit) != 0) {
-					pages++;
-				}
-				if (page == pages && page != 1) {
-					//Last page
-					page--;
-					this.ui.setListPageNumber(page, contactListComponent);
-				} 
-			}
-			this.ui.setListElementCount(this.ui.getListElementCount(contactListComponent) - 1, contactListComponent);
-			updateContactList();
-		}
-	}
+	
 	/** Repopulates the contact list according to the current filter. */
 	public void updateContactList() {
-		// To repopulate the contact list, we must first locate it and remove the current
-		// contents.  Once we've done that, work out what should now be displayed in it,
-		// and add them all.
-		this.ui.removeAll(contactListComponent);
-		// If we have only selected one of the 'system' groups, we need to disable the
-		// delete button - it's not possible to delete the root group, and the other 2
-		// special groups.
-		Group group = this.ui.getGroup(this.ui.getSelectedItem(groupListComponent));
-		
-		if (group != null) {
-			int limit = this.ui.getListLimit(contactListComponent);
-			int pageNumber = this.ui.getListCurrentPage(contactListComponent);
-			List<? extends Contact> contacts = group.getAllMembers((pageNumber - 1) * limit, limit);
-
-			int count = group.getAllMembersCount();
-			this.ui.setListElementCount(count, contactListComponent);
-
-			for (Contact con : contacts) {
-				this.ui.add(contactListComponent, this.ui.getRow(con));
-			}
-			this.ui.updatePageNumber(contactListComponent, this.ui.find(TAB_CONTACT_MANAGER));
-			enabledButtonsAfterSelection(contactListComponent);
-		}
+		this.contactListPager.setCurrentPage(0);
+		this.contactListPager.refresh();
+		enabledButtonsAfterSelection(contactListComponent);
 	}
 
 	/** Updates the group tree. */
@@ -771,13 +719,11 @@ public class ContactsTabHandler extends BaseTabHandler {
 		}
 		
 		if (selectedGroupsFromTree.contains(group)) {
-			int limit = this.ui.getListLimit(contactListComponent);
+			int limit = this.contactListPager.getMaxItemsPerPage();
 			//Adding
 			if (this.ui.getItems(contactListComponent).length < limit) {
 				this.ui.add(contactListComponent, this.ui.getRow(contact));
 			}
-			this.ui.setListElementCount(this.ui.getListElementCount(contactListComponent) + 1, contactListComponent);
-			this.ui.updatePageNumber(contactListComponent, this.ui.find(TAB_CONTACT_MANAGER));
 		}
 		
 		updateTree(group);
@@ -810,20 +756,14 @@ public class ContactsTabHandler extends BaseTabHandler {
 	protected Object initialiseTab() {
 		Object tabComponent = ui.loadComponentFromFile(UI_FILE_CONTACTS_TAB, this);
 		
-		Object pnContacts = this.ui.find(tabComponent, COMPONENT_PN_CONTACTS);
-		String listName = COMPONENT_CONTACT_MANAGER_CONTACT_LIST;
-		Object pagePanel = ui.loadComponentFromFile(UI_FILE_PAGE_PANEL, this);
-		ui.add(pnContacts, pagePanel, 0);
-		ui.setPageMethods(pnContacts, listName, pagePanel);
 		
 		// Cache Thinlet UI components
 		groupListComponent = this.ui.find(tabComponent, COMPONENT_CONTACT_MANAGER_GROUP_TREE);
 		contactListComponent = this.ui.find(tabComponent, COMPONENT_CONTACT_MANAGER_CONTACT_LIST);
-
-		//Entries per page
-		this.ui.setListLimit(contactListComponent);
-		//Current page
-		this.ui.setListPageNumber(1, contactListComponent);
+		
+		this.contactListPager = new ComponentPagingHandler(this.ui, this, contactListComponent);
+		Object pnContacts = this.ui.find(tabComponent, COMPONENT_PN_CONTACTS);
+		this.ui.add(pnContacts, this.contactListPager.getPanel());
 		
 		return tabComponent;
 	}
