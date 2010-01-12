@@ -18,6 +18,7 @@ public abstract class BaseTabHandler implements ThinletUiEventHandler {
 	protected final Logger log = Utils.getLogger(this.getClass());
 	/** The {@link UiGeneratorController} that shows the tab. */
 	protected final UiGeneratorController ui;
+	/** The tab component this handler is based around */
 	private Object tabComponent;
 	
 	protected BaseTabHandler(UiGeneratorController ui) {

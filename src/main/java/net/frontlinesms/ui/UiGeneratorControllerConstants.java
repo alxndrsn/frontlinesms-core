@@ -74,7 +74,6 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_LB_NUMBER_OF_PAGES = "lbNumberOfPages";
 	public static final String COMPONENT_BT_NEXT_PAGE = "btNextPage";
 	public static final String COMPONENT_BT_PREVIOUS_PAGE = "btPreviousPage";
-	public static final String COMPONENT_PN_MESSAGE_LIST = "pnMessageList";
 	public static final String COMPONENT_FILTER_LIST = "filterList";
 	public static final String COMPONENT_PN_FILTER = "pnFilter";
 	public static final String COMPONENT_MI_SEND_SMS = "miSendSMS";
@@ -168,7 +167,6 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_STATUS_BAR = "statusBar";
 	public static final String COMPONENT_CONTACT_MANAGER_GROUP_TREE = "contactManager_groupList";
 	public static final String COMPONENT_CONTACT_MANAGER_CONTACT_LIST = "contactManager_contactList";
-	public static final String COMPONENT_MESSAGE_LIST = "messageList";
 	public static final String COMPONENT_COMPOSE_MESSAGE_RECIPIENT_LIST = "composeMessage_to";
 	public static final String COMPONENT_RECEIVED_MESSAGES_TOGGLE = "receivedMessagesToggle";
 	public static final String COMPONENT_SENT_MESSAGES_TOGGLE = "sentMessagesToggle";

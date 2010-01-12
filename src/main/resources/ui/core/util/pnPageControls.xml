@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<panel name="pagePanel" gap="4" halign="left">
+    <label name="lbPageNumber"/>
+    <button enabled="false" icon="/icons/left.png" action="previousPage" name="btPreviousPage"/>
+    <button enabled="false" icon="/icons/right.png" action="nextPage" name="btNextPage"/>
+</panel>

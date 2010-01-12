@@ -19,10 +19,8 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_HISTO
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_HISTORY_SENT_MESSAGES_TOGGLE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_COST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_MSGS_NUMBER;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_MESSAGE_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_BOTTOM;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_FILTER;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_MESSAGE_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RECEIVED_MESSAGES_TOGGLE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_SENT_MESSAGES_TOGGLE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_END_DATE;
@@ -31,6 +29,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.UI_FILE_PAGE_PA
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -45,6 +44,7 @@ import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.Message;
+import net.frontlinesms.data.domain.Message.Field;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
@@ -52,6 +52,8 @@ import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiProperties;
 import net.frontlinesms.ui.handler.BaseTabHandler;
+import net.frontlinesms.ui.handler.ComponentPagingHandler;
+import net.frontlinesms.ui.handler.PagedComponentItemProvider;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
@@ -59,13 +61,17 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * @author Carlos Eduardo Genz
  * <li> kadu(at)masabi(dot)com
  */
-public class MessageHistoryTabHandler extends BaseTabHandler {
+public class MessageHistoryTabHandler extends BaseTabHandler implements PagedComponentItemProvider {
 	
 //> CONSTANTS
 	/** Path to the Thinlet XML layout file for the message history tab */
 	private static final String UI_FILE_MESSAGES_TAB = "/ui/core/messages/messagesTab.xml";
 	/** Path to the Thinlet XML layout file for the message details form */
 	public static final String UI_FILE_MSG_DETAILS_FORM = "/ui/core/messages/dgMessageDetails.xml";
+
+	/** UI Component name: the list of messages */
+	public static final String COMPONENT_MESSAGE_LIST = "messageList";
+	
 	/** Number of milliseconds in a day */
 	private static final long MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
 	
@@ -85,6 +91,9 @@ public class MessageHistoryTabHandler extends BaseTabHandler {
 	private Object showSentMessagesComponent;
 	private Object showReceivedMessagesComponent;
 	private Object filterListComponent;
+	
+	/** Paging handler for this list of messages. */
+	ComponentPagingHandler messagePagingHandler;
 	
 	/** Start date of the message history, or <code>null</code> if none has been set. */
 	private Long messageHistoryStart;
@@ -158,7 +167,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler {
 		// tree, so we never get a positive match.
 		if(next == null) next = ui.getItem(list, 0);
 		ui.setSelectedItem(list, next);
-		messageHistory_selectionChanged();
+		updateMessageList();
 	}
 
 //> INSTANCE HELPER METHODS
@@ -170,31 +179,27 @@ public class MessageHistoryTabHandler extends BaseTabHandler {
 		
 		Object pnBottom = ui.find(tabComponent, COMPONENT_PN_BOTTOM);
 		Object pnFilter = ui.find(tabComponent, COMPONENT_PN_FILTER);
-		String listName = COMPONENT_MESSAGE_LIST;
-		Object pagePanel = ui.loadComponentFromFile(UI_FILE_PAGE_PANEL);
-		ui.add(pnBottom, pagePanel, 0);
-		ui.setPageMethods(ui.find(tabComponent, COMPONENT_PN_MESSAGE_LIST), listName, pagePanel);
-		pagePanel = ui.loadComponentFromFile(UI_FILE_PAGE_PANEL);
-		listName = COMPONENT_FILTER_LIST;
-		ui.add(pnFilter, pagePanel);
-		ui.setPageMethods(pnFilter, listName, pagePanel);
 
 		messageListComponent = ui.find(tabComponent, COMPONENT_MESSAGE_LIST);
+		messagePagingHandler = new ComponentPagingHandler(this.ui, this, this.messageListComponent);
+		ui.add(pnBottom, messagePagingHandler.getPanel(), 0);
+
+		Object pagePanel = ui.loadComponentFromFile(UI_FILE_PAGE_PANEL);
+		String listName = COMPONENT_FILTER_LIST;
+		ui.add(pnFilter, pagePanel);
+		ui.setPageMethods(pnFilter, listName, pagePanel);
 		filterListComponent = ui.find(tabComponent, COMPONENT_FILTER_LIST);
 		
 		// Set the types for the message list columns...
-		Object header = Thinlet.get(messageListComponent, ThinletText.HEADER);
-		initMessageTableForSorting(header);
+		initMessageTableForSorting();
 		
 		showReceivedMessagesComponent = ui.find(tabComponent, COMPONENT_RECEIVED_MESSAGES_TOGGLE);
 		showSentMessagesComponent = ui.find(tabComponent, COMPONENT_SENT_MESSAGES_TOGGLE);
 		
 		// initListsForPaging
 		//Entries per page
-		ui.setListLimit(messageListComponent);
 		ui.setListLimit(filterListComponent);
 		//Current page
-		ui.setListPageNumber(1, messageListComponent);
 		ui.setListPageNumber(1, filterListComponent);
 		//Count
 		//setListElementCount(1, messageListComponent);
@@ -202,6 +207,142 @@ public class MessageHistoryTabHandler extends BaseTabHandler {
 		
 		LOG.trace("EXIT");
 		return tabComponent;
+	}
+	
+//> LIST PAGING METHODS
+	/** @see PagedComponentItemProvider#getListItems(Object, int, int) */
+	public Object[] getListItems(Object list, int start, int limit) {
+		if(list.equals(this.messagePagingHandler.getList())) {
+			List<Message> messages = getListMessages(list, start, limit);
+			Object[] messageRows = new Object[messages.size()];
+			for (int i = 0; i < messages.size(); i++) {
+				Message m = messages.get(i);
+				messageRows[i] = ui.getRow(m);
+			}
+			return messageRows;
+		} else throw new IllegalStateException();
+	}
+	/** @see PagedComponentItemProvider#getTotalListItemCount(Object) */
+	public int getTotalListItemCount(Object list) {
+		if(list.equals(this.messagePagingHandler.getList())) {
+			return getMessageCount();
+		} else throw new IllegalStateException();
+	}
+	
+	/** @return total number of messages to be displayed in the message list. */
+	private int getMessageCount() {
+		Class<?> filterClass = getMessageHistoryFilterType();
+		Object filterList;
+		if(filterClass == Group.class) {
+			filterList = find("messageHistory_groupList");
+		} else filterList = filterListComponent;
+		Object selectedItem = ui.getSelectedItem(filterList);
+
+		if (selectedItem == null) {
+			return 0;
+		} else {
+			final int messageType = getSelectedMessageType();
+			int selectedIndex = ui.getSelectedIndex(filterList);
+			if (selectedIndex == 0) {
+				return messageDao.getMessageCount(messageType, messageHistoryStart, messageHistoryEnd);
+			} else {
+				if(filterClass == Contact.class) {
+					Contact c = ui.getContact(selectedItem);
+					return messageDao.getMessageCountForMsisdn(messageType, c.getPhoneNumber(), messageHistoryStart, messageHistoryEnd);
+				} else if(filterClass == Group.class) {
+					// A Group was selected
+					List<Group> groups = new ArrayList<Group>();
+					ui.getGroupsRecursivelyDown(groups, ui.getGroup(selectedItem));
+					return messageDao.getMessageCountForGroups(messageType, groups, messageHistoryStart, messageHistoryEnd);
+				} else /* (filterClass == Keyword.class) */ {
+					// Keyword Selected
+					Keyword k = ui.getKeyword(selectedItem);
+					return messageDao.getMessageCount(messageType, k, messageHistoryStart, messageHistoryEnd);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Gets the list of messages to display in the message table.
+	 * @param list The message table object
+	 * @param start The index of the first message to return
+	 * @param limit The maximum number of messages to return
+	 * @return a page of messages, sorted and filtered
+	 */
+	private List<Message> getListMessages(Object list, int start, int limit) {
+		Class<?> filterClass = getMessageHistoryFilterType();
+		Object filterList;
+		if(filterClass == Group.class) {
+			filterList = find("messageHistory_groupList");
+		} else filterList = filterListComponent;
+		Object selectedItem = ui.getSelectedItem(filterList);
+		
+		if (selectedItem == null) {
+			return Collections.emptyList();
+		} else {
+			int messageType = getSelectedMessageType();
+			Order order = getMessageSortOrder();
+			Field field = getMessageSortField();
+			
+			int selectedIndex = ui.getSelectedIndex(filterList);
+			if (selectedIndex == 0) {
+				List<Message> allMessages = messageDao.getAllMessages(messageType, field, order, messageHistoryStart, messageHistoryEnd, start, limit);
+				return allMessages;
+			} else {
+				if(filterClass == Contact.class) {
+					// Contact selected
+					Contact c = ui.getContact(selectedItem);
+					return messageDao.getMessagesForMsisdn(messageType, c.getPhoneNumber(), field, order, messageHistoryStart, messageHistoryEnd, start, limit);
+				} else if(filterClass == Group.class) {
+					// A Group was selected
+					List<Group> groups = new ArrayList<Group>();
+					ui.getGroupsRecursivelyDown(groups, ui.getGroup(selectedItem));
+					return messageDao.getMessagesForGroups(messageType, groups, field, order, messageHistoryStart, messageHistoryEnd, start, limit);
+				} else /* (filterClass == Keyword.class) */ {
+					// Keyword Selected
+					Keyword k = ui.getKeyword(selectedItem);
+					return messageDao.getMessagesForKeyword(messageType, k, field, order, messageHistoryStart, messageHistoryEnd, start, limit);
+				}
+			}
+		}
+	}
+	
+	/** @return the field to sort messages in the message list by */
+	private Field getMessageSortField() {
+		Object header = Thinlet.get(messageListComponent, ThinletText.HEADER);
+		Object tableColumn = ui.getSelectedItem(header);
+		Message.Field field = Message.Field.DATE;
+		if (tableColumn != null) {
+			field = (Message.Field) ui.getProperty(tableColumn, PROPERTY_FIELD);
+		}
+		
+		return field;
+	}
+	
+	/** @return the sorting order for the message list */
+	private Order getMessageSortOrder() {
+		Object header = Thinlet.get(messageListComponent, ThinletText.HEADER);
+		Object tableColumn = ui.getSelectedItem(header);
+		Order order = Order.DESCENDING;
+		if (tableColumn != null) {
+			order = Thinlet.get(tableColumn, ThinletText.SORT).equals(ThinletText.ASCENT) ? Order.ASCENDING : Order.DESCENDING;
+		}
+
+		return order;
+	}
+	
+	/** @return he type(s) of messages to display in the message list */
+	private int getSelectedMessageType() {
+		boolean showSentMessages = ui.isSelected(showSentMessagesComponent);
+		boolean showReceivedMessages = ui.isSelected(showReceivedMessagesComponent);
+		int messageType;
+		if (showSentMessages && showReceivedMessages) { 
+			messageType = Message.TYPE_ALL;
+		} else if (showSentMessages) {
+			messageType = Message.TYPE_OUTBOUND;
+		} else messageType = Message.TYPE_RECEIVED;
+		return messageType;
 	}
 	
 //> PUBLIC UI METHODS
@@ -293,89 +434,93 @@ public class MessageHistoryTabHandler extends BaseTabHandler {
 		}
 		
 	}
-
-	/**
-	 * Update the message list inside the message log tab.
-	 * This only works for advanced mode.
-	 */
-	@SuppressWarnings("unchecked")
+	
 	public void updateMessageList() {
-		Class filterClass = getMessageHistoryFilterType();
-		Object filterList;
-		if(filterClass == Group.class) {
-			filterList = find("messageHistory_groupList");
-		} else filterList = filterListComponent;
-		Object selectedItem = ui.getSelectedItem(filterList);
-
-		ui.removeAll(messageListComponent);
-		int count = 0;
-		if (selectedItem == null) {
-			//Nothing selected
-			ui.setListPageNumber(1, messageListComponent);
-			numberToSend = 0;
-		} else {
-			int messageType;
-			boolean showSentMessages = ui.isSelected(showSentMessagesComponent);
-			boolean showReceivedMessages = ui.isSelected(showReceivedMessagesComponent);
-			if (showSentMessages && showReceivedMessages) { 
-				messageType = Message.TYPE_ALL;
-			} else if (showSentMessages) {
-				messageType = Message.TYPE_OUTBOUND;
-			} else messageType = Message.TYPE_RECEIVED;
-			Object header = Thinlet.get(messageListComponent, ThinletText.HEADER);
-			Object tableColumn = ui.getSelectedItem(header);
-			Message.Field field = Message.Field.DATE;
-			Order order = Order.DESCENDING;
-			if (tableColumn != null) {
-				field = (Message.Field) ui.getProperty(tableColumn, PROPERTY_FIELD);
-				order = Thinlet.get(tableColumn, ThinletText.SORT).equals(ThinletText.ASCENT) ? Order.ASCENDING : Order.DESCENDING;
-			}
-			int limit = ui.getListLimit(messageListComponent);
-			int pageNumber = ui.getListCurrentPage(messageListComponent);
-			//ALL messages
-			int selectedIndex = ui.getSelectedIndex(filterList);
-			if (selectedIndex == 0) {
-
-				List<Message> allMessages = messageDao.getAllMessages(messageType, field, order, messageHistoryStart, messageHistoryEnd, (pageNumber - 1) * limit, limit);
-				for (Message m : allMessages) {
-					ui.add(messageListComponent, ui.getRow(m));
-				}
-				count = messageDao.getMessageCount(messageType, messageHistoryStart, messageHistoryEnd);
-				numberToSend = messageDao.getSMSCount(messageHistoryStart, messageHistoryEnd);
-			} else {
-				if(filterClass == Contact.class) {
-					// Contact selected
-					Contact c = ui.getContact(selectedItem);
-					for (Message m : messageDao.getMessagesForMsisdn(messageType, c.getPhoneNumber(), field, order, messageHistoryStart, messageHistoryEnd, (pageNumber - 1) * limit, limit)) {
-						ui.add(messageListComponent, ui.getRow(m));
-					}
-					count = messageDao.getMessageCountForMsisdn(messageType, c.getPhoneNumber(), messageHistoryStart, messageHistoryEnd);
-					numberToSend = messageDao.getSMSCountForMsisdn(c.getPhoneNumber(), messageHistoryStart, messageHistoryEnd);
-				} else if(filterClass == Group.class) {
-					// A Group was selected
-					List<Group> groups = new ArrayList<Group>();
-					ui.getGroupsRecursivelyDown(groups, ui.getGroup(selectedItem));
-					for (Message m : messageDao.getMessagesForGroups(messageType, groups, field, order, messageHistoryStart, messageHistoryEnd, (pageNumber - 1) * limit, limit)) {
-						ui.add(messageListComponent, ui.getRow(m));
-					}
-					count = messageDao.getMessageCountForGroups(messageType, groups, messageHistoryStart, messageHistoryEnd);
-					numberToSend = messageDao.getSMSCountForGroups(groups, messageHistoryStart, messageHistoryEnd);
-				} else /* (filterClass == Keyword.class) */ {
-					// Keyword Selected
-					Keyword k = ui.getKeyword(selectedItem);
-					for (Message m : messageDao.getMessagesForKeyword(messageType, k, field, order, messageHistoryStart, messageHistoryEnd, (pageNumber - 1) * limit, limit)) {
-						ui.add(messageListComponent, ui.getRow(m));
-					}
-					count = messageDao.getMessageCount(messageType, k, messageHistoryStart, messageHistoryEnd);
-					numberToSend = messageDao.getSMSCountForKeyword(k, messageHistoryStart, messageHistoryEnd);
-				}
-			}
-		}
-		ui.setListElementCount(count, messageListComponent);
-		ui.updatePageNumber(messageListComponent, ui.getParent(messageListComponent));
-		updateMessageHistoryCost();
-		ui.setEnabled(messageListComponent, selectedItem != null && ui.getItems(messageListComponent).length > 0);
+		this.messagePagingHandler.refresh();
 	}
+
+//	/**
+//	 * Update the message list inside the message log tab.
+//	 * This only works for advanced mode.
+//	 */
+//	@SuppressWarnings("unchecked")
+//	public void updateMessageList() {
+//		Class filterClass = getMessageHistoryFilterType();
+//		Object filterList;
+//		if(filterClass == Group.class) {
+//			filterList = find("messageHistory_groupList");
+//		} else filterList = filterListComponent;
+//		Object selectedItem = ui.getSelectedItem(filterList);
+//
+//		ui.removeAll(messageListComponent);
+//		int count = 0;
+//		if (selectedItem == null) {
+//			//Nothing selected
+//			ui.setListPageNumber(1, messageListComponent);
+//			numberToSend = 0;
+//		} else {
+//			int messageType;
+//			boolean showSentMessages = ui.isSelected(showSentMessagesComponent);
+//			boolean showReceivedMessages = ui.isSelected(showReceivedMessagesComponent);
+//			if (showSentMessages && showReceivedMessages) { 
+//				messageType = Message.TYPE_ALL;
+//			} else if (showSentMessages) {
+//				messageType = Message.TYPE_OUTBOUND;
+//			} else messageType = Message.TYPE_RECEIVED;
+//			Object header = Thinlet.get(messageListComponent, ThinletText.HEADER);
+//			Object tableColumn = ui.getSelectedItem(header);
+//			Message.Field field = Message.Field.DATE;
+//			Order order = Order.DESCENDING;
+//			if (tableColumn != null) {
+//				field = (Message.Field) ui.getProperty(tableColumn, PROPERTY_FIELD);
+//				order = Thinlet.get(tableColumn, ThinletText.SORT).equals(ThinletText.ASCENT) ? Order.ASCENDING : Order.DESCENDING;
+//			}
+//			int limit = ui.getListLimit(messageListComponent);
+//			int pageNumber = ui.getListCurrentPage(messageListComponent);
+//			//ALL messages
+//			int selectedIndex = ui.getSelectedIndex(filterList);
+//			if (selectedIndex == 0) {
+//
+//				List<Message> allMessages = messageDao.getAllMessages(messageType, field, order, messageHistoryStart, messageHistoryEnd, (pageNumber - 1) * limit, limit);
+//				for (Message m : allMessages) {
+//					ui.add(messageListComponent, ui.getRow(m));
+//				}
+//				count = messageDao.getMessageCount(messageType, messageHistoryStart, messageHistoryEnd);
+//				numberToSend = messageDao.getSMSCount(messageHistoryStart, messageHistoryEnd);
+//			} else {
+//				if(filterClass == Contact.class) {
+//					// Contact selected
+//					Contact c = ui.getContact(selectedItem);
+//					for (Message m : messageDao.getMessagesForMsisdn(messageType, c.getPhoneNumber(), field, order, messageHistoryStart, messageHistoryEnd, (pageNumber - 1) * limit, limit)) {
+//						ui.add(messageListComponent, ui.getRow(m));
+//					}
+//					count = messageDao.getMessageCountForMsisdn(messageType, c.getPhoneNumber(), messageHistoryStart, messageHistoryEnd);
+//					numberToSend = messageDao.getSMSCountForMsisdn(c.getPhoneNumber(), messageHistoryStart, messageHistoryEnd);
+//				} else if(filterClass == Group.class) {
+//					// A Group was selected
+//					List<Group> groups = new ArrayList<Group>();
+//					ui.getGroupsRecursivelyDown(groups, ui.getGroup(selectedItem));
+//					for (Message m : messageDao.getMessagesForGroups(messageType, groups, field, order, messageHistoryStart, messageHistoryEnd, (pageNumber - 1) * limit, limit)) {
+//						ui.add(messageListComponent, ui.getRow(m));
+//					}
+//					count = messageDao.getMessageCountForGroups(messageType, groups, messageHistoryStart, messageHistoryEnd);
+//					numberToSend = messageDao.getSMSCountForGroups(groups, messageHistoryStart, messageHistoryEnd);
+//				} else /* (filterClass == Keyword.class) */ {
+//					// Keyword Selected
+//					Keyword k = ui.getKeyword(selectedItem);
+//					for (Message m : messageDao.getMessagesForKeyword(messageType, k, field, order, messageHistoryStart, messageHistoryEnd, (pageNumber - 1) * limit, limit)) {
+//						ui.add(messageListComponent, ui.getRow(m));
+//					}
+//					count = messageDao.getMessageCount(messageType, k, messageHistoryStart, messageHistoryEnd);
+//					numberToSend = messageDao.getSMSCountForKeyword(k, messageHistoryStart, messageHistoryEnd);
+//				}
+//			}
+//		}
+//		ui.setListElementCount(count, messageListComponent);
+//		ui.updatePageNumber(messageListComponent, ui.getParent(messageListComponent));
+//		updateMessageHistoryCost();
+//		ui.setEnabled(messageListComponent, selectedItem != null && ui.getItems(messageListComponent).length > 0);
+//	}
 
 	/**
 	 * Update the message history filter.
@@ -452,11 +597,6 @@ public class MessageHistoryTabHandler extends BaseTabHandler {
 		updateMessageHistoryFilter();
 	}
 	
-	public void messageHistory_selectionChanged() {
-		ui.setListPageNumber(1, messageListComponent);
-		updateMessageList();
-	}
-	
 	public void messagesTab_removeMessages() {
 		LOG.trace("ENTER");
 		
@@ -490,17 +630,15 @@ public class MessageHistoryTabHandler extends BaseTabHandler {
 		LOG.trace("EXIT");
 	}
 
-	/**
-	 * Show the message details dialog.
-	 */
-	public void showMessageDetails(Object list) {
-		Object selected = ui.getSelectedItem(list);
+	/** Show the details of the message selected in {@link #messageListComponent}. */
+	public void showMessageDetails() {
+		Object selected = ui.getSelectedItem(this.messageListComponent);
 		if (selected != null) {
 			Message message = ui.getMessage(selected);
 			Object details = ui.loadComponentFromFile(UI_FILE_MSG_DETAILS_FORM, this);
 			String senderDisplayName = ui.getSenderDisplayValue(message);
 			String recipientDisplayName = ui.getRecipientDisplayValue(message);
-			String status = ui.getMessageStatusAsString(message);
+			String status = UiGeneratorController.getMessageStatusAsString(message);
 			String date = InternationalisationUtils.getDatetimeFormat().format(message.getDate());
 			String content = message.getTextContent();
 			
@@ -581,7 +719,9 @@ public class MessageHistoryTabHandler extends BaseTabHandler {
 	}
 
 //> UI HELPER METHODS
-	private void initMessageTableForSorting(Object header) {
+	/** Initialise the message table's HEADER component for sorting the table. */
+	private void initMessageTableForSorting() {
+		Object header = Thinlet.get(messageListComponent, ThinletText.HEADER);
 		for (Object o : ui.getItems(header)) {
 			String text = ui.getString(o, Thinlet.TEXT);
 			// Here, the FIELD property is set on each column of the message table.  These field objects are
