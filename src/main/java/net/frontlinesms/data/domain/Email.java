@@ -104,7 +104,7 @@ public class Email {
 
 	/** Date of the email */
 	@Column(name=COLUMN_DATE)
-	private Long date;
+	private long date;
 
 	/** Sender of the email */
 	@ManyToOne(targetEntity=EmailAccount.class)
@@ -126,6 +126,7 @@ public class Email {
 	 * @param content The email content
 	 */
 	public Email(EmailAccount from, String recipients, String subject, String content) {
+		this.date = System.currentTimeMillis();
 		this.sender = from;
 		this.recipients = recipients;
 		this.subject = subject;
@@ -144,12 +145,6 @@ public class Email {
 	public void setContent(String content) {
 		this.content = content;
 	}
-
-	/** @param date new value for {@link #date} */
-	public void setDate(Long date) {
-		this.date = date;
-	}
-
 	/** @param sender new value for {@link #sender} */
 	public void setSender(EmailAccount sender) {
 		this.sender = sender;
@@ -183,14 +178,12 @@ public class Email {
 	public String getEmailContent() {
 		return this.content;
 	}
-	
-	/**
-	 * Sets the date for this email.
-	 * @param date
-	 */
+
+	/** @param date new value for {@link #date} */
 	public void setDate(long date) {
 		this.date = date;
 	}
+
 	
 	/**
 	 * Gets this action email recipients.
@@ -223,7 +216,7 @@ public class Email {
 	public long getDate() {
 		return this.date;
 	}
-
+	
 //> GENERATED CODE
 	/** @see java.lang.Object#hashCode() */
 	@Override
@@ -231,15 +224,14 @@ public class Email {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((content == null) ? 0 : content.hashCode());
-		result = prime * result + ((date == null) ? 0 : date.hashCode());
+		result = prime * result + (int) (date ^ (date >>> 32));
 		result = prime * result
 				+ ((recipients == null) ? 0 : recipients.hashCode());
-		result = prime * result + ((sender == null) ? 0 : sender.hashCode());
 		result = prime * result + status;
 		result = prime * result + ((subject == null) ? 0 : subject.hashCode());
 		return result;
 	}
-
+	
 	/** @see java.lang.Object#equals(java.lang.Object) */
 	@Override
 	public boolean equals(Object obj) {
@@ -255,20 +247,12 @@ public class Email {
 				return false;
 		} else if (!content.equals(other.content))
 			return false;
-		if (date == null) {
-			if (other.date != null)
-				return false;
-		} else if (!date.equals(other.date))
+		if (date != other.date)
 			return false;
 		if (recipients == null) {
 			if (other.recipients != null)
 				return false;
 		} else if (!recipients.equals(other.recipients))
-			return false;
-		if (sender == null) {
-			if (other.sender != null)
-				return false;
-		} else if (!sender.equals(other.sender))
 			return false;
 		if (status != other.status)
 			return false;

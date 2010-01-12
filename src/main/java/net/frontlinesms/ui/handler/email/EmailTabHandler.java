@@ -11,13 +11,16 @@ import static net.frontlinesms.FrontlineSMSConstants.COMMON_STATUS;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_SUBJECT;
 import static net.frontlinesms.FrontlineSMSConstants.PROPERTY_FIELD;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import thinlet.Thinlet;
 import thinlet.ThinletText;
 import net.frontlinesms.EmailSender;
 import net.frontlinesms.EmailServerHandler;
 import net.frontlinesms.FrontlineSMS;
+import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Email;
 import net.frontlinesms.data.domain.EmailAccount;
@@ -31,8 +34,10 @@ import net.frontlinesms.ui.handler.PagedComponentItemProvider;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
- * @author aga
- *
+ * @author Alex Anderson 
+ * <li> alex(at)masabi(dot)com
+ * @author Carlos Eduardo Genz
+ * <li> kadu(at)masabi(dot)com
  */
 public class EmailTabHandler extends BaseTabHandler implements PagedComponentItemProvider {
 //> UI LAYOUT FILES
@@ -72,6 +77,7 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 		super(ui);
 		this.emailManager = frontlineController.getEmailServerManager();
 		this.emailDao = frontlineController.getEmailDao();
+		this.emailAccountDao = frontlineController.getEmailAccountFactory();
 	}
 	
 //> ACCESSORS
@@ -91,7 +97,7 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 		
 		// Set the types for the email list columns...
 		initEmailTableForSorting();
-		
+	
 		return tabComponent;
 	}
 	
