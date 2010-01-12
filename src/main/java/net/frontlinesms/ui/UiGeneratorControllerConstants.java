@@ -166,7 +166,6 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_NEW_CONTACT_GROUP_LIST = "newContact_groupList";
 	public static final String COMPONENT_MENU_ITEM_CREATE = "miCreate";
 	public static final String COMPONENT_STATUS_BAR = "statusBar";
-	public static final String COMPONENT_PROGRESS_BAR = "progressBar";
 	public static final String COMPONENT_CONTACT_MANAGER_GROUP_TREE = "contactManager_groupList";
 	public static final String COMPONENT_CONTACT_MANAGER_CONTACT_LIST = "contactManager_contactList";
 	public static final String COMPONENT_MESSAGE_LIST = "messageList";

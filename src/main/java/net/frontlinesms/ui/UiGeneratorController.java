@@ -30,7 +30,6 @@ import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -46,7 +45,6 @@ import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.PluginManager;
 import net.frontlinesms.Utils;
-import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.data.repository.*;
@@ -127,12 +125,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	private final MessageDao messageFactory;
 	/** Data Access Object for {@link Keyword}s */
 	private final KeywordDao keywordDao;
-	/** Data Access Object for {@link KeywordAction}s */
-	private final KeywordActionDao keywordActionDao;
 	/** Data Access Object for {@link SmsModemSettings}s */
 	private final SmsModemSettingsDao phoneDetailsManager;
-	/** Data Access Object for {@link EmailAccount}s */
-	private final EmailAccountDao emailAccountDao;
 
 	/** Controller of the home tab. */
 	private final HomeTabHandler homeTabController;
@@ -206,16 +200,14 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	/** Thinlet UI Component: status bar at the bottom of the window */
 	private final Object statusBarComponent;
-	private final Object progressBarComponent;
 	
 	/**
 	 * Creates a new instance of the UI Controller.
-	 * @param frontlineController
+	 * @param frontlineController The {@link FrontlineSMS} instance that this class is tied to.
 	 * @param detectPhones <code>true</code> if phone detection should be started automatically; <code>false</code> otherwise.
-	 * @throws Throwable
+	 * @throws Throwable any unhandled {@link Throwable} from this method
 	 */
 	public UiGeneratorController(FrontlineSMS frontlineController, boolean detectPhones) throws Throwable {
-		super();
 		this.frontlineController = frontlineController;
 		
 		// Load the requested language file.
@@ -237,9 +229,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		this.groupDao = frontlineController.getGroupDao();
 		this.messageFactory = frontlineController.getMessageDao();
 		this.keywordDao = frontlineController.getKeywordDao();
-		this.keywordActionDao = frontlineController.getKeywordActionDao();
 		this.phoneDetailsManager = frontlineController.getSmsModemSettingsDao();
-		this.emailAccountDao = frontlineController.getEmailAccountFactory();
 		this.pluginManager = frontlineController.getPluginManager();
 		
 		// Load the data mode from the ui.properties file
@@ -329,8 +319,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			
 			currentTab = TAB_HOME;
 
-			progressBarComponent = find(COMPONENT_PROGRESS_BAR);
-			
 			// Try to add the emulator number to the contacts
 			try {
 				Contact testContact = new Contact(TEST_NUMBER_NAME, EMULATOR_MSISDN, "", "", "", true);
@@ -385,8 +373,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	/**
 	 * 
-	 * @param pluginClassName
-	 * @param enabled
+	 * @param pluginClassName the fully qualified name of the plugin class
+	 * @param enabled <code>true</code> if the plugin should be enabled by this method, <code>false</code> if it should be disabled
 	 */
 	public void updatePluginEnabled(String pluginClassName, boolean enabled) {
 		if(LOG.isTraceEnabled()) {
@@ -447,7 +435,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	/**
 	 * Adds the text resources for a {@link PluginController} to {@link UiGeneratorController}'s text resource manager.
-	 * @param controller
+	 * @param controller the plugin controller whose text resource should be loaded
 	 */
 	private void addPluginTextResources(PluginController controller) {
 		// Add to the default English bundle
@@ -462,20 +450,17 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 	}
 	
-	/** Pass throught to method in the {@link HomeTabHandler}. */
+	/** Pass through to method in the {@link HomeTabHandler}. */
 	public void showHomeTabSettings() {
 		this.homeTabController.showHomeTabSettings();
-	}
-	
-	@SuppressWarnings("unchecked")
-	public <T extends Object> List<T> getListContents(Object table, Class<T> clazz) {
-		return (List<T>)getProperty(table, "listContents");
 	}
 
 	/**
 	 * Sets the ACTION attribute on a Thinlet UI component.
 	 * FIXME this method is misnamed, and its behaviour appears to be bad - why is it swallowing exceptions?
-	 * FIXME It is also unclear
+	 * FIXME It is also unclear if this method actually does what it appears to do, or is completely non-functional
+	 * TODO it seems that this method could be paging-specific functionality.  It is imperative that paging of
+	 * all lists be fully tested once use of this method has been removed.
 	 * @param component
 	 * @param methodName
 	 * @deprecated please use {@link #setAction(Object, String, Object, Object)} instead
@@ -493,6 +478,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		LOG.trace("EXIT");
 	}
 	
+	/**
+	 * Sets the maximum number of items that should be displayed per-page of a paged list.
+	 * @param list a Thinlet list component
+	 */
 	public void setListLimit(Object list) {
 		putProperty(list, PROPERTY_ENTRIES_PER_PAGE, RESULTS_PER_PAGE_DEFAULT);
 	}
@@ -507,6 +496,12 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		return (Method) getProperty(list, PROPERTY_ACTION);
 	}
 
+	/**
+	 * TODO this should probably be replaced with the {@link Thinlet} implementation of action
+	 * execution - this method does not appear to handle different event handlers than this class,
+	 * and otherwise is duplicating functionality already present in Thinlet.
+	 * @param method
+	 */
 	public void executeAction(Method method) {
 		LOG.trace("ENTER");
 		LOG.debug("Invoking method [" + method + "]");
@@ -583,7 +578,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	/**
 	 * Selects the supplied object. If not found, none is selected.
-	 * 
 	 * @param selected
 	 * @param groupListComponent
 	 */
@@ -682,60 +676,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void setListPageNumber(int page, Object list) {
 		putProperty(list, PROPERTY_CURRENT_PAGE, page);
 	}
-	
-	/**
-	 * Enables or disables menu options in a List Component's popup list
-	 * and toolbar.  These enablements are based on whether any items in
-	 * the list are selected, and if they are, on the nature of these
-	 * items.
-	 * @param list 
-	 * @param popup 
-	 * @param toolbar
-	 * @deprecated this method should be separated out for the different things it applies to 
-	 */
-	public void enableOptions(Object list, Object popup, Object toolbar) {
-		Object[] selectedItems = getSelectedItems(list);
-		boolean hasSelection = selectedItems.length > 0;
-
-		if(popup!= null && !hasSelection && "emailServerListPopup".equals(getName(popup))) {
-			setVisible(popup, false);
-			return;
-		}
-		
-		if (hasSelection && popup != null) {
-			// If nothing is selected, hide the popup menu
-			setBoolean(popup, Thinlet.VISIBLE, hasSelection);
-			
-			Object att = getAttachedObject(selectedItems[0]);
-			// If we are looking at a list of messages, there are certain popup menu items that
-			// should or shouldn't be enabled, depending on the type of messages we have selected.
-			if (att instanceof Message) {
-				/** Check to see whether there are any "received messages" selected */
-				boolean receivedMessagesSelected = false;
-				for(Object selectedComponent : selectedItems) {
-					Object attachment = getAttachedObject(selectedComponent);
-					if(attachment instanceof Message && ((Message)attachment).getType()==Message.TYPE_RECEIVED) {
-						receivedMessagesSelected = true;
-					}
-				}
-				
-				for (Object popupMenuItem : getItems(popup)) {
-					String popupMenuItemName = getName(popupMenuItem);
-					boolean visible = hasSelection;
-					if(popupMenuItemName.equals("miReply")) {
-						visible = receivedMessagesSelected;
-					}
-					setVisible(popupMenuItem, visible);
-				}
-			}
-		}
-		
-		if (toolbar != null && !toolbar.equals(popup)) {
-			for (Object o : getItems(toolbar)) {
-				setEnabled(o, hasSelection);
-			}
-		}
-	}
 
 	public int getListLimit(Object list) {
 		int limit = (Integer) getProperty(list, PROPERTY_ENTRIES_PER_PAGE);
@@ -746,51 +686,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void removeConfirmationDialog() {
 		Object confirm = find(COMPONENT_CONFIRM_DIALOG);
 		if (confirm != null) removeDialog(confirm);
-	}
-
-	/**
-	 * Removes the selected accounts.
-	 */
-	public void removeSelectedFromSmsHttpServicesList() {
-		LOG.trace("ENTER");
-		removeConfirmationDialog();
-		Object list = find(COMPONENT_ACCOUNTS_LIST);
-		Object[] selected = getSelectedItems(list);
-		for (Object o : selected) {
-			SmsInternetService service = (SmsInternetService) getAttachedObject(o);
-			LOG.debug("Removing Account [" + SmsInternetServiceSettingsHandler.getProviderName(service.getClass()) + " - " + service.getIdentifier() + "]");
-			phoneManager.removeSmsInternetService(service);
-			// FIXME delete this service from the database
-			remove(o);
-		}
-		refreshPhonesViews();
-		LOG.trace("EXIT");
-	}
-	
-	/** @param max new maximum value for progress bar */
-	private synchronized void setProgressMax(int max) {
-		setInteger(progressBarComponent, Thinlet.MAXIMUM, max);
-	}
-
-	/** Increments the progress bar value. */
-	private synchronized void incProgress() {
-		setInteger(progressBarComponent, Thinlet.VALUE, getInteger(progressBarComponent, Thinlet.VALUE) + 1);
-	}
-
-	/**
-	 * Sets the progress bar to invisible and set the status bar with the supplied message.
-	 * @param status new status message
-	 */
-	private synchronized void finishProgress(String status) {
-		setStatus(status);
-		setVisible(progressBarComponent, false);
-	}
-
-	/** Initialises the progress bar and make it visible. */
-	private void initProgress() {
-		setVisible(progressBarComponent, true);
-		setInteger(progressBarComponent, Thinlet.VALUE, 0);
-		setInteger(progressBarComponent, Thinlet.MINIMUM, 0);
 	}
 	
 	/** Shows a general dialog asking the user to confirm his action.
@@ -1784,8 +1679,13 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		LOG.trace("EXIT");
 	}
 	
+	/**
+	 * Event triggered when a contact is added to a group by a {@link KeywordAction}.
+	 */
 	public synchronized void contactAddedToGroup(Contact contact, Group group) {
-		this.contactsTabController.addToContactList(contact, group);
+		if(currentTab.equals(TAB_CONTACT_MANAGER)) {
+			this.contactsTabController.addToContactList(contact, group);
+		}
 	}
 
 	public synchronized void keywordActionExecuted(KeywordAction action) {

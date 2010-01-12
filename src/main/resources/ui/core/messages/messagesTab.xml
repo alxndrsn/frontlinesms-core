@@ -44,7 +44,7 @@
 	                    <column icon="/icons/user_receiver.png" text="i18n.common.recipient" width="120"/>
 	                    <column icon="/icons/message.png" text="i18n.common.message"/>
 	                </header>
-	                <popupmenu menushown="enableOptions(messageList, this, this)" name="menu">
+	                <popupmenu menushown="enableOptions(messageList, this)" name="menu">
 	                    <menuitem action="showMessageDetails(messageList)" name="miDetails" icon="/icons/sms_details.png" text="i18n.common.message.details"/>
 	                    <menuitem action="show_composeMessageForm(messageList)" name="miReply" icon="/icons/sms_send.png" text="i18n.common.reply"/>
 	                    <menuitem action="resendSelectedFromMessageList(messageList)" name="miResend" icon="/icons/sms_send.png" text="i18n.action.resend"/>

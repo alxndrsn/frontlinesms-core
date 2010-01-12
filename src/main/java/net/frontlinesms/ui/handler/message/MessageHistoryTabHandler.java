@@ -49,30 +49,38 @@ import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.ui.Icon;
-import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiProperties;
 import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
- * @author aga
+ * @author Alex Anderson alex@frontlinesms.com
+ * @author Carlos Eduardo Genz
+ * <li> kadu(at)masabi(dot)com
  */
 public class MessageHistoryTabHandler extends BaseTabHandler {
 	
 //> CONSTANTS
+	/** Path to the Thinlet XML layout file for the message history tab */
 	private static final String UI_FILE_MESSAGES_TAB = "/ui/core/messages/messagesTab.xml";
+	/** Path to the Thinlet XML layout file for the message details form */
 	public static final String UI_FILE_MSG_DETAILS_FORM = "/ui/core/messages/dgMessageDetails.xml";
 	/** Number of milliseconds in a day */
 	private static final long MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
 	
-//> INSTANCE METHODS
+//> INSTANCE PROPERTIES
+	/** Logger */
 	private final Logger LOG = Utils.getLogger(this.getClass());
 	
+	/** DAO for {@link Contact}s */
 	private ContactDao contactDao;
+	/** DAO for {@link Keyword}s */
 	private KeywordDao keywordDao;
+	/** DAO for {@link Message}s */
 	private MessageDao messageDao;
 	
+//> UI COMPONENTS
 	private Object messageListComponent;
 	private Object showSentMessagesComponent;
 	private Object showReceivedMessagesComponent;
@@ -89,7 +97,6 @@ public class MessageHistoryTabHandler extends BaseTabHandler {
 	/**
 	 * @param ui value for {@link #ui}
 	 * @param contactDao value for {@link #contactDao}
-	 * @param groupMembershipDao value for {@link #groupMembershipDao}
 	 * @param keywordDao value for {@link #keywordDao}
 	 * @param messageDao value for {@link #messageDao}
 	 */
@@ -528,6 +535,50 @@ public class MessageHistoryTabHandler extends BaseTabHandler {
 			}
 		}
 	}
+	
+	/**
+	 * Enables or disables menu options in a List Component's popup list
+	 * and toolbar.  These enablements are based on whether any items in
+	 * the list are selected, and if they are, on the nature of these
+	 * items.
+	 * @param list the list
+	 * @param popupMenu the popup menu the list refers to
+	 */
+	public void enableOptions(Object list, Object popupMenu) {
+		Object[] selectedItems = ui.getSelectedItems(list);
+		boolean hasSelection = selectedItems.length > 0;
+
+		// If nothing is selected, hide the popup menu
+		ui.setVisible(popupMenu, hasSelection);
+		
+		if (hasSelection) {
+			// If we are looking at a list of messages, there are certain popup menu items that
+			// should or shouldn't be enabled, depending on the type of messages we have selected.
+			boolean receivedMessagesSelected = false;
+			boolean sentMessagesSelected = false;
+			for(Object selectedComponent : selectedItems) {
+				Message attachedMessage = ui.getAttachedObject(selectedComponent, Message.class);
+				if(attachedMessage.getType() == Message.TYPE_RECEIVED) {
+					receivedMessagesSelected = true;
+				}
+				if(attachedMessage.getType() == Message.TYPE_OUTBOUND) {
+					sentMessagesSelected = true;
+				}
+			}
+			
+			for (Object popupMenuItem : ui.getItems(popupMenu)) {
+				String popupMenuItemName = ui.getName(popupMenuItem);
+				boolean visible = hasSelection;
+				if(popupMenuItemName.equals("miReply")) {
+					visible = receivedMessagesSelected;
+				}
+				if(popupMenuItemName.equals("miResend")) {
+					visible = sentMessagesSelected;
+				}
+				ui.setVisible(popupMenuItem, visible);
+			}
+		}
+	}
 
 //> UI HELPER METHODS
 	private void initMessageTableForSorting(Object header) {
@@ -630,9 +681,5 @@ public class MessageHistoryTabHandler extends BaseTabHandler {
 	/** @see UiGeneratorController#showDateSelecter(Object) */
 	public void showDateSelecter(Object textField) {
 		this.ui.showDateSelecter(textField);
-	}
-	/** @see UiGeneratorController#enableOptions(Object, Object, Object) */
-	public void enableOptions(Object list, Object popup, Object toolbar) {
-		this.ui.enableOptions(list, popup, toolbar);
 	}
 }
