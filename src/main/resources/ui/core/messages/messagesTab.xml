@@ -20,17 +20,17 @@
 	        </panel>
 	        <panel name="pnMessageList" columns="2" gap="9" left="9" right="9">
 	            <panel colspan="2" gap="8" weightx="1">
-	                <checkbox action="toggleMessageListOptions(this, messageList)" icon="/icons/sms_receive.png" name="receivedMessagesToggle" selected="true" text="i18n.common.received"/>
-	                <checkbox action="toggleMessageListOptions(this, messageList)" icon="/icons/sms_send.png" name="sentMessagesToggle" selected="true" text="i18n.common.sent"/>
+	                <checkbox action="toggleMessageListOptions(this" icon="/icons/sms_receive.png" name="receivedMessagesToggle" selected="true" text="i18n.common.received"/>
+	                <checkbox action="toggleMessageListOptions(this)" icon="/icons/sms_send.png" name="sentMessagesToggle" selected="true" text="i18n.common.sent"/>
 	                <panel halign="right" weightx="1" gap="10">
 		                <label icon="/icons/date_start.png" text="i18n.common.from"/>
 		                <panel>
-		                    <textfield action="messageHistory_dateChanged" columns="10" name="tfStartDate"/>
+		                    <textfield action="messageHistoryDateChanged" columns="10" name="tfStartDate"/>
 		                    <button action="showDateSelecter(tfStartDate)" icon="/icons/date.png"/>
 		                </panel>
 		                <label icon="/icons/date_end.png" text="i18n.common.to"/>
 		                <panel>
-		                    <textfield action="messageHistory_dateChanged" columns="10" name="tfEndDate"/>
+		                    <textfield action="messageHistoryDateChanged" columns="10" name="tfEndDate"/>
 		                    <button action="showDateSelecter(tfEndDate)" icon="/icons/date.png"/>
 		                </panel>
 	                </panel>

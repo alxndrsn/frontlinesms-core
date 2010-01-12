@@ -159,8 +159,6 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_DELETE_NEW_CONTACT = "deleteNewContact";
 	public static final String COMPONENT_LABEL_STATUS = "lbStatus";
 	public static final String COMPONENT_MENU_ITEM_VIEW_CONTACT = "viewContact";
-	public static final String COMPONENT_HISTORY_RECEIVED_MESSAGES_TOGGLE = "historyReceivedMessagesToggle";
-	public static final String COMPONENT_HISTORY_SENT_MESSAGES_TOGGLE = "historySentMessagesToggle";
 	public static final String COMPONENT_MENU_ITEM_MSG_HISTORY = "msg_history";
 	public static final String COMPONENT_NEW_CONTACT_GROUP_LIST = "newContact_groupList";
 	public static final String COMPONENT_MENU_ITEM_CREATE = "miCreate";

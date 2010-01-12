@@ -10,11 +10,13 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  */
 public class ComponentPagingHandler implements ThinletUiEventHandler {
 	
-private static final String I18N_KEY_PAGES_X_OF_Y = "common.page.number";
 
 	//> CONSTANTS
 	/** Thinlet UI layout file for paging controls */
 	private static final String UI_FILE_PAGE_PANEL = "/ui/core/util/pnPageControls.xml";
+	
+	/** I18N Text key: "Page X of Y" */
+	private static final String I18N_KEY_PAGES_X_OF_Y = "common.page.number";
 
 	/** UI Component name for  */
 	private static final String COMPONENT_BT_NEXT_PAGE = "btNextPage";
@@ -52,12 +54,28 @@ private static final String I18N_KEY_PAGES_X_OF_Y = "common.page.number";
 	/**
 	 * Creates a new {@link ComponentPagingHandler}.
 	 * @param ui The {@link UiGeneratorController} instance that this is tied to.
+	 * @param itemProvider The class which provides items to place in the list
 	 * @param list The list that this will handle paging for.
 	 */
 	public ComponentPagingHandler(UiGeneratorController ui, PagedComponentItemProvider itemProvider, Object list) {
 		this.ui = ui;
 		this.itemProvider = itemProvider;
 		this.list = list;
+	}
+
+//> ACCESSORS
+	/**
+	 * <p>Sets the value of {@link #currentPage}.</p>
+	 * <p>N.B. this method does NOT refresh the view, it merely sets the value of the current page.</p>
+	 * @param currentPage the page number to set
+	 */
+	public void setCurrentPage(int currentPage) {
+		this.currentPage = currentPage;
+	}
+	
+	/** @return the maximum number of items that this will display per page. */
+	public int getMaxItemsPerPage() {
+		return maxItemsPerPage;
 	}
 	
 	/**
@@ -74,7 +92,6 @@ private static final String I18N_KEY_PAGES_X_OF_Y = "common.page.number";
 		return list;
 	}
 	
-//> ACCESSORS
 	/** Refresh the paging panel and its associated list. */
 	public void refresh() {
 		this.refreshList();
