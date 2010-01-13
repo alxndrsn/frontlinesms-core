@@ -438,8 +438,8 @@ public class Thinlet extends Container implements Runnable, Serializable, Thinle
 					int iy = areay + top + getSum(grid[1], 0, grid[5][i], gap, true);
 					int iwidth = getSum(grid[0], grid[4][i], grid[6][i], gap, false);
 					int iheight = getSum(grid[1], grid[5][i], grid[7][i], gap, false);
-					String halign = getString(comp, "halign", "fill");
-					String valign = getString(comp, "valign", "fill");
+					String halign = getString(comp, ATTRIBUTE_HALIGN, "fill");
+					String valign = getString(comp, ATTRIBUTE_VALIGN, "fill");
 					if ((halign != "fill") || (valign != "fill")) {
 						Dimension d = getPreferredSize(comp);
 						if (halign != "fill") {
@@ -6332,7 +6332,7 @@ public class Thinlet extends Container implements Runnable, Serializable, Thinle
 	/**
 	 * Sets the given property pair (key and value) for the component
 	 */
-	public void setChoice(Object component, String key, String value) {
+	protected void setChoice(Object component, String key, String value) {
 		Object[] definition = getDefinition(getClass(component), key, CHOICE);
 		String[] values = (String[]) definition[3];
 		if (setChoice(component, (String) definition[1],
@@ -6874,9 +6874,9 @@ public class Thinlet extends Container implements Runnable, Serializable, Thinle
 				{ INTEGER, ThinletText.ATTRIBUTE_ROWSPAN, VALIDATE, integer1 },
 				{ INTEGER, ATTRIBUTE_WEIGHT_X, VALIDATE, integer0 },
 				{ INTEGER, ATTRIBUTE_WEIGHT_Y, VALIDATE, integer0 },
-				{ CHOICE, "halign", VALIDATE,
+				{ CHOICE, ATTRIBUTE_HALIGN, VALIDATE,
 					new String[] { "fill", CENTER, LEFT, RIGHT } },
-				{ CHOICE, "valign", VALIDATE,
+				{ CHOICE, ATTRIBUTE_VALIGN, VALIDATE,
 				new String[] { "fill", CENTER, TOP, BOTTOM } },
 				// component class String null*
 				// parent Object null

@@ -81,7 +81,6 @@ public interface ThinletText {
 	public static final String BOUNDS = "bounds";
 	public static final String VISIBLE = "visible";
 	public static final String FOREGROUND = "foreground";
-	public static final String HALIGN = "halign";
 	public static final String ALIGNMENT = "alignment";
 	public static final String WRAP = "wrap";
 	public static final String CLOSABLE = "closable";
@@ -117,6 +116,10 @@ public interface ThinletText {
 	public static final String ATTRIBUTE_WIDTH = "width";
 	/** Component attribute key: height */
 	public static final String ATTRIBUTE_HEIGHT = "height";
+	/** Component attribute key: horizontal alignment */
+	public static final String ATTRIBUTE_HALIGN = "halign";
+	/** Component attribute key: vertical alignment */
+	public static final String ATTRIBUTE_VALIGN = "valign";
 
 	static final String ATTRIBUTE_I18N = "i18n";
 	/** Prefix applied to a text label to denote an internationalised string */

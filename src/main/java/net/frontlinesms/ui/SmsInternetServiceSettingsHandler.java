@@ -11,6 +11,7 @@ import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.Provider;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
 import net.frontlinesms.smsdevice.properties.*;
+import net.frontlinesms.ui.handler.ContactSelecter;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 import org.apache.log4j.Logger;
@@ -490,12 +491,8 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 
 	public void showContacts(Object button) {
 		Object textField = controller.getAttachedObject(button);
-		controller.showContactSelecter(
-				InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SENDER_NUMBER),
-				"setContactNumber(contactSelecter_contactList, contactSelecter)",
-				textField,
-				this
-		);
+		ContactSelecter contactSelecter = new ContactSelecter(controller, controller.contactDao);
+		contactSelecter.show(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SENDER_NUMBER), "setContactNumber(contactSelecter_contactList, contactSelecter)", textField, this);
 	}
 
 	public void setContactNumber(Object list, Object dialog) {

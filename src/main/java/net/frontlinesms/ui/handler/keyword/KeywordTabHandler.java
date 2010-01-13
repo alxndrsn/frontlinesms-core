@@ -94,6 +94,7 @@ import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BaseTabHandler;
+import net.frontlinesms.ui.handler.ContactSelecter;
 import net.frontlinesms.ui.handler.message.MessagePanelHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
@@ -858,7 +859,8 @@ public class KeywordTabHandler extends BaseTabHandler {
 	 * Method invoked when the user decides to send a mail specifically to one contact.
 	 */
 	public void selectMailRecipient(Object dialog) {
-		ui.showContactSelecter(InternationalisationUtils.getI18NString(SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "mail_setRecipient(contactSelecter_contactList, contactSelecter)", dialog, this);
+		ContactSelecter contactSelecter = new ContactSelecter(ui, ui.contactDao);
+		contactSelecter.show(InternationalisationUtils.getI18NString(SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "mail_setRecipient(contactSelecter_contactList, contactSelecter)", dialog, this);
 	}
 
 	/**

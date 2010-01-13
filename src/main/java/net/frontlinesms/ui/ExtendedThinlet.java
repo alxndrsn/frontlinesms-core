@@ -6,6 +6,7 @@ package net.frontlinesms.ui;
 import java.awt.Image;
 
 import thinlet.Thinlet;
+import thinlet.ThinletText;
 
 /**
  * Extension of Thinlet which adds accessors for properties and factory methods for creating components.
@@ -200,7 +201,7 @@ public class ExtendedThinlet extends Thinlet {
 	}
 
 	/**
-	 * Set the action of a component
+	 * Set the ACTION of a component
 	 * @param component
 	 * @param methodCall
 	 * @param root
@@ -209,9 +210,20 @@ public class ExtendedThinlet extends Thinlet {
 	public void setAction(Object component, String methodCall, Object root, Object handler) {
 		setMethod(component, Thinlet.ATTRIBUTE_ACTION, methodCall, root, handler);
 	}
+
+	/**
+	 * Set the PERFORM method of a component
+	 * @param component
+	 * @param methodCall
+	 * @param root
+	 * @param handler
+	 */
+	public void setPerform(Object component, String methodCall, Object root, Object handler) {
+		setMethod(component, Thinlet.PERFORM, methodCall, root, handler);
+	}
 	
 	/**
-	 * Set the close action of a component
+	 * Set the CLOSE action of a component
 	 * @param component
 	 * @param methodCall
 	 * @param root
@@ -235,6 +247,24 @@ public class ExtendedThinlet extends Thinlet {
 	 */
 	public void setBoolean(Object component, String key, boolean value) {
 		super.setBoolean(component, key, value);
+	}
+	
+	/**
+	 * Sets the horizontal alignment of a component.
+	 * @param component The component whose horizontal align will be set.
+	 * @param align The alignment value, e.g. {@link ThinletText#LEFT}
+	 */
+	public void setHAlign(Object component, String align) {
+		super.setChoice(component, Thinlet.ATTRIBUTE_HALIGN, align);
+	}
+
+	/**
+	 * Sets the vertical alignment of a component.
+	 * @param component The component whose horizontal align will be set.
+	 * @param align The alignment value, e.g. {@link ThinletText#LEFT}
+	 */
+	public void setVAlign(Object component, String align) {
+		super.setChoice(component, Thinlet.ATTRIBUTE_VALIGN, align);
 	}
 	
 //> COMPONENT FACTORY METHODS
@@ -366,6 +396,20 @@ public class ExtendedThinlet extends Thinlet {
 		Object button = Thinlet.create(BUTTON);
 		setString(button, TEXT, text);
 		setMethod(button, ATTRIBUTE_ACTION, action, root, this);
+		return button;
+	}
+	
+	/**
+	 * Create's a Thinlet UI Component of type BUTTON with type LINK.  The button's
+	 * action and text label are also set.
+	 * @param text
+	 * @param action
+	 * @param root
+	 * @return
+	 */
+	public final Object createLink(String text, String action, Object root) {
+		Object button = createButton(text, action, root);
+		setChoice(button, "type", "link");
 		return button;
 	}
 	

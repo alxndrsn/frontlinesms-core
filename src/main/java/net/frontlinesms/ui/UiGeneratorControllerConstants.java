@@ -70,10 +70,6 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_PN_KEYWORD_ACTIONS_ADVANCED = "pnKeywordActionsAdvanced";
 	public static final String COMPONENT_CONTACT_SELECTER = "contactSelecter";
 	public static final String COMPONENT_CONTACT_MANAGER_CONTACT_FILTER = "contactManager_contactFilter";
-	public static final String COMPONENT_LB_PAGE_NUMBER = "lbPageNumber";
-	public static final String COMPONENT_LB_NUMBER_OF_PAGES = "lbNumberOfPages";
-	public static final String COMPONENT_BT_NEXT_PAGE = "btNextPage";
-	public static final String COMPONENT_BT_PREVIOUS_PAGE = "btPreviousPage";
 	public static final String COMPONENT_FILTER_LIST = "filterList";
 	public static final String COMPONENT_PN_FILTER = "pnFilter";
 	public static final String COMPONENT_MI_SEND_SMS = "miSendSMS";
@@ -151,9 +147,6 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_FORWARD_FORM_GROUP_LIST = "forwardForm_groupList";
 	public static final String COMPONENT_FORWARD_FORM_TITLE = "forwardForm_title";
 	public static final String COMPONENT_FORWARD_FORM_TEXTAREA = "forward";
-	public static final String COMPONENT_CONTACT_SELECTER_OK_BUTTON = "contactSelecter_okButton";
-	public static final String COMPONENT_CONTACT_SELECTER_CONTACT_LIST = "contactSelecter_contactList";
-	public static final String COMPONENT_CONTACT_SELECTER_TITLE = "contactSelecter_title";
 	public static final String COMPONENT_GROUPS_MENU = "groupsMenu";
 	public static final String COMPONENT_BUTTON_YES = "btYes";
 	public static final String COMPONENT_DELETE_NEW_CONTACT = "deleteNewContact";

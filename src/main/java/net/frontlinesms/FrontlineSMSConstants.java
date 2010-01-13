@@ -51,11 +51,6 @@ public final class FrontlineSMSConstants {
 	
 	public static final String DEFAULT_DATABASE_NAME = "frontline_database";
 	
-	public static final String PROPERTY_CURRENT_PAGE = "currentPage";
-	public static final String PROPERTY_ENTRIES_PER_PAGE = "entriesPerPage";
-	public static final String PROPERTY_ACTION = "action";
-	public static final String PROPERTY_COUNT = "count";
-	
 	public static final String PROPERTIES_SMS_INTERNET_ICONS = "sms.internet.icons";
 	
 	public static final String USER_MARKER_TO_NAME = "$to";

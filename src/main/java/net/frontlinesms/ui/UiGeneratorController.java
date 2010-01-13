@@ -56,6 +56,7 @@ import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.*;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
+import net.frontlinesms.ui.handler.ContactSelecter;
 import net.frontlinesms.ui.handler.ContactsTabHandler;
 import net.frontlinesms.ui.handler.HomeTabHandler;
 import net.frontlinesms.ui.handler.PhoneTabHandler;
@@ -456,82 +457,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 
 	/**
-	 * Sets the ACTION attribute on a Thinlet UI component.
-	 * FIXME this method is misnamed, and its behaviour appears to be bad - why is it swallowing exceptions?
-	 * FIXME It is also unclear if this method actually does what it appears to do, or is completely non-functional
-	 * TODO it seems that this method could be paging-specific functionality.  It is imperative that paging of
-	 * all lists be fully tested once use of this method has been removed.
-	 * @param component
-	 * @param methodName
-	 * @deprecated please use {@link #setAction(Object, String, Object, Object)} instead
-	 */
-	private void setMethod(Object component, String methodName) {
-		LOG.trace("ENTER");
-		LOG.debug("Method [" + methodName + "]");
-		try {
-			putProperty(component, PROPERTY_ACTION, getClass().getDeclaredMethod(methodName, new Class[]{}));
-		} catch (SecurityException e) {
-			LOG.debug("", e);
-		} catch (NoSuchMethodException e) {
-			LOG.debug("", e);
-		}
-		LOG.trace("EXIT");
-	}
-	
-	/**
-	 * Sets the maximum number of items that should be displayed per-page of a paged list.
-	 * @param list a Thinlet list component
-	 */
-	private void setListLimit(Object list) {
-		putProperty(list, PROPERTY_ENTRIES_PER_PAGE, RESULTS_PER_PAGE_DEFAULT);
-	}
-
-	private void nextPage(Object list, Object panel) {
-		int pageNumber = (Integer) getProperty(list, PROPERTY_CURRENT_PAGE);
-		putProperty(list, PROPERTY_CURRENT_PAGE, pageNumber + 1);
-		executeAction(getMethod(list));
-	}
-	
-	private Method getMethod(Object list) {
-		return (Method) getProperty(list, PROPERTY_ACTION);
-	}
-
-	/**
-	 * TODO this should probably be replaced with the {@link Thinlet} implementation of action
-	 * execution - this method does not appear to handle different event handlers than this class,
-	 * and otherwise is duplicating functionality already present in Thinlet.
-	 * @param method
-	 */
-	private void executeAction(Method method) {
-		LOG.trace("ENTER");
-		LOG.debug("Invoking method [" + method + "]");
-		try {
-			method.invoke(this, new Object[] {});
-		} catch (IllegalArgumentException e) {
-			LOG.debug("", e);
-		} catch (IllegalAccessException e) {
-			LOG.debug("", e);
-		} catch (InvocationTargetException e) {
-			LOG.debug("", e);
-		}
-		LOG.trace("EXIT");
-	}
-
-	private void previousPage(Object list, Object panel) {
-		int pageNumber = (Integer) getProperty(list, PROPERTY_CURRENT_PAGE);
-		putProperty(list, PROPERTY_CURRENT_PAGE, pageNumber - 1);
-		executeAction(getMethod(list));
-	}
-
-	// FIXME this could be private if it wasn't used in forms tab.  Should probably be abstracted
-	private void setPageMethods(Object root, String listName, Object pagePanel) {
-		Object btPrev = find(pagePanel, COMPONENT_BT_PREVIOUS_PAGE);
-		Object btNext = find(pagePanel, COMPONENT_BT_NEXT_PAGE);
-		setMethod(btPrev, ATTRIBUTE_ACTION, "previousPage(" + listName + ",pagePanel)", root, this);
-		setMethod(btNext, ATTRIBUTE_ACTION, "nextPage(" + listName + ",pagePanel)", root, this);
-	}
-
-	/**
 	 * Gets the string to display for the recipient of a message.
 	 * @param message
 	 * @return This will be the name of the contact who received the message, or the recipient's phone number if they are not a contact.
@@ -604,45 +529,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			setSelectedGC(selected, o);
 		}
 	}
-	
-	private int getListCurrentPage(Object list) {
-		int pageNumber = (Integer) getProperty(list, PROPERTY_CURRENT_PAGE);
-		return pageNumber;
-	}
-
-	private void updatePageNumber(Object list, Object panel) {
-		int pageNumber = getListCurrentPage(list);
-		int limit = getListLimit(list);
-		int count = getListElementCount(list);
-		updatePageNumber(panel, count, pageNumber, limit);
-	}
-
-	/**
-	 * Update the page number displayed in a pagination control.
-	 * @param panel Panel containing page controls
-	 * @param count Total number of items in list
-	 * @param pageNumber The current page number that we are showing
-	 * @param limit Maximum visble items in the list
-	 */
-	private void updatePageNumber(Object panel, int count, int pageNumber, int limit) {
-		setText(find(panel, COMPONENT_LB_PAGE_NUMBER), String.valueOf(pageNumber));
-		
-		// Calculate the total number of pages, making sure there is at least one.
-		int pages = count / limit;
-		if ((count % limit) != 0) {
-			pages++;
-		}
-		pages = Math.max(pages, 1);
-		setText(find(panel, COMPONENT_LB_NUMBER_OF_PAGES), String.valueOf(pages));
-		
-		setEnabled(find(panel, COMPONENT_BT_PREVIOUS_PAGE), pageNumber > 1);
-		setEnabled(find(panel, COMPONENT_BT_NEXT_PAGE), pageNumber != pages);
-	}
-
-	private int getListElementCount(Object list) {
-		int count = (Integer) getProperty(list, PROPERTY_COUNT);
-		return count;
-	}
 
 	public void getGroupsRecursivelyUp(List<Group> groups, Group g) {
 		groups.add(g);
@@ -667,19 +553,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		Object attachment = getAttachedObject(getSelectedItem(component));
 		changeTab(TAB_MESSAGE_HISTORY);
 		this.messageTabController.doShowMessageHistory(component);
-	}
-	
-	private void setListElementCount(int count, Object list) {
-		putProperty(list, PROPERTY_COUNT, count);
-	}
-
-	private void setListPageNumber(int page, Object list) {
-		putProperty(list, PROPERTY_CURRENT_PAGE, page);
-	}
-
-	private int getListLimit(Object list) {
-		int limit = (Integer) getProperty(list, PROPERTY_ENTRIES_PER_PAGE);
-		return limit;
 	}
 	
 	/** If the confirmation dialog exists, remove it */
@@ -916,47 +789,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param callbackMethodName
 	 */
 	private void showContactSelecter(String title, String callbackMethodName, Object dialog) {
-		showContactSelecter(title, callbackMethodName, dialog, this);
+		ContactSelecter contactSelecter = new ContactSelecter(this, this.contactDao);
+		contactSelecter.show(title, callbackMethodName, dialog, this);
 	}
 
-	/**
-	 * Shows a dialog for selecting contacts.
-	 * @param title
-	 * @param callbackMethodName
-	 * @param attachment
-	 * @param handler
-	 */
-	public void showContactSelecter(String title, String callbackMethodName, Object attachment, ThinletUiEventHandler handler) {
-		Object selecter = loadComponentFromFile(UI_FILE_CONTACT_SELECTER, handler);
-		setText(find(selecter, COMPONENT_CONTACT_SELECTER_TITLE), title);
-		Object contactList = find(selecter, COMPONENT_CONTACT_SELECTER_CONTACT_LIST);
-		setMethod(contactList, Thinlet.PERFORM, callbackMethodName, selecter, handler);
-		setMethod(find(selecter, COMPONENT_CONTACT_SELECTER_OK_BUTTON), ATTRIBUTE_ACTION, callbackMethodName, selecter, handler);
-		if (attachment != null) {
-			setAttachedObject(selecter, attachment);
-		}
-		Object pagePanel = loadComponentFromFile(UI_FILE_PAGE_PANEL);
-		setChoice(pagePanel, HALIGN, RIGHT);
-		add(selecter, pagePanel, getItems(selecter).length - 1);
-		setPageMethods(selecter, COMPONENT_CONTACT_SELECTER_CONTACT_LIST, pagePanel);
-		add(selecter);
-		
-		setListLimit(contactList);
-		setListPageNumber(1, contactList);
-		setMethod(contactList, "updateContactSelecterList");
-		setListElementCount(contactDao.getAllContacts().size(), contactList);
-		
-		Object list = find(COMPONENT_CONTACT_SELECTER_CONTACT_LIST);
-		int limit = getListLimit(list);
-		int pageNumber = getListCurrentPage(list);
-		List<? extends Contact> contacts = contactDao.getAllContacts((pageNumber - 1) * limit, limit);
-		removeAll(list);
-		for (Contact c : contacts) {
-			add(list, createListItem(c));
-		}
-		updatePageNumber(list, find(COMPONENT_CONTACT_SELECTER));
-	}
-	
 	/**
 	 * Method invoked when the user decides to send a message specifically to one contact on the <b>Send</b> tab.
 	 */

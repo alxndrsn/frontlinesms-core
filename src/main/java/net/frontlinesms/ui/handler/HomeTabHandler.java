@@ -140,15 +140,10 @@ public class HomeTabHandler extends BaseTabHandler {
 		ui.updateCost();
 	}
 
-	/**
-	 * Method which triggers showing of the contact selecter.
-	 */
+	/** Method which triggers showing of the contact selecter. */
 	public void selectMessageRecipient() {
-		ui.showContactSelecter(
-				InternationalisationUtils.getI18NString(FrontlineSMSConstants.SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE),
-				"setRecipientTextfield(contactSelecter_contactList, contactSelecter)",
-				null,
-				this);
+		ContactSelecter contactSelecter = new ContactSelecter(ui, ui.contactDao);
+		contactSelecter.show(InternationalisationUtils.getI18NString(FrontlineSMSConstants.SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "setRecipientTextfield(contactSelecter_contactList, contactSelecter)", null, this);
 	}
 	
 //> UI PASSTHRU METHODS TO UiGC
@@ -185,11 +180,10 @@ public class HomeTabHandler extends BaseTabHandler {
 			// Don't show the flag for the current language
 			if(languageBundle.equals(FrontlineUI.currentResourceBundle)) continue;
 			
-			Object button = ui.createButton("", "changeLanguage(this)", tabComponent);
+			Object button = ui.createLink("", "changeLanguage(this)", tabComponent);
 			ui.setIcon(button, ui.getFlagIcon(languageBundle));
 			ui.setString(button, "tooltip", languageBundle.getLanguageName());
 			ui.setWeight(button, 1, 0);
-			ui.setChoice(button, "type", "link");
 			ui.setAttachedObject(button, languageBundle.getFile().getAbsolutePath());
 			ui.add(fastLanguageSwitch, button);
 		}
