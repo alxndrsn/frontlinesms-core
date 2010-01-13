@@ -873,17 +873,17 @@ public class KeywordTabHandler extends BaseTabHandler {
 			action.setGroup(group);
 			action.setStartDate(start);
 			action.setEndDate(end);
+			keywordActionDao.updateKeywordAction(action);
 		} else {
 			isNew  = true;
 			Keyword keyword = ui.getKeyword(groupSelecterDialog);
 			log.debug("Creating action for keyword [" + keyword.getKeyword() + "].");
 			if (join) {
 				action = KeywordAction.createGroupJoinAction(keyword, group, start, end);
-				keywordActionDao.saveKeywordAction(action);
 			} else {
 				action = KeywordAction.createGroupLeaveAction(keyword, group, start, end);
-				keywordActionDao.saveKeywordAction(action);
 			}
+			keywordActionDao.saveKeywordAction(action);
 		}
 		updateKeywordActionList(action, isNew);
 		ui.remove(groupSelecterDialog);
@@ -1245,7 +1245,7 @@ public class KeywordTabHandler extends BaseTabHandler {
 
 	/** @see #showGroupSelecter(Object, String, String, Object) */
 	private void showGroupSelecter(Object actionObject, String title, String callbackMethodName, ThinletUiEventHandler eventHandler) {
-		showGroupSelecter(actionObject, false, title, callbackMethodName, eventHandler);
+		showGroupSelecter(actionObject, true, title, callbackMethodName, eventHandler);
 	}
 	
 	/**
