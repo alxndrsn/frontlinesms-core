@@ -33,7 +33,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
 /**
  * @author aga
  */
-public class ForwardActionDialog extends BaseActionDialogHandler {
+public class ForwardActionDialog extends BaseActionDialog {
 	
 //> CONSTANTS
 	/** UI XML Layout file: forward keyword action edit form */
@@ -99,7 +99,7 @@ public class ForwardActionDialog extends BaseActionDialogHandler {
 		}
 	}
 
-	/** @see net.frontlinesms.ui.handler.keyword.BaseActionDialogHandler#getLayoutFilePath() */
+	/** @see net.frontlinesms.ui.handler.keyword.BaseActionDialog#getLayoutFilePath() */
 	@Override
 	protected String getLayoutFilePath() {
 		return UI_FILE_NEW_KACTION_FORWARD_FORM;

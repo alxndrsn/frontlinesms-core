@@ -14,7 +14,7 @@ import net.frontlinesms.ui.UiGeneratorController;
  * Base class containing shared attributes and behaviour of {@link KeywordAction} edit dialogs. 
  * @author aga
  */
-public abstract class BaseActionDialogHandler implements ThinletUiEventHandler {
+public abstract class BaseActionDialog implements ThinletUiEventHandler {
 
 //> INSTANCE PROPERTIES
 	/** Log */
@@ -40,7 +40,7 @@ public abstract class BaseActionDialogHandler implements ThinletUiEventHandler {
 	 * @param ui the UI which this is tied to
 	 * @param owner the {@link KeywordTabHandler} which spawned this
 	 */
-	BaseActionDialogHandler(UiGeneratorController ui, KeywordTabHandler owner) {
+	BaseActionDialog(UiGeneratorController ui, KeywordTabHandler owner) {
 		this.ui = ui;
 		this.owner = owner;
 		this.keywordActionDao = ui.getFrontlineController().getKeywordActionDao();

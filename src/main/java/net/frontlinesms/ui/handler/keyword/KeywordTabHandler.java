@@ -112,64 +112,34 @@ public class KeywordTabHandler extends BaseTabHandler {
      *  5 - External Command 
      */
 	public void keywordTab_createAction(int index) {
+		BaseActionDialog dialog;
 		switch (index) {
-		case 0:
-			show_newKActionReplyForm(keywordListComponent);
-			break;
-		case 1:
-			show_newKActionForwardForm(keywordListComponent);
-			break;
-		case 2:
-			show_newKActionJoinForm(keywordListComponent);
-			break;
-		case 3:
-			show_newKActionLeaveForm(keywordListComponent);
-			break;
-		case 4:
-			show_newKActionEmailForm(keywordListComponent);
-			break;
-		case 5:
-			show_newKActionExternalCmdForm(keywordListComponent);
-			break;
+			case 0:
+				dialog = new ReplyActionDialog(ui, this);
+				break;
+			case 1:
+				dialog = new ForwardActionDialog(ui, this); 
+				break;
+			case 2:
+				dialog = new JoinGroupActionDialog(ui, this);
+				break;
+			case 3:
+				dialog = new LeaveGroupActionDialog(ui, this); 
+				break;
+			case 4:
+				dialog = new EmailActionDialog(ui, this);
+				break;
+			case 5:
+				dialog = new ExternalCommandActionDialog(ui, this);
+				break;
+			default: throw new IllegalStateException("Unhandled action type: " + index);
 		}
-	}
-	
-	/**
-	 * Shows the new forward message action dialog.
-	 * @param keywordList
-	 */
-	public void show_newKActionForwardForm(Object keywordList) {
-		Keyword keyword = ui.getKeyword(ui.getSelectedItem(keywordList));
-		ForwardActionDialog dialog = new ForwardActionDialog(ui, this);
+		
+		Keyword keyword = ui.getKeyword(ui.getSelectedItem(keywordListComponent));
 		dialog.init(keyword);
 		dialog.show();
 	}
-
-	/**
-	 * Shows the new auto reply action dialog.
-	 * 
-	 * @param keywordList
-	 */
-	public void show_newKActionReplyForm(Object keywordList) {
-		ReplyActionDialogHandler replyActionDialogHandler = new ReplyActionDialogHandler(ui, this);
-		replyActionDialogHandler.init(ui.getKeyword(ui.getSelectedItem(keywordList)));
-		replyActionDialogHandler.show();
-	}
 	
-	/**
-	 * Shows the new email action dialog.
-	 * 
-	 * @param keywordList
-	 */
-	public void show_newKActionEmailForm(Object keywordList) {
-		log.trace("ENTER");
-		Keyword keyword = ui.getKeyword(ui.getSelectedItem(keywordList));
-		EmailActionDialog dialog = new EmailActionDialog(ui, this);
-		dialog.init(keyword);
-		dialog.show();
-		log.trace("EXIT");
-	}
-
 	public void keywordShowAdvancedView() {
 		Object divider = find(COMPONENT_KEYWORDS_DIVIDER);
 		if (ui.getItems(divider).length >= 2) {
@@ -423,30 +393,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 		log.trace("EXIT");
 	}
 	
-	/**
-	 * Shows the new join group action dialog.
-	 * 
-	 * @param keywordList
-	 */
-	public void show_newKActionJoinForm(Object keywordList) {
-		Keyword keyword = ui.getKeyword(ui.getSelectedItem(keywordList));
-		JoinGroupActionDialog dialog = new JoinGroupActionDialog(ui, this);
-		dialog.init(keyword);
-		dialog.show();
-	}
-	
-	/**
-	 * Shows the new leave group action dialog.
-	 * 
-	 * @param keywordList
-	 */
-	public void show_newKActionLeaveForm(Object keywordList) {
-		Keyword keyword = ui.getKeyword(ui.getSelectedItem(keywordList));
-		LeaveGroupActionDialog dialog = new LeaveGroupActionDialog(ui, this);
-		dialog.init(keyword);
-		dialog.show();
-	}
-	
 	public void keywordTab_doClear(Object panel) {
 		ui.setText(ui.find(panel, COMPONENT_TF_KEYWORD), "");
 		ui.setSelected(ui.find(panel, COMPONENT_CB_AUTO_REPLY), false);
@@ -619,18 +565,17 @@ public class KeywordTabHandler extends BaseTabHandler {
 
 	/**
 	 * Shows the new keyword dialog.
-	 * 
-	 * @param keyword
+	 * @param parentKeyword
 	 */
-	private void showNewKeywordForm(Keyword keyword) {
+	private void showNewKeywordForm(Keyword parentKeyword) {
 		String title = "Create new keyword.";
 		Object keywordForm = ui.loadComponentFromFile(UI_FILE_NEW_KEYWORD_FORM, this);
-		ui.setAttachedObject(keywordForm, keyword);
+		ui.setAttachedObject(keywordForm, parentKeyword);
 		ui.setText(ui.find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_TITLE), title);
 		// Pre-populate the keyword textfield with currently-selected keyword string so that
 		// a sub-keyword can easily be created.  Append a space to save the user from having
 		// to do it!
-		if (keyword != null) ui.setText(ui.find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_KEYWORD), keyword.getKeyword() + ' ');
+		if (parentKeyword != null) ui.setText(ui.find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_KEYWORD), parentKeyword.getKeyword() + ' ');
 		ui.add(keywordForm);
 	}
 	
@@ -658,40 +603,33 @@ public class KeywordTabHandler extends BaseTabHandler {
 	
 	/**
 	 * This method invokes the correct edit dialog according to the supplied action type.
-	 * 
-	 * @param action
+	 * @param action The action to edit
 	 */
 	private void showActionEditDialog(KeywordAction action) {
+		BaseActionDialog dialog;
 		switch (action.getType()) {
 			case KeywordAction.TYPE_FORWARD:
-			ForwardActionDialog dialog = new ForwardActionDialog(ui, this);
-			dialog.init(action);
-			dialog.show();
+				dialog = new ForwardActionDialog(ui, this);
 				break;
 			case KeywordAction.TYPE_JOIN: 
-				JoinGroupActionDialog joinDialog = new JoinGroupActionDialog(ui, this);
-				joinDialog.init(action);
-				joinDialog.show();
+				dialog = new JoinGroupActionDialog(ui, this);
 				break;
 			case KeywordAction.TYPE_LEAVE: 
-				JoinGroupActionDialog leaveDialog = new JoinGroupActionDialog(ui, this);
-				leaveDialog.init(action);
-				leaveDialog.show();
+				dialog = new JoinGroupActionDialog(ui, this);
 				break;
 			case KeywordAction.TYPE_REPLY:
-			ReplyActionDialogHandler dialog1 = new ReplyActionDialogHandler(ui, this);
-			dialog1.init(action);
-			dialog1.show();
+				dialog = new ReplyActionDialog(ui, this);
 				break;
 			case KeywordAction.TYPE_EXTERNAL_CMD:
-				show_newKActionExternalCmdFormForEdition(action);
+				dialog = new ExternalCommandActionDialog(ui, this);
 				break;
 			case KeywordAction.TYPE_EMAIL:
-				EmailActionDialog emailDialog = new EmailActionDialog(ui, this);
-				emailDialog.init(action);
-				emailDialog.show();
+				dialog = new EmailActionDialog(ui, this);
 				break;
+			default: throw new IllegalStateException();
 		}
+		dialog.init(action);
+		dialog.show();
 	}
 	
 	/**
@@ -741,20 +679,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 		}
 	}
 
-	/**
-	 * Shows the new external command action dialog.
-	 * 
-	 * @param keywordList
-	 */
-	public void show_newKActionExternalCmdForm(Object keywordList) {
-		log.trace("ENTER");
-		Keyword keyword = ui.getKeyword(ui.getSelectedItem(keywordList));
-		ExternalCommandActionDialog dialog = new ExternalCommandActionDialog(ui, this);
-		dialog.init(keyword);
-		dialog.show();
-		log.trace("EXIT");
-	}
-
 	private String keywordSimple_getAutoReply(Object panel) {
 		String ret = null;
 		if (ui.isSelected(ui.find(panel, COMPONENT_CB_AUTO_REPLY))) {
@@ -779,21 +703,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 		return ret;
 	}
 	
-	/**
-	 * Shows the new external command action dialog for edition.
-	 * 
-	 * @param keywordList
-	 */
-	private void show_newKActionExternalCmdFormForEdition(KeywordAction action) {
-		log.trace("ENTER");
-
-		ExternalCommandActionDialog dialog = new ExternalCommandActionDialog(ui, this);
-		dialog.init(action);
-		dialog.show();
-		
-		log.trace("EXIT");
-	}
-
 	private Object createComboBoxChoice(Group g) {
 		Object item = ui.createComboboxChoice(g.getName(), g);
 		ui.setIcon(item, Icon.GROUP);

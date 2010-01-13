@@ -39,7 +39,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * @author aga
  *
  */
-public class ExternalCommandActionDialog extends BaseActionDialogHandler {
+public class ExternalCommandActionDialog extends BaseActionDialog {
 	/** UI XML Layout file for editing external command actions */
 	public static final String UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM = "/ui/core/keyword/dgEditExternalCommandAction.xml";
 	/** DAO for {@link Group}s */
@@ -56,7 +56,7 @@ public class ExternalCommandActionDialog extends BaseActionDialogHandler {
 		this.groupDao = ui.getFrontlineController().getGroupDao();
 	}
 
-	/** @see net.frontlinesms.ui.handler.keyword.BaseActionDialogHandler#_init() */
+	/** @see net.frontlinesms.ui.handler.keyword.BaseActionDialog#_init() */
 	@Override
 	protected void _init() {
 		//Adds the date panel to it
@@ -137,7 +137,7 @@ public class ExternalCommandActionDialog extends BaseActionDialogHandler {
 		}
 	}
 
-	/** @see net.frontlinesms.ui.handler.keyword.BaseActionDialogHandler#getLayoutFilePath() */
+	/** @see net.frontlinesms.ui.handler.keyword.BaseActionDialog#getLayoutFilePath() */
 	@Override
 	protected String getLayoutFilePath() {
 		return UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM;

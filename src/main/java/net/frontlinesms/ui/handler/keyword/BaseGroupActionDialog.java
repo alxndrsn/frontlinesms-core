@@ -30,7 +30,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * @author aga
  *
  */
-abstract class BaseGroupActionDialog extends BaseActionDialogHandler {
+abstract class BaseGroupActionDialog extends BaseActionDialog {
 	/** Thinlet XML layout file for group action */
 	public static final String UI_FILE_GROUP_SELECTER = "/ui/core/keyword/dgEditGroupAction.xml";
 	
@@ -49,7 +49,7 @@ abstract class BaseGroupActionDialog extends BaseActionDialogHandler {
 		this.groupDao = ui.getFrontlineController().getGroupDao();
 	}
 
-	/** @see net.frontlinesms.ui.handler.keyword.BaseActionDialogHandler#getLayoutFilePath() */
+	/** @see net.frontlinesms.ui.handler.keyword.BaseActionDialog#getLayoutFilePath() */
 	@Override
 	protected String getLayoutFilePath() {
 		return UI_FILE_GROUP_SELECTER;

@@ -32,7 +32,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * @author aga
  *
  */
-public class EmailActionDialog extends BaseActionDialogHandler {
+public class EmailActionDialog extends BaseActionDialog {
 	
 //> CONSTANTS
 	/** UI Layout file path: Email Action dialog */
@@ -66,7 +66,7 @@ public class EmailActionDialog extends BaseActionDialogHandler {
 	}
 	
 //> INSTANCE METHODS
-	/** @see net.frontlinesms.ui.handler.keyword.BaseActionDialogHandler#_init() */
+	/** @see net.frontlinesms.ui.handler.keyword.BaseActionDialog#_init() */
 	@Override
 	protected void _init() {
 		Object emailForm = super.getDialogComponent();
@@ -104,7 +104,7 @@ public class EmailActionDialog extends BaseActionDialogHandler {
 		}
 	}
 
-	/** @see net.frontlinesms.ui.handler.keyword.BaseActionDialogHandler#getLayoutFilePath() */
+	/** @see net.frontlinesms.ui.handler.keyword.BaseActionDialog#getLayoutFilePath() */
 	@Override
 	protected String getLayoutFilePath() {
 		return UI_FILE_NEW_KACTION_EMAIL_FORM;

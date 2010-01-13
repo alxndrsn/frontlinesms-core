@@ -28,7 +28,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * @author Carlos Eduardo Genz
  * <li> kadu(at)masabi(dot)com
  */
-public class ReplyActionDialogHandler extends BaseActionDialogHandler {
+public class ReplyActionDialog extends BaseActionDialog {
 
 //> UI LAYOUT FILES
 	/** UI XML Layout file: Reply action edit dialog */
@@ -43,11 +43,11 @@ public class ReplyActionDialogHandler extends BaseActionDialogHandler {
 	
 //> CONSTRUCTORS
 	/**
-	 * Create a new {@link ReplyActionDialogHandler}.
+	 * Create a new {@link ReplyActionDialog}.
 	 * @param ui The {@link UiGeneratorController} instance this is tied to
 	 * @param owner the {@link KeywordTabHandler} which spawned this
 	 */
-	public ReplyActionDialogHandler(UiGeneratorController ui, KeywordTabHandler owner) {
+	public ReplyActionDialog(UiGeneratorController ui, KeywordTabHandler owner) {
 		super(ui, owner);
 	}
 	
