@@ -112,7 +112,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 	public static final String UI_FILE_KEYWORDS_SIMPLE_VIEW = "/ui/core/keyword/pnSimpleView.xml";
 	public static final String UI_FILE_KEYWORDS_ADVANCED_VIEW = "/ui/core/keyword/pnAdvancedView.xml";
 	public static final String UI_FILE_NEW_KEYWORD_FORM = "/ui/core/keyword/newKeywordForm.xml";
-	public static final String UI_FILE_NEW_KACTION_FORWARD_FORM = "/ui/core/keyword/newKActionForwardForm.xml";
 	public static final String UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM = "/ui/core/keyword/externalCommandDialog.xml";
 	public static final String UI_FILE_NEW_KACTION_EMAIL_FORM = "/ui/core/keyword/dgEmailKAction.xml";
 
@@ -158,20 +157,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 	}
 	
 	/**
-	 * Adds the $sender to the text, allowing the user to forward the sender.
-	 */
-	public void addSenderToForwardMessage(String currentText, Object textArea) {
-		ui.setText(textArea, currentText + ' ' + CsvUtils.MARKER_SENDER_NAME);
-	}
-
-	/**
-	 * Adds the $content to the text, allowing the user to forward the message content.
-	 */
-	public void addMsgContentToForwardMessage(String currentText, Object textArea) {
-		ui.setText(textArea, currentText + ' ' + CsvUtils.MARKER_MESSAGE_CONTENT);
-	}
-	
-	/**
      *  0 - Auto Reply
      *  1 - Auto Forward
      *  2 - Join Group
@@ -212,19 +197,9 @@ public class KeywordTabHandler extends BaseTabHandler {
 	 */
 	public void show_newKActionForwardForm(Object keywordList) {
 		Keyword keyword = ui.getKeyword(ui.getSelectedItem(keywordList));
-		Object forwardForm = ui.loadComponentFromFile(UI_FILE_NEW_KACTION_FORWARD_FORM, this);
-		//Adds the date panel to it
-		ui.addDatePanel(forwardForm);
-		ui.setAttachedObject(forwardForm, keyword);
-		ui.setText(ui.find(forwardForm, COMPONENT_FORWARD_FORM_TITLE), InternationalisationUtils.getI18NString(COMMON_AUTO_FORWARD_FOR_KEYWORD) + " '" + keyword.getKeyword() + "' " + InternationalisationUtils.getI18NString(COMMON_TO_GROUP) + ":");
-		Object list = ui.find(forwardForm, COMPONENT_FORWARD_FORM_GROUP_LIST);
-		List<Group> userGroups = this.groupDao.getAllGroups();
-		for (Group g : userGroups) {
-			Object item = ui.createListItem(g.getName(), g);
-			ui.setIcon(item, Icon.GROUP);
-			ui.add(list, item);
-		}
-		ui.add(forwardForm);
+		ForwardActionDialog dialog = new ForwardActionDialog(ui, this);
+		dialog.init(keyword);
+		dialog.show();
 	}
 
 	/**
@@ -258,68 +233,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 			ui.add(list, item);
 		}
 		ui.add(emailForm);
-		log.trace("EXIT");
-	}
-	
-	/**
-	 * Creates a new forward message action.
-	 */
-	public void do_newKActionForward(Object forwardDialog, Object groupList, String forwardText) {
-		log.trace("ENTER");
-		Group group = ui.getGroup(ui.getSelectedItem(groupList));
-		if (group != null) {
-			String startDate = ui.getText(ui.find(forwardDialog, COMPONENT_TF_START_DATE));
-			String endDate = ui.getText(ui.find(forwardDialog, COMPONENT_TF_END_DATE));
-			log.debug("Start Date [" + startDate + "]");
-			log.debug("End Date [" + endDate + "]");
-			if (startDate.equals("")) {
-				log.debug("No start date set, so we set to [" + InternationalisationUtils.getDefaultStartDate() + "]");
-				startDate = InternationalisationUtils.getDefaultStartDate();
-			}
-			long start;
-			long end;
-			try {
-				Date ds = InternationalisationUtils.parseDate(startDate); 
-				if (!endDate.equals("") && !endDate.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
-					Date de = InternationalisationUtils.parseDate(endDate);
-					if (!Utils.validateDates(ds, de)) {
-						log.debug("Start date is not before the end date");
-						ui.alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
-						log.trace("EXIT");
-						return;
-					}
-					end = de.getTime();
-				} else {
-					end = DEFAULT_END_DATE;
-				}
-				start = ds.getTime();
-			} catch (ParseException e) {
-				log.debug("Wrong format for date", e);
-				ui.alert(InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
-				log.trace("EXIT");
-				return;
-			} 
-			KeywordAction action;
-			boolean isNew = false;
-			if (ui.isAttachment(forwardDialog, KeywordAction.class)) {
-				action = ui.getKeywordAction(forwardDialog);
-				log.debug("Editing action [" + action + "]. Setting new values!");
-				action.setGroup(group);
-				action.setForwardText(forwardText);
-				action.setStartDate(start);
-				action.setEndDate(end);
-			} else {
-				isNew = true;
-				Keyword keyword = ui.getKeyword(forwardDialog);
-				log.debug("Creating action for keyword [" + keyword.getKeyword() + "]");
-				action = KeywordAction.createForwardAction(keyword, group, forwardText, start, end);
-				keywordActionDao.saveKeywordAction(action);
-			}
-			updateKeywordActionList(action, isNew);
-			ui.remove(forwardDialog);
-		} else {
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_GROUP_SELECTED_TO_FWD));
-		}
 		log.trace("EXIT");
 	}
 
@@ -1220,36 +1133,9 @@ public class KeywordTabHandler extends BaseTabHandler {
 	 * @param action
 	 */
 	private void show_newKActionForwardFormForEdition(KeywordAction action) {
-		Keyword keyword = action.getKeyword();
-		Object forwardForm = ui.loadComponentFromFile(UI_FILE_NEW_KACTION_FORWARD_FORM, this);
-		//Adds the date panel to it
-		ui.addDatePanel(forwardForm);
-		ui.setAttachedObject(forwardForm, action);
-		ui.setText(ui.find(forwardForm, COMPONENT_FORWARD_FORM_TITLE), InternationalisationUtils.getI18NString(COMMON_AUTO_FORWARD_FOR_KEYWORD) + " '" + keyword.getKeyword() + "' " + InternationalisationUtils.getI18NString(COMMON_TO_GROUP) + ":");
-		Object list = ui.find(forwardForm, COMPONENT_FORWARD_FORM_GROUP_LIST);
-		List<Group> userGroups = this.groupDao.getAllGroups();
-		for (Group g : userGroups) {
-			Object item = ui.createListItem(g.getName(), g);
-			ui.setIcon(item, Icon.GROUP);
-			if (g.getName().equals(action.getGroup().getName())) {
-				ui.setSelected(item, true);
-			}
-			ui.add(list, item);
-		}
-		ui.setText(ui.find(forwardForm, COMPONENT_FORWARD_FORM_TEXTAREA), action.getUnformattedForwardText());
-		
-		ui.setText(ui.find(forwardForm, COMPONENT_TF_START_DATE), action == null ? "" : InternationalisationUtils.getDateFormat().format(action.getStartDate()));
-		Object endDate = ui.find(forwardForm, COMPONENT_TF_END_DATE);
-		String toSet = "";
-		if (action != null) {
-			if (action.getEndDate() == DEFAULT_END_DATE) {
-				toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
-			} else {
-				toSet = InternationalisationUtils.getDateFormat().format(action.getEndDate());
-			}
-		}
-		ui.setText(endDate, toSet);
-		ui.add(forwardForm);
+		ForwardActionDialog dialog = new ForwardActionDialog(ui, this);
+		dialog.init(action);
+		dialog.show();
 	}
 
 	/**

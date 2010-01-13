@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 
 import net.frontlinesms.Utils;
 import net.frontlinesms.csv.CsvUtils;
+import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
 import net.frontlinesms.data.repository.KeywordActionDao;
 import net.frontlinesms.ui.ThinletUiEventHandler;
@@ -14,7 +15,8 @@ import net.frontlinesms.ui.UiGeneratorController;
  * @author aga
  */
 public abstract class BaseActionDialogHandler implements ThinletUiEventHandler {
-	
+
+//> INSTANCE PROPERTIES
 	/** Log */
 	protected Logger log = Utils.getLogger(this.getClass());
 	/** UI */
@@ -26,6 +28,14 @@ public abstract class BaseActionDialogHandler implements ThinletUiEventHandler {
 
 	/** Appears to be the in-focus item on the email tab. */
 	private Object emailTabFocusOwner;
+	
+	/** The UI dialog component */
+	private Object dialogComponent;
+	/**
+	 * The object that this dialog is dealing with.  This should either be a {@link Keyword}, if
+	 * we are creating a new action, or a {@link KeywordAction} if we are editing an existing action.
+	 */
+	private Object targetObject;
 
 //> CONSTRUCTORS
 	/**
@@ -39,9 +49,65 @@ public abstract class BaseActionDialogHandler implements ThinletUiEventHandler {
 		this.keywordActionDao = ui.getFrontlineController().getKeywordActionDao();
 	}
 	
-//> ACCESSORS
+	/** Show the dialog */
+	public void show() {
+		this.ui.add(this.dialogComponent);
+	}
 	
-//>
+	/**
+	 * Initialise the dialog to create a new action 
+	 * @param keyword the keyword the new action will be attached to
+	 */
+	public abstract void init(Keyword keyword);
+
+	/** 
+	 * Initialise the dialog to edit an existing keyword action 
+	 * @param action the action to edit
+	 */
+	public abstract void init(KeywordAction action);
+	
+	/**
+	 * Load the tab for displaying, and set the target object we are working on.
+	 * This should be called by {@link #init(Keyword)} and {@link #init(KeywordAction)} ONLY.
+	 * @param targetObject the {@link KeywordAction} we are modifying, or a {@link Keyword} if we are creating a new {@link KeywordAction}.
+	 */
+	protected void _init(Object targetObject) {
+		this.dialogComponent = ui.loadComponentFromFile(getLayoutFilePath(), this);
+		assert(targetObject instanceof Keyword || targetObject instanceof KeywordAction) : "Target object for a keyword action edit dialog must be a keyword or action.";
+		this.targetObject = targetObject;
+	}
+	
+//> ACCESSORS
+	/** @return the path to the Thinlet XML layout file for this dialog */
+	protected abstract String getLayoutFilePath();
+	
+	/** @return the dialog component */
+	protected Object getDialogComponent() {
+		return dialogComponent;
+	}
+	
+	/**
+	 * @param <T> {@link Keyword} or {@link KeywordAction}
+	 * @param clazz the class of {@link #targetObject}
+	 * @return the {@link #targetObject}, cast to a particular class
+	 */
+	@SuppressWarnings("unchecked")
+	protected <T> T getTargetObject(Class<T> clazz) {
+		return (T) targetObject;
+	}
+	
+	/** @return the {@link Keyword} whose action is being edited or created */
+	protected Keyword getTargetKeyword() {
+		if(isEditing()) return getTargetObject(KeywordAction.class).getKeyword();
+		else return getTargetObject(Keyword.class);
+	}
+	
+//> INSTANCE HELPER METHODS
+	/** @return <code>true</code> if we are editing an existing {@link KeywordAction}, <code>false</code> if we are creating a new one. */
+	protected boolean isEditing() {
+		return this.targetObject instanceof KeywordAction;
+	}
+	
 	/** 
 	 * Save a new {@link KeywordAction} to the database 
 	 * @param action a new keyword action 
@@ -58,17 +124,27 @@ public abstract class BaseActionDialogHandler implements ThinletUiEventHandler {
 		this.keywordActionDao.updateKeywordAction(action);
 	}
 	
+//> UI EVENT METHODS
+	/** Remove the dialog from display. */
+	public void removeDialog() {
+		ui.remove(this.dialogComponent);
+	}
+	
+//> UI HELPER METHODS
+	/** 
+	 * Find a thinlet component within the {@link #dialogComponent}.
+	 * @param componentName The name of the component
+	 * @return the component with the given name, or <code>null</code> if none could be found.
+	 */
+	protected Object find(String componentName) {
+		return ui.find(this.dialogComponent, componentName);
+	}
+	
 //> UI PASSTHROUGH METHODS
 	/**
-	 * Remove the supplied dialog from view.
-	 * @param dialog the dialog to remove
-	 */
-	public void removeDialog(Object dialog) {
-		ui.removeDialog(dialog);
-	}
-
-	/**
 	 * Adds a constant substitution marker to the text of an email action's text area (a thinlet component).
+	 * @param currentText 
+	 * @param textArea 
 	 * 
 	 * @param type The index of the constant that should be inserted
 	 * <li> 0 for Sender name
@@ -104,6 +180,11 @@ public abstract class BaseActionDialogHandler implements ThinletUiEventHandler {
 		log.trace("EXIT");
 	}
 	
+	/**
+	 * @param tfSubject
+	 * @param tfMessage
+	 * @param type
+	 */
 	public void addConstantToEmailDialog(Object tfSubject, Object tfMessage, int type) {
 		Object toSet = tfMessage;
 		Object focused = emailTabFocusOwner;
@@ -113,10 +194,17 @@ public abstract class BaseActionDialogHandler implements ThinletUiEventHandler {
 		addConstantToCommand(ui.getText(toSet), toSet, type);
 	}
 
+	/**
+	 * @param obj
+	 */
 	public void setEmailFocusOwner(Object obj) {
 		emailTabFocusOwner = obj;
 	}
 	
+	/**
+	 * @param action
+	 * @param isNew
+	 */
 	protected void updateKeywordActionList(KeywordAction action, boolean isNew) {
 		owner.updateKeywordActionList_(action, isNew);
 	}

@@ -36,14 +36,11 @@ public class ReplyActionDialogHandler extends BaseActionDialogHandler {
 	public static final String UI_FILE_NEW_KACTION_REPLY_FORM = "/ui/core/keyword/dgEditReply.xml";
 	
 //> INSTANCE PROPERTIES
-	/** The UI dialog component */
-	private Object dialogComponent;
-	
-	/**
-	 * The object that this dialog is dealing with.  This should either be a {@link Keyword}, if
-	 * we are creating a new action, or a {@link KeywordAction} if we are editing an existing action.
-	 */
-	private Object targetObject;
+	/** @return the path to the thinlet layout file for the reply action edit dialog */
+	@Override
+	protected String getLayoutFilePath() {
+		return UI_FILE_NEW_KACTION_REPLY_FORM;
+	}
 	
 //> CONSTRUCTORS
 	/**
@@ -60,7 +57,7 @@ public class ReplyActionDialogHandler extends BaseActionDialogHandler {
 	 * @param keyword the keyword which the new action will be attached to.
 	 */
 	public void init(Keyword keyword) {
-		this.targetObject = keyword;
+		super._init(keyword);
 		sharedInit(null);
 	}
 
@@ -69,13 +66,13 @@ public class ReplyActionDialogHandler extends BaseActionDialogHandler {
 	 * @param action the action to edit
 	 */
 	public void init(KeywordAction action) {
-		this.targetObject = action;
+		super._init(action);
 		sharedInit(action.getUnformattedReplyText());
 		
-		ui.setText(ui.find(this.dialogComponent, COMPONENT_TF_MESSAGE), action.getUnformattedReplyText());
+		ui.setText(find(COMPONENT_TF_MESSAGE), action.getUnformattedReplyText());
 		
-		ui.setText(ui.find(this.dialogComponent, COMPONENT_TF_START_DATE), action == null ? "" : InternationalisationUtils.getDateFormat().format(action.getStartDate()));
-		Object endDate = ui.find(this.dialogComponent, COMPONENT_TF_END_DATE);
+		ui.setText(find(COMPONENT_TF_START_DATE), action == null ? "" : InternationalisationUtils.getDateFormat().format(action.getStartDate()));
+		Object endDate = find(COMPONENT_TF_END_DATE);
 		String toSet = "";
 		if (action != null) {
 			if (action.getEndDate() == DEFAULT_END_DATE) {
@@ -93,8 +90,6 @@ public class ReplyActionDialogHandler extends BaseActionDialogHandler {
 	 */
 	private void sharedInit(String replyText) {
 		// Load the reply form from file.
-		this.dialogComponent = ui.loadComponentFromFile(UI_FILE_NEW_KACTION_REPLY_FORM, this);
-
 		MessagePanelHandler messagePanelController = new MessagePanelHandler(this.ui);
 		Object pnMessage = messagePanelController.getPanel();
 		// FIX 0000542
@@ -102,22 +97,17 @@ public class ReplyActionDialogHandler extends BaseActionDialogHandler {
 		ui.remove(ui.getItem(pnBottom, 0));
 		Object senderPanel = ui.loadComponentFromFile(UI_FILE_SENDER_NAME_PANEL, this);
 		ui.add(pnBottom, senderPanel, 0);
-		ui.add(this.dialogComponent, pnMessage, ui.getItems(this.dialogComponent).length - 3);
-		ui.setAction(ui.find(senderPanel, COMPONENT_BT_SENDER_NAME), "addConstantToCommand(tfMessage.text, tfMessage, 0)", this.dialogComponent, this);
-		ui.setAction(ui.find(senderPanel, "btSenderNumber"), "addConstantToCommand(tfMessage.text, tfMessage, 1)", this.dialogComponent, this);
+		ui.add(this.getDialogComponent(), pnMessage, ui.getItems(this.getDialogComponent()).length - 3);
+		ui.setAction(ui.find(senderPanel, COMPONENT_BT_SENDER_NAME), "addConstantToCommand(tfMessage.text, tfMessage, 0)", this.getDialogComponent(), this);
+		ui.setAction(ui.find(senderPanel, "btSenderNumber"), "addConstantToCommand(tfMessage.text, tfMessage, 1)", this.getDialogComponent(), this);
 		// FIX 0000542
 		
 		//Adds the date panel to it
-		ui.addDatePanel(this.dialogComponent);
+		ui.addDatePanel(this.getDialogComponent());
 		
 		if(replyText != null) {
 			messagePanelController.messageChanged(replyText);
 		}
-	}
-
-	/** Show the dialog */
-	public void show() {
-		this.ui.add(this.dialogComponent);
 	}
 	
 //> UI EVENT HANDLERS
@@ -162,8 +152,8 @@ public class ReplyActionDialogHandler extends BaseActionDialogHandler {
 		boolean isNew = false;
 		KeywordAction action;
 		String replyText = ui.getText(getMessageTextfield());
-		if (this.targetObject instanceof KeywordAction) {
-			action = (KeywordAction) this.targetObject;
+		if (this.isEditing()) {
+			action = getTargetObject(KeywordAction.class);
 			log.debug("Editing action [" + action + "]. Setting new values!");
 			action.setReplyText(replyText);
 			action.setStartDate(start);
@@ -171,7 +161,7 @@ public class ReplyActionDialogHandler extends BaseActionDialogHandler {
 			super.update(action);
 		} else {
 			isNew = true;
-			Keyword keyword = (Keyword) this.targetObject;
+			Keyword keyword = getTargetObject(Keyword.class);
 			log.debug("Creating action for keyword [" + keyword.getKeyword() + "].");
 			action = KeywordAction.createReplyAction(keyword, replyText, start, end);
 			super.save(action);
@@ -181,23 +171,9 @@ public class ReplyActionDialogHandler extends BaseActionDialogHandler {
 		log.trace("EXIT");
 	}
 	
-	/** Remove the dialog from display. */
-	public void removeDialog() {
-		ui.remove(this.dialogComponent);
-	}
-	
 //> UI HELPER METHODS
 	/** @return the message textfield */
 	private Object getMessageTextfield() {
 		return find("tfMessage");
-	}
-	
-	/** 
-	 * Find a thinlet component within the {@link #dialogComponent}.
-	 * @param componentName The name of the component
-	 * @return the component with the given name, or <code>null</code> if none could be found.
-	 */
-	private Object find(String componentName) {
-		return ui.find(this.dialogComponent, componentName);
 	}
 }
