@@ -37,7 +37,7 @@ public class ForwardActionDialog extends BaseActionDialog {
 	
 //> CONSTANTS
 	/** UI XML Layout file: forward keyword action edit form */
-	private static final String UI_FILE_NEW_KACTION_FORWARD_FORM = "/ui/core/keyword/dgEditForward.xml";
+	private static final String UI_FILE_NEW_KACTION_FORWARD_FORM = "/ui/core/keyword/dgEditForwardAction.xml";
 	
 //> INSTANCE VARIABLES
 	/** DAO for {@link Group}s */

@@ -32,7 +32,7 @@ public class ReplyActionDialog extends BaseActionDialog {
 
 //> UI LAYOUT FILES
 	/** UI XML Layout file: Reply action edit dialog */
-	public static final String UI_FILE_NEW_KACTION_REPLY_FORM = "/ui/core/keyword/dgEditReply.xml";
+	public static final String UI_FILE_NEW_KACTION_REPLY_FORM = "/ui/core/keyword/dgEditReplyAction.xml";
 	
 //> INSTANCE PROPERTIES
 	/** @return the path to the thinlet layout file for the reply action edit dialog */
