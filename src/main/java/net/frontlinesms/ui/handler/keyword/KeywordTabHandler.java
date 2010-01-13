@@ -8,24 +8,18 @@ import static net.frontlinesms.FrontlineSMSConstants.ACTION_CREATE;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_BLANK;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_EDITING_KEYWORD;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_KEYWORD_ACTIONS_OF;
-import static net.frontlinesms.FrontlineSMSConstants.COMMON_UNDEFINED;
 import static net.frontlinesms.FrontlineSMSConstants.DEFAULT_END_DATE;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_KEYWORD_EXISTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_KEYWORD_SAVED;
-import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_GROUP_SELECTED_TO_FWD;
-import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_START_DATE_AFTER_END;
-import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_WRONG_FORMAT_DATE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_ACTION_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_CLEAR;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_SAVE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_ACTION_TYPE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_AUTO_REPLY;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_FORWARD;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_GROUPS_TO_JOIN;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_GROUPS_TO_LEAVE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_JOIN_GROUP;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_LEAVE_GROUP;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_EXTERNAL_COMMAND_GROUP_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORDS_DIVIDER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORD_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEY_ACT_PANEL;
@@ -35,34 +29,21 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_K
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_DESCRIPTION;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_KEYWORD;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_TITLE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_RESPONSE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_TIP;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RB_FRONTLINE_COMMANDS;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RB_NO_RESPONSE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RB_PLAIN_TEXT;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RB_TYPE_COMMAND_LINE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RB_TYPE_HTTP;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_AUTO_REPLY;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_COMMAND;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_END_DATE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_KEYWORD;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_START_DATE;
 
 import java.text.ParseException;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import thinlet.Thinlet;
 
 import net.frontlinesms.FrontlineSMS;
-import net.frontlinesms.Utils;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
-import net.frontlinesms.data.repository.EmailAccountDao;
 import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.KeywordActionDao;
 import net.frontlinesms.data.repository.KeywordDao;
@@ -83,21 +64,16 @@ public class KeywordTabHandler extends BaseTabHandler {
 	public static final String UI_FILE_KEYWORDS_SIMPLE_VIEW = "/ui/core/keyword/pnSimpleView.xml";
 	public static final String UI_FILE_KEYWORDS_ADVANCED_VIEW = "/ui/core/keyword/pnAdvancedView.xml";
 	public static final String UI_FILE_NEW_KEYWORD_FORM = "/ui/core/keyword/newKeywordForm.xml";
-	public static final String UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM = "/ui/core/keyword/externalCommandDialog.xml";
 
-	private EmailAccountDao emailAccountDao;
 	private GroupDao groupDao;
 	private KeywordDao keywordDao;
 	private KeywordActionDao keywordActionDao;
 
 	private Object keywordListComponent;
 	
-	/** The number of people the current SMS will be sent to */
-	private int numberToSend = 1;
-	
 	public KeywordTabHandler(UiGeneratorController ui, FrontlineSMS frontlineController) {
 		super(ui);
-		this.emailAccountDao = frontlineController.getEmailAccountFactory();
+
 		this.groupDao = frontlineController.getGroupDao();
 		this.keywordDao = frontlineController.getKeywordDao();
 		this.keywordActionDao = frontlineController.getKeywordActionDao(); 
@@ -160,7 +136,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 	
 	/**
 	 * Shows the new forward message action dialog.
-	 * 
 	 * @param keywordList
 	 */
 	public void show_newKActionForwardForm(Object keywordList) {
@@ -305,7 +280,9 @@ public class KeywordTabHandler extends BaseTabHandler {
 		updateKeywordList();
 		ui.remove(formPanel);
 		log.trace("EXIT");
-	}	public void keywordTab_doSave(Object panel) {
+	}
+	
+	public void keywordTab_doSave(Object panel) {
 		log.trace("ENTER");
 		long startDate;
 		try {
@@ -470,127 +447,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 		dialog.show();
 	}
 	
-	/**
-	 * Creates a new forward message action.
-	 */
-	public void do_newKActionExternalCommand(Object externalCommandDialog) {
-		log.trace("ENTER");
-		String startDate = ui.getText(ui.find(externalCommandDialog, COMPONENT_TF_START_DATE));
-		String endDate = ui.getText(ui.find(externalCommandDialog, COMPONENT_TF_END_DATE));
-		log.debug("Start Date [" + startDate + "]");
-		log.debug("End Date [" + endDate + "]");
-		if (startDate.equals("")) {
-			log.debug("No start date set, so we set to [" + InternationalisationUtils.getDefaultStartDate() + "]");
-			startDate = InternationalisationUtils.getDefaultStartDate();
-		}
-		long start;
-		long end;
-		try {
-			Date ds = InternationalisationUtils.parseDate(startDate); 
-			if (!endDate.equals("") && !endDate.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
-				Date de = InternationalisationUtils.parseDate(endDate);
-				if (!Utils.validateDates(ds, de)) {
-					log.debug("Start date is not before the end date");
-					ui.alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
-					log.trace("EXIT");
-					return;
-				}
-				end = de.getTime();
-			} else {
-				end = DEFAULT_END_DATE;
-			}
-			start = ds.getTime();
-		} catch (ParseException e) {
-			log.debug("Wrong format for date", e);
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
-			log.trace("EXIT");
-			return;
-		} 
-		int commandType = ui.isSelected(ui.find(externalCommandDialog, COMPONENT_RB_TYPE_HTTP)) ? KeywordAction.EXTERNAL_HTTP_REQUEST : KeywordAction.EXTERNAL_COMMAND_LINE;
-		String commandLine = ui.getText(ui.find(externalCommandDialog, COMPONENT_TF_COMMAND));
-		int responseType = KeywordAction.EXTERNAL_RESPONSE_DONT_WAIT;
-		if (ui.isSelected(ui.find(externalCommandDialog, COMPONENT_RB_PLAIN_TEXT))) {
-			responseType = KeywordAction.EXTERNAL_RESPONSE_PLAIN_TEXT;
-		} else if (ui.isSelected(ui.find(externalCommandDialog, COMPONENT_RB_FRONTLINE_COMMANDS))) {
-			responseType = KeywordAction.EXTERNAL_RESPONSE_LIST_COMMANDS;
-		}
-		
-		log.debug("Command type [" + commandType + "]");
-		log.debug("Command [" + commandLine + "]");
-		log.debug("Response type [" + responseType + "]");
-		
-		Group group = null;
-		String message = null;
-		int responseActionType = KeywordAction.EXTERNAL_DO_NOTHING; 
-		if (responseType == KeywordAction.EXTERNAL_RESPONSE_PLAIN_TEXT) {
-			boolean reply = ui.isSelected(ui.find(externalCommandDialog, COMPONENT_CB_AUTO_REPLY));
-			boolean fwd = ui.isSelected(ui.find(externalCommandDialog, COMPONENT_CB_FORWARD));
-			
-			if (reply && fwd) {
-				responseActionType = KeywordAction.EXTERNAL_REPLY_AND_FORWARD;
-			} else if (reply) {
-				responseActionType = KeywordAction.TYPE_REPLY;
-			} else if (fwd) {
-				responseActionType = KeywordAction.TYPE_FORWARD;
-			}
-			log.debug("Response Action type [" + responseActionType + "]");
-			if (responseActionType == KeywordAction.TYPE_REPLY 
-					|| responseActionType == KeywordAction.TYPE_FORWARD
-					|| responseActionType == KeywordAction.EXTERNAL_REPLY_AND_FORWARD) {
-				message = ui.getText(ui.find(externalCommandDialog, COMPONENT_TF_MESSAGE));
-				log.debug("Message [" + message + "]");
-			}
-			if (responseActionType == KeywordAction.TYPE_FORWARD 
-					|| responseActionType == KeywordAction.EXTERNAL_REPLY_AND_FORWARD) {
-				group = ui.getGroup(ui.getSelectedItem(ui.find(externalCommandDialog, COMPONENT_EXTERNAL_COMMAND_GROUP_LIST)));
-				if (group == null) {
-					log.debug("No group selected to forward");
-					ui.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_GROUP_SELECTED_TO_FWD));
-					log.trace("EXIT");
-					return;
-				}
-				log.debug("Group [" + group.getName() + "]");
-			}
-		}
-		KeywordAction action = null;
-		boolean isNew = false;
-		if (ui.isAttachment(externalCommandDialog, KeywordAction.class)) {
-			//Editing
-			action = ui.getKeywordAction(externalCommandDialog);
-			log.debug("We are editing action [" + action + "]. Setting new values.");
-			if (group != null) {
-				action.setGroup(group);
-			}
-			action.setCommandLine(commandLine);
-			action.setExternalCommandType(commandType);
-			action.setExternalCommandResponseType(responseType);
-			action.setCommandResponseActionType(responseActionType);
-			action.setCommandText(message);
-			action.setStartDate(start);
-			action.setEndDate(end);
-			keywordActionDao.updateKeywordAction(action);
-		} else {
-			isNew = true;
-			Keyword keyword = ui.getKeyword(externalCommandDialog);
-			log.debug("Creating new keyword action for keyword [" + keyword.getKeyword() + "]");
-			action = KeywordAction.createExternalCommandAction(
-					keyword,
-					commandLine,
-					commandType,
-					responseType,
-					responseActionType,
-					message,
-					group,
-					start,
-					end
-			);
-			keywordActionDao.saveKeywordAction(action);
-		}
-		updateKeywordActionList(action, isNew);
-		ui.remove(externalCommandDialog);
-		log.trace("EXIT");
-	}
-	
 	public void keywordTab_doClear(Object panel) {
 		ui.setText(ui.find(panel, COMPONENT_TF_KEYWORD), "");
 		ui.setSelected(ui.find(panel, COMPONENT_CB_AUTO_REPLY), false);
@@ -599,20 +455,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 		ui.setSelectedIndex(ui.find(panel, COMPONENT_CB_GROUPS_TO_JOIN), 0);
 		ui.setSelected(ui.find(panel, COMPONENT_CB_LEAVE_GROUP), false);
 		ui.setSelectedIndex(ui.find(panel, COMPONENT_CB_GROUPS_TO_LEAVE), 0);
-	}
-	
-	/**
-	 * Activates or deactivates the supplied panel according to user selection.
-	 * 
-	 * @param list
-	 * @param selected
-	 */
-	public void controlExternalCommandResponseType(Object list, boolean selected) {
-		if (selected) {
-			ui.activate(list);
-		} else {
-			ui.deactivate(list);
-		}
 	}
 	
 	/**
@@ -907,20 +749,9 @@ public class KeywordTabHandler extends BaseTabHandler {
 	public void show_newKActionExternalCmdForm(Object keywordList) {
 		log.trace("ENTER");
 		Keyword keyword = ui.getKeyword(ui.getSelectedItem(keywordList));
-		log.debug("External command for keyword [" + keyword.getKeyword() + "]");
-		Object externalCmdForm = ui.loadComponentFromFile(UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM, this);
-		//Adds the date panel to it
-		ui.addDatePanel(externalCmdForm);
-		ui.setAttachedObject(externalCmdForm, keyword);
-		Object list = ui.find(externalCmdForm, COMPONENT_EXTERNAL_COMMAND_GROUP_LIST);
-		List<Group> userGroups = this.groupDao.getAllGroups();
-		for (Group g : userGroups) {
-			log.debug("Adding group [" + g.getName() + "] to list");
-			Object item = ui.createListItem(g.getName(), g);
-			ui.setIcon(item, Icon.GROUP);
-			ui.add(list, item);
-		}
-		ui.add(externalCmdForm);
+		ExternalCommandActionDialog dialog = new ExternalCommandActionDialog(ui, this);
+		dialog.init(keyword);
+		dialog.show();
 		log.trace("EXIT");
 	}
 
@@ -955,80 +786,11 @@ public class KeywordTabHandler extends BaseTabHandler {
 	 */
 	private void show_newKActionExternalCmdFormForEdition(KeywordAction action) {
 		log.trace("ENTER");
-		Object externalCmdForm = ui.loadComponentFromFile(UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM, this);
-		//Adds the date panel to it
-		ui.addDatePanel(externalCmdForm);
-		Object list = ui.find(externalCmdForm, COMPONENT_EXTERNAL_COMMAND_GROUP_LIST);
-		List<Group> userGroups = this.groupDao.getAllGroups();
-		for (Group g : userGroups) {
-			log.debug("Adding group [" + g.getName() + "] to list");
-			Object item = ui.createListItem(g.getName(), g);
-			ui.setIcon(item, Icon.GROUP);
-			ui.add(list, item);
-		}
-		ui.setAttachedObject(externalCmdForm, action);
-		//COMMAND TYPE
-		ui.setSelected(ui.find(externalCmdForm, COMPONENT_RB_TYPE_HTTP), action.getExternalCommandType() == KeywordAction.EXTERNAL_HTTP_REQUEST);
-		ui.setSelected(ui.find(externalCmdForm, COMPONENT_RB_TYPE_COMMAND_LINE), action.getExternalCommandType() == KeywordAction.EXTERNAL_COMMAND_LINE);
+
+		ExternalCommandActionDialog dialog = new ExternalCommandActionDialog(ui, this);
+		dialog.init(action);
+		dialog.show();
 		
-		//COMMAND
-		ui.setText(ui.find(externalCmdForm, COMPONENT_TF_COMMAND), action.getUnformattedCommand());
-		
-		Object pnResponse = ui.find(externalCmdForm, COMPONENT_PN_RESPONSE);
-		//RESPONSE TYPE
-		if (action.getExternalCommandResponseType() == KeywordAction.EXTERNAL_RESPONSE_PLAIN_TEXT) {
-			log.debug("Setting up dialog for PLAIN TEXT response.");
-			ui.setSelected(ui.find(externalCmdForm, COMPONENT_RB_PLAIN_TEXT), true);
-			ui.setSelected(ui.find(externalCmdForm, COMPONENT_RB_FRONTLINE_COMMANDS), false);
-			ui.setSelected(ui.find(externalCmdForm, COMPONENT_RB_NO_RESPONSE), false);
-			
-			ui.activate(pnResponse);
-			ui.deactivate(list);
-			//RESPONSE PANEL
-			ui.setText(ui.find(externalCmdForm, COMPONENT_TF_MESSAGE), action.getUnformattedCommandText());
-			int responseActionType = action.getCommandResponseActionType();
-			ui.setSelected(ui.find(externalCmdForm, COMPONENT_CB_AUTO_REPLY),
-						responseActionType == KeywordAction.TYPE_REPLY || responseActionType == KeywordAction.EXTERNAL_REPLY_AND_FORWARD);
-		
-			if (responseActionType == KeywordAction.TYPE_FORWARD || responseActionType == KeywordAction.EXTERNAL_REPLY_AND_FORWARD) {
-				ui.setSelected(ui.find(externalCmdForm, COMPONENT_CB_FORWARD), true);
-				ui.activate(list);
-				//Select group
-				Group g = action.getGroup();
-				for (Object item : ui.getItems(list)) {
-					Group it = ui.getGroup(item);
-					if (it.equals(g)) {
-						log.debug("Selecting group [" + g.getName() + "].");
-						ui.setSelected(item, true);
-						break;
-					}
-				}
-			}
-		} else if (action.getExternalCommandResponseType() == KeywordAction.EXTERNAL_RESPONSE_LIST_COMMANDS) {
-			log.debug("Setting up dialog for LIST COMMANDS response.");
-			ui.setSelected(ui.find(externalCmdForm, COMPONENT_RB_PLAIN_TEXT), false);
-			ui.setSelected(ui.find(externalCmdForm, COMPONENT_RB_FRONTLINE_COMMANDS), true);
-			ui.setSelected(ui.find(externalCmdForm, COMPONENT_RB_NO_RESPONSE), false);
-			ui.deactivate(pnResponse);
-		} else {
-			log.debug("Setting up dialog for NO response.");
-			ui.setSelected(ui.find(externalCmdForm, COMPONENT_RB_PLAIN_TEXT), false);
-			ui.setSelected(ui.find(externalCmdForm, COMPONENT_RB_FRONTLINE_COMMANDS), false);
-			ui.setSelected(ui.find(externalCmdForm, COMPONENT_RB_NO_RESPONSE), true);
-			ui.deactivate(pnResponse);
-		}
-		
-		//START and END dates
-		ui.setText(ui.find(externalCmdForm, COMPONENT_TF_START_DATE), InternationalisationUtils.getDateFormat().format(action.getStartDate()));
-		Object endDate = ui.find(externalCmdForm, COMPONENT_TF_END_DATE);
-		String toSet = "";
-		if (action.getEndDate() == DEFAULT_END_DATE) {
-			toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
-		} else {
-			toSet = InternationalisationUtils.getDateFormat().format(action.getEndDate());
-		}
-		ui.setText(endDate, toSet);
-		ui.add(externalCmdForm);
 		log.trace("EXIT");
 	}
 
@@ -1036,20 +798,5 @@ public class KeywordTabHandler extends BaseTabHandler {
 		Object item = ui.createComboboxChoice(g.getName(), g);
 		ui.setIcon(item, Icon.GROUP);
 		return item;
-	}
-	
-//> UI PASSTHROUGH METHODS
-	/**
-	 * @param component
-	 * @param value
-	 */
-	public void setText(Object component, String value) {
-		this.ui.setText(component, value);
-	}
-	public void activate(Object component) {
-		this.ui.activate(component);
-	}
-	public void deactivate(Object component) {
-		this.ui.deactivate(component);
 	}
 }

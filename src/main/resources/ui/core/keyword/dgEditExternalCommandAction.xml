@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<dialog closable="true" close="removeDialog(this)" bottom="10" columns="3" gap="10" icon="/icons/cmd.png" left="5" modal="true" name="externalCommandDialog" resizable="true" right="5" text="i18n.common.external.command" top="10">
+<dialog closable="true" close="removeDialog" bottom="10" columns="3" gap="10" icon="/icons/cmd.png" left="5" modal="true" name="externalCommandDialog" resizable="true" right="5" text="i18n.common.external.command" top="10">
     <panel bottom="-5" colspan="3" gap="20" left="1" right="1" weightx="1">
         <label text="i18n.common.execution.type"/>
         <checkbox action="setText(tfCommand,'http://')" group="cmdType" icon="/icons/httpRequest.png" name="rbTypeHTTP" selected="true" text="i18n.common.http.request" weightx="1"/>
@@ -35,7 +35,7 @@
     </panel>
     <separator colspan="3"/>
     <panel colspan="3" gap="20" halign="center" left="5" right="5">
-        <button icon="/icons/tick.png" text="i18n.action.done" action="do_newKActionExternalCommand(externalCommandDialog)"/>
-        <button action="removeDialog(externalCommandDialog)" icon="/icons/cross.png" text="i18n.action.cancel"/>
+        <button icon="/icons/tick.png" text="i18n.action.done" action="save"/>
+        <button action="removeDialog" icon="/icons/cross.png" text="i18n.action.cancel"/>
     </panel>
 </dialog>
