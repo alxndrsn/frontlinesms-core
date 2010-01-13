@@ -19,6 +19,7 @@ import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_BLANK_RECIPIENTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_KEYWORD_EXISTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_KEYWORD_SAVED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_ACCOUNT_SELECTED_TO_SEND_FROM;
+import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_CONTACT_SELECTED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_GROUP_CREATED_BY_USERS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_GROUP_SELECTED_TO_FWD;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_START_DATE_AFTER_END;
@@ -82,6 +83,7 @@ import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.Utils;
 import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.DuplicateKeyException;
+import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
@@ -859,8 +861,37 @@ public class KeywordTabHandler extends BaseTabHandler {
 	 * Method invoked when the user decides to send a mail specifically to one contact.
 	 */
 	public void selectMailRecipient(Object dialog) {
-		ContactSelecter contactSelecter = new ContactSelecter(ui, ui.contactDao);
+		ContactSelecter contactSelecter = new ContactSelecter(ui);
 		contactSelecter.show(InternationalisationUtils.getI18NString(SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "mail_setRecipient(contactSelecter_contactList, contactSelecter)", dialog, this);
+	}
+	
+	/**
+	 * Sets the phone number of the selected contact.
+	 * 
+	 * @param contactSelecter_contactList
+	 * @param dialog
+	 */
+	public void mail_setRecipient(Object contactSelecter_contactList, Object dialog) {
+		log.trace("ENTER");
+		Object emailDialog = ui.getAttachedObject(dialog);
+		Object recipientTextfield = ui.find(emailDialog, COMPONENT_TF_RECIPIENT);
+		Object selectedItem = ui.getSelectedItem(contactSelecter_contactList);
+		if (selectedItem == null) {
+			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_CONTACT_SELECTED));
+			log.trace("EXIT");
+			return;
+		}
+		Contact selectedContact = ui.getContact(selectedItem);
+		String currentText = ui.getText(recipientTextfield);
+		log.debug("Recipients begin [" + currentText + "]");
+		if (!currentText.equals("")) {
+			currentText += ";";
+		}
+		currentText += selectedContact.getEmailAddress();
+		log.debug("Recipients final [" + currentText + "]");
+		setText(recipientTextfield, currentText);
+		removeDialog(dialog);
+		log.trace("EXIT");
 	}
 
 	/**
@@ -1091,7 +1122,7 @@ public class KeywordTabHandler extends BaseTabHandler {
 		Object cbLeaveGroup = ui.find(panel, COMPONENT_CB_LEAVE_GROUP);
 		List<Group> groups = this.groupDao.getAllGroups();
 		for (Group g : groups) {
-			Object item = ui.createComboBoxChoice(g);
+			Object item = createComboBoxChoice(g);
 			ui.add(cbJoin, item);
 			ui.add(cbLeave, item);
 		}
@@ -1470,6 +1501,12 @@ public class KeywordTabHandler extends BaseTabHandler {
 		ui.setText(endDate, toSet);
 		ui.add(externalCmdForm);
 		log.trace("EXIT");
+	}
+
+	private Object createComboBoxChoice(Group g) {
+		Object item = ui.createComboboxChoice(g.getName(), g);
+		ui.setIcon(item, Icon.GROUP);
+		return item;
 	}
 	
 //> UI PASSTHROUGH METHODS

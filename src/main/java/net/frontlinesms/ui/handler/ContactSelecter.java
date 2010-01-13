@@ -30,18 +30,18 @@ public class ContactSelecter implements ThinletUiEventHandler, PagedComponentIte
 	
 //> INSTANCE PROPERTIES
 	/** {@link UiGeneratorController} instance which this is working with */
-	private UiGeneratorController ui;
+	private final UiGeneratorController ui;
 	/** DAO for {@link Contact}s */
-	private ContactDao contactDao;
+	private final ContactDao contactDao;
 	
 	/** The dialog we are displaying. */
 	private Object selecterDialog;
 	private ComponentPagingHandler selecterPager; 
 	
 //> CONSTRUCTORS
-	public ContactSelecter(UiGeneratorController ui, ContactDao contactDao) {
+	public ContactSelecter(UiGeneratorController ui) {
 		this.ui = ui;
-		this.contactDao = contactDao;
+		this.contactDao = ui.getFrontlineController().getContactDao();
 	}
 	
 	/**

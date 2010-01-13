@@ -142,7 +142,7 @@ public class HomeTabHandler extends BaseTabHandler {
 
 	/** Method which triggers showing of the contact selecter. */
 	public void selectMessageRecipient() {
-		ContactSelecter contactSelecter = new ContactSelecter(ui, ui.contactDao);
+		ContactSelecter contactSelecter = new ContactSelecter(ui);
 		contactSelecter.show(InternationalisationUtils.getI18NString(FrontlineSMSConstants.SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "setRecipientTextfield(contactSelecter_contactList, contactSelecter)", null, this);
 	}
 	

@@ -9,6 +9,7 @@ import java.util.Enumeration;
 
 import net.frontlinesms.CommUtils;
 import net.frontlinesms.Utils;
+import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.SmsModemSettings;
 import net.frontlinesms.data.repository.SmsModemSettingsDao;
 import net.frontlinesms.smsdevice.SmsDevice;

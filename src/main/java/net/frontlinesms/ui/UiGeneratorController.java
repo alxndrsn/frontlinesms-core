@@ -25,8 +25,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Collections;
@@ -56,7 +54,6 @@ import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.*;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
-import net.frontlinesms.ui.handler.ContactSelecter;
 import net.frontlinesms.ui.handler.ContactsTabHandler;
 import net.frontlinesms.ui.handler.HomeTabHandler;
 import net.frontlinesms.ui.handler.PhoneTabHandler;
@@ -458,7 +455,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 
 	/**
 	 * Gets the string to display for the recipient of a message.
-	 * @param message
+	 * @param message The message whose recipient to get the name of
 	 * @return This will be the name of the contact who received the message, or the recipient's phone number if they are not a contact.
 	 */
 	public String getRecipientDisplayValue(Message message) {
@@ -469,7 +466,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 
 	/**
 	 * Gets the string to display for the sender of a message.
-	 * @param message
+	 * @param message The message whose sender to get the name of
 	 * @return This will be the name of the contact who sent the message, or the sender's phone number if they are not a contact.
 	 * @deprecated should be moved to message tab cont
 	 */
@@ -482,17 +479,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/**
 	 * Checks if the supplied group is a real group, or just one of the default groups
 	 * used for visualization.
-	 * @param group
+	 * @param group the group to check
 	 * @return <code>true</code> if the supplied {@link Group} is one of the synthetic groups; <code>false</code> otherwise. 
 	 */
 	public boolean isDefaultGroup(Group group) {
 		return group == this.rootGroup || group == this.ungroupedContacts || group == this.unnamedContacts;
-	}
-
-	public Object createComboBoxChoice(Group g) {
-		Object item = createComboboxChoice(g.getName(), g);
-		setIcon(item, Icon.GROUP);
-		return item;
 	}
 
 	public void addDatePanel(Object dialog) {
@@ -561,15 +552,19 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		if (confirm != null) removeDialog(confirm);
 	}
 	
-	/** Shows a general dialog asking the user to confirm his action.
-	 * @deprecated this should not be called without the event handler specified.  still here because ui calls it for keyword tab
+	/** 
+	 * Shows a general dialog asking the user to confirm his action. 
+	 * @param methodToBeCalled the name of the method to be called
 	 */
 	public void showConfirmationDialog(String methodToBeCalled){
 		showConfirmationDialog(methodToBeCalled, this);
 	}
 	
-	/** Shows a general dialog asking the user to confirm his action. */
-	public void showConfirmationDialog(String methodToBeCalled, Object handler){
+	/** Shows a general dialog asking the user to confirm his action. 
+	 * @param methodToBeCalled The name of the method to be called
+	 * @param handler The event handler to call the method on
+	 */
+	public void showConfirmationDialog(String methodToBeCalled, ThinletUiEventHandler handler){
 		Object conf = loadComponentFromFile(UI_FILE_CONFIRMATION_DIALOG_FORM);
 		setMethod(find(conf, COMPONENT_BT_CONTINUE), ATTRIBUTE_ACTION, methodToBeCalled, conf, handler);
 		add(conf);
@@ -619,8 +614,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 
 	/**
 	 * Shows the pending message dialog.
-	 * 
-	 * @param messages
+	 * @param messages thy messages which are pending
 	 */
 	private void showPendingMessages(Collection<Message> messages) {
 		Object pendingMsgForm = loadComponentFromFile(UI_FILE_PENDING_MESSAGES_FORM);
@@ -633,18 +627,14 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 
 	/**
 	 * Remove the selected items from the supplied list.
-	 * 
 	 * @param recipientList
+	 * @param dialog 
 	 */
 	public void removeSelectedFromRecipientList(Object recipientList, Object dialog) {
 		for (Object selected : getSelectedItems(recipientList)) {
 			numberToSend--;
 			remove(selected);
 		}
-	}
-	
-	public void setListContents(Object table, List<? extends Object> listContents) {
-		putProperty(table, "listContents", listContents);		
 	}
 	
 	/**
@@ -779,62 +769,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public synchronized void setStatus(String status) {
 		LOG.debug("Status Text [" + status + "]");
 		setString(statusBarComponent, TEXT, status);
-	}
-	
-	/**
-	 * Shows the contact selected dialog.
-	 * <br> Note that this method includes all contacts to the list.
-	 * 
-	 * @param title
-	 * @param callbackMethodName
-	 */
-	private void showContactSelecter(String title, String callbackMethodName, Object dialog) {
-		ContactSelecter contactSelecter = new ContactSelecter(this, this.contactDao);
-		contactSelecter.show(title, callbackMethodName, dialog, this);
-	}
-
-	/**
-	 * Method invoked when the user decides to send a message specifically to one contact on the <b>Send</b> tab.
-	 */
-	public void selectMessageRecipient() {
-		showContactSelecter(InternationalisationUtils.getI18NString(SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "sendConsole_setLoneRecipientTextfield(contactSelecter_contactList, contactSelecter)", null);
-	}
-	
-	public void selectSenderNumber() {
-		showContactSelecter(InternationalisationUtils.getI18NString(COMMON_SENDER_NUMBER), "smsHttpSettings_setTextfield(contactSelecter_contactList, contactSelecter)", null);
-	}
-	
-	public void selectEditSenderNumber() {
-		showContactSelecter(InternationalisationUtils.getI18NString(COMMON_SENDER_NUMBER), "smsHttpSettingsEdit_setTextfield(contactSelecter_contactList, contactSelecter)", null);
-	}
-	
-	/**
-	 * Sets the phone number of the selected contact.
-	 * 
-	 * @param contactSelecter_contactList
-	 * @param dialog
-	 */
-	public void mail_setRecipient(Object contactSelecter_contactList, Object dialog) {
-		LOG.trace("ENTER");
-		Object emailDialog = getAttachedObject(dialog);
-		Object recipientTextfield = find(emailDialog, COMPONENT_TF_RECIPIENT);
-		Object selectedItem = getSelectedItem(contactSelecter_contactList);
-		if (selectedItem == null) {
-			alert(InternationalisationUtils.getI18NString(MESSAGE_NO_CONTACT_SELECTED));
-			LOG.trace("EXIT");
-			return;
-		}
-		Contact selectedContact = getContact(selectedItem);
-		String currentText = getText(recipientTextfield);
-		LOG.debug("Recipients begin [" + currentText + "]");
-		if (!currentText.equals("")) {
-			currentText += ";";
-		}
-		currentText += selectedContact.getEmailAddress();
-		LOG.debug("Recipients final [" + currentText + "]");
-		setText(recipientTextfield, currentText);
-		remove(dialog);
-		LOG.trace("EXIT");
 	}
 	
 	/**
