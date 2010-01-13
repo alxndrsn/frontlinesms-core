@@ -763,8 +763,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 
 	/**
 	 * Updates the status bar with the supplied string.
-	 * 
-	 * @param status
+	 * @param status the new status to display
 	 */
 	public synchronized void setStatus(String status) {
 		LOG.debug("Status Text [" + status + "]");
