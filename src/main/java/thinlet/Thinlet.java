@@ -6352,9 +6352,8 @@ public class Thinlet extends Container implements Runnable, Serializable, Thinle
 
 	/**
 	 * Sets the given property pair (key and value) for the component
-	 * @deprecated this should be protected, and specific uses exposed
 	 */
-	public void setBoolean(Object component, String key, boolean value) {
+	protected void setBoolean(Object component, String key, boolean value) {
 		Object[] definition = getDefinition(getClass(component), key, BOOLEAN);
 		if (setBoolean(component, (String) definition[1],
 				value, (definition[3] == Boolean.TRUE))) {

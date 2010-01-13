@@ -21,9 +21,7 @@ package net.frontlinesms.ui;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -81,7 +79,6 @@ public class DateSelecter {
 	
 	/**
 	 * Shows the date selecter dialog, showing the previous date or today.
-	 * 
 	 * @throws IOException
 	 */
 	public void showSelecter() throws IOException {
@@ -184,7 +181,7 @@ public class DateSelecter {
 		String date = InternationalisationUtils.getDateFormat().format(c.getTime());
 		ui.setText(textField, date);
 		ui.remove(dialog);
-		if (ui.getMethod(textField) != null) ui.executeAction(ui.getMethod(textField));
+		ui.invokeAction(this.textField);
 	}
 	
 //> UI HELPER METHODS

@@ -28,7 +28,7 @@ public class ExtendedThinlet extends Thinlet {
 	 * @param value
 	 */
 	private final void setEnabledRecursively(Object parent, boolean value) {
-		setBoolean(parent, ENABLED, value);
+		setEnabled(parent, value);
 		for(Object component : getItems(parent)) {
 			if(!getClass(parent).equals(TABLE)) setEnabledRecursively(component, value);
 		}
@@ -219,6 +219,22 @@ public class ExtendedThinlet extends Thinlet {
 	 */
 	public void setCloseAction(Object component, String methodCall, Object root, Object handler) {
 		setMethod(component, Thinlet.CLOSE, methodCall, root, handler);
+	}
+	
+	/**
+	 * Invoke the ACTION method on a component.
+	 * @param component The component whose ACTION should be invoked
+	 */
+	public final void invokeAction(Object component) {
+		invoke(component, null, Thinlet.ATTRIBUTE_ACTION);
+	}
+	
+	/**
+	 * Sets the given property pair (key and value) for the component
+	 * @deprecated this should be protected, and specific uses exposed
+	 */
+	public void setBoolean(Object component, String key, boolean value) {
+		super.setBoolean(component, key, value);
 	}
 	
 //> COMPONENT FACTORY METHODS
@@ -465,7 +481,7 @@ public class ExtendedThinlet extends Thinlet {
 	public final Object createCheckboxMenuitem(String iconPath, String text, boolean checked) {
 		Object item = Thinlet.create(CHECKBOXMENUITEM);
 		setIcon(item, iconPath);
-		setBoolean(item, SELECTED, checked);
+		setSelected(item, checked);
 		setText(item, text);
 		return item;
 	}
