@@ -121,9 +121,7 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_MI_DELETE = "miDelete";
 	public static final String COMPONENT_MI_EDIT = "miEdit";
 	public static final String COMPONENT_KEY_PANEL = "keyPanel";
-	public static final String COMPONENT_TF_SUBJECT = "tfSubject";
 	public static final String COMPONENT_TF_RECIPIENT = "tfRecipient";
-	public static final String COMPONENT_MAIL_LIST = "accountsList";
 	public static final String COMPONENT_RB_NO_RESPONSE = "rbNoResponse";
 	public static final String COMPONENT_PN_RESPONSE = "pnResponse";
 	public static final String COMPONENT_RB_TYPE_COMMAND_LINE = "rbTypeCL";

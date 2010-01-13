@@ -10,15 +10,11 @@ import static net.frontlinesms.FrontlineSMSConstants.COMMON_EDITING_KEYWORD;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_KEYWORD_ACTIONS_OF;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_UNDEFINED;
 import static net.frontlinesms.FrontlineSMSConstants.DEFAULT_END_DATE;
-import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_BLANK_RECIPIENTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_KEYWORD_EXISTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_KEYWORD_SAVED;
-import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_ACCOUNT_SELECTED_TO_SEND_FROM;
-import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_CONTACT_SELECTED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_GROUP_SELECTED_TO_FWD;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_START_DATE_AFTER_END;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_WRONG_FORMAT_DATE;
-import static net.frontlinesms.FrontlineSMSConstants.SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_ACTION_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_CLEAR;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_SAVE;
@@ -34,7 +30,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWO
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORD_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEY_ACT_PANEL;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEY_PANEL;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_MAIL_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_MENU_ITEM_CREATE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_BUTTON_DONE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_DESCRIPTION;
@@ -52,9 +47,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_CO
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_END_DATE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_KEYWORD;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_RECIPIENT;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_START_DATE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_SUBJECT;
 
 import java.text.ParseException;
 import java.util.Collection;
@@ -66,8 +59,6 @@ import thinlet.Thinlet;
 import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.DuplicateKeyException;
-import net.frontlinesms.data.domain.Contact;
-import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
@@ -78,7 +69,6 @@ import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BaseTabHandler;
-import net.frontlinesms.ui.handler.ContactSelecter;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
@@ -94,7 +84,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 	public static final String UI_FILE_KEYWORDS_ADVANCED_VIEW = "/ui/core/keyword/pnAdvancedView.xml";
 	public static final String UI_FILE_NEW_KEYWORD_FORM = "/ui/core/keyword/newKeywordForm.xml";
 	public static final String UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM = "/ui/core/keyword/externalCommandDialog.xml";
-	public static final String UI_FILE_NEW_KACTION_EMAIL_FORM = "/ui/core/keyword/dgEmailKAction.xml";
 
 	private EmailAccountDao emailAccountDao;
 	private GroupDao groupDao;
@@ -138,15 +127,13 @@ public class KeywordTabHandler extends BaseTabHandler {
 	}
 	
 	/**
+	 * @param index
      *  0 - Auto Reply
      *  1 - Auto Forward
      *  2 - Join Group
      *  3 - Leave Group
-     *  4 - Survey
-     *  5 - E-mail
-     *  6 - External Command
-     *  
-     *  TODO MAKE SURE THAT THIS STILL WORKS - WE HAVE REMOVED THE SURVEY ACTION!!!
+     *  4 - E-mail
+     *  5 - External Command 
      */
 	public void keywordTab_createAction(int index) {
 		switch (index) {
@@ -202,18 +189,9 @@ public class KeywordTabHandler extends BaseTabHandler {
 	public void show_newKActionEmailForm(Object keywordList) {
 		log.trace("ENTER");
 		Keyword keyword = ui.getKeyword(ui.getSelectedItem(keywordList));
-		Object emailForm = ui.loadComponentFromFile(UI_FILE_NEW_KACTION_EMAIL_FORM, this);
-		ui.setAttachedObject(emailForm, keyword);
-		//Adds the date panel to it
-		ui.addDatePanel(emailForm);
-		Object list = ui.find(emailForm, COMPONENT_MAIL_LIST);
-		for (EmailAccount acc : emailAccountDao.getAllEmailAccounts()) {
-			log.debug("Adding existent e-mail account [" + acc.getAccountName() + "] to list");
-			Object item = ui.createListItem(acc.getAccountName(), acc);
-			ui.setIcon(item, Icon.SERVER);
-			ui.add(list, item);
-		}
-		ui.add(emailForm);
+		EmailActionDialog dialog = new EmailActionDialog(ui, this);
+		dialog.init(keyword);
+		dialog.show();
 		log.trace("EXIT");
 	}
 
@@ -493,83 +471,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 	}
 	
 	/**
-	 * Creates a email message action.
-	 */
-	public void do_newKActionEmail(Object mailDialog, Object mailList) {
-		log.trace("ENTER");
-		String message = ui.getText(ui.find(mailDialog, COMPONENT_TF_MESSAGE));
-		String recipients = ui.getText(ui.find(mailDialog, COMPONENT_TF_RECIPIENT));
-		String subject = ui.getText(ui.find(mailDialog, COMPONENT_TF_SUBJECT));
-		log.debug("Message [" + message + "]");
-		log.debug("Recipients [" + recipients + "]");
-		log.debug("Subject [" + subject + "]");
-		if (recipients.equals("") || recipients.equals(";")) {
-			log.debug("No valid recipients.");
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_BLANK_RECIPIENTS));
-			return;
-		}
-		EmailAccount account = (EmailAccount) ui.getAttachedObject(ui.getSelectedItem(mailList));
-		if (account == null) {
-			log.debug("No account selected to send the e-mail from.");
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_ACCOUNT_SELECTED_TO_SEND_FROM));
-			return;
-		}
-		log.debug("Account [" + account.getAccountName() + "]");
-		String startDate = ui.getText(ui.find(mailDialog, COMPONENT_TF_START_DATE));
-		String endDate = ui.getText(ui.find(mailDialog, COMPONENT_TF_END_DATE));
-		log.debug("Start Date [" + startDate + "]");
-		log.debug("End Date [" + endDate + "]");
-		if (startDate.equals("")) {
-			log.debug("No start date set, so we set to [" + InternationalisationUtils.getDefaultStartDate() + "]");
-			startDate = InternationalisationUtils.getDefaultStartDate();
-		}
-		long start;
-		long end;
-		try {
-			Date ds = InternationalisationUtils.parseDate(startDate); 
-			if (!endDate.equals("") && !endDate.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
-				Date de = InternationalisationUtils.parseDate(endDate);
-				if (!Utils.validateDates(ds, de)) {
-					log.debug("Start date is not before the end date");
-					ui.alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
-					log.trace("EXIT");
-					return;
-				}
-				end = de.getTime();
-			} else {
-				end = DEFAULT_END_DATE;
-			}
-			start = ds.getTime();
-		} catch (ParseException e) {
-			log.debug("Wrong format for date", e);
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
-			log.trace("EXIT");
-			return;
-		} 
-		KeywordAction action = null;
-		boolean isNew = false;
-		if (ui.isAttachment(mailDialog, KeywordAction.class)) {
-			action = ui.getKeywordAction(mailDialog);
-			log.debug("We are editing action [" + action + "]. Setting new values.");
-			action.setEmailAccount(account);
-			action.setReplyText(message);
-			action.setEmailRecipients(recipients);
-			action.setEmailSubject(subject);
-			action.setStartDate(start);
-			action.setEndDate(end);
-		} else {
-			isNew = true;
-			Keyword keyword = ui.getKeyword(mailDialog);
-			log.debug("Creating new action  for keyword[" + keyword.getKeyword() + "].");
-			action = KeywordAction.createEmailAction(keyword, message, account, recipients, subject,start, end);
-			keywordActionDao.saveKeywordAction(action);
-		}
-		updateKeywordActionList(action, isNew);
-		ui.remove(mailDialog);
-		log.trace("EXIT");
-	}
-
-	/**
 	 * Creates a new forward message action.
 	 */
 	public void do_newKActionExternalCommand(Object externalCommandDialog) {
@@ -750,43 +651,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 		ui.removeDialog(dialog);
 		log.trace("EXIT");
 	}
-	
-	/**
-	 * Method invoked when the user decides to send a mail specifically to one contact.
-	 */
-	public void selectMailRecipient(Object dialog) {
-		ContactSelecter contactSelecter = new ContactSelecter(ui);
-		contactSelecter.show(InternationalisationUtils.getI18NString(SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "mail_setRecipient(contactSelecter_contactList, contactSelecter)", dialog, this);
-	}
-	
-	/**
-	 * Sets the phone number of the selected contact.
-	 * 
-	 * @param contactSelecter_contactList
-	 * @param dialog
-	 */
-	public void mail_setRecipient(Object contactSelecter_contactList, Object dialog) {
-		log.trace("ENTER");
-		Object emailDialog = ui.getAttachedObject(dialog);
-		Object recipientTextfield = ui.find(emailDialog, COMPONENT_TF_RECIPIENT);
-		Object selectedItem = ui.getSelectedItem(contactSelecter_contactList);
-		if (selectedItem == null) {
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_CONTACT_SELECTED));
-			log.trace("EXIT");
-			return;
-		}
-		Contact selectedContact = ui.getContact(selectedItem);
-		String currentText = ui.getText(recipientTextfield);
-		log.debug("Recipients begin [" + currentText + "]");
-		if (!currentText.equals("")) {
-			currentText += ";";
-		}
-		currentText += selectedContact.getEmailAddress();
-		log.debug("Recipients final [" + currentText + "]");
-		setText(recipientTextfield, currentText);
-		removeDialog(dialog);
-		log.trace("EXIT");
-	}
 
 	public void showSelectedKeyword() {
 		int index = ui.getSelectedIndex(keywordListComponent);
@@ -958,7 +822,9 @@ public class KeywordTabHandler extends BaseTabHandler {
 	private void showActionEditDialog(KeywordAction action) {
 		switch (action.getType()) {
 			case KeywordAction.TYPE_FORWARD:
-				show_newKActionForwardFormForEdition(action);
+			ForwardActionDialog dialog = new ForwardActionDialog(ui, this);
+			dialog.init(action);
+			dialog.show();
 				break;
 			case KeywordAction.TYPE_JOIN: 
 				JoinGroupActionDialog joinDialog = new JoinGroupActionDialog(ui, this);
@@ -971,13 +837,17 @@ public class KeywordTabHandler extends BaseTabHandler {
 				leaveDialog.show();
 				break;
 			case KeywordAction.TYPE_REPLY:
-				show_newKActionReplyFormForEdition(action);
+			ReplyActionDialogHandler dialog1 = new ReplyActionDialogHandler(ui, this);
+			dialog1.init(action);
+			dialog1.show();
 				break;
 			case KeywordAction.TYPE_EXTERNAL_CMD:
 				show_newKActionExternalCmdFormForEdition(action);
 				break;
 			case KeywordAction.TYPE_EMAIL:
-				show_newKActionEmailFormForEdition(action);
+				EmailActionDialog emailDialog = new EmailActionDialog(ui, this);
+				emailDialog.init(action);
+				emailDialog.show();
 				break;
 		}
 	}
@@ -1030,28 +900,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 	}
 
 	/**
-	 * Shows the forward message action dialog for editing purpose.
-	 * 
-	 * @param action
-	 */
-	private void show_newKActionForwardFormForEdition(KeywordAction action) {
-		ForwardActionDialog dialog = new ForwardActionDialog(ui, this);
-		dialog.init(action);
-		dialog.show();
-	}
-
-	/**
-	 * Shows the new auto reply action dialog for editing purpose.
-	 * 
-	 * @param action
-	 */
-	private void show_newKActionReplyFormForEdition(KeywordAction action) {
-		ReplyActionDialogHandler dialog = new ReplyActionDialogHandler(ui, this);
-		dialog.init(action);
-		dialog.show();
-	}
-	
-	/**
 	 * Shows the new external command action dialog.
 	 * 
 	 * @param keywordList
@@ -1073,46 +921,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 			ui.add(list, item);
 		}
 		ui.add(externalCmdForm);
-		log.trace("EXIT");
-	}
-	
-	/**
-	 * Shows the new email action dialog.
-	 * 
-	 * @param keywordList
-	 */
-	private void show_newKActionEmailFormForEdition(KeywordAction action) {
-		Object emailForm = ui.loadComponentFromFile(UI_FILE_NEW_KACTION_EMAIL_FORM, this);
-		//Adds the date panel to it
-		ui.addDatePanel(emailForm);
-		ui.setAttachedObject(emailForm, action);
-		Object list = ui.find(emailForm, COMPONENT_MAIL_LIST);
-		for (EmailAccount acc : emailAccountDao.getAllEmailAccounts()) {
-			log.debug("Adding existent e-mail account [" + acc.getAccountName() + "] to list");
-			Object item = ui.createListItem(acc.getAccountName(), acc);
-			ui.setIcon(item, Icon.SERVER);
-			ui.add(list, item);
-			if (acc.equals(action.getEmailAccount())) {
-				log.debug("Selecting the current account for this e-mail [" + acc.getAccountName() + "]");
-				ui.setSelected(item, true);
-			}
-		}
-		ui.setText(ui.find(emailForm, COMPONENT_TF_SUBJECT), action.getEmailSubject());
-		ui.setText(ui.find(emailForm, COMPONENT_TF_MESSAGE), action.getUnformattedReplyText());
-		ui.setText(ui.find(emailForm, COMPONENT_TF_RECIPIENT), action.getEmailRecipients());
-		
-		ui.setText(ui.find(emailForm, COMPONENT_TF_START_DATE), action == null ? "" : InternationalisationUtils.getDateFormat().format(action.getStartDate()));
-		Object endDate = ui.find(emailForm, COMPONENT_TF_END_DATE);
-		String toSet = "";
-		if (action != null) {
-			if (action.getEndDate() == DEFAULT_END_DATE) {
-				toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
-			} else {
-				toSet = InternationalisationUtils.getDateFormat().format(action.getEndDate());
-			}
-		}
-		ui.setText(endDate, toSet);
-		ui.add(emailForm);
 		log.trace("EXIT");
 	}
 
@@ -1237,10 +1045,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 	 */
 	public void setText(Object component, String value) {
 		this.ui.setText(component, value);
-	}
-	/** Show the email account settings dialog. */
-	public void showEmailAccountsSettings() {
-		this.ui.showEmailAccountsSettings();
 	}
 	public void activate(Object component) {
 		this.ui.activate(component);

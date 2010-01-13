@@ -241,8 +241,6 @@ public final class FrontlineSMSConstants {
 	public static final String MESSAGE_IMPOSSIBLE_TO_GO_UP_A_DIRECTORY = "message.impossible.to.go.up";
 	public static final String MESSAGE_DIRECTORY_NOT_FOUND = "message.directory.not.found";
 	public static final String MESSAGE_NO_GROUP_SELECTED_TO_FWD = "message.no.group.selected";
-	public static final String MESSAGE_NO_ACCOUNT_SELECTED_TO_SEND_FROM = "message.no.email.account.selected";
-	public static final String MESSAGE_BLANK_RECIPIENTS = "message.recipients.blank";
 	public static final String MESSAGE_NO_CONTACT_SELECTED = "message.no.contact.selected";
 	public static final String MESSAGE_NO_GROUP_CREATED_BY_USERS = "message.no.group.created.by.users";
 	public static final String MESSAGE_KEYWORD_ACTIONS_DELETED = "message.keyword.actions.deleted";

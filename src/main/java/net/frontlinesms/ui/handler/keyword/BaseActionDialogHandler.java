@@ -25,9 +25,6 @@ public abstract class BaseActionDialogHandler implements ThinletUiEventHandler {
 	protected final KeywordTabHandler owner;
 	/** DAO for {@link KeywordAction}s */
 	private final KeywordActionDao keywordActionDao;
-
-	/** Appears to be the in-focus item on the email tab. */
-	private Object emailTabFocusOwner;
 	
 	/** The UI dialog component */
 	private Object dialogComponent;
@@ -183,27 +180,6 @@ public abstract class BaseActionDialogHandler implements ThinletUiEventHandler {
 		ui.setText(textArea, currentText + toAdd);
 		ui.setFocus(textArea);
 		log.trace("EXIT");
-	}
-	
-	/**
-	 * @param tfSubject
-	 * @param tfMessage
-	 * @param type
-	 */
-	public void addConstantToEmailDialog(Object tfSubject, Object tfMessage, int type) {
-		Object toSet = tfMessage;
-		Object focused = emailTabFocusOwner;
-		if (focused.equals(tfSubject)) {
-			toSet = tfSubject;
-		}
-		addConstantToCommand(ui.getText(toSet), toSet, type);
-	}
-
-	/**
-	 * @param obj
-	 */
-	public void setEmailFocusOwner(Object obj) {
-		emailTabFocusOwner = obj;
 	}
 	
 	/**
