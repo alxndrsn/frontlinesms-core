@@ -58,23 +58,28 @@ public abstract class BaseActionDialogHandler implements ThinletUiEventHandler {
 	 * Initialise the dialog to create a new action 
 	 * @param keyword the keyword the new action will be attached to
 	 */
-	public abstract void init(Keyword keyword);
+	public void init(Keyword keyword) {
+		this.targetObject = keyword;
+		loadDialogFromFile();
+		_init();
+	}
 
 	/** 
 	 * Initialise the dialog to edit an existing keyword action 
 	 * @param action the action to edit
 	 */
-	public abstract void init(KeywordAction action);
+	public void init(KeywordAction action) {
+		this.targetObject = action;
+		loadDialogFromFile();
+		_init();
+	}
 	
-	/**
-	 * Load the tab for displaying, and set the target object we are working on.
-	 * This should be called by {@link #init(Keyword)} and {@link #init(KeywordAction)} ONLY.
-	 * @param targetObject the {@link KeywordAction} we are modifying, or a {@link Keyword} if we are creating a new {@link KeywordAction}.
-	 */
-	protected void _init(Object targetObject) {
+	/** Initialise the dialog before displaying it. */
+	protected abstract void _init();
+
+	/** Load the dialog for displaying. */
+	private void loadDialogFromFile() {
 		this.dialogComponent = ui.loadComponentFromFile(getLayoutFilePath(), this);
-		assert(targetObject instanceof Keyword || targetObject instanceof KeywordAction) : "Target object for a keyword action edit dialog must be a keyword or action.";
-		this.targetObject = targetObject;
 	}
 	
 //> ACCESSORS

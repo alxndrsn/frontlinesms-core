@@ -4,7 +4,6 @@ import static net.frontlinesms.FrontlineSMSConstants.COMMON_UNDEFINED;
 import static net.frontlinesms.FrontlineSMSConstants.DEFAULT_END_DATE;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_START_DATE_AFTER_END;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_WRONG_FORMAT_DATE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_SAVE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_SENDER_NAME;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_BOTTOM;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_END_DATE;
@@ -52,43 +51,11 @@ public class ReplyActionDialogHandler extends BaseActionDialogHandler {
 		super(ui, owner);
 	}
 	
-	/** 
-	 * Initialise the dialog to add an action to a particular keyword. 
-	 * @param keyword the keyword which the new action will be attached to.
-	 */
-	public void init(Keyword keyword) {
-		super._init(keyword);
-		sharedInit(null);
-	}
-
-	/**
-	 * Initialise the dialog to edit an existing reply action.
-	 * @param action the action to edit
-	 */
-	public void init(KeywordAction action) {
-		super._init(action);
-		sharedInit(action.getUnformattedReplyText());
-		
-		ui.setText(find(COMPONENT_TF_MESSAGE), action.getUnformattedReplyText());
-		
-		ui.setText(find(COMPONENT_TF_START_DATE), action == null ? "" : InternationalisationUtils.getDateFormat().format(action.getStartDate()));
-		Object endDate = find(COMPONENT_TF_END_DATE);
-		String toSet = "";
-		if (action != null) {
-			if (action.getEndDate() == DEFAULT_END_DATE) {
-				toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
-			} else {
-				toSet = InternationalisationUtils.getDateFormat().format(action.getEndDate());
-			}
-		}
-		ui.setText(endDate, toSet);
-	}
-	
 	/**
 	 * Initialise the dialog 
 	 * @param replyText The current value of the replyText for the dialog, or <code>null</code> if there is no current value
 	 */
-	private void sharedInit(String replyText) {
+	protected void _init() {
 		// Load the reply form from file.
 		MessagePanelHandler messagePanelController = new MessagePanelHandler(this.ui);
 		Object pnMessage = messagePanelController.getPanel();
@@ -105,8 +72,23 @@ public class ReplyActionDialogHandler extends BaseActionDialogHandler {
 		//Adds the date panel to it
 		ui.addDatePanel(this.getDialogComponent());
 		
-		if(replyText != null) {
-			messagePanelController.messageChanged(replyText);
+		if(isEditing()) {
+			KeywordAction action = getTargetObject(KeywordAction.class);
+			
+			// Set the initial value of the reply text
+			ui.setText(find(COMPONENT_TF_MESSAGE), action.getUnformattedReplyText());
+			messagePanelController.messageChanged(action.getUnformattedReplyText());
+			
+			// Set up the dates
+			ui.setText(find(COMPONENT_TF_START_DATE), InternationalisationUtils.getDateFormat().format(action.getStartDate()));
+			Object endDate = find(COMPONENT_TF_END_DATE);
+			String toSet = "";
+			if (action.getEndDate() == DEFAULT_END_DATE) {
+				toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
+			} else {
+				toSet = InternationalisationUtils.getDateFormat().format(action.getEndDate());
+			}
+			ui.setText(endDate, toSet);
 		}
 	}
 	

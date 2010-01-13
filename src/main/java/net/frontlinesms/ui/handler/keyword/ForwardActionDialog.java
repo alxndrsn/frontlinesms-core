@@ -53,25 +53,13 @@ public class ForwardActionDialog extends BaseActionDialogHandler {
 		super(ui, owner);
 		this.groupDao = ui.getFrontlineController().getGroupDao();
 	}
-	
-	/** @see net.frontlinesms.ui.handler.keyword.BaseActionDialogHandler#init(net.frontlinesms.data.domain.Keyword) */
-	@Override
-	public void init(Keyword keyword) {
-		super._init(keyword);
-		sharedInit(null);
-	}
-	
-	/** @see net.frontlinesms.ui.handler.keyword.BaseActionDialogHandler#init(net.frontlinesms.data.domain.KeywordAction) */
-	@Override
-	public void init(KeywordAction action) {
-		super._init(action);
-		sharedInit(action);
-	}
 
 	/**
 	 * @param action the action we are editing, or <code>null</code> if we are creating a new action
 	 */
-	private void sharedInit(KeywordAction action) {
+	protected final void _init() {
+		KeywordAction action = isEditing() ? super.getTargetObject(KeywordAction.class) : null;
+		
 		// Set the title of the dialog
 		String title = InternationalisationUtils.getI18NString(COMMON_AUTO_FORWARD_FOR_KEYWORD)
 				+ " '" + super.getTargetKeyword().getKeyword() + "' "

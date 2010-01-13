@@ -5,14 +5,9 @@ package net.frontlinesms.ui.handler.keyword;
 
 import static net.frontlinesms.FrontlineSMSConstants.ACTION_ADD_KEYWORD;
 import static net.frontlinesms.FrontlineSMSConstants.ACTION_CREATE;
-import static net.frontlinesms.FrontlineSMSConstants.COMMON_AUTO_FORWARD_FOR_KEYWORD;
-import static net.frontlinesms.FrontlineSMSConstants.COMMON_AUTO_JOIN_GROUP;
-import static net.frontlinesms.FrontlineSMSConstants.COMMON_AUTO_LEAVE_GROUP;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_BLANK;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_EDITING_KEYWORD;
-import static net.frontlinesms.FrontlineSMSConstants.COMMON_KEYWORD;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_KEYWORD_ACTIONS_OF;
-import static net.frontlinesms.FrontlineSMSConstants.COMMON_TO_GROUP;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_UNDEFINED;
 import static net.frontlinesms.FrontlineSMSConstants.DEFAULT_END_DATE;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_BLANK_RECIPIENTS;
@@ -20,7 +15,6 @@ import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_KEYWORD_EXISTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_KEYWORD_SAVED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_ACCOUNT_SELECTED_TO_SEND_FROM;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_CONTACT_SELECTED;
-import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_GROUP_CREATED_BY_USERS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_GROUP_SELECTED_TO_FWD;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_START_DATE_AFTER_END;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_WRONG_FORMAT_DATE;
@@ -28,7 +22,6 @@ import static net.frontlinesms.FrontlineSMSConstants.SENTENCE_SELECT_MESSAGE_REC
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_ACTION_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_CLEAR;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_SAVE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_SENDER_NAME;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_ACTION_TYPE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_AUTO_REPLY;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_FORWARD;
@@ -37,12 +30,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_GR
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_JOIN_GROUP;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_LEAVE_GROUP;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_EXTERNAL_COMMAND_GROUP_LIST;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_FORWARD_FORM_GROUP_LIST;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_FORWARD_FORM_TEXTAREA;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_FORWARD_FORM_TITLE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_GROUP_SELECTER_GROUP_LIST;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_GROUP_SELECTER_OK_BUTTON;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_GROUP_SELECTER_TITLE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORDS_DIVIDER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORD_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEY_ACT_PANEL;
@@ -53,7 +40,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_K
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_DESCRIPTION;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_KEYWORD;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_TITLE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_BOTTOM;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_RESPONSE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_TIP;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RB_FRONTLINE_COMMANDS;
@@ -69,8 +55,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_ME
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_RECIPIENT;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_START_DATE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_SUBJECT;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.UI_FILE_GROUP_SELECTER;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.UI_FILE_SENDER_NAME_PANEL;
 
 import java.text.ParseException;
 import java.util.Collection;
@@ -81,7 +65,6 @@ import thinlet.Thinlet;
 
 import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.Utils;
-import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.EmailAccount;
@@ -93,11 +76,9 @@ import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.KeywordActionDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.ui.Icon;
-import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.handler.ContactSelecter;
-import net.frontlinesms.ui.handler.message.MessagePanelHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
@@ -310,12 +291,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 	public void keywordTab_newAction(Object combo) {
 		keywordTab_createAction(ui.getSelectedIndex(combo));
 	}
-	/**
-	 * Creates a new leave group action.
-	 */
-	public void do_newKActionLeave(Object groupSelecterDialog, Object groupList) {
-		createActionLeaveOrJoin(groupSelecterDialog, groupList, false);
-	}
 
 	/**
 	 * Shows the new keyword dialog.
@@ -500,7 +475,9 @@ public class KeywordTabHandler extends BaseTabHandler {
 	 */
 	public void show_newKActionJoinForm(Object keywordList) {
 		Keyword keyword = ui.getKeyword(ui.getSelectedItem(keywordList));
-		showGroupSelecter(keyword, InternationalisationUtils.getI18NString(COMMON_KEYWORD) + " \"" + keyword.getKeyword() + "\" " + InternationalisationUtils.getI18NString(COMMON_AUTO_JOIN_GROUP) + ":", "do_newKActionJoin(groupSelecter, groupSelecter_groupList)", this);
+		JoinGroupActionDialog dialog = new JoinGroupActionDialog(ui, this);
+		dialog.init(keyword);
+		dialog.show();
 	}
 	
 	/**
@@ -510,7 +487,9 @@ public class KeywordTabHandler extends BaseTabHandler {
 	 */
 	public void show_newKActionLeaveForm(Object keywordList) {
 		Keyword keyword = ui.getKeyword(ui.getSelectedItem(keywordList));
-		showGroupSelecter(keyword, InternationalisationUtils.getI18NString(COMMON_KEYWORD) + " \"" + keyword.getKeyword() + "\" " + InternationalisationUtils.getI18NString(COMMON_AUTO_LEAVE_GROUP) + ":", "do_newKActionLeave(groupSelecter, groupSelecter_groupList)", this);
+		LeaveGroupActionDialog dialog = new LeaveGroupActionDialog(ui, this);
+		dialog.init(keyword);
+		dialog.show();
 	}
 	
 	/**
@@ -809,87 +788,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 		log.trace("EXIT");
 	}
 
-	/**
-	 * Creates a new join group action.
-	 */
-	public void do_newKActionJoin(Object groupSelecterDialog, Object groupList) {
-		createActionLeaveOrJoin(groupSelecterDialog, groupList, true);
-	}
-
-	/**
-	 * Creates an action to leave or join group, according to supplied information.
-	 * 
-	 * @param groupSelecterDialog
-	 * @param groupList
-	 * @param join
-	 */
-	private void createActionLeaveOrJoin(Object groupSelecterDialog,
-			Object groupList, boolean join) {
-		log.trace("ENTER");
-		log.debug("Join [" + join + "]");
-		Group group = ui.getGroup(ui.getSelectedItem(groupList));
-		if (group == null) {
-			log.debug("No group selected");
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_GROUP_SELECTED_TO_FWD));
-			log.trace("EXIT");
-			return;
-		}
-		String startDate = ui.getText(ui.find(groupSelecterDialog, COMPONENT_TF_START_DATE));
-		String endDate = ui.getText(ui.find(groupSelecterDialog, COMPONENT_TF_END_DATE));
-		log.debug("Start Date [" + startDate + "]");
-		log.debug("End Date [" + endDate + "]");
-		if (startDate.equals("")) {
-			log.debug("No start date set, so we set to [" + InternationalisationUtils.getDefaultStartDate() + "]");
-			startDate = InternationalisationUtils.getDefaultStartDate();
-		}
-		long start;
-		long end;
-		try {
-			Date ds = InternationalisationUtils.parseDate(startDate); 
-			if (!endDate.equals("") && !endDate.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
-				Date de = InternationalisationUtils.parseDate(endDate);
-				if (!Utils.validateDates(ds, de)) {
-					log.debug("Start date is not before the end date");
-					ui.alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
-					log.trace("EXIT");
-					return;
-				}
-				end = de.getTime();
-			} else {
-				end = DEFAULT_END_DATE;
-			}
-			start = ds.getTime();
-		} catch (ParseException e) {
-			log.debug("Wrong format for date", e);
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
-			log.trace("EXIT");
-			return;
-		} 
-		KeywordAction action;
-		boolean isNew = false;;
-		if (ui.isAttachment(groupSelecterDialog, KeywordAction.class)) {
-			action = ui.getKeywordAction(groupSelecterDialog);
-			log.debug("Editing action [" + action + "]. Setting new values!");
-			action.setGroup(group);
-			action.setStartDate(start);
-			action.setEndDate(end);
-			keywordActionDao.updateKeywordAction(action);
-		} else {
-			isNew  = true;
-			Keyword keyword = ui.getKeyword(groupSelecterDialog);
-			log.debug("Creating action for keyword [" + keyword.getKeyword() + "].");
-			if (join) {
-				action = KeywordAction.createGroupJoinAction(keyword, group, start, end);
-			} else {
-				action = KeywordAction.createGroupLeaveAction(keyword, group, start, end);
-			}
-			keywordActionDao.saveKeywordAction(action);
-		}
-		updateKeywordActionList(action, isNew);
-		ui.remove(groupSelecterDialog);
-		log.trace("EXIT");
-	}
-	
 	public void showSelectedKeyword() {
 		int index = ui.getSelectedIndex(keywordListComponent);
 		Object selected = ui.getSelectedItem(keywordListComponent);
@@ -1063,10 +961,14 @@ public class KeywordTabHandler extends BaseTabHandler {
 				show_newKActionForwardFormForEdition(action);
 				break;
 			case KeywordAction.TYPE_JOIN: 
-				showGroupSelecter(action, InternationalisationUtils.getI18NString(COMMON_KEYWORD) + " \"" + action.getKeyword().getKeyword()+ "\" " + InternationalisationUtils.getI18NString(COMMON_AUTO_LEAVE_GROUP) + ":", "do_newKActionJoin(groupSelecter, groupSelecter_groupList)");
+				JoinGroupActionDialog joinDialog = new JoinGroupActionDialog(ui, this);
+				joinDialog.init(action);
+				joinDialog.show();
 				break;
 			case KeywordAction.TYPE_LEAVE: 
-				showGroupSelecter(action, InternationalisationUtils.getI18NString(COMMON_KEYWORD) + " \"" + action.getKeyword().getKeyword()+ "\" " + InternationalisationUtils.getI18NString(COMMON_AUTO_LEAVE_GROUP) + ":", "do_newKActionLeave(groupSelecter, groupSelecter_groupList)");
+				JoinGroupActionDialog leaveDialog = new JoinGroupActionDialog(ui, this);
+				leaveDialog.init(action);
+				leaveDialog.show();
 				break;
 			case KeywordAction.TYPE_REPLY:
 				show_newKActionReplyFormForEdition(action);
@@ -1236,72 +1138,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 			ret = ui.getAttachedObject(ui.getSelectedItem(ui.find(panel, COMPONENT_CB_GROUPS_TO_LEAVE)), Group.class);
 		}
 		return ret;
-	}
-
-	/** @see #showGroupSelecter(Object, String, String, Object) */
-	private void showGroupSelecter(Object actionObject, String title, String callbackMethodName) {
-		showGroupSelecter(actionObject, title, callbackMethodName, this);
-	}
-
-	/** @see #showGroupSelecter(Object, String, String, Object) */
-	private void showGroupSelecter(Object actionObject, String title, String callbackMethodName, ThinletUiEventHandler eventHandler) {
-		showGroupSelecter(actionObject, true, title, callbackMethodName, eventHandler);
-	}
-	
-	/**
-	 * Shows the group selecter dialog, which is used for JOIN/LEAVE group actions.
-	 * @param actionObject The object to be edited, or null if we are creating one.
-	 * @param title
-	 * @param callbackMethodName
-	 * TODO remove data panel references
-	 */
-	private void showGroupSelecter(Object actionObject, boolean addDatePanel, String title, String callbackMethodName, ThinletUiEventHandler eventHandler) {
-		if(log.isTraceEnabled()) {
-			log.trace("UiGeneratorController.showGroupSelecter()");
-			log.trace("actionObject: " + actionObject);
-			log.trace("title: " + title);
-		}
-		Object selecter = ui.loadComponentFromFile(UI_FILE_GROUP_SELECTER, eventHandler);
-		//Adds the date panel to it
-		if(addDatePanel) {
-			ui.addDatePanel(selecter);
-		}
-		ui.setAttachedObject(selecter, actionObject);
-		ui.setText(ui.find(selecter, COMPONENT_GROUP_SELECTER_TITLE), title);
-		Object list = ui.find(selecter, COMPONENT_GROUP_SELECTER_GROUP_LIST);
-		List<Group> userGroups = this.groupDao.getAllGroups();
-		if (userGroups.size() == 0) {
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_GROUP_CREATED_BY_USERS));
-			return;
-		}
-		for (Group g : userGroups) {
-			Object item = ui.createListItem(g.getName(), g);
-			ui.setIcon(item, Icon.GROUP);
-			if (actionObject instanceof KeywordAction) {
-				KeywordAction action = (KeywordAction) actionObject;
-				if (g.getName().equals(action.getGroup().getName())) {
-					ui.setSelected(item, true);
-				}
-			}
-			ui.add(list, item);
-		}
-		if (addDatePanel && actionObject instanceof KeywordAction) {
-			log.trace("UiGeneratorController.showGroupSelecter() : ADDING THE DATES COMPONENT.");
-			KeywordAction action = (KeywordAction) actionObject;
-			ui.setText(ui.find(selecter, COMPONENT_TF_START_DATE), action == null ? "" : InternationalisationUtils.getDateFormat().format(action.getStartDate()));
-			Object endDate = ui.find(selecter, COMPONENT_TF_END_DATE);
-			String toSet = "";
-			if (action != null) {
-				if (action.getEndDate() == DEFAULT_END_DATE) {
-					toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
-				} else {
-					toSet = InternationalisationUtils.getDateFormat().format(action.getEndDate());
-				}
-			}
-			ui.setText(endDate, toSet);
-		}
-		ui.setAction(ui.find(selecter, COMPONENT_GROUP_SELECTER_OK_BUTTON), callbackMethodName, selecter, eventHandler);
-		ui.add(selecter);
 	}
 	
 	/**

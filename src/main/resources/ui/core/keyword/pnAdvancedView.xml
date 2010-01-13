@@ -24,11 +24,9 @@
 					text="i18n.action.create.join.group"/>
 				<menuitem action="keywordTab_createAction(3)" icon="/icons/group_leave.png"
 					text="i18n.action.create.leave.group"/>
-				<menuitem action="keywordTab_createAction(4)" icon="/icons/survey.png"
-					text="i18n.common.survey"/>
-				<menuitem action="keywordTab_createAction(5)" icon="/icons/email.png"
+				<menuitem action="keywordTab_createAction(4)" icon="/icons/email.png"
 					text="i18n.action.create.email"/>
-				<menuitem action="keywordTab_createAction(6)" icon="/icons/cmd.png"
+				<menuitem action="keywordTab_createAction(5)" icon="/icons/cmd.png"
 					text="i18n.action.create.external.command"/>
 			</menu>
 			<menuitem action="keywordManager_edit(actionList)" icon="/icons/keywordAction_edit.png"
