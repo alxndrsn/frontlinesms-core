@@ -18,34 +18,81 @@ import java.util.Date;
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
-import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.message.MessagePanelHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
+/**
+ * UI Event handler for the dialog for editing {@link KeywordAction}s of {@link KeywordAction#TYPE_REPLY}.
+ * @author Alex Anderson 
+ * <li> alex(at)masabi(dot)com
+ * @author Carlos Eduardo Genz
+ * <li> kadu(at)masabi(dot)com
+ */
 public class ReplyActionDialogHandler extends BaseActionDialogHandler {
 
 //> UI LAYOUT FILES
-	public static final String UI_FILE_NEW_KACTION_REPLY_FORM = "/ui/core/keyword/newKActionReplyForm.xml";
+	/** UI XML Layout file: Reply action edit dialog */
+	public static final String UI_FILE_NEW_KACTION_REPLY_FORM = "/ui/core/keyword/dgEditReply.xml";
 	
-	/** The number of people the current SMS will be sent to */
-	private int numberToSend = 1;
-	
+//> INSTANCE PROPERTIES
+	/** The UI dialog component */
 	private Object dialogComponent;
 	
+	/**
+	 * The object that this dialog is dealing with.  This should either be a {@link Keyword}, if
+	 * we are creating a new action, or a {@link KeywordAction} if we are editing an existing action.
+	 */
+	private Object targetObject;
+	
+//> CONSTRUCTORS
+	/**
+	 * Create a new {@link ReplyActionDialogHandler}.
+	 * @param ui The {@link UiGeneratorController} instance this is tied to
+	 * @param owner the {@link KeywordTabHandler} which spawned this
+	 */
 	public ReplyActionDialogHandler(UiGeneratorController ui, KeywordTabHandler owner) {
 		super(ui, owner);
 	}
 	
+	/** 
+	 * Initialise the dialog to add an action to a particular keyword. 
+	 * @param keyword the keyword which the new action will be attached to.
+	 */
 	public void init(Keyword keyword) {
-		sharedInit(keyword, null);
+		this.targetObject = keyword;
+		sharedInit(null);
+	}
+
+	/**
+	 * Initialise the dialog to edit an existing reply action.
+	 * @param action the action to edit
+	 */
+	public void init(KeywordAction action) {
+		this.targetObject = action;
+		sharedInit(action.getUnformattedReplyText());
+		
+		ui.setText(ui.find(this.dialogComponent, COMPONENT_TF_MESSAGE), action.getUnformattedReplyText());
+		
+		ui.setText(ui.find(this.dialogComponent, COMPONENT_TF_START_DATE), action == null ? "" : InternationalisationUtils.getDateFormat().format(action.getStartDate()));
+		Object endDate = ui.find(this.dialogComponent, COMPONENT_TF_END_DATE);
+		String toSet = "";
+		if (action != null) {
+			if (action.getEndDate() == DEFAULT_END_DATE) {
+				toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
+			} else {
+				toSet = InternationalisationUtils.getDateFormat().format(action.getEndDate());
+			}
+		}
+		ui.setText(endDate, toSet);
 	}
 	
-	private void sharedInit(Object attachment, String replyText) {
-		// Load the reply form from file.  We then attach the keyword we're working on to
-		// the form so that it can be retrieved later for actioning.  Also, we can set the
-		// title of the loaded form to remind the user which keyword they are adding a
-		// reply to.
+	/**
+	 * Initialise the dialog 
+	 * @param replyText The current value of the replyText for the dialog, or <code>null</code> if there is no current value
+	 */
+	private void sharedInit(String replyText) {
+		// Load the reply form from file.
 		this.dialogComponent = ui.loadComponentFromFile(UI_FILE_NEW_KACTION_REPLY_FORM, this);
 
 		MessagePanelHandler messagePanelController = new MessagePanelHandler(this.ui);
@@ -63,37 +110,12 @@ public class ReplyActionDialogHandler extends BaseActionDialogHandler {
 		//Adds the date panel to it
 		ui.addDatePanel(this.dialogComponent);
 		
-		ui.setAction(ui.find(this.dialogComponent, COMPONENT_BT_SAVE), "do_newKActionReply(autoReplyForm, tfMessage.text)", this.dialogComponent, this);
-		
-		ui.setAttachedObject(this.dialogComponent, attachment);
-
 		if(replyText != null) {
 			messagePanelController.messageChanged(replyText);
 		}
-		
-		numberToSend = 1;
 	}
 
-	public void init(KeywordAction action) {
-		sharedInit(action, action.getUnformattedReplyText());
-		
-		ui.setText(ui.find(this.dialogComponent, COMPONENT_TF_MESSAGE), action.getUnformattedReplyText());
-		
-		ui.setText(ui.find(this.dialogComponent, COMPONENT_TF_START_DATE), action == null ? "" : InternationalisationUtils.getDateFormat().format(action.getStartDate()));
-		Object endDate = ui.find(this.dialogComponent, COMPONENT_TF_END_DATE);
-		String toSet = "";
-		if (action != null) {
-			if (action.getEndDate() == DEFAULT_END_DATE) {
-				toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
-			} else {
-				toSet = InternationalisationUtils.getDateFormat().format(action.getEndDate());
-			}
-		}
-		ui.setText(endDate, toSet);
-//
-//		numberToSend = 1;
-	}
-
+	/** Show the dialog */
 	public void show() {
 		this.ui.add(this.dialogComponent);
 	}
@@ -102,11 +124,12 @@ public class ReplyActionDialogHandler extends BaseActionDialogHandler {
 	
 	/**
 	 * Creates a new auto reply action.
+	 * @param replyText The reply text of the action
 	 */
-	public void do_newKActionReply(Object replyDialog, String replyText) {
+	public void save() {
 		log.trace("ENTER");
-		String startDate = ui.getText(ui.find(replyDialog, COMPONENT_TF_START_DATE));
-		String endDate = ui.getText(ui.find(replyDialog, COMPONENT_TF_END_DATE));
+		String startDate = ui.getText(find(COMPONENT_TF_START_DATE));
+		String endDate = ui.getText(find(COMPONENT_TF_END_DATE));
 		log.debug("Start Date [" + startDate + "]");
 		log.debug("End Date [" + endDate + "]");
 		if (startDate.equals("")) {
@@ -138,20 +161,43 @@ public class ReplyActionDialogHandler extends BaseActionDialogHandler {
 		} 
 		boolean isNew = false;
 		KeywordAction action;
-		if (ui.isAttachment(replyDialog, KeywordAction.class)) {
-			action = ui.getKeywordAction(replyDialog);
+		String replyText = ui.getText(getMessageTextfield());
+		if (this.targetObject instanceof KeywordAction) {
+			action = (KeywordAction) this.targetObject;
 			log.debug("Editing action [" + action + "]. Setting new values!");
 			action.setReplyText(replyText);
 			action.setStartDate(start);
 			action.setEndDate(end);
+			super.update(action);
 		} else {
 			isNew = true;
-			Keyword keyword = ui.getKeyword(replyDialog);
+			Keyword keyword = (Keyword) this.targetObject;
 			log.debug("Creating action for keyword [" + keyword.getKeyword() + "].");
 			action = KeywordAction.createReplyAction(keyword, replyText, start, end);
+			super.save(action);
 		}
 		updateKeywordActionList(action, isNew);
-		ui.remove(replyDialog);
+		removeDialog();
 		log.trace("EXIT");
+	}
+	
+	/** Remove the dialog from display. */
+	public void removeDialog() {
+		ui.remove(this.dialogComponent);
+	}
+	
+//> UI HELPER METHODS
+	/** @return the message textfield */
+	private Object getMessageTextfield() {
+		return find("tfMessage");
+	}
+	
+	/** 
+	 * Find a thinlet component within the {@link #dialogComponent}.
+	 * @param componentName The name of the component
+	 * @return the component with the given name, or <code>null</code> if none could be found.
+	 */
+	private Object find(String componentName) {
+		return ui.find(this.dialogComponent, componentName);
 	}
 }

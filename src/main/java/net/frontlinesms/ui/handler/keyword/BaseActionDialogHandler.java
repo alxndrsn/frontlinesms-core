@@ -5,23 +5,64 @@ import org.apache.log4j.Logger;
 import net.frontlinesms.Utils;
 import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.domain.KeywordAction;
+import net.frontlinesms.data.repository.KeywordActionDao;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 
+/**
+ * Base class containing shared attributes and behaviour of {@link KeywordAction} edit dialogs. 
+ * @author aga
+ */
 public abstract class BaseActionDialogHandler implements ThinletUiEventHandler {
+	
+	/** Log */
 	protected Logger log = Utils.getLogger(this.getClass());
+	/** UI */
 	protected final UiGeneratorController ui;
+	/** {@link KeywordTabHandler} which spawned this. */
 	protected final KeywordTabHandler owner;
+	/** DAO for {@link KeywordAction}s */
+	private final KeywordActionDao keywordActionDao;
 
 	/** Appears to be the in-focus item on the email tab. */
 	private Object emailTabFocusOwner;
 
+//> CONSTRUCTORS
+	/**
+	 * Create a new instance, setting required fields.
+	 * @param ui the UI which this is tied to
+	 * @param owner the {@link KeywordTabHandler} which spawned this
+	 */
 	BaseActionDialogHandler(UiGeneratorController ui, KeywordTabHandler owner) {
 		this.ui = ui;
 		this.owner = owner;
+		this.keywordActionDao = ui.getFrontlineController().getKeywordActionDao();
+	}
+	
+//> ACCESSORS
+	
+//>
+	/** 
+	 * Save a new {@link KeywordAction} to the database 
+	 * @param action a new keyword action 
+	 */
+	protected void save(KeywordAction action) {
+		this.keywordActionDao.saveKeywordAction(action);
+	}
+	
+	/** 
+	 * Save changes to an existing {@link KeywordAction} 
+	 * @param action an existing keyword action whose details have been changed.
+	 */
+	protected void update(KeywordAction action) {
+		this.keywordActionDao.updateKeywordAction(action);
 	}
 	
 //> UI PASSTHROUGH METHODS
+	/**
+	 * Remove the supplied dialog from view.
+	 * @param dialog the dialog to remove
+	 */
 	public void removeDialog(Object dialog) {
 		ui.removeDialog(dialog);
 	}

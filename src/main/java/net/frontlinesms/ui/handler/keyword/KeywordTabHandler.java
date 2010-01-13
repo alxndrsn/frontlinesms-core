@@ -101,8 +101,10 @@ import net.frontlinesms.ui.handler.message.MessagePanelHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
- * @author aga
- *
+ * @author Alex Anderson 
+ * <li> alex(at)masabi(dot)com
+ * @author Carlos Eduardo Genz
+ * <li> kadu(at)masabi(dot)com
  */
 public class KeywordTabHandler extends BaseTabHandler {
 //> UI LAYOUT FILES
@@ -1192,9 +1194,6 @@ public class KeywordTabHandler extends BaseTabHandler {
 	}
 	
 	void updateKeywordActionList_(KeywordAction action, boolean isNew) {
-		if(isNew) {
-			keywordActionDao.saveKeywordAction(action);
-		}
 		updateKeywordActionList(action, isNew);
 	}
 	
