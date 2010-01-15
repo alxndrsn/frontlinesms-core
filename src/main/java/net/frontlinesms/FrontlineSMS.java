@@ -76,7 +76,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	/** Logging object */
 	private static Logger LOG = Utils.getLogger(FrontlineSMS.class);
 	/** SMS device emulator */
-	public static final SmsModem EMULATOR = SmsModem.createEmulator(FrontlineSMSConstants.EMULATOR_MSISDN);
+	public static final SmsDevice EMULATOR = new DummySmsDevice(FrontlineSMSConstants.EMULATOR_MSISDN);
 	
 //> INSTANCE VARIABLES
 

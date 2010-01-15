@@ -3,14 +3,20 @@
  */
 package net.frontlinesms.smsdevice;
 
+import serial.SerialClassFactory;
 import net.frontlinesms.resources.PropertySet;
 
 /**
  * @author Alex
- *
  */
 public class CommProperties extends PropertySet {
+
 //> STATIC CONSTANTS
+	/** Property key: list of ignored ports.  This is a comma-separated list of COM ports to ignore. */
+	private static final String PROPERTY_IGNORE = "ignore";
+	/** Property key: package to use for COM access, e.g. gnu.io or javax.comm */
+	private static final String PROPERTY_PACKAGE = "package";
+	
 	/** Singleton instance of this class. */
 	private static CommProperties instance;
 
@@ -42,9 +48,14 @@ public class CommProperties extends PropertySet {
 
 	/** @return the list of Comm ports to ignore. */
 	public String[] getIgnoreList() {
-		String ignore = super.getProperty("ignore");
+		String ignore = super.getProperty(PROPERTY_IGNORE);
 		if (ignore == null) return new String[0]; 
 		else return ignore.toUpperCase().split(",");
+	}
+	
+	/** @return the name of the comm library to use */
+	public String getCommLibraryPackageName() {
+		return super.getProperty(PROPERTY_PACKAGE, SerialClassFactory.PACKAGE_RXTX);
 	}
 
 //> STATIC HELPER METHODS

@@ -26,28 +26,34 @@ import java.util.Enumeration;
 import serial.*;
 
 import net.frontlinesms.resources.ResourceUtils;
+import net.frontlinesms.smsdevice.CommProperties;
 
 import org.apache.log4j.Logger;
 
 
 /**
  * Utilities class for managing bugs in javax.comm classes.
- * 
- * 
- * FIXME the {@link #getPortIdentifiers()} method should be grafted into {@link CommPortIdentifier} where it is needed
- * 
  * @author Alex
  */
 public final class CommUtils {
 	/** Logging object */
 	private static Logger LOG = Utils.getLogger(CommUtils.class);
+	
+	/** Flag indicating whether the preferred COM package has been set. */
+	private static boolean setPackage;
+	
 	/**
 	 * Gets a FRESH list of available COM ports.  This method works around a bug with Java COM API
 	 * that leads to ports being cached.  For more info on the bug, see http://forum.java.sun.com/thread.jspa?threadID=575580&messageID=2986928
 	 * @return an enumeration of {@link CommPortIdentifier}s, as supplied by {@link CommPortIdentifier#getPortIdentifiers()}
 	 */
-	@SuppressWarnings("restriction")
 	public static synchronized Enumeration<CommPortIdentifier> getPortIdentifiers() {
+		// Get the preferred comm drivers
+		if(!setPackage) {
+			SerialClassFactory.init(CommProperties.getInstance().getCommLibraryPackageName());
+			setPackage = true;
+		}
+		
 		/* This method is synchronized to prevent strange things happening when reloading the config etc. */
 		if(SerialClassFactory.PACKAGE_JAVAXCOMM.equals(SerialClassFactory.getInstance().getSerialPackageName())) {
 			try {

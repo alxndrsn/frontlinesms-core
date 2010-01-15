@@ -14,7 +14,7 @@ public class SerialClassFactory {
 	/** Package name for javax.comm */
 	public static final String PACKAGE_JAVAXCOMM = "javax.comm";
 	/** Package name for RXTXserial */
-	private static final String PACKAGE_RXTX = "gnu.io";
+	public static final String PACKAGE_RXTX = "gnu.io";
 	/** Singleton instance of this class */
 	private static SerialClassFactory INSTANCE;
 
@@ -27,50 +27,63 @@ public class SerialClassFactory {
 //> CONSTRUCTORS
 	/**
 	 * Constructs a {@link SerialClassFactory}.
-	 * TODO this currently tests RXTX first, but as javax.comm provides better device support, we should really test that first.  Need to isolate how to tell if it works.
+	 * @param preferredSerialPackageName the name of the serial package we would rather use
 	 */
-	private SerialClassFactory() {
-		String serialPackageName;
-		try {
-			log.info("Attempting to load serial package: " + PACKAGE_JAVAXCOMM);
-			// Javax.Serial will throw: class java.lang.UnsatisfiedLinkError :: no rxtxSerial in java.library.path if it cannot load.
-			Class.forName(PACKAGE_JAVAXCOMM + "." + CommPortIdentifier.class.getSimpleName());
-			serialPackageName = PACKAGE_JAVAXCOMM;
-			log.info("Using serial package: " + PACKAGE_JAVAXCOMM);
-		} catch(Throwable t) {
-			log.warn("Failed to load serial package: " + PACKAGE_JAVAXCOMM, t);
-			// TODO test this package works - it's possible neither does
-			// TODO What should we do if neither package works?  It would certainly be useful to know...
-			serialPackageName = PACKAGE_RXTX;
-			log.info("Using serial package: " + PACKAGE_RXTX);
+	private SerialClassFactory(String preferredSerialPackageName) {
+		if(testSerialPackageName(preferredSerialPackageName)) {
+			this.serialPackageName = preferredSerialPackageName;
+		} else if(!PACKAGE_JAVAXCOMM.equals(preferredSerialPackageName)
+				&& testSerialPackageName(PACKAGE_JAVAXCOMM)) {
+			this.serialPackageName = PACKAGE_JAVAXCOMM;
+		} else if(!PACKAGE_RXTX.equals(PACKAGE_RXTX)
+				&& testSerialPackageName(PACKAGE_RXTX)) {
+				this.serialPackageName = PACKAGE_RXTX;
+		} else {
+			this.log.error("Failed to load any serial pacakges.  Using RXTX by default, but it won't work.");
+			this.serialPackageName = PACKAGE_RXTX;
 		}
-		// TODO log what we have ended up with
-		this.serialPackageName = serialPackageName;
 	}
 
 //> ACCESSORS
-	/**
-	 * @return {@link #serialPackageName}.
-	 */
+	/** @return {@link #serialPackageName}. */
 	public String getSerialPackageName() {
 		return serialPackageName;
+	}
+	/**
+	 * Test loading a serial package.
+	 * @param serialPackageName the name of the serial package, e.g. {@link #PACKAGE_JAVAXCOMM}
+	 * @return <code>true</code> if the package loaded successfully; <code>false</code> otherwise
+	 */
+	private boolean testSerialPackageName(String serialPackageName) {
+		try {
+			log.info("Attempting to load serial package: " + serialPackageName);
+			Class.forName(serialPackageName + "." + CommPortIdentifier.class.getSimpleName());
+			log.info("Using serial package: " + serialPackageName);
+			return true;
+		} catch(Throwable t) {
+			log.warn("Failed to load serial package: " + serialPackageName, t);
+			return false;
+		}
 	}
 
 //> INSTANCE HELPER METHODS
 
 //> STATIC FACTORIES
+	/**
+	 * The preferred serial package to use.  This package will be tried first, but the others
+	 * will still be tried as well.
+	 * @param preferredSerialPackageName the name of the serial package to prefer
+	 */
+	public static final synchronized void init(String preferredSerialPackageName) {
+		INSTANCE = new SerialClassFactory(preferredSerialPackageName);
+	}
 
 //> STATIC HELPER METHODS
 	/**
-	 * Get the singleton instance of this class.  If the singleton is not yet
-	 * initialized, this method will do that too.
+	 * Get the singleton instance of this class.  The class must previously have been initialised using {@link #init(String)}
 	 * @return the singleton instance of this class
-	 * @throws IllegalStateException If there was a problem initialising the class
 	 */
-	public static final synchronized SerialClassFactory getInstance() throws IllegalStateException {
-		if(INSTANCE == null) {
-			INSTANCE = new SerialClassFactory();
-		}
+	public static final synchronized SerialClassFactory getInstance() {
 		return INSTANCE;
 	}
 	
