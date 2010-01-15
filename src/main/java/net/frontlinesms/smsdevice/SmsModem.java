@@ -1086,15 +1086,4 @@ public class SmsModem extends Thread implements SmsDevice {
 		if (alias == null) return model;
 		else return alias;
 	}
-	
-	/**
-	 * TODO an emulator should surely be a different type of device???
-	 * @param number the phone number of the emulator
-	 * @return a new "emulator"
-	 */
-	public static SmsModem createEmulator(String number) {
-		SmsModem emulator = new SmsModem(null, null);
-		emulator.setMsisdn(number);
-		return emulator;
-	}
 }

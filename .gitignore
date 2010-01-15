@@ -17,3 +17,6 @@ temp/
 
 # Ignore log files in the root directory
 *.log
+
+# Ignore binary libraries placed in the home directory to allow for JNI access
+*.dll
