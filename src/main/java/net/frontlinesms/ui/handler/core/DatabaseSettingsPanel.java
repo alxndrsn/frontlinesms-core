@@ -20,7 +20,9 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
 public class DatabaseSettingsPanel extends BasePanelHandler {
 
 //> STATIC CONSTANTS
+	/** XML UI Layout File path: database settings panel */
 	private static final String XML_SETTINGS_PANEL = "/ui/core/database/pnSettings.xml";
+	/** i18n Text Key: "Database Config" - used as title for the dialog, and menu text to launch the dialog */
 	private static final String I18N_KEY_DATABASE_CONFIG = "common.database.config";
 	
 	private static final String COMPONENT_SETTINGS_SELECTION = "cbConfigFile";
@@ -45,7 +47,7 @@ public class DatabaseSettingsPanel extends BasePanelHandler {
 	}
 	
 	/**
-	 * 
+	 * Initialise the UI.
 	 * @param restartRequired
 	 */
 	public void init(boolean restartRequired) {
