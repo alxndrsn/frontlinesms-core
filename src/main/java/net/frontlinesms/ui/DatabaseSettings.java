@@ -74,6 +74,11 @@ public class DatabaseSettings {
 		}
 	}
 	
+	public synchronized void saveProperties() {
+		assert(this.properties != null) : "Cannot save null properties.";
+		this.properties.saveToDisk();
+	}
+	
 //> STATIC FACTORIES
 	/**
 	 * Gets all DatabaseSettings which are available in the file system.

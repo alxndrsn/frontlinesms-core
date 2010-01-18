@@ -3,6 +3,7 @@
  */
 package net.frontlinesms.ui.handler.core;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.context.ApplicationContext;
@@ -91,9 +92,10 @@ public class DatabaseSettingsPanel extends BasePanelHandler {
 		
 		this.selectedSettings.loadProperties();
 		for(String key : this.selectedSettings.getPropertyKeys()) {
+			// TODO would be nice to set icons for the different settings
 			ui.add(settingsPanel, ui.createLabel(key));
 			// TODO may want to set the types of these, e.g. password, number etc.
-			ui.add(settingsPanel, ui.createTextfield("tf" + key, this.selectedSettings.getPropertyValue(key)));
+			ui.add(settingsPanel, ui.createTextfield(key, this.selectedSettings.getPropertyValue(key)));
 		}
 	}
 
@@ -105,6 +107,23 @@ public class DatabaseSettingsPanel extends BasePanelHandler {
 		Object cb = ui.createComboboxChoice(settings.getName(), settings);
 		// TODO perhaps we could set a settings-specific icon here
 		return cb;
+	}
+	
+	/** @return the settings and values that are currently displayed on the UI */
+	private List<Setting> getDisplayedSettingValues() {
+		Object settingsPanel = super.find(COMPONENT_SETTINGS_PANEL);
+		Object[] settingsComponents = ui.getItems(settingsPanel);
+		
+		ArrayList<Setting> settings = new ArrayList<Setting>();
+		for (int settingIndex=1; settingIndex<settingsComponents.length; settingIndex+=2) {
+			// This code assumes that all settings are in TEXTFIELDS; this may change in the future.
+			Object tf = settingsComponents[settingIndex];
+			String key = ui.getName(tf);
+			String value = ui.getText(tf);
+			settings.add(new Setting(key, value));
+		}
+		
+		return settings;
 	}
 	
 //> UI EVENT METHODS
@@ -128,12 +147,18 @@ public class DatabaseSettingsPanel extends BasePanelHandler {
 		// check if the settings file has changed
 		AppProperties appProperties = AppProperties.getInstance();
 		boolean settingsFileChanged = !selectedSettings.getFilePath().equals(appProperties.getDatabaseConfigPath());
+		
 		// If settings file has NOT changed, check if individual settings have changed
 		boolean updateIndividualSettings = false;
-		if(!settingsFileChanged) {
-			// We are modifying the current settings rather than changing to a whole new database config
-			
-			// TODO check if the settings have changed at all 
+		List<Setting> displayedSettings = getDisplayedSettingValues();
+		// We are modifying the current settings rather than changing to a whole new database config, so check if the
+		// settings have changed at all
+		for(Setting displayed : displayedSettings) {
+			String originalValue = this.selectedSettings.getPropertyValue(displayed.getKey());
+			if(!originalValue.equals(displayed.getValue())) {
+				updateIndividualSettings = true;
+				break;
+			}
 		}
 		
 		if(!settingsFileChanged && !updateIndividualSettings) {
@@ -143,8 +168,13 @@ public class DatabaseSettingsPanel extends BasePanelHandler {
 			if(settingsFileChanged) {
 				appProperties.setDatabaseConfigPath(selectedSettings.getFilePath());
 				appProperties.saveToDisk();
-			} else if(updateIndividualSettings) {
-				// TODO implement saving of settings changes
+			}
+			
+			if(updateIndividualSettings) {
+				for(Setting displayed : displayedSettings) {
+					this.selectedSettings.setPropertyValue(displayed.getKey(), displayed.getValue());
+				}
+				this.selectedSettings.saveProperties();
 			}
 			
 			if(restartRequired) {
@@ -157,7 +187,7 @@ public class DatabaseSettingsPanel extends BasePanelHandler {
 		
 		removeDialog();
 	}
-	
+
 	/** Cancel button pressed. */
 	public void cancel() {
 		// If we are displaying the settings panel as a dialog, remove it.  Otherwise TODO call the callback method?
@@ -181,5 +211,23 @@ public class DatabaseSettingsPanel extends BasePanelHandler {
 //> UI EVENT METHODS
 	public void removeDialog() {
 		this.ui.removeDialog(this.dialogComponent);
+	}
+}
+
+class Setting {
+	private final String key;
+	private final String value;
+	
+	public Setting(String key, String value) {
+		this.key = key;
+		this.value = value;
+	}
+	
+	public String getKey() {
+		return key;
+	}
+	
+	public String getValue() {
+		return value;
 	}
 }
