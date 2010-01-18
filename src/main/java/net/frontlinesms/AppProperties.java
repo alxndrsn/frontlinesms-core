@@ -3,13 +3,13 @@
  */
 package net.frontlinesms;
 
-import net.frontlinesms.resources.PropertySet;
+import net.frontlinesms.resources.UserHomeFilePropertySet;
 
 /**
  * @author Alex
  *
  */
-public final class AppProperties extends PropertySet {
+public final class AppProperties extends UserHomeFilePropertySet {
 //> STATIC CONSTANTS
 	
 //> PROPERTY STRINGS

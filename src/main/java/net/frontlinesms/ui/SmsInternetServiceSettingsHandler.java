@@ -6,7 +6,7 @@ import java.util.*;
 import net.frontlinesms.*;
 import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
-import net.frontlinesms.resources.PropertySet;
+import net.frontlinesms.resources.UserHomeFilePropertySet;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.Provider;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
@@ -652,7 +652,7 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 	}
 }
 
-final class IconMap extends PropertySet {
+final class IconMap extends UserHomeFilePropertySet {
 //> STATIC CONSTANTS
 
 //> INSTANCE PROPERTIES

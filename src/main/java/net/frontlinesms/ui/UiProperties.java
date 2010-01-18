@@ -3,15 +3,15 @@
  */
 package net.frontlinesms.ui;
 
-import net.frontlinesms.resources.PropertySet;
+import net.frontlinesms.resources.UserHomeFilePropertySet;
 
 /**
  * Wrapper class for UI properties file.
  * @author Alex
  */
-public final class UiProperties extends PropertySet {
+public final class UiProperties extends UserHomeFilePropertySet {
 //> STATIC CONSTANTS
-	/** The name of the {@link PropertySet} which these properties are loaded from and saved in. */
+	/** The name of the {@link UserHomeFilePropertySet} which these properties are loaded from and saved in. */
 	private static final String PROPERTYSET_NAME = "ui";
 	
 //> PROPERTY KEYS & VALUES

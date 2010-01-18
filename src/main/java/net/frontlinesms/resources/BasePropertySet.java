@@ -25,23 +25,9 @@ class BasePropertySet {
 
 //> INSTANCE PROPERTIES
 	/** Map from property key to value */
-	private final Map<String, String> properties;
+	private Map<String, String> properties;
 
 //> CONSTRUCTORS
-	/**
-	 * @deprecated This constructor should be replaced with {@link BasePropertySet#BasePropertySet(Map)}
-	 */
-	BasePropertySet() {
-		this.properties = null;
-	}
-	
-	/**
-	 * Create a new instance of this class.
-	 * @param properties value for {@link #properties}. 
-	 */
-	BasePropertySet(Map<String, String> properties) {
-		this.properties = properties;
-	}
 
 //> ACCESSORS
 	/**
@@ -50,6 +36,20 @@ class BasePropertySet {
 	 */
 	String getProperty(String propertyKey) {
 		return this.properties.get(propertyKey);
+	}
+	
+	protected Map<String, String> getProperties() {
+		return properties;
+	}
+	
+	/**
+	 * Set the properties.  This should be done exactly once.
+	 * @param properties value for {@link #properties}
+	 */
+	void setProperties(Map<String, String> properties) {
+		assert(this.properties == null) : "Properties already set.  Cannot be changed.";
+		assert(properties != null) : "Cannot set properties to null.";
+		this.properties = properties;
 	}
 
 //> INSTANCE HELPER METHODS

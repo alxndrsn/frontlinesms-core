@@ -1,21 +1,5 @@
-/*
- * FrontlineSMS <http://www.frontlinesms.com>
- * Copyright 2007, 2008 kiwanja
+/**
  * 
- * This file is part of FrontlineSMS.
- * 
- * FrontlineSMS is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at
- * your option) any later version.
- * 
- * FrontlineSMS is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with FrontlineSMS. If not, see <http://www.gnu.org/licenses/>.
  */
 package net.frontlinesms.resources;
 
@@ -27,47 +11,27 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
-
-import net.frontlinesms.Utils;
-
-import org.apache.log4j.Logger;
+import java.util.Set;
 
 /**
- * Set of properties with String value. Each {@link PropertySet} is tied to a specific file located in
- * the properties directory of the application's config.
- *
- * TODO This class should be renamed FilePropertySet
- * 
- * @author Alex
+ * @author aga
  */
-public abstract class PropertySet extends BasePropertySet {
+public class FilePropertySet extends BasePropertySet {
+	/** The file the properties are loaded from and saved to. */
+	private File file;
 	
-//> CONSTANTS
-	/** Logging object for this instance. */
-	public static final Logger LOG = Utils.getLogger(PropertySet.class);
-	
-//> INSTANCE PROPERTIES
-	/** The {@link File} that this {@link PropertySet} is loaded from and saved to. */
-	private final File file;
-	/** Map from property key to value TODO why does this have its own map, when {@link BasePropertySet} also has one? */
-	private Map<String, String> properties;
+	/**
+	 * Create a new instance of this class pointing to the supplied file.
+	 * @param file
+	 */
+	protected FilePropertySet(File file) {
+		this.file = file;
+	}
 	
 //> INSTANCE METHODS
 	/**
-	 * Create a new instance of this class from the supplied name.
-	 * @param name The name of the {@link PropertySet} from which is derived the file it is persisted to
-	 */
-	protected PropertySet(String name) {
-		super();
-		this.file = ResourceUtils.getPropertiesFile(name);
-		this.properties = PropertySet.load(this.file);
-	}
-	
-	/**
-	 * Save this {@link PropertySet} to disk.
+	 * Save this {@link UserHomeFilePropertySet} to disk.
 	 * @return <code>true</code> if the properties file was successfully saved; <code>false</code> otherwise.
 	 */
 	public synchronized boolean saveToDisk() {
@@ -80,8 +44,8 @@ public abstract class PropertySet extends BasePropertySet {
 			fos = new FileOutputStream(propFile);
 			out = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
 			
-			for(String propertyKey : this.properties.keySet()) {
-				out.write(propertyKey + "=" + this.properties.get(propertyKey) + "\n");
+			for(String propertyKey : this.getProperties().keySet()) {
+				out.write(propertyKey + "=" + this.getProperties().get(propertyKey) + "\n");
 			}
 			
 			out.flush();
@@ -105,7 +69,7 @@ public abstract class PropertySet extends BasePropertySet {
 	 * @param value
 	 */
 	protected synchronized void setProperty(String propertyName, String value) {
-		this.properties.put(propertyName, value);
+		this.getProperties().put(propertyName, value);
 	}
 	
 	/**
@@ -114,19 +78,7 @@ public abstract class PropertySet extends BasePropertySet {
 	 * @return The value of the property as a {@link String} or <code>null</code> if it is not set.
 	 */
 	protected synchronized String getProperty(String propertyName) {
-		return this.properties.get(propertyName);
-	}
-
-	/**
-	 * Gets the {@link Boolean} value of a property.
-	 * @param propertyName
-	 * @return The value of the property as a {@link Boolean} or <code>null</code> if it is not set.
-	 * @deprecated Should use {@link #getPropertyAsBoolean(String, boolean)} instead
-	 */
-	protected Boolean getPropertyAsBoolean(String propertyName) {
-		String value = getProperty(propertyName);
-		if (value == null) return null;
-		else return Boolean.parseBoolean(value);
+		return this.getProperties().get(propertyName);
 	}
 	
 	/**
@@ -152,8 +104,8 @@ public abstract class PropertySet extends BasePropertySet {
 	}
 	
 	/** @return the property keys in {@link #properties} */
-	protected Collection<String> getPropertyKeys() {
-		return this.properties.keySet();
+	protected Set<String> getPropertyKeys() {
+		return this.getProperties().keySet();
 	}
 	
 //> GETTERS WITH DEFAULT VALUES
@@ -164,19 +116,30 @@ public abstract class PropertySet extends BasePropertySet {
 	 * @return The value to be used for this property
 	 */
 	protected synchronized String getProperty(String propertyName, String defaultValue) {
-		if(!this.properties.containsKey(propertyName)) {
-			this.properties.put(propertyName, defaultValue);
+		if(!this.getProperties().containsKey(propertyName)) {
+			this.getProperties().put(propertyName, defaultValue);
 		}
-		return this.properties.get(propertyName);
+		return this.getProperties().get(propertyName);
 	}
 	
-//> STATIC FACTORY METHODS
+//> STATIC FACTORIES
+	public static FilePropertySet load(String filePath) {
+		File file = new File(filePath);
+		return load(file);
+	}
+	
+	public static FilePropertySet load(File file) {
+		FilePropertySet properties = new FilePropertySet(file);
+		properties.setProperties(loadPropertyMap(file));
+		return properties;
+	}
+	
 	/**
-	 * Loads a {@link PropertySet} from the supplied file
-	 * @param propFile The file to load the {@link PropertySet} from
+	 * Loads a {@link UserHomeFilePropertySet} from the supplied file
+	 * @param propFile The file to load the {@link UserHomeFilePropertySet} from
 	 * @return new map of properties loaded from the requested file, or an empty map if no properties could be loaded. 
 	 */
-	public static HashMap<String, String> load(File propFile) {
+	static HashMap<String, String> loadPropertyMap(File propFile) {
 		LOG.debug("File [" + propFile.getAbsolutePath() + "]");
 
 		HashMap<String, String> properties = null;

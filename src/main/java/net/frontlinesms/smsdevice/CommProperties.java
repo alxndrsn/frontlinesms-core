@@ -4,12 +4,12 @@
 package net.frontlinesms.smsdevice;
 
 import serial.SerialClassFactory;
-import net.frontlinesms.resources.PropertySet;
+import net.frontlinesms.resources.UserHomeFilePropertySet;
 
 /**
  * @author Alex
  */
-public class CommProperties extends PropertySet {
+public class CommProperties extends UserHomeFilePropertySet {
 
 //> STATIC CONSTANTS
 	/** Property key: list of ignored ports.  This is a comma-separated list of COM ports to ignore. */

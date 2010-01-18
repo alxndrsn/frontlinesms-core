@@ -27,7 +27,7 @@ public class ClasspathPropertySet extends BasePropertySet {
 	 * @throws IOException 
 	 */
 	protected ClasspathPropertySet(String path) throws IOException {
-		super(BasePropertySet.load(BasePropertySet.class.getResourceAsStream(path)));
+		super.setProperties(BasePropertySet.load(BasePropertySet.class.getResourceAsStream(path)));
 	}
 
 //> ACCESSORS

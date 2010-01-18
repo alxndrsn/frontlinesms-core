@@ -6,13 +6,13 @@ package net.frontlinesms.plugins;
 import java.util.Collection;
 import java.util.HashSet;
 
-import net.frontlinesms.resources.PropertySet;
+import net.frontlinesms.resources.UserHomeFilePropertySet;
 
 /**
  * @author Alex
  *
  */
-public class PluginProperties extends PropertySet {
+public class PluginProperties extends UserHomeFilePropertySet {
 //> STATIC CONSTANTS
 	/** Singleton instance of this class. */
 	private static PluginProperties instance;

@@ -46,9 +46,9 @@ public class ResourceUtils {
 	/** Name of directory that discarded resources are put in after an upgrade of FrontlineSMS. */
 	private static final String GRAVEYARD = "old";
 	
-	/** The location of {@link PropertySet} files. */
+	/** The location of {@link UserHomeFilePropertySet} files. */
 	public static final String PROPERTIES_DIRECTORY_NAME = "properties";
-	/** The filename extension used for {@link PropertySet} files. */
+	/** The filename extension used for {@link UserHomeFilePropertySet} files. */
 	private static final String PROPERTIES_EXTENSION = ".properties";
 	
 	/** Name of the FrontlineSMS resource initialisation file. */
@@ -275,7 +275,7 @@ public class ResourceUtils {
 		if(resourcePath == null) {
 			try {
 				File resourceLocationsFile = new File(RESOURCE_INI_FILE);
-				HashMap<String, String> resourceLocation = PropertySet.load(resourceLocationsFile);
+				HashMap<String, String> resourceLocation = FilePropertySet.loadPropertyMap(resourceLocationsFile);
 				resourcePath = resourceLocation.get(PROPKEY_RESOURCE_PATH);
 			} catch(Throwable t) {
 				// If there is a problem loading the path from the working directory, then we just
@@ -298,7 +298,7 @@ public class ResourceUtils {
 	}
 	
 	/**
-	 * Gets the path of the file where a {@link PropertySet} is persisted.
+	 * Gets the path of the file where a {@link UserHomeFilePropertySet} is persisted.
 	 * @param propertySetName
 	 * @return the path to a particular property file
 	 */
