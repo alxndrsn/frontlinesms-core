@@ -18,25 +18,20 @@ public class DatabaseSettings {
 	
 //> INSTANCE PROPERTIES
 	/** The path to the file containing the settings. */
-	private File xmlSettingsFile;
+	private String xmlSettingsPath;
 	
 //> CONSTRUCTORS
 	private DatabaseSettings() {}
 	
 //> ACCESSORS
-	/** @param xmlSettingsFilePath the path to {@link #xmlSettingsFile} */
-	private void setXmlSettingsFile(String xmlSettingsFilePath) {
-		this.xmlSettingsFile = new File(xmlSettingsFilePath);
-	}
-	
-	/** @return {@link #xmlSettingsFile} */
-	public File getXmlSettingsFile() {
-		return xmlSettingsFile;
+	/** @param xmlSettingsPath the path to the xml file containing the settings. */
+	private void setXmlSettingsFile(String xmlSettingsPath) {
+		this.xmlSettingsPath = xmlSettingsPath;
 	}
 
-	/** @return the path to {@link #xmlSettingsFile} */
-	public Object getFilePath() {
-		return this.xmlSettingsFile.getPath();
+	/** @return the relative path to the settings file */
+	public String getFilePath() {
+		return this.xmlSettingsPath;
 	}
 	
 //> STATIC FACTORIES
@@ -72,7 +67,7 @@ public class DatabaseSettings {
 
 	/** @return a human-readable name for these settings */
 	public String getName() {
-		// TODO for now, we just display the file name; in future it might be nice to pretify it somehow
-		return this.xmlSettingsFile.getName();
+		// TODO for now, we just display the file path; in future it might be nice to pretify it somehow
+		return this.xmlSettingsPath;
 	}
 }

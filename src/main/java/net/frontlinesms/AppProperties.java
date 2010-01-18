@@ -68,6 +68,11 @@ public final class AppProperties extends PropertySet {
 		return super.getProperty(KEY_DATABASE_CONFIG_PATH, DEFAULT_DATABASE_CONFIG_PATH);
 	}
 
+	/** @param databaseConfigPath new value for the path to the database config file */
+	public void setDatabaseConfigPath(String databaseConfigPath) {
+		super.setProperty(KEY_DATABASE_CONFIG_PATH, databaseConfigPath);
+	}
+
 //> INSTANCE HELPER METHODS
 
 //> STATIC FACTORIES

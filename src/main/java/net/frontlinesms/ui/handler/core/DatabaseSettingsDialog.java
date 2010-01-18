@@ -5,6 +5,8 @@ package net.frontlinesms.ui.handler.core;
 
 import java.util.List;
 
+import org.springframework.context.ApplicationContext;
+
 import net.frontlinesms.AppProperties;
 import net.frontlinesms.ui.DatabaseSettings;
 import net.frontlinesms.ui.UiGeneratorController;
@@ -31,12 +33,23 @@ public class DatabaseSettingsDialog extends BasePanelHandler {
 	/** Dialog UI Component.  This should only be used if {@link #showAsDialog()} is called, and then should only be used by {@link #removeDialog()}. */
 	private Object dialogComponent;
 	
+	/**
+	 * Set <code>true</code> if a restart is required after changing settings.  Set <code>false</code> if we are
+	 * modifying the settings before the {@link ApplicationContext} has been started.
+	 */
+	private boolean restartRequired;
+	
 //> CONSTRUCTORS
 	public DatabaseSettingsDialog(UiGeneratorController ui) {
 		super(ui);
 	}
 	
-	public void init() {
+	/**
+	 * 
+	 * @param restartRequired
+	 */
+	public void init(boolean restartRequired) {
+		this.restartRequired = restartRequired;
 		super.loadPanel(XML_SETTINGS_PANEL);
 		
 		// Populate combobox
@@ -65,12 +78,7 @@ public class DatabaseSettingsDialog extends BasePanelHandler {
 //> UI HELPER METHODS
 	/** Refresh the panel containing settings specific to the currently-selected {@link DatabaseSettings}. */
 	private void refreshSettingsPanel() {
-		Object selected = ui.getSelectedItem(getConfigFileSelecter());
-		if(selected != null) {
-			setSelectedConfigFile(ui.getAttachedObject(selected, DatabaseSettings.class));
-			
-			refreshSettingsPanel();
-		}
+		// TODO populate the settings panel
 	}
 
 	private Object getConfigFileSelecter() {
@@ -85,15 +93,58 @@ public class DatabaseSettingsDialog extends BasePanelHandler {
 	
 //> UI EVENT METHODS
 	public void configFileChanged() {
-		// TODO
+		Object selected = ui.getSelectedItem(getConfigFileSelecter());
+		if(selected != null) {
+			setSelectedConfigFile(ui.getAttachedObject(selected, DatabaseSettings.class));
+			
+			refreshSettingsPanel();
+		}
 	}
 	
+	/**
+	 * Save button pressed: Saves the database settings and restarts FrontlineSMS to use
+	 * the new settings.
+	 */
 	public void save() {
-		// TODO implement saving of settings we are currently modifying
+		// get the settings we are modifying
+		DatabaseSettings selectedSettings = this.selectedSettings;
+		
+		// check if the settings file has changed
+		AppProperties appProperties = AppProperties.getInstance();
+		boolean settingsFileChanged = !selectedSettings.getFilePath().equals(appProperties.getDatabaseConfigPath());
+		// If settings file has NOT changed, check if individual settings have changed
+		boolean updateIndividualSettings = false;
+		if(!settingsFileChanged) {
+			// We are modifying the current settings rather than changing to a whole new database config
+			
+			// TODO check if the settings have changed at all 
+		}
+		
+		if(!settingsFileChanged && !updateIndividualSettings) {
+			// Nothing has changed, so no need to update anything
+			ui.alert("You did not make any changes to the settings."); // FIXME i18n
+		} else {
+			if(settingsFileChanged) {
+				appProperties.setDatabaseConfigPath(selectedSettings.getFilePath());
+				appProperties.saveToDisk();
+			} else if(updateIndividualSettings) {
+				// TODO implement saving of settings changes
+			}
+			
+			if(restartRequired) {
+				// Display alert warning the user that their settings have changed, and they
+				// must restart FrontlineSMS for the changes to take effect.  Restarting automatically
+				// may be quite complicated, and the gain would be little.
+				ui.alert("Settings saved.  You are advised to restart FrontlineSMS immediately."); // FIXME i18n
+			}
+		}
+		
+		removeDialog();
 	}
 	
+	/** Cancel button pressed. */
 	public void cancel() {
-		// TODO remove the dialog and call the callback method.  How is callback specified?
+		// If we are displaying the settings panel as a dialog, remove it.  Otherwise TODO call the callback method?
 		if(this.dialogComponent != null) {
 			removeDialog();
 		}
