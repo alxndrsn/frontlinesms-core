@@ -46,7 +46,7 @@ class BasePropertySet {
 	 * Set the properties.  This should be done exactly once.
 	 * @param properties value for {@link #properties}
 	 */
-	void setProperties(Map<String, String> properties) {
+	protected void setProperties(Map<String, String> properties) {
 		assert(this.properties == null) : "Properties already set.  Cannot be changed.";
 		assert(properties != null) : "Cannot set properties to null.";
 		this.properties = properties;

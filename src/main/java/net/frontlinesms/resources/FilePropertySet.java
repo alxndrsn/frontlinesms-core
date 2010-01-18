@@ -108,6 +108,11 @@ public class FilePropertySet extends BasePropertySet {
 		return this.getProperties().keySet();
 	}
 	
+	/** @return {@link #file} */
+	protected File getFile() {
+		return file;
+	}
+	
 //> GETTERS WITH DEFAULT VALUES
 	/**
 	 * Gets the {@link String} value of a property.  If no value is set, the default value is set and then returned.
@@ -139,7 +144,7 @@ public class FilePropertySet extends BasePropertySet {
 	 * @param propFile The file to load the {@link UserHomeFilePropertySet} from
 	 * @return new map of properties loaded from the requested file, or an empty map if no properties could be loaded. 
 	 */
-	static HashMap<String, String> loadPropertyMap(File propFile) {
+	protected static HashMap<String, String> loadPropertyMap(File propFile) {
 		LOG.debug("File [" + propFile.getAbsolutePath() + "]");
 
 		HashMap<String, String> properties = null;

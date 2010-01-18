@@ -2,7 +2,7 @@
 <panel bottom="10" columns="1" gap="10" left="10" right="10" top="10">
 	<combobox name="cbConfigFile" action="configFileChanged" editable="false"/>
 	<separator colspan="2"/>
-	<panel columns="1" gap="6" weightx="1" name="pnSettings">
+	<panel columns="1" gap="6" weightx="1" name="pnSettings" columns="2">
 		<!-- This panel will be populated with modifiable settings at runtime -->
 	</panel>
     <panel colspan="2" gap="5" halign="center">

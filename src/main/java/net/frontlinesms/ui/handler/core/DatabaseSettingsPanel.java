@@ -26,6 +26,8 @@ public class DatabaseSettingsPanel extends BasePanelHandler {
 	private static final String I18N_KEY_DATABASE_CONFIG = "common.database.config";
 	
 	private static final String COMPONENT_SETTINGS_SELECTION = "cbConfigFile";
+	/** The panel containing individual settings controls */
+	private static final String COMPONENT_SETTINGS_PANEL = "pnSettings";
 
 //> INSTANCE PROPERTIES
 	private List<DatabaseSettings> databaseSettings;
@@ -83,7 +85,16 @@ public class DatabaseSettingsPanel extends BasePanelHandler {
 //> UI HELPER METHODS
 	/** Refresh the panel containing settings specific to the currently-selected {@link DatabaseSettings}. */
 	private void refreshSettingsPanel() {
-		// TODO populate the settings panel
+		// populate the settings panel
+		Object settingsPanel = super.find(COMPONENT_SETTINGS_PANEL);
+		ui.removeAll(settingsPanel);
+		
+		this.selectedSettings.loadProperties();
+		for(String key : this.selectedSettings.getPropertyKeys()) {
+			ui.add(settingsPanel, ui.createLabel(key));
+			// TODO may want to set the types of these, e.g. password, number etc.
+			ui.add(settingsPanel, ui.createTextfield("tf" + key, this.selectedSettings.getPropertyValue(key)));
+		}
 	}
 
 	private Object getConfigFileSelecter() {

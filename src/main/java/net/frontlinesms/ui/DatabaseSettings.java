@@ -19,8 +19,10 @@ import net.frontlinesms.resources.ResourceUtils;
 public class DatabaseSettings {
 	
 //> INSTANCE PROPERTIES
-	/** The path to the file containing the settings. */
-	private String xmlSettingsPath;
+	/** The parent directory in which the settings file is found */
+	private File parentDirectory;
+	/** The name of the file containing the settings. */
+	private String xmlFileName;
 	/** Properties attached to the database settings. */
 	private DatabaseSettingsPropertySet properties;
 	
@@ -28,14 +30,15 @@ public class DatabaseSettings {
 	private DatabaseSettings() {}
 	
 //> ACCESSORS
-	/** @param xmlSettingsPath the path to the xml file containing the settings. */
-	private void setXmlSettingsFile(String xmlSettingsPath) {
-		this.xmlSettingsPath = xmlSettingsPath;
+	/** @param fileName the name of the xml file containing the settings. */
+	private void setXmlSettingsFile(File parentDirectory, String fileName) {
+		this.parentDirectory = parentDirectory;
+		this.xmlFileName = fileName;
 	}
 
 	/** @return the relative path to the settings file */
 	public String getFilePath() {
-		return this.xmlSettingsPath;
+		return this.xmlFileName;
 	}
 	
 	/** @return keys for all properties */
@@ -63,6 +66,14 @@ public class DatabaseSettings {
 		return this.properties.get(propertyKey);
 	}
 	
+//> INSTANCE METHODS
+	/** Loads the properties from external file if they are not already initialised. */
+	public synchronized void loadProperties() {
+		if(this.properties == null) {
+			this.properties = DatabaseSettingsPropertySet.loadForSettings(parentDirectory, xmlFileName);
+		}
+	}
+	
 //> STATIC FACTORIES
 	/**
 	 * Gets all DatabaseSettings which are available in the file system.
@@ -78,32 +89,32 @@ public class DatabaseSettings {
 		
 		List<DatabaseSettings> settings = new ArrayList<DatabaseSettings>();
 		for(String settingsFilePath : settingsFiles) {
-			settings.add(createFromPath(settingsFilePath));
+			settings.add(createFromPath(settingsDirectory, settingsFilePath));
 		}
 		return settings;
 	}
 
 	/**
 	 * Creates a {@link DatabaseSettings} from a file found at a particular path.
-	 * @param xmlSettingsFilePath the path to the settings file
+	 * @param fileName the path to the settings file
 	 * @return a new {@link DatabaseSettings}
 	 */
-	private static DatabaseSettings createFromPath(String xmlSettingsFilePath) {
+	private static DatabaseSettings createFromPath(File parentDirectory, String fileName) {
 		DatabaseSettings settings = new DatabaseSettings();
-		settings.setXmlSettingsFile(xmlSettingsFilePath);
+		settings.setXmlSettingsFile(parentDirectory, fileName);
 		return settings;
 	}
 
 	/** @return a human-readable name for these settings */
 	public String getName() {
 		// TODO for now, we just display the file path; in future it might be nice to pretify it somehow
-		return this.xmlSettingsPath;
+		return this.xmlFileName;
 	}
 }
 
 class DatabaseSettingsPropertySet extends FilePropertySet {
-	DatabaseSettingsPropertySet(File databaseXmlFile) {
-		super(new File(databaseXmlFile.getAbsolutePath() + ".properties"));
+	private DatabaseSettingsPropertySet(File parentDirectory, String databaseXmlFilePath) {
+		super(new File(parentDirectory, databaseXmlFilePath + ".properties"));
 	}
 	
 	Set<String> getKeys() {
@@ -120,5 +131,11 @@ class DatabaseSettingsPropertySet extends FilePropertySet {
 	
 	String get(String key) {
 		return super.getProperty(key);
+	}
+	
+	static DatabaseSettingsPropertySet loadForSettings(File parentDirectory, String databaseXmlFile) {
+		DatabaseSettingsPropertySet props = new DatabaseSettingsPropertySet(parentDirectory, databaseXmlFile);
+		props.setProperties(FilePropertySet.loadPropertyMap(props.getFile()));
+		return props;
 	}
 }
