@@ -57,7 +57,7 @@ import net.frontlinesms.smsdevice.internet.SmsInternetService;
 import net.frontlinesms.ui.handler.ContactsTabHandler;
 import net.frontlinesms.ui.handler.HomeTabHandler;
 import net.frontlinesms.ui.handler.PhoneTabHandler;
-import net.frontlinesms.ui.handler.core.DatabaseSettingsDialog;
+import net.frontlinesms.ui.handler.core.DatabaseSettingsPanel;
 import net.frontlinesms.ui.handler.email.EmailAccountDialogHandler;
 import net.frontlinesms.ui.handler.email.EmailTabHandler;
 import net.frontlinesms.ui.handler.keyword.KeywordTabHandler;
@@ -1755,7 +1755,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	public void showDatabaseConfigDialog() {
-		DatabaseSettingsDialog dialog = new DatabaseSettingsDialog(this);
+		DatabaseSettingsPanel dialog = new DatabaseSettingsPanel(this);
 		dialog.init(true);
 		dialog.showAsDialog();
 	}

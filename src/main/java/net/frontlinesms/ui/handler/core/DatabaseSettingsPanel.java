@@ -17,7 +17,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * @author aga
  *
  */
-public class DatabaseSettingsDialog extends BasePanelHandler {
+public class DatabaseSettingsPanel extends BasePanelHandler {
 
 //> STATIC CONSTANTS
 	private static final String XML_SETTINGS_PANEL = "/ui/core/database/pnSettings.xml";
@@ -40,7 +40,7 @@ public class DatabaseSettingsDialog extends BasePanelHandler {
 	private boolean restartRequired;
 	
 //> CONSTRUCTORS
-	public DatabaseSettingsDialog(UiGeneratorController ui) {
+	public DatabaseSettingsPanel(UiGeneratorController ui) {
 		super(ui);
 	}
 	
