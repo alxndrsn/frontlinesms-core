@@ -35,7 +35,7 @@ public class SerialClassFactory {
 		} else if(!PACKAGE_JAVAXCOMM.equals(preferredSerialPackageName)
 				&& testSerialPackageName(PACKAGE_JAVAXCOMM)) {
 			this.serialPackageName = PACKAGE_JAVAXCOMM;
-		} else if(!PACKAGE_RXTX.equals(PACKAGE_RXTX)
+		} else if(!PACKAGE_RXTX.equals(preferredSerialPackageName)
 				&& testSerialPackageName(PACKAGE_RXTX)) {
 				this.serialPackageName = PACKAGE_RXTX;
 		} else {
@@ -74,7 +74,7 @@ public class SerialClassFactory {
 	 * will still be tried as well.
 	 * @param preferredSerialPackageName the name of the serial package to prefer
 	 */
-	public static final synchronized void init(String preferredSerialPackageName) {
+	public static final void init(String preferredSerialPackageName) {
 		INSTANCE = new SerialClassFactory(preferredSerialPackageName);
 	}
 
@@ -83,7 +83,7 @@ public class SerialClassFactory {
 	 * Get the singleton instance of this class.  The class must previously have been initialised using {@link #init(String)}
 	 * @return the singleton instance of this class
 	 */
-	public static final synchronized SerialClassFactory getInstance() {
+	public static final SerialClassFactory getInstance() {
 		return INSTANCE;
 	}
 	
