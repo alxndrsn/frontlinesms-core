@@ -375,7 +375,7 @@ public class ExtendedThinlet extends Thinlet {
 	 * @param title
 	 * @return
 	 */
-	protected final Object createDialog(String title) {
+	public Object createDialog(String title) {
 		Object dialog = Thinlet.create(DIALOG);
 		setString(dialog, TEXT, title);
 		setBoolean(dialog, MODAL, true);

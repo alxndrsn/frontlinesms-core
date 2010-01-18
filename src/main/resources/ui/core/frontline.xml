@@ -14,6 +14,7 @@
 			<menuitem icon="/icons/exit.png" text="i18n.menuitem.exit" name="menu_exit" action="close"/>
 		</menu>
 		<menu text="i18n.menubar.settings">
+			<menuitem icon="/icons/database_edit.png" text="i18n.menuitem.edit.db.settings" name="menu_editDatabase" action="showDatabaseConfigDialog"/>
 			<menuitem icon="/icons/emailAccount_edit.png" text="i18n.menuitem.email.settings" name="menu_emailSettings" action="showEmailAccountsSettings"/>
 			<menuitem icon="/icons/sms_http_edit.png" text="i18n.smsdevice.internet.settings" action="showSmsInternetServiceSettings"/>
 			<separator />
