@@ -56,13 +56,14 @@ public class DatabaseSettingsDialog extends BasePanelHandler {
 		String selectedDatabaseConfigPath = AppProperties.getInstance().getDatabaseConfigPath();
 		this.databaseSettings = DatabaseSettings.getSettings();
 		Object settingsSelection = getConfigFileSelecter();
-		for(DatabaseSettings settings : databaseSettings) {
+		for(int settingsIndex=0; settingsIndex<this.databaseSettings.size(); ++settingsIndex) {
+			DatabaseSettings settings = databaseSettings.get(settingsIndex);
 			Object comboBox = createComboBox(settings);
 			ui.add(settingsSelection, comboBox);
 
 			// if appropriate, choose the combobox selection
 			if(settings.getFilePath().equals(selectedDatabaseConfigPath)) {
-//				ui.setSelectedItem(settingsSelection, comboBox);
+				ui.setSelectedIndex(settingsSelection, settingsIndex);
 			}
 		}
 		
