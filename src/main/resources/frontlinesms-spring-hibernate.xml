@@ -13,7 +13,8 @@
 	<tx:annotation-driven />
 	
 	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<description>This property configurer allows the use of Systemp Properties in the Spring XML config.</description>
+		<description>This property configurer allows the use of System Properties in the Spring XML config.</description>
+		<property name="ignoreUnresolvablePlaceholders" value="true"/>
 	</bean>
 
 	<bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager" parent="sessionFactoryAware"/>

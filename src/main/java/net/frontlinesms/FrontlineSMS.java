@@ -38,10 +38,12 @@ import org.smslib.CIncomingMessage;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ListFactoryBean;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.core.io.FileSystemResource;
 
 /**
  * 
@@ -133,12 +135,22 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 			// Create a base ApplicationContext defining the hibernate config file we need to import
 			StaticApplicationContext baseApplicationContext = new StaticApplicationContext();
 			baseApplicationContext.registerBeanDefinition("hibernateConfigLocations", createHibernateConfigLocationsBeanDefinition());
-			baseApplicationContext.refresh();
 			
 			// Get the spring config locations
-			String springExternalConfigPath = ResourceUtils.getConfigDirectoryPath() + ResourceUtils.PROPERTIES_DIRECTORY_NAME + File.separatorChar + appProperties.getDatabaseConfigPath();
-			String[] configLocations = getSpringConfigLocations(springExternalConfigPath);
-			ApplicationContext applicationContext = new FileSystemXmlApplicationContext(configLocations, baseApplicationContext);
+			String databaseExternalConfigPath = ResourceUtils.getConfigDirectoryPath() + ResourceUtils.PROPERTIES_DIRECTORY_NAME + File.separatorChar + appProperties.getDatabaseConfigPath();
+			String[] configLocations = getSpringConfigLocations(databaseExternalConfigPath);
+			baseApplicationContext.refresh();
+			
+			FileSystemXmlApplicationContext applicationContext = new FileSystemXmlApplicationContext(configLocations, false, baseApplicationContext);
+			
+			// Add post-processor to handle substituted database properties
+			PropertyPlaceholderConfigurer propertyPlaceholderConfigurer = new PropertyPlaceholderConfigurer();
+			String databasePropertiesPath = ResourceUtils.getConfigDirectoryPath() + ResourceUtils.PROPERTIES_DIRECTORY_NAME + File.separatorChar + appProperties.getDatabaseConfigPath() + ".properties";
+			propertyPlaceholderConfigurer.setLocation(new FileSystemResource(new File(databasePropertiesPath)));
+			propertyPlaceholderConfigurer.setIgnoreResourceNotFound(true);
+			applicationContext.addBeanFactoryPostProcessor(propertyPlaceholderConfigurer);
+			applicationContext.refresh();
+			
 			LOG.info("Context loaded successfully.");
 			
 			this.pluginManager = new PluginManager(this, applicationContext);
@@ -253,7 +265,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		}
 		
 		GenericBeanDefinition myBeanDefinition = new GenericBeanDefinition();
-		myBeanDefinition.setBeanClassName(ListFactoryBean.class.getName());
+		myBeanDefinition.setBeanClass(ListFactoryBean.class);
 		MutablePropertyValues values = new MutablePropertyValues();
 		values.addPropertyValue("sourceList", hibernateConfigList);
 		myBeanDefinition.setPropertyValues(values);
@@ -267,14 +279,18 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	 * @param externalConfigPath Spring path to the external Spring database config file 
 	 * @return list of configLocations used for initialising {@link ApplicationContext}
 	 */
-	private String[] getSpringConfigLocations(String externalConfigPath) {
-		LOG.info("Loading spring application context from: " + externalConfigPath);
-		
+	private String[] getSpringConfigLocations(String...externalConfigPaths) {
 		ArrayList<String> configLocations = new ArrayList<String>();
+		
+		// Custom Spring configurations
+		for(String externalConfigPath : externalConfigPaths) {
+			LOG.info("Loading spring application context from: " + externalConfigPath);
+			configLocations.add("file:" + externalConfigPath);
+		}
+		
 		// Main Spring configuration
 		configLocations.add("classpath:frontlinesms-spring-hibernate.xml");
-		// Custom Spring configurations
-		configLocations.add("file:" + externalConfigPath);
+		
 		// Add config locations for plugins
 		for(Class<PluginController> pluginControllerClass : PluginProperties.getInstance().getPluginClasses()) {
 			if(pluginControllerClass.isAnnotationPresent(PluginControllerProperties.class)) {
