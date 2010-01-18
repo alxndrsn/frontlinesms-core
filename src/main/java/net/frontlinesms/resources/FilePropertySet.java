@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -145,16 +146,25 @@ public class FilePropertySet extends BasePropertySet {
 	 * @return new map of properties loaded from the requested file, or an empty map if no properties could be loaded. 
 	 */
 	protected static HashMap<String, String> loadPropertyMap(File propFile) {
+		HashMap<String, String> properties = new HashMap<String, String>();
+		loadPropertyMap(properties, propFile);
+		
+		return properties;
+	}
+	
+	/**
+	 * Loads a {@link UserHomeFilePropertySet} from the supplied file
+	 * @param propFile The file to load the {@link UserHomeFilePropertySet} from
+	 * @return new map of properties loaded from the requested file, or an empty map if no properties could be loaded. 
+	 */
+	protected static void loadPropertyMap(Map<String, String> map, File propFile) {
 		LOG.debug("File [" + propFile.getAbsolutePath() + "]");
 
-		HashMap<String, String> properties = null;
-		
 		FileInputStream fis = null;
 		BufferedReader in = null;
 		try {
 			fis = new FileInputStream(propFile);
-			
-			properties = BasePropertySet.load(fis);
+			BasePropertySet.load(map, fis);
 		} catch(FileNotFoundException ex) {
 			LOG.debug("Properties file not found [" + propFile.getAbsolutePath() + "]", ex);
 		} catch(IOException ex) {
@@ -170,12 +180,6 @@ public class FilePropertySet extends BasePropertySet {
 				LOG.warn("Exception thrown while closing stream 'fis'.", ex);
 			}
 		}
-		
-		if(properties == null) {
-			properties = new HashMap<String, String>();
-		}
-		
 		LOG.trace("EXIT");
-		return properties;
 	}
 }

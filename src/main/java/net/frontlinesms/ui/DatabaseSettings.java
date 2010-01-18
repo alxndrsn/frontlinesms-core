@@ -6,6 +6,7 @@ package net.frontlinesms.ui;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -140,7 +141,9 @@ class DatabaseSettingsPropertySet extends FilePropertySet {
 	
 	static DatabaseSettingsPropertySet loadForSettings(File parentDirectory, String databaseXmlFile) {
 		DatabaseSettingsPropertySet props = new DatabaseSettingsPropertySet(parentDirectory, databaseXmlFile);
-		props.setProperties(FilePropertySet.loadPropertyMap(props.getFile()));
+		LinkedHashMap<String, String> propertyMap = new LinkedHashMap<String, String>();
+		FilePropertySet.loadPropertyMap(propertyMap, props.getFile());
+		props.setProperties(propertyMap);
 		return props;
 	}
 }

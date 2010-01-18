@@ -63,13 +63,11 @@ class BasePropertySet {
 	 * @return The loaded properties
 	 * @throws IOException If there was a problem loading the properties from the supplied {@link InputStream}.
 	 */
-	static HashMap<String, String> load(InputStream inputStream) throws IOException {
+	static void load(Map<String, String> map, InputStream inputStream) throws IOException {
 		if(inputStream == null) throw new NullPointerException("The supplied input stream was null.");
 		
 		BufferedReader in = null;
 		try {
-			HashMap<String, String> properties = new HashMap<String, String>();
-			
 			in = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
 			
 			String line;
@@ -85,19 +83,18 @@ class BasePropertySet {
 						LOG.warn("Bad line in properties file: '" + line + "'");
 					} else {
 						String key = line.substring(0, splitChar);					
-						if(properties.containsKey(key)) {
+						if(map.containsKey(key)) {
 							// This key has already been read from the language file.  Ignore the new value.
 							LOG.warn("Duplicate key in properties file: ''");
 						} else {
 							String value = line.substring(splitChar + 1);
-							properties.put(key, value);
+							map.put(key, value);
 						}
 					}
 				}
 			}
 			
 			LOG.trace("EXIT");
-			return properties;
 		} finally {
 			// Close all streams
 			if(in != null) try { in.close(); } catch(IOException ex) {
@@ -105,5 +102,11 @@ class BasePropertySet {
 				LOG.warn("Exception thrown while closing stream 'fis'.", ex);
 			}
 		}
+	}
+	
+	static HashMap<String, String> load(InputStream inputStream) throws IOException {
+		HashMap<String, String> map = new HashMap<String, String>();
+		load(map, inputStream);
+		return map;
 	}
 }
