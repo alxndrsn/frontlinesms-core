@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<panel bottom="10" columns="1" gap="10" left="10" right="10" top="10">
+<panel bottom="10" columns="1" gap="10" left="10" right="10" top="10" halign="center" weightx="1">
 	<combobox name="cbConfigFile" action="configFileChanged" editable="false"/>
-	<separator colspan="2"/>
-	<panel columns="1" gap="6" weightx="1" name="pnSettings" columns="2">
+	<separator colspan="1"/>
+	<panel columns="2" gap="6" weightx="1" name="pnSettings" weightx="1">
 		<!-- This panel will be populated with modifiable settings at runtime -->
 	</panel>
-    <panel colspan="2" gap="5" halign="center">
+    <panel gap="5" halign="center" columns="2">
         <button action="save" icon="/icons/tick.png" text="i18n.action.save" />
         <button action="cancel" icon="/icons/cross.png" text="i18n.action.cancel" name="btCancel"/>
     </panel>
