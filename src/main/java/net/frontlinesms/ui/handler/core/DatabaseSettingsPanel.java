@@ -9,6 +9,7 @@ import java.util.List;
 import net.frontlinesms.AppProperties;
 import net.frontlinesms.ui.DatabaseSettings;
 import net.frontlinesms.ui.FrontlineUI;
+import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BasePanelHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
@@ -209,9 +210,10 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 	/** This should be called if we are showing the settings panel in a dialog.  The dialog should now be removed. */
 	public void handleDatabaseSettingsChanged() {
 		// Display alert warning the user that their settings have changed, and they
-		// must restart FrontlineSMS for the changes to take effect.  Restarting automatically
-		// may be quite complicated, and the gain would be little.
-		ui.alert("Settings saved.  You are advised to restart FrontlineSMS immediately."); // FIXME i18n
+		// must restart FrontlineSMS for the changes to take effect.  In a perfect world,
+		// we would AUTOMATICALLY restart here, but this is not quite trivial, so is not
+		// implemented at this stage.
+		ui.alert("Settings saved.  Please restart FrontlineSMS immediately."); // FIXME i18n
 		
 		removeDialog();	
 	}

@@ -1486,7 +1486,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		AppProperties appProperties = AppProperties.getInstance();
 		appProperties.setLanguageFilename(getAttachedObject(menuItem).toString());
 		appProperties.saveToDisk();
-		reloadUI();
+		reloadUi();
 	}
 	
 	private void addLanguageMenu(Object menu) {
@@ -1762,7 +1762,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	/** Reloads the ui. */
-	private final void reloadUI() {
+	public final void reloadUi() {
 		this.frameLauncher.dispose();
 		this.frameLauncher.setContent(null);
 		this.frameLauncher = null;
