@@ -10,7 +10,6 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 
-import net.frontlinesms.data.DatabaseConnectionTestHandler;
 import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginInitialisationException;
 import net.frontlinesms.plugins.PluginProperties;
@@ -73,7 +72,7 @@ public class PluginManager {
 	/**
 	 * <p>Load the plugin controllers that will be used.  N.B. these will not have {@link PluginController#init(FrontlineSMS, ApplicationContext)} called
 	 * until {@link #initPluginControllers()} is called.</p>
-	 * <p>This method should only be called from the constructor {@link FrontlineSMS#FrontlineSMS(DatabaseConnectionTestHandler)}.</p>
+	 * <p>This method should only be called from the constructor {@link #PluginManager(FrontlineSMS, ApplicationContext)}.</p>
 	 */
 	private void loadPluginControllers() {
 		log.info("Loading plugin controllers....");
@@ -99,7 +98,7 @@ public class PluginManager {
 
 	/**
 	 * Initialise {@link #pluginControllers}.
-	 * This method should only be called from the constructor {@link FrontlineSMS#FrontlineSMS(DatabaseConnectionTestHandler)}.
+	 * This method should only be called from the constructor {@link FrontlineSMS#startServices()}.
 	 */
 	public void initPluginControllers() {
 		log.info("Initialising plugin controllers...");

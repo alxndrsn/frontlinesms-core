@@ -108,6 +108,9 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/** Logging object */
 	public Logger LOG = Utils.getLogger(UiGeneratorController.class);
 	
+	/** The {@link FrontlineSMS} instance that this UI is attached to. */
+	private FrontlineSMS frontlineController;
+	
 	/** The INTERNAL NAME of the tab (a thinlet UI component) currently active */
 	private String currentTab;
 	
@@ -542,7 +545,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param component group list or contact list
 	 */
 	public void showMessageHistory(Object component) {
-		Object attachment = getAttachedObject(getSelectedItem(component));
 		changeTab(TAB_MESSAGE_HISTORY);
 		this.messageTabController.doShowMessageHistory(component);
 	}
@@ -1484,7 +1486,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		AppProperties appProperties = AppProperties.getInstance();
 		appProperties.setLanguageFilename(getAttachedObject(menuItem).toString());
 		appProperties.saveToDisk();
-		reloadUI(false);
+		reloadUI();
 	}
 	
 	private void addLanguageMenu(Object menu) {
@@ -1691,7 +1693,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 //> ACCESSORS
 	/** @return {@link #frontlineController} */
 	public FrontlineSMS getFrontlineController() {
-		return super.frontlineController;
+		return this.frontlineController;
 	}
 	/** @return {@link #phoneManager} */
 	public SmsDeviceManager getPhoneManager() {
@@ -1755,8 +1757,20 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	public void showDatabaseConfigDialog() {
-		DatabaseSettingsPanel dialog = new DatabaseSettingsPanel(this);
-		dialog.init(true);
-		dialog.showAsDialog();
+		DatabaseSettingsPanel databaseSettings = DatabaseSettingsPanel.createNew(this);
+		databaseSettings.showAsDialog();
+	}
+	
+	/** Reloads the ui. */
+	private final void reloadUI() {
+		this.frameLauncher.dispose();
+		this.frameLauncher.setContent(null);
+		this.frameLauncher = null;
+		this.destroy();
+		try {
+			new UiGeneratorController(frontlineController, false);
+		} catch(Throwable t) {
+			log.error("Unable to reload frontlineSMS.", t);
+		}
 	}
 }

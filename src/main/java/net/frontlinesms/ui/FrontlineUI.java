@@ -27,6 +27,7 @@ import net.frontlinesms.Utils;
 import net.frontlinesms.ui.i18n.LanguageBundle;
 
 import org.apache.log4j.Logger;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import thinlet.FrameLauncher;
 
@@ -51,8 +52,6 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	public static LanguageBundle currentResourceBundle;
 	/** Frame launcher that this UI instance is displayed within.  We need to keep a handle on it so that we can dispose of it when we quit or change UI modes. */
 	protected FrameLauncher frameLauncher;
-	/** The {@link FrontlineSMS} instance that this UI is attached to. */
-	protected FrontlineSMS frontlineController;
 
 	/**
 	 * Gets the icon for a specific language bundle
@@ -164,31 +163,4 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 		log.error("Unhandled exception from thinlet.", throwable);
 		ErrorUtils.showErrorDialog("Unexpected error", "There was an unexpected error.", throwable, false);
 	}
-	
-	/**
-	 * Reloads the ui.
-	 * @param useNewFrontlineController <code>true</code> if a new {@link FrontlineSMS} should be isntantiated; <code>false</code> if the current one should be reused
-	 */
-	final void reloadUI(boolean useNewFrontlineController) {
-		this.frameLauncher.dispose();
-		this.frameLauncher.setContent(null);
-		this.frameLauncher = null;
-		this.destroy();
-		try {
-			if (useNewFrontlineController) {
-				// If we're using a new Frontline controller, we have to properly
-				// shut down the last one so that ownership of any connected phones
-				// is relinquished
-				if (frontlineController != null) frontlineController.destroy();
-				new UiGeneratorController(new FrontlineSMS(new ThinletDatabaseConnectionTestHandler()), false);
-			} else {
-				new UiGeneratorController(frontlineController, false);
-			}
-			
-		} catch(Throwable t) {
-			log.error("Unable to reload frontlineSMS.", t);
-		}
-	}
-	
-	
 }

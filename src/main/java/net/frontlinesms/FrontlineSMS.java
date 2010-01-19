@@ -41,9 +41,11 @@ import org.springframework.beans.factory.config.ListFactoryBean;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.dao.DataAccessResourceFailureException;
 
 /**
  * 
@@ -84,32 +86,32 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 
 //> DATA ACCESS OBJECTS
 	/** Data Access Object for {@link Keyword}s */
-	private final KeywordDao keywordDao;
+	private KeywordDao keywordDao;
 	/** Data Access Object for {@link Group}s */
-	private final GroupDao groupDao;
+	private GroupDao groupDao;
 	/** Data Access Object for {@link Contact}s */
-	private final ContactDao contactDao;
+	private ContactDao contactDao;
 	/** Data Access Object for {@link Message}s */
-	private final MessageDao messageDao;
+	private MessageDao messageDao;
 	/** Data Access Object for {@link KeywordAction}s */
-	private final KeywordActionDao keywordActionDao;
+	private KeywordActionDao keywordActionDao;
 	/** Data Access Object for {@link SmsModemSettings} */
-	private final SmsModemSettingsDao smsModemSettingsDao;
+	private SmsModemSettingsDao smsModemSettingsDao;
 	/** Data Access Object for {@link SmsInternetServiceSettings} */
-	private final SmsInternetServiceSettingsDao smsInternetServiceSettingsDao;
+	private SmsInternetServiceSettingsDao smsInternetServiceSettingsDao;
 	/** Data Access Object for {@link EmailAccount}s */
-	private final EmailAccountDao emailAccountDao;
+	private EmailAccountDao emailAccountDao;
 	/** Data Access Object for {@link Email}s */
-	private final EmailDao emailDao;
+	private EmailDao emailDao;
 	
 //> SERVICE MANAGERS
 	/** Class that handles sending of email messages */
-	private final EmailServerHandler emailServerManager;
+	private EmailServerHandler emailServerManager;
 	/** Manager of SMS devices */
-	private final SmsDeviceManager smsDeviceManager;
+	private SmsDeviceManager smsDeviceManager;
 	/** Asynchronous processor of received messages. */
-	private final IncomingMessageProcessor incomingMessageProcessor;
-	private final PluginManager pluginManager;
+	private IncomingMessageProcessor incomingMessageProcessor;
+	private PluginManager pluginManager;
 
 //> EVENT LISTENERS
 	/** Listener for email events */
@@ -119,114 +121,141 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	/** Listener for {@link SmsDevice} events. */
 	private SmsDeviceEventListener smsDeviceEventListener;
 	
-	/**
-	 * Create a new {@link FrontlineSMS} instance.
-	 * @param databaseConnectionTestHandler handler for failed database connection test
-	 * @throws Throwable
-	 */
-	public FrontlineSMS(DatabaseConnectionTestHandler databaseConnectionTestHandler) throws Throwable {
-		LOG.trace("ENTER");
-		try {
-			// Load the data mode from the app.properties file
-			AppProperties appProperties = AppProperties.getInstance();
+//> INITIALISATION METHODS
+	/** The application context describing dependencies of the application. */
+	private ConfigurableApplicationContext applicationContext;
+	
+	/** Initialise {@link #applicationContext}. */
+	public void initApplicationContext() throws DataAccessResourceFailureException {
+		// Load the data mode from the app.properties file
+		AppProperties appProperties = AppProperties.getInstance();
+		
+		LOG.info("Load Spring/Hibernate application context to initialise DAOs");
 			
-			LOG.info("Load Spring/Hibernate application context to initialise DAOs");
-				
-			// Create a base ApplicationContext defining the hibernate config file we need to import
-			StaticApplicationContext baseApplicationContext = new StaticApplicationContext();
-			baseApplicationContext.registerBeanDefinition("hibernateConfigLocations", createHibernateConfigLocationsBeanDefinition());
-			
-			// Get the spring config locations
-			String databaseExternalConfigPath = ResourceUtils.getConfigDirectoryPath() + ResourceUtils.PROPERTIES_DIRECTORY_NAME + File.separatorChar + appProperties.getDatabaseConfigPath();
-			String[] configLocations = getSpringConfigLocations(databaseExternalConfigPath);
-			baseApplicationContext.refresh();
-			
-			FileSystemXmlApplicationContext applicationContext = new FileSystemXmlApplicationContext(configLocations, false, baseApplicationContext);
-			
-			// Add post-processor to handle substituted database properties
-			PropertyPlaceholderConfigurer propertyPlaceholderConfigurer = new PropertyPlaceholderConfigurer();
-			String databasePropertiesPath = ResourceUtils.getConfigDirectoryPath() + ResourceUtils.PROPERTIES_DIRECTORY_NAME + File.separatorChar + appProperties.getDatabaseConfigPath() + ".properties";
-			propertyPlaceholderConfigurer.setLocation(new FileSystemResource(new File(databasePropertiesPath)));
-			propertyPlaceholderConfigurer.setIgnoreResourceNotFound(true);
-			applicationContext.addBeanFactoryPostProcessor(propertyPlaceholderConfigurer);
-			applicationContext.refresh();
-			
-			LOG.info("Context loaded successfully.");
-			
-			this.pluginManager = new PluginManager(this, applicationContext);
-			
-			LOG.info("Getting DAOs from application context...");
-			groupDao = (GroupDao) applicationContext.getBean("groupDao");
-			contactDao = (ContactDao) applicationContext.getBean("contactDao");
-			keywordDao = (KeywordDao) applicationContext.getBean("keywordDao");
-			keywordActionDao = (KeywordActionDao) applicationContext.getBean("keywordActionDao");
-			messageDao = (MessageDao) applicationContext.getBean("messageDao");
-			emailDao = (EmailDao) applicationContext.getBean("emailDao");
-			emailAccountDao = (EmailAccountDao) applicationContext.getBean("emailAccountDao");
-			smsInternetServiceSettingsDao = (SmsInternetServiceSettingsDao) applicationContext.getBean("smsInternetServiceSettingsDao");
-			smsModemSettingsDao = (SmsModemSettingsDao) applicationContext.getBean("smsModemSettingsDao");
-
-			DatabaseConnectionTester databaseConnectionTester = new DatabaseConnectionTester();
-			databaseConnectionTester.setContactDao(this.contactDao);
-			databaseConnectionTester.setTestHandler(databaseConnectionTestHandler);
-			databaseConnectionTester.ensureConnected();
-			
-			try {
-				LOG.debug("Creating blank keyword...");
-				Keyword blankKeyword = new Keyword("", "Blank keyword, used to be triggerd by every received message.[i18n]");
-				keywordDao.saveKeyword(blankKeyword);
-				LOG.debug("Blank keyword created.");
-			} catch (DuplicateKeyException e) {
-				// Looks like this has been created already, so ignore the exception
-				LOG.debug("Blank keyword creation failed - already exists.");
-			}
-			
-			LOG.debug("Initialising email server handler...");
-			emailServerManager = new EmailServerHandler();
-			emailServerManager.setEmailListener(this);
-
-			LOG.debug("Initialising incoming message processor...");
-			// Initialise the incoming message processor
-			incomingMessageProcessor = new IncomingMessageProcessor(this, contactDao, keywordDao, keywordActionDao, groupDao, messageDao, emailDao, emailServerManager);
-			incomingMessageProcessor.start();
-			
-			LOG.debug("Starting Phone Manager...");
-			smsDeviceManager = new SmsDeviceManager();
-			smsDeviceManager.setSmsListener(this);
-			smsDeviceManager.start();
-
-			initSmsInternetServices();
-			
-			this.pluginManager.initPluginControllers();
-
-			LOG.debug("Starting E-mail Manager...");
-			emailServerManager.start();
-
-			LOG.debug("Re-Loading messages to outbox.");
-			//We need to reload all messages, which status is OUTBOX, to the outbox.
-			for (Message m : messageDao.getMessages(Message.TYPE_OUTBOUND, new Integer[] { Message.STATUS_OUTBOX, Message.STATUS_PENDING})) {
-				smsDeviceManager.sendSMS(m);
-			}
-
-			LOG.debug("Re-Loading e-mails to outbox.");
-			//We need to reload all email, which status is RETRYING, to the outbox.
-			for (Email m : emailDao.getEmailsForStatus(new Integer[] {Email.STATUS_RETRYING, Email.STATUS_PENDING, Email.STATUS_OUTBOX})) {
-				emailServerManager.sendEmail(m);
-			}
-		} catch(Throwable t) {
-			LOG.info("Problem initialising FrontlineSMS", t);
-			// This try {} catch {} is necessary to make sure the ThinletWorker thread
-			// is shut down when an exception is thrown.  An alternative would be to 
-			// explicitly START the worker when we know this constructor has successfully
-			// completed.
-			destroy();
-			LOG.trace("EXIT");
-			throw t;
-		}
-		LOG.trace("EXIT");
+		// Create a base ApplicationContext defining the hibernate config file we need to import
+		StaticApplicationContext baseApplicationContext = new StaticApplicationContext();
+		baseApplicationContext.registerBeanDefinition("hibernateConfigLocations", createHibernateConfigLocationsBeanDefinition());
+		
+		// Get the spring config locations
+		String databaseExternalConfigPath = ResourceUtils.getConfigDirectoryPath() + ResourceUtils.PROPERTIES_DIRECTORY_NAME + File.separatorChar + appProperties.getDatabaseConfigPath();
+		String[] configLocations = getSpringConfigLocations(databaseExternalConfigPath);
+		baseApplicationContext.refresh();
+		
+		FileSystemXmlApplicationContext applicationContext = new FileSystemXmlApplicationContext(configLocations, false, baseApplicationContext);
+		
+		// Add post-processor to handle substituted database properties
+		PropertyPlaceholderConfigurer propertyPlaceholderConfigurer = new PropertyPlaceholderConfigurer();
+		String databasePropertiesPath = ResourceUtils.getConfigDirectoryPath() + ResourceUtils.PROPERTIES_DIRECTORY_NAME + File.separatorChar + appProperties.getDatabaseConfigPath() + ".properties";
+		propertyPlaceholderConfigurer.setLocation(new FileSystemResource(new File(databasePropertiesPath)));
+		propertyPlaceholderConfigurer.setIgnoreResourceNotFound(true);
+		applicationContext.addBeanFactoryPostProcessor(propertyPlaceholderConfigurer);
+		applicationContext.refresh();
+		
+		LOG.info("Context loaded successfully.");
+		
+		this.pluginManager = new PluginManager(this, applicationContext);
+		
+		LOG.info("Getting DAOs from application context...");
+		groupDao = (GroupDao) applicationContext.getBean("groupDao");
+		contactDao = (ContactDao) applicationContext.getBean("contactDao");
+		keywordDao = (KeywordDao) applicationContext.getBean("keywordDao");
+		keywordActionDao = (KeywordActionDao) applicationContext.getBean("keywordActionDao");
+		messageDao = (MessageDao) applicationContext.getBean("messageDao");
+		emailDao = (EmailDao) applicationContext.getBean("emailDao");
+		emailAccountDao = (EmailAccountDao) applicationContext.getBean("emailAccountDao");
+		smsInternetServiceSettingsDao = (SmsInternetServiceSettingsDao) applicationContext.getBean("smsInternetServiceSettingsDao");
+		smsModemSettingsDao = (SmsModemSettingsDao) applicationContext.getBean("smsModemSettingsDao");
+		
+		this.applicationContext = applicationContext;
 	}
 	
-//> INITIALISATION METHODS
+	/** Deinitialise {@link #applicationContext}. */
+	public void deinitApplicationContext() {
+		this.applicationContext.close();
+	}
+	
+	/**
+	 * Start services for the {@link FrontlineSMS} instance.  N.B. this must be called <strong>after</strong> {@link #initApplicationContext()}
+	 * This method should be called only once before the services are stopped using {@link #stopServices()}.
+	 */
+	public void startServices() {
+		try {
+			LOG.debug("Creating blank keyword...");
+			Keyword blankKeyword = new Keyword("", "Blank keyword, used to be triggerd by every received message.[i18n]");
+			keywordDao.saveKeyword(blankKeyword);
+			LOG.debug("Blank keyword created.");
+		} catch (DuplicateKeyException e) {
+			// Looks like this has been created already, so ignore the exception
+			LOG.debug("Blank keyword creation failed - already exists.");
+		}
+		
+		LOG.debug("Initialising email server handler...");
+		emailServerManager = new EmailServerHandler();
+		emailServerManager.setEmailListener(this);
+
+		LOG.debug("Initialising incoming message processor...");
+		// Initialise the incoming message processor
+		incomingMessageProcessor = new IncomingMessageProcessor(this, contactDao, keywordDao, keywordActionDao, groupDao, messageDao, emailDao, emailServerManager);
+		incomingMessageProcessor.start();
+		
+		LOG.debug("Starting Phone Manager...");
+		smsDeviceManager = new SmsDeviceManager();
+		smsDeviceManager.setSmsListener(this);
+		smsDeviceManager.start();
+
+		initSmsInternetServices();
+		
+		this.pluginManager.initPluginControllers();
+
+		LOG.debug("Starting E-mail Manager...");
+		emailServerManager.start();
+
+		LOG.debug("Re-Loading messages to outbox.");
+		//We need to reload all messages, which status is OUTBOX, to the outbox.
+		for (Message m : messageDao.getMessages(Message.TYPE_OUTBOUND, new Integer[] { Message.STATUS_OUTBOX, Message.STATUS_PENDING})) {
+			smsDeviceManager.sendSMS(m);
+		}
+
+		LOG.debug("Re-Loading e-mails to outbox.");
+		//We need to reload all email, which status is RETRYING, to the outbox.
+		for (Email m : emailDao.getEmailsForStatus(new Integer[] {Email.STATUS_RETRYING, Email.STATUS_PENDING, Email.STATUS_OUTBOX})) {
+			emailServerManager.sendEmail(m);
+		}
+	}
+	
+	private void stopServices() {
+		// de-initialise plugin controllers
+		if(this.pluginManager != null) {
+			for(PluginController pluginController : this.pluginManager.getPluginControllers()) {
+				pluginController.deinit();
+			}
+		}
+		
+		if (smsDeviceManager != null) {
+			LOG.debug("Stopping Phone Manager...");
+			smsDeviceManager.stopRunning();
+		}
+		if (emailServerManager != null) {
+			LOG.debug("Stopping E-mail Manager...");
+			emailServerManager.stopRunning();
+		}
+		if(this.incomingMessageProcessor != null) {
+			LOG.debug("Stopping the incoming message processor...");
+			this.incomingMessageProcessor.die();
+		}
+	}
+	
+	/**
+	 * Shutdown and re-initialise the {@link #applicationContext}.
+	 * TODO it has not been confirmed this method exectutes cleanly, so it should be used with caution.
+	 */
+	public void reboot() {
+		deinitApplicationContext();
+		stopServices();
+		initApplicationContext();
+		startServices();
+	}
+	
 	/** Initialise {@link SmsInternetService}s. */
 	private void initSmsInternetServices() {
 		for (SmsInternetServiceSettings settings : this.smsInternetServiceSettingsDao.getSmsInternetServiceAccounts()) {
@@ -244,7 +273,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	
 	/**
 	 * Create the configLocations bean for the Hibernate config.
-	 * This method should only be called from within {@link FrontlineSMS#FrontlineSMS(DatabaseConnectionTestHandler)}
+	 * This method should only be called from within {@link FrontlineSMS#initApplicationContext()}
 	 * @return {@link BeanDefinition} containing details of the hibernate config for the app and its plugins.
 	 */
 	private BeanDefinition createHibernateConfigLocationsBeanDefinition() {
@@ -275,7 +304,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	
 	/**
 	 * Gets a list of configLocations required for initialising Spring {@link ApplicationContext}.
-	 * This method should only be called from within {@link FrontlineSMS#FrontlineSMS(DatabaseConnectionTestHandler)}
+	 * This method should only be called from within {@link FrontlineSMS#initApplicationContext()}
 	 * @param externalConfigPath Spring path to the external Spring database config file 
 	 * @return list of configLocations used for initialising {@link ApplicationContext}
 	 */
@@ -311,26 +340,8 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	 */
 	public void destroy() {
 		LOG.trace("ENTER");
-		
-		// de-initialise plugin controllers
-		if(this.pluginManager != null) {
-			for(PluginController pluginController : this.pluginManager.getPluginControllers()) {
-				pluginController.deinit();
-			}
-		}
-		
-		if (smsDeviceManager != null) {
-			LOG.debug("Stopping Phone Manager...");
-			smsDeviceManager.stopRunning();
-		}
-		if (emailServerManager != null) {
-			LOG.debug("Stopping E-mail Manager...");
-			emailServerManager.stopRunning();
-		}
-		if(this.incomingMessageProcessor != null) {
-			LOG.debug("Stopping the incoming message processor...");
-			this.incomingMessageProcessor.die();
-		}
+		stopServices();
+		deinitApplicationContext();
 		LOG.trace("EXIT");
 	}
 	

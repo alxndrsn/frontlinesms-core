@@ -6,19 +6,17 @@ package net.frontlinesms.ui.handler.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.context.ApplicationContext;
-
 import net.frontlinesms.AppProperties;
 import net.frontlinesms.ui.DatabaseSettings;
-import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.handler.BasePanelHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
+ * Thinlet UI Component event handler for displaying and modifying database settings.
  * @author aga
- *
  */
-public class DatabaseSettingsPanel extends BasePanelHandler {
+public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseSettingsChangedCallbackListener {
 
 //> STATIC CONSTANTS
 	/** XML UI Layout File path: database settings panel */
@@ -29,23 +27,21 @@ public class DatabaseSettingsPanel extends BasePanelHandler {
 	private static final String COMPONENT_SETTINGS_SELECTION = "cbConfigFile";
 	/** The panel containing individual settings controls */
 	private static final String COMPONENT_SETTINGS_PANEL = "pnSettings";
+	/** UI Component: cancel button */
+	private static final String COMPONENT_CANCEL_BUTTON = "btCancel";
 
 //> INSTANCE PROPERTIES
-	private List<DatabaseSettings> databaseSettings;
 	/** The settings currently selected in the combobox */
 	private DatabaseSettings selectedSettings;
 	
 	/** Dialog UI Component.  This should only be used if {@link #showAsDialog()} is called, and then should only be used by {@link #removeDialog()}. */
 	private Object dialogComponent;
 	
-	/**
-	 * Set <code>true</code> if a restart is required after changing settings.  Set <code>false</code> if we are
-	 * modifying the settings before the {@link ApplicationContext} has been started.
-	 */
-	private boolean restartRequired;
+	/** Callback listener to take action if the database settings have changed. */
+	private DatabaseSettingsChangedCallbackListener settingsChangedCallbackListener;
 	
 //> CONSTRUCTORS
-	public DatabaseSettingsPanel(UiGeneratorController ui) {
+	private DatabaseSettingsPanel(FrontlineUI ui) {
 		super(ui);
 	}
 	
@@ -53,8 +49,7 @@ public class DatabaseSettingsPanel extends BasePanelHandler {
 	 * Initialise the UI.
 	 * @param restartRequired
 	 */
-	public void init(boolean restartRequired) {
-		this.restartRequired = restartRequired;
+	private void init() {
 		super.loadPanel(XML_SETTINGS_PANEL);
 		
 		// Populate combobox
@@ -72,10 +67,29 @@ public class DatabaseSettingsPanel extends BasePanelHandler {
 				ui.setSelectedIndex(settingsSelection, settingsIndex);
 			}
 		}
-		this.databaseSettings = databaseSettings;
 		
 		// populate settings panel
 		refreshSettingsPanel();
+	}
+	
+//> ACCESSORS
+	@Override
+	public Object getPanelComponent() {
+		return super.getPanelComponent();
+	}
+
+	/**
+	 * Sets the saveMethod
+	 * @param methodCall
+	 * @param eventHandler
+	 */
+	public void setSettingsChangedCallbackListener(DatabaseSettingsChangedCallbackListener callbackListener) {
+		this.settingsChangedCallbackListener = callbackListener;
+	}
+	
+	/** @param enabled <code>true</code> if the cancel button should be enabled, <code>false</code> if it should be disabled */
+	public void setCancelEnabled(boolean enabled) {
+		ui.setEnabled(find(COMPONENT_CANCEL_BUTTON), enabled);
 	}
 
 //> INSTANCE HELPER METHODS
@@ -164,6 +178,7 @@ public class DatabaseSettingsPanel extends BasePanelHandler {
 		if(!settingsFileChanged && !updateIndividualSettings) {
 			// Nothing has changed, so no need to update anything
 			ui.alert("You did not make any changes to the settings."); // FIXME i18n
+			removeDialog();
 		} else {
 			if(settingsFileChanged) {
 				appProperties.setDatabaseConfigPath(selectedSettings.getFilePath());
@@ -177,23 +192,28 @@ public class DatabaseSettingsPanel extends BasePanelHandler {
 				this.selectedSettings.saveProperties();
 			}
 			
-			if(restartRequired) {
-				// Display alert warning the user that their settings have changed, and they
-				// must restart FrontlineSMS for the changes to take effect.  Restarting automatically
-				// may be quite complicated, and the gain would be little.
-				ui.alert("Settings saved.  You are advised to restart FrontlineSMS immediately."); // FIXME i18n
-			}
+			this.settingsChangedCallbackListener.handleDatabaseSettingsChanged();
 		}
-		
-		removeDialog();
 	}
 
 	/** Cancel button pressed. */
 	public void cancel() {
-		// If we are displaying the settings panel as a dialog, remove it.  Otherwise TODO call the callback method?
-		if(this.dialogComponent != null) {
-			removeDialog();
-		}
+		// Currently this method should only function properly if we are displaying
+		// the settings panel in a dialog.
+		assert(this.dialogComponent != null) : "Currently the cancel button should only be enabled if we are displaying as a dialog.";
+		
+		// If we are displaying the settings panel as a dialog, remove it.
+		removeDialog();
+	}
+	
+	/** This should be called if we are showing the settings panel in a dialog.  The dialog should now be removed. */
+	public void handleDatabaseSettingsChanged() {
+		// Display alert warning the user that their settings have changed, and they
+		// must restart FrontlineSMS for the changes to take effect.  Restarting automatically
+		// may be quite complicated, and the gain would be little.
+		ui.alert("Settings saved.  You are advised to restart FrontlineSMS immediately."); // FIXME i18n
+		
+		removeDialog();	
 	}
 
 	/**
@@ -201,6 +221,8 @@ public class DatabaseSettingsPanel extends BasePanelHandler {
 	 * @param titleI18nKey
 	 */
 	public void showAsDialog() {
+		this.settingsChangedCallbackListener = this;
+		
 		Object dialogComponent = ui.createDialog(InternationalisationUtils.getI18NString(I18N_KEY_DATABASE_CONFIG));
 		ui.add(dialogComponent, this.getPanelComponent());
 		ui.setCloseAction(dialogComponent, "removeDialog", dialogComponent, this);
@@ -211,6 +233,13 @@ public class DatabaseSettingsPanel extends BasePanelHandler {
 //> UI EVENT METHODS
 	public void removeDialog() {
 		this.ui.removeDialog(this.dialogComponent);
+	}
+	
+//> STATIC FACTORIES
+	public static DatabaseSettingsPanel createNew(FrontlineUI ui) {
+		DatabaseSettingsPanel panel = new DatabaseSettingsPanel(ui);
+		panel.init();
+		return panel;
 	}
 }
 

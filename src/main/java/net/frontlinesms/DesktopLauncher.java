@@ -26,8 +26,8 @@ import javax.swing.UIManager;
 
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.ui.FirstTimeWizard;
-import net.frontlinesms.ui.ThinletDatabaseConnectionTestHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.handler.core.DatabaseConnectionFailedDialog;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.LanguageBundle;
 
@@ -81,7 +81,7 @@ public class DesktopLauncher {
 			appProperties.setLastRunVersion(VERSION);
 			appProperties.saveToDisk();
 
-			frontline = new FrontlineSMS(new ThinletDatabaseConnectionTestHandler());
+			frontline = initFrontline();
 			if (showWizard) {
 				new FirstTimeWizard(frontline);
 			} else {
@@ -96,5 +96,43 @@ public class DesktopLauncher {
 			// so that they can give us some feedback :)
 			ErrorUtils.showErrorDialog("Fatal error starting FrontlineSMS!", "A problem ocurred during FrontlineSMS startup.", t, true);
 		} 
+	}
+
+	private static FrontlineSMS initFrontline() throws Throwable {
+		LOG.trace("ENTER");
+
+		FrontlineSMS frontline = new FrontlineSMS();
+		try {
+			
+			// Test the database connection is working
+			boolean connected = false;
+			while(!connected) {
+				try {
+					frontline.initApplicationContext();
+					frontline.getContactDao().getContactByName("test");
+					connected = true;
+				} catch(Exception ex) {
+					LOG.warn("Problem testing database connection.", ex);
+					frontline.deinitApplicationContext();
+					DatabaseConnectionFailedDialog.create(ex).acquireSettings();
+				}
+			}
+			
+			// Start FrontlineSMS services
+			frontline.startServices();
+			
+			LOG.trace("EXIT");
+			
+			return frontline;
+		} catch(Throwable t) {
+			LOG.info("Problem initialising FrontlineSMS", t);
+			// This try {} catch {} is necessary to make sure the ThinletWorker thread
+			// is shut down when an exception is thrown.  An alternative would be to 
+			// explicitly START the worker when we know this constructor has successfully
+			// completed.
+			frontline.destroy();
+			LOG.trace("EXIT");
+			throw t;
+		}
 	}
 }
