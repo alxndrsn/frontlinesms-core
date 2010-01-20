@@ -56,8 +56,10 @@ import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.*;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
 import net.frontlinesms.ui.handler.ContactsTabHandler;
+import net.frontlinesms.ui.handler.GroupSelecter;
 import net.frontlinesms.ui.handler.HomeTabHandler;
 import net.frontlinesms.ui.handler.PhoneTabHandler;
+import net.frontlinesms.ui.handler.SingleGroupSelecterOwner;
 import net.frontlinesms.ui.handler.core.DatabaseSettingsPanel;
 import net.frontlinesms.ui.handler.email.EmailAccountDialogHandler;
 import net.frontlinesms.ui.handler.email.EmailTabHandler;
@@ -97,7 +99,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.*;
  * <li> kadu(at)masabi(dot)com
  */
 @SuppressWarnings("serial")
-public class UiGeneratorController extends FrontlineUI implements EmailListener, UIListener {
+public class UiGeneratorController extends FrontlineUI implements EmailListener, UIListener, SingleGroupSelecterOwner {
 
 //> CONSTANTS
 	/** Default height of the Thinlet frame launcher */
@@ -1782,5 +1784,17 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		randy.initFromClasspath();
 		randy.setFrontlineController(this.frontlineController);
 		randy.generate(200);
+	}
+	
+	public void showGroupSelecter() {
+		Object dialog = super.createDialog("Group Selecter Test");
+		GroupSelecter selecter = new GroupSelecter(this, this);
+		selecter.init(this.rootGroup);
+		add(dialog, selecter.getPanelComponent());
+		add(dialog);
+	}
+	
+	public void groupSelectionChanged(Group selectedGroup) {
+		System.out.println("GROUP SELECTION IS NOW: " + selectedGroup);
 	}
 }

@@ -33,6 +33,11 @@
 		</menu>
 		<menu text="i18n.menubar.debug">
 			<menuitem icon="/icons/database_execute.png" text="i18n.menuitem.debug.data.generate" action="generateTestData"/>
+			
+			<!-- This separator and below are for dev. -->
+			<separator />
+			<menuitem icon="/icons/group.png" text="Show group selecter" action="showGroupSelecter"/>
+			
 		</menu>
 		<menu text="i18n.menubar.help">
 			<menuitem icon="/icons/help.png" text="i18n.menuitem.help.manual" action="showHelpPage('help-menu.htm')"/>
