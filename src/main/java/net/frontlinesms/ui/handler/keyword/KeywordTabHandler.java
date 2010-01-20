@@ -23,7 +23,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_LE
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORDS_DIVIDER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORD_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEY_ACT_PANEL;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEY_PANEL;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_MENU_ITEM_CREATE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_BUTTON_DONE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_DESCRIPTION;
@@ -66,6 +65,8 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	public static final String UI_FILE_KEYWORDS_SIMPLE_VIEW = "/ui/core/keyword/pnSimpleView.xml";
 	public static final String UI_FILE_KEYWORDS_ADVANCED_VIEW = "/ui/core/keyword/pnAdvancedView.xml";
 	public static final String UI_FILE_NEW_KEYWORD_FORM = "/ui/core/keyword/newKeywordForm.xml";
+	
+	public static final String COMPONENT_KEY_PANEL = "keyPanel";
 
 	private GroupDao groupDao;
 	private KeywordDao keywordDao;

@@ -4,13 +4,14 @@
 package net.frontlinesms.ui;
 
 /**
- * Constants from {@link UiGeneratorController} which we can hopefully be rid of soon.
+ * Constants from {@link UiGeneratorController} which we can hopefully be rid of
+ * soon.
  * 
  * @author Alex
  */
 public class UiGeneratorControllerConstants {
-	
-//> UI FILES
+
+	// > UI FILES
 	public static final String UI_FILE_HOME = "/ui/core/frontline.xml";
 	public static final String UI_FILE_DATE_PANEL = "/ui/dialog/datePanel.xml";
 	public static final String UI_FILE_PENDING_MESSAGES_FORM = "/ui/dialog/pendingMessagesDialog.xml";
@@ -26,10 +27,10 @@ public class UiGeneratorControllerConstants {
 	public static final String UI_FILE_SENDER_NAME_PANEL = "/ui/dialog/senderNamePanel.xml";
 	public static final String UI_FILE_INCOMING_NUMBER_SETTINGS_FORM = "/ui/dialog/incomingNumberSettingsDialog.xml";
 	public static final String UI_FILE_USER_DETAILS_DIALOG = "/ui/dialog/userDetailsDialog.xml";
-	
+
 	public static final String UI_FILE_MESSAGES_TAB = "/ui/advanced/messagesTab.xml";
-	
-//> TAB NAMES
+
+	// > TAB NAMES
 	/** The name of the Contact Manager tab */
 	public static final String TAB_CONTACT_MANAGER = ":contactManager";
 	/** The name of the Message Log tab */
@@ -42,17 +43,13 @@ public class UiGeneratorControllerConstants {
 	public static final String TAB_KEYWORD_MANAGER = ":keywordManager";
 	/** The name of the Phone Manager tab in advanced view */
 	public static final String TAB_ADVANCED_PHONE_MANAGER = ":advancedPhoneManager";
-	
-//> COMPONENT NAMES
-	/** 
-	 * Component naming conventions:
-	 *  <li> <code>tf</code> means TextField
-	 *  <li> <code>pn</code> means Panel
-	 *  <li> <code>cb</code> means CheckBox or ComboBox
-	 *  <li> <code>rb</code> means RadioButton
-	 *  <li> <code>bt</code> means Button
-	 *  <li> <code>lb</code> means Label
-	 *  <li> <code>mi</code> means MenuItem
+
+	// > COMPONENT NAMES
+	/**
+	 * Component naming conventions: <li> <code>tf</code> means TextField <li>
+	 * <code>pn</code> means Panel <li> <code>cb</code> means CheckBox or
+	 * ComboBox <li> <code>rb</code> means RadioButton <li> <code>bt</code> means
+	 * Button <li> <code>lb</code> means Label <li> <code>mi</code> means MenuItem
 	 */
 	public static final String COMPONENT_MI_EMAIL = "miEmail";
 	public static final String COMPONENT_MI_KEYWORD = "miKeyword";
@@ -82,11 +79,7 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_LB_MSG_NUMBER = "lbMsgNumber";
 	public static final String COMPONENT_LB_REMAINING_CHARS = "lbRemainingChars";
 	public static final String COMPONENT_PN_MESSAGE = "pnMessage";
-	@Deprecated
-	public static final String COMPONENT_BT_SEND = "btSend";
 	public static final String COMPONENT_PN_SEND = "pnSend";
-	public static final String COMPONENT_LB_HOME_TAB_LOGO = "lbHomeTabLogo";
-	public static final String COMPONENT_CB_HOME_TAB_LOGO_VISIBLE = "cbHomeTabLogoVisible";
 	public static final String COMPONENT_TF_IMAGE_SOURCE = "tfImageSource";
 	public static final String COMPONENT_KEY_ACT_PANEL = "keyActPanel";
 	public static final String COMPONENT_BT_CLEAR = "btClear";
