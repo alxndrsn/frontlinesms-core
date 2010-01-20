@@ -643,49 +643,16 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 	}
 	
-	/**
-	 * Shows the compose message dialog, populating the list with the selection of the 
-	 * supplied list.
-	 * @param list
-	 */
-	public void show_composeMessageForm(Object list) {
-		LOG.trace("ENTER");
-		// Build up a list of selected recipients, and then pass this to
-		// the message composition form.
-		Set<Object> recipients = new HashSet<Object>();
+	public void show_composeMessageForm(Group group) {
+		LOG.debug("Getting contacts from Group [" + group.getName() + "]");
+		
+		HashSet<Object> recipients = new HashSet<Object>();
 		boolean hasMembers = false;
-		for (Object selectedComponent : getSelectedItems(list)) {
-			Object attachedItem = getAttachedObject(selectedComponent);
-			
-			if(attachedItem == null) {
-				/** skip null items TODO is this necessary with instanceof */
-			} else if (attachedItem instanceof Contact) {
-				Contact contact = (Contact)attachedItem;
-				LOG.debug("Adding contact [" + contact.getName() + "] to the send list.");
-				recipients.add(getContact(selectedComponent));
-			} else if (attachedItem instanceof Group) {
-				LOG.debug("Getting contacts from Group [" + getGroup(selectedComponent).getName() + "]");
-				Group group = (Group)attachedItem;
-				for (Contact c : group.getAllMembers()) {
-					hasMembers = true;
-					if (c.isActive()) {
-						LOG.debug("Adding contact [" + c.getName() + "] to the send list.");
-						recipients.add(c);
-					}
-				}
-			} else if (attachedItem instanceof Message) {
-				Message message = (Message) attachedItem;
-				// We should only attempt to reply to messages we have received - otherwise
-				// we could end up texting ourselves a lot!
-				if(message.getType() == Message.TYPE_RECEIVED) {
-					String senderMsisdn = message.getSenderMsisdn();
-					Contact contact = contactDao.getFromMsisdn(senderMsisdn);
-					if(contact != null) {
-						recipients.add(contact);
-					} else {
-						recipients.add(senderMsisdn);
-					}
-				}
+		for (Contact c : group.getAllMembers()) {
+			hasMembers = true;
+			if (c.isActive()) {
+				LOG.debug("Adding contact [" + c.getName() + "] to the send list.");
+				recipients.add(c);
 			}
 		}
 		
@@ -694,9 +661,12 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			String key = hasMembers ? MESSAGE_ONLY_DORMANTS : MESSAGE_GROUP_NO_MEMBERS;
 			alert(InternationalisationUtils.getI18NString(key));
 			LOG.trace("EXIT");
-			return;
+		} else {
+			show_composeMessageForm(recipients);
 		}
-		
+	}
+	
+	private void show_composeMessageForm(Collection<Object> recipients) {
 		numberToSend = recipients.size();
 		
 		Object dialog = loadComponentFromFile(UI_FILE_COMPOSE_MESSAGE_FORM);
@@ -718,6 +688,46 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		add(dialog);
 		
 		LOG.trace("EXIT");
+	}
+	
+	/**
+	 * Shows the compose message dialog, populating the list with the selection of the 
+	 * supplied list.
+	 * @param list
+	 */
+	public void show_composeMessageForm(Object list) {
+		LOG.trace("ENTER");
+		// Build up a list of selected recipients, and then pass this to
+		// the message composition form.
+		for (Object selectedComponent : getSelectedItems(list)) {
+			Object attachedItem = getAttachedObject(selectedComponent);
+			
+			if(attachedItem == null) {
+				/** skip null items TODO is this necessary with instanceof */
+			} else if (attachedItem instanceof Contact) {
+				Set<Object> recipients = new HashSet<Object>();
+				Contact contact = (Contact)attachedItem;
+				LOG.debug("Adding contact [" + contact.getName() + "] to the send list.");
+				recipients.add(getContact(selectedComponent));
+			} else if (attachedItem instanceof Group) {
+				show_composeMessageForm((Group) attachedItem);
+			} else if (attachedItem instanceof Message) {
+				Set<Object> recipients = new HashSet<Object>();
+				Message message = (Message) attachedItem;
+				// We should only attempt to reply to messages we have received - otherwise
+				// we could end up texting ourselves a lot!
+				if(message.getType() == Message.TYPE_RECEIVED) {
+					String senderMsisdn = message.getSenderMsisdn();
+					Contact contact = contactDao.getFromMsisdn(senderMsisdn);
+					if(contact != null) {
+						recipients.add(contact);
+					} else {
+						recipients.add(senderMsisdn);
+					}
+				}
+				show_composeMessageForm(recipients);
+			}
+		}
 	}
 
 	/**

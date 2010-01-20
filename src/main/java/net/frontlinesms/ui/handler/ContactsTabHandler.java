@@ -164,6 +164,9 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			return PagedListDetails.EMPTY;
 		} else {
 			int totalItemCount = selectedGroup.getAllMembersCount();
+			
+			// TODO fix filtering
+			
 	//		int totalItemCount = (this.contactNameFilter == null || this.contactNameFilter.length() == 0) 
 	//				? this.contactDao.getContactCount()
 	//				: this.contactDao.getContactsFilteredByNameCount(this.contactNameFilter);
@@ -766,7 +769,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 * @param list
 	 */
 	public void show_composeMessageForm() {
-		this.ui.show_composeMessageForm(this.groupSelecter.getPanelComponent());
+		this.ui.show_composeMessageForm(this.groupSelecter.getSelectedGroup());
 	}
 	/**
 	 * Shows the compose message dialog, populating the list with the selection of the 
