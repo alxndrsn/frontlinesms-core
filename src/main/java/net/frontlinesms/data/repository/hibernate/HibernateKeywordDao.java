@@ -9,6 +9,7 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 
 import net.frontlinesms.data.DuplicateKeyException;
+import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.repository.KeywordDao;
 
@@ -29,12 +30,18 @@ public class HibernateKeywordDao extends BaseHibernateDao<Keyword> implements Ke
 
 	/** @see KeywordDao#getAllKeywords() */
 	public List<Keyword> getAllKeywords() {
-		return super.getAll();
+		return super.getList(getGetAllCriterion());
 	}
 
 	/** @see KeywordDao#getAllKeywords(int, int) */
 	public List<Keyword> getAllKeywords(int startIndex, int limit) {
-		return super.getAll(startIndex, limit);
+		return super.getList(getGetAllCriterion(), startIndex, limit);
+	}
+
+	/** @return Criteria for getting all keywords ordered by the keyword itself. */
+	private DetachedCriteria getGetAllCriterion() {
+		DetachedCriteria criteria = super.getSortCriterion(Keyword.Field.KEYWORD, Order.ASCENDING);
+		return criteria;
 	}
 
 	/** @see KeywordDao#getFromMessageText(String) */
