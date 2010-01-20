@@ -31,6 +31,7 @@ import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.handler.ComponentPagingHandler;
 import net.frontlinesms.ui.handler.PagedComponentItemProvider;
+import net.frontlinesms.ui.handler.PagedListDetails;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
@@ -102,18 +103,27 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 	}
 	
 //> PAGING METHODS
-	/** @see PagedComponentItemProvider#getListItems(Object, int, int) */
-	public Object[] getListItems(Object list, int startIndex, int limit) {
+	/** @see PagedComponentItemProvider#getListDetails(Object, int, int) */
+	public PagedListDetails getListDetails(Object list, int startIndex, int limit) {
 		if(list == this.emailListComponent) {
-			List<Email> emails = this.emailDao.getEmailsWithLimit(getSortField(), getSortOrder(), startIndex, limit);
-			Object[] components = new Object[emails.size()];
-			for (int i=0; i<components.length; ++i) {
-				Email email = emails.get(i);
-				components[i] = ui.getRow(email);
-			}
-			return components;
+			return getEmailListDetails(startIndex, limit);
 		} else throw new IllegalStateException();
 	}
+	
+	/** @return {@link PagedListDetails} for the {@link #emailListComponent} */
+	private PagedListDetails getEmailListDetails(int startIndex, int limit) {
+		int totalItemCount = this.emailDao.getEmailCount();
+
+		List<Email> emails = this.emailDao.getEmailsWithLimit(getSortField(), getSortOrder(), startIndex, limit);
+		Object[] components = new Object[emails.size()];
+		for (int i=0; i<components.length; ++i) {
+			Email email = emails.get(i);
+			components[i] = ui.getRow(email);
+		}
+		
+		return new PagedListDetails(totalItemCount, components);
+	}
+
 	/** @return the order to sort emails in {@link #emailListComponent} */
 	private Order getSortOrder() {
 		Object header = Thinlet.get(emailListComponent, ThinletText.HEADER);
@@ -133,12 +143,6 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 			field = (Email.Field) ui.getProperty(tableColumn, PROPERTY_FIELD);
 		}
 		return field;
-	}
-	/** @see PagedComponentItemProvider#getTotalListItemCount(Object) */
-	public int getTotalListItemCount(Object list) {
-		if(list == this.emailListComponent) {
-			return this.emailDao.getEmailCount();
-		} else throw new IllegalStateException();
 	}
 	
 //>

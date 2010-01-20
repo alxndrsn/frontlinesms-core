@@ -110,14 +110,26 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	}
 	
 //> PAGING METHODS
-	public Object[] getListItems(Object list, int start, int limit) {
+	public PagedListDetails getListDetails(Object list, int startIndex, int limit) {
 		if(list == this.contactListComponent) {
-			List<Contact> contacts = (this.contactNameFilter == null || this.contactNameFilter.length() == 0) 
-					? this.contactDao.getAllContacts(start, limit)
-					: this.contactDao.getContactsFilteredByName(this.contactNameFilter, start, limit);
-			return toThinletComponents(contacts);
+			return getContactListDetails(startIndex, limit);
 		} else throw new IllegalStateException();
-	};
+	}
+	
+	private PagedListDetails getContactListDetails(int startIndex, int limit) {
+		int totalItemCount = (this.contactNameFilter == null || this.contactNameFilter.length() == 0) 
+				? this.contactDao.getContactCount()
+				: this.contactDao.getContactsFilteredByNameCount(this.contactNameFilter);
+		
+		List<Contact> contacts = (this.contactNameFilter == null || this.contactNameFilter.length() == 0) 
+				? this.contactDao.getAllContacts(startIndex, limit)
+				: this.contactDao.getContactsFilteredByName(this.contactNameFilter, startIndex, limit);
+		Object[] listItems = toThinletComponents(contacts);
+		
+		return new PagedListDetails(totalItemCount, listItems);
+		
+	}
+	
 	private Object[] toThinletComponents(List<Contact> contacts) {
 		Object[] components = new Object[contacts.size()];
 		for (int i = 0; i < components.length; i++) {
@@ -125,14 +137,6 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			components[i] = ui.getRow(c);
 		}
 		return components;
-	}
-	public int getTotalListItemCount(Object list) {
-		if(list == this.contactListComponent) {
-			int count = (this.contactNameFilter == null || this.contactNameFilter.length() == 0) 
-					? this.contactDao.getContactCount()
-					: this.contactDao.getContactsFilteredByNameCount(this.contactNameFilter);
-			return count;
-		} else throw new IllegalStateException();
 	}
 
 //> UI METHODS

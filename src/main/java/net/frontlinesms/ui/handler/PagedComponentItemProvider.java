@@ -9,16 +9,11 @@ package net.frontlinesms.ui.handler;
  */
 public interface PagedComponentItemProvider {
 	/**
-	 * Get items to be displayed on a particular page of a list. 
+	 * Get items and details to be displayed on a particular page of a list. 
 	 * @param list The list or table whose items we are fetching 
 	 * @param startIndex The index of the first item in the list
-	 * @param limit The maximum number of items to display in the list
-	 * @return a list of Thinlet UI components to be displayed in the list controlled by {@link ComponentPagingHandler}.
+	 * @param limit The maximum number of items to display in the
+	 * @return
 	 */
-	Object[] getListItems(Object list, int startIndex, int limit);
-	/**
-	 * @param list The list or table whose items we are fetching
-	 * @return the total count of all items to be displayed in this list, over all pages
-	 */
-	int getTotalListItemCount(Object list);
+	PagedListDetails getListDetails(Object list, int startIndex, int limit);
 }

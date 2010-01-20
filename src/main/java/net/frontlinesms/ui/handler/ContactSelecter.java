@@ -72,18 +72,18 @@ public class ContactSelecter implements ThinletUiEventHandler, PagedComponentIte
 	}
 	
 //> PAGING METHODS
-	public int getTotalListItemCount(Object list) {
-		return this.contactDao.getContactCount();
-	}
-	
-	public Object[] getListItems(Object list, int startIndex, int limit) {
+	/** @see PagedComponentItemProvider#getListDetails(Object, int, int) */
+	public PagedListDetails getListDetails(Object list, int startIndex, int limit) {
+		int totalItemCount = this.contactDao.getContactCount();
+		
 		List<Contact> contacts = this.contactDao.getAllContacts(startIndex, limit);
 		Object[] components = new Object[contacts.size()];
 		for (int i = 0; i < components.length; i++) {
 			Contact contact = contacts.get(i);
 			components[i] = ui.createListItem(contact);
 		}
-		return components;
+		
+		return new PagedListDetails(totalItemCount, components);
 	}
 	
 //> UI EVENT METHODS

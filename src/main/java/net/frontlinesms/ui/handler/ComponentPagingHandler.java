@@ -119,9 +119,9 @@ public class ComponentPagingHandler implements ThinletUiEventHandler {
 	
 //> UI HELPER METHODS
 	/** Update the page count internally, and that displayed. */
-	private void updatePageCount() {
+	private void updatePageCount(int totalItemCount) {
 		// Update the page count etc.
-		this.totalListItems = this.itemProvider.getTotalListItemCount(this.list);
+		this.totalListItems = totalItemCount;
 		this.totalPages = (int) Math.ceil(((double)this.totalListItems) / this.maxItemsPerPage);
 		// Make sure that the page has not got out of range
 		if(totalPages == 0) {
@@ -141,12 +141,18 @@ public class ComponentPagingHandler implements ThinletUiEventHandler {
 	
 	/** Load the list items for the {@link #currentPage} and display them. */
 	private synchronized void refreshList() {
-		updatePageCount();
+		int startIndex = this.currentPage*this.maxItemsPerPage;
+		PagedListDetails details = this.itemProvider.getListDetails(this.list, startIndex, this.maxItemsPerPage);
+		
+		updatePageCount(details.getTotalItemCount());
 		
 		// Refresh the contents of the list
 		ui.removeAll(this.list);
-		for(Object newChild : this.itemProvider.getListItems(this.list, this.currentPage*this.maxItemsPerPage, this.maxItemsPerPage)) {
+		for(Object newChild : details.getListItems()) {
 			ui.add(this.list, newChild);
+			if(details.isSelected(newChild)) {
+				ui.setSelected(newChild, true);
+			}
 		}
 	}
 }

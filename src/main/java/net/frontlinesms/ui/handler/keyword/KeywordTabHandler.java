@@ -52,6 +52,7 @@ import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.handler.ComponentPagingHandler;
 import net.frontlinesms.ui.handler.PagedComponentItemProvider;
+import net.frontlinesms.ui.handler.PagedListDetails;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
@@ -705,21 +706,27 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		ui.setIcon(item, Icon.GROUP);
 		return item;
 	}
+	
+	/** @see PagedComponentItemProvider#getListDetails(Object, int, int) */
+	public PagedListDetails getListDetails(Object list, int startIndex, int limit) {
+		int totalItemCount = this.keywordDao.getTotalKeywordCount();
 
-	public Object[] getListItems(Object list, int startIndex, int limit) {
+		Object selectedItem = ui.getSelectedItem(list);
+		Keyword selectedKeyword = ui.getAttachedObject(selectedItem, Keyword.class);
+		
 		List<Keyword> keywords = keywordDao.getAllKeywords(startIndex, limit);
-
 		Object[] listItems = new Object[keywords.size() + 1];
 		Object newKeyword = ui.createListItem(InternationalisationUtils.getI18NString(ACTION_ADD_KEYWORD), null);
 		listItems[0] = newKeyword;
-		for(int i=1; i<listItems.length; ++i) {
-			listItems[i] = ui.createListItem(keywords.get(i-1));
-		}
 		
-		return listItems;
-	}
+		for(int i=1; i<listItems.length; ++i) {
+			Keyword keyword = keywords.get(i-1);
+			listItems[i] = ui.createListItem(keyword);
+			if(selectedKeyword != null && selectedKeyword.equals(keyword)) {
+				selectedItem = listItems[i];
+			}
+		}
 
-	public int getTotalListItemCount(Object list) {
-		return this.keywordDao.getTotalKeywordCount();
+		return new PagedListDetails(totalItemCount, listItems, selectedItem);
 	}
 }

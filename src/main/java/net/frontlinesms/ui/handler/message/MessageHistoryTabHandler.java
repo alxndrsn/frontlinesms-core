@@ -48,6 +48,7 @@ import net.frontlinesms.ui.UiProperties;
 import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.handler.ComponentPagingHandler;
 import net.frontlinesms.ui.handler.PagedComponentItemProvider;
+import net.frontlinesms.ui.handler.PagedListDetails;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
@@ -201,49 +202,60 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	}
 	
 //> LIST PAGING METHODS
-	/** @see PagedComponentItemProvider#getListItems(Object, int, int) */
-	public Object[] getListItems(Object list, int start, int limit) {
+	/** @see PagedComponentItemProvider#getListDetails(Object, int, int) */
+	public PagedListDetails getListDetails(Object list, int startIndex, int limit) {
 		if(list.equals(this.messagePagingHandler.getList())) {
-			List<Message> messages = getListMessages(list, start, limit);
-			Object[] messageRows = new Object[messages.size()];
-			for (int i = 0; i < messages.size(); i++) {
-				Message m = messages.get(i);
-				messageRows[i] = ui.getRow(m);
-			}
-			return messageRows;
+			return getMessageListPagingDetails(startIndex, limit);
 		} else if(list.equals(this.contactListPagingHandler.getList())) {
-			List<Contact> contacts = this.contactDao.getAllContacts(start, limit);
-			Object[] contactRows = new Object[contacts.size() + 1];
-			contactRows[0] = getAllMessagesListItem();
-			for (int i = 0; i < contacts.size(); i++) {
-				Contact c = contacts.get(i);
-				contactRows[i+1] = ui.createListItem(c);
-			}
-			return contactRows;
+			return getContactListPagingDetails(startIndex, limit);
 		} else if(list.equals(this.keywordListPagingHandler.getList())) {
-			List<Keyword> keywords = this.keywordDao.getAllKeywords(start, limit);
-			Object[] keywordRows = new Object[keywords.size() + 1];
-			keywordRows[0] = getAllMessagesListItem();
-			for (int i = 0; i < keywords.size(); i++) {
-				Keyword k = keywords.get(i);
-				keywordRows[i+1] = ui.createListItem(k);
-			}
-			return keywordRows;
+			return getKeywordListPagingDetails(startIndex, limit);
 		} else throw new IllegalStateException();
 	}
-	/** @see PagedComponentItemProvider#getTotalListItemCount(Object) */
-	public int getTotalListItemCount(Object list) {
-		if(list.equals(this.messagePagingHandler.getList())) {
-			int messageCount = getMessageCount();
-			numberToSend = messageCount;
-			return messageCount;
-		} else if(list.equals(this.contactListPagingHandler.getList())) {
-			return this.contactDao.getContactCount();
-		} else if(list.equals(this.keywordListPagingHandler.getList())) {
-			return this.keywordDao.getTotalKeywordCount();
-		} else {
-			throw new IllegalStateException();
+	
+	/** @return {@link PagedListDetails} for {@link #keywordListComponent} */
+	private PagedListDetails getKeywordListPagingDetails(int startIndex, int limit) {
+		int totalItemCount = this.keywordDao.getTotalKeywordCount();
+		
+		List<Keyword> keywords = this.keywordDao.getAllKeywords(startIndex, limit);
+		Object[] keywordRows = new Object[keywords.size() + 1];
+		keywordRows[0] = getAllMessagesListItem();
+		for (int i = 0; i < keywords.size(); i++) {
+			Keyword k = keywords.get(i);
+			keywordRows[i+1] = ui.createListItem(k);
 		}
+		
+		return new PagedListDetails(totalItemCount, keywordRows);
+	}
+
+	/** @return {@link PagedListDetails} for {@link #contactListComponent} */
+	private PagedListDetails getContactListPagingDetails(int startIndex, int limit) {
+		int totalItemCount = this.contactDao.getContactCount();
+		
+		List<Contact> contacts = this.contactDao.getAllContacts(startIndex, limit);
+		Object[] contactRows = new Object[contacts.size() + 1];
+		contactRows[0] = getAllMessagesListItem();
+		for (int i = 0; i < contacts.size(); i++) {
+			Contact c = contacts.get(i);
+			contactRows[i+1] = ui.createListItem(c);
+		}
+		
+		return new PagedListDetails(totalItemCount, contactRows);
+	}
+
+	/** @return {@link PagedListDetails} for {@link #messageListComponent} */
+	private PagedListDetails getMessageListPagingDetails(int startIndex, int limit) {
+		int messageCount = getMessageCount();
+		numberToSend = messageCount;
+		
+		List<Message> messages = getListMessages(startIndex, limit);
+		Object[] messageRows = new Object[messages.size()];
+		for (int i = 0; i < messages.size(); i++) {
+			Message m = messages.get(i);
+			messageRows[i] = ui.getRow(m);
+		}
+		
+		return new PagedListDetails(messageCount, messageRows);
 	}
 	
 	/** @return total number of messages to be displayed in the message list. */
@@ -279,12 +291,11 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	
 	/**
 	 * Gets the list of messages to display in the message table.
-	 * @param list The message table object
-	 * @param start The index of the first message to return
+	 * @param startIndex The index of the first message to return
 	 * @param limit The maximum number of messages to return
 	 * @return a page of messages, sorted and filtered
 	 */
-	private List<Message> getListMessages(Object list, int start, int limit) {
+	private List<Message> getListMessages(int startIndex, int limit) {
 		Class<?> filterClass = getMessageHistoryFilterType();
 		Object filterList = getMessageHistoryFilterList();
 		Object selectedItem = ui.getSelectedItem(filterList);
@@ -298,22 +309,22 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			
 			int selectedIndex = ui.getSelectedIndex(filterList);
 			if (selectedIndex == 0) {
-				List<Message> allMessages = messageDao.getAllMessages(messageType, field, order, messageHistoryStart, messageHistoryEnd, start, limit);
+				List<Message> allMessages = messageDao.getAllMessages(messageType, field, order, messageHistoryStart, messageHistoryEnd, startIndex, limit);
 				return allMessages;
 			} else {
 				if(filterClass == Contact.class) {
 					// Contact selected
 					Contact c = ui.getContact(selectedItem);
-					return messageDao.getMessagesForMsisdn(messageType, c.getPhoneNumber(), field, order, messageHistoryStart, messageHistoryEnd, start, limit);
+					return messageDao.getMessagesForMsisdn(messageType, c.getPhoneNumber(), field, order, messageHistoryStart, messageHistoryEnd, startIndex, limit);
 				} else if(filterClass == Group.class) {
 					// A Group was selected
 					List<Group> groups = new ArrayList<Group>();
 					ui.getGroupsRecursivelyDown(groups, ui.getGroup(selectedItem));
-					return messageDao.getMessagesForGroups(messageType, groups, field, order, messageHistoryStart, messageHistoryEnd, start, limit);
+					return messageDao.getMessagesForGroups(messageType, groups, field, order, messageHistoryStart, messageHistoryEnd, startIndex, limit);
 				} else /* (filterClass == Keyword.class) */ {
 					// Keyword Selected
 					Keyword k = ui.getKeyword(selectedItem);
-					return messageDao.getMessagesForKeyword(messageType, k, field, order, messageHistoryStart, messageHistoryEnd, start, limit);
+					return messageDao.getMessagesForKeyword(messageType, k, field, order, messageHistoryStart, messageHistoryEnd, startIndex, limit);
 				}
 			}
 		}
