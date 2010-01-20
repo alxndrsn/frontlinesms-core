@@ -46,6 +46,7 @@ import net.frontlinesms.Utils;
 import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.data.repository.*;
+import net.frontlinesms.debug.RandomDataGenerator;
 import net.frontlinesms.listener.EmailListener;
 import net.frontlinesms.listener.UIListener;
 import net.frontlinesms.plugins.PluginController;
@@ -1772,5 +1773,14 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		} catch(Throwable t) {
 			log.error("Unable to reload frontlineSMS.", t);
 		}
+	}
+	
+	/** UI Event method: Generate test data 
+	 * @throws IOException */
+	public void generateTestData() throws IOException {
+		RandomDataGenerator randy = new RandomDataGenerator();
+		randy.initFromClasspath();
+		randy.setFrontlineController(this.frontlineController);
+		randy.generate(200);
 	}
 }

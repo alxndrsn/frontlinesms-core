@@ -31,6 +31,9 @@
 			<separator />
 			<menuitem icon="/icons/frontline_icon.png" text="i18n.hometab.settings" name="menu_showHometabSettings" action="showHomeTabSettings()"/>
 		</menu>
+		<menu text="i18n.menubar.debug">
+			<menuitem icon="/icons/database_execute.png" text="i18n.menuitem.debug.data.generate" action="generateTestData"/>
+		</menu>
 		<menu text="i18n.menubar.help">
 			<menuitem icon="/icons/help.png" text="i18n.menuitem.help.manual" action="showHelpPage('help-menu.htm')"/>
 			<menuitem icon="/icons/frontline_icon.png" text="i18n.menuitem.website" action="openBrowser('http://www.frontlinesms.com')"/>
