@@ -50,15 +50,16 @@ import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BaseTabHandler;
+import net.frontlinesms.ui.handler.ComponentPagingHandler;
+import net.frontlinesms.ui.handler.PagedComponentItemProvider;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
- * @author Alex Anderson 
- * <li> alex(at)masabi(dot)com
- * @author Carlos Eduardo Genz
- * <li> kadu(at)masabi(dot)com
+ * UI Event handler for Keywords tab
+ * @author Alex Anderson alex@frontlinesms.com
+ * @author Carlos Eduardo Genz kadu@masabi.com
  */
-public class KeywordTabHandler extends BaseTabHandler {
+public class KeywordTabHandler extends BaseTabHandler implements PagedComponentItemProvider {
 //> UI LAYOUT FILES
 	public static final String UI_FILE_KEYWORDS_TAB = "/ui/core/keyword/keywordsTab.xml";
 	public static final String UI_FILE_KEYWORDS_SIMPLE_VIEW = "/ui/core/keyword/pnSimpleView.xml";
@@ -70,6 +71,7 @@ public class KeywordTabHandler extends BaseTabHandler {
 	private KeywordActionDao keywordActionDao;
 
 	private Object keywordListComponent;
+	private ComponentPagingHandler keywordListPagingHandler;
 	
 	public KeywordTabHandler(UiGeneratorController ui, FrontlineSMS frontlineController) {
 		super(ui);
@@ -82,6 +84,13 @@ public class KeywordTabHandler extends BaseTabHandler {
 	protected Object initialiseTab() {
 		Object tabComponent = ui.loadComponentFromFile(UI_FILE_KEYWORDS_TAB, this);
 		this.keywordListComponent = ui.find(tabComponent, COMPONENT_KEYWORD_LIST);
+		this.keywordListPagingHandler = new ComponentPagingHandler(ui, this, keywordListComponent);
+		
+		// Add the paging controls just below the list of keyword
+		Object pageControls = keywordListPagingHandler.getPanel();
+		ui.setHAlign(pageControls, Thinlet.RIGHT);
+		Object parentPanel = ui.getParent(keywordListComponent);
+		ui.add(parentPanel, pageControls, ui.getIndex(parentPanel, keywordListComponent)+1);
 		return tabComponent;
 	}
 
@@ -548,19 +557,7 @@ public class KeywordTabHandler extends BaseTabHandler {
 	 * <br>Has no effect in classic mode.
 	 */
 	private void updateKeywordList() {
-		int selectedIndex = ui.getSelectedIndex(keywordListComponent);
-		ui.removeAll(keywordListComponent);
-		Object newKeyword = ui.createListItem(InternationalisationUtils.getI18NString(ACTION_ADD_KEYWORD), null);
-		ui.setIcon(newKeyword, Icon.KEYWORD_NEW);
-		ui.add(keywordListComponent, newKeyword);
-		for(Keyword keyword : keywordDao.getAllKeywords()) {
-			ui.add(keywordListComponent, ui.createListItem(keyword));
-		}
-		if (selectedIndex >= ui.getItems(keywordListComponent).length || selectedIndex == -1) {
-			selectedIndex = 0;
-		}
-		ui.setSelectedIndex(keywordListComponent, selectedIndex);
-		showSelectedKeyword();
+		this.keywordListPagingHandler.refresh();
 	}
 
 	/**
@@ -707,5 +704,22 @@ public class KeywordTabHandler extends BaseTabHandler {
 		Object item = ui.createComboboxChoice(g.getName(), g);
 		ui.setIcon(item, Icon.GROUP);
 		return item;
+	}
+
+	public Object[] getListItems(Object list, int startIndex, int limit) {
+		List<Keyword> keywords = keywordDao.getAllKeywords(startIndex, limit);
+
+		Object[] listItems = new Object[keywords.size() + 1];
+		Object newKeyword = ui.createListItem(InternationalisationUtils.getI18NString(ACTION_ADD_KEYWORD), null);
+		listItems[0] = newKeyword;
+		for(int i=1; i<listItems.length; ++i) {
+			listItems[i] = ui.createListItem(keywords.get(i-1));
+		}
+		
+		return listItems;
+	}
+
+	public int getTotalListItemCount(Object list) {
+		return this.keywordDao.getTotalKeywordCount();
 	}
 }
