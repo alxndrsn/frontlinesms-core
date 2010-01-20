@@ -65,6 +65,7 @@ public class RandomDataGenerator {
 		
 		// Generate keywords
 		List<Keyword> keywords = generateKeywords(count);
+		persistKeywords(keywords);
 		
 		// Generate keyword actions
 		generateKeywordActions(keywords);
@@ -80,6 +81,19 @@ public class RandomDataGenerator {
 		generateEmails(emailAccounts, count);
 	}
 	
+	private void persistKeywords(List<Keyword> keywords) {
+		KeywordDao dao = this.frontlineController.getKeywordDao();
+		for (Iterator iterator = keywords.iterator(); iterator.hasNext();) {
+			Keyword keyword = (Keyword) iterator.next();
+			try {
+				dao.saveKeyword(keyword);
+			} catch (DuplicateKeyException e) {
+				// Duplicate keyword - remove it
+				iterator.remove();
+			}
+		}
+	}
+
 	private void generateEmails(List<EmailAccount> emailAccounts, int count) {
 		// TODO Auto-generated method stub
 		
@@ -125,8 +139,16 @@ public class RandomDataGenerator {
 	}
 
 	private List<Keyword> generateKeywords(int count) {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<Keyword> keywords = new ArrayList<Keyword>(count);
+		while(--count >= 0) {
+			String keywordString = "";
+			// Make keywords up to 5 words long
+			int wordCount = 1 + randy.nextInt(4);
+			while(--wordCount>=0) keywordString+=" "+getRandomMessageWord();
+			Keyword keyword = new Keyword(keywordString.substring(1), "Keyword string generated for debug.");
+			keywords.add(keyword);
+		}
+		return keywords;
 	}
 
 	private void persistContacts(List<Contact> contacts) {
