@@ -110,7 +110,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	public void init() {
 		super.init();
 		this.groupSelecter.init(ui.getRootGroup());
-		ui.add(find(COMPONENT_GROUP_SELECTER_CONTAINER), this.groupSelecter.getPanelComponent());
+		ui.add(find(COMPONENT_GROUP_SELECTER_CONTAINER), this.groupSelecter.getPanelComponent(), 0);
 	}
 
 //> ACCESSORS

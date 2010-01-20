@@ -86,7 +86,9 @@ public class GroupSelecter extends BasePanelHandler {
 	
 	/** Adds a new group to the tree */
 	public void addGroup(Group group) {
-		ui.add(getNodeForGroup(group.getParent()), createNode(group, true));
+		Object groupTree = this.getGroupTreeComponent();
+		Object parentGroupNode = getNodeForGroup(groupTree, group.getParent());
+		ui.add(parentGroupNode, createNode(group, true));
 	}
 	
 //> UI EVENT METHODS
@@ -105,16 +107,15 @@ public class GroupSelecter extends BasePanelHandler {
 	 * @param group
 	 * @return
 	 */
-	private Object getNodeForGroup(Group group) {
-		Object groupTree = this.getGroupTreeComponent();
+	private Object getNodeForGroup(Object component, Group group) {
 		Object ret = null;
-		for (Object o : this.ui.getItems(groupTree)) {
+		for (Object o : this.ui.getItems(component)) {
 			Group g = ui.getAttachedObject(o, Group.class);
 			if (g.equals(group)) {
 				ret = o;
 				break;
 			} else {
-				ret = getNodeForGroup(group);
+				ret = getNodeForGroup(o, group);
 				if (ret != null) break;
 			}
 		}
