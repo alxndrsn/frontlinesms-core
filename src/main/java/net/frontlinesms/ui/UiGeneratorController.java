@@ -56,10 +56,10 @@ import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.*;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
 import net.frontlinesms.ui.handler.ContactsTabHandler;
-import net.frontlinesms.ui.handler.GroupSelecter;
+import net.frontlinesms.ui.handler.GroupSelecterPanel;
 import net.frontlinesms.ui.handler.HomeTabHandler;
 import net.frontlinesms.ui.handler.PhoneTabHandler;
-import net.frontlinesms.ui.handler.SingleGroupSelecterOwner;
+import net.frontlinesms.ui.handler.SingleGroupSelecterPanelOwner;
 import net.frontlinesms.ui.handler.core.DatabaseSettingsPanel;
 import net.frontlinesms.ui.handler.email.EmailAccountDialogHandler;
 import net.frontlinesms.ui.handler.email.EmailTabHandler;
@@ -99,7 +99,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.*;
  * <li> kadu(at)masabi(dot)com
  */
 @SuppressWarnings("serial")
-public class UiGeneratorController extends FrontlineUI implements EmailListener, UIListener, SingleGroupSelecterOwner {
+public class UiGeneratorController extends FrontlineUI implements EmailListener, UIListener, SingleGroupSelecterPanelOwner {
 
 //> CONSTANTS
 	/** Default height of the Thinlet frame launcher */
@@ -1799,7 +1799,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	public void showGroupSelecter() {
 		Object dialog = super.createDialog("Group Selecter Test");
-		GroupSelecter selecter = new GroupSelecter(this, this);
+		GroupSelecterPanel selecter = new GroupSelecterPanel(this, this);
 		selecter.init(this.groupDao.getChildGroups(null).toArray(new Group[0]));
 		add(dialog, selecter.getPanelComponent());
 		add(dialog);

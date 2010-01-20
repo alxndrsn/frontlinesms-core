@@ -18,23 +18,23 @@ import net.frontlinesms.ui.Icon;
  * @author aga
  *
  */
-public class GroupSelecter extends BasePanelHandler {
+public class GroupSelecterPanel extends BasePanelHandler {
 	private Logger LOG = Logger.getLogger(this.getClass());
 
 	private static final String XML_LAYOUT_GROUP_PANEL = "/ui/core/util/pnGroupSelecter.xml";
 	private static final String COMPONENT_GROUP_TREE = "trGroups";
 	
-	private GroupSelecterOwner owner;
+	private GroupSelecterPanelOwner owner;
 	
 	private boolean allowMultipleSelections;
 
 	private Group[] rootGroups;
 
 //> CONSTRUCTORS
-	public GroupSelecter(FrontlineUI ui, GroupSelecterOwner owner) {
+	public GroupSelecterPanel(FrontlineUI ui, GroupSelecterPanelOwner owner) {
 		super(ui);
 		this.owner = owner;
-		allowMultipleSelections = owner instanceof MultiGroupSelecterOwner;
+		allowMultipleSelections = owner instanceof MultiGroupSelecterPanelOwner;
 	}
 
 	/** Initialise the selecter. */
@@ -95,10 +95,10 @@ public class GroupSelecter extends BasePanelHandler {
 	
 //> UI EVENT METHODS
 	public void selectionChanged() {
-		if(owner instanceof SingleGroupSelecterOwner) {
-			((SingleGroupSelecterOwner) owner).groupSelectionChanged(getSelectedGroup());
+		if(owner instanceof SingleGroupSelecterPanelOwner) {
+			((SingleGroupSelecterPanelOwner) owner).groupSelectionChanged(getSelectedGroup());
 		} else {
-			((MultiGroupSelecterOwner) owner).groupSelectionChanged(getSelectedGroups());
+			((MultiGroupSelecterPanelOwner) owner).groupSelectionChanged(getSelectedGroups());
 		}
 	}
 

@@ -60,7 +60,7 @@ import thinlet.Thinlet;
  * Event handler for the Contacts tab and associated dialogs.
  * @author Alex
  */
-public class ContactsTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterOwner {
+public class ContactsTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterPanelOwner {
 //> STATIC CONSTANTS
 	/** UI XML File Path: the Home Tab itself */
 	private static final String UI_FILE_CONTACTS_TAB = "/ui/core/contacts/contactsTab.xml";
@@ -91,7 +91,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	/** String to filter the contacts by */
 	private String contactNameFilter;
 
-	private final GroupSelecter groupSelecter;
+	private final GroupSelecterPanel groupSelecter;
 
 //> CONSTRUCTORS
 	/**
@@ -104,7 +104,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		super(ui);
 		this.contactDao = contactDao;
 		this.groupDao = groupDao;
-		this.groupSelecter = new GroupSelecter(ui, this);
+		this.groupSelecter = new GroupSelecterPanel(ui, this);
 	}
 	
 	@Override

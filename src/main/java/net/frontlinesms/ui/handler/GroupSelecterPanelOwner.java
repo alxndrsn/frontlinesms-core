@@ -7,5 +7,5 @@ package net.frontlinesms.ui.handler;
  * Owner of a GroupSelecter panel.
  * @author aga
  */
-public abstract interface GroupSelecterOwner {
+public abstract interface GroupSelecterPanelOwner {
 }
