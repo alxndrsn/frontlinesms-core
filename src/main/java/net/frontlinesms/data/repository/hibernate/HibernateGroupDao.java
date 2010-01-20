@@ -3,7 +3,10 @@
  */
 package net.frontlinesms.data.repository.hibernate;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import org.hibernate.criterion.DetachedCriteria;
@@ -47,7 +50,12 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 	public Collection<Group> getChildGroups(Group parent) {
 		DetachedCriteria criteria = super.getCriterion();
 		criteria.add(getEqualsOrNull(Group.Field.PARENT, parent));
-		return super.getList(criteria);
+		List<Group> groupList = super.getList(criteria);
+		
+		// FIXME FIXME for some reason the list contains duplicates.  FIX THE CAUSE, as THIS IS STUPID! FIXME FIXME
+		HashSet<Group> uniqueGroups = new HashSet<Group>();
+		for(Group g : groupList) uniqueGroups.add(g);
+		return new ArrayList<Group>(uniqueGroups);
 	}
 
 	/** @see GroupDao#getAllGroups(int, int) */
