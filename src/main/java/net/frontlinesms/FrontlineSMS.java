@@ -142,6 +142,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		baseApplicationContext.refresh();
 		
 		FileSystemXmlApplicationContext applicationContext = new FileSystemXmlApplicationContext(configLocations, false, baseApplicationContext);
+		this.applicationContext = applicationContext;
 		
 		// Add post-processor to handle substituted database properties
 		PropertyPlaceholderConfigurer propertyPlaceholderConfigurer = new PropertyPlaceholderConfigurer();
@@ -165,8 +166,6 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		emailAccountDao = (EmailAccountDao) applicationContext.getBean("emailAccountDao");
 		smsInternetServiceSettingsDao = (SmsInternetServiceSettingsDao) applicationContext.getBean("smsInternetServiceSettingsDao");
 		smsModemSettingsDao = (SmsModemSettingsDao) applicationContext.getBean("smsModemSettingsDao");
-		
-		this.applicationContext = applicationContext;
 	}
 	
 	/** Deinitialise {@link #applicationContext}. */
