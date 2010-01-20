@@ -158,16 +158,24 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	}
 	
 	private PagedListDetails getContactListDetails(int startIndex, int limit) {
-		int totalItemCount = (this.contactNameFilter == null || this.contactNameFilter.length() == 0) 
-				? this.contactDao.getContactCount()
-				: this.contactDao.getContactsFilteredByNameCount(this.contactNameFilter);
+		Group selectedGroup = this.groupSelecter.getSelectedGroup();
 		
-		List<Contact> contacts = (this.contactNameFilter == null || this.contactNameFilter.length() == 0) 
-				? this.contactDao.getAllContacts(startIndex, limit)
-				: this.contactDao.getContactsFilteredByName(this.contactNameFilter, startIndex, limit);
-		Object[] listItems = toThinletComponents(contacts);
-		
-		return new PagedListDetails(totalItemCount, listItems);
+		if(selectedGroup == null) {
+			return PagedListDetails.EMPTY;
+		} else {
+			int totalItemCount = selectedGroup.getAllMembersCount();
+	//		int totalItemCount = (this.contactNameFilter == null || this.contactNameFilter.length() == 0) 
+	//				? this.contactDao.getContactCount()
+	//				: this.contactDao.getContactsFilteredByNameCount(this.contactNameFilter);
+	//		
+	//		List<Contact> contacts = (this.contactNameFilter == null || this.contactNameFilter.length() == 0) 
+	//				? this.contactDao.getAllContacts(startIndex, limit)
+	//				: this.contactDao.getContactsFilteredByName(this.contactNameFilter, startIndex, limit);
+			List<Contact> contacts = selectedGroup.getAllMembers(startIndex, limit);
+			Object[] listItems = toThinletComponents(contacts);
+			
+			return new PagedListDetails(totalItemCount, listItems);
+		}
 		
 	}
 	

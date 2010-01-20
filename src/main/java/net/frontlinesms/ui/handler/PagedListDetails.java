@@ -11,6 +11,9 @@ import java.util.Set;
  * @author Alex Anderson alex@frontlinesms.com
  */
 public class PagedListDetails {
+//> STATIC CONSTANTS
+	public static final PagedListDetails EMPTY = new PagedListDetails(0, new Object[0]);
+	
 //> INSTANCE PROPERTIES
 	/** Total count of all items to be displayed in this list, over all pages. */
 	private final int totalItemCount;
