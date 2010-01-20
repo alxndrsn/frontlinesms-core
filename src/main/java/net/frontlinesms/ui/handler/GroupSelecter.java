@@ -49,8 +49,10 @@ public class GroupSelecter extends BasePanelHandler {
 
 	/** Refresh the list of groups */
 	public void refresh() {
+		Object groupTree = getGroupTreeComponent();
+		ui.removeAll(groupTree);
 		for(Group rootGroup : rootGroups) {
-			ui.add(getGroupTreeComponent(), createNode(rootGroup, true));
+			ui.add(groupTree, createNode(rootGroup, true));
 		}
 	}
 	
@@ -122,6 +124,7 @@ public class GroupSelecter extends BasePanelHandler {
 		return ret;
 	}
 	
+	/** @return the group tree TODO cache this - it's not going to change, and we use it a lot */
 	private Object getGroupTreeComponent() {
 		return super.find(COMPONENT_GROUP_TREE);
 	}
