@@ -28,6 +28,8 @@ public class GroupSelecter extends BasePanelHandler {
 	
 	private boolean allowMultipleSelections;
 
+	private Group[] rootGroups;
+
 //> CONSTRUCTORS
 	public GroupSelecter(FrontlineUI ui, GroupSelecterOwner owner) {
 		super(ui);
@@ -42,25 +44,47 @@ public class GroupSelecter extends BasePanelHandler {
 		// TODO update selection of group tree appropriate to allowMultipleSelections
 		
 		// add nodes for group tree
+		this.rootGroups = rootGroups;
+	}
+
+	/** Refresh the list of groups */
+	public void refresh() {
 		for(Group rootGroup : rootGroups) {
 			ui.add(getGroupTreeComponent(), createNode(rootGroup, true));
 		}
 	}
 	
+//> ACCESSORS
 	private void setAllowMultipleSelections(boolean allowMultipleSelections) {
 		this.allowMultipleSelections = allowMultipleSelections;
 		// TODO set selection option of group tree appropriately
 		throw new IllegalStateException("NYI");
 	}
 	
+	/** @return a single group selected in the tree */
+	public Group getSelectedGroup() {
+		assert(!this.allowMultipleSelections) : "Cannot get a single selection if multiple groups are selectable.";
+		return ui.getAttachedObject(ui.getSelectedItem(this.getGroupTreeComponent()), Group.class);
+	}
+	
+	/** @return groups selected in the tree */
+	public Collection<Group> getSelectedGroups() {
+		assert(this.allowMultipleSelections) : "Cannot get multiple groups if multiple selection is not enabled.";
+		Object[] selectedItems = ui.getSelectedItems(this.getGroupTreeComponent());
+		HashSet<Group> groups = new HashSet<Group>();
+		for(Object selected : selectedItems) {
+			groups.add(ui.getAttachedObject(selected, Group.class));
+		}
+		return groups;
+	}
+	
+	/** FIXME this is only here for debug purposes. */
 	@Override
 	public Object getPanelComponent() {
 		return super.getPanelComponent();
 	}
 	
-	/**
-	 * Adds a new group to the UI
-	 */
+	/** Adds a new group to the tree */
 	public void addGroup(Group group) {
 		ui.add(getNodeForGroup(group.getParent()), createNode(group, true));
 	}
@@ -95,23 +119,6 @@ public class GroupSelecter extends BasePanelHandler {
 			}
 		}
 		return ret;
-	}
-	
-	/** @return a single group selected in the tree */
-	private Group getSelectedGroup() {
-		assert(!this.allowMultipleSelections) : "Cannot get a single selection if multiple groups are selectable.";
-		return ui.getAttachedObject(ui.getSelectedItem(this.getGroupTreeComponent()), Group.class);
-	}
-	
-	/** @return groups selected in the tree */
-	private Collection<Group> getSelectedGroups() {
-		assert(this.allowMultipleSelections) : "Cannot get multiple groups if multiple selection is not enabled.";
-		Object[] selectedItems = ui.getSelectedItems(this.getGroupTreeComponent());
-		HashSet<Group> groups = new HashSet<Group>();
-		for(Object selected : selectedItems) {
-			groups.add(ui.getAttachedObject(selected, Group.class));
-		}
-		return groups;
 	}
 	
 	private Object getGroupTreeComponent() {

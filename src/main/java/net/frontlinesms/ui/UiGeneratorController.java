@@ -1060,62 +1060,62 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		} else throw new RuntimeException();
 	}
 
-	/**
-	 * Get's the group from the selected node of the groups list
-	 * @param selected
-	 * @return
-	 */
-	public Group getGroupFromSelectedNode(Object selected) {
-		while (selected != null && !isAttachment(selected, Group.class)) selected = getParent(selected);
-		if (selected == null) return null;
-		return getGroup(selected);
-	}
+//	/**
+//	 * Get's the group from the selected node of the groups list
+//	 * @param selected
+//	 * @return
+//	 */
+//	public Group getGroupFromSelectedNode(Object selected) {
+//		while (selected != null && !isAttachment(selected, Group.class)) selected = getParent(selected);
+//		if (selected == null) return null;
+//		return getGroup(selected);
+//	}
 
-	/**
-	 * Creates a node for the supplied group, creating nodes for its sub-groups and contacts as well.
-	 * 
-	 * @param group The group to be put into a node.
-	 * @param showContactsNumber set <code>true</code> to show the number of contacts per group in the node's text or <code>false</code> otherwise
-	 *   TODO removing this argument, and treating it as always <code>false</code> speeds up the contact tab a lot
-	 * @return
-	 */
-	public Object getNode(Group group, boolean showContactsNumber) {
-		LOG.trace("ENTER");
-		
-		LOG.debug("Group [" + group.getName() + "]");
-		
-		String toSet = group.getName();
-		if (showContactsNumber) {
-			toSet += " (" + group.getAllMembers().size() + ")";
-		}
-		
-		Object node = createNode(toSet, group);
-
-		if ((getBoolean(node, EXPANDED) && group.hasDescendants()) || group == this.rootGroup) {
-			setIcon(node, Icon.FOLDER_OPEN);
-		} else {
-			setIcon(node, Icon.FOLDER_CLOSED);
-		}
-		
-		if (group.equals(this.unnamedContacts)) {
-			setString(node, TOOLTIP, InternationalisationUtils.getI18NString(TOOLTIP_UNNAMED_GROUP));
-		} else if(group.equals(this.ungroupedContacts)) {
-			setString(node, TOOLTIP, InternationalisationUtils.getI18NString(TOOLTIP_UNGROUPED_GROUP));
-		} 
-		
-		if (group == rootGroup) {
-			add(node, getNode(this.ungroupedContacts, showContactsNumber));
-			add(node, getNode(this.unnamedContacts, showContactsNumber));
-		}
-		
-		// Add subgroup components to this node
-		for (Group subGroup : group.getDirectSubGroups()) {
-			Object groupNode = getNode(subGroup, showContactsNumber);
-			add(node, groupNode);
-		}
-		LOG.trace("EXIT");
-		return node;
-	}
+//	/**
+//	 * Creates a node for the supplied group, creating nodes for its sub-groups and contacts as well.
+//	 * 
+//	 * @param group The group to be put into a node.
+//	 * @param showContactsNumber set <code>true</code> to show the number of contacts per group in the node's text or <code>false</code> otherwise
+//	 *   TODO removing this argument, and treating it as always <code>false</code> speeds up the contact tab a lot
+//	 * @return
+//	 */
+//	public Object getNode(Group group, boolean showContactsNumber) {
+//		LOG.trace("ENTER");
+//		
+//		LOG.debug("Group [" + group.getName() + "]");
+//		
+//		String toSet = group.getName();
+//		if (showContactsNumber) {
+//			toSet += " (" + group.getAllMembers().size() + ")";
+//		}
+//		
+//		Object node = createNode(toSet, group);
+//
+//		if ((getBoolean(node, EXPANDED) && group.hasDescendants()) || group == this.rootGroup) {
+//			setIcon(node, Icon.FOLDER_OPEN);
+//		} else {
+//			setIcon(node, Icon.FOLDER_CLOSED);
+//		}
+//		
+//		if (group.equals(this.unnamedContacts)) {
+//			setString(node, TOOLTIP, InternationalisationUtils.getI18NString(TOOLTIP_UNNAMED_GROUP));
+//		} else if(group.equals(this.ungroupedContacts)) {
+//			setString(node, TOOLTIP, InternationalisationUtils.getI18NString(TOOLTIP_UNGROUPED_GROUP));
+//		} 
+//		
+//		if (group == rootGroup) {
+//			add(node, getNode(this.ungroupedContacts, showContactsNumber));
+//			add(node, getNode(this.unnamedContacts, showContactsNumber));
+//		}
+//		
+//		// Add subgroup components to this node
+//		for (Group subGroup : group.getDirectSubGroups()) {
+//			Object groupNode = getNode(subGroup, showContactsNumber);
+//			add(node, groupNode);
+//		}
+//		LOG.trace("EXIT");
+//		return node;
+//	}
 	
 	/**
 	 * Get the status of a {@link Message} as a {@link String}.

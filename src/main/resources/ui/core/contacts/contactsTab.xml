@@ -3,8 +3,9 @@
 	<splitpane divider="380" weightx="1" weighty="1">
 	    <panel bottom="9" columns="2" gap="9" left="9" right="9" top="9">
 	        <label icon="/icons/header/contactManager.png" valign="top"/>
-	        <panel rowspan="2" border="true" bottom="4" columns="1" gap="8" icon="/icons/group.png" left="4" right="4" text="i18n.common.groups" top="4" weightx="1" weighty="1">
-	            <tree delete="showDeleteOptionDialog(contactManager_groupList)" action="selectionChanged(this, pnContacts)" collapse="groupList_expansionChanged(this)" expand="groupList_expansionChanged(this)" name="contactManager_groupList" perform="showContactDetails(this)" weightx="1" weighty="1">
+	        <panel name="pnGroupsContainer"
+	        		rowspan="2" border="true" bottom="4" columns="1" gap="8" icon="/icons/group.png" left="4" right="4" text="i18n.common.groups" top="4" weightx="1" weighty="1">
+	            <!--  <tree delete="showDeleteOptionDialog(contactManager_groupList)" action="selectionChanged(this, pnContacts)" collapse="groupList_expansionChanged(this)" expand="groupList_expansionChanged(this)" name="contactManager_groupList" perform="showContactDetails(this)" weightx="1" weighty="1">
 	                <popupmenu menushown="populateGroups(this, contactManager_groupList)" name="menu">
 	                    <menu icon="/icons/group_join.png" name="groupsMenu" text="i18n.action.add.to.group"/>
 	                    <menuitem action="showNewGroupDialog(contactManager_groupList)" icon="/icons/group_add.png" name="newGroup" text="i18n.action.new.group"/>
@@ -15,11 +16,11 @@
 	                    <menuitem text="i18n.action.new.contact" action="showNewContactDialog()" icon="/icons/user_add.png" name="miNewContact"/>
 	                    <menuitem action="showDeleteOptionDialog(contactManager_groupList)" icon="/icons/group_delete.png" name="miDelete" text="i18n.action.delete" tooltip="i18n.tooltip.remove.contacts.and.groups"/>
 	                </popupmenu>
-	            </tree>
+	            </tree>  -->
 	            <panel gap="5">
-	                <button action="showNewGroupDialog(contactManager_groupList)" icon="/icons/big_group_add.png" text="i18n.action.new.group" weightx="1" weighty="1"/>
-	                <button action="showDeleteOptionDialog(contactManager_groupList)" icon="/icons/big_group_delete.png" name="deleteButton" text="i18n.action.delete" weightx="1" weighty="1" enabled="false"/>
-	                <button action="show_composeMessageForm(contactManager_groupList)" icon="/icons/big_sms_send.png" name="sendSMSButtonGroupSide" text="i18n.action.send.sms" weightx="1" weighty="1" enabled="false"/>
+	                <button action="showNewGroupDialog" icon="/icons/big_group_add.png" text="i18n.action.new.group" weightx="1" weighty="1"/>
+	                <button action="showDeleteOptionDialog" icon="/icons/big_group_delete.png" name="deleteButton" text="i18n.action.delete" weightx="1" weighty="1" enabled="false"/>
+	                <button action="show_composeMessageForm" icon="/icons/big_sms_send.png" name="sendSMSButtonGroupSide" text="i18n.action.send.sms" weightx="1" weighty="1" enabled="false"/>
 	            </panel>
 	        </panel>
 	        <button tooltip="i18n.tooltip.click.for.help" valign="bottom" action="showHelpPage('contacts.htm')" icon="/icons/big_help.png" type="link"/>

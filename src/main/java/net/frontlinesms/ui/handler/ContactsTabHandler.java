@@ -18,7 +18,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTA
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_EMAIL_ADDRESS;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_MANAGER_CONTACT_FILTER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_MANAGER_CONTACT_LIST;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_MANAGER_GROUP_TREE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_MOBILE_MSISDN;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_NAME;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_NOTES;
@@ -60,7 +59,7 @@ import thinlet.Thinlet;
  * Event handler for the Contacts tab and associated dialogs.
  * @author Alex
  */
-public class ContactsTabHandler extends BaseTabHandler implements PagedComponentItemProvider {
+public class ContactsTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterOwner {
 //> STATIC CONSTANTS
 	/** UI XML File Path: the Home Tab itself */
 	private static final String UI_FILE_CONTACTS_TAB = "/ui/core/contacts/contactsTab.xml";
@@ -68,6 +67,8 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	private static final String UI_FILE_CREATE_CONTACT_FORM = "/ui/core/contacts/dgEditContact.xml";
 	private static final String UI_FILE_DELETE_OPTION_DIALOG_FORM = "/ui/dialog/deleteOptionDialogForm.xml"; // TODO move this to the correct path
 	private static final String UI_FILE_NEW_GROUP_FORM = "/ui/dialog/newGroupForm.xml"; // TODO move this to the correct path
+	
+	private static final String COMPONENT_GROUP_SELECTER_CONTAINER = "pnGroupsContainer";
 	
 //> INSTANCE PROPERTIES
 	/** Logging object */
@@ -79,9 +80,8 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	/** Data access object for {@link Contact}s */
 	private final ContactDao contactDao;
 	
+	
 //> CACHED THINLET UI COMPONENTS
-	/** UI Component: group tree.  This is cached here to save searching for it later. */
-	private Object groupListComponent;
 	/** UI Component component: contact list.  This is cached here to save searching for it later. */
 	private Object contactListComponent;
 	
@@ -89,6 +89,8 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	private ComponentPagingHandler contactListPager;
 	/** String to filter the contacts by */
 	private String contactNameFilter;
+
+	private final GroupSelecter groupSelecter;
 
 //> CONSTRUCTORS
 	/**
@@ -101,12 +103,51 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		super(ui);
 		this.contactDao = contactDao;
 		this.groupDao = groupDao;
+		this.groupSelecter = new GroupSelecter(ui, this);
+	}
+	
+	@Override
+	public void init() {
+		super.init();
+		this.groupSelecter.init(ui.getRootGroup());
+		ui.add(find(COMPONENT_GROUP_SELECTER_CONTAINER), this.groupSelecter.getPanelComponent());
 	}
 
 //> ACCESSORS
 	/** Refreshes the data displayed in the tab. */
 	public void refresh() {
 		updateGroupList();
+	}
+	
+//> GROUP SELECTION METHODS
+	public void groupSelectionChanged(Group selectedGroup) {
+		System.out.println("Group selected: " + selectedGroup);
+//	}
+//	
+//	/**
+//	 * Method invoked when the group/contacts tree selection changes. 
+//	 * <br>This method updated the contact list according to the new selection.
+//	 * @param tree
+//	 * @param panel 
+//	 */
+//	public void selectionChanged(Object tree, Object panel) {
+		LOG.trace("ENTER");
+		this.ui.setText(this.ui.find(COMPONENT_CONTACT_MANAGER_CONTACT_FILTER), "");
+
+//		Group g = this.ui.getGroup(this.ui.getSelectedItem(tree));
+		Group g = this.groupSelecter.getSelectedGroup();
+		String toSet = InternationalisationUtils.getI18NString(COMMON_CONTACTS_IN_GROUP, g.getName());
+		this.ui.setText(find("pnContacts"), toSet); // FIXME this should be a constant
+		
+		Object buttonPanelContainer = find(COMPONENT_GROUP_SELECTER_CONTAINER);
+		Object deleteButton = this.ui.find(buttonPanelContainer, "deleteButton"); // FIXME this should be a constant
+		this.ui.setEnabled(deleteButton, !this.ui.isDefaultGroup(g));
+		
+		Object sms = this.ui.find(buttonPanelContainer, "sendSMSButtonGroupSide"); // FIXME this should be a constant
+		this.ui.setEnabled(sms, g != null);
+		
+		updateContactList();
+		LOG.trace("EXIT");
 	}
 	
 //> PAGING METHODS
@@ -145,41 +186,12 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 * the selected contacts from database.
 	 * @param list
 	 */
-	public void showDeleteOptionDialog(Object list) {
-		LOG.trace("ENTER");
-		Object selected = this.ui.getSelectedItem(list);
-		if (selected != null) {
-			Group g = this.ui.getGroup(selected);
-			if (!this.ui.isDefaultGroup(g)) {
-				Object deleteDialog = ui.loadComponentFromFile(UI_FILE_DELETE_OPTION_DIALOG_FORM, this);
-				ui.add(deleteDialog);
-			}
+	public void showDeleteOptionDialog() {
+		Group g = this.groupSelecter.getSelectedGroup();
+		if (!this.ui.isDefaultGroup(g)) {
+			Object deleteDialog = ui.loadComponentFromFile(UI_FILE_DELETE_OPTION_DIALOG_FORM, this);
+			ui.add(deleteDialog);
 		}
-		LOG.trace("EXIT");
-	}
-	
-	/**
-	 * Method invoked when the group/contacts tree selection changes. 
-	 * <br>This method updated the contact list according to the new selection.
-	 * @param tree
-	 * @param panel 
-	 */
-	public void selectionChanged(Object tree, Object panel) {
-		LOG.trace("ENTER");
-		this.ui.setText(this.ui.find(COMPONENT_CONTACT_MANAGER_CONTACT_FILTER), "");
-
-		Group g = this.ui.getGroup(this.ui.getSelectedItem(tree));
-		String toSet = InternationalisationUtils.getI18NString(COMMON_CONTACTS_IN_GROUP, g.getName());
-		this.ui.setText(panel, toSet);
-		
-		Object deleteButton = this.ui.find(this.ui.getParent(tree), "deleteButton");
-		this.ui.setEnabled(deleteButton, !this.ui.isDefaultGroup(g));
-		
-		Object sms = this.ui.find(this.ui.getParent(tree), "sendSMSButtonGroupSide");
-		this.ui.setEnabled(sms, g != null);
-		
-		updateContactList();
-		LOG.trace("EXIT");
 	}
 
 	/**
@@ -285,9 +297,10 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 * Shows the new group dialog.
 	 * @param groupList
 	 */
-	public void showNewGroupDialog(Object groupList) {
+	public void showNewGroupDialog() {
 		Object newGroupForm = this.ui.loadComponentFromFile(UI_FILE_NEW_GROUP_FORM, this);
-		this.ui.setAttachedObject(newGroupForm, this.ui.getGroupFromSelectedNode(this.ui.getSelectedItem(groupList)));
+		ui.setAttachedObject(newGroupForm, this.groupSelecter.getSelectedGroup());
+//		this.ui.setAttachedObject(newGroupForm, this.ui.getGroupFromSelectedNode(this.ui.getSelectedItem(groupList)));
 		this.ui.add(newGroupForm);
 	}
 
@@ -324,7 +337,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	public void showNewContactDialog() {
 		Object createDialog = this.ui.loadComponentFromFile(UI_FILE_CREATE_CONTACT_FORM, this);
 		Object list = this.ui.find(createDialog, COMPONENT_NEW_CONTACT_GROUP_LIST);
-		Group sel = this.ui.getGroup(this.ui.getSelectedItem(this.groupListComponent));
+		Group sel = this.groupSelecter.getSelectedGroup();
 		List<Group> allGroups = this.groupDao.getAllGroups();
 		for (Group g : allGroups) {
 			Object item = this.ui.createListItem(g.getName(), g);
@@ -393,37 +406,39 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 */
 	public void removeSelectedFromGroupList(final Object button, Object dialog) {
 		LOG.trace("ENTER");
-		final Object[] selected;
-		selected = this.ui.getSelectedItems(groupListComponent);
+//		final Object[] selected;
+//		selected = this.ui.getSelectedItems(groupListComponent);
 		if (dialog != null) {
 			this.ui.removeDialog(dialog);
 		}
-		for (Object o : selected) {
-			Group group = ui.getGroupFromSelectedNode(o);
-			if(!ui.isDefaultGroup(group)) {
+//		for (Object o : selected) {
+//			Group group = ui.getGroupFromSelectedNode(o);
+			Group selectedGroup = this.groupSelecter.getSelectedGroup();
+			if(!ui.isDefaultGroup(selectedGroup)) {
 				boolean removeContactsAlso = false;
 				if (button != null) {
 					removeContactsAlso = ui.getName(button).equals(COMPONENT_BUTTON_YES);
 				}
-				LOG.debug("Selected Group [" + group.getName() + "]");
+				LOG.debug("Selected Group [" + selectedGroup.getName() + "]");
 				LOG.debug("Remove Contacts from database [" + removeContactsAlso + "]");
-				if (!ui.isDefaultGroup(group)) {
+				if (!ui.isDefaultGroup(selectedGroup)) {
 					//Inside a default group
-					LOG.debug("Removing group [" + group.getName() + "] from database");
-					groupDao.deleteGroup(group, removeContactsAlso);
+					LOG.debug("Removing group [" + selectedGroup.getName() + "] from database");
+					groupDao.deleteGroup(selectedGroup, removeContactsAlso);
 				} else {
 					if (removeContactsAlso) {
 						LOG.debug("Group not destroyable, removing contacts...");
-						for (Contact c : group.getDirectMembers()) {
+						for (Contact c : selectedGroup.getDirectMembers()) {
 							LOG.debug("Removing contact [" + c.getName() + "] from database");
 							contactDao.deleteContact(c);
 						}
 					}
 				}
 			}
-		}
-		Object sms = ui.find(ui.getParent(groupListComponent), "sendSMSButtonGroupSide");
-		ui.setEnabled(sms, ui.getSelectedItems(groupListComponent).length > 0);
+//		}
+		Object sms = ui.find(find(COMPONENT_GROUP_SELECTER_CONTAINER), "sendSMSButtonGroupSide");
+//		ui.setEnabled(sms, ui.getSelectedItems(groupListComponent).length > 0);
+		ui.setEnabled(sms, selectedGroup != null);
 		ui.alert(InternationalisationUtils.getI18NString(MESSAGE_GROUPS_AND_CONTACTS_DELETED));
 		refresh();
 		LOG.trace("EXIT");
@@ -541,29 +556,29 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	}
 	
 //> PRIVATE UI HELPER METHODS
-	/**
-	 * Gets the node we are currently displaying for a group.
-	 * @param component
-	 * @param group
-	 * @return
-	 */
-	private Object getNodeForGroup(Object component, Group group) {
-		if(group == null) {
-			group = this.ui.getRootGroup();
-		}
-		Object ret = null;
-		for (Object o : this.ui.getItems(component)) {
-			Group g = this.ui.getGroup(o);
-			if (g.equals(group)) {
-				ret = o;
-				break;
-			} else {
-				ret = getNodeForGroup(o, group);
-				if (ret != null) break;
-			}
-		}
-		return ret;
-	}
+//	/**
+//	 * Gets the node we are currently displaying for a group.
+//	 * @param component
+//	 * @param group
+//	 * @return
+//	 */
+//	private Object getNodeForGroup(Object component, Group group) {
+//		if(group == null) {
+//			group = this.ui.getRootGroup();
+//		}
+//		Object ret = null;
+//		for (Object o : this.ui.getItems(component)) {
+//			Group g = this.ui.getGroup(o);
+//			if (g.equals(group)) {
+//				ret = o;
+//				break;
+//			} else {
+//				ret = getNodeForGroup(o, group);
+//				if (ret != null) break;
+//			}
+//		}
+//		return ret;
+//	}
 	/**
 	 * @param tree
 	 * @return all the selected contacts to show in the contact list
@@ -586,10 +601,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		
 		return toBeShown;
 	}
-	/** @return {@link #groupListComponent} - the Thinlet TREE component displaying the tree of {@link Group}s. */
-	private Object getGroupTreeComponent() {
-		return this.groupListComponent;
-	}
+
 	/**
 	 * Show the form to allow merging between a previously-created contact, and an attempted-newly-created contact.
 	 * TODO if we work out a good-looking way of doing this, we should implement it.  Currently this just warns the user that a contact with this number already exists.
@@ -625,10 +637,11 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			Group g = new Group(selectedParentGroup, newGroupName);
 			this.groupDao.saveGroup(g);
 			
-			// Now we've saved the group, add it to the groups tree displayed in the contacts manager
-			Object groupListComponent = getGroupTreeComponent();
-			Object parentNode = getNodeForGroup(groupListComponent, selectedParentGroup);
-			this.ui.add(parentNode, this.ui.getNode(g, true));
+			this.groupSelecter.addGroup(g);
+//			// Now we've saved the group, add it to the groups tree displayed in the contacts manager
+//			Object groupListComponent = getGroupTreeComponent();
+//			Object parentNode = getNodeForGroup(groupListComponent, selectedParentGroup);
+//			this.ui.add(parentNode, this.ui.getNode(g, true));
 			
 			if (dialog != null) this.ui.remove(dialog);
 			LOG.debug("Group created successfully!");
@@ -638,10 +651,10 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		}
 		LOG.trace("EXIT");
 	}
-	private void updateTree(Group group) {
-		Object node = getNodeForGroup(groupListComponent, group); //Only advanced mode
-		updateGroup(group, node);
-	}
+//	private void updateTree(Group group) {
+//		Object node = getNodeForGroup(groupListComponent, group); //Only advanced mode
+//		updateGroup(group, node);
+//	}
 	
 	/**
 	 * Finds a child component by name, and then sets its text value.
@@ -695,14 +708,15 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 
 	/** Updates the group tree. */
 	private void updateGroupList() {
-		Object groupListComponent = getGroupTreeComponent();
-		
-		Object selected = this.ui.getSelectedItem(groupListComponent);
-		
-		this.ui.removeAll(groupListComponent);
-		this.ui.add(groupListComponent, this.ui.getNode(this.ui.getRootGroup(), true));
-
-		this.ui.setSelectedGC(selected, groupListComponent);
+//		Object groupListComponent = getGroupTreeComponent();
+//		
+//		Object selected = this.ui.getSelectedItem(groupListComponent);
+//		
+//		this.ui.removeAll(groupListComponent);
+//		this.ui.add(groupListComponent, this.ui.getNode(this.ui.getRootGroup(), true));
+//
+//		this.ui.setSelectedGC(selected, groupListComponent);
+		this.groupSelecter.refresh();
 		
 		updateContactList();
 	}
@@ -717,10 +731,9 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 //> EVENT HANDLER METHODS
 	public void addToContactList(Contact contact, Group group) {
 		List<Group> selectedGroupsFromTree = new ArrayList<Group>();
-		for (Object o : this.ui.getSelectedItems(groupListComponent)) {
-			Group g = this.ui.getGroup(o);
-			selectedGroupsFromTree.add(g);
-		}
+		
+		Group g = this.groupSelecter.getSelectedGroup();
+		selectedGroupsFromTree.add(g);
 		
 		if (selectedGroupsFromTree.contains(group)) {
 			int limit = this.contactListPager.getMaxItemsPerPage();
@@ -730,13 +743,22 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			}
 		}
 		
-		updateTree(group);
+		this.groupSelecter.refresh();
+//		updateTree(group);
 	}
 	
 //> UI PASS-THROUGH METHODS TO UiGC
 	/** @see UiGeneratorController#groupList_expansionChanged(Object) */
 	public void groupList_expansionChanged(Object groupList) {
 		this.ui.groupList_expansionChanged(groupList);
+	}
+	/**
+	 * Shows the compose message dialog, populating the list with the selection of the 
+	 * supplied list.
+	 * @param list
+	 */
+	public void show_composeMessageForm() {
+		this.ui.show_composeMessageForm(this.groupSelecter.getPanelComponent());
 	}
 	/**
 	 * Shows the compose message dialog, populating the list with the selection of the 
@@ -762,7 +784,6 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		
 		
 		// Cache Thinlet UI components
-		groupListComponent = this.ui.find(tabComponent, COMPONENT_CONTACT_MANAGER_GROUP_TREE);
 		contactListComponent = this.ui.find(tabComponent, COMPONENT_CONTACT_MANAGER_CONTACT_LIST);
 		
 		this.contactListPager = new ComponentPagingHandler(this.ui, this, contactListComponent);
