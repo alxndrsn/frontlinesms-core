@@ -80,7 +80,6 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_LB_REMAINING_CHARS = "lbRemainingChars";
 	public static final String COMPONENT_PN_MESSAGE = "pnMessage";
 	public static final String COMPONENT_PN_SEND = "pnSend";
-	public static final String COMPONENT_TF_IMAGE_SOURCE = "tfImageSource";
 	public static final String COMPONENT_KEY_ACT_PANEL = "keyActPanel";
 	public static final String COMPONENT_BT_CLEAR = "btClear";
 	public static final String COMPONENT_CB_LEAVE_GROUP = "cbLeaveGroup";
@@ -110,7 +109,6 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_BT_DELETE = "btDelete";
 	public static final String COMPONENT_MI_DELETE = "miDelete";
 	public static final String COMPONENT_MI_EDIT = "miEdit";
-	public static final String COMPONENT_KEY_PANEL = "keyPanel";
 	public static final String COMPONENT_TF_RECIPIENT = "tfRecipient";
 	public static final String COMPONENT_RB_NO_RESPONSE = "rbNoResponse";
 	public static final String COMPONENT_PN_RESPONSE = "pnResponse";
