@@ -9,14 +9,19 @@
 	                <checkbox action="messageHistory_filterChanged" group="group" icon="/icons/group.png" name="cbGroups" text="i18n.common.groups" weightx="1"/>
 	                <checkbox action="messageHistory_filterChanged" group="group" icon="/icons/keyword.png" name="cbKeywords" text="i18n.common.keywords" weightx="1"/>
 	            </panel>
-	            <list action="updateMessageList" name="filterList" weightx="1" weighty="1">
-	            	<popupmenu menushown="messageHistory_enableSend(this, cbKeywords.selected)" name="menu">
-	                    <menuitem action="show_composeMessageForm(filterList)" icon="/icons/sms_send.png" name="miSendSMS" text="i18n.action.send.sms"/>
-	                </popupmenu>
-	            </list>
+	            <panel gap="9" name="pnContactList" weightx="1" weighty="1" columns="1" visible="false">
+		            <list action="updateMessageList" name="lsContacts" weightx="1" weighty="1">
+		            	<popupmenu menushown="lsContacts_enableSend(this)" name="menu">
+		                    <menuitem action="show_composeMessageForm(lsContacts)" icon="/icons/sms_send.png" name="miSendSMS" text="i18n.action.send.sms"/>
+		                </popupmenu>
+		            </list>
+		        </panel>
+	            <panel gap="9" name="pnKeywordList" weightx="1" weighty="1" columns="1" visible="false">
+		            <list action="updateMessageList" name="lsKeywords" weightx="1" weighty="1"/>
+		        </panel>
 	            <tree action="updateMessageList" collapse="groupList_expansionChanged(this)"
 	            		expand="groupList_expansionChanged(this)" name="messageHistory_groupList"
-	            		weightx="1" weighty="1" visible="true"/>
+	            		weightx="1" weighty="1" visible="true" weightx="1" weighty="1" visible="false"/>
 	        </panel>
 	        <panel name="pnMessageList" columns="2" gap="9" left="9" right="9">
 	            <panel colspan="2" gap="8" weightx="1">

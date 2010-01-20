@@ -58,6 +58,9 @@ public class ComponentPagingHandler implements ThinletUiEventHandler {
 	 * @param list The list that this will handle paging for.
 	 */
 	public ComponentPagingHandler(UiGeneratorController ui, PagedComponentItemProvider itemProvider, Object list) {
+		assert(ui!=null) : "Must supply non-null UI";
+		assert(itemProvider!=null) : "Must supply non-null itemProvider";
+		assert(list!=null) : "Must supply non-null list";
 		this.ui = ui;
 		this.itemProvider = itemProvider;
 		this.list = list;
