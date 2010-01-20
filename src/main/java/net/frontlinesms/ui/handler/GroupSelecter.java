@@ -36,13 +36,15 @@ public class GroupSelecter extends BasePanelHandler {
 	}
 
 	/** Initialise the selecter. */
-	public void init(Group rootGroup) {
+	public void init(Group...rootGroups) {
 		super.loadPanel(XML_LAYOUT_GROUP_PANEL);
 		
 		// TODO update selection of group tree appropriate to allowMultipleSelections
 		
 		// add nodes for group tree
-		ui.add(getGroupTreeComponent(), getNode(rootGroup, true));
+		for(Group rootGroup : rootGroups) {
+			ui.add(getGroupTreeComponent(), createNode(rootGroup, true));
+		}
 	}
 	
 	private void setAllowMultipleSelections(boolean allowMultipleSelections) {
@@ -56,6 +58,13 @@ public class GroupSelecter extends BasePanelHandler {
 		return super.getPanelComponent();
 	}
 	
+	/**
+	 * Adds a new group to the UI
+	 */
+	public void addGroup(Group group) {
+		ui.add(getNodeForGroup(group.getParent()), createNode(group, true));
+	}
+	
 //> UI EVENT METHODS
 	public void selectionChanged() {
 		if(owner instanceof SingleGroupSelecterOwner) {
@@ -66,6 +75,28 @@ public class GroupSelecter extends BasePanelHandler {
 	}
 
 //> UI HELPER METHODS
+	/**
+	 * Gets the node we are currently displaying for a group.
+	 * @param component
+	 * @param group
+	 * @return
+	 */
+	private Object getNodeForGroup(Group group) {
+		Object groupTree = this.getGroupTreeComponent();
+		Object ret = null;
+		for (Object o : this.ui.getItems(groupTree)) {
+			Group g = ui.getAttachedObject(o, Group.class);
+			if (g.equals(group)) {
+				ret = o;
+				break;
+			} else {
+				ret = getNodeForGroup(group);
+				if (ret != null) break;
+			}
+		}
+		return ret;
+	}
+	
 	/** @return a single group selected in the tree */
 	private Group getSelectedGroup() {
 		assert(!this.allowMultipleSelections) : "Cannot get a single selection if multiple groups are selectable.";
@@ -95,7 +126,7 @@ public class GroupSelecter extends BasePanelHandler {
 	 *   TODO removing this argument, and treating it as always <code>false</code> speeds up the contact tab a lot
 	 * @return
 	 */
-	private Object getNode(Group group, boolean showContactsNumber) {
+	private Object createNode(Group group, boolean showContactsNumber) {
 		LOG.trace("ENTER");
 		
 		LOG.debug("Group [" + group.getName() + "]");
@@ -115,7 +146,7 @@ public class GroupSelecter extends BasePanelHandler {
 		
 		// Add subgroup components to this node
 		for (Group subGroup : group.getDirectSubGroups()) {
-			Object groupNode = getNode(subGroup, showContactsNumber);
+			Object groupNode = createNode(subGroup, showContactsNumber);
 			ui.add(node, groupNode);
 		}
 		LOG.trace("EXIT");

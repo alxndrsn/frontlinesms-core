@@ -1789,7 +1789,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void showGroupSelecter() {
 		Object dialog = super.createDialog("Group Selecter Test");
 		GroupSelecter selecter = new GroupSelecter(this, this);
-		selecter.init(this.rootGroup);
+		selecter.init(this.groupDao.getChildGroups(null).toArray(new Group[0]));
 		add(dialog, selecter.getPanelComponent());
 		add(dialog);
 	}
