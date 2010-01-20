@@ -20,7 +20,7 @@
 	            <panel gap="5">
 	                <button action="showNewGroupDialog" icon="/icons/big_group_add.png" text="i18n.action.new.group" weightx="1" weighty="1"/>
 	                <button action="showDeleteOptionDialog" icon="/icons/big_group_delete.png" name="deleteButton" text="i18n.action.delete" weightx="1" weighty="1" enabled="false"/>
-	                <button action="show_composeMessageForm" icon="/icons/big_sms_send.png" name="sendSMSButtonGroupSide" text="i18n.action.send.sms" weightx="1" weighty="1" enabled="false"/>
+	                <button action="sendSmsToGroup" icon="/icons/big_sms_send.png" name="sendSMSButtonGroupSide" text="i18n.action.send.sms" weightx="1" weighty="1" enabled="false"/>
 	            </panel>
 	        </panel>
 	        <button tooltip="i18n.tooltip.click.for.help" valign="bottom" action="showHelpPage('contacts.htm')" icon="/icons/big_help.png" type="link"/>
@@ -41,7 +41,7 @@
 	                    <menu icon="/icons/group_join.png" name="groupsMenu" text="i18n.action.add.to.group"/>
 	                    <menu icon="/icons/group_leave.png" name="groupsMenuRemove" text="i18n.action.delete.from.group"/>
 	                    <separator name="sp1"/>
-	                    <menuitem action="show_composeMessageForm(contactManager_contactList)" icon="/icons/sms_send.png" name="miSendSMS" text="i18n.action.send.sms"/>
+	                    <menuitem action="sendSmsToContacts" icon="/icons/sms_send.png" name="miSendSMS" text="i18n.action.send.sms"/>
 	                    <menuitem action="showMessageHistory(contactManager_contactList)" icon="/icons/history.png" name="msg_history" text="i18n.action.message.history"/>
 	                    <menuitem action="showExportWizard(contactManager_contactList)" icon="/icons/export.png" name="miExportSelected" text="i18n.action.export.selected"/>
 	                    <separator name="sp2"/>
@@ -53,7 +53,7 @@
 	                <button action="showNewContactDialog()" icon="/icons/big_user_add.png" text="i18n.action.new.contact" weightx="1" weighty="1"/>
 	                <button action="showConfirmationDialog('deleteSelectedContacts')" enabled="false" icon="/icons/big_user_delete.png" name="deleteNewContact" text="i18n.action.delete.selected.contacts" weightx="1" weighty="1"/>
 	                <button action="showContactDetails(contactManager_contactList)" enabled="false" icon="/icons/big_user_edit.png" name="viewContactButton" text="i18n.action.edit" weightx="1" weighty="1"/>
-	                <button action="show_composeMessageForm(contactManager_contactList)" enabled="false" icon="/icons/big_sms_send.png" name="sendSMSButton" text="i18n.action.send.sms" weightx="1" weighty="1"/>
+	                <button action="sendSmsToContacts" enabled="false" icon="/icons/big_sms_send.png" name="sendSMSButton" text="i18n.action.send.sms" weightx="1" weighty="1"/>
 	            </panel>
 	        </panel>
 	    </panel>

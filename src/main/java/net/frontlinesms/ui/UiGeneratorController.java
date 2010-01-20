@@ -665,8 +665,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			show_composeMessageForm(recipients);
 		}
 	}
-	
-	private void show_composeMessageForm(Collection<Object> recipients) {
+
+	public void show_composeMessageForm(Collection<Object> recipients) {
 		numberToSend = recipients.size();
 		
 		Object dialog = loadComponentFromFile(UI_FILE_COMPOSE_MESSAGE_FORM);
@@ -709,6 +709,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				Contact contact = (Contact)attachedItem;
 				LOG.debug("Adding contact [" + contact.getName() + "] to the send list.");
 				recipients.add(getContact(selectedComponent));
+				show_composeMessageForm(recipients);
 			} else if (attachedItem instanceof Group) {
 				show_composeMessageForm((Group) attachedItem);
 			} else if (attachedItem instanceof Message) {

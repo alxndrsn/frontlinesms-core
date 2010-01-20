@@ -38,6 +38,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_VIEW_
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -763,21 +764,22 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	public void groupList_expansionChanged(Object groupList) {
 		this.ui.groupList_expansionChanged(groupList);
 	}
-	/**
-	 * Shows the compose message dialog, populating the list with the selection of the 
-	 * supplied list.
-	 * @param list
-	 */
-	public void show_composeMessageForm() {
+	/** Shows the compose message dialog for all members of the selected group. */
+	public void sendSmsToGroup() {
 		this.ui.show_composeMessageForm(this.groupSelecter.getSelectedGroup());
 	}
-	/**
-	 * Shows the compose message dialog, populating the list with the selection of the 
-	 * supplied list.
-	 * @param list
-	 */
-	public void show_composeMessageForm(Object list) {
-		this.ui.show_composeMessageForm(list);
+	/** Shows the compose message dialog for all selected contacts. */
+	public void sendSmsToContacts() {
+		Object[] selectedItems = ui.getSelectedItems(contactListComponent);
+		if(selectedItems.length > 0) {
+			HashSet<Object> contacts = new HashSet<Object>(); // Must be Objects because of stupid method sig of show_comp...
+			for(Object selectedItem : selectedItems) {
+				contacts.add(ui.getAttachedObject(selectedItem, Contact.class));
+			}
+
+			this.ui.show_composeMessageForm(contacts);	
+		}
+		
 	}
 	/**
 	 * Shows the export wizard dialog for exporting contacts.
