@@ -5,7 +5,7 @@ import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 
 public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSelecterPanelOwner {
-	private static final String XML_LAYOUT_GROUP_SELECTER_DIALOG = "/ui/core/util/dgGroupSelecter.xml";
+	private static final String XML_LAYOUT_GROUP_SELECTER_DIALOG = "/ui/core/contacts/dgGroupSelecter.xml";
 	private UiGeneratorController ui;
 	
 	private SingleGroupSelecterDialogOwner owner;

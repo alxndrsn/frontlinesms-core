@@ -22,7 +22,7 @@ import net.frontlinesms.ui.handler.BasePanelHandler;
 public class GroupSelecterPanel extends BasePanelHandler {
 	private Logger LOG = Logger.getLogger(this.getClass());
 
-	private static final String XML_LAYOUT_GROUP_PANEL = "/ui/core/util/pnGroupSelecter.xml";
+	private static final String XML_LAYOUT_GROUP_PANEL = "/ui/core/contacts/pnGroupSelecter.xml";
 	private static final String COMPONENT_GROUP_TREE = "trGroups";
 	
 	private GroupSelecterPanelOwner owner;

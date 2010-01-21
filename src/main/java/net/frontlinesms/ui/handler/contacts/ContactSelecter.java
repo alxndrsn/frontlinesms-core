@@ -26,7 +26,7 @@ public class ContactSelecter implements ThinletUiEventHandler, PagedComponentIte
 	
 //> UI CONSTANTS
 	/** UI XML Layout File: contact selecter dialog */
-	private static final String UI_FILE_CONTACT_SELECTER = "/ui/core/util/dgContactSelecter.xml";
+	private static final String UI_FILE_CONTACT_SELECTER = "/ui/core/contacts/dgContactSelecter.xml";
 	public static final String COMPONENT_CONTACT_SELECTER_OK_BUTTON = "contactSelecter_okButton";
 	public static final String COMPONENT_CONTACT_SELECTER_CONTACT_LIST = "contactSelecter_contactList";
 	public static final String COMPONENT_CONTACT_SELECTER_TITLE = "contactSelecter_title";
