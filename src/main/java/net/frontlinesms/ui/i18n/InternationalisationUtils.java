@@ -56,6 +56,8 @@ import thinlet.Thinlet;
 public class InternationalisationUtils {
 	
 //> STATIC PROPERTIES
+	/** The path to the default language bundle on the classpath. */
+	private static final String DEFAULT_LANGUAGE_BUNDLE_PATH = "/resources/languages/frontlineSMS.properties";
 	/** Logging object for this class */
 	private static Logger LOG = Utils.getLogger(InternationalisationUtils.class);
 	
@@ -206,7 +208,11 @@ public class InternationalisationUtils {
 	 * @throws IOException If there was a problem loading the default language bundle.  // TODO this should probably throw a runtimeexception of some sort
 	 */
 	public static final LanguageBundle getDefaultLanguageBundle() throws IOException {
-		return ClasspathLanguageBundle.create("/resources/languages/frontlineSMS.properties");
+		return ClasspathLanguageBundle.create(DEFAULT_LANGUAGE_BUNDLE_PATH);
+	}
+	
+	static InputStream getDefaultLanguageBundleInputStream() {
+		return ClasspathLanguageBundle.class.getResourceAsStream(DEFAULT_LANGUAGE_BUNDLE_PATH);
 	}
 	
 	/**
