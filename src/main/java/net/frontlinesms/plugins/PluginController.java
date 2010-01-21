@@ -43,14 +43,14 @@ public interface PluginController {
 
 	/**
 	 * Gets the default language bundle for text strings used in the UI of this plugin.
-	 * @return map of text keys to English translations of strings used in the UI of this plugin, or <code>null</code> if no text keys are required for this plugin
+	 * @return map of text keys to English translations of strings used in the UI of this plugin, or an empty map if no text keys are required for this plugin
 	 */
 	public Map<String, String> getDefaultTextResource();
 	
 	/**
 	 * Get the language bundle for text string to be used for the UI of this plugin in a particular language.
 	 * @param locale the {@link Locale} of the translation to use
-	 * @return map of text keys to translations of strings used in the UI of this plugin, or null if there is no translation available for this plugin.
+	 * @return map of text keys to translations of strings used in the UI of this plugin, or an empty map if there is no translation available for this plugin.
 	 */
 	public Map<String, String> getTextResource(Locale locale);
 }

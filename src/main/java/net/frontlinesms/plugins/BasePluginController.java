@@ -5,6 +5,7 @@ package net.frontlinesms.plugins;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 
@@ -74,8 +75,8 @@ public abstract class BasePluginController implements PluginController {
 	/** @see net.frontlinesms.plugins.PluginController#getDefaultTextResource() */
 	public Map<String, String> getDefaultTextResource() {
 		Map<String, String> defaultTextResource = getTextResource();
-		assert(defaultTextResource!=null):"The text resource for this plugin is not available.";
-		return defaultTextResource;
+		if(defaultTextResource != null) return defaultTextResource;
+		else return Collections.emptyMap();
 	}
 	
 	/** @see net.frontlinesms.plugins.PluginController#getTextResource(java.util.Locale) */
@@ -88,7 +89,9 @@ public abstract class BasePluginController implements PluginController {
 			Map<String, String> textResource = getTextResource(locale.getLanguage(), locale.getCountry());
 			if(textResource != null) return textResource;
 		}
-		return getTextResource(locale.getLanguage());
+		Map<String, String> textResource = getTextResource(locale.getLanguage());
+		if(textResource != null) return textResource;
+		else return Collections.emptyMap();
 	}
 
 //> INSTANCE HELPER METHODS	
