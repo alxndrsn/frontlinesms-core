@@ -11,7 +11,7 @@ import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.Provider;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
 import net.frontlinesms.smsdevice.properties.*;
-import net.frontlinesms.ui.handler.ContactSelecter;
+import net.frontlinesms.ui.handler.contacts.ContactSelecter;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 import org.apache.log4j.Logger;

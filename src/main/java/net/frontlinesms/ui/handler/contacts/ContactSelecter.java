@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui.handler;
+package net.frontlinesms.ui.handler.contacts;
 
 import java.util.List;
 
@@ -10,6 +10,9 @@ import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.handler.ComponentPagingHandler;
+import net.frontlinesms.ui.handler.PagedComponentItemProvider;
+import net.frontlinesms.ui.handler.PagedListDetails;
 
 /**
  * Handler class for selecting contacts.

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui.handler;
+package net.frontlinesms.ui.handler.contacts;
 
 /**
  * Owner of a GroupSelecter panel.

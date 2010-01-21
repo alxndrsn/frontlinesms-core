@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui.handler;
+package net.frontlinesms.ui.handler.contacts;
 
 import net.frontlinesms.data.domain.Group;
 

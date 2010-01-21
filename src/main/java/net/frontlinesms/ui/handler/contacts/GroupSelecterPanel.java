@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui.handler;
+package net.frontlinesms.ui.handler.contacts;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -13,6 +13,7 @@ import thinlet.Thinlet;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.Icon;
+import net.frontlinesms.ui.handler.BasePanelHandler;
 
 /**
  * @author aga

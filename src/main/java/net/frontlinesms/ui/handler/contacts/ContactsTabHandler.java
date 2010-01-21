@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui.handler;
+package net.frontlinesms.ui.handler.contacts;
 
 // TODO remove static imports
 import static net.frontlinesms.FrontlineSMSConstants.ACTION_ADD_TO_GROUP;
@@ -50,6 +50,10 @@ import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.handler.BaseTabHandler;
+import net.frontlinesms.ui.handler.ComponentPagingHandler;
+import net.frontlinesms.ui.handler.PagedComponentItemProvider;
+import net.frontlinesms.ui.handler.PagedListDetails;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 import org.apache.log4j.Logger;

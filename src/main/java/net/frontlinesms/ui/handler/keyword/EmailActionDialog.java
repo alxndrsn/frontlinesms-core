@@ -25,7 +25,7 @@ import net.frontlinesms.data.domain.KeywordAction;
 import net.frontlinesms.data.repository.EmailAccountDao;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
-import net.frontlinesms.ui.handler.ContactSelecter;
+import net.frontlinesms.ui.handler.contacts.ContactSelecter;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
