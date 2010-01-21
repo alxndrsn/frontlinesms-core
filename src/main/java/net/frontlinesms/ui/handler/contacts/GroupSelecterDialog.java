@@ -1,8 +1,11 @@
 package net.frontlinesms.ui.handler.contacts;
 
+import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.UiGeneratorControllerConstants;
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSelecterPanelOwner {
 	private static final String XML_LAYOUT_GROUP_SELECTER_DIALOG = "/ui/core/contacts/dgGroupSelecter.xml";
@@ -16,6 +19,14 @@ public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSe
 	public GroupSelecterDialog(UiGeneratorController ui, SingleGroupSelecterDialogOwner owner) {
 		this.ui = ui;
 		this.owner = owner;
+	}
+	
+	/**
+	 * Init with default title
+	 * @param rootGroups
+	 */
+	public void init(Group...rootGroups) {
+		init(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_GROUP), rootGroups);
 	}
 	
 	public void init(String title, Group...rootGroups) {

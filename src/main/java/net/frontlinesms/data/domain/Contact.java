@@ -86,7 +86,7 @@ public class Contact {
 	private boolean active;
 	
 	/** Groups that this chap is a member of. */
-	@ManyToMany(fetch=FetchType.EAGER, mappedBy=Group.COLUMN_DIRECT_MEMBERS, cascade=CascadeType.REMOVE)
+	@ManyToMany(fetch=FetchType.EAGER, mappedBy=Group.COLUMN_DIRECT_MEMBERS, cascade=CascadeType.ALL)
 	private Set<Group> groups = new HashSet<Group>();
 	
 //> CONSTRUCTORS

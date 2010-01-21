@@ -8,28 +8,19 @@ import static net.frontlinesms.FrontlineSMSConstants.ACTION_ADD_TO_GROUP;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_CONTACTS_IN_GROUP;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_GROUP;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_CONTACTS_DELETED;
-import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_EXISTENT_CONTACT;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUPS_AND_CONTACTS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUP_ALREADY_EXISTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_IMPOSSIBLE_TO_CREATE_A_GROUP_HERE;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_REMOVING_CONTACTS;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BUTTON_YES;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_DORMANT;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_EMAIL_ADDRESS;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_MANAGER_CONTACT_FILTER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_MANAGER_CONTACT_LIST;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_MOBILE_MSISDN;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_NAME;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_NOTES;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_OTHER_MSISDN;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_DELETE_NEW_CONTACT;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_GROUPS_MENU;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LABEL_STATUS;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_MENU_ITEM_MSG_HISTORY;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_MENU_ITEM_VIEW_CONTACT;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_MI_DELETE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_MI_SEND_SMS;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_CONTACT_GROUP_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_GROUP;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_CONTACTS;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RADIO_BUTTON_ACTIVE;
@@ -64,12 +55,10 @@ import thinlet.Thinlet;
  * Event handler for the Contacts tab and associated dialogs.
  * @author Alex
  */
-public class ContactsTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterPanelOwner {
+public class ContactsTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterPanelOwner, ContactEditorOwner {
 //> STATIC CONSTANTS
 	/** UI XML File Path: the Home Tab itself */
 	private static final String UI_FILE_CONTACTS_TAB = "/ui/core/contacts/contactsTab.xml";
-	/** UI XML File Path: Edit and Create dialog for {@link Contact} objects */
-	private static final String UI_FILE_CREATE_CONTACT_FORM = "/ui/core/contacts/dgEditContact.xml";
 	private static final String UI_FILE_DELETE_OPTION_DIALOG_FORM = "/ui/dialog/deleteOptionDialogForm.xml"; // TODO move this to the correct path
 	private static final String UI_FILE_NEW_GROUP_FORM = "/ui/dialog/newGroupForm.xml"; // TODO move this to the correct path
 	
@@ -155,6 +144,17 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		LOG.trace("EXIT");
 	}
 	
+//> CONTACT EDITING METHODS
+	/** @see ContactEditorOwner#contactCreationComplete(Contact) */
+	public void contactCreationComplete(Contact contact) {
+		// Refresh the Contacts tab, and make sure that the group and contact who were previously selected are still selected
+		updateContactList();
+	};
+	/** @see ContactEditorOwner#contactEditingComplete(Contact) */
+	public void contactEditingComplete(Contact contact) {
+		contactCreationComplete(contact);
+	}
+	
 //> PAGING METHODS
 	public PagedListDetails getListDetails(Object list, int startIndex, int limit) {
 		if(list == this.contactListComponent) {
@@ -197,6 +197,12 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	}
 
 //> UI METHODS
+	/** Show editor for new contact. */
+	public void showNewContactDialog() {
+		ContactEditor editor = new ContactEditor(ui, this);
+		editor.show(this.groupSelecter.getSelectedGroup());
+	}
+	
 	/**
 	 * Shows the delete option dialog, which asks the user if he/she wants to remove
 	 * the selected contacts from database.
@@ -217,8 +223,9 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 */
 	public void showContactDetails(Object list) {
 		Object selected = this.ui.getSelectedItem(list);
-		if (this.ui.isAttachment(selected, Contact.class)) {
-			showContactDetails(this.ui.getContact(selected));
+		if(selected != null) {
+			ContactEditor editor = new ContactEditor(ui, this);
+			editor.show(this.ui.getAttachedObject(selected, Contact.class));
 		}
 	}
 	
@@ -320,50 +327,6 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		this.ui.add(newGroupForm);
 	}
 
-	/**
-	 * Shows the edit contact dialog. If the contact is null, then all fields are blank since
-	 * it's a new contact. Otherwise we set the fields with the contact details, leaving it
-	 * for editing.
-	 * @param contact 
-	 */
-	private void showContactDetails(Contact contact) {
-		Object createDialog = this.ui.loadComponentFromFile(UI_FILE_CREATE_CONTACT_FORM, this);
-		this.ui.setAttachedObject(createDialog, contact);
-		if (contact != null) {
-			setText(createDialog, COMPONENT_CONTACT_NAME, contact.getName());
-			setText(createDialog, COMPONENT_CONTACT_MOBILE_MSISDN, contact.getPhoneNumber());
-			setText(createDialog, COMPONENT_CONTACT_OTHER_MSISDN, contact.getOtherPhoneNumber());
-			setText(createDialog, COMPONENT_CONTACT_EMAIL_ADDRESS, contact.getEmailAddress());
-			setText(createDialog, COMPONENT_CONTACT_NOTES, contact.getNotes());
-			contactDetails_setActive(createDialog, contact.isActive());
-
-			Object groupList = this.ui.find(createDialog, COMPONENT_NEW_CONTACT_GROUP_LIST);
-			for (Group g : contact.getGroups()) {
-				Object item = this.ui.createListItem(g.getName(), g);
-				this.ui.setIcon(item, Icon.GROUP);
-				this.ui.add(groupList, item);
-			}
-		}
-		this.ui.add(createDialog);
-	}
-
-	/**
-	 * Shows the new contact dialog. This method affects the advanced mode.
-	 */
-	public void showNewContactDialog() {
-		Object createDialog = this.ui.loadComponentFromFile(UI_FILE_CREATE_CONTACT_FORM, this);
-		Object list = this.ui.find(createDialog, COMPONENT_NEW_CONTACT_GROUP_LIST);
-		Group sel = this.groupSelecter.getSelectedGroup();
-		List<Group> allGroups = this.groupDao.getAllGroups();
-		for (Group g : allGroups) {
-			Object item = this.ui.createListItem(g.getName(), g);
-			this.ui.setIcon(item, Icon.GROUP);
-			this.ui.setSelected(item, g.equals(sel));
-			this.ui.add(list, item);
-		}
-		this.ui.add(createDialog);
-	}
-
 	/** Updates the list of contacts with the new filter. */
 	public void filterContacts() {
 		updateContactList();
@@ -461,57 +424,6 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	}
 
 	/**
-	 * Updates or create a contact with the details added by the user. <br>
-	 * This method is used by advanced mode, and also Contact Merge
-	 * TODO this method should be transactional
-	 * @param contactDetailsDialog
-	 */
-	public void saveContactDetailsAdvancedView(Object contactDetailsDialog) {
-		LOG.trace("ENTER");
-		Object attachment = this.ui.getAttachedObject(contactDetailsDialog);
-		Contact contact = null;
-		if (attachment != null) {
-			contact = (Contact)attachment;
-			LOG.debug("Attachment is a contact [" + contact.getName() + "]");
-		}
-		String name = getText(contactDetailsDialog, COMPONENT_CONTACT_NAME);
-		String msisdn = getText(contactDetailsDialog, COMPONENT_CONTACT_MOBILE_MSISDN);
-		String otherMsisdn = getText(contactDetailsDialog, COMPONENT_CONTACT_OTHER_MSISDN);
-		String emailAddress = getText(contactDetailsDialog, COMPONENT_CONTACT_EMAIL_ADDRESS);
-		String notes = getText(contactDetailsDialog, COMPONENT_CONTACT_NOTES);
-		boolean isActive = contactDetails_getActive(contactDetailsDialog);
-		
-		try {
-			if (contact == null) {
-				LOG.debug("Creating a new contact [" + name + ", " + msisdn + "]");
-				contact = new Contact(name, msisdn, otherMsisdn, emailAddress, notes, isActive);
-				this.contactDao.saveContact(contact);
-			} else {
-				// If this is not a new contact, we still need to update all details
-				// that would otherwise be set by the constructor called in the block
-				// above.
-				LOG.debug("Editing contact [" + contact.getName() + "]. Setting new values!");
-				contact.setPhoneNumber(msisdn);
-				contact.setName(name);
-				contact.setOtherPhoneNumber(otherMsisdn);
-				contact.setEmailAddress(emailAddress);
-				contact.setNotes(notes);
-				contact.setActive(isActive);
-				this.contactDao.updateContact(contact);
-			}
-
-			// Refresh the Contacts tab, and make sure that the group and contact who were previously selected are still selected
-			updateContactList();
-		} catch(DuplicateKeyException ex) {
-			LOG.debug("There is already a contact with this mobile number - cannot save!", ex);
-			showMergeContactDialog(contact, contactDetailsDialog);
-		} finally {
-			this.ui.removeDialog(contactDetailsDialog);
-		}
-		LOG.trace("EXIT");
-	}
-
-	/**
 	 * Removes the contacts selected in the contacts list from the group which is selected in the groups tree.
 	 * @param selectedGroup A set of thinlet components with group members attached to them.
 	 */
@@ -554,21 +466,6 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		// create the new group, update the group list and then remove the dialog.
 		Group selectedParentGroup = this.ui.getGroup(dialog);
 		doGroupCreation(newGroupName, dialog, selectedParentGroup);		
-	}
-
-	/**
-	 * Update the icon for active/dormant.
-	 * @param radioButton
-	 * @param label
-	 */
-	public void updateIconActive(Object radioButton, Object label) {
-		String icon;
-		if (this.ui.getName(radioButton).equals(COMPONENT_RADIO_BUTTON_ACTIVE)) {
-			icon = Icon.ACTIVE;
-		} else {
-			icon = Icon.DORMANT;
-		}
-		this.ui.setIcon(label, icon);
 	}
 	
 //> PRIVATE UI HELPER METHODS
@@ -617,14 +514,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		
 		return toBeShown;
 	}
-
-	/**
-	 * Show the form to allow merging between a previously-created contact, and an attempted-newly-created contact.
-	 * TODO if we work out a good-looking way of doing this, we should implement it.  Currently this just warns the user that a contact with this number already exists.
-	 */
-	private void showMergeContactDialog(Contact oldContact, Object createContactForm) { // FIXME remove arguments from this method
-		this.ui.alert(InternationalisationUtils.getI18NString(MESSAGE_EXISTENT_CONTACT));
-	}
+	
 	/**
 	 * Creates a group with the supplied name and inside the supplied parent .
 	 * 
@@ -671,49 +561,6 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 //		Object node = getNodeForGroup(groupListComponent, group); //Only advanced mode
 //		updateGroup(group, node);
 //	}
-	
-	/**
-	 * Finds a child component by name, and then sets its text value.
-	 * @param parentComponent The parent component to search within
-	 * @param componentName The name of the child component
-	 * @param value the value to set the child's TEXT attribute to
-	 */
-	private void setText(Object parentComponent, String componentName, String value) {
-		if(value == null) value = "";
-		this.ui.setText(this.ui.find(parentComponent, componentName), value);
-	}
-	
-	/**
-	 * Finds a child component by name, and gets its text value.
-	 * @param parentComponent The parent component to search within
-	 * @param componentName The name of the child component
-	 * @return the text attribute of the child
-	 */
-	private String getText(Object parentComponent, String componentName) {
-		return this.ui.getText(this.ui.find(parentComponent, componentName));
-	}
-	
-	/**
-	 * Set the current state of the active/dormant component.
-	 * @param contactDetails
-	 * @param active
-	 */
-	private void contactDetails_setActive(Object contactDetails, boolean active) {
-		this.ui.setSelected(this.ui.find(contactDetails, COMPONENT_RADIO_BUTTON_ACTIVE), active);
-		this.ui.setSelected(this.ui.find(contactDetails, COMPONENT_CONTACT_DORMANT), !active);
-		if (active) {
-			this.ui.setIcon(this.ui.find(contactDetails, COMPONENT_LABEL_STATUS), Icon.ACTIVE);
-		} else {
-			this.ui.setIcon(this.ui.find(contactDetails, COMPONENT_LABEL_STATUS), Icon.DORMANT);
-		}
-	}
-	/**
-	 * @param contactDetails contact details dialog
-	 * @return the current state of the active component 
-	 */
-	private boolean contactDetails_getActive(Object contactDetails) {
-		return this.ui.isSelected(this.ui.find(contactDetails, COMPONENT_RADIO_BUTTON_ACTIVE));
-	}
 	
 	/** Repopulates the contact list according to the current filter. */
 	public void updateContactList() {

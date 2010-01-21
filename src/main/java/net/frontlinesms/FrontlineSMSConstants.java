@@ -255,7 +255,6 @@ public final class FrontlineSMSConstants {
 	public static final String MESSAGE_MESSAGES_DELETED = "message.messages.deleted";
 	public static final String MESSAGE_REMOVING_MESSAGES = "message.removing.messages";
 	public static final String MESSAGE_GROUPS_AND_CONTACTS_DELETED = "message.group.and.contacts.deleted";
-	public static final String MESSAGE_EXISTENT_CONTACT = "message.contact.already.exists";
 	public static final String MESSAGE_PHONE_BLANK = "message.phone.number.blank";
 	public static final String MESSAGE_NO_GROUP_SELECTED = "message.no.group.selected.to.send";
 	public static final String MESSAGE_BLANK_PHONE_NUMBER = "message.no.phone.number.to.send";

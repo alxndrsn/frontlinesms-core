@@ -138,7 +138,6 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_LABEL_STATUS = "lbStatus";
 	public static final String COMPONENT_MENU_ITEM_VIEW_CONTACT = "viewContact";
 	public static final String COMPONENT_MENU_ITEM_MSG_HISTORY = "msg_history";
-	public static final String COMPONENT_NEW_CONTACT_GROUP_LIST = "newContact_groupList";
 	public static final String COMPONENT_MENU_ITEM_CREATE = "miCreate";
 	public static final String COMPONENT_STATUS_BAR = "statusBar";
 	public static final String COMPONENT_CONTACT_MANAGER_CONTACT_LIST = "contactManager_contactList";
@@ -149,12 +148,6 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_GROUP_SELECTER_TITLE = "groupSelecter_title";
 	public static final String COMPONENT_VIEW_CONTACT_BUTTON = "viewContactButton";
 	public static final String COMPONENT_SEND_SMS_BUTTON = "sendSMSButton";
-	public static final String COMPONENT_CONTACT_NAME = "contact_name";
-	public static final String COMPONENT_CONTACT_MOBILE_MSISDN = "contact_mobileMsisdn";
-	public static final String COMPONENT_CONTACT_OTHER_MSISDN = "contact_otherMsisdn";
-	public static final String COMPONENT_CONTACT_EMAIL_ADDRESS = "contact_emailAddress";
-	public static final String COMPONENT_CONTACT_NOTES = "contact_notes";
-	public static final String COMPONENT_CONTACT_DORMANT = "rb_dormant";
 	/** Thinlet Component Name: TODO document */
 	public static final String COMPONENT_CB_GROUPS = "cbGroups";
 }
