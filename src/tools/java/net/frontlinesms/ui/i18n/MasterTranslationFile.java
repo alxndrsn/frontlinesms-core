@@ -12,7 +12,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -22,11 +24,27 @@ import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginProperties;
 
 /**
- * This creates a master translation file, containing default translation for all available plugins.
+ * This creates a master translation file, containing translation for FrontlineSMS core and all available plugins.
  * @author Alex alex@frontlinesms.com
  */
 public class MasterTranslationFile {
+	private String filename;
 	private List<TextFileContent> translationFiles;
+
+	/** @return map of key-value pairs of translations found in the MTF */
+	public Map<String, String> getTranslationMap() {
+		HashMap<String, String> translations = new HashMap<String, String>();
+		for(TextFileContent file : this.translationFiles) {
+			for(String line : file.getLines()) {
+				line = line.trim();
+				if(line.length() > 0 && line.charAt(0)!='#') {
+					int eqIndex = line.indexOf('=');
+					translations.put(line.substring(0, eqIndex), line.substring(eqIndex+1));
+				}
+			}
+		}
+		return translations;
+	}
 	
 	/**
 	 * Initialise a {@link MasterTranslationFile} for a language other than the default.
@@ -34,10 +52,11 @@ public class MasterTranslationFile {
 	 * will have their translations fetched individually.
 	 */
 	private void init(FileLanguageBundle languageBundle) {
+		File file = languageBundle.getFile();
 		try {
-			initCoreLanguageBundle(new FileInputStream(languageBundle.getFile()));
+			initCoreLanguageBundle(file.getName(), new FileInputStream(file));
 		} catch (IOException ex) {
-			throw new RuntimeException("Failed to load language bundle from file: " + languageBundle.getFile().getAbsolutePath(), ex);
+			throw new RuntimeException("Failed to load language bundle from file: " + file.getAbsolutePath(), ex);
 		}
 		
 		// load localised bundles for all plugins
@@ -56,7 +75,7 @@ public class MasterTranslationFile {
 	
 	/** Initialise a {@link MasterTranslationFile} for the default language. */
 	private void initDefault() {
-		initCoreLanguageBundle(InternationalisationUtils.getDefaultLanguageBundleInputStream());
+		initCoreLanguageBundle("frontlineSMS.properties", InternationalisationUtils.getDefaultLanguageBundleInputStream());
 		
 		// load default bundles for all plugins
 		Collection<Class<PluginController>> pluginClasses = PluginProperties.getInstance().getPluginClasses();
@@ -77,21 +96,26 @@ public class MasterTranslationFile {
 	 * will be loaded from the {@link InputStream}.  Plugin translations will not be loaded.
 	 * @param is input stream to the core language bundle
 	 */
-	private void initCoreLanguageBundle(InputStream is) {
-		assert(this.translationFiles != null) : "init() should be run only once on this class.";
+	private void initCoreLanguageBundle(String filename, InputStream is) {
+		assert(this.translationFiles != null
+				&& this.filename == null) : "init() should be run only once on this class.";
+		this.filename = filename;
 		this.translationFiles = new LinkedList<TextFileContent>();
 		
 		// load the default, english bundle
 		this.translationFiles.add(TextFileContent.getFromStream("FrontlineSMS Core", is));
 	}
 
-	/** Save the MTF to a file 
-	 * @throws IOException */
-	private void saveToFile(File file) throws IOException {
+	/**
+	 * Save the MTF to a file 
+	 * @throws IOException
+	 */
+	private void saveToFile(File targetDirectory) throws IOException {
 		FileOutputStream fos = null;
 		OutputStreamWriter osw = null;
 		PrintWriter out = null;
 		try {
+			File file = new File(targetDirectory, this.filename);
 			fos = new FileOutputStream(file);
 			osw = new OutputStreamWriter(fos, InternationalisationUtils.CHARSET_UTF8);
 			out = new PrintWriter(osw);
@@ -108,6 +132,31 @@ public class MasterTranslationFile {
 			if(osw != null) try { osw.close(); } catch(IOException ex) {}
 			if(fos != null) try { fos.close(); } catch(IOException ex) {}
 		}
+	}
+	
+//> STATIC FACTORIES
+	/**
+	 * @return the default {@link MasterTranslationFile}, and one for each {@link FileLanguageBundle}
+	 * found in the languages directory.
+	 */
+	public static Collection<MasterTranslationFile> getAll() {
+		ArrayList<MasterTranslationFile> all = new ArrayList<MasterTranslationFile>();
+		all.add(getDefault());
+		
+		for(FileLanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
+			MasterTranslationFile mtf = new MasterTranslationFile();
+			mtf.init(languageBundle);
+			all.add(mtf);
+		}
+		
+		return all;
+	}
+	
+	/** @return the {@link MasterTranslationFile} for the default translation */
+	private static MasterTranslationFile getDefault() {
+		MasterTranslationFile mtf = new MasterTranslationFile();
+		mtf.initDefault();
+		return mtf;
 	}
 	
 	/**
@@ -133,8 +182,7 @@ public class MasterTranslationFile {
 
 	/** Create the {@link MasterTranslationFile} for the default translation. */
 	private static void processDefaultMtf(File targetDir) throws IOException {
-		MasterTranslationFile mtf = new MasterTranslationFile();
-		mtf.initDefault();
+		MasterTranslationFile mtf = getDefault();
 		mtf.saveToFile(new File(targetDir, "frontlineSMS.properties"));
 	}
 }
