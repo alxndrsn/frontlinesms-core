@@ -1,31 +1,36 @@
 /**
  * 
  */
-package net.frontlinesms.ui.i18n;
+package net.frontlinesms.ui.i18n.legacy;
 
 import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
 
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
+
 /**
+ * Compares two translation files, and reports on translations which are unique to one file or
+ * the other, and translations on which the two files disagree.
  * @author aga
  */
 public class BundleMerger {
 	
 //> INSTANCE PROPERTIES
+	/** Translations in the primary bundle */
 	private final Map<String, String> primary;
+	/** Translations in the secondary bundle */
 	private final Map<String, String> secondary;
 
 //> CONSTRUCTORS
+	/** Creates a new BundleMerger to merge the two supplied bundles. */
 	public BundleMerger(Map<String, String> primary, Map<String, String> secondary) {
 		this.primary = primary;
 		this.secondary = secondary;
 	}
 
 //> ACCESSORS
-	/**
-	 * Gets keys and values that are not disputed between the primary and secondary sources.
-	 */
+	/** @return keys and values that are not disputed between the primary and secondary sources */
 	public Map<String, String> getUndisputed() {
 		Map<String, String> undisputed = new HashMap<String, String>();
 		for(Entry<String, String> entry : this.primary.entrySet()) {
@@ -39,9 +44,7 @@ public class BundleMerger {
 		return undisputed;
 	}
 
-	/**
-	 * Gets keys and values that are attributed different values in the primary and secondary sources.
-	 */
+	/** @return keys and values that are attributed different values in the primary and secondary sources */
 	public Map<String, StringPair> getDisputed() {
 		Map<String, StringPair> disputed = new HashMap<String, StringPair>();
 		for(Entry<String, String> entry : this.primary.entrySet()) {
@@ -57,7 +60,25 @@ public class BundleMerger {
 		return disputed;
 	}
 
+	/** @return entries only found in {@link #secondary} */
+	public Map<String, String> getSecondaryOnly() {
+		return getLeftOnly(this.secondary, this.primary);
+	}
+	
+	/** @return entries only found in {@link #primary} */
+	public Map<String, String> getPrimaryOnly() {
+		return getLeftOnly(this.primary, this.secondary);
+	}
+
 //> STATIC HELPER METHODS
+	/** @return map containing entries whose keys were only found in the lefthand of the two maps supplied */
+	private static Map<String, String> getLeftOnly(Map<String, String> left, Map<String, String> right) {
+		Map<String, String> filtered = new HashMap<String, String>();
+		filtered.putAll(left);
+		for(String rightKey : right.keySet()) filtered.remove(rightKey);
+		return filtered;
+	}
+	
 	/**
 	 * 
 	 * @param path
@@ -83,21 +104,6 @@ public class BundleMerger {
 		
 		new MergeReporter(System.out).report(merger);
 	}
-
-public Map<String, String> getSecondaryOnly() {
-	return getLeftOnly(this.secondary, this.primary);
-}
-
-private Map<String, String> getLeftOnly(Map<String, String> left, Map<String, String> right) {
-	Map<String, String> filtered = new HashMap<String, String>();
-	filtered.putAll(left);
-	for(String rightKey : right.keySet()) filtered.remove(rightKey);
-	return filtered;
-}
-
-public Map<String, String> getPrimaryOnly() {
-	return getLeftOnly(this.primary, this.secondary);
-}
 }
 
 /**
@@ -138,15 +144,19 @@ class MergeReporter {
 		hr();
 	}
 	
+	/** Print a string to {@link #out} */
 	private void p(Object s) {
 		out.print(s.toString());
 	}
+	/** Print a blank line to {@link #out} */
 	private void ln() {
 		out.println();
 	}
+	/** Print a horizontal rule to {@link #out} */
 	private void hr() {
 		ln("----------");
 	}
+	/** Print a string to {@link #out}, followed by a line break */
 	private void ln(Object s) {
 		out.println(s.toString());
 	}

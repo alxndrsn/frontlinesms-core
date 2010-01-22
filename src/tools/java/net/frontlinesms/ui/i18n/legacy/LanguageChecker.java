@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui.i18n;
+package net.frontlinesms.ui.i18n.legacy;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
 import org.jdom.Document;
 import org.jdom.Element;

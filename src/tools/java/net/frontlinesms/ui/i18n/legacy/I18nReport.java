@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui.i18n;
+package net.frontlinesms.ui.i18n.legacy;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,8 +14,10 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
+
 /**
- * A report about internationalisation
+ * A report detailing the translation keys missing from 
  * @author Alex
  */
 public class I18nReport {

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui.i18n;
+package net.frontlinesms.ui.i18n.legacy;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -14,6 +14,8 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.MissingResourceException;
+
+import net.frontlinesms.ui.i18n.LanguageBundle;
 
 /**
  * File for printing out updated translation files

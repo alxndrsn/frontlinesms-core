@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui.i18n;
+package net.frontlinesms.ui.i18n.legacy;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -15,6 +15,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
+import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
 /**
  * Main class for running the language tools from the CommandLine.
