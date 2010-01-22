@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import javax.mail.MessagingException;
@@ -449,8 +448,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		// Add to the current language bundle
 		LanguageBundle currentResourceBundle = FrontlineUI.currentResourceBundle;
 		if(currentResourceBundle != null) {
-			Locale locale = new Locale(currentResourceBundle.getLanguageCode(), currentResourceBundle.getCountry());
-			InternationalisationUtils.mergeMaps(currentResourceBundle.getProperties(), controller.getTextResource(locale));
+			InternationalisationUtils.mergeMaps(currentResourceBundle.getProperties(), controller.getTextResource(currentResourceBundle.getLocale()));
 			setResourceBundle(currentResourceBundle.getProperties(), currentResourceBundle.isRightToLeft());
 		}
 	}

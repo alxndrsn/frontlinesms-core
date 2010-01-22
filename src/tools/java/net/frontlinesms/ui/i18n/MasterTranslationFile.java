@@ -4,15 +4,13 @@
 package net.frontlinesms.ui.i18n;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -28,16 +26,37 @@ import net.frontlinesms.plugins.PluginProperties;
  * @author Alex alex@frontlinesms.com
  */
 public class MasterTranslationFile {
-	private List<TextFileContent> translationFiles = new LinkedList<TextFileContent>();
+	private List<TextFileContent> translationFiles;
 	
 	/**
-	 * 
+	 * Initialise a {@link MasterTranslationFile} for a language other than the default.
+	 * The core translation will be loaded from the {@link FileLanguageBundle} provided, and plugins
+	 * will have their translations fetched individually.
 	 */
-	private void init() {
-		// load the default, english bundle
-		this.translationFiles.add(TextFileContent.getFromStream(
-				"FrontlineSMS Core",
-				InternationalisationUtils.getDefaultLanguageBundleInputStream()));
+	private void init(FileLanguageBundle languageBundle) {
+		try {
+			initCoreLanguageBundle(new FileInputStream(languageBundle.getFile()));
+		} catch (IOException ex) {
+			throw new RuntimeException("Failed to load language bundle from file: " + languageBundle.getFile().getAbsolutePath(), ex);
+		}
+		
+		// load localised bundles for all plugins
+		Collection<Class<PluginController>> pluginClasses = PluginProperties.getInstance().getPluginClasses();
+		for(Class<PluginController> pluginClass : pluginClasses) {
+			try {
+				PluginController controller = pluginClass.newInstance();
+				this.translationFiles.add(TextFileContent.getFromMap(
+						"Plugin: " + controller.getName(),
+						controller.getTextResource(languageBundle.getLocale())));
+			} catch (Exception ex) {
+				throw new RuntimeException("Unable to instantiate plugin: " + pluginClass.getName(), ex);
+			}
+		}		
+	}
+	
+	/** Initialise a {@link MasterTranslationFile} for the default language. */
+	private void initDefault() {
+		initCoreLanguageBundle(InternationalisationUtils.getDefaultLanguageBundleInputStream());
 		
 		// load default bundles for all plugins
 		Collection<Class<PluginController>> pluginClasses = PluginProperties.getInstance().getPluginClasses();
@@ -51,6 +70,19 @@ public class MasterTranslationFile {
 				throw new RuntimeException("Unable to instantiate plugin: " + pluginClass.getName(), ex);
 			}
 		}
+	}
+	
+	/**
+	 * Initialise a {@link MasterTranslationFile} from the supplied {@link InputStream}.  The core translations
+	 * will be loaded from the {@link InputStream}.  Plugin translations will not be loaded.
+	 * @param is input stream to the core language bundle
+	 */
+	private void initCoreLanguageBundle(InputStream is) {
+		assert(this.translationFiles != null) : "init() should be run only once on this class.";
+		this.translationFiles = new LinkedList<TextFileContent>();
+		
+		// load the default, english bundle
+		this.translationFiles.add(TextFileContent.getFromStream("FrontlineSMS Core", is));
 	}
 
 	/** Save the MTF to a file 
@@ -85,14 +117,26 @@ public class MasterTranslationFile {
 	 */
 	public static void main(String[] args) throws IOException {
 		System.out.println("Starting Master Language File generation...");
-		String targetFile = args[0];
+		String targetDirPath = args[0];
+		File targetDir = new File(targetDirPath);
 		
-		MasterTranslationFile mtf = new MasterTranslationFile();
-		mtf.init();
-		mtf.saveToFile(new File(targetFile));
-		System.out.println("Master Language File generated at: " + targetFile);
+		processDefaultMtf(targetDir);
+		
+		for(FileLanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
+			MasterTranslationFile mtf = new MasterTranslationFile();
+			mtf.init(languageBundle);
+			mtf.saveToFile(new File(targetDir, languageBundle.getFile().getName()));	
+		}
+		
+		System.out.println("Master language files generated at: " + targetDirPath);
 	}
 
+	/** Create the {@link MasterTranslationFile} for the default translation. */
+	private static void processDefaultMtf(File targetDir) throws IOException {
+		MasterTranslationFile mtf = new MasterTranslationFile();
+		mtf.initDefault();
+		mtf.saveToFile(new File(targetDir, "frontlineSMS.properties"));
+	}
 }
 
 class TextFileContent {

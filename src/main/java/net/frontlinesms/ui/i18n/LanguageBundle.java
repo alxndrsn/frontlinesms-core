@@ -23,6 +23,7 @@
 package net.frontlinesms.ui.i18n;
 
 import java.awt.Font;
+import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
 
@@ -82,6 +83,11 @@ public abstract class LanguageBundle {
 	}
 	
 //> ACCESSORS
+	/** @return the locale that this {@link LanguageBundle} is for. */
+	public Locale getLocale() {
+		return new Locale(this.getLanguageCode(), this.getCountry());
+	}
+	
 	/**
 	 * @return a String identifier uniquely detailing where this {@link LanguageBundle} was loaded from.
 	 */

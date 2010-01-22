@@ -18,7 +18,7 @@ import net.frontlinesms.resources.properties.PropsFileLayout;
 
 /**
  * A {@link LanguageBundle} loaded from a file.
- * @author alexanderson
+ * @author Alex alex@frontlinesms.com
  */
 public class FileLanguageBundle extends LanguageBundle {
 //> STATIC PROPERTIES
