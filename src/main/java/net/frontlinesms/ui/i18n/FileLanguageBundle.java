@@ -41,7 +41,7 @@ public class FileLanguageBundle extends LanguageBundle {
 	}
 	
 	@Override
-	String getIdentifier() {
+	public String getIdentifier() {
 		return "file:" + this.file.getAbsolutePath();
 	}
 	

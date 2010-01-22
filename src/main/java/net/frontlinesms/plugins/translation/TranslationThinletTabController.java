@@ -3,7 +3,6 @@
  */
 package net.frontlinesms.plugins.translation;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,9 +16,7 @@ import thinlet.Thinlet;
 
 import net.frontlinesms.plugins.BasePluginThinletTabController;
 import net.frontlinesms.ui.UiGeneratorController;
-import net.frontlinesms.ui.i18n.FileLanguageBundle;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
-import net.frontlinesms.ui.i18n.LanguageBundle;
 
 /**
  * @author alex
@@ -40,7 +37,7 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	/** The dialog used for editing a translation.  When the dialog is not visible, this should be <code>null</code>. */
 	private Object editDialog;
 	/** The localized language file which we are currently editing/working on. */
-	FileLanguageBundle selectedLanguageFile;
+	MasterTranslationFile selectedLanguageFile;
 
 //> CONSTRUCTORS
 	protected TranslationThinletTabController(TranslationPluginController pluginController, UiGeneratorController uiController) {
@@ -64,7 +61,7 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		String defaultValue = "";
 		try { defaultValue = getDefaultLanguageBundle().getValue(textKey); } catch(MissingResourceException ex) {};
 		
-		LanguageBundle selectedLanguageBundle = getSelectedLanguageBundle();
+		MasterTranslationFile selectedLanguageBundle = getSelectedLanguageBundle();
 		String localValue = "";
 		try { localValue = selectedLanguageBundle.getValue(textKey); } catch(MissingResourceException ex) {};
 		
@@ -87,21 +84,31 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		if(textKey != null) {
 			ui.showConfirmationDialog("deleteText('" + textKey + "')", this);
 		}
+		
 		removeEditDialog();
 	}
 	
 	public void deleteText(String textKey) throws IOException {
-		FileLanguageBundle lang = this.getSelectedLanguageBundle();
-		lang.getProperties().remove(textKey);
+		MasterTranslationFile lang = this.getSelectedLanguageBundle();
+		lang.delete(textKey);
 		// save language bundle to disk
-		lang.saveToDisk();
+		lang.saveToDisk(InternationalisationUtils.getLanguageDirectory());
+		
+		// Remove the deleted item from view and from the 
+		Object selectedTableItem = getSelectedTableItem(this.visibleTab);
+		ui.remove(selectedTableItem);
+		for(List<Object> tableRows : this.translationTableRows.values()) {
+			tableRows.remove(selectedTableItem);
+		}
+
+		ui.removeConfirmationDialog();
 	}
 	
 	public void saveText(String textKey, String textValue) throws IOException {
-		FileLanguageBundle lang = this.getSelectedLanguageBundle();
-		lang.getProperties().put(textKey, textValue);
+		MasterTranslationFile lang = this.getSelectedLanguageBundle();
+		lang.add(textKey, textValue);
 		// save language bundle to disk
-		lang.saveToDisk();
+		lang.saveToDisk(InternationalisationUtils.getLanguageDirectory());
 		
 		// Update the table
 		setSelectedTextValue(this.visibleTab, textValue);
@@ -135,10 +142,13 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		Object table = find(view.getTableName());
 		String filterText = getFilterText();
 		ui.removeAll(table);
-		for(Object tableRow : this.translationTableRows.get(view)) {
-			boolean show = rowMatches(tableRow, filterText);
-			if(show) {
-				ui.add(table, tableRow);
+		List<Object> tableRows = this.translationTableRows.get(view);
+		if(tableRows != null) {
+			for(Object tableRow : tableRows) {
+				boolean show = rowMatches(tableRow, filterText);
+				if(show) {
+					ui.add(table, tableRow);
+				}
 			}
 		}
 	}
@@ -169,22 +179,26 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	 * @return
 	 */
 	private String getSelectedTextKey(TranslationView view) {
-		Object selectedItem = ui.getSelectedItem(find(view.getTableName()));
+		Object selectedItem = getSelectedTableItem(view);
 		if(selectedItem == null) return null;
 		String selectedKey = ui.getAttachedObject(selectedItem, String.class);
 		return selectedKey;
 	}
+
+	private Object getSelectedTableItem(TranslationView view) {
+		return ui.getSelectedItem(find(view.getTableName()));
+	}
 	
 	private void setSelectedTextValue(TranslationView view, String value) {
-		Object selectedItem = ui.getSelectedItem(find(view.getTableName()));
+		Object selectedItem = getSelectedTableItem(view);
 		assert(selectedItem != null) : "Should not attempt to update the selected text item if none is selected";
 		Object textColumn = ui.getItem(selectedItem, 2);
 		ui.setText(textColumn, value);
 	}
 	
 	private void refreshTables() {
-		LanguageBundle lang = getSelectedLanguageBundle();
-		LanguageBundle defaultLang = getDefaultLanguageBundle();
+		MasterTranslationFile lang = getSelectedLanguageBundle();
+		MasterTranslationFile defaultLang = getDefaultLanguageBundle();
 		
 		this.translationTableRows = new HashMap<TranslationView, List<Object>>();
 		
@@ -208,8 +222,9 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		ui.setEnabled(find(TranslationView.MISSING.getTabName()), !isDefaultLang);
 		ui.setEnabled(find(TranslationView.EXTRA.getTabName()), !isDefaultLang);
 		if(isDefaultLang) {
-			// Select the 'all' tab if we are viewing default bundle, as the others are disabled 
-			ui.setSelected(find(TranslationView.ALL.getTabName()), true);
+			// Select the 'all' tab if we are viewing default bundle, as the others are disabled
+			Object tabParent = ui.getParent(find(TranslationView.ALL.getTabName()));
+			ui.setSelectedIndex(tabParent, 0);
 		} else {
 			// populate and enable the missing table
 			Set<String> missingKeys = comp.getKeysIn1Only();
@@ -229,6 +244,7 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 			}
 			this.translationTableRows.put(TranslationView.EXTRA, extraRows);
 		}
+		
 		initTable(TranslationView.ALL);
 		initTable(TranslationView.MISSING);
 		initTable(TranslationView.EXTRA);
@@ -261,8 +277,8 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		// Refresh language list
 		Object languageList = getLanguageList();
 		super.removeAll(languageList);
-		for (FileLanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
-			Object item = ui.createListItem(languageBundle.getLanguageName(), languageBundle.getFile().getAbsolutePath());
+		for (MasterTranslationFile languageBundle : MasterTranslationFile.getAll()) {
+			Object item = ui.createListItem(languageBundle.getLanguageName(), languageBundle.getIdentifier());
 			ui.setIcon(item, ui.getFlagIcon(languageBundle));
 			int index = -1;
 			if (languageBundle.getCountry().equals("gb")) {
@@ -277,22 +293,18 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		return super.find("lsLanguages");
 	}
 	
-	private synchronized FileLanguageBundle getSelectedLanguageBundle() {
-		String languageFilePath = ui.getAttachedObject(ui.getSelectedItem(getLanguageList()), String.class);
+	private synchronized MasterTranslationFile getSelectedLanguageBundle() {
+		String languageFileIdentifier = ui.getAttachedObject(ui.getSelectedItem(getLanguageList()), String.class);
 		if(selectedLanguageFile == null
-				|| languageFilePath != selectedLanguageFile.getFile().getAbsolutePath()) {
-			File languageFile = new File(languageFilePath);
-			selectedLanguageFile = InternationalisationUtils.getLanguageBundle(languageFile);
+				|| languageFileIdentifier != selectedLanguageFile.getIdentifier()) {
+			
+			selectedLanguageFile = MasterTranslationFile.getFromIdentifier(languageFileIdentifier);
 		}
 		return selectedLanguageFile;
 	}
 	
-	private LanguageBundle getDefaultLanguageBundle() {
-		try {
-			return InternationalisationUtils.getDefaultLanguageBundle();
-		} catch (IOException e) {
-			throw new IllegalStateException("There was a problem loading the default language bundle.");
-		}
+	private MasterTranslationFile getDefaultLanguageBundle() {
+		return MasterTranslationFile.getDefault();
 	}
 
 	private String getFilterText() {

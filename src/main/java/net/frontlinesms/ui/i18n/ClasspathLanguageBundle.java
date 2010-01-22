@@ -23,7 +23,7 @@ public class ClasspathLanguageBundle extends LanguageBundle {
 	
 //> ACCESORS
 	@Override
-	String getIdentifier() {
+	public String getIdentifier() {
 		return "classpath:" + this.path;
 	}
 

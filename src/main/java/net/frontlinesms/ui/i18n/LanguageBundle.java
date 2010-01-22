@@ -61,7 +61,7 @@ public abstract class LanguageBundle {
 	 * @param filename
 	 * @param properties
 	 */
-	LanguageBundle(Map<String, String> properties) {
+	public LanguageBundle(Map<String, String> properties) {
 		this.properties = properties;
 
 		checkRequiredProperty(KEY_LANGUAGE_CODE);
@@ -91,7 +91,7 @@ public abstract class LanguageBundle {
 	/**
 	 * @return a String identifier uniquely detailing where this {@link LanguageBundle} was loaded from.
 	 */
-	abstract String getIdentifier();
+	public abstract String getIdentifier();
 	
 	/** @return the ISO-???? country code relating to the language in this bundle */
 	public String getCountry() {

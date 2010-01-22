@@ -56,6 +56,8 @@ import thinlet.Thinlet;
 public class InternationalisationUtils {
 	
 //> STATIC PROPERTIES
+	/** Name of the directory containing the languages files.  This is located within the config directory. */
+	private static final String LANGUAGES_DIRECTORY_NAME = "languages";
 	/** The path to the default language bundle on the classpath. */
 	private static final String DEFAULT_LANGUAGE_BUNDLE_PATH = "/resources/languages/frontlineSMS.properties";
 	/** Logging object for this class */
@@ -63,7 +65,7 @@ public class InternationalisationUtils {
 	
 //> GENERAL i18n HELP METHODS
 	/** The default characterset, UTF-8.  This must be available for every JVM. */
-	static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
+	public static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
 	
 //>
 	/**
@@ -211,7 +213,8 @@ public class InternationalisationUtils {
 		return ClasspathLanguageBundle.create(DEFAULT_LANGUAGE_BUNDLE_PATH);
 	}
 	
-	static InputStream getDefaultLanguageBundleInputStream() {
+	/** @return {@link InputStream} to the default translation file on the classpath. */
+	public static InputStream getDefaultLanguageBundleInputStream() {
 		return ClasspathLanguageBundle.class.getResourceAsStream(DEFAULT_LANGUAGE_BUNDLE_PATH);
 	}
 	
@@ -290,7 +293,12 @@ public class InternationalisationUtils {
 	
 	/** @return path of the directory in which language bundles are located. */
 	private static final String getLanguageDirectoryPath() {
-		return ResourceUtils.getConfigDirectoryPath() + "languages" + File.separatorChar;
+		return ResourceUtils.getConfigDirectoryPath() + LANGUAGES_DIRECTORY_NAME + File.separatorChar;
+	}
+	
+	/** @return path of the directory in which language bundles are located. */
+	public static final File getLanguageDirectory() {
+		return new File(ResourceUtils.getConfigDirectoryPath(), LANGUAGES_DIRECTORY_NAME);
 	}
 
 //> DATE FORMAT GETTERS

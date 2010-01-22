@@ -265,6 +265,11 @@ public class ResourceUtils {
 		return lines.toArray(new String[lines.size()]);
 	}
 	
+	/** Gets the directory containing the properties files. */
+	public static File getPropertiesDirectory() {
+		return new File(getConfigDirectoryPath(), PROPERTIES_DIRECTORY_NAME);
+	}
+	
 	/**
 	 * Gets the path to the configuration directory in which languages, conf, and properties directories all lie.
 	 * @return path to the directory containing resources for FrontlineSMS
