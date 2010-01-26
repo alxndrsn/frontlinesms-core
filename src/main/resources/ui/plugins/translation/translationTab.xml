@@ -17,7 +17,7 @@
 							<table selection="multiple" name="tbAllTranslations" weightx="1" weighty="1" perform="editText">
 								<header>
 									<column text="Key"/>
-									<column text="English"/>
+									<column text="i18n.common.default"/>
 									<column name="clCurrentLanguage"/>
 								</header>
 							</table>
@@ -27,7 +27,7 @@
 						<table selection="multiple" name="tbMissingTranslations" perform="editText">
 							<header>
 								<column text="Key"/>
-								<column text="English"/>
+								<column text="i18n.common.default"/>
 								<column name="clCurrentLanguage"/>
 							</header>
 						</table>
@@ -36,7 +36,7 @@
 						<table selection="multiple" name="tbExtraTranslations" perform="editText">
 							<header>
 								<column text="Key"/>
-								<column text="English"/>
+								<column text="i18n.common.default"/>
 								<column name="clCurrentLanguage"/>
 							</header>
 						</table>
