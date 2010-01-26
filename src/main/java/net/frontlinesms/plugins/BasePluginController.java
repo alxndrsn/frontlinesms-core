@@ -81,17 +81,26 @@ public abstract class BasePluginController implements PluginController {
 	
 	/** @see net.frontlinesms.plugins.PluginController#getTextResource(java.util.Locale) */
 	public Map<String, String> getTextResource(Locale locale) {
-		if(locale.getVariant() != null) {
-			Map<String, String> textResource = getTextResource(locale.getLanguage(), locale.getCountry(), locale.getVariant());
+		String variant = locale.getVariant();
+		String country = locale.getCountry();
+		String language = locale.getLanguage();
+		
+		if(variant != null && variant.length() > 0) {
+			Map<String, String> textResource = getTextResource(language, country, variant);
 			if(textResource != null) return textResource;
 		}
-		if(locale.getCountry() != null) {
-			Map<String, String> textResource = getTextResource(locale.getLanguage(), locale.getCountry());
+		
+		if(country != null && country.length() > 0) {
+			Map<String, String> textResource = getTextResource(language, country);
 			if(textResource != null) return textResource;
 		}
-		Map<String, String> textResource = getTextResource(locale.getLanguage());
-		if(textResource != null) return textResource;
-		else return Collections.emptyMap();
+		
+		if(language != null && language.length() > 0) {
+			Map<String, String> textResource = getTextResource(language);
+			if(textResource != null) return textResource;
+		}
+		
+		return Collections.emptyMap();
 	}
 
 //> INSTANCE HELPER METHODS	

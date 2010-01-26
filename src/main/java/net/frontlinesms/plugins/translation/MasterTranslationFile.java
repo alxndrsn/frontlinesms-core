@@ -22,6 +22,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.log4j.Logger;
+
+import net.frontlinesms.Utils;
 import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.ui.i18n.*;
@@ -34,6 +37,9 @@ public class MasterTranslationFile extends LanguageBundle {
 //> STATIC CONSTANTS
 	/** prefix applied in {@link #getIdentifier()} */
 	private static final String IDENTIFIER_PREFIX = "master:";
+
+	/** Logging object */
+	private static final Logger LOG = Utils.getLogger(MasterTranslationFile.class);
 	
 //> INSTANCE VARIABLES
 	private final String filename;
@@ -46,6 +52,7 @@ public class MasterTranslationFile extends LanguageBundle {
 		this.filename = filename;
 		this.translationFiles = translationFiles;
 		this.extraTranslations = TextFileContent.createEmpty();
+		this.translationFiles.add(this.extraTranslations);
 	}
 	
 //> ACCESSORS
@@ -70,13 +77,20 @@ public class MasterTranslationFile extends LanguageBundle {
 			for(TextFileContent translationFile : this.translationFiles) {
 				String description = translationFile.getDescription();
 				if(description != null) {
+					// Write the header
 					out.write("###");
 					out.write("### " + description + "###\n");
-					for(String line : translationFile.getLines()) {
-						out.write(line + "\n");
-					}
+				}
+				// Write the translations
+				for(String line : translationFile.getLines()) {
+					out.write(line + "\n");
+				}
+				
+				// Write the footer
+				if(description != null) {
 					out.write("### /" + description + "###\n");
 				}
+				
 				out.write("\n");
 			}
 			out.write("\n");
@@ -96,7 +110,15 @@ public class MasterTranslationFile extends LanguageBundle {
 				line = line.trim();
 				if(line.length() > 0 && line.charAt(0)!='#') {
 					int eqIndex = line.indexOf('=');
-					translations.put(line.substring(0, eqIndex), line.substring(eqIndex+1));
+
+					// Do not overwrite entries from previous file contents
+					String key = line.substring(0, eqIndex);
+					String value = line.substring(eqIndex+1);
+					if(!translations.containsKey(key)) {
+						translations.put(key, value);
+					} else {
+						LOG.trace("Omitting overridden translation: " + key + "=" + value);
+					}
 				}
 			}
 		}
@@ -122,20 +144,20 @@ public class MasterTranslationFile extends LanguageBundle {
 		String filename = identifier.substring(IDENTIFIER_PREFIX.length());
 		String localeBits = filename.substring("frontlineSMS".length(), filename.length() - ".properties".length());
 		String[] bits = localeBits.split("_");
+		
+		File file = new File(InternationalisationUtils.getLanguageDirectory(), filename);
+		Locale locale;
+
 		if(bits.length <= 1) {
-			return getDefault();
-		} else {
-			File file = new File(InternationalisationUtils.getLanguageDirectory(), filename);
-			Locale locale;
-			if(bits.length == 2) {
-				locale = new Locale(bits[1]);
-			} else if(bits.length == 3) {
-				locale = new Locale(bits[1], bits[2]);
-			} else if(bits.length == 4) {
-				locale = new Locale(bits[1], bits[2], bits[3]);
-			} else throw new RuntimeException("Too many bits in " + filename);
-			return MasterTranslationFile.get(file, locale);
-		}
+			locale = new Locale("");
+		} else if(bits.length == 2) {
+			locale = new Locale(bits[1]);
+		} else if(bits.length == 3) {
+			locale = new Locale(bits[1], bits[2]);
+		} else if(bits.length == 4) {
+			locale = new Locale(bits[1], bits[2], bits[3]);
+		} else throw new RuntimeException("Too many bits in " + filename);
+		return MasterTranslationFile.get(file, locale);
 	}
 
 	/** @return {@link MasterTranslationFile} for the supplied file */
@@ -156,15 +178,30 @@ public class MasterTranslationFile extends LanguageBundle {
 		for(Class<PluginController> pluginClass : pluginClasses) {
 			try {
 				PluginController controller = pluginClass.newInstance();
-				content.add(TextFileContent.getFromMap(
-						"Plugin: " + controller.getName(),
-						controller.getTextResource(locale)));
+				Map<String, String> textResource;
+				if(isDefault(locale)) {
+					textResource = controller.getDefaultTextResource();
+				} else {
+					textResource = controller.getTextResource(locale);
+				}
+				String tfcDescription = "Plugin: " + controller.getName();
+				content.add(TextFileContent.getFromMap(tfcDescription, textResource));
 			} catch (Exception ex) {
 				throw new RuntimeException("Unable to instantiate plugin: " + pluginClass.getName(), ex);
 			}
 		}
 		
 		return new MasterTranslationFile(file.getName(), content);
+	}
+	
+	/** @return true if the supplied locale is for an unspecified language, country and variant; <code>false</code> otherwise */
+	private static boolean isDefault(Locale locale) {
+		String lang = locale.getLanguage();
+		String var = locale.getVariant();
+		String country = locale.getCountry();
+		return (lang==null || lang.length()==0)
+				&& (var==null || var.length()==0)
+				&& (country==null || country.length()==0);
 	}
 
 	/** @return {@link MasterTranslationFile} for the supplied {@link LanguageBundle} */
@@ -223,20 +260,49 @@ public class MasterTranslationFile extends LanguageBundle {
 
 	public void add(String textKey, String textValue) {
 		super.getProperties().put(textKey, textValue);
-		
-		// Add to the extra translations
-		this.extraTranslations.addLine(textKey + "=" + textValue);
+		try {
+			// Attempt to update the translation in the current files
+			updateTranslation(textKey, textValue);
+		} catch(KeyNotFoundException ex) {
+			// Add to the extra translations
+			this.extraTranslations.addLine(textKey + "=" + textValue);
+		}
+	}
+
+	/**
+	 * Updates the value of a translation in the attached files.
+	 * @param textKey
+	 * @param textValue
+	 * @throws KeyNotFoundException 
+	 */
+	private void updateTranslation(String textKey, String textValue) throws KeyNotFoundException {
+		TextFileContent tfc = getTextFileContent(textKey);
+		tfc.updateValue(textKey, textValue);
 	}
 
 	public void delete(String textKey) {
+		try {
+			TextFileContent tfc = getTextFileContent(textKey);
+			String line = tfc.getLine(textKey);
+			tfc.removeLine(line);
+		} catch (KeyNotFoundException e) {
+			throw new IllegalStateException("Could not delete text with key '" + textKey + "' because it does not exist.");
+		}
+	}
+	
+	/**
+	 * Gets the {@link TextFileContent} containing the supplied text key.
+	 * @param textKey
+	 * @return
+	 * @throws KeyNotFoundException 
+	 */
+	private TextFileContent getTextFileContent(String textKey) throws KeyNotFoundException {
 		for(TextFileContent tf : this.translationFiles) {
-			for(String line : tf.getLines()) {
-				if(line.trim().startsWith(textKey + "=")) {
-					tf.removeLine(line);
-					return;
-				}
+			if(tf.containsKey(textKey)) {
+				return tf;
 			}
 		}
+		throw new KeyNotFoundException("The text key could not be found in any of the attached content: " + textKey);
 	}
 }
 
@@ -270,6 +336,41 @@ class TextFileContent {
 		this.lines.add(line);
 	}
 	
+	/** @return <code>true</code> if this contains the supplied key; <code>false</code> otherwise */
+	boolean containsKey(String textKey) {
+		for(String line : getLines()) {
+			if(line.trim().startsWith(textKey + "=")) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/** 
+	 * @return the line containing the supplied key 
+	 * @throws KeyNotFoundException
+	 */
+	String getLine(String textKey) throws KeyNotFoundException {
+		for(String line : getLines()) {
+			if(line.trim().startsWith(textKey + "=")) {
+				return line;
+			}
+		}
+		throw new KeyNotFoundException(textKey);
+	}
+
+	/**
+	 * Changes the value for a text key in this file.
+	 * @param textKey
+	 * @param newValue
+	 * @throws KeyNotFoundException 
+	 */
+	void updateValue(String textKey, String newValue) throws KeyNotFoundException {
+		String oldLine = getLine(textKey);
+		String newLine = textKey + "=" + newValue;
+		this.lines.set(lines.indexOf(oldLine), newLine);
+	}
+	
 	static TextFileContent getFromMap(String description, Map<String, String> map) {
 		TextFileContent content = new TextFileContent(description);
 		for(Entry<String, String> entry : map.entrySet()) {
@@ -293,5 +394,11 @@ class TextFileContent {
 		} finally {
 			if(in != null) try { in.close(); } catch(IOException ex) {}
 		}
+	}
+}
+
+class KeyNotFoundException extends Exception {
+	public KeyNotFoundException(String key) {
+		super("Key not found: " + key);
 	}
 }
