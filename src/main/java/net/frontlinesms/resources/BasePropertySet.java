@@ -38,7 +38,7 @@ class BasePropertySet {
 		return this.properties.get(propertyKey);
 	}
 	
-	protected Map<String, String> getProperties() {
+	Map<String, String> getProperties() {
 		return properties;
 	}
 	

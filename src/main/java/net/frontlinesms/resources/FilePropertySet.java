@@ -114,6 +114,11 @@ public class FilePropertySet extends BasePropertySet {
 		return file;
 	}
 	
+	/** @return {@link BasePropertySet#getProperties()} */
+	public Map<String, String> getProperties() {
+		return super.getProperties();
+	}
+	
 //> GETTERS WITH DEFAULT VALUES
 	/**
 	 * Gets the {@link String} value of a property.  If no value is set, the default value is set and then returned.
