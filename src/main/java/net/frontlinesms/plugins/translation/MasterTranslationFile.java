@@ -105,17 +105,16 @@ public class MasterTranslationFile extends LanguageBundle {
 	
 //> STATIC FACTORIES
 	/**
-	 * @return the default {@link MasterTranslationFile}, and one for each {@link FileLanguageBundle}
-	 * found in the languages directory.
+	 * <p>Creates a {@link MasterTranslationFile} for each {@link FileLanguageBundle} found in the languages directory.</p>
+	 * <p>N.B. This does not create a {@link MasterTranslationFile} for the default language bundle.  This can be fetched
+	 * by calling the {@link #getDefault()} method.</p>
+	 * @return a {@link MasterTranslationFile} for each {@link FileLanguageBundle} found in the languages directory.
 	 */
 	public static Collection<MasterTranslationFile> getAll() {
 		ArrayList<MasterTranslationFile> all = new ArrayList<MasterTranslationFile>();
-		all.add(getDefault());
-		
 		for(FileLanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
 			all.add(get(languageBundle));
 		}
-		
 		return all;
 	}
 	
