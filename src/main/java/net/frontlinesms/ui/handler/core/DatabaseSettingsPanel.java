@@ -12,11 +12,13 @@ import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BasePanelHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
+import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
 /**
  * Thinlet UI Component event handler for displaying and modifying database settings.
  * @author aga
  */
+@TextResourceKeyOwner
 public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseSettingsChangedCallbackListener {
 
 //> STATIC CONSTANTS

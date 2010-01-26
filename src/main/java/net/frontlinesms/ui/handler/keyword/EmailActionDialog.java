@@ -27,11 +27,12 @@ import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.contacts.ContactSelecter;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
+import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
 /**
- * @author aga
- *
+ * @author Alex alex@frontlinesms.com
  */
+@TextResourceKeyOwner(prefix="MESSAGE_")
 public class EmailActionDialog extends BaseActionDialog {
 	
 //> CONSTANTS

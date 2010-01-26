@@ -33,6 +33,7 @@ import net.frontlinesms.ui.handler.ComponentPagingHandler;
 import net.frontlinesms.ui.handler.PagedComponentItemProvider;
 import net.frontlinesms.ui.handler.PagedListDetails;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
+import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
 /**
  * @author Alex Anderson 
@@ -40,6 +41,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * @author Carlos Eduardo Genz
  * <li> kadu(at)masabi(dot)com
  */
+@TextResourceKeyOwner(prefix="MESSAGE_")
 public class EmailTabHandler extends BaseTabHandler implements PagedComponentItemProvider {
 //> UI LAYOUT FILES
 	/** Thinlet XML Layout file for the email tab */

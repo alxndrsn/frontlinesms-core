@@ -21,7 +21,7 @@
 		        </panel>
 	            <tree action="updateMessageList" collapse="groupList_expansionChanged(this)"
 	            		expand="groupList_expansionChanged(this)" name="messageHistory_groupList"
-	            		weightx="1" weighty="1" visible="true" weightx="1" weighty="1" visible="false"/>
+	            		weightx="1" weighty="1" visible="false"/>
 	        </panel>
 	        <panel name="pnMessageList" columns="2" gap="9" left="9" right="9">
 	            <panel colspan="2" gap="8" weightx="1">

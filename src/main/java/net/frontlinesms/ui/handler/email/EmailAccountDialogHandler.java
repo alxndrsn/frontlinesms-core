@@ -16,11 +16,13 @@ import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
+import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
 /**
  * @author aga
  *
  */
+@TextResourceKeyOwner
 public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 //> UI LAYOUT FILES
 	public static final String UI_FILE_EMAIL_ACCOUNTS_SETTINGS_FORM = "/ui/core/email/dgServerConfig.xml";
@@ -36,9 +38,9 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 	public static final String COMPONENT_CB_USE_SSL = "cbUseSSL";
 	
 //> I18N TEXT KEYS
-	public static final String COMMON_EDITING_EMAIL_ACCOUNT = "common.editing.email.account";
-	public static final String MESSAGE_ACCOUNT_NAME_BLANK = "message.account.name.blank";
-	public static final String MESSAGE_ACCOUNT_NAME_ALREADY_EXISTS = "message.account.already.exists";
+	public static final String I18N_EDITING_EMAIL_ACCOUNT = "common.editing.email.account";
+	public static final String I18N_ACCOUNT_NAME_BLANK = "message.account.name.blank";
+	public static final String I18N_ACCOUNT_NAME_ALREADY_EXISTS = "message.account.already.exists";
 
 //> INSTANCE PROPERTIES
 	/** Logger */
@@ -130,7 +132,7 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 			emailAccountDao.saveEmailAccount(acc);
 		} catch (DuplicateKeyException e) {
 			LOG.debug("Account already exists", e);
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_ACCOUNT_NAME_ALREADY_EXISTS));
+			ui.alert(InternationalisationUtils.getI18NString(I18N_ACCOUNT_NAME_ALREADY_EXISTS));
 			LOG.trace("EXIT");
 			return;
 		}
@@ -169,7 +171,7 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 		LOG.debug("SSL [" + useSSL + "]");
 		
 		if (accountName.equals("")) {
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_ACCOUNT_NAME_BLANK));
+			ui.alert(InternationalisationUtils.getI18NString(I18N_ACCOUNT_NAME_BLANK));
 			LOG.trace("EXIT");
 			return;
 		}
@@ -209,8 +211,8 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 			}
 			
 		} catch (DuplicateKeyException e) {
-			LOG.debug(InternationalisationUtils.getI18NString(MESSAGE_ACCOUNT_NAME_ALREADY_EXISTS), e);
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_ACCOUNT_NAME_ALREADY_EXISTS));
+			LOG.debug(InternationalisationUtils.getI18NString(I18N_ACCOUNT_NAME_ALREADY_EXISTS), e);
+			ui.alert(InternationalisationUtils.getI18NString(I18N_ACCOUNT_NAME_ALREADY_EXISTS));
 		}
 		LOG.trace("EXIT");
 	}
@@ -313,7 +315,7 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 	 */
 	private void showEmailAccountDialog(EmailAccount acc) {
 		Object settingsDialog = ui.loadComponentFromFile(UI_FILE_EMAIL_ACCOUNT_FORM, this);
-		ui.setText(settingsDialog, InternationalisationUtils.getI18NString(COMMON_EDITING_EMAIL_ACCOUNT, acc.getAccountName()));
+		ui.setText(settingsDialog, InternationalisationUtils.getI18NString(I18N_EDITING_EMAIL_ACCOUNT, acc.getAccountName()));
 		
 		Object tfServer = ui.find(settingsDialog, COMPONENT_TF_MAIL_SERVER);
 		Object tfAccountName = ui.find(settingsDialog, COMPONENT_TF_ACCOUNT);

@@ -3,11 +3,13 @@ package net.frontlinesms.ui.handler;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
+import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
 /**
  * Thinlet UI event handler for paging lists and tables.
  * @author Alex alex@frontlinesms.com
  */
+@TextResourceKeyOwner
 public class ComponentPagingHandler implements ThinletUiEventHandler {
 	
 

@@ -9,7 +9,7 @@ import java.util.Set;
 import net.frontlinesms.ui.i18n.LanguageBundle;
 
 /**
- * @author alexanderson
+ * @author Alex alex@frontlinesms.com
  *
  */
 public class LanguageBundleComparison {

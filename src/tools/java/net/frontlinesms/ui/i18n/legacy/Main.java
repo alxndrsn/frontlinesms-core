@@ -31,10 +31,17 @@ public class Main {
 	/** Directory of the language files, hardcoded for now */
 	private static final String LANGUAGEBUNDLE_DIRECTORY = "src/main/resources/resources/languages";
 	/** Java package names containing the {@link TextResourceKeyOwner}s */
-	private static final String[] DEFAULT_TEXTKEYRESOURCE_PACKAGE_NAMES = {"net.frontlinesms", "net.frontlinesms.ui"};
+	private static final String[] DEFAULT_TEXTKEYRESOURCE_PACKAGE_NAMES = {
+		"net.frontlinesms",
+		"net.frontlinesms.ui",
+		"net.frontlinesms.ui.handler",
+		"net.frontlinesms.ui.handler.contacts",
+		"net.frontlinesms.ui.handler.core",
+		"net.frontlinesms.ui.handler.email",
+		"net.frontlinesms.ui.handler.keyword",
+		"net.frontlinesms.ui.handler.message"};
 	/** Directory of the XML files, hardcoded for now */
 	private static final String[] UI_XML_LAYOUT_DIRECTORIES = {
-			"src/main/resources/ui/advanced", 
 			"src/main/resources/ui/core",
 			"src/main/resources/ui/dialog",
 			"src/main/resources/ui/smsdevice",

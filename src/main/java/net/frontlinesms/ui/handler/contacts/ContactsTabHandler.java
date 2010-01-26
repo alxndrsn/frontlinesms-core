@@ -51,7 +51,7 @@ import thinlet.Thinlet;
 
 /**
  * Event handler for the Contacts tab and associated dialogs.
- * @author Alex
+ * @author Alex alex@frontlinesms.com
  */
 public class ContactsTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterPanelOwner, ContactEditorOwner {
 //> STATIC CONSTANTS
