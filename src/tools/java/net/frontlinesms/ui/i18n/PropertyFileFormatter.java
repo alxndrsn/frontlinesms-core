@@ -12,6 +12,7 @@ import net.frontlinesms.resources.FilePropertySet;
 
 /**
  * Separate the translation for FrontlineSMS core or one of the plugins from a {@link MasterTranslationFile}.
+ * Feed in 2 files, and a new file with the format of the first and the values of the other will be created.
  * @author Alex alex@frontlinesms.com
  */
 public class PropertyFileFormatter {
