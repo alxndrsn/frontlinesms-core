@@ -39,6 +39,9 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	/** The localized language file which we are currently editing/working on. */
 	MasterTranslationFile selectedLanguageFile;
 
+	/** The default {@link MasterTranslationFile}.  This is cached here to prevent it being reloaded regularly. */
+	private MasterTranslationFile defaultLanguageBundle;
+
 //> CONSTRUCTORS
 	protected TranslationThinletTabController(TranslationPluginController pluginController, UiGeneratorController uiController) {
 		super(pluginController, uiController);
@@ -46,15 +49,17 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 
 	public void init() {
 		this.visibleTab = TranslationView.ALL;
+		this.defaultLanguageBundle =  MasterTranslationFile.getDefault();
 		refreshLanguageList();
 	}
 
 //> UI METHODS
+	/** Method called when the current translation tab is changed. */
 	public void tabChanged(int selectedTabIndex) {
-		System.out.println("TranslationThinletTabController.tabChanged()");
 		this.visibleTab = TranslationView.getFromTabIndex(selectedTabIndex);
 	}
 
+	/** UI Event method: show the editor for the selected translation in the translation table. */
 	public void editText() {
 		System.out.println("TranslationThinletTabController.editText()");
 		String textKey = getSelectedTextKey(this.visibleTab);
@@ -77,9 +82,12 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		// Display the dialog
 		ui.add(this.editDialog);
 	}
-	
+
+	/**
+	 * UI Event method: triggered when the user tries to delete the translation on the list.
+	 * The user is shown a dialog requesting that they confirm the action.
+	 */
 	public void confirmDeleteText() {
-		System.out.println("TranslationThinletTabController.languageSelectionChanged()");
 		String textKey = getSelectedTextKey(this.visibleTab);
 		if(textKey != null) {
 			ui.showConfirmationDialog("deleteText('" + textKey + "')", this);
@@ -88,6 +96,11 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		removeEditDialog();
 	}
 	
+	/**
+	 * Method called when the user has confirmed his desire to delete a particular translation.
+	 * @param textKey The key of the translation to delete.
+	 * @throws IOException If there is a problem saving the translation file.
+	 */
 	public void deleteText(String textKey) throws IOException {
 		MasterTranslationFile lang = this.getSelectedLanguageBundle();
 		lang.delete(textKey);
@@ -104,6 +117,13 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		ui.removeConfirmationDialog();
 	}
 	
+	/**
+	 * Method called when a translation has been added or saved.  The translation is added to the relevant
+	 * file, and the file is then saved.
+	 * @param textKey
+	 * @param textValue
+	 * @throws IOException
+	 */
 	public void saveText(String textKey, String textValue) throws IOException {
 		MasterTranslationFile lang = this.getSelectedLanguageBundle();
 		lang.add(textKey, textValue);
@@ -218,32 +238,24 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		this.translationTableRows.put(TranslationView.ALL, allRows);
 		
 		LanguageBundleComparison comp = new LanguageBundleComparison(defaultLang, lang);
-		boolean isDefaultLang = lang.equals(defaultLang);
-		ui.setEnabled(find(TranslationView.MISSING.getTabName()), !isDefaultLang);
-		ui.setEnabled(find(TranslationView.EXTRA.getTabName()), !isDefaultLang);
-		if(isDefaultLang) {
-			// Select the 'all' tab if we are viewing default bundle, as the others are disabled
-			Object tabParent = ui.getParent(find(TranslationView.ALL.getTabName()));
-			ui.setSelectedIndex(tabParent, 0);
-		} else {
-			// populate and enable the missing table
-			Set<String> missingKeys = comp.getKeysIn1Only();
-			ArrayList<Object> missingRows = new ArrayList<Object>(missingKeys.size());
-			for(String key : missingKeys) {
-				Object tableRow = createTableRow(key, comp.get1(key), "");
-				missingRows.add(tableRow);
-			}
-			this.translationTableRows.put(TranslationView.MISSING, missingRows);
-
-			// populate and enable the extra table
-			Set<String> extraKeys = comp.getKeysIn2Only();
-			ArrayList<Object> extraRows = new ArrayList<Object>(extraKeys.size());
-			for(String key : extraKeys) {
-				Object tableRow = createTableRow(key, "", comp.get2(key));
-				extraRows.add(tableRow);
-			}
-			this.translationTableRows.put(TranslationView.EXTRA, extraRows);
+		
+		// populate and enable the missing table
+		Set<String> missingKeys = comp.getKeysIn1Only();
+		ArrayList<Object> missingRows = new ArrayList<Object>(missingKeys.size());
+		for(String key : missingKeys) {
+			Object tableRow = createTableRow(key, comp.get1(key), "");
+			missingRows.add(tableRow);
 		}
+		this.translationTableRows.put(TranslationView.MISSING, missingRows);
+
+		// populate and enable the extra table
+		Set<String> extraKeys = comp.getKeysIn2Only();
+		ArrayList<Object> extraRows = new ArrayList<Object>(extraKeys.size());
+		for(String key : extraKeys) {
+			Object tableRow = createTableRow(key, "", comp.get2(key));
+			extraRows.add(tableRow);
+		}
+		this.translationTableRows.put(TranslationView.EXTRA, extraRows);
 		
 		initTable(TranslationView.ALL);
 		initTable(TranslationView.MISSING);
@@ -280,11 +292,7 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 		for (MasterTranslationFile languageBundle : MasterTranslationFile.getAll()) {
 			Object item = ui.createListItem(languageBundle.getLanguageName(), languageBundle.getIdentifier());
 			ui.setIcon(item, ui.getFlagIcon(languageBundle));
-			int index = -1;
-			if (languageBundle.getCountry().equals("gb")) {
-				index = 0;
-			}
-			ui.add(languageList, item, index);
+			ui.add(languageList, item);
 		}
 	}
 	
@@ -304,7 +312,7 @@ public class TranslationThinletTabController extends BasePluginThinletTabControl
 	}
 	
 	private MasterTranslationFile getDefaultLanguageBundle() {
-		return MasterTranslationFile.getDefault();
+		return this.defaultLanguageBundle;
 	}
 
 	private String getFilterText() {
