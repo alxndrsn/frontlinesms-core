@@ -89,7 +89,7 @@ public class ClickatellInternetService extends AbstractSmsInternetService {
 		} else {
 			oMessage = new OutboundMessage(message.getRecipientMsisdn(), message.getTextContent());
 		}
-		if(message.getRecipientSmsPort() != -1) {
+		if(message.getRecipientSmsPort() > 0) {
 			oMessage.setDstPort(message.getRecipientSmsPort());
 		}
 		
