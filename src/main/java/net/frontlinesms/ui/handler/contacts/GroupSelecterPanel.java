@@ -90,7 +90,14 @@ public class GroupSelecterPanel extends BasePanelHandler {
 	/** Adds a new group to the tree */
 	public void addGroup(Group group) {
 		Object groupTree = this.getGroupTreeComponent();
-		Object parentGroupNode = getNodeForGroup(groupTree, group.getParent());
+		Group parent = group.getParent();
+		Object parentGroupNode;
+		if(parent != null) {
+			parentGroupNode = getNodeForGroup(groupTree, parent);
+		} else {
+			// There is no parent for the group, so we need to get the node for the root group
+			parentGroupNode = ui.getItem(groupTree, 0);
+		}
 		ui.add(parentGroupNode, createNode(group, true));
 	}
 	
@@ -111,6 +118,7 @@ public class GroupSelecterPanel extends BasePanelHandler {
 	 * @return
 	 */
 	private Object getNodeForGroup(Object component, Group group) {
+		assert(group!=null) : "Cannot get a node for a null group.";
 		Object ret = null;
 		for (Object o : this.ui.getItems(component)) {
 			Group g = ui.getAttachedObject(o, Group.class);
