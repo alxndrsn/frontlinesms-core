@@ -338,9 +338,9 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 */
 	public void enabledButtonsAfterSelection(Object contactList) {
 		boolean enabled = this.ui.getSelectedItems(contactList).length > 0;
-		this.ui.setEnabled(this.ui.find(COMPONENT_DELETE_NEW_CONTACT), enabled);
-		this.ui.setEnabled(this.ui.find(COMPONENT_VIEW_CONTACT_BUTTON), enabled);
-		this.ui.setEnabled(this.ui.find(COMPONENT_SEND_SMS_BUTTON), enabled);
+		this.ui.setEnabled(find(COMPONENT_DELETE_NEW_CONTACT), enabled);
+		this.ui.setEnabled(find(COMPONENT_VIEW_CONTACT_BUTTON), enabled);
+		this.ui.setEnabled(find(COMPONENT_SEND_SMS_BUTTON), enabled);
 	}
 
 	/**

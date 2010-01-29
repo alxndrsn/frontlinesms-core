@@ -127,8 +127,16 @@ public class RandomDataGenerator {
 		int wordCount = randy.nextInt(100);
 		String messageContent = "";
 		while(--wordCount >= 0) {
-			messageContent += getRandomMessageWord();
-			if(wordCount > 1) messageContent += " ";
+			String nextWord = getRandomMessageWord();
+			if((messageContent + nextWord).length() <=480)
+				messageContent += nextWord;
+			else break;
+			
+			if(wordCount > 1) {
+				if(messageContent.length() < 480)
+					messageContent += " ";
+				else break;
+			}
 		}
 		return messageContent;
 	}
