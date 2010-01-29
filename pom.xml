@@ -40,7 +40,7 @@
 		</repository>
 		<repository>
 			<id>maven-repository.dev.java.net</id>
-			<url>https://maven-repository.dev.java.net/repository</url>
+			<url>http://download.java.net/maven/2/</url>
 		</repository>
 	</repositories>
 	
@@ -253,6 +253,12 @@
 			<artifactId>frontlinesms-test</artifactId>
 			<version>0.01.00</version>
 			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.2.127</version>
 		</dependency>
 	</dependencies>
 </project>
