@@ -25,6 +25,9 @@ public class GroupSelecterPanel extends BasePanelHandler {
 	private static final String XML_LAYOUT_GROUP_PANEL = "/ui/core/contacts/pnGroupSelecter.xml";
 	private static final String COMPONENT_GROUP_TREE = "trGroups";
 	
+	/** Thinlet UI component: the group tree */
+	private Object groupTreeComponent;
+	
 	private GroupSelecterPanelOwner owner;
 	
 	private boolean allowMultipleSelections;
@@ -43,6 +46,9 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		super.loadPanel(XML_LAYOUT_GROUP_PANEL);
 		
 		// TODO update selection of group tree appropriate to allowMultipleSelections
+
+		// Cache the group tree
+		groupTreeComponent = super.find(COMPONENT_GROUP_TREE);
 		
 		// add nodes for group tree
 		this.rootGroups = rootGroups;
@@ -134,8 +140,8 @@ public class GroupSelecterPanel extends BasePanelHandler {
 	}
 	
 	/** @return the group tree TODO cache this - it's not going to change, and we use it a lot */
-	private Object getGroupTreeComponent() {
-		return super.find(COMPONENT_GROUP_TREE);
+	public Object getGroupTreeComponent() {
+		return this.groupTreeComponent;
 	}
 	
 	/**

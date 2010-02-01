@@ -49,6 +49,8 @@ import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.handler.ComponentPagingHandler;
 import net.frontlinesms.ui.handler.PagedComponentItemProvider;
 import net.frontlinesms.ui.handler.PagedListDetails;
+import net.frontlinesms.ui.handler.contacts.GroupSelecterPanel;
+import net.frontlinesms.ui.handler.contacts.SingleGroupSelecterPanelOwner;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
@@ -58,7 +60,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * @author Carlos Eduardo Genz
  * <li> kadu(at)masabi(dot)com
  */
-public class MessageHistoryTabHandler extends BaseTabHandler implements PagedComponentItemProvider {
+public class MessageHistoryTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterPanelOwner {
 	
 //> CONSTANTS
 	/** Path to the Thinlet XML layout file for the message history tab */
@@ -68,12 +70,13 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 
 	/** UI Component name: the list of messages */
 	public static final String COMPONENT_MESSAGE_LIST = "messageList";
-	/** UI Component name: the list of groups */
-	private static final String COMPONENT_GROUP_LIST = "messageHistory_groupList";
+	/** UI Component name: the list of groups.  This is a placeholder which is ultimately replaced. */
+	private static final String COMPONENT_GROUP_LIST = "groupListPlaceholder";
 	
 	/** Number of milliseconds in a day */
 	private static final long MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
 
+	private static final String COMPONENT_GROUP_PANEL = "pnGroups";
 	private static final String COMPONENT_CONTACT_LIST = "lsContacts";
 	private static final String COMPONENT_CONTACT_PANEL = "pnContactList";
 	private static final String COMPONENT_KEYWORD_LIST = "lsKeywords";
@@ -110,6 +113,9 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	private ComponentPagingHandler contactListPagingHandler;
 	/** Paging handler for the list of keywords. */
 	private ComponentPagingHandler keywordListPagingHandler;
+
+	/** Group selecter */
+	private GroupSelecterPanel groupSelecter;
 	
 	/** Start date of the message history, or <code>null</code> if none has been set. */
 	private Long messageHistoryStart;
@@ -157,6 +163,9 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		
 		// Find which list item should be selected
 		Object list = getMessageHistoryFilterList();
+		
+		// TODO can do this more simply for group selecter
+		
 		boolean recurse = Thinlet.TREE.equals(Thinlet.getClass(list));
 		Object next = ui.getNextItem(list, Thinlet.get(list, ":comp"), recurse);
 		while(next != null && !ui.getAttachedObject(next).equals(attachment)) {
@@ -181,15 +190,26 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		Object pnBottom = ui.find(tabComponent, COMPONENT_PN_BOTTOM);
 		ui.add(pnBottom, messagePagingHandler.getPanel(), 0);
 
+		// Cache the contacts list, and add paging
 		contactListComponent = ui.find(tabComponent, COMPONENT_CONTACT_LIST);
 		contactListPagingHandler = new ComponentPagingHandler(ui, this, this.contactListComponent);
 		ui.add(ui.find(tabComponent, COMPONENT_CONTACT_PANEL), contactListPagingHandler.getPanel());
 
+		// Cache the keywords list, and add paging
 		keywordListComponent = ui.find(tabComponent, COMPONENT_KEYWORD_LIST);
 		keywordListPagingHandler = new ComponentPagingHandler(ui, this, this.keywordListComponent);
 		ui.add(ui.find(tabComponent, COMPONENT_KEYWORD_PANEL), keywordListPagingHandler.getPanel());
 		
-		groupTreeComponent = ui.find(tabComponent, COMPONENT_GROUP_LIST);
+		// Initialise and cache the group tree
+		Object oldGroupTreeComponent = ui.find(tabComponent, COMPONENT_GROUP_LIST);
+		groupSelecter = new GroupSelecterPanel(ui, this);
+		groupSelecter.init(ui.getRootGroup());
+		
+		Object groupTreeParent = ui.getParent(oldGroupTreeComponent);
+		this.groupTreeComponent = groupSelecter.getGroupTreeComponent();
+		ui.add(groupTreeParent, groupSelecter.getPanelComponent(), ui.getIndex(groupTreeParent, oldGroupTreeComponent));
+		ui.remove(oldGroupTreeComponent);
+		
 
 		// Set the types for the message list columns...
 		initMessageTableForSorting();
@@ -199,6 +219,12 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		
 		LOG.trace("EXIT");
 		return tabComponent;
+	}
+	
+//> GROUP SELECTER METHODS
+	/** @see SingleGroupSelecterPanelOwner#groupSelectionChanged(Group) */
+	public void groupSelectionChanged(Group selectedGroup) {
+		updateMessageList();
 	}
 	
 //> LIST PAGING METHODS
@@ -448,8 +474,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		
 		if(showGroups) {
 			// Clear and reload the group list
-			ui.removeAll(groupTreeComponent);
-//			ui.add(groupTreeComponent, ui.getNode(ui.getRootGroup(), false));
+			groupSelecter.refresh();
 		} else if(showContacts) {
 			this.contactListPagingHandler.refresh();
 		} else if(showKeywords) {
@@ -458,7 +483,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			throw new IllegalStateException();
 		}
 		
-		ui.setVisible(groupTreeComponent, showGroups);
+		ui.setVisible(find(COMPONENT_GROUP_PANEL), showGroups);
 		ui.setVisible(find(COMPONENT_CONTACT_PANEL), showContacts);
 		ui.setVisible(find(COMPONENT_KEYWORD_PANEL), showKeywords);
 	}
@@ -732,10 +757,6 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	/** @see UiGeneratorController#show_composeMessageForm(Object) */
 	public void show_composeMessageForm(Object list) {
 		this.ui.show_composeMessageForm(list);
-	}
-	/** @see UiGeneratorController#groupList_expansionChanged(Object) */
-	public void groupList_expansionChanged(Object groupList) {
-		this.ui.groupList_expansionChanged(groupList);
 	}
 	/** @see UiGeneratorController#showDateSelecter(Object) */
 	public void showDateSelecter(Object textField) {
