@@ -11,6 +11,8 @@ import org.apache.log4j.Logger;
 import thinlet.Thinlet;
 
 import net.frontlinesms.data.domain.Group;
+import net.frontlinesms.data.repository.GroupDao;
+import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.handler.BasePanelHandler;
@@ -29,6 +31,9 @@ public class GroupSelecterPanel extends BasePanelHandler {
 	private Object groupTreeComponent;
 	
 	private GroupSelecterPanelOwner owner;
+
+	private GroupDao groupDao;
+	private GroupMembershipDao groupMembershipDao;
 	
 	private boolean allowMultipleSelections;
 
@@ -159,19 +164,20 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		
 		String toSet = group.getName();
 		if (showContactsNumber) {
-			toSet += " (" + group.getAllMembers().size() + ")";
+			toSet += " (" + this.groupMembershipDao.getMemberCount(group) + ")";
 		}
 		
 		Object node = ui.createNode(toSet, group);
 
-		if(ui.getBoolean(node, Thinlet.EXPANDED) && group.hasDescendants()) {
+		if(ui.getBoolean(node, Thinlet.EXPANDED)
+				&& groupDao.hasDescendants(group)) {
 			ui.setIcon(node, Icon.FOLDER_OPEN);
 		} else {
 			ui.setIcon(node, Icon.FOLDER_CLOSED);
 		}
 		
 		// Add subgroup components to this node
-		for (Group subGroup : group.getDirectSubGroups()) {
+		for (Group subGroup : groupDao.getChildGroups(group)) {
 			Object groupNode = createNode(subGroup, showContactsNumber);
 			ui.add(node, groupNode);
 		}

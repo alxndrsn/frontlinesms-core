@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -206,6 +205,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		this.phoneManager = frontlineController.getSmsDeviceManager();
 		this.contactDao = frontlineController.getContactDao();
 		this.groupDao = frontlineController.getGroupDao();
+		this.groupMembershipDao = frontlineController.getGroupMembershipDao();
 		this.messageFactory = frontlineController.getMessageDao();
 		this.keywordDao = frontlineController.getKeywordDao();
 		this.phoneDetailsManager = frontlineController.getSmsModemSettingsDao();
@@ -1249,7 +1249,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 
 		add(row, createTableCell(contact.getPhoneNumber()));
 		add(row, createTableCell(contact.getEmailAddress()));
-		String groups = Utils.contactGroupsAsString(contact, DEFAULT_GROUPS_DELIMITER);
+		String groups = Utils.contactGroupsAsString(this.groupMembershipDao.getGroups(contact), DEFAULT_GROUPS_DELIMITER);
 		add(row, createTableCell(groups));
 		return row;
 	}
@@ -1637,7 +1637,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void groupList_expansionChanged(Object groupList) {
 		for (Object o : getItems(groupList)) {
 			if (isAttachment(o, Group.class)) {
-				if(getBoolean(o, EXPANDED) && groupDao.hasDescendants(o)) {
+				if(getBoolean(o, EXPANDED) && groupDao.hasDescendants(getAttachedObject(o, Group.class))) {
 					// Set the icon to EXPANDED, and set children icons too!
 					setIcon(o, Icon.FOLDER_OPEN);
 					groupList_expansionChanged(o);

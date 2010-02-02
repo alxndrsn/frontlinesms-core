@@ -210,50 +210,17 @@ public interface MessageDao {
 	 */
 	public Message getMessageForStatusUpdate(String targetMsisdnSuffix, int smscReference);
 	
-	/**
-	 * Returns all message associated with these groups.
-	 * @param messageType 
-	 * @param groups 
-	 * @param field TODO
-	 * @param order TODO
-	 * @param start TODO
-	 * @param end TODO
-	 * @param startIndex 
-	 * @param limit 
-	 * @return
-	 */
-	public List<Message> getMessagesForGroups(int messageType, List<Group> groups, Field field, Order order, Long start, Long end, int startIndex, int limit);
-	
-	/**
-	 * Returns the message count associated to these groups.
-	 * @param messageType 
-	 * @param groups 
-	 * @param start TODO
-	 * @param end TODO
-	 * @return
-	 */
-	public int getMessageCountForGroups(int messageType, List<Group> groups, Long start, Long end);
-	
-	/**
-	 * Returns the count of sent SMS associated to these groups.
-	 * @param groups 
-	 * @param start TODO
-	 * @param end TODO
-	 * @return
-	 */
-	public int getSMSCountForGroups(List<Group> groups, Long start, Long end);
+	/** @return the number of messages sent to the specified phone numbers within the specified dates */
+	public int getMessageCount(int messageType, List<String> phoneNumbers, Long messageHistoryStart, Long messageHistoryEnd);
+
+	/** @return the messages sent to the specified phone numbers within the specified dates */
+	public List<Message> getMessages(int messageType, List<String> phoneNumbers, Long messageHistoryStart, Long messageHistoryEnd);
 
 	/**
 	 * Delete the supplied message to the data source.
 	 * @param message the message to be deleted
 	 */
 	public void deleteMessage(Message message);
-
-	/**
-	 * @param action
-	 * @return
-	 */
-	public List<Message> getMessagesForAction(KeywordAction action);
 
 	/**
 	 * Save the supplied message to the data source.

@@ -27,7 +27,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_SEND_
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_VIEW_CONTACT_BUTTON;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -274,7 +273,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			if (menuRemove != null) {
 				Contact c = this.ui.getContact(this.ui.getSelectedItem(list));
 				this.ui.removeAll(menuRemove);
-				Collection<Group> groups = c.getGroups();
+				List<Group> groups = this.groupMembershipDao.getGroups(c);
 				for (Group g : groups) {
 					Object menuItem = Thinlet.create(Thinlet.MENUITEM);
 					this.ui.setText(menuItem, g.getName());
@@ -361,7 +360,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			if (this.ui.isAttachment(component, Contact.class)) {
 				Contact contact = this.ui.getContact(component);
 				LOG.debug("Adding Contact [" + contact.getName() + "] to [" + destination + "]");
-				if(destination.addDirectMember(contact)) {
+				if(this.groupMembershipDao.addMembership(destination, contact)) {
 					groupDao.updateGroup(destination);
 				}
 			}
@@ -395,13 +394,14 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 				LOG.debug("Removing group [" + selectedGroup.getName() + "] from database");
 				groupDao.deleteGroup(selectedGroup, removeContactsAlso);
 			} else {
-				if (removeContactsAlso) {
-					LOG.debug("Group not destroyable, removing contacts...");
-					for (Contact c : selectedGroup.getDirectMembers()) {
-						LOG.debug("Removing contact [" + c.getName() + "] from database");
-						contactDao.deleteContact(c);
-					}
-				}
+				throw new IllegalStateException();
+//				if (removeContactsAlso) {
+//					LOG.debug("Group not destroyable, removing contacts...");
+//					for (Contact c : selectedGroup.getDirectMembers()) {
+//						LOG.debug("Removing contact [" + c.getName() + "] from database");
+//						contactDao.deleteContact(c);
+//					}
+//				}
 			}
 		}
 		
@@ -419,7 +419,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	public void removeFromGroup(Object selectedGroup) {
 		Group g = this.ui.getGroup(selectedGroup);
 		Contact c = this.ui.getContact(this.ui.getSelectedItem(contactListComponent));
-		if(g.removeContact(c)) {
+		if(this.groupMembershipDao.removeMembership(g, c)) {
 			this.groupDao.updateGroup(g);
 		}
 		this.refresh();

@@ -34,7 +34,7 @@ public class Group {
 //> DATABASE COLUMN NAMES
 	/** Database column name for property: {@link #name} */
 	static final String COLUMN_PATH = "path";
-	private static final char PATH_SEPARATOR = '/';
+	public static final char PATH_SEPARATOR = '/';
 
 //> ENTITY FIELDS
 	/** Details of the fields that this class has. */
@@ -64,6 +64,7 @@ public class Group {
 	
 	private Group(String path) {
 		assert(path.startsWith("" + PATH_SEPARATOR)) : "Path must start with the seprator character '" + PATH_SEPARATOR + "'";
+		assert(path.indexOf(',') == -1) : "Comma illegal in group name.";
 	}
 	
 	/**
@@ -72,7 +73,11 @@ public class Group {
 	 * @param name The name of the new group.
 	 */
 	public Group(Group parent, String name) {
-		assert(name.indexOf(PATH_SEPARATOR) == -1) : "Group names cannot contain the path separator character '" + PATH_SEPARATOR + "'";
+		if(name.indexOf(PATH_SEPARATOR) != -1) 
+			throw new IllegalArgumentException("Group names cannot contain the path separator character '" + PATH_SEPARATOR + "'");
+		if(name.indexOf(',') != -1)
+			throw new IllegalArgumentException("Comma character not valid in group name.");
+		
 		this.path = parent.getPath() + PATH_SEPARATOR + name;
 	}
 	
@@ -83,7 +88,7 @@ public class Group {
 	}
 
 	/** @return the path of this group */
-	private String getPath() {
+	public String getPath() {
 		return this.path;
 	}
 	

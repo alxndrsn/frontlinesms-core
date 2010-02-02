@@ -34,6 +34,7 @@ import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 
@@ -116,9 +117,9 @@ public class Utils {
 	 * @param groups_delimiter
 	 * @return the groups this contact is a member of represented as a string with vales separated by the requested delimiter
 	 */
-	public static String contactGroupsAsString(Contact contact, String groups_delimiter) {
+	public static String contactGroupsAsString(Collection<Group> groupCollection, String groups_delimiter) {
 		String groups = "";
-		for (Group g : contact.getGroups()) {
+		for (Group g : groupCollection) {
 			groups += g.getName() + groups_delimiter;
 		}
 		if (groups.endsWith(groups_delimiter)) {

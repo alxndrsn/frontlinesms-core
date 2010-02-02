@@ -69,11 +69,6 @@ public class InMemoryMessageDao implements MessageDao {
 		return this.getMessagesForKeyword(messageType, keyword, Field.MESSAGE_CONTENT, Order.ASCENDING, start, end, 0, Integer.MAX_VALUE).size();
 	}
 
-	/** @see MessageDao#getMessageCountForGroups(int, List, Long, Long) */
-	public int getMessageCountForGroups(int messageType, List<Group> groups, Long start, Long end) {
-		return getMessagesForGroups(messageType, groups, Field.MESSAGE_CONTENT, Order.ASCENDING, start, end, 0, Integer.MAX_VALUE).size();
-	}
-
 	/** @see MessageDao#getMessageCountForMsisdn(int, String, Long, Long) */
 	public int getMessageCountForMsisdn(int type, String number, Long start, Long end) {
 		return this.getMessagesForMsisdn(type, number, Field.MESSAGE_CONTENT, Order.ASCENDING, start, end).size();

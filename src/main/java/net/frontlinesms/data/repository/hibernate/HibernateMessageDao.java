@@ -3,7 +3,6 @@
  */
 package net.frontlinesms.data.repository.hibernate;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -14,9 +13,7 @@ import org.hibernate.criterion.SimpleExpression;
 
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Email;
-import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
-import net.frontlinesms.data.domain.KeywordAction;
 import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.data.domain.Message.Field;
 import net.frontlinesms.data.repository.MessageDao;
@@ -74,15 +71,6 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 		return getCount(criteria);
 	}
 
-	/** @see MessageDao#getMessageCountForGroups(int, List, Long, Long) */
-	public int getMessageCountForGroups(int messageType, List<Group> groups, Long start, Long end) {
-		DetachedCriteria criteria = super.getCriterion();
-		addTypeCriteria(criteria, messageType);
-		addGroupsCriteria(criteria, groups);
-		addDateCriteria(criteria, start, end);
-		return super.getCount(criteria);
-	}
-
 	/** @see MessageDao#getMessageCountForMsisdn(int, String, Long, Long) */
 	public int getMessageCountForMsisdn(int messageType, String phoneNumber, Long start, Long end) {
 		DetachedCriteria criteria = super.getCriterion();
@@ -122,20 +110,28 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 		addStatusCriteria(criteria, status);
 		return getList(criteria);
 	}
-
-	/** @see MessageDao#getMessagesForAction(KeywordAction) */
-	public List<Message> getMessagesForAction(KeywordAction action) {
-		// TODO need to add action messages
-		return new ArrayList<Message>();
+	
+	public int getMessageCount(int messageType, List<String> phoneNumbers,
+			Long messageHistoryStart, Long messageHistoryEnd) {
+		return super.getCount(getCriteria(messageType, phoneNumbers,
+				messageHistoryStart, messageHistoryEnd));
+	}
+	
+	public List<Message> getMessages(int messageType,
+			List<String> phoneNumbers, Long messageHistoryStart,
+			Long messageHistoryEnd) {
+		return super.getList(getCriteria(messageType, phoneNumbers,
+				messageHistoryStart, messageHistoryEnd));
 	}
 
-	/** @see MessageDao#getMessagesForGroups(int, List, Field, Order, Long, Long, int, int) */
-	public List<Message> getMessagesForGroups(int messageType, List<Group> groups, Field sortBy, Order order, Long start, Long end, int startIndex, int limit) {
-		DetachedCriteria criteria = super.getSortCriterion(sortBy, order);
+	private DetachedCriteria getCriteria(int messageType,
+			List<String> phoneNumbers, Long messageHistoryStart,
+			Long messageHistoryEnd) {
+		DetachedCriteria criteria = super.getCriterion();
 		addTypeCriteria(criteria, messageType);
-		addGroupsCriteria(criteria, groups);
-		addDateCriteria(criteria, start, end);
-		return super.getList(criteria , startIndex, limit);
+		addDateCriteria(criteria, messageHistoryStart, messageHistoryEnd);
+		addPhoneNumberMatchCriteria(criteria, phoneNumbers, true, true);
+		return criteria;
 	}
 
 	/** @see MessageDao#getMessagesForKeyword(int, Keyword, Field, Order, Long, Long, int, int) */
@@ -184,14 +180,6 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	/** @see MessageDao#getSMSCount(Long, Long) */
 	public int getSMSCount(Long start, Long end) {
 		DetachedCriteria criteria = super.getCriterion();
-		addDateCriteria(criteria, start, end);
-		return super.getCount(criteria);
-	}
-
-	/** @see MessageDao#getSMSCountForGroups(List, Long, Long) */
-	public int getSMSCountForGroups(List<Group> groups, Long start, Long end) {
-		DetachedCriteria criteria = super.getCriterion();
-		addGroupsCriteria(criteria, groups);
 		addDateCriteria(criteria, start, end);
 		return super.getCount(criteria);
 	}
@@ -261,6 +249,40 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 	
 	/**
+	 * Augments the supplied criteria with that required to match an msisdn, either for the sender, the receiver or both.
+	 * @param criteria
+	 * @param phoneNumber 
+	 * @param sender 
+	 * @param receiver 
+	 */
+	private void addPhoneNumberMatchCriteria(DetachedCriteria criteria, List<String> phoneNumbers, boolean sender, boolean receiver) {
+		if(!sender && !receiver) {
+			throw new IllegalStateException("This neither sender nor receiver matching is requested.");
+		}
+
+		// build multi level OR
+		Criterion ors = null;
+		for(String phoneNumber : phoneNumbers) {
+			if(sender) {
+				SimpleExpression eqSender = Restrictions.eq(Field.SENDER_MSISDN.getFieldName(), phoneNumber);
+				if(ors == null) ors = eqSender;
+				else ors = Restrictions.or(ors, eqSender);
+			}
+
+			if(receiver) {
+				SimpleExpression eqReceiver = Restrictions.eq(Field.RECIPIENT_MSISDN.getFieldName(), phoneNumber);
+				if(ors == null) ors = eqReceiver;
+				else ors = Restrictions.or(ors, eqReceiver);
+			}
+		}
+		
+		// If we've made any ORs, apply them to the criteria
+		if(ors != null) {
+			criteria.add(ors);
+		}
+	}
+	
+	/**
 	 * Augments the supplied criteria with that required to match a date range.
 	 * @param criteria
 	 * @param start
@@ -293,14 +315,5 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	 */
 	private void addStatusCriteria(DetachedCriteria criteria, Integer[] statuses) {
 		criteria.add(Restrictions.in(Field.STATUS.getFieldName(), statuses));
-	}
-
-	/**
-	 * Augments the supplied criteria with that required to match a list of groups.
-	 * @param criteria 
-	 * @param groups 
-	 */
-	private void addGroupsCriteria(DetachedCriteria criteria, Collection<Group> groups) {
-		// TODO add a join off contact.message, contact.groups => groups
 	}
 }
