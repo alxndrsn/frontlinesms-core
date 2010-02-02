@@ -72,12 +72,6 @@ public class HibernateKeywordDao extends BaseHibernateDao<Keyword> implements Ke
 		return longest;
 	}
 
-	/** @see KeywordDao#getPageNumber(Keyword, int) */
-	public int getPageNumber(Keyword keyword, int keywordsPerPage) {
-		// TODO do this better
-		return super.getAll().indexOf(keyword) / keywordsPerPage;
-	}
-
 	/** @see KeywordDao#getTotalKeywordCount() */
 	public int getTotalKeywordCount() {
 		return super.countAll();

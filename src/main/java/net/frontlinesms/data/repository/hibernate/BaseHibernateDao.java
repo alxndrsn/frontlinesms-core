@@ -17,6 +17,7 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.transform.DistinctRootEntityResultTransformer;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
@@ -121,12 +122,8 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	 * Gets all entities of type {@link #clazz}.
 	 * @return list of all entities of type {@link #clazz}
 	 */
-	@SuppressWarnings("unchecked")
 	protected List<E> getAll() {
-		log.trace("Fetching all entities...");
-		List<E> allEntities = this.getHibernateTemplate().loadAll(this.clazz);
-		log.trace("Fetched: " + allEntities.size());
-		return allEntities;
+		return this.getList(getCriterion());
 	}
 	
 	/**
@@ -198,7 +195,9 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	 * @return {@link DetachedCriteria} with order and sort field set
 	 */
 	protected DetachedCriteria getCriterion() {
-		return DetachedCriteria.forClass(this.clazz);
+		DetachedCriteria criteria = DetachedCriteria.forClass(this.clazz);
+		criteria.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE);
+		return criteria;
 	}
 	
 	/**

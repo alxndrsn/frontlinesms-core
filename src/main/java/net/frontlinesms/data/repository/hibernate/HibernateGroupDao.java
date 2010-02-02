@@ -75,12 +75,6 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 		return super.countAll();
 	}
 
-	/** @see GroupDao#getPageNumber(Group, int) */
-	public int getPageNumber(Group group, int groupsPerPage) {
-		// TODO Do this better - this isn't hugely efficient
-		return super.getAll().indexOf(group) / groupsPerPage;
-	}
-
 	/** @see GroupDao#saveGroup(Group) */
 	public void saveGroup(Group group) throws DuplicateKeyException {
 		if(group.getParent() == null) {

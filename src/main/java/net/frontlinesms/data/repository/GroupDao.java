@@ -48,15 +48,6 @@ public interface GroupDao {
 	 */
 	public Collection<Group> getChildGroups(Group parent);
 	
-	/**
-	 * Retrieve the page number that the specified group would appear on for
-	 * getAllGroups()
-	 * @param group
-	 * @param groupsPerPage
-	 * @return page number that a group appears on
-	 */
-	public int getPageNumber(Group group, int groupsPerPage);
-	
 	/** @return Total number of groups */
 	public int getGroupCount();
 	

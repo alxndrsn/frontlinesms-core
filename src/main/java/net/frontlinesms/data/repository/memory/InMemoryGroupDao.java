@@ -78,13 +78,6 @@ public class InMemoryGroupDao implements GroupDao {
 		return allGroups.size();
 	}
 
-	/** @see GroupDao#getPageNumber(Group, int) */
-	public int getPageNumber(Group group, int groupsPerPage) {
-		ArrayList<Group> groups = new ArrayList<Group>();
-		groups.addAll(allGroups);
-		return groups.indexOf(group) / groupsPerPage;
-	}
-
 	/** @see GroupDao#saveGroup(Group) */
 	public void saveGroup(Group group) throws DuplicateKeyException {
 		Group parent = group.getParent();

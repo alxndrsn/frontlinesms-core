@@ -72,11 +72,6 @@ public class InMemoryKeywordDao implements KeywordDao {
 		return matchingKeyword;
 	}
 
-	/** @see KeywordDao#getPageNumber(Keyword, int) */
-	public int getPageNumber(Keyword keyword, int keywordsPerPage) {
-		return getAllKeywords().indexOf(keyword) / keywordsPerPage;
-	}
-
 	/** @see net.frontlinesms.data.repository.KeywordDao#getTotalKeywordCount() */
 	public int getTotalKeywordCount() {
 		return this.allKeywords.size();

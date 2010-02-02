@@ -40,14 +40,6 @@ public interface KeywordDao {
 	 * @return A subset of the total keywords
 	 */
 	public List<Keyword> getAllKeywords(int startIndex, int limit);
-	
-	/**
-	 * Gets the page number that a keyword will appear on when getAllKeywords is called.
-	 * @param keyword the keyword we are searching for
-	 * @param keywordsPerPage number of keywords per page
-	 * @return page number that the supplied keyword is found on
-	 */
-	public int getPageNumber(Keyword keyword, int keywordsPerPage);
 		
 	/**
 	 * Get's the lowest-generation keyword from the supplied message text.
