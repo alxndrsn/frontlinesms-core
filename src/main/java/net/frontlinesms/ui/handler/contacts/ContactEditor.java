@@ -15,6 +15,7 @@ import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.repository.ContactDao;
+import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
@@ -43,6 +44,7 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	private Logger LOG = Logger.getLogger(this.getClass());
 	private UiGeneratorController ui;
 	private ContactDao contactDao;
+	private GroupMembershipDao groupMembershipDao;
 	private ContactEditorOwner owner;
 	/** UI Component: the dialog that will contain the contact editor */
 	private Object dialogComponent;
@@ -78,7 +80,7 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 		this.target = contact;
 		initDialog();
 		populateContactDetails(contact);
-		for(Group g : contact.getGroups()) {
+		for(Group g : groupMembershipDao.getGroups(contact)) {
 			addGroupToList(g);
 		}
 		showDialog();
@@ -182,7 +184,7 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 
 				// Update the groups that this contact is a member of
 				for(Group g : getAddedGroups()) {
-					g.addDirectMember(contact);
+					groupMembershipDao.addMembership(g, contact);
 				}
 				
 				this.contactDao.saveContact(contact);
@@ -203,10 +205,10 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 
 				// Update the groups that this contact is a member of
 				for(Group g : getRemovedGroups()) {
-					g.removeContact(contact);
+					groupMembershipDao.removeMembership(g, contact);
 				}
 				for(Group g : getAddedGroups()) {
-					g.addDirectMember(contact);
+					groupMembershipDao.addMembership(g, contact);
 				}
 				
 				this.contactDao.updateContact(contact);

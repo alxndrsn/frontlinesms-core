@@ -87,12 +87,6 @@ public interface ContactDao {
 	 */
 	public void updateContact(Contact contact) throws DuplicateKeyException;
 	
-	/** @return all contacts who are not a member of any groups */
-	public Collection<Contact> getUngroupedContacts();
-	
-	/** @return all contacts who do not have a name set for them */
-	public Collection<Contact> getUnnamedContacts();
-
 	/**
 	 * @param contactNameFilter A contact's name, or any part of it 
 	 * @param start The first contact to return

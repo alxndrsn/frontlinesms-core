@@ -52,11 +52,10 @@ public interface GroupDao {
 	public int getGroupCount();
 	
 	/**
-	 * Retrieves the group with the specified name, or returns NULL if none exists.
-	 * @param name the name of the group
-	 * @return group with the requested name, or <code>null</code> if none exists
+	 * @param name the path of the group
+	 * @return group with the requested path, or <code>null</code> if none exists
 	 */
-	public Group getGroupByName(String name);
+	public Group getGroupByPath(String path);
 	
 	/**
 	 * Deletes a group and its subgroups, optionally deleting members too.
@@ -77,4 +76,6 @@ public interface GroupDao {
 	 * @param group the group to update
 	 */
 	public void updateGroup(Group group);
+
+	public boolean hasDescendants(Group group);
 }

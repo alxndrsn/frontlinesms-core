@@ -37,6 +37,7 @@ import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;
+import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BaseTabHandler;
@@ -71,6 +72,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	private final GroupDao groupDao;
 	/** Data access object for {@link Contact}s */
 	private final ContactDao contactDao;
+	private GroupMembershipDao groupMembershipDao;
 	
 	
 //> CACHED THINLET UI COMPONENTS
@@ -160,7 +162,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		if(selectedGroup == null) {
 			return PagedListDetails.EMPTY;
 		} else {
-			int totalItemCount = selectedGroup.getAllMembersCount();
+			int totalItemCount = groupMembershipDao.getMemberCount(selectedGroup);
 			
 			// TODO fix filtering
 			
@@ -171,7 +173,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	//		List<Contact> contacts = (this.contactNameFilter == null || this.contactNameFilter.length() == 0) 
 	//				? this.contactDao.getAllContacts(startIndex, limit)
 	//				: this.contactDao.getContactsFilteredByName(this.contactNameFilter, startIndex, limit);
-			List<Contact> contacts = selectedGroup.getAllMembers(startIndex, limit);
+			List<Contact> contacts = groupMembershipDao.getMembers(selectedGroup, startIndex, limit);
 			Object[] listItems = toThinletComponents(contacts);
 			
 			return new PagedListDetails(totalItemCount, listItems);

@@ -125,6 +125,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	private final ContactDao contactDao;
 	/** Data Access Object for {@link Group}s */
 	private final GroupDao groupDao;
+	/** Data Access Object for {@link GroupMembership}s */
+	private final GroupMembershipDao groupMembershipDao;
 	/** Data Access Object for {@link Message}s */
 	private final MessageDao messageFactory;
 	/** Data Access Object for {@link Keyword}s */
@@ -149,15 +151,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/** Fake group: The root group, of which all other top-level groups are children.  The name of this group specified in the constructor will not be used due to overridden {@link Group#getName()}. */
 	final Group rootGroup = new Group(null, "Root Group [i18n]") {
 		@Override
-		public Collection<Contact> getAllMembers() {
-			return contactDao.getAllContacts();
-		}
-		@Override
-		/** This group can have no direct subgroups. */
-		public Collection<Group> getDirectSubGroups() {
-			return groupDao.getChildGroups(null);
-		}
-		@Override
 		/** Provide an internationalised version of this group's name */
 		public String getName() {
 			return InternationalisationUtils.getI18NString(FrontlineSMSConstants.CONTACTS_ALL);
@@ -166,15 +159,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/** Fake group: all contacts without a name set.  The name of this group specified in the constructor will not be used due to overridden {@link Group#getName()}. */
 	final Group unnamedContacts = new Group(null, "Unnamed [i18n]") {
 		@Override
-		public Collection<Contact> getAllMembers() {
-			return contactDao.getUnnamedContacts();
-		}
-		@Override
-		/** This group can have no direct subgroups. */
-		public Collection<Group> getDirectSubGroups() {
-			return Collections.emptySet();
-		}
-		@Override
 		/** Provide an internationalised version of this group's name */
 		public String getName() {
 			return InternationalisationUtils.getI18NString(FrontlineSMSConstants.CONTACTS_UNNAMED);
@@ -182,15 +166,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	};
 	/** Fake group: all contacts not a member of a group.  The name of this group specified in the constructor will not be used due to overridden {@link Group#getName()}. */
 	final Group ungroupedContacts = new Group(null, "Ungrouped [i18n]") {
-		@Override
-		public Collection<Contact> getAllMembers() {
-			return contactDao.getUngroupedContacts();
-		}
-		@Override
-		/** This group can have no direct subgroups. */
-		public Collection<Group> getDirectSubGroups() {
-			return Collections.emptySet();
-		}
 		@Override
 		/** Provide an internationalised version of this group's name */
 		public String getName() {
@@ -534,13 +509,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 	}
 	
-	public void getGroupsRecursivelyDown(List<Group> groups, Group g) {
-		groups.add(g);
-		for (Group subGroup : g.getDirectSubGroups()) {
-			getGroupsRecursivelyDown(groups, subGroup);
-		}
-	}
-	
 	/**
 	 * Shows the message history for the selected contact or group.
 	 * @param component group list or contact list
@@ -646,7 +614,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		
 		HashSet<Object> recipients = new HashSet<Object>();
 		boolean hasMembers = false;
-		for (Contact c : group.getAllMembers()) {
+		for (Contact c : groupMembershipDao.getMembers(group)) {
 			hasMembers = true;
 			if (c.isActive()) {
 				LOG.debug("Adding contact [" + c.getName() + "] to the send list.");
@@ -1669,7 +1637,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void groupList_expansionChanged(Object groupList) {
 		for (Object o : getItems(groupList)) {
 			if (isAttachment(o, Group.class)) {
-				if(getBoolean(o, EXPANDED) && getGroup(o).hasDescendants()) {
+				if(getBoolean(o, EXPANDED) && groupDao.hasDescendants(o)) {
 					// Set the icon to EXPANDED, and set children icons too!
 					setIcon(o, Icon.FOLDER_OPEN);
 					groupList_expansionChanged(o);

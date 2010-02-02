@@ -87,21 +87,4 @@ public class HibernateContactDao extends BaseHibernateDao<Contact> implements Co
 		// TODO this method is pretty dumb, at least in its current form.  or perhaps hibernate can cope with such foolishness?
 		return this.getAllContacts().indexOf(contact) / contactsPerPage;
 	}
-
-	/** @see ContactDao#getUngroupedContacts() */
-	public Collection<Contact> getUngroupedContacts() {
-		DetachedCriteria criteria = super.getCriterion();
-		criteria.add(Restrictions.isEmpty(Contact.Field.GROUPS.getFieldName()));
-		return super.getList(criteria);
-	}
-
-	/** @see ContactDao#getUnnamedContacts() */
-	public Collection<Contact> getUnnamedContacts() {
-		DetachedCriteria criteria = super.getCriterion();
-		criteria.add(Restrictions.or(
-				Restrictions.eq(Field.NAME.getFieldName(), ""),
-				Restrictions.isNull(Field.NAME.getFieldName())));
-		return super.getList(criteria);
-	}
-
 }
