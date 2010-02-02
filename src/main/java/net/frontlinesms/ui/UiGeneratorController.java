@@ -238,7 +238,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			this.phoneTabController = new PhoneTabHandler(this);
 			this.phoneTabController.init();
 			
-			this.contactsTabController = new ContactsTabHandler(this, this.contactDao, this.groupDao);
+			this.contactsTabController = new ContactsTabHandler(this);
 			this.contactsTabController.init();
 			
 			this.messageTabController = new MessageHistoryTabHandler(this, contactDao, keywordDao, messageFactory);

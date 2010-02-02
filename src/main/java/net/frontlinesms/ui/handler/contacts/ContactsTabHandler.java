@@ -71,7 +71,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	private final GroupDao groupDao;
 	/** Data access object for {@link Contact}s */
 	private final ContactDao contactDao;
-	private GroupMembershipDao groupMembershipDao;
+	private final GroupMembershipDao groupMembershipDao;
 	
 	
 //> CACHED THINLET UI COMPONENTS
@@ -92,10 +92,11 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 * @param contactDao {@link #contactDao}
 	 * @param groupDao {@link #groupDao}
 	 */
-	public ContactsTabHandler(UiGeneratorController ui, ContactDao contactDao, GroupDao groupDao) {
+	public ContactsTabHandler(UiGeneratorController ui) {
 		super(ui);
-		this.contactDao = contactDao;
-		this.groupDao = groupDao;
+		this.contactDao = ui.getFrontlineController().getContactDao();
+		this.groupDao = ui.getFrontlineController().getGroupDao();
+		this.groupMembershipDao = ui.getFrontlineController().getGroupMembershipDao();
 		this.groupSelecter = new GroupSelecterPanel(ui, this);
 	}
 	

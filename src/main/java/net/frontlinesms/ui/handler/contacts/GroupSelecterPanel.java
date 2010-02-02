@@ -13,8 +13,8 @@ import thinlet.Thinlet;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
-import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.Icon;
+import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BasePanelHandler;
 
 /**
@@ -40,9 +40,13 @@ public class GroupSelecterPanel extends BasePanelHandler {
 	private Group[] rootGroups;
 
 //> CONSTRUCTORS
-	public GroupSelecterPanel(FrontlineUI ui, GroupSelecterPanelOwner owner) {
+	public GroupSelecterPanel(UiGeneratorController ui, GroupSelecterPanelOwner owner) {
 		super(ui);
 		this.owner = owner;
+		
+		this.groupDao = ui.getFrontlineController().getGroupDao();
+		this.groupMembershipDao = ui.getFrontlineController().getGroupMembershipDao();
+		
 		allowMultipleSelections = owner instanceof MultiGroupSelecterPanelOwner;
 	}
 

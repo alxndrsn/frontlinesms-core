@@ -160,6 +160,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		
 		LOG.info("Getting DAOs from application context...");
 		groupDao = (GroupDao) applicationContext.getBean("groupDao");
+		groupMembershipDao = (GroupMembershipDao) applicationContext.getBean("groupMembershipDao");
 		contactDao = (ContactDao) applicationContext.getBean("contactDao");
 		keywordDao = (KeywordDao) applicationContext.getBean("keywordDao");
 		keywordActionDao = (KeywordActionDao) applicationContext.getBean("keywordActionDao");

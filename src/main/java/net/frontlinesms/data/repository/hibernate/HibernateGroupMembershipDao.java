@@ -3,6 +3,7 @@
  */
 package net.frontlinesms.data.repository.hibernate;
 
+import java.util.Collections;
 import java.util.List;
 
 import net.frontlinesms.data.domain.Contact;
@@ -33,7 +34,7 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 	 */
 	public List<Contact> getActiveMembers(Group group) {
 		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyList();
 	}
 
 	/**
@@ -41,7 +42,7 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 	 */
 	public List<Group> getGroups(Contact contact) {
 		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyList();
 	}
 
 	/**
@@ -57,7 +58,7 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 	 */
 	public List<Contact> getMembers(Group group) {
 		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyList();
 	}
 
 	/**
@@ -65,7 +66,7 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 	 */
 	public List<Contact> getMembers(Group group, int startIndex, int limit) {
 		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyList();
 	}
 
 	/**
