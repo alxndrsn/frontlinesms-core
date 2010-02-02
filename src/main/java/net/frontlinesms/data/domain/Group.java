@@ -55,7 +55,7 @@ public class Group {
 	
 //> PROPERTIES
 	/** The path of this group. */
-	@Column(name=COLUMN_PATH, unique=true, updatable=false, nullable=false)
+	@Id @Column(name=COLUMN_PATH, unique=true, updatable=false, nullable=false)
 	private String path;
 	
 //> CONSTRUCTORS
@@ -78,7 +78,8 @@ public class Group {
 		if(name.indexOf(',') != -1)
 			throw new IllegalArgumentException("Comma character not valid in group name.");
 		
-		this.path = parent.getPath() + PATH_SEPARATOR + name;
+		String parentPath = parent == null ? "" : parent.getPath();
+		this.path = parentPath + PATH_SEPARATOR + name;
 	}
 	
 //> ACCESSOR METHODS
