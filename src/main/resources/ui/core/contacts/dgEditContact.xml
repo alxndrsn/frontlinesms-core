@@ -16,8 +16,8 @@
     <label icon="/icons/group.png" text="i18n.common.groups"/>
     <panel columns="2" colspan="2" weightx="1">
     	<list colspan="2" name="newContact_groupList" selection="single" weightx="1"/>
-    	<button action="addNewGroup" text="Add New Group" halign="left"/>
-    	<button action="removeSelectedGroups" text="Remove Groups" halign="right"/>
+    	<button action="addNewGroup" text="i18n.action.add.to.group" halign="left" icon="/icons/group_add.png"/>
+    	<button action="removeSelectedGroups" text="i18n.action.delete.from.group" halign="right" icon="/icons/group_delete.png"/>
     </panel>
     
     <label/>
