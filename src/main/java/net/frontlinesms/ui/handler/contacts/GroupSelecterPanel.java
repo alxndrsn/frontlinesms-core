@@ -107,7 +107,7 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		Object groupTree = this.getGroupTreeComponent();
 		Group parent = group.getParent();
 		Object parentGroupNode;
-		if(parent != null) {
+		if(parent != null && !parent.isRoot()) {
 			parentGroupNode = getNodeForGroup(groupTree, parent);
 		} else {
 			// There is no parent for the group, so we need to get the node for the root group

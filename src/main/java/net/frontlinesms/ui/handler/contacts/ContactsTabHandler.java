@@ -10,7 +10,6 @@ import static net.frontlinesms.FrontlineSMSConstants.COMMON_GROUP;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_CONTACTS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUPS_AND_CONTACTS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUP_ALREADY_EXISTS;
-import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_IMPOSSIBLE_TO_CREATE_A_GROUP_HERE;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_REMOVING_CONTACTS;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BUTTON_YES;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_MANAGER_CONTACT_FILTER;
@@ -303,8 +302,9 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 					this.ui.setVisible(o, !this.ui.isDefaultGroup(g));
 				}
 				
+				// FIXME this is superfluous - always sets vis to true
 				if (COMPONENT_NEW_GROUP.equals(name)) {
-					this.ui.setVisible(o, g!=this.ui.getUnnamedContacts() && g!=this.ui.getUngroupedContacts());
+					this.ui.setVisible(o, true);
 				}
 			}
 		}
@@ -468,14 +468,10 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			String parentGroupName = selectedParentGroup == null ? "null" : selectedParentGroup.getName();
 			LOG.debug("Parent group [" + parentGroupName + "]");
 		}
-		if(selectedParentGroup == this.ui.getRootGroup()) {
-			selectedParentGroup = null;
-		}
-		if (selectedParentGroup == this.ui.getUnnamedContacts() || selectedParentGroup == this.ui.getUngroupedContacts()) {
-			this.ui.alert(InternationalisationUtils.getI18NString(MESSAGE_IMPOSSIBLE_TO_CREATE_A_GROUP_HERE));
-			if (dialog != null) this.ui.remove(dialog);
-			return;
-		}
+//		if(selectedParentGroup == this.ui.getRootGroup()) {
+//			selectedParentGroup = null;
+//		}
+
 		LOG.debug("Group Name [" + newGroupName + "]");
 		try {
 			if(LOG.isDebugEnabled()) LOG.debug("Creating group with name: " + newGroupName + " and parent: " + selectedParentGroup);

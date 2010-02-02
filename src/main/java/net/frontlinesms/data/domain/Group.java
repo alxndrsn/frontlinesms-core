@@ -54,7 +54,12 @@ public class Group {
 	}
 	
 //> PROPERTIES
-	/** The path of this group. */
+	/**
+	 * The path of this group.
+	 * This is a {@link #PATH_SEPARATOR}-separated list of this group and its parents.
+	 * Empty string denotes the root group.
+	 * There is no leading or trailing {@link #PATH_SEPARATOR}
+	 */
 	@Id @Column(name=COLUMN_PATH, unique=true, updatable=false, nullable=false)
 	private String path;
 	
@@ -65,6 +70,7 @@ public class Group {
 	private Group(String path) {
 		assert(path.startsWith("" + PATH_SEPARATOR)) : "Path must start with the seprator character '" + PATH_SEPARATOR + "'";
 		assert(path.indexOf(',') == -1) : "Comma illegal in group name.";
+		this.path = path;
 	}
 	
 	/**
@@ -73,19 +79,32 @@ public class Group {
 	 * @param name The name of the new group.
 	 */
 	public Group(Group parent, String name) {
-		if(name.indexOf(PATH_SEPARATOR) != -1) 
-			throw new IllegalArgumentException("Group names cannot contain the path separator character '" + PATH_SEPARATOR + "'");
-		if(name.indexOf(',') != -1)
-			throw new IllegalArgumentException("Comma character not valid in group name.");
+		assert((parent != null && name != null) 
+				|| (parent == null && name == null)) : "Only the root group should have a null parent, and that should be defined internally.";
 		
-		String parentPath = parent == null ? "" : parent.getPath();
-		this.path = parentPath + PATH_SEPARATOR + name;
+		if(parent == null && name == null) {
+			this.path = "";
+		} else {
+			if(name.length() == 0)
+				throw new IllegalArgumentException("Group names cannot be empty.");
+			if(name.indexOf(PATH_SEPARATOR) != -1) 
+				throw new IllegalArgumentException("Group names cannot contain the path separator character '" + PATH_SEPARATOR + "'");
+			if(name.indexOf(',') != -1)
+				throw new IllegalArgumentException("Comma character not valid in group name.");
+			
+			if(parent.isRoot()) {
+				this.path = PATH_SEPARATOR + name;
+			} else {
+				this.path = parent.getPath() + PATH_SEPARATOR + name;				
+			}
+		}
 	}
 	
 //> ACCESSOR METHODS
 	/** @return the name of this group */
 	public String getName() {
-		return this.path.substring(this.path.lastIndexOf(PATH_SEPARATOR));
+		if(this.isRoot()) return "";
+		else return this.path.substring(this.path.lastIndexOf(PATH_SEPARATOR) + 1);
 	}
 
 	/** @return the path of this group */
@@ -101,13 +120,19 @@ public class Group {
 		if(this.isRoot()) {
 			return null;
 		} else {
-			return new Group(this.path.substring(0, this.path.lastIndexOf(PATH_SEPARATOR)));
+			String parentPath = this.path.substring(0, this.path.lastIndexOf(PATH_SEPARATOR));
+			if(parentPath.length() == 0) {
+				return new Group(null, null);
+			} else {
+				assert(parentPath.charAt(0) == PATH_SEPARATOR) : "Splitting performed incorrectly on group path.";
+				return new Group(parentPath);
+			}
 		}
 	}
 	
 	/** @return <code>true</code> if this is the root group */
-	private boolean isRoot() {
-		return this.path.equals("" + PATH_SEPARATOR);
+	public boolean isRoot() {
+		return this.path.length() == 0;
 	}
 
 //> GENERATED CODE
@@ -136,6 +161,11 @@ public class Group {
 		} else if (!path.equals(other.path))
 			return false;
 		return true;
-	}	
+	}
+	
+	@Override
+	public String toString() {
+		return this.path;
+	}
 	
 }

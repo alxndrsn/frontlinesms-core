@@ -148,27 +148,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	// FIXME these should probably move to the contacts tab controller
 	/** Fake group: The root group, of which all other top-level groups are children.  The name of this group specified in the constructor will not be used due to overridden {@link Group#getName()}. */
-	final Group rootGroup = new Group(null, "Root Group [i18n]") {
+	final Group rootGroup = new Group(null, null) {
 		@Override
 		/** Provide an internationalised version of this group's name */
 		public String getName() {
 			return InternationalisationUtils.getI18NString(FrontlineSMSConstants.CONTACTS_ALL);
-		}
-	};
-	/** Fake group: all contacts without a name set.  The name of this group specified in the constructor will not be used due to overridden {@link Group#getName()}. */
-	final Group unnamedContacts = new Group(null, "Unnamed [i18n]") {
-		@Override
-		/** Provide an internationalised version of this group's name */
-		public String getName() {
-			return InternationalisationUtils.getI18NString(FrontlineSMSConstants.CONTACTS_UNNAMED);
-		}
-	};
-	/** Fake group: all contacts not a member of a group.  The name of this group specified in the constructor will not be used due to overridden {@link Group#getName()}. */
-	final Group ungroupedContacts = new Group(null, "Ungrouped [i18n]") {
-		@Override
-		/** Provide an internationalised version of this group's name */
-		public String getName() {
-			return InternationalisationUtils.getI18NString(FrontlineSMSConstants.CONTACTS_UNGROUPED);
 		}
 	};
 
@@ -463,7 +447,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @return <code>true</code> if the supplied {@link Group} is one of the synthetic groups; <code>false</code> otherwise. 
 	 */
 	public boolean isDefaultGroup(Group group) {
-		return group == this.rootGroup || group == this.ungroupedContacts || group == this.unnamedContacts;
+		return group == this.rootGroup;
 	}
 
 	public void addDatePanel(Object dialog) {
@@ -1703,14 +1687,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/** @return {@link #rootGroup} */
 	public Group getRootGroup() {
 		return this.rootGroup;
-	}
-	
-	public Group getUnnamedContacts() {
-		return unnamedContacts;
-	}
-	
-	public Group getUngroupedContacts() {
-		return ungroupedContacts;
 	}
 
 	/** @return the {@link Frame} attached to this thinlet window */

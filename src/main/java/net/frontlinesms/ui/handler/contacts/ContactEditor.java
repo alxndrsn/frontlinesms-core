@@ -62,6 +62,7 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	ContactEditor(UiGeneratorController ui, ContactEditorOwner owner) {
 		this.ui = ui;
 		this.contactDao = ui.getFrontlineController().getContactDao();
+		this.groupMembershipDao = ui.getFrontlineController().getGroupMembershipDao();
 		this.owner = owner;
 	}
 	
