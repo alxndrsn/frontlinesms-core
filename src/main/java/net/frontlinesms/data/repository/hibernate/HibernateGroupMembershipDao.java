@@ -6,7 +6,9 @@ package net.frontlinesms.data.repository.hibernate;
 import java.util.Collections;
 import java.util.List;
 
+import org.hibernate.Criteria;
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.dao.DataAccessException;
 
 import net.frontlinesms.data.DuplicateKeyException;
@@ -49,9 +51,9 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 	/**
 	 * @see GroupMembershipDao#getGroups(Contact)
 	 */
+	@SuppressWarnings("unchecked")
 	public List<Group> getGroups(Contact contact) {
-		// TODO Auto-generated method stub
-		return Collections.emptyList();
+		return this.getHibernateTemplate().find("SELECT mem.group FROM GroupMembership AS mem WHERE mem.contact='" + contact.getId() + "'");
 	}
 
 	/**
@@ -70,7 +72,20 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 		if(group.isRoot()) {
 			return this.getHibernateTemplate().findByCriteria(DetachedCriteria.forClass(Contact.class));
 		} else {
-			return this.getHibernateTemplate().find("SELECT mem.contact FROM GroupMembership AS mem WHERE mem.group='" + group + "'");
+			return this.getHibernateTemplate().find("SELECT mem.contact FROM GroupMembership AS mem WHERE mem.group='" + group.getPath() + "'");
+////			DetachedCriteria crit = DetachedCriteria.forClass(Contact.class);
+////			crit.createAlias(GroupMembership.class.getName(), "mem");
+////			crit.add(Restrictions.eq("mem.group", group));
+////			return super.getHibernateTemplate().findByCriteria(crit);
+//			
+//			DetachedCriteria gmCrit = DetachedCriteria.forClass(GroupMembership.class);
+//			gmCrit.add(Restrictions.eq("group", group));
+//			
+//			DetachedCriteria crit = DetachedCriteria.forClass(Contact.class);
+//			crit.add(gmCrit);
+////			DetachedCriteria gmCrit = crit.createCriteria("GroupMembership", "mem");
+////			gmCrit.add(Restrictions.eq("mem.group", group));
+////			return super.getHibernateTemplate().findByCriteria(crit);
 		}
 	}
 

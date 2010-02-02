@@ -56,6 +56,10 @@ public class Contact {
 		/** @see EntityField#getFieldName() */
 		public String getFieldName() { return this.fieldName; }
 	}
+
+	public long getId() {
+		return this.id;
+	}
 	
 //> INSTANCE PROPERTIES
 	/** Unique id for this entity.  This is for hibernate usage. */
