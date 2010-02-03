@@ -1,11 +1,10 @@
 package net.frontlinesms.data.repository.hibernate;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
+import org.springframework.transaction.annotation.Transactional;
 
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Contact;
@@ -33,7 +32,12 @@ public class HibernateContactDao extends BaseHibernateDao<Contact> implements Co
 	}
 
 	/** @see ContactDao#deleteContact(Contact) */
+	@Transactional
 	public void deleteContact(Contact contact) {
+		// Delete all group memberships associated with this contact
+		super.getHibernateTemplate().bulkUpdate("DELETE FROM GroupMembership WHERE contact_contact_id='" + contact.getId() + "'");
+		
+		// Delete the contact
 		super.delete(contact);
 	}
 	

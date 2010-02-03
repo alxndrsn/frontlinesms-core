@@ -28,12 +28,17 @@ import net.frontlinesms.data.EntityField;
  * whose membership is entirely independent of the main group.
  * @author Alex
  */
-@Entity(name="frontline_group")
+@Entity(name=Group.TABLE_NAME)
 public class Group {
 
-//> DATABASE COLUMN NAMES
+//> DATABASE NAMES
+	/** Table name */
+	public static final String TABLE_NAME = "frontline_group";
 	/** Database column name for property: {@link #name} */
 	static final String COLUMN_PATH = "path";
+	
+//> CONSTANTS
+	/** Character used to separate paths in the group name */
 	public static final char PATH_SEPARATOR = '/';
 
 //> ENTITY FIELDS

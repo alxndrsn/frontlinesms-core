@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
+import org.springframework.transaction.annotation.Transactional;
 
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Group;
@@ -24,8 +25,15 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 	}
 
 	/** @see GroupDao#deleteGroup(Group, boolean) */
+	@Transactional
 	public void deleteGroup(Group group, boolean destroyContacts) {
-		super.delete(group);
+		// Delete all group memberships for this group and its descendants
+		super.getHibernateTemplate().bulkUpdate("DELETE from GroupMembership WHERE group_path='"+group.getPath()+"' OR " +
+				"group_path LIKE '" + group.getPath()+Group.PATH_SEPARATOR + "%'");
+		
+		// Delete all child groups and the group itself
+		super.getHibernateTemplate().bulkUpdate("DELETE from " + Group.TABLE_NAME + " WHERE path='"+group.getPath()+"' OR " +
+				"path LIKE '" + group.getPath()+Group.PATH_SEPARATOR + "%'");
 	}
 	
 	/** @see GroupDao#getAllGroups() */
