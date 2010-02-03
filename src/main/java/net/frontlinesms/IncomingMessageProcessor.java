@@ -290,7 +290,7 @@ public class IncomingMessageProcessor extends Thread {
 				}
 				Group group = action.getGroup();
 				LOG.debug("Adding contact [" + contact.getName() + "], Number [" + contact.getPhoneNumber() + "] to Group [" + group.getName() + "]");
-				boolean contactAdded = this.groupMembershipDao.addMembership(group, contact);
+				boolean contactAdded = this.groupMembershipDao.addMember(group, contact);
 				if(contactAdded) {
 					groupDao.updateGroup(group);
 					if(uiListener != null) {
@@ -311,7 +311,7 @@ public class IncomingMessageProcessor extends Thread {
 			if (contact != null) {
 				Group group = action.getGroup();
 				LOG.debug("Removing contact [" + contact.getName() + "] from Group [" + group.getName() + "]");
-				if(this.groupMembershipDao.removeMembership(group, contact)) {
+				if(this.groupMembershipDao.removeMember(group, contact)) {
 					this.groupDao.updateGroup(group);
 				}
 				if (uiListener != null) {

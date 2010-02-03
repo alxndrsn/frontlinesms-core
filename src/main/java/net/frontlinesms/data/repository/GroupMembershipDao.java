@@ -30,11 +30,11 @@ public interface GroupMembershipDao {
 
 	/** Add a contact to a group
 	 * @return <code>true</code> if the contact was added to the group, <code>false</code> if he was already a member  */
-	public boolean addMembership(Group group, Contact contact);
+	public boolean addMember(Group group, Contact contact);
 
 	/** Remove a contact from a group
 	 * @return <code>true</code> if the contact was removed from the group, <code>false</code> if he was not a member */
-	public boolean removeMembership(Group group, Contact contact);
+	public boolean removeMember(Group group, Contact contact);
 
 	/** @return <code>true</code> if the contact is a member of the group, <code>false</code> otherwise */
 	public boolean isMember(Group group, Contact contact);

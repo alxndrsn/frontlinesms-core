@@ -187,7 +187,7 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 
 				// Update the groups that this contact is a member of
 				for(Group g : getAddedGroups()) {
-					groupMembershipDao.addMembership(g, contact);
+					groupMembershipDao.addMember(g, contact);
 				}
 				
 				removeDialog();
@@ -206,10 +206,10 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 
 				// Update the groups that this contact is a member of
 				for(Group g : getRemovedGroups()) {
-					groupMembershipDao.removeMembership(g, contact);
+					groupMembershipDao.removeMember(g, contact);
 				}
 				for(Group g : getAddedGroups()) {
-					groupMembershipDao.addMembership(g, contact);
+					groupMembershipDao.addMember(g, contact);
 				}
 				
 				this.contactDao.updateContact(contact);

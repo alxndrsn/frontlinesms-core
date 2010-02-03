@@ -361,7 +361,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			if (this.ui.isAttachment(component, Contact.class)) {
 				Contact contact = this.ui.getContact(component);
 				LOG.debug("Adding Contact [" + contact.getName() + "] to [" + destination + "]");
-				if(this.groupMembershipDao.addMembership(destination, contact)) {
+				if(this.groupMembershipDao.addMember(destination, contact)) {
 					groupDao.updateGroup(destination);
 				}
 			}
@@ -420,7 +420,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	public void removeFromGroup(Object selectedGroup) {
 		Group g = this.ui.getGroup(selectedGroup);
 		Contact c = this.ui.getContact(this.ui.getSelectedItem(contactListComponent));
-		if(this.groupMembershipDao.removeMembership(g, c)) {
+		if(this.groupMembershipDao.removeMember(g, c)) {
 			this.refresh();
 		}
 	}

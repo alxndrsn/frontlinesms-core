@@ -29,9 +29,9 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 	}
 	
 	/**
-	 * @see GroupMembershipDao#addMembership(Group, Contact)
+	 * @see GroupMembershipDao#addMember(Group, Contact)
 	 */
-	public boolean addMembership(Group g, Contact contact) {
+	public boolean addMember(Group g, Contact contact) {
 		GroupMembership membership = new GroupMembership(g, contact);
 		try {
 			super.save(membership);
@@ -75,19 +75,6 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 			return this.getHibernateTemplate().findByCriteria(DetachedCriteria.forClass(Contact.class));
 		} else {
 			return this.getHibernateTemplate().find("SELECT mem.contact FROM GroupMembership AS mem WHERE mem.group='" + group.getPath() + "'");
-////			DetachedCriteria crit = DetachedCriteria.forClass(Contact.class);
-////			crit.createAlias(GroupMembership.class.getName(), "mem");
-////			crit.add(Restrictions.eq("mem.group", group));
-////			return super.getHibernateTemplate().findByCriteria(crit);
-//			
-//			DetachedCriteria gmCrit = DetachedCriteria.forClass(GroupMembership.class);
-//			gmCrit.add(Restrictions.eq("group", group));
-//			
-//			DetachedCriteria crit = DetachedCriteria.forClass(Contact.class);
-//			crit.add(gmCrit);
-////			DetachedCriteria gmCrit = crit.createCriteria("GroupMembership", "mem");
-////			gmCrit.add(Restrictions.eq("mem.group", group));
-////			return super.getHibernateTemplate().findByCriteria(crit);
 		}
 	}
 
@@ -115,9 +102,9 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 		return crit;
 	}
 
-	/** @see GroupMembershipDao#removeMembership(Group, Contact) */
+	/** @see GroupMembershipDao#removeMember(Group, Contact) */
 	@Transactional
-	public boolean removeMembership(Group group, Contact contact) {
+	public boolean removeMember(Group group, Contact contact) {
 		try {
 			DetachedCriteria crit = getMembershipCriteria(group, contact);
 			this.getHibernateTemplate().delete(DataAccessUtils.uniqueResult(this.getList(crit)));
