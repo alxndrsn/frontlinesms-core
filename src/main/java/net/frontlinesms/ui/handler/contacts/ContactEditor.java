@@ -70,7 +70,7 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	/** Show dialog to create a new contact in a particular group. */
 	public void show(Group selectedGroup) {
 		initDialog();
-		if(selectedGroup != null) {
+		if(selectedGroup != null && !selectedGroup.isRoot()) {
 			addNewGroup(selectedGroup);
 		}
 		showDialog();

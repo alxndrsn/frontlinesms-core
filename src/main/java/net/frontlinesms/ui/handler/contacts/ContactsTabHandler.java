@@ -193,7 +193,8 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	/** Show editor for new contact. */
 	public void showNewContactDialog() {
 		ContactEditor editor = new ContactEditor(ui, this);
-		editor.show(this.groupSelecter.getSelectedGroup());
+		Group selectedGroup = this.groupSelecter.getSelectedGroup();
+		editor.show(selectedGroup);
 	}
 	
 	/**
