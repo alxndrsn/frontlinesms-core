@@ -24,13 +24,13 @@ import net.frontlinesms.data.repository.GroupMembershipDao;
  */
 public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembership> implements GroupMembershipDao {
 
+//> CONSTRUCTORS
 	HibernateGroupMembershipDao() {
 		super(GroupMembership.class);
 	}
 	
-	/**
-	 * @see GroupMembershipDao#addMember(Group, Contact)
-	 */
+//> DAO METHODS
+	/** @see GroupMembershipDao#addMember(Group, Contact) */
 	public boolean addMember(Group g, Contact contact) {
 		GroupMembership membership = new GroupMembership(g, contact);
 		try {
@@ -66,9 +66,7 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 		}
 	}
 
-	/**
-	 * @see GroupMembershipDao#getMembers(Group)
-	 */
+	/** @see GroupMembershipDao#getMembers(Group) */
 	@SuppressWarnings("unchecked")
 	public List<Contact> getMembers(Group group) {
 		if(group.isRoot()) {
@@ -78,28 +76,17 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 		}
 	}
 
-	/**
-	 * @see GroupMembershipDao#getMembers(Group, int, int)
-	 */
+	/** @see GroupMembershipDao#getMembers(Group, int, int) */
 	public List<Contact> getMembers(Group group, int startIndex, int limit) {
 		// TODO Auto-generated method stub
 		List<Contact> allMembers = getMembers(group);
 		return allMembers.subList(startIndex, Math.min(allMembers.size(), startIndex + limit));
 	}
 
-	/**
-	 * @see GroupMembershipDao#isMember(Group, Contact)
-	 */
+	/** @see GroupMembershipDao#isMember(Group, Contact) */
 	public boolean isMember(Group group, Contact contact) {
 		DetachedCriteria crit = getMembershipCriteria(group, contact);
 		return super.getCount(crit) == 1;
-	}
-
-	private DetachedCriteria getMembershipCriteria(Group group, Contact contact) {
-		DetachedCriteria crit = super.getCriterion();
-		crit.add(Restrictions.eq("contact", contact));
-		crit.add(Restrictions.eq("group", group));
-		return crit;
 	}
 
 	/** @see GroupMembershipDao#removeMember(Group, Contact) */
@@ -112,5 +99,14 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 		} catch(DataAccessException ex) {
 			return false;
 		}
+	}
+
+//> PRIVATE HELPER METHODS
+	/** @return criteria for fetching a {@link GroupMembership} entity */
+	private DetachedCriteria getMembershipCriteria(Group group, Contact contact) {
+		DetachedCriteria crit = super.getCriterion();
+		crit.add(Restrictions.eq("contact", contact));
+		crit.add(Restrictions.eq("group", group));
+		return crit;
 	}
 }
