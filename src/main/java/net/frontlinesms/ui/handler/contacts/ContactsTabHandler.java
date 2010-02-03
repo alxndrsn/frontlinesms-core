@@ -421,9 +421,8 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		Group g = this.ui.getGroup(selectedGroup);
 		Contact c = this.ui.getContact(this.ui.getSelectedItem(contactListComponent));
 		if(this.groupMembershipDao.removeMembership(g, c)) {
-			this.groupDao.updateGroup(g);
+			this.refresh();
 		}
-		this.refresh();
 	}
 
 	/** Removes the selected contacts of the supplied contact list component. */

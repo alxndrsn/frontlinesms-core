@@ -10,6 +10,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Contact;
@@ -103,23 +104,26 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 	 * @see GroupMembershipDao#isMember(Group, Contact)
 	 */
 	public boolean isMember(Group group, Contact contact) {
-		DetachedCriteria crit = super.getCriterion();
-		crit.add(Restrictions.eq("contact", contact));
-		crit.add(Restrictions.eq("group", group));
+		DetachedCriteria crit = getMembershipCriteria(group, contact);
 		return super.getCount(crit) == 1;
 	}
 
-	/**
-	 * @see GroupMembershipDao#removeMembership(Group, Contact)
-	 */
-	public boolean removeMembership(Group g, Contact contact) {
-		GroupMembership membership = new GroupMembership(g, contact);
+	private DetachedCriteria getMembershipCriteria(Group group, Contact contact) {
+		DetachedCriteria crit = super.getCriterion();
+		crit.add(Restrictions.eq("contact", contact));
+		crit.add(Restrictions.eq("group", group));
+		return crit;
+	}
+
+	/** @see GroupMembershipDao#removeMembership(Group, Contact) */
+	@Transactional
+	public boolean removeMembership(Group group, Contact contact) {
 		try {
-			super.delete(membership);
+			DetachedCriteria crit = getMembershipCriteria(group, contact);
+			this.getHibernateTemplate().delete(DataAccessUtils.uniqueResult(this.getList(crit)));
 			return true;
 		} catch(DataAccessException ex) {
 			return false;
 		}
 	}
-
 }
