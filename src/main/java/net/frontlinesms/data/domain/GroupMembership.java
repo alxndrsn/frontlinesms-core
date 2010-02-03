@@ -3,10 +3,12 @@
  */
 package net.frontlinesms.data.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -14,15 +16,14 @@ import javax.persistence.UniqueConstraint;
  * @author Alex
  */
 @Entity
-//@Table(uniqueConstraints=@UniqueConstraint(columnNames={Contact.COLUMN_ID, Group.COLUMN_PATH}))
+@Table(uniqueConstraints=@UniqueConstraint(columnNames={"contact_contact_id", "group_path"}))
 public class GroupMembership {
-	@SuppressWarnings("unused")
-	@Id
+	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
+	@Column(name="id", nullable=false, unique=true, updatable=false)
 	private long id;
-	
-	@ManyToOne()
+	@ManyToOne(optional=false)
 	private Group group;
-	@ManyToOne()
+	@ManyToOne(optional=false)
 	private Contact contact;
 
 	public GroupMembership(Group group, Contact contact) {

@@ -3,13 +3,13 @@
  */
 package net.frontlinesms.data.repository.hibernate;
 
-import java.util.Collections;
 import java.util.List;
 
-import org.hibernate.Criteria;
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.support.DataAccessUtils;
 
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Contact;
@@ -40,28 +40,29 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 		}
 	}
 
-	/**
-	 * @see GroupMembershipDao#getActiveMembers(Group)
-	 */
+	/** @see GroupMembershipDao#getActiveMembers(Group) */
+	@SuppressWarnings("unchecked")
 	public List<Contact> getActiveMembers(Group group) {
-		// TODO Auto-generated method stub
-		return Collections.emptyList();
+		return this.getHibernateTemplate().find("SELECT mem.contact FROM GroupMembership AS mem, Contact AS c WHERE mem.group='" + group.getPath() + "' AND c.active=TRUE");
 	}
 
-	/**
-	 * @see GroupMembershipDao#getGroups(Contact)
-	 */
+	/** @see GroupMembershipDao#getGroups(Contact) */
 	@SuppressWarnings("unchecked")
 	public List<Group> getGroups(Contact contact) {
 		return this.getHibernateTemplate().find("SELECT mem.group FROM GroupMembership AS mem WHERE mem.contact='" + contact.getId() + "'");
 	}
 
-	/**
-	 * @see GroupMembershipDao#getMemberCount(Group)
-	 */
+	/** @see GroupMembershipDao#getMemberCount(Group) */
 	public int getMemberCount(Group group) {
-		// TODO Auto-generated method stub
-		return 0;
+		if(group.isRoot()) {
+			DetachedCriteria crit = DetachedCriteria.forClass(Contact.class);
+			crit.setProjection(Projections.rowCount());
+			return DataAccessUtils.intResult(this.getHibernateTemplate().findByCriteria(crit));
+		} else {
+			DetachedCriteria crit = super.getCriterion();
+			crit.add(Restrictions.eq("group", group));
+			return super.getCount(crit);
+		}
 	}
 
 	/**
@@ -102,8 +103,10 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 	 * @see GroupMembershipDao#isMember(Group, Contact)
 	 */
 	public boolean isMember(Group group, Contact contact) {
-		// TODO Auto-generated method stub
-		return false;
+		DetachedCriteria crit = super.getCriterion();
+		crit.add(Restrictions.eq("contact", contact));
+		crit.add(Restrictions.eq("group", group));
+		return super.getCount(crit) == 1;
 	}
 
 	/**

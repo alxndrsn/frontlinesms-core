@@ -182,13 +182,13 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 			if (contact == null) {
 				LOG.debug("Creating a new contact [" + name + ", " + msisdn + "]");
 				contact = new Contact(name, msisdn, otherMsisdn, emailAddress, notes, isActive);
+				
+				this.contactDao.saveContact(contact);
 
 				// Update the groups that this contact is a member of
 				for(Group g : getAddedGroups()) {
 					groupMembershipDao.addMembership(g, contact);
 				}
-				
-				this.contactDao.saveContact(contact);
 				
 				removeDialog();
 				owner.contactCreationComplete(contact);
