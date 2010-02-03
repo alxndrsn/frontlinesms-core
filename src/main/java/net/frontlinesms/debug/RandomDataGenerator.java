@@ -175,12 +175,13 @@ public class RandomDataGenerator {
 	/** Randomly populate the generated groups with generated contacts */
 	private void populateGroups(List<Group> groups, List<Contact> contacts) {
 		GroupDao groupDao = this.frontlineController.getGroupDao();
+		GroupMembershipDao memDao = this.frontlineController.getGroupMembershipDao();
 		for (Iterator<Contact> iterator = contacts.iterator(); iterator.hasNext();) {
 			Contact contact = (Contact) iterator.next();
 			int groupCount = randy.nextInt(7);
 			while(--groupCount >= 0) {
 				Group g = groups.get(randy.nextInt(groups.size()));
-				g.addDirectMember(contact);
+				memDao.addMember(g, contact);
 				groupDao.updateGroup(g);
 			}
 		}
@@ -193,12 +194,13 @@ public class RandomDataGenerator {
 	 */
 	private List<Group> generateAndPersistGroups(int count) {
 		ArrayList<Group> groups = new ArrayList<Group>(count);
-		Group lastGroup = null;
+		Group rootGroup = new Group(null, null);
+		Group lastGroup = rootGroup;
 		GroupDao groupDao = this.frontlineController.getGroupDao();
 		while(--count >= 0) {
 			String name = getRandomGroupName() + " " + getRandomGroupName();
 			boolean isOrphan = randy.nextBoolean();
-			Group newGroup = new Group(isOrphan ? null : lastGroup, name);
+			Group newGroup = new Group(isOrphan ? rootGroup : lastGroup, name);
 			try {
 				groupDao.saveGroup(newGroup);
 				groups.add(newGroup);
