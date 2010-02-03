@@ -76,7 +76,9 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 		if(group.isRoot()) {
 			return this.getHibernateTemplate().findByCriteria(DetachedCriteria.forClass(Contact.class));
 		} else {
-			return this.getHibernateTemplate().find("SELECT mem.contact FROM GroupMembership AS mem WHERE mem.group='" + group.getPath() + "'");
+			return this.getHibernateTemplate().find("SELECT mem.contact FROM GroupMembership AS mem WHERE " +
+					"mem.group='" + group.getPath() + "' OR " +
+					"mem.group LIKE '" + group.getPath() + Group.PATH_SEPARATOR + "%'");
 		}
 	}
 

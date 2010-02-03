@@ -25,17 +25,17 @@ public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSe
 	 * Init with default title
 	 * @param rootGroups
 	 */
-	public void init(Group...rootGroups) {
-		init(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_GROUP), rootGroups);
+	public void init(Group rootGroup) {
+		init(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_GROUP), rootGroup);
 	}
 	
-	public void init(String title, Group...rootGroups) {
+	public void init(String title, Group rootGroup) {
 		// TODO init
 		dialogComponent = ui.loadComponentFromFile(XML_LAYOUT_GROUP_SELECTER_DIALOG, this);
 		this.setTitle(title);
 		
 		this.selecter = new GroupSelecterPanel(ui, this);
-		selecter.init(rootGroups);
+		selecter.init(rootGroup);
 		selecter.refresh();
 		
 		Object selecterPanel = selecter.getPanelComponent();

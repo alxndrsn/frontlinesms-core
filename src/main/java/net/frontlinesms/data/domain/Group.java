@@ -68,6 +68,8 @@ public class Group {
 	@Id @Column(name=COLUMN_PATH, unique=true, updatable=false, nullable=false)
 	private String path;
 	
+	private String parentPath;
+	
 //> CONSTRUCTORS
 	/** Empty constructor for hibernate */
 	Group() {}
@@ -76,6 +78,7 @@ public class Group {
 		assert(path.startsWith("" + PATH_SEPARATOR)) : "Path must start with the seprator character '" + PATH_SEPARATOR + "'";
 		assert(path.indexOf(',') == -1) : "Comma illegal in group name.";
 		this.path = path;
+		this.parentPath = getParentPath(path);
 	}
 	
 	/**
@@ -103,6 +106,7 @@ public class Group {
 				this.path = parent.getPath() + PATH_SEPARATOR + name;				
 			}
 		}
+		this.parentPath = getParentPath(path);
 	}
 	
 //> ACCESSOR METHODS
@@ -125,14 +129,24 @@ public class Group {
 		if(this.isRoot()) {
 			return null;
 		} else {
-			String parentPath = this.path.substring(0, this.path.lastIndexOf(PATH_SEPARATOR));
+			String parentPath = getParentPath(this.path);
 			if(parentPath.length() == 0) {
 				return new Group(null, null);
 			} else {
-				assert(parentPath.charAt(0) == PATH_SEPARATOR) : "Splitting performed incorrectly on group path.";
 				return new Group(parentPath);
 			}
 		}
+	}
+	
+	private static String getParentPath(String path) {
+		if(path.length() == 0) return "";
+		
+		String parentPath = path.substring(0, path.lastIndexOf(PATH_SEPARATOR));
+		if(parentPath.length() == 0) {
+			return "";
+		}
+		assert(parentPath.charAt(0) == PATH_SEPARATOR) : "Splitting performed incorrectly on group path.";
+		return parentPath;
 	}
 	
 	/** @return <code>true</code> if this is the root group */

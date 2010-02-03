@@ -1233,8 +1233,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 
 		add(row, createTableCell(contact.getPhoneNumber()));
 		add(row, createTableCell(contact.getEmailAddress()));
-		String groups = Utils.contactGroupsAsString(this.groupMembershipDao.getGroups(contact), DEFAULT_GROUPS_DELIMITER);
-		add(row, createTableCell(groups));
+//		String groups = Utils.contactGroupsAsString(this.groupMembershipDao.getGroups(contact), DEFAULT_GROUPS_DELIMITER);
+//		add(row, createTableCell(groups));
 		return row;
 	}
 
@@ -1742,7 +1742,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void showGroupSelecter() {
 		Object dialog = super.createDialog("Group Selecter Test");
 		GroupSelecterPanel selecter = new GroupSelecterPanel(this, this);
-		selecter.init(this.groupDao.getChildGroups(null).toArray(new Group[0]));
+		selecter.init(this.rootGroup);
 		add(dialog, selecter.getPanelComponent());
 		add(dialog);
 	}

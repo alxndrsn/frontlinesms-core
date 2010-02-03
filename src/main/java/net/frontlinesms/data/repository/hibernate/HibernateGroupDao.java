@@ -80,7 +80,8 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 	/** @return criteria for getting the children of a group */
 	private DetachedCriteria getChildCriteria(Group parent) {
 		DetachedCriteria criteria = super.getCriterion();
-		criteria.add(Restrictions.like(Group.Field.PATH.getFieldName(), parent.getPath() + Group.PATH_SEPARATOR + "%"));
+//		criteria.add(Restrictions.like(Group.Field.PATH.getFieldName(), parent.getPath() + Group.PATH_SEPARATOR + "[^" + Group.PATH_SEPARATOR + "]"));
+		criteria.add(Restrictions.eq("parentPath", parent.getPath()));
 		return criteria;
 	}
 }

@@ -10,16 +10,16 @@ import org.apache.log4j.Logger;
 
 import thinlet.Thinlet;
 
+import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.data.domain.Group;
-import net.frontlinesms.data.repository.GroupDao;
-import net.frontlinesms.data.repository.GroupMembershipDao;
+import net.frontlinesms.data.repository.unmodifiable.UnmodifiableGroupDao;
+import net.frontlinesms.data.repository.unmodifiable.UnmodifiableGroupMembershipDao;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BasePanelHandler;
 
 /**
  * @author aga
- *
  */
 public class GroupSelecterPanel extends BasePanelHandler {
 	private Logger LOG = Logger.getLogger(this.getClass());
@@ -32,26 +32,23 @@ public class GroupSelecterPanel extends BasePanelHandler {
 	
 	private GroupSelecterPanelOwner owner;
 
-	private GroupDao groupDao;
-	private GroupMembershipDao groupMembershipDao;
+	private UnmodifiableGroupDao groupDao;
+	private UnmodifiableGroupMembershipDao groupMembershipDao;
 	
 	private boolean allowMultipleSelections;
 
-	private Group[] rootGroups;
+	private Group rootGroup;
 
 //> CONSTRUCTORS
 	public GroupSelecterPanel(UiGeneratorController ui, GroupSelecterPanelOwner owner) {
 		super(ui);
 		this.owner = owner;
 		
-		this.groupDao = ui.getFrontlineController().getGroupDao();
-		this.groupMembershipDao = ui.getFrontlineController().getGroupMembershipDao();
-		
 		allowMultipleSelections = owner instanceof MultiGroupSelecterPanelOwner;
 	}
 
 	/** Initialise the selecter. */
-	public void init(Group...rootGroups) {
+	public void init(Group rootGroup) {
 		super.loadPanel(XML_LAYOUT_GROUP_PANEL);
 		
 		// TODO update selection of group tree appropriate to allowMultipleSelections
@@ -60,16 +57,22 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		groupTreeComponent = super.find(COMPONENT_GROUP_TREE);
 		
 		// add nodes for group tree
-		this.rootGroups = rootGroups;
+		this.rootGroup = rootGroup;
 	}
 
-	/** Refresh the list of groups */
+	/**
+	 * Refresh the list of groups
+	 * This method will reload the view of groups.
+	 */
 	public void refresh() {
 		Object groupTree = getGroupTreeComponent();
+		
+		FrontlineSMS frontlineController = ((UiGeneratorController) super.ui).getFrontlineController();
+		this.groupDao = new UnmodifiableGroupDao(frontlineController.getGroupDao());
+		this.groupMembershipDao = new UnmodifiableGroupMembershipDao(frontlineController.getGroupMembershipDao());
+		
 		ui.removeAll(groupTree);
-		for(Group rootGroup : rootGroups) {
-			ui.add(groupTree, createNode(rootGroup, true));
-		}
+		ui.add(groupTree, createNode(rootGroup, true));
 	}
 	
 //> ACCESSORS
@@ -167,14 +170,14 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		LOG.debug("Group [" + group.getName() + "]");
 		
 		String toSet = group.getName();
-		if (showContactsNumber) {
-			toSet += " (" + this.groupMembershipDao.getMemberCount(group) + ")";
-		}
+//		if (showContactsNumber) {
+//			toSet += " (" + this.groupMembershipDao.getMemberCount(group) + ")";
+//		}
 		
 		Object node = ui.createNode(toSet, group);
 
 		if(ui.getBoolean(node, Thinlet.EXPANDED)
-				&& groupDao.hasDescendants(group)) {
+				/*&& groupDao.hasDescendants(group)*/) {
 			ui.setIcon(node, Icon.FOLDER_OPEN);
 		} else {
 			ui.setIcon(node, Icon.FOLDER_CLOSED);
