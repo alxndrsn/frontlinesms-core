@@ -121,6 +121,10 @@ public class Group {
 		return this.path;
 	}
 	
+	public void setPath(String path) {
+		this.path = path;
+	}
+	
 	/**
 	 * Returns the parent of this group. 
 	 * @return {@link #parent}

@@ -3,6 +3,7 @@
  */
 package net.frontlinesms.data.repository.hibernate;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -76,9 +77,18 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 		if(group.isRoot()) {
 			return this.getHibernateTemplate().findByCriteria(DetachedCriteria.forClass(Contact.class));
 		} else {
-			return this.getHibernateTemplate().find("SELECT mem.contact FROM GroupMembership AS mem WHERE " +
-					"mem.group='" + group.getPath() + "' OR " +
-					"mem.group LIKE '" + group.getPath() + Group.PATH_SEPARATOR + "%'");
+			String queryString = "SELECT DISTINCT mem.contact FROM GroupMembership AS mem"
+					+ " WHERE "
+					+ "mem.group=:path"
+					+ " OR "
+					+ "mem.group.path LIKE :childPath"
+					;
+			String childPath = group.getPath() + Group.PATH_SEPARATOR + "%";
+			String[] paramNames = new String[]{"path", "childPath"};
+			Object[] paramValues = new Object[]{group, childPath};
+			return super.getHibernateTemplate().findByNamedParam(queryString,
+					paramNames,
+					paramValues);
 		}
 	}
 
