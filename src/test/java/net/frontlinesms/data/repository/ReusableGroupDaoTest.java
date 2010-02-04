@@ -119,7 +119,7 @@ public abstract class ReusableGroupDaoTest extends ReusableTestCase<Group> {
 	}
 	
 	public void testCascadingDelete() throws DuplicateKeyException {
-		Group group = new Group(null, MY_GROUP_NAME);
+		Group group = new Group(getRootGroup(), MY_GROUP_NAME);
 		confirmSanity();
 		dao.saveGroup(group);
 		confirmSanity();
@@ -127,8 +127,8 @@ public abstract class ReusableGroupDaoTest extends ReusableTestCase<Group> {
 		Group childGroup = new Group(group, CHILD_GROUP_NAME);
 		dao.saveGroup(childGroup);
 
-		assertEquals(group, dao.getGroupByName(MY_GROUP_NAME));
-		assertEquals(childGroup, dao.getGroupByName(CHILD_GROUP_NAME));
+		assertEquals(group, dao.getGroupByPath(Group.PATH_SEPARATOR + MY_GROUP_NAME));
+		assertEquals(childGroup, dao.getGroupByPath(Group.PATH_SEPARATOR + MY_GROUP_NAME + Group.PATH_SEPARATOR + CHILD_GROUP_NAME));
 		
 		assertEquals(2, dao.getGroupCount());
 		
@@ -145,6 +145,10 @@ public abstract class ReusableGroupDaoTest extends ReusableTestCase<Group> {
 	private void confirmSanity() {
 		assertEquals(dao.getAllGroups(), dao.getAllGroups(0, Integer.MAX_VALUE));
 		assertEquals(dao.getGroupCount(), dao.getAllGroups().size());
-		assertNull("Group should not exist.", dao.getGroupByName("I just invented this name"));
+		assertNull("Group should not exist.", dao.getGroupByPath("I just invented this name"));
+	}
+	
+	private Group getRootGroup() {
+		return new Group(null, null);
 	}
 }

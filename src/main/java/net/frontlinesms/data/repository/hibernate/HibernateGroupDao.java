@@ -27,13 +27,26 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 	/** @see GroupDao#deleteGroup(Group, boolean) */
 	@Transactional
 	public void deleteGroup(Group group, boolean destroyContacts) {
+		// Dereference all keywordActions relating to this group
+		String keywordActionQuery = "DELETE FROM KeywordAction WHERE group_path=?";
+		super.getHibernateTemplate().bulkUpdate(keywordActionQuery, group.getPath());
+
+		Object[] paramValues = getPathParamValues(group);
+		
 		// Delete all group memberships for this group and its descendants
-		super.getHibernateTemplate().bulkUpdate("DELETE from GroupMembership WHERE group_path='"+group.getPath()+"' OR " +
-				"group_path LIKE '" + group.getPath()+Group.PATH_SEPARATOR + "%'");
+		String groupMembershipQuery = "DELETE from GroupMembership WHERE group_path=? OR group_path LIKE ?";
+		super.getHibernateTemplate().bulkUpdate(groupMembershipQuery, paramValues);
 		
 		// Delete all child groups and the group itself
-		super.getHibernateTemplate().bulkUpdate("DELETE from " + Group.TABLE_NAME + " WHERE path='"+group.getPath()+"' OR " +
-				"path LIKE '" + group.getPath()+Group.PATH_SEPARATOR + "%'");
+		String deleteGroupsQuery = "DELETE from " + Group.TABLE_NAME + " WHERE path=? OR path LIKE ?";
+		super.getHibernateTemplate().bulkUpdate(deleteGroupsQuery, paramValues);
+	}
+	
+	/** @return params for matching this group and its children */
+	private Object[] getPathParamValues(Group group) {
+		String groupPath = group.getPath();
+		String childPath = groupPath + Group.PATH_SEPARATOR + "%";
+		return new Object[]{groupPath, childPath};
 	}
 	
 	/** @see GroupDao#getAllGroups() */

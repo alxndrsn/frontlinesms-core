@@ -9,4 +9,20 @@
 	<bean id="groupDao" class="net.frontlinesms.data.repository.hibernate.HibernateGroupDao">
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
+	
+	<bean id="groupMembershipDao" class="net.frontlinesms.data.repository.hibernate.HibernateGroupMembershipDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="contactDao" class="net.frontlinesms.data.repository.hibernate.HibernateContactDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="keywordDao" class="net.frontlinesms.data.repository.hibernate.HibernateKeywordDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="keywordActionDao" class="net.frontlinesms.data.repository.hibernate.HibernateKeywordActionDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
 </beans>
