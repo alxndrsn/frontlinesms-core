@@ -468,9 +468,9 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			String parentGroupName = selectedParentGroup == null ? "null" : selectedParentGroup.getName();
 			LOG.debug("Parent group [" + parentGroupName + "]");
 		}
-//		if(selectedParentGroup == this.ui.getRootGroup()) {
-//			selectedParentGroup = null;
-//		}
+		if(selectedParentGroup == null) {
+			selectedParentGroup = ui.getRootGroup();
+		}
 
 		LOG.debug("Group Name [" + newGroupName + "]");
 		try {
