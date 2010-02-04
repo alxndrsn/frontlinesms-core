@@ -12,21 +12,16 @@ import static net.frontlinesms.FrontlineSMSConstants.DEFAULT_END_DATE;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_KEYWORD_EXISTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_KEYWORD_SAVED;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_ACTION_LIST;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_CLEAR;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_SAVE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_ACTION_TYPE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_AUTO_REPLY;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORDS_DIVIDER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORD_LIST;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEY_ACT_PANEL;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_MENU_ITEM_CREATE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_BUTTON_DONE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_DESCRIPTION;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_KEYWORD;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_TITLE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_TIP;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_AUTO_REPLY;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_KEYWORD;
 
 import java.text.ParseException;
 import java.util.Collection;
@@ -48,6 +43,8 @@ import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.handler.ComponentPagingHandler;
 import net.frontlinesms.ui.handler.PagedComponentItemProvider;
 import net.frontlinesms.ui.handler.PagedListDetails;
+import net.frontlinesms.ui.handler.contacts.GroupSelecterDialog;
+import net.frontlinesms.ui.handler.contacts.SingleGroupSelecterDialogOwner;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
@@ -55,19 +52,22 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * @author Alex Anderson alex@frontlinesms.com
  * @author Carlos Eduardo Genz kadu@masabi.com
  */
-public class KeywordTabHandler extends BaseTabHandler implements PagedComponentItemProvider {
+public class KeywordTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterDialogOwner {
 //> UI LAYOUT FILES
 	public static final String UI_FILE_KEYWORDS_TAB = "/ui/core/keyword/keywordsTab.xml";
 	public static final String UI_FILE_KEYWORDS_SIMPLE_VIEW = "/ui/core/keyword/pnSimpleView.xml";
 	public static final String UI_FILE_KEYWORDS_ADVANCED_VIEW = "/ui/core/keyword/pnAdvancedView.xml";
 	public static final String UI_FILE_NEW_KEYWORD_FORM = "/ui/core/keyword/newKeywordForm.xml";
 
-	@Deprecated public static final String COMPONENT_CB_LEAVE_GROUP = "cbLeaveGroup";
-	@Deprecated public static final String COMPONENT_CB_GROUPS_TO_LEAVE = "cbGroupsToLeave";
-	@Deprecated public static final String COMPONENT_CB_JOIN_GROUP = "cbJoinGroup";
-	@Deprecated public static final String COMPONENT_CB_GROUPS_TO_JOIN = "cbGroupsToJoin";
-	
 	public static final String COMPONENT_KEY_PANEL = "keyPanel";
+	private static final String COMPONENT_JOIN_GROUP_SELECT_BUTTON = "btJoinGroupSelect";
+	private static final String COMPONENT_LEAVE_GROUP_SELECT_BUTTON = "btLeaveGroupSelect";
+
+	public static final String COMPONENT_KEY_ACT_PANEL = "keyActPanel";
+	public static final String COMPONENT_BT_CLEAR = "btClear";
+	public static final String COMPONENT_TF_AUTO_REPLY = "tfAutoReply";
+	public static final String COMPONENT_TF_KEYWORD = "tfKeyword";
+	public static final String COMPONENT_CB_ACTION_TYPE = "cbActionType";
 
 	private GroupDao groupDao;
 	private KeywordDao keywordDao;
@@ -75,6 +75,9 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 
 	private Object keywordListComponent;
 	private ComponentPagingHandler keywordListPagingHandler;
+	
+	/** Flag used to indicate if we are selecting the join group or the leave group. */
+	private boolean selectingJoinGroup;
 	
 	public KeywordTabHandler(UiGeneratorController ui) {
 		super(ui);
@@ -278,8 +281,8 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		
 		// Get the KeywordAction details
 		String replyText = keywordSimple_getAutoReply(panel);
-		Group joinGroup = keywordSimple_getJoin(panel);
-		Group leaveGroup = keywordSimple_getLeave(panel);
+		Group joinGroup = keywordSimple_getJoin();
+		Group leaveGroup = keywordSimple_getLeave();
 		
 		// Get the keyword attached to the selected item.  If the "Add Keyword" option is selected,
 		// there will be no keyword attached to it.
@@ -410,10 +413,8 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		ui.setText(ui.find(panel, COMPONENT_TF_KEYWORD), "");
 		ui.setSelected(ui.find(panel, COMPONENT_CB_AUTO_REPLY), false);
 		ui.setText(ui.find(panel, COMPONENT_TF_AUTO_REPLY), "");
-		ui.setSelected(ui.find(panel, COMPONENT_CB_JOIN_GROUP), false);
-		ui.setSelectedIndex(ui.find(panel, COMPONENT_CB_GROUPS_TO_JOIN), 0);
-		ui.setSelected(ui.find(panel, COMPONENT_CB_LEAVE_GROUP), false);
-		ui.setSelectedIndex(ui.find(panel, COMPONENT_CB_GROUPS_TO_LEAVE), 0);
+		
+		// TODO do we need to clear the group displays here?
 	}
 	
 	/**
@@ -539,11 +540,23 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 
 	/** Show group selecter for choosing the group to join. */
 	public void selectJoinGroup() {
+		selectingJoinGroup = true;
+		GroupSelecterDialog groupSelect = new GroupSelecterDialog(ui, this);
+		groupSelect.init(ui.getRootGroup());
+
+		// TODO should select the current leave group in the dialog
 		
+		groupSelect.show();
 	}
 	/** Show group selecter for choosing the group to leave. */
 	public void selectLeaveGroup() {
+		selectingJoinGroup = false;
+		GroupSelecterDialog groupSelect = new GroupSelecterDialog(ui, this);
+		groupSelect.init(ui.getRootGroup());
+
+		// TODO should select the current leave group in the dialog
 		
+		groupSelect.show();
 	}
 
 //> UI HELPER METHODS
@@ -569,13 +582,6 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		// to do it!
 		if (parentKeyword != null) ui.setText(ui.find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_KEYWORD), parentKeyword.getKeyword() + ' ');
 		ui.add(keywordForm);
-	}
-
-	private void setJoinGroupDisplay(Group group) {
-		ui.setText(find("btJoinGroupSelect"), group.getPath());
-	}
-	private void setLeaveGroupDisplay(Group group) {
-		ui.setText(find("btLeaveGroupSelect"), group.getPath());
 	}
 	
 	/**
@@ -656,6 +662,27 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		}
 	}
 
+	private void setJoinGroupDisplay(Group group) {
+		Object joinGroupButton = find(COMPONENT_JOIN_GROUP_SELECT_BUTTON);
+		ui.setAttachedObject(joinGroupButton, group);
+		if(group != null) {
+			ui.setText(joinGroupButton, group.getPath());
+		} else {
+			// TODO set the text to the original
+			ui.setText(joinGroupButton, "Select"); // FIXME i18n
+		}
+	}
+	private void setLeaveGroupDisplay(Group group) {
+		Object leaveGroupButton = find(COMPONENT_LEAVE_GROUP_SELECT_BUTTON);
+		ui.setAttachedObject(leaveGroupButton, group);
+		if(group != null) {
+			ui.setText(leaveGroupButton, group.getPath());
+		} else {
+			// TODO set the text to the original
+			ui.setText(leaveGroupButton, "Select"); // FIXME i18n
+		}
+	}
+
 	private String keywordSimple_getAutoReply(Object panel) {
 		String ret = null;
 		if (ui.isSelected(ui.find(panel, COMPONENT_CB_AUTO_REPLY))) {
@@ -664,22 +691,25 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		return ret;
 	}
 	
-	private Group keywordSimple_getJoin(Object panel) {
-		Group ret = null;
-		if (ui.isSelected(ui.find(panel, COMPONENT_CB_JOIN_GROUP))) {
-			ret = ui.getAttachedObject(ui.getSelectedItem(ui.find(panel, COMPONENT_CB_GROUPS_TO_JOIN)), Group.class);
+	private Group keywordSimple_getJoin() {
+		Object joinGroupButton = find(COMPONENT_JOIN_GROUP_SELECT_BUTTON);
+		if(joinGroupButton != null) {
+			return ui.getAttachedObject(joinGroupButton, Group.class);
+		} else {
+			return null;
 		}
-		return ret;
 	}
 	
-	private Group keywordSimple_getLeave(Object panel) {
-		Group ret = null;
-		if (ui.isSelected(ui.find(panel, COMPONENT_CB_LEAVE_GROUP))) {
-			ret = ui.getAttachedObject(ui.getSelectedItem(ui.find(panel, COMPONENT_CB_GROUPS_TO_LEAVE)), Group.class);
+	private Group keywordSimple_getLeave() {
+		Object leaveGroupButton = find(COMPONENT_LEAVE_GROUP_SELECT_BUTTON);
+		if (leaveGroupButton != null) {
+			return ui.getAttachedObject(leaveGroupButton, Group.class);
+		} else {
+			return null;
 		}
-		return ret;
 	}
 	
+//> PAGING METHODS
 	/** @see PagedComponentItemProvider#getListDetails(Object, int, int) */
 	public PagedListDetails getListDetails(Object list, int startIndex, int limit) {
 		int totalItemCount = this.keywordDao.getTotalKeywordCount();
@@ -701,5 +731,18 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		}
 
 		return new PagedListDetails(totalItemCount, listItems, selectedItem);
+	}
+	
+//> GROUP SELECTER METHODS
+	public void groupSelectionCompleted(Group group) {
+		// Make sure we don't try to use the root group here
+		if(group.isRoot()) group = null;
+		
+		// We are either selecting the join group or the leave group
+		if(selectingJoinGroup) {
+			setJoinGroupDisplay(group);
+		} else {
+			setLeaveGroupDisplay(group);
+		}
 	}
 }

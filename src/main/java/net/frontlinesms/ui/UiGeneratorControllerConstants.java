@@ -80,15 +80,10 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_LB_REMAINING_CHARS = "lbRemainingChars";
 	public static final String COMPONENT_PN_MESSAGE = "pnMessage";
 	public static final String COMPONENT_PN_SEND = "pnSend";
-	public static final String COMPONENT_KEY_ACT_PANEL = "keyActPanel";
-	public static final String COMPONENT_BT_CLEAR = "btClear";
-	public static final String COMPONENT_TF_AUTO_REPLY = "tfAutoReply";
-	public static final String COMPONENT_TF_KEYWORD = "tfKeyword";
 	public static final String COMPONENT_PN_TIP = "pnTip";
 	public static final String COMPONENT_BT_SAVE = "btSave";
 	public static final String COMPONENT_ACTION_LIST = "actionList";
 	public static final String COMPONENT_KEYWORDS_DIVIDER = "keywordsDivider";
-	public static final String COMPONENT_CB_ACTION_TYPE = "cbActionType";
 	public static final String COMPONENT_ACCOUNTS_LIST = "accountsList";
 	public static final String COMPONENT_CB_FREQUENCY = "cbFrequency";
 	public static final String COMPONENT_TF_TEXT = "tfText";
