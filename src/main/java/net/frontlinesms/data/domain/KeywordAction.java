@@ -125,13 +125,13 @@ public class KeywordAction {
 	
 	/** @return the external command type */
 	public int getExternalCommandType() {
-		assert(type==TYPE_EXTERNAL_CMD) : "This method cannot be called on an action of type " + type;
+		assert(this.type==TYPE_EXTERNAL_CMD) : "This method cannot be called on an action of type " + type;
 		return this.externalCommandType;
 	}
 	
 	/** @return the external command response type */
 	public int getExternalCommandResponseType() {
-		assert(type==TYPE_EXTERNAL_CMD) : "Cannot get command response from type: " + type;
+		assert(this.type==TYPE_EXTERNAL_CMD) : "Cannot get command response from type: " + type;
 		return externalCommandResponseType;
 	}
 	
@@ -140,7 +140,7 @@ public class KeywordAction {
 	 * @param type new value for {@link #externalCommandResponseType}
 	 */
 	public void setExternalCommandResponseType(int type) {
-		assert(type==TYPE_EXTERNAL_CMD) : "Cannot set command response from type: " + type;
+		assert(this.type==TYPE_EXTERNAL_CMD) : "Cannot set command response from type: " + type;
 		this.externalCommandResponseType = type;
 	}
 	
@@ -149,7 +149,7 @@ public class KeywordAction {
 	 * @return
 	 */
 	public int getCommandResponseActionType() {
-		assert(type==TYPE_EXTERNAL_CMD) : "Cannot get command response action from type: " + type;
+		assert(this.type==TYPE_EXTERNAL_CMD) : "Cannot get command response action from type: " + type;
 		return externalCommandResponseActionType;
 	}
 	
@@ -158,7 +158,7 @@ public class KeywordAction {
 	 * @param type
 	 */
 	public void setCommandResponseActionType(int type) {
-		assert(type==TYPE_EXTERNAL_CMD) : "Cannot get command response action from type: " + type;
+		assert(this.type==TYPE_EXTERNAL_CMD) : "Cannot get command response action from type: " + type;
 		this.externalCommandResponseActionType = type;
 	}
 	
@@ -256,7 +256,7 @@ public class KeywordAction {
 	
 	/** @param text new value for {@link #commandString} of a {@link #TYPE_FORWARD} */
 	public void setForwardText(String text) {
-		assert(type==TYPE_FORWARD) : "Cannot get forward text from action of type: " + type;
+		assert(this.type==TYPE_FORWARD) : "Cannot get forward text from action of type: " + type;
 		this.commandString = text;
 	}
 	
@@ -294,7 +294,7 @@ public class KeywordAction {
 	
 	/** @return {@link #unformattedReplyText} the reply text for this action (if it is of TYPE_REPLY or TYPE_EMAIL) */
 	public String getUnformattedReplyText() {
-		assert(type==TYPE_REPLY || type==TYPE_EMAIL) : "Cannot get reply text from action of type: " + type;
+		assert(this.type==TYPE_REPLY || this.type==TYPE_EMAIL) : "Cannot get reply text from action of type: " + type;
 		return this.commandString;
 	}
 	
@@ -303,25 +303,25 @@ public class KeywordAction {
 	 * @param replyText new value for {@link #replyText}
 	 */
 	public void setReplyText(String replyText) {
-		assert(type==TYPE_REPLY || type==TYPE_EMAIL) : "Cannot set reply text from action of type: " + type;
+		assert(this.type==TYPE_REPLY || this.type==TYPE_EMAIL) : "Cannot set reply text from action of type: " + type;
 		this.commandString = replyText;
 	}
 	
 	/** @return the forward text for this action (if it is of TYPE_FORWARD). */
 	public String getUnformattedForwardText() {
-		assert(type==TYPE_FORWARD) : "Cannot get forward text from action of type: " + type;
+		assert(this.type==TYPE_FORWARD) : "Cannot get forward text from action of type: " + type;
 		return this.commandString;
 	}
 	
 	/** @return the command text for this action (if it is of TYPE_EXTERNAL_CMD). */
 	public String getUnformattedCommandText() {
-		assert(type==TYPE_EXTERNAL_CMD) : "Cannot get command text from type: " + type;
+		assert(this.type==TYPE_EXTERNAL_CMD) : "Cannot get command text from type: " + type;
 		return this.commandString;
 	}
 	
 	/** @return the command line for this action (if it is of TYPE_EXTERNAL_CMD). */
 	public String getUnformattedCommand() {
-		assert(type==TYPE_EXTERNAL_CMD) : "Cannot get command from type: " + type;
+		assert(this.type==TYPE_EXTERNAL_CMD) : "Cannot get command from type: " + type;
 		return this.externalCommand;
 	}
 	
