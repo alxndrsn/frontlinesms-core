@@ -102,6 +102,28 @@ public class HibernateGroupDaoTest extends HibernateTestCase {
 		assertNull(groupDao.getGroupByPath("/parent/child"));
 	}
 	
+	/** Check that 2 lists cannot be created with the same path 
+	 * @throws DuplicateKeyException */
+	public void testDuplicateKeys() throws DuplicateKeyException {
+		// Test 2 groups at root level
+		Group group1 = new Group(getRootGroup(), "name");
+		groupDao.saveGroup(group1);
+		Group group2 = new Group(getRootGroup(), "name");
+		try {
+			groupDao.saveGroup(group2);
+			fail("Second attempt to create identical group should have failed.");
+		} catch(DuplicateKeyException ex) {/* expected */}
+		
+		// Test 2 child groups
+		Group child1 = new Group(group1, "child");
+		groupDao.saveGroup(child1);
+		Group child2 = new Group(group1, "child");
+		try {
+			groupDao.saveGroup(child2);
+			fail("Second attempt to create identical group should have failed.");
+		} catch(DuplicateKeyException ex) {/* expected */}
+	}
+	
 	/**
 	 * Check that saving and deleting a group with special SQL characters in its name
 	 * functions correctly.  This should verify that our HQL is not open to SQL Injection
