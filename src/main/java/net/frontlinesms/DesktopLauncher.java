@@ -90,14 +90,14 @@ public class DesktopLauncher {
 				// Auto-detect phones.
 				new UiGeneratorController(frontline, true);
 			}
-//			
+			
 //			int count = 100;
 //			long tot = 0;
 //			long min = Long.MAX_VALUE;
 //			long max = 0;
 //			TreeList times = new TreeList(); 
 //			for(int i=0; i<count; ++i) {
-//				long t = timeGetAllGroups(frontline);
+//				long t = timeGetAllContacts(frontline);
 //				min = Math.min(min, t);
 //				max = Math.max(max, t);
 //				times.add(t);
@@ -119,10 +119,16 @@ public class DesktopLauncher {
 		} 
 	}
 	
+	private static long timeGetAllContacts(FrontlineSMS frontline) {
+		long start = System.currentTimeMillis();
+		frontline.getContactDao().getAllContacts(0, 100);
+		return System.currentTimeMillis() - start;
+	}
+
 	private static long timeGetAllGroups(FrontlineSMS frontline) {
-		long time = System.currentTimeMillis();
+		long start = System.currentTimeMillis();
 		frontline.getGroupDao().getAllGroups();
-		return System.currentTimeMillis() - time;
+		return System.currentTimeMillis() - start;
 	}
 
 	private static FrontlineSMS initFrontline() throws Throwable {

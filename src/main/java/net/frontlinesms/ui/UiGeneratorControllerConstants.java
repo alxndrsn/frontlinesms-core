@@ -82,10 +82,6 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_PN_SEND = "pnSend";
 	public static final String COMPONENT_KEY_ACT_PANEL = "keyActPanel";
 	public static final String COMPONENT_BT_CLEAR = "btClear";
-	public static final String COMPONENT_CB_LEAVE_GROUP = "cbLeaveGroup";
-	public static final String COMPONENT_CB_GROUPS_TO_LEAVE = "cbGroupsToLeave";
-	public static final String COMPONENT_CB_JOIN_GROUP = "cbJoinGroup";
-	public static final String COMPONENT_CB_GROUPS_TO_JOIN = "cbGroupsToJoin";
 	public static final String COMPONENT_TF_AUTO_REPLY = "tfAutoReply";
 	public static final String COMPONENT_TF_KEYWORD = "tfKeyword";
 	public static final String COMPONENT_PN_TIP = "pnTip";

@@ -16,10 +16,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_CL
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_SAVE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_ACTION_TYPE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_AUTO_REPLY;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_GROUPS_TO_JOIN;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_GROUPS_TO_LEAVE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_JOIN_GROUP;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_LEAVE_GROUP;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORDS_DIVIDER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORD_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEY_ACT_PANEL;
@@ -65,6 +61,11 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	public static final String UI_FILE_KEYWORDS_SIMPLE_VIEW = "/ui/core/keyword/pnSimpleView.xml";
 	public static final String UI_FILE_KEYWORDS_ADVANCED_VIEW = "/ui/core/keyword/pnAdvancedView.xml";
 	public static final String UI_FILE_NEW_KEYWORD_FORM = "/ui/core/keyword/newKeywordForm.xml";
+
+	@Deprecated public static final String COMPONENT_CB_LEAVE_GROUP = "cbLeaveGroup";
+	@Deprecated public static final String COMPONENT_CB_GROUPS_TO_LEAVE = "cbGroupsToLeave";
+	@Deprecated public static final String COMPONENT_CB_JOIN_GROUP = "cbJoinGroup";
+	@Deprecated public static final String COMPONENT_CB_GROUPS_TO_JOIN = "cbGroupsToJoin";
 	
 	public static final String COMPONENT_KEY_PANEL = "keyPanel";
 
@@ -462,7 +463,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		if (index == 0) {
 			//Add keyword selected
 			Object panel = ui.loadComponentFromFile(UI_FILE_KEYWORDS_SIMPLE_VIEW, this);
-			fillGroups(panel);
+
 			Object btSave = ui.find(panel, COMPONENT_BT_SAVE);
 			ui.setText(btSave, InternationalisationUtils.getI18NString(ACTION_CREATE));
 			ui.setVisible(ui.find(panel,COMPONENT_PN_TIP), false);
@@ -498,8 +499,9 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 			}
 			if (simple) {
 				Object panel = ui.loadComponentFromFile(UI_FILE_KEYWORDS_SIMPLE_VIEW, this);
+				ui.add(divider, panel);
+				
 				//Fill every field
-				fillGroups(panel);
 				Object tfKeyword = ui.find(panel, COMPONENT_TF_KEYWORD);
 				ui.setEnabled(tfKeyword, false);
 				String key = keyword.getKeyword().length() == 0 ? "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">" : keyword.getKeyword();
@@ -512,32 +514,13 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 						ui.setSelected(cbReply, true);
 						ui.setText(tfReply, action.getUnformattedReplyText());
 					} else if (type == KeywordAction.TYPE_JOIN) {
-						Object checkboxJoin = ui.find(panel, COMPONENT_CB_JOIN_GROUP);
-						Object cbJoinGroup = ui.find(panel, COMPONENT_CB_GROUPS_TO_JOIN);
-						for (int i = 0; i < ui.getItems(cbJoinGroup).length; i++) {
-							Group g = ui.getAttachedObject(ui.getItems(cbJoinGroup)[i], Group.class);
-							if (g.equals(action.getGroup())) {
-								ui.setInteger(cbJoinGroup, Thinlet.SELECTED, i);
-								break;
-							}
-						}
-						ui.setSelected(checkboxJoin, true);
+						setJoinGroupDisplay(action.getGroup());
 					} else if (type == KeywordAction.TYPE_LEAVE) {
-						Object checkboxLeave = ui.find(panel, COMPONENT_CB_LEAVE_GROUP);
-						Object cbLeaveGroup = ui.find(panel, COMPONENT_CB_GROUPS_TO_LEAVE);
-						for (int i = 0; i < ui.getItems(cbLeaveGroup).length; i++) {
-							Group g = ui.getAttachedObject(ui.getItems(cbLeaveGroup)[i], Group.class);
-							if (g.equals(action.getGroup())) {
-								ui.setInteger(cbLeaveGroup, Thinlet.SELECTED, i);
-								break;
-							}
-						}
-						ui.setSelected(checkboxLeave, true);
+						setLeaveGroupDisplay(action.getGroup());
 					}
 				}
 				
 				ui.setVisible(ui.find(panel, COMPONENT_BT_CLEAR), false);
-				ui.add(divider, panel);
 			} else {
 				Object panel = ui.loadComponentFromFile(UI_FILE_KEYWORDS_ADVANCED_VIEW, this);
 				Object table = ui.find(panel, COMPONENT_ACTION_LIST);
@@ -552,6 +535,15 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 			}
 		}
 		enableKeywordFields(ui.find(COMPONENT_KEY_PANEL));
+	}
+
+	/** Show group selecter for choosing the group to join. */
+	public void selectJoinGroup() {
+		
+	}
+	/** Show group selecter for choosing the group to leave. */
+	public void selectLeaveGroup() {
+		
 	}
 
 //> UI HELPER METHODS
@@ -578,27 +570,12 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		if (parentKeyword != null) ui.setText(ui.find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_KEYWORD), parentKeyword.getKeyword() + ' ');
 		ui.add(keywordForm);
 	}
-	
-	private void fillGroups(Object panel) {
-		Object cbJoin = ui.find(panel, COMPONENT_CB_GROUPS_TO_JOIN);
-		Object cbLeave = ui.find(panel, COMPONENT_CB_GROUPS_TO_LEAVE);
-		Object cbJoinGroup = ui.find(panel, COMPONENT_CB_JOIN_GROUP);
-		Object cbLeaveGroup = ui.find(panel, COMPONENT_CB_LEAVE_GROUP);
-		List<Group> groups = this.groupDao.getAllGroups();
-		for (Group g : groups) {
-			Object item = createComboBoxChoice(g);
-			ui.add(cbJoin, item);
-			ui.add(cbLeave, item);
-		}
-		if (groups.size() == 0) {
-			ui.setEnabled(cbJoinGroup, false);
-			ui.setEnabled(cbJoin, false);
-			ui.setEnabled(cbLeaveGroup , false);
-			ui.setEnabled(cbLeave, false);
-		} else {
-			ui.setSelectedIndex(cbJoin, 0);
-			ui.setSelectedIndex(cbLeave, 0);
-		}
+
+	private void setJoinGroupDisplay(Group group) {
+		ui.setText(find("btJoinGroupSelect"), group.getPath());
+	}
+	private void setLeaveGroupDisplay(Group group) {
+		ui.setText(find("btLeaveGroupSelect"), group.getPath());
 	}
 	
 	/**
@@ -701,12 +678,6 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 			ret = ui.getAttachedObject(ui.getSelectedItem(ui.find(panel, COMPONENT_CB_GROUPS_TO_LEAVE)), Group.class);
 		}
 		return ret;
-	}
-	
-	private Object createComboBoxChoice(Group g) {
-		Object item = ui.createComboboxChoice(g.getName(), g);
-		ui.setIcon(item, Icon.GROUP);
-		return item;
 	}
 	
 	/** @see PagedComponentItemProvider#getListDetails(Object, int, int) */
