@@ -22,7 +22,6 @@ package net.frontlinesms.data.domain;
 import javax.persistence.*;
 
 import net.frontlinesms.data.EntityField;
-import net.frontlinesms.data.repository.memory.InMemoryKeywordDao;
 
 /**
  * 

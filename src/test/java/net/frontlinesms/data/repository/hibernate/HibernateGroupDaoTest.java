@@ -177,6 +177,7 @@ public class HibernateGroupDaoTest extends HibernateTestCase {
 
 	@Override
 	public void test() throws Throwable {
+		// FIXME this method should not be necessary
 	}
 	
 //> ACCESSORS
