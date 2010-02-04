@@ -38,6 +38,7 @@ public class HibernateContactDaoTest extends HibernateTestCase {
 		contactDao.deleteContact(c);
 	}
 	
+	/** Test saving of contacts with duplicate phone numbers. */
 	public void testDuplicates() throws DuplicateKeyException {
 		Contact one = new Contact("Jeremy 1", "+123456789", null, null, null, true);
 		contactDao.saveContact(one);
