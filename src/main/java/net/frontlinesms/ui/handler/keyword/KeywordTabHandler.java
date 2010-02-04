@@ -60,8 +60,8 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	public static final String UI_FILE_NEW_KEYWORD_FORM = "/ui/core/keyword/newKeywordForm.xml";
 
 	public static final String COMPONENT_KEY_PANEL = "keyPanel";
-	private static final String COMPONENT_JOIN_GROUP_SELECT_BUTTON = "btJoinGroupSelect";
-	private static final String COMPONENT_LEAVE_GROUP_SELECT_BUTTON = "btLeaveGroupSelect";
+	private static final String COMPONENT_JOIN_GROUP_SELECT_LABEL = "lbJoinGroup";
+	private static final String COMPONENT_LEAVE_GROUP_SELECT_LABEL = "lbLeaveGroup";
 
 	public static final String COMPONENT_KEY_ACT_PANEL = "keyActPanel";
 	public static final String COMPONENT_BT_CLEAR = "btClear";
@@ -548,6 +548,12 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		
 		groupSelect.show();
 	}
+	public void removeJoinGroup() {
+		setJoinGroupDisplay(null);
+	}
+	public void removeLeaveGroup() {
+		setLeaveGroupDisplay(null);
+	}
 	/** Show group selecter for choosing the group to leave. */
 	public void selectLeaveGroup() {
 		selectingJoinGroup = false;
@@ -663,18 +669,26 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	}
 
 	private void setJoinGroupDisplay(Group group) {
-		Object joinGroupButton = find(COMPONENT_JOIN_GROUP_SELECT_BUTTON);
+		Object joinGroupButton = find(COMPONENT_JOIN_GROUP_SELECT_LABEL);
 		ui.setAttachedObject(joinGroupButton, group);
+
+		ui.setVisible(find("btJoinGroupSelect"), group==null);
+		ui.setVisible(find("btJoinGroupRemove"), group!=null);
+		
 		if(group != null) {
 			ui.setText(joinGroupButton, group.getPath());
 		} else {
 			// TODO set the text to the original
-			ui.setText(joinGroupButton, "Select"); // FIXME i18n
+			ui.setText(joinGroupButton, "(None)"); // FIXME i18n
 		}
 	}
 	private void setLeaveGroupDisplay(Group group) {
-		Object leaveGroupButton = find(COMPONENT_LEAVE_GROUP_SELECT_BUTTON);
+		Object leaveGroupButton = find(COMPONENT_LEAVE_GROUP_SELECT_LABEL);
 		ui.setAttachedObject(leaveGroupButton, group);
+
+		ui.setVisible(find("btLeaveGroupSelect"), group==null);
+		ui.setVisible(find("btLeaveGroupRemove"), group!=null);
+		
 		if(group != null) {
 			ui.setText(leaveGroupButton, group.getPath());
 		} else {
@@ -692,7 +706,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	}
 	
 	private Group keywordSimple_getJoin() {
-		Object joinGroupButton = find(COMPONENT_JOIN_GROUP_SELECT_BUTTON);
+		Object joinGroupButton = find(COMPONENT_JOIN_GROUP_SELECT_LABEL);
 		if(joinGroupButton != null) {
 			return ui.getAttachedObject(joinGroupButton, Group.class);
 		} else {
@@ -701,7 +715,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	}
 	
 	private Group keywordSimple_getLeave() {
-		Object leaveGroupButton = find(COMPONENT_LEAVE_GROUP_SELECT_BUTTON);
+		Object leaveGroupButton = find(COMPONENT_LEAVE_GROUP_SELECT_LABEL);
 		if (leaveGroupButton != null) {
 			return ui.getAttachedObject(leaveGroupButton, Group.class);
 		} else {
