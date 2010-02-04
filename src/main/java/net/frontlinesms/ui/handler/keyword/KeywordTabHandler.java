@@ -75,9 +75,10 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	private Object keywordListComponent;
 	private ComponentPagingHandler keywordListPagingHandler;
 	
-	public KeywordTabHandler(UiGeneratorController ui, FrontlineSMS frontlineController) {
+	public KeywordTabHandler(UiGeneratorController ui) {
 		super(ui);
-
+		
+		FrontlineSMS frontlineController = ui.getFrontlineController();
 		this.groupDao = frontlineController.getGroupDao();
 		this.keywordDao = frontlineController.getKeywordDao();
 		this.keywordActionDao = frontlineController.getKeywordActionDao(); 

@@ -88,12 +88,12 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	private final Logger LOG = Utils.getLogger(this.getClass());
 	
 	/** DAO for {@link Contact}s */
-	private ContactDao contactDao;
-	private GroupMembershipDao groupMembershipDao;
+	private final ContactDao contactDao;
+	private final GroupMembershipDao groupMembershipDao;
 	/** DAO for {@link Keyword}s */
-	private KeywordDao keywordDao;
+	private final KeywordDao keywordDao;
 	/** DAO for {@link Message}s */
-	private MessageDao messageDao;
+	private final MessageDao messageDao;
 	
 //> UI COMPONENTS
 	/** UI Component: table of messages */
@@ -133,11 +133,12 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	 * @param keywordDao value for {@link #keywordDao}
 	 * @param messageDao value for {@link #messageDao}
 	 */
-	public MessageHistoryTabHandler(UiGeneratorController ui, ContactDao contactDao, KeywordDao keywordDao, MessageDao messageDao) {
+	public MessageHistoryTabHandler(UiGeneratorController ui) {
 		super(ui);
-		this.contactDao = contactDao;
-		this.keywordDao = keywordDao;
-		this.messageDao = messageDao;
+		this.contactDao = ui.getFrontlineController().getContactDao();
+		this.keywordDao = ui.getFrontlineController().getKeywordDao();
+		this.messageDao = ui.getFrontlineController().getMessageDao();
+		this.groupMembershipDao = ui.getFrontlineController().getGroupMembershipDao();
 	}
 
 //> ACCESSORS
