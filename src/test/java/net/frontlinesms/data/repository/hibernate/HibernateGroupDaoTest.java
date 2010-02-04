@@ -3,6 +3,8 @@
  */
 package net.frontlinesms.data.repository.hibernate;
 
+import java.util.Collection;
+
 import net.frontlinesms.junit.HibernateTestCase;
 
 import net.frontlinesms.data.DuplicateKeyException;
@@ -51,6 +53,53 @@ public class HibernateGroupDaoTest extends HibernateTestCase {
 		Group myGroup = new Group(getRootGroup(), "My Team");
 		groupDao.saveGroup(myGroup);
 		groupDao.deleteGroup(myGroup, false);
+	}
+	
+	/** Check that deleting a group's child is successful, and does not affect the group itself. 
+	 * @throws DuplicateKeyException */
+	public void testChildDelete() throws DuplicateKeyException {
+		Group parent = new Group(getRootGroup(), "parent");
+		groupDao.saveGroup(parent);
+		Group child = new Group(parent, "child");
+		groupDao.saveGroup(child);
+		
+		Collection<Group> fetchedChildren = groupDao.getChildGroups(parent);
+		assertEquals(1, fetchedChildren.size());
+		assertEquals(child, fetchedChildren.toArray(new Group[0])[0]);
+
+		// Delete the child
+		groupDao.deleteGroup(child, false);
+
+		// Confirm that the child has been removed
+		fetchedChildren = groupDao.getChildGroups(parent);
+		assertEquals(0, fetchedChildren.size());
+		Group fetchedChild = groupDao.getGroupByPath("/parent/child");
+		assertNull(fetchedChild);
+		
+		// Confirm that the original group is still present
+		assertEquals(parent, groupDao.getGroupByPath("/parent"));
+	}
+
+	/** Check that deleting a group's parent has the expected effect on the child groups 
+	 * @throws DuplicateKeyException */
+	public void testParentDelete() throws DuplicateKeyException {
+		Group parent = new Group(getRootGroup(), "parent");
+		groupDao.saveGroup(parent);
+		Group child = new Group(parent, "child");
+		groupDao.saveGroup(child);
+		
+		// Confirm that the parent and child are both present in the database
+		Group fetchedParent = groupDao.getGroupByPath("/parent");
+		assertEquals(parent, fetchedParent);
+		Group fetchedChild = groupDao.getGroupByPath("/parent/child");
+		assertEquals(child, fetchedChild);
+		
+		// Delete the parent group
+		groupDao.deleteGroup(parent, false);
+
+		// Confirm that the parent and child are both deleted from the database
+		assertNull(groupDao.getGroupByPath("/parent"));
+		assertNull(groupDao.getGroupByPath("/parent/child"));
 	}
 	
 	/**
