@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -125,10 +124,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	private final ContactDao contactDao;
 	/** Data Access Object for {@link Group}s */
 	private final GroupDao groupDao;
+	/** Data Access Object for {@link GroupMembership}s */
+	private final GroupMembershipDao groupMembershipDao;
 	/** Data Access Object for {@link Message}s */
 	private final MessageDao messageFactory;
-	/** Data Access Object for {@link Keyword}s */
-	private final KeywordDao keywordDao;
 	/** Data Access Object for {@link SmsModemSettings}s */
 	private final SmsModemSettingsDao phoneDetailsManager;
 
@@ -147,54 +146,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	// FIXME these should probably move to the contacts tab controller
 	/** Fake group: The root group, of which all other top-level groups are children.  The name of this group specified in the constructor will not be used due to overridden {@link Group#getName()}. */
-	final Group rootGroup = new Group(null, "Root Group [i18n]") {
-		@Override
-		public Collection<Contact> getAllMembers() {
-			return contactDao.getAllContacts();
-		}
-		@Override
-		/** This group can have no direct subgroups. */
-		public Collection<Group> getDirectSubGroups() {
-			return groupDao.getChildGroups(null);
-		}
+	final Group rootGroup = new Group(null, null) {
 		@Override
 		/** Provide an internationalised version of this group's name */
 		public String getName() {
 			return InternationalisationUtils.getI18NString(FrontlineSMSConstants.CONTACTS_ALL);
-		}
-	};
-	/** Fake group: all contacts without a name set.  The name of this group specified in the constructor will not be used due to overridden {@link Group#getName()}. */
-	final Group unnamedContacts = new Group(null, "Unnamed [i18n]") {
-		@Override
-		public Collection<Contact> getAllMembers() {
-			return contactDao.getUnnamedContacts();
-		}
-		@Override
-		/** This group can have no direct subgroups. */
-		public Collection<Group> getDirectSubGroups() {
-			return Collections.emptySet();
-		}
-		@Override
-		/** Provide an internationalised version of this group's name */
-		public String getName() {
-			return InternationalisationUtils.getI18NString(FrontlineSMSConstants.CONTACTS_UNNAMED);
-		}
-	};
-	/** Fake group: all contacts not a member of a group.  The name of this group specified in the constructor will not be used due to overridden {@link Group#getName()}. */
-	final Group ungroupedContacts = new Group(null, "Ungrouped [i18n]") {
-		@Override
-		public Collection<Contact> getAllMembers() {
-			return contactDao.getUngroupedContacts();
-		}
-		@Override
-		/** This group can have no direct subgroups. */
-		public Collection<Group> getDirectSubGroups() {
-			return Collections.emptySet();
-		}
-		@Override
-		/** Provide an internationalised version of this group's name */
-		public String getName() {
-			return InternationalisationUtils.getI18NString(FrontlineSMSConstants.CONTACTS_UNGROUPED);
 		}
 	};
 
@@ -231,8 +187,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		this.phoneManager = frontlineController.getSmsDeviceManager();
 		this.contactDao = frontlineController.getContactDao();
 		this.groupDao = frontlineController.getGroupDao();
+		this.groupMembershipDao = frontlineController.getGroupMembershipDao();
 		this.messageFactory = frontlineController.getMessageDao();
-		this.keywordDao = frontlineController.getKeywordDao();
 		this.phoneDetailsManager = frontlineController.getSmsModemSettingsDao();
 		this.pluginManager = frontlineController.getPluginManager();
 		
@@ -263,16 +219,16 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			this.phoneTabController = new PhoneTabHandler(this);
 			this.phoneTabController.init();
 			
-			this.contactsTabController = new ContactsTabHandler(this, this.contactDao, this.groupDao);
+			this.contactsTabController = new ContactsTabHandler(this);
 			this.contactsTabController.init();
 			
-			this.messageTabController = new MessageHistoryTabHandler(this, contactDao, keywordDao, messageFactory);
+			this.messageTabController = new MessageHistoryTabHandler(this);
 			this.messageTabController.init();
 			
-			this.emailTabHandler = new EmailTabHandler(this, this.frontlineController);
+			this.emailTabHandler = new EmailTabHandler(this);
 			this.emailTabHandler.init();
 			
-			this.keywordTabHandler = new KeywordTabHandler(this, this.frontlineController);
+			this.keywordTabHandler = new KeywordTabHandler(this);
 			this.keywordTabHandler.init();
 
 			this.homeTabController = new HomeTabHandler(this);
@@ -488,7 +444,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @return <code>true</code> if the supplied {@link Group} is one of the synthetic groups; <code>false</code> otherwise. 
 	 */
 	public boolean isDefaultGroup(Group group) {
-		return group == this.rootGroup || group == this.ungroupedContacts || group == this.unnamedContacts;
+		return group == this.rootGroup;
 	}
 
 	public void addDatePanel(Object dialog) {
@@ -531,13 +487,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		Group parent = g.getParent();
 		if (!parent.equals(this.rootGroup)) {
 			getGroupsRecursivelyUp(groups, parent);
-		}
-	}
-	
-	public void getGroupsRecursivelyDown(List<Group> groups, Group g) {
-		groups.add(g);
-		for (Group subGroup : g.getDirectSubGroups()) {
-			getGroupsRecursivelyDown(groups, subGroup);
 		}
 	}
 	
@@ -588,7 +537,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param type The desired type
 	 */
 	public void showExportWizard(Object list, String type){
-		new ImportExportUiController(this, this.contactDao, this.messageFactory, this.keywordDao).showWizard(true, list, type);
+		new ImportExportUiController(this).showWizard(true, list, type);
 	}
 	
 	/**
@@ -596,7 +545,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param type The desired type
 	 */
 	public void showExportWizard(String type){
-		new ImportExportUiController(this, this.contactDao, this.messageFactory, this.keywordDao).showWizard(true, type);
+		new ImportExportUiController(this).showWizard(true, type);
 	}
 	
 	/**
@@ -605,7 +554,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param type The desired type
 	 */
 	public void showImportWizard(Object list, String type){
-		new ImportExportUiController(this, this.contactDao, this.messageFactory, this.keywordDao).showWizard(false, list, type);
+		new ImportExportUiController(this).showWizard(false, list, type);
 	}
 	
 	/**
@@ -613,7 +562,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param type The desired type (0 for Contacts, 1 for Messages and 2 for Keywords)
 	 */
 	public void showImportWizard(String type){
-		new ImportExportUiController(this, this.contactDao, this.messageFactory, this.keywordDao).showWizard(false, type);
+		new ImportExportUiController(this).showWizard(false, type);
 	}
 
 	/**
@@ -646,7 +595,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		
 		HashSet<Object> recipients = new HashSet<Object>();
 		boolean hasMembers = false;
-		for (Contact c : group.getAllMembers()) {
+		for (Contact c : groupMembershipDao.getMembers(group)) {
 			hasMembers = true;
 			if (c.isActive()) {
 				LOG.debug("Adding contact [" + c.getName() + "] to the send list.");
@@ -1281,8 +1230,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 
 		add(row, createTableCell(contact.getPhoneNumber()));
 		add(row, createTableCell(contact.getEmailAddress()));
-		String groups = Utils.contactGroupsAsString(contact, DEFAULT_GROUPS_DELIMITER);
-		add(row, createTableCell(groups));
+//		String groups = Utils.contactGroupsAsString(this.groupMembershipDao.getGroups(contact), DEFAULT_GROUPS_DELIMITER);
+//		add(row, createTableCell(groups));
 		return row;
 	}
 
@@ -1669,7 +1618,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void groupList_expansionChanged(Object groupList) {
 		for (Object o : getItems(groupList)) {
 			if (isAttachment(o, Group.class)) {
-				if(getBoolean(o, EXPANDED) && getGroup(o).hasDescendants()) {
+				if(getBoolean(o, EXPANDED) && groupDao.hasDescendants(getAttachedObject(o, Group.class))) {
 					// Set the icon to EXPANDED, and set children icons too!
 					setIcon(o, Icon.FOLDER_OPEN);
 					groupList_expansionChanged(o);
@@ -1736,14 +1685,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public Group getRootGroup() {
 		return this.rootGroup;
 	}
-	
-	public Group getUnnamedContacts() {
-		return unnamedContacts;
-	}
-	
-	public Group getUngroupedContacts() {
-		return ungroupedContacts;
-	}
 
 	/** @return the {@link Frame} attached to this thinlet window */
 	public Frame getFrameLauncher() {
@@ -1798,7 +1739,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void showGroupSelecter() {
 		Object dialog = super.createDialog("Group Selecter Test");
 		GroupSelecterPanel selecter = new GroupSelecterPanel(this, this);
-		selecter.init(this.groupDao.getChildGroups(null).toArray(new Group[0]));
+		selecter.init(this.rootGroup);
 		add(dialog, selecter.getPanelComponent());
 		add(dialog);
 	}

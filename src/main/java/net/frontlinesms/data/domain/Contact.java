@@ -19,10 +19,6 @@
  */
 package net.frontlinesms.data.domain;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.persistence.*;
 
 import net.frontlinesms.data.DuplicateKeyException;
@@ -42,16 +38,12 @@ public class Contact {
 	private static final String FIELD_NAME = "name";
 	/** Column name for {@link #phoneNumber} */
 	private static final String FIELD_PHONE_NUMBER = "phoneNumber";
-	/** Column name for {@link #groups} */
-	private static final String FIELD_GROUPS = "groups";
 	
 //> ENTITY FIELDS
 	/** Details of the fields that this class has. */
 	public enum Field implements EntityField<Contact> {
 		/** field mapping for {@link Contact#name} */
 		NAME(FIELD_NAME),
-		/** field mapping for {@link Contact#groups} */
-		GROUPS(FIELD_GROUPS),
 		/** field mapping for {@link Contact#phoneNumber} */
 		PHONE_NUMBER(FIELD_PHONE_NUMBER);
 		/** name of a field */
@@ -63,6 +55,10 @@ public class Contact {
 		Field(String fieldName) { this.fieldName = fieldName; }
 		/** @see EntityField#getFieldName() */
 		public String getFieldName() { return this.fieldName; }
+	}
+
+	public long getId() {
+		return this.id;
 	}
 	
 //> INSTANCE PROPERTIES
@@ -84,10 +80,6 @@ public class Contact {
 	private String emailAddress;
 	private String notes;
 	private boolean active;
-	
-	/** Groups that this chap is a member of. */
-	@ManyToMany(fetch=FetchType.EAGER, mappedBy=Group.COLUMN_DIRECT_MEMBERS, cascade=CascadeType.ALL)
-	private Set<Group> groups = new HashSet<Group>();
 	
 //> CONSTRUCTORS
 	/** Empty constructor for hibernate */
@@ -202,15 +194,6 @@ public class Contact {
 	}
 	
 	/**
-	 * Checks if this contact is a member of the specified group.
-	 * @param group The group to check membership of.
-	 * @return TRUE if the contact is a member of the supplied group; FALSE otherwise.
-	 */
-	public boolean isMemberOf(Group group) {
-		return this.groups.contains(group);
-	}
-	
-	/**
 	 * Checks if this contact is active.
 	 * @return TRUE if the contact is active; FALSE otherwise.
 	 */
@@ -224,35 +207,6 @@ public class Contact {
 	 */
 	public void setActive(boolean active) {
 		this.active = active;
-	}
-	
-	/**
-	 * Returns the groups that this contact is a member of.
-	 * @return {@link #groups}
-	 */
-	public Collection<Group> getGroups() {
-		return this.groups;
-	}
-	
-	/** @param groups new value for {@link #groups} */
-	public void setGroups(Set<Group> groups) {
-		this.groups = groups;
-	}
-	
-	/**
-	 * Adds this contact to a group.  This should only be called from {@link Group#addContact(Contact)}
-	 * @param group Group this contact is being added to
-	 */
-	void addToGroup(Group group) {
-		this.groups.add(group);
-	}
-	
-	/**
-	 * Removes this contact from a group.  This should only be called from {@link Group#removeContact(Contact)}
-	 * @param group Group this contact is being added to
-	 */
-	void removeFromGroup(Group group) {
-		this.groups.remove(group);
 	}
 
 //> GENERATED CODE

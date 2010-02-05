@@ -3,14 +3,12 @@
  */
 package net.frontlinesms.data.repository.hibernate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
+import org.springframework.transaction.annotation.Transactional;
 
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Group;
@@ -27,18 +25,28 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 	}
 
 	/** @see GroupDao#deleteGroup(Group, boolean) */
+	@Transactional
 	public void deleteGroup(Group group, boolean destroyContacts) {
-		if(destroyContacts) {
-			// TODO delete contacts here
-		}
+		// Dereference all keywordActions relating to this group
+		String keywordActionQuery = "DELETE FROM KeywordAction WHERE group_path=?";
+		super.getHibernateTemplate().bulkUpdate(keywordActionQuery, group.getPath());
+
+		Object[] paramValues = getPathParamValues(group);
 		
-		// Remove the group from its parent, as hibernate does not seem to deal with this
-		Group parent = group.getParent();
-		if(parent != null) {
-			parent.removeChild(group);
-		}
+		// Delete all group memberships for this group and its descendants
+		String groupMembershipQuery = "DELETE from GroupMembership WHERE group_path=? OR group_path LIKE ?";
+		super.getHibernateTemplate().bulkUpdate(groupMembershipQuery, paramValues);
 		
-		super.delete(group);
+		// Delete all child groups and the group itself
+		String deleteGroupsQuery = "DELETE from " + Group.TABLE_NAME + " WHERE path=? OR path LIKE ?";
+		super.getHibernateTemplate().bulkUpdate(deleteGroupsQuery, paramValues);
+	}
+	
+	/** @return params for matching this group and its children */
+	private Object[] getPathParamValues(Group group) {
+		String groupPath = group.getPath();
+		String childPath = groupPath + Group.PATH_SEPARATOR + "%";
+		return new Object[]{groupPath, childPath};
 	}
 	
 	/** @see GroupDao#getAllGroups() */
@@ -46,16 +54,13 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 		return super.getAll();
 	}
 	
+	public boolean hasDescendants(Group parent) {
+		return super.getCount(getChildCriteria(parent)) > 0;
+	}
+	
 	/** @see GroupDao#getChildGroups(Group) */
 	public Collection<Group> getChildGroups(Group parent) {
-		DetachedCriteria criteria = super.getCriterion();
-		criteria.add(getEqualsOrNull(Group.Field.PARENT, parent));
-		List<Group> groupList = super.getList(criteria);
-		
-		// FIXME FIXME for some reason the list contains duplicates.  FIX THE CAUSE, as THIS IS STUPID! FIXME FIXME
-		HashSet<Group> uniqueGroups = new HashSet<Group>();
-		for(Group g : groupList) uniqueGroups.add(g);
-		return new ArrayList<Group>(uniqueGroups);
+		return super.getList(getChildCriteria(parent));
 	}
 
 	/** @see GroupDao#getAllGroups(int, int) */
@@ -63,10 +68,10 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 		return super.getAll(startIndex, limit);
 	}
 
-	/** @see GroupDao#getGroupByName(String) */
-	public Group getGroupByName(String name) {
+	/** @see GroupDao#getGroupByPath(String) */
+	public Group getGroupByPath(String path) {
 		DetachedCriteria criteria = super.getCriterion();
-		criteria.add(Restrictions.eq(Group.Field.NAME.getFieldName(), name));
+		criteria.add(Restrictions.eq(Group.Field.PATH.getFieldName(), path));
 		return super.getUnique(criteria);
 	}
 
@@ -77,18 +82,6 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 
 	/** @see GroupDao#saveGroup(Group) */
 	public void saveGroup(Group group) throws DuplicateKeyException {
-		if(group.getParent() == null) {
-			// Check there is not already a top-level group with this name.  We do this here as SQL does not
-			// consider NULL == NULL, so top-level groups with the same name are allowed in the database.
-			// TODO this check/save operation would ideally be atomic - what if someone snuck in and created
-			// this group between the check and the creation?
-			DetachedCriteria criteria = super.getCriterion();
-			criteria.add(Restrictions.isNull(Group.Field.PARENT.getFieldName()));
-			criteria.add(Restrictions.eq(Group.Field.NAME.getFieldName(), group.getName()));
-			if(super.getUnique(criteria) != null) {
-				throw new DuplicateKeyException();
-			}
-		}
 		super.save(group);
 	}
 
@@ -97,4 +90,11 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 		super.updateWithoutDuplicateHandling(group);
 	}
 
+	/** @return criteria for getting the children of a group */
+	private DetachedCriteria getChildCriteria(Group parent) {
+		DetachedCriteria criteria = super.getCriterion();
+//		criteria.add(Restrictions.like(Group.Field.PATH.getFieldName(), parent.getPath() + Group.PATH_SEPARATOR + "[^" + Group.PATH_SEPARATOR + "]"));
+		criteria.add(Restrictions.eq("parentPath", parent.getPath()));
+		return criteria;
+	}
 }

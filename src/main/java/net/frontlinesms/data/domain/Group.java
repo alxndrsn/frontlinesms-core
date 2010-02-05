@@ -19,12 +19,6 @@
  */
 package net.frontlinesms.data.domain;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import javax.persistence.*;
 
 import net.frontlinesms.data.EntityField;
@@ -34,32 +28,24 @@ import net.frontlinesms.data.EntityField;
  * whose membership is entirely independent of the main group.
  * @author Alex
  */
-@Entity(name="frontline_group")
-@Table(uniqueConstraints={@UniqueConstraint(columnNames={Group.COLUMN_NAME, Group.COLUMN_PARENT + "_" + Group.COLUMN_ID})})
+@Entity(name=Group.TABLE_NAME)
 public class Group {
 
-//> DATABASE COLUMN NAMES
+//> DATABASE NAMES
+	/** Table name */
+	public static final String TABLE_NAME = "frontline_group";
 	/** Database column name for property: {@link #name} */
-	static final String COLUMN_ID = "group_id";
-	/** Database column name for property: {@link #name} */
-	static final String COLUMN_NAME = "name";
-	/** Database column name for property: {@link #directMembers} */
-	static final String COLUMN_DIRECT_MEMBERS = "directMembers";
-	/** Database column name for property: {@link #parent} */
-	static final String COLUMN_PARENT = "parent";
-	/** Database column name for property: {@link #parent} */
-	static final String COLUMN_CHILDREN = "children";
+	static final String COLUMN_PATH = "path";
+	
+//> CONSTANTS
+	/** Character used to separate paths in the group name */
+	public static final char PATH_SEPARATOR = '/';
 
 //> ENTITY FIELDS
 	/** Details of the fields that this class has. */
 	public enum Field implements EntityField<Group> {
-		ID(COLUMN_ID),
-		/** Represents {@link #name} */
-		NAME(COLUMN_NAME),
-		/** Represents {@link #parent} */
-		PARENT(COLUMN_PARENT),
-		/** Represents {@link #directMembers} */
-		DIRECT_MEMBERS(COLUMN_DIRECT_MEMBERS);
+		/** Represents {@link #path} */
+		PATH(COLUMN_PATH);
 		
 		/** name of a field */
 		private final String fieldName;
@@ -73,38 +59,27 @@ public class Group {
 	}
 	
 //> PROPERTIES
-	/** Unique id for this entity.  This is for hibernate usage. */
-	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name=COLUMN_ID,unique=true,nullable=false,updatable=false)
-	@SuppressWarnings("unused")
-	private long id;
+	/**
+	 * The path of this group.
+	 * This is a {@link #PATH_SEPARATOR}-separated list of this group and its parents.
+	 * Empty string denotes the root group.
+	 * There is no leading or trailing {@link #PATH_SEPARATOR}
+	 */
+	@Id @Column(name=COLUMN_PATH, unique=true, updatable=false, nullable=false)
+	private String path;
 	
-	/** The name of this group. */
-	@Column(name=COLUMN_NAME)
-	private String name;
-	
-	/** Contacts who are direct members of this group */
-	@ManyToMany(
-			fetch=FetchType.EAGER)
-	@JoinTable(
-			name="group_contact",
-			joinColumns=@JoinColumn(name=Group.COLUMN_ID),
-			inverseJoinColumns=@JoinColumn(name=Contact.COLUMN_ID))
-	private Set<Contact> directMembers = new HashSet<Contact>();
-
-	/** Parent of this group */
-	@ManyToOne(fetch=FetchType.EAGER, targetEntity=Group.class)
-	private Group parent;
-
-	/** Subgroups */
-	@OneToMany(fetch=FetchType.EAGER, mappedBy=COLUMN_PARENT, targetEntity=Group.class, cascade=CascadeType.REMOVE)
-	@Column(name=COLUMN_CHILDREN)
-	private Set<Group> children = new HashSet<Group>();
+	private String parentPath;
 	
 //> CONSTRUCTORS
 	/** Empty constructor for hibernate */
 	Group() {}
+	
+	private Group(String path) {
+		assert(path.startsWith("" + PATH_SEPARATOR)) : "Path must start with the seprator character '" + PATH_SEPARATOR + "'";
+		assert(path.indexOf(',') == -1) : "Comma illegal in group name.";
+		this.path = path;
+		this.parentPath = getParentPath(path);
+	}
 	
 	/**
 	 * Creates a group with the specified parent and name.
@@ -112,107 +87,38 @@ public class Group {
 	 * @param name The name of the new group.
 	 */
 	public Group(Group parent, String name) {
-		this.name = name;
-		this.parent = parent;
-		if(this.parent != null) {
-			this.parent.addChild(this);
+		assert((parent != null && name != null) 
+				|| (parent == null && name == null)) : "Only the root group should have a null parent, and that should be defined internally.";
+		
+		if(parent == null && name == null) {
+			this.path = "";
+		} else {
+			if(name.length() == 0)
+				throw new IllegalArgumentException("Group names cannot be empty.");
+			if(name.indexOf(PATH_SEPARATOR) != -1) 
+				throw new IllegalArgumentException("Group names cannot contain the path separator character '" + PATH_SEPARATOR + "'");
+			if(name.indexOf(',') != -1)
+				throw new IllegalArgumentException("Comma character not valid in group name.");
+			
+			if(parent.isRoot()) {
+				this.path = PATH_SEPARATOR + name;
+			} else {
+				this.path = parent.getPath() + PATH_SEPARATOR + name;				
+			}
 		}
+		this.parentPath = getParentPath(path);
 	}
 	
 //> ACCESSOR METHODS
-	/**
-	 * Checks if there are any subgroups of this group.
-	 * @return TRUE if this group has sub-groups, or FALSE otherwise.
-	 */
-	public boolean hasDescendants() {
-		return this.children.size() > 0;
-	}
-	
-	/**
-	 * Returns the direct subgroups of this group.
-	 * @return {@link #children}
-	 */
-	public Collection<Group> getDirectSubGroups() {
-		return this.children;
-	}
-	
-	/**
-	 * Gets members of this group.  Does NOT recurse into subgroups.
-	 * @return {@link #directMembers}
-	 */
-	public Set<Contact> getDirectMembers() {
-		return this.directMembers;
-	}
-	
-	/** @param directMembers new value for {@link #directMembers} */
-	public void setDirectMembers(Set<Contact> directMembers) {
-		this.directMembers = directMembers;
-	}
-	
-	/**
-	 * Gets the name of this group.
-	 * @return {@link #name}
-	 */
+	/** @return the name of this group */
 	public String getName() {
-		return this.name;
-	}
-	
-	/**
-	 * Adds the contact to this group if they are not already a member.
-	 * @param contact The contact to add to this group.
-	 * @return TRUE if the contact has been added to this group, or FALSE if the contact was already a member.
-	 */
-	public boolean addDirectMember(Contact contact) {
-		contact.addToGroup(this);
-		return this.directMembers.add(contact);
-	}
-	
-	/**
-	 * Removes the supplied contact from this group if they were already a member.
-	 * @param contact
-	 * @return <code>true</code> if the {@link Contact} was removed from the {@link Group}; <code>false</code> if he was never a member in the first place.
-	 */
-	public boolean removeContact(Contact contact) {
-		contact.removeFromGroup(this);
-		return this.directMembers.remove(contact);
+		if(this.isRoot()) return "";
+		else return this.path.substring(this.path.lastIndexOf(PATH_SEPARATOR) + 1);
 	}
 
-	/** @return  an unsorted list of all members of this group. */
-	public Collection<Contact> getAllMembers() {
-		Set<Contact> allMembers = new HashSet<Contact>();
-		addAllMembers(allMembers);
-		return allMembers;
-	}
-	
-	/**
-	 * Add all members of this group and its subgroups to the supplied {@link Set}.
-	 * @param allMembers
-	 */
-	private void addAllMembers(Set<Contact> allMembers) {
-		allMembers.addAll(this.directMembers);
-		for(Group g : this.children) {
-			g.addAllMembers(allMembers);
-		}
-	}
-	
-	/**
-	 * Returns a sub-section of the list of members of this group.
-	 * @param startIndex
-	 * @param limit
-	 * @return a page from the list of all members of this group
-	 */
-	public List<Contact> getAllMembers(int startIndex, int limit) {
-		List<Contact> allMembers = new ArrayList<Contact>();
-		allMembers.addAll(getAllMembers());
-		return allMembers.subList(startIndex, Math.min(allMembers.size(), startIndex + limit));
-	}
-	
-	/**
-	 * Returns the number of members in this group. 
-	 * @return the number of members in this group
-	 */
-	public int getAllMembersCount() {
-		return getAllMembers().size();
+	/** @return the path of this group */
+	public String getPath() {
+		return this.path;
 	}
 	
 	/**
@@ -220,44 +126,33 @@ public class Group {
 	 * @return {@link #parent}
 	 */
 	public Group getParent() {
-		return this.parent;
+		if(this.isRoot()) {
+			return null;
+		} else {
+			String parentPath = getParentPath(this.path);
+			if(parentPath.length() == 0) {
+				return new Group(null, null);
+			} else {
+				return new Group(parentPath);
+			}
+		}
 	}
 	
-	/**
-	 * Set {@link #name}.
-	 * @param name new value for {@link #name}
-	 */
-	public void setName(String name) {
-		if(this.name != null) throw new IllegalStateException("Groups may not change name.");
-		if(name == null) throw new IllegalArgumentException("Illegal group name: " + null);
-		this.name = name;
-	}
-
-	/**
-	 * Set {@link #parent}
-	 * @param parent new value for {@link #parent}
-	 */
-	public void setParent(Group parent) {
-		if(this.parent != null) throw new IllegalStateException("Groups may not change their parent.");
-		this.parent = parent;
-	}
-
-	/**
-	 * Add group to {@link #children}
-	 * @param group group to add to {@link #children}
-	 */
-	public void addChild(Group group) {
-		this.children.add(group);
+	private static String getParentPath(String path) {
+		if(path.length() == 0) return "";
+		
+		String parentPath = path.substring(0, path.lastIndexOf(PATH_SEPARATOR));
+		if(parentPath.length() == 0) {
+			return "";
+		}
+		assert(parentPath.charAt(0) == PATH_SEPARATOR) : "Splitting performed incorrectly on group path.";
+		return parentPath;
 	}
 	
-	/**
-	 * Remove a group from {@link #children}
-	 * @param group group to remove from {@link #children}
-	 */
-	public void removeChild(Group group) {
-		this.children.remove(group);
+	/** @return <code>true</code> if this is the root group */
+	public boolean isRoot() {
+		return this.path.length() == 0;
 	}
-
 
 //> GENERATED CODE
 	/** @see java.lang.Object#hashCode() */
@@ -265,11 +160,10 @@ public class Group {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((parent == null) ? 0 : parent.hashCode());
+		result = prime * result + ((path == null) ? 0 : path.hashCode());
 		return result;
 	}
-
+	
 	/** @see java.lang.Object#equals(java.lang.Object) */
 	@Override
 	public boolean equals(Object obj) {
@@ -280,16 +174,17 @@ public class Group {
 		if (getClass() != obj.getClass())
 			return false;
 		Group other = (Group) obj;
-		if (name == null) {
-			if (other.name != null)
+		if (path == null) {
+			if (other.path != null)
 				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (parent == null) {
-			if (other.parent != null)
-				return false;
-		} else if (!parent.equals(other.parent))
+		} else if (!path.equals(other.path))
 			return false;
 		return true;
 	}
+	
+	@Override
+	public String toString() {
+		return this.path;
+	}
+	
 }

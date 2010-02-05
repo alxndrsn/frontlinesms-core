@@ -10,14 +10,16 @@ import org.apache.log4j.Logger;
 
 import thinlet.Thinlet;
 
+import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.data.domain.Group;
-import net.frontlinesms.ui.FrontlineUI;
+import net.frontlinesms.data.repository.unmodifiable.UnmodifiableGroupDao;
+import net.frontlinesms.data.repository.unmodifiable.UnmodifiableGroupMembershipDao;
 import net.frontlinesms.ui.Icon;
+import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BasePanelHandler;
 
 /**
  * @author aga
- *
  */
 public class GroupSelecterPanel extends BasePanelHandler {
 	private Logger LOG = Logger.getLogger(this.getClass());
@@ -29,20 +31,24 @@ public class GroupSelecterPanel extends BasePanelHandler {
 	private Object groupTreeComponent;
 	
 	private GroupSelecterPanelOwner owner;
+
+	private UnmodifiableGroupDao groupDao;
+	private UnmodifiableGroupMembershipDao groupMembershipDao;
 	
 	private boolean allowMultipleSelections;
 
-	private Group[] rootGroups;
+	private Group rootGroup;
 
 //> CONSTRUCTORS
-	public GroupSelecterPanel(FrontlineUI ui, GroupSelecterPanelOwner owner) {
+	public GroupSelecterPanel(UiGeneratorController ui, GroupSelecterPanelOwner owner) {
 		super(ui);
 		this.owner = owner;
+		
 		allowMultipleSelections = owner instanceof MultiGroupSelecterPanelOwner;
 	}
 
 	/** Initialise the selecter. */
-	public void init(Group...rootGroups) {
+	public void init(Group rootGroup) {
 		super.loadPanel(XML_LAYOUT_GROUP_PANEL);
 		
 		// TODO update selection of group tree appropriate to allowMultipleSelections
@@ -51,16 +57,22 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		groupTreeComponent = super.find(COMPONENT_GROUP_TREE);
 		
 		// add nodes for group tree
-		this.rootGroups = rootGroups;
+		this.rootGroup = rootGroup;
 	}
 
-	/** Refresh the list of groups */
+	/**
+	 * Refresh the list of groups
+	 * This method will reload the view of groups.
+	 */
 	public void refresh() {
 		Object groupTree = getGroupTreeComponent();
+		
+		FrontlineSMS frontlineController = ((UiGeneratorController) super.ui).getFrontlineController();
+		this.groupDao = new UnmodifiableGroupDao(frontlineController.getGroupDao());
+		this.groupMembershipDao = new UnmodifiableGroupMembershipDao(frontlineController.getGroupMembershipDao());
+		
 		ui.removeAll(groupTree);
-		for(Group rootGroup : rootGroups) {
-			ui.add(groupTree, createNode(rootGroup, true));
-		}
+		ui.add(groupTree, createNode(rootGroup, true));
 	}
 	
 //> ACCESSORS
@@ -98,7 +110,7 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		Object groupTree = this.getGroupTreeComponent();
 		Group parent = group.getParent();
 		Object parentGroupNode;
-		if(parent != null) {
+		if(parent != null && !parent.isRoot()) {
 			parentGroupNode = getNodeForGroup(groupTree, parent);
 		} else {
 			// There is no parent for the group, so we need to get the node for the root group
@@ -158,20 +170,21 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		LOG.debug("Group [" + group.getName() + "]");
 		
 		String toSet = group.getName();
-		if (showContactsNumber) {
-			toSet += " (" + group.getAllMembers().size() + ")";
-		}
+//		if (showContactsNumber) {
+//			toSet += " (" + this.groupMembershipDao.getMemberCount(group) + ")";
+//		}
 		
 		Object node = ui.createNode(toSet, group);
 
-		if(ui.getBoolean(node, Thinlet.EXPANDED) && group.hasDescendants()) {
+		if(ui.getBoolean(node, Thinlet.EXPANDED)
+				/*&& groupDao.hasDescendants(group)*/) {
 			ui.setIcon(node, Icon.FOLDER_OPEN);
 		} else {
 			ui.setIcon(node, Icon.FOLDER_CLOSED);
 		}
 		
 		// Add subgroup components to this node
-		for (Group subGroup : group.getDirectSubGroups()) {
+		for (Group subGroup : groupDao.getChildGroups(group)) {
 			Object groupNode = createNode(subGroup, showContactsNumber);
 			ui.add(node, groupNode);
 		}

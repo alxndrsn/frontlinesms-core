@@ -40,6 +40,7 @@ import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.data.domain.Message.Field;
 import net.frontlinesms.data.repository.ContactDao;
+import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.ui.Icon;
@@ -87,11 +88,12 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	private final Logger LOG = Utils.getLogger(this.getClass());
 	
 	/** DAO for {@link Contact}s */
-	private ContactDao contactDao;
+	private final ContactDao contactDao;
+	private final GroupMembershipDao groupMembershipDao;
 	/** DAO for {@link Keyword}s */
-	private KeywordDao keywordDao;
+	private final KeywordDao keywordDao;
 	/** DAO for {@link Message}s */
-	private MessageDao messageDao;
+	private final MessageDao messageDao;
 	
 //> UI COMPONENTS
 	/** UI Component: table of messages */
@@ -131,11 +133,12 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	 * @param keywordDao value for {@link #keywordDao}
 	 * @param messageDao value for {@link #messageDao}
 	 */
-	public MessageHistoryTabHandler(UiGeneratorController ui, ContactDao contactDao, KeywordDao keywordDao, MessageDao messageDao) {
+	public MessageHistoryTabHandler(UiGeneratorController ui) {
 		super(ui);
-		this.contactDao = contactDao;
-		this.keywordDao = keywordDao;
-		this.messageDao = messageDao;
+		this.contactDao = ui.getFrontlineController().getContactDao();
+		this.keywordDao = ui.getFrontlineController().getKeywordDao();
+		this.messageDao = ui.getFrontlineController().getMessageDao();
+		this.groupMembershipDao = ui.getFrontlineController().getGroupMembershipDao();
 	}
 
 //> ACCESSORS
@@ -303,9 +306,8 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 					return messageDao.getMessageCountForMsisdn(messageType, c.getPhoneNumber(), messageHistoryStart, messageHistoryEnd);
 				} else if(filterClass == Group.class) {
 					// A Group was selected
-					List<Group> groups = new ArrayList<Group>();
-					ui.getGroupsRecursivelyDown(groups, ui.getGroup(selectedItem));
-					return messageDao.getMessageCountForGroups(messageType, groups, messageHistoryStart, messageHistoryEnd);
+					Group selectedGroup = ui.getGroup(selectedItem);
+					return messageDao.getMessageCount(messageType, getPhoneNumbers(selectedGroup), messageHistoryStart, messageHistoryEnd);
 				} else /* (filterClass == Keyword.class) */ {
 					// Keyword Selected
 					Keyword k = ui.getKeyword(selectedItem);
@@ -344,9 +346,8 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 					return messageDao.getMessagesForMsisdn(messageType, c.getPhoneNumber(), field, order, messageHistoryStart, messageHistoryEnd, startIndex, limit);
 				} else if(filterClass == Group.class) {
 					// A Group was selected
-					List<Group> groups = new ArrayList<Group>();
-					ui.getGroupsRecursivelyDown(groups, ui.getGroup(selectedItem));
-					return messageDao.getMessagesForGroups(messageType, groups, field, order, messageHistoryStart, messageHistoryEnd, startIndex, limit);
+					Group selectedGroup = ui.getGroup(selectedItem);
+					return messageDao.getMessages(messageType, getPhoneNumbers(selectedGroup), messageHistoryStart, messageHistoryEnd);
 				} else /* (filterClass == Keyword.class) */ {
 					// Keyword Selected
 					Keyword k = ui.getKeyword(selectedItem);
@@ -695,8 +696,8 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 						Contact sender = contactDao.getFromMsisdn(message.getSenderMsisdn());
 						Contact receiver = contactDao.getFromMsisdn(message.getRecipientMsisdn());
 						for (Group gg : groups) {
-							if ( (sender != null && sender.isMemberOf(gg)) 
-									|| (receiver != null && receiver.isMemberOf(gg))) {
+							if((sender != null && groupMembershipDao.isMember(gg, sender))
+									|| (receiver != null && groupMembershipDao.isMember(gg, receiver))) {
 								toAdd = true;
 								break;
 							}
@@ -761,5 +762,18 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	/** @see UiGeneratorController#showDateSelecter(Object) */
 	public void showDateSelecter(Object textField) {
 		this.ui.showDateSelecter(textField);
+	}
+	
+//> HELPER METHODS
+	public List<String> getPhoneNumbers(Group group) {
+		return getPhoneNumbers(this.groupMembershipDao.getMembers(group));
+	}
+	
+	public List<String> getPhoneNumbers(List<Contact> contacts) {
+		ArrayList<String> phoneNumbers = new ArrayList<String>(contacts.size());
+		for(Contact c : contacts) {
+			phoneNumbers.add(c.getPhoneNumber());
+		}
+		return phoneNumbers;
 	}
 }

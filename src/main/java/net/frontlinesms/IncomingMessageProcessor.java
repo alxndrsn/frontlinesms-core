@@ -62,6 +62,7 @@ public class IncomingMessageProcessor extends Thread {
 	private final KeywordDao keywordDao;
 	private final KeywordActionDao keywordActionDao;
 	private final GroupDao groupDao;
+	private final GroupMembershipDao groupMembershipDao;
 	private final MessageDao messageFactory;
 	private EmailDao emailDao;
 
@@ -84,6 +85,7 @@ public class IncomingMessageProcessor extends Thread {
 	public IncomingMessageProcessor(FrontlineSMS frontlineSms,
 			ContactDao contactFactory, KeywordDao keywordFactory,
 			KeywordActionDao keywordActionDao, GroupDao groupFactory,
+			GroupMembershipDao groupMembershipDao,
 			MessageDao messageFactory, EmailDao emailFactory,
 			EmailServerHandler emailServerManager) {
 		super("Incoming message processor");
@@ -92,6 +94,7 @@ public class IncomingMessageProcessor extends Thread {
 		this.keywordDao = keywordFactory;
 		this.keywordActionDao = keywordActionDao;
 		this.groupDao = groupFactory;
+		this.groupMembershipDao = groupMembershipDao;
 		this.messageFactory = messageFactory;
 		this.emailDao = emailFactory;
 		this.emailServerManager = emailServerManager;
@@ -112,7 +115,7 @@ public class IncomingMessageProcessor extends Thread {
 	}
 	
 	public void run() {
-		boolean keepAlive = true;
+		this.keepAlive = true;
 		while(keepAlive) {
 			IncomingMessageProcessorQueueItem queueItem = null;
 			LOG.trace("Getting incoming message from queue.");
@@ -269,11 +272,9 @@ public class IncomingMessageProcessor extends Thread {
 			LOG.debug("It is a forward action!");
 			String forwardedMessageText = KeywordAction.KeywordUtils.getForwardText(action, contactDao.getFromMsisdn(incomingSenderMsisdn), incomingSenderMsisdn, incomingMessageText);
 			LOG.debug("Message to forward [" + forwardedMessageText + "]");
-			for (Contact contact : action.getGroup().getDirectMembers()) {
-				if (contact.isActive()) {
-					LOG.debug("Sending to [" + contact.getName() + "]");
-					frontlineSms.sendTextMessage(contact.getPhoneNumber(), KeywordAction.KeywordUtils.personaliseMessage(contact, forwardedMessageText));
-				}
+			for (Contact contact : this.groupMembershipDao.getActiveMembers(action.getGroup())) {
+				LOG.debug("Sending to [" + contact.getName() + "]");
+				frontlineSms.sendTextMessage(contact.getPhoneNumber(), KeywordAction.KeywordUtils.personaliseMessage(contact, forwardedMessageText));
 			}
 			break;
 		case KeywordAction.TYPE_JOIN: {
@@ -289,7 +290,7 @@ public class IncomingMessageProcessor extends Thread {
 				}
 				Group group = action.getGroup();
 				LOG.debug("Adding contact [" + contact.getName() + "], Number [" + contact.getPhoneNumber() + "] to Group [" + group.getName() + "]");
-				boolean contactAdded = group.addDirectMember(contact);
+				boolean contactAdded = this.groupMembershipDao.addMember(group, contact);
 				if(contactAdded) {
 					groupDao.updateGroup(group);
 					if(uiListener != null) {
@@ -310,7 +311,7 @@ public class IncomingMessageProcessor extends Thread {
 			if (contact != null) {
 				Group group = action.getGroup();
 				LOG.debug("Removing contact [" + contact.getName() + "] from Group [" + group.getName() + "]");
-				if(group.removeContact(contact)) {
+				if(this.groupMembershipDao.removeMember(group, contact)) {
 					this.groupDao.updateGroup(group);
 				}
 				if (uiListener != null) {
@@ -427,9 +428,9 @@ public class IncomingMessageProcessor extends Thread {
 					}
 					//Groups
 					for (String group : msg.getToGroups()) {
-						Group g = groupDao.getGroupByName(group);
+						Group g = groupDao.getGroupByPath(group);
 						if (g != null) {
-							for (Contact c : g.getDirectMembers()) {
+							for(Contact c : this.groupMembershipDao.getActiveMembers(g)) {
 								if (c.isActive()) {
 									msg.addNumber(c.getPhoneNumber());
 								}
@@ -479,7 +480,7 @@ public class IncomingMessageProcessor extends Thread {
 			//Forwarding to a group
 			Group fwd = action.getGroup();
 			LOG.debug("Forwarding to group [" + fwd.getName() + "]");
-			for (Contact contact : fwd.getDirectMembers()) {
+			for(Contact contact : this.groupMembershipDao.getActiveMembers(fwd)) {
 				if (contact.isActive()) {
 					if (responseActionType != KeywordAction.EXTERNAL_REPLY_AND_FORWARD 
 							|| !contact.getPhoneNumber().equalsIgnoreCase(incomingSenderMsisdn)) {

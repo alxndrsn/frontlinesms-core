@@ -23,6 +23,7 @@
 	<bean id="emailDao" class="net.frontlinesms.data.repository.hibernate.HibernateEmailDao" parent="sessionFactoryAware"/>
 	<bean id="emailAccountDao" class="net.frontlinesms.data.repository.hibernate.HibernateEmailAccountDao" parent="sessionFactoryAware"/>
 	<bean id="groupDao" class="net.frontlinesms.data.repository.hibernate.HibernateGroupDao" parent="sessionFactoryAware"/>
+	<bean id="groupMembershipDao" class="net.frontlinesms.data.repository.hibernate.HibernateGroupMembershipDao" parent="sessionFactoryAware"/>
 	<bean id="keywordDao" class="net.frontlinesms.data.repository.hibernate.HibernateKeywordDao" parent="sessionFactoryAware"/>
 	<bean id="keywordActionDao" class="net.frontlinesms.data.repository.hibernate.HibernateKeywordActionDao" parent="sessionFactoryAware"/>
 	<bean id="messageDao" class="net.frontlinesms.data.repository.hibernate.HibernateMessageDao" parent="sessionFactoryAware"/>

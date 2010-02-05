@@ -19,6 +19,7 @@ import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.data.repository.ContactDao;
+import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -126,6 +127,8 @@ public class ImportExportUiController implements ThinletUiEventHandler {
 	private final Logger log = Utils.getLogger(this.getClass());
 	/** Data access object for {@link Contact}s */
 	private final ContactDao contactDao;
+	/** Data access object for determining group memberships */
+	private final GroupMembershipDao groupMembershipDao;
 	/** Data access object for {@link Message}s */
 	private final MessageDao messageDao;
 	/** Data access object for {@link Keyword}s */
@@ -151,11 +154,12 @@ public class ImportExportUiController implements ThinletUiEventHandler {
 	 * @param messageDao 
 	 * @param keywordDao 
 	 */
-	public ImportExportUiController(UiGeneratorController uiController, ContactDao contactDao, MessageDao messageDao, KeywordDao keywordDao) {
+	public ImportExportUiController(UiGeneratorController uiController) {
 		this.uiController = uiController;
-		this.contactDao = contactDao;
-		this.messageDao = messageDao;
-		this.keywordDao = keywordDao;
+		this.contactDao = uiController.getFrontlineController().getContactDao();
+		this.groupMembershipDao = uiController.getFrontlineController().getGroupMembershipDao();
+		this.messageDao = uiController.getFrontlineController().getMessageDao();
+		this.keywordDao = uiController.getFrontlineController().getKeywordDao();
 	}
 	
 //> ACCESSORS
@@ -316,7 +320,7 @@ public class ImportExportUiController implements ThinletUiEventHandler {
 		
 		log.debug("Row Format [" + rowFormat + "]");
 		
-		CsvExporter.exportContacts(new File(filename), contacts, rowFormat);
+		CsvExporter.exportContacts(new File(filename), contacts, groupMembershipDao, rowFormat);
 		uiController.setStatus(InternationalisationUtils.getI18NString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
 	}
 	

@@ -3,11 +3,20 @@
  */
 package net.frontlinesms.data.repository.hibernate;
 
+import java.util.Collection;
+
 import net.frontlinesms.junit.HibernateTestCase;
 
 import net.frontlinesms.data.DuplicateKeyException;
+import net.frontlinesms.data.domain.Contact;
+import net.frontlinesms.data.domain.Group;
+import net.frontlinesms.data.domain.Keyword;
+import net.frontlinesms.data.domain.KeywordAction;
+import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;
-import net.frontlinesms.data.repository.ReusableGroupDaoTest;
+import net.frontlinesms.data.repository.GroupMembershipDao;
+import net.frontlinesms.data.repository.KeywordActionDao;
+import net.frontlinesms.data.repository.KeywordDao;
 
 import org.springframework.beans.factory.annotation.Required;
 
@@ -17,36 +26,188 @@ import org.springframework.beans.factory.annotation.Required;
  */
 public class HibernateGroupDaoTest extends HibernateTestCase {
 //> PROPERTIES
-	/** Embedded shared test code from InMemoryDownloadDaoTest - Removes need to CopyAndPaste shared test code */
-	private final ReusableGroupDaoTest test = new ReusableGroupDaoTest() { /* nothing needs to be added */ };
+//	/** Embedded shared test code from InMemoryDownloadDaoTest - Removes need to CopyAndPaste shared test code */
+//	private final ReusableGroupDaoTest test = new ReusableGroupDaoTest() { /* nothing needs to be added */ };
+	
+	private ContactDao contactDao;
+	private GroupDao groupDao;
+	private GroupMembershipDao groupMembershipDao;
+	private KeywordDao keywordDao;
+	private KeywordActionDao keywordActionDao;
 
 //> TEST METHODS
-	/** @see HibernateTestCase#test() */
-	public void test() throws DuplicateKeyException {
-		test.test();
+//	/** @see HibernateTestCase#test() */
+//	public void test() throws DuplicateKeyException {
+//		test.test();
+//	}
+//	/** @see ReusableGroupDaoTest#testCascadingDelete() */
+//	public void testCascadingDelete() throws DuplicateKeyException {
+//		test.testCascadingDelete();
+//	}
+//	/** @see ReusableGroupDaoTest#testChildDelete() */
+//	public void testChildDelete() throws DuplicateKeyException {
+//		test.testChildDelete();
+//	}
+	
+	public void testDelete() throws DuplicateKeyException {
+		Group myGroup = new Group(getRootGroup(), "My Team");
+		groupDao.saveGroup(myGroup);
+		groupDao.deleteGroup(myGroup, false);
 	}
-	/** @see ReusableGroupDaoTest#testCascadingDelete() */
-	public void testCascadingDelete() throws DuplicateKeyException {
-		test.testCascadingDelete();
-	}
-	/** @see ReusableGroupDaoTest#testChildDelete() */
+	
+	/** Check that deleting a group's child is successful, and does not affect the group itself. 
+	 * @throws DuplicateKeyException */
 	public void testChildDelete() throws DuplicateKeyException {
-		test.testChildDelete();
+		Group parent = new Group(getRootGroup(), "parent");
+		groupDao.saveGroup(parent);
+		Group child = new Group(parent, "child");
+		groupDao.saveGroup(child);
+		
+		Collection<Group> fetchedChildren = groupDao.getChildGroups(parent);
+		assertEquals(1, fetchedChildren.size());
+		assertEquals(child, fetchedChildren.toArray(new Group[0])[0]);
+
+		// Delete the child
+		groupDao.deleteGroup(child, false);
+
+		// Confirm that the child has been removed
+		fetchedChildren = groupDao.getChildGroups(parent);
+		assertEquals(0, fetchedChildren.size());
+		Group fetchedChild = groupDao.getGroupByPath("/parent/child");
+		assertNull(fetchedChild);
+		
+		// Confirm that the original group is still present
+		assertEquals(parent, groupDao.getGroupByPath("/parent"));
 	}
 
+	/** Check that deleting a group's parent has the expected effect on the child groups 
+	 * @throws DuplicateKeyException */
+	public void testParentDelete() throws DuplicateKeyException {
+		Group parent = new Group(getRootGroup(), "parent");
+		groupDao.saveGroup(parent);
+		Group child = new Group(parent, "child");
+		groupDao.saveGroup(child);
+		
+		// Confirm that the parent and child are both present in the database
+		Group fetchedParent = groupDao.getGroupByPath("/parent");
+		assertEquals(parent, fetchedParent);
+		Group fetchedChild = groupDao.getGroupByPath("/parent/child");
+		assertEquals(child, fetchedChild);
+		
+		// Delete the parent group
+		groupDao.deleteGroup(parent, false);
+
+		// Confirm that the parent and child are both deleted from the database
+		assertNull(groupDao.getGroupByPath("/parent"));
+		assertNull(groupDao.getGroupByPath("/parent/child"));
+	}
+	
+	/** Check that 2 lists cannot be created with the same path 
+	 * @throws DuplicateKeyException */
+	public void testDuplicateKeys() throws DuplicateKeyException {
+		// Test 2 groups at root level
+		Group group1 = new Group(getRootGroup(), "name");
+		groupDao.saveGroup(group1);
+		Group group2 = new Group(getRootGroup(), "name");
+		try {
+			groupDao.saveGroup(group2);
+			fail("Second attempt to create identical group should have failed.");
+		} catch(DuplicateKeyException ex) {/* expected */}
+		
+		// Test 2 child groups
+		Group child1 = new Group(group1, "child");
+		groupDao.saveGroup(child1);
+		Group child2 = new Group(group1, "child");
+		try {
+			groupDao.saveGroup(child2);
+			fail("Second attempt to create identical group should have failed.");
+		} catch(DuplicateKeyException ex) {/* expected */}
+	}
+	
+	/**
+	 * Check that saving and deleting a group with special SQL characters in its name
+	 * functions correctly.  This should verify that our HQL is not open to SQL Injection
+	 * issues.
+	 * @throws DuplicateKeyException
+	 */
+	public void testSqlInjection() throws DuplicateKeyException {
+		Group myGroup = new Group(getRootGroup(), "Dan's Team");
+		groupDao.saveGroup(myGroup);
+		groupDao.deleteGroup(myGroup, false);
+	}
+	
+	/**
+	 * Test that deleting a group that has an associated {@link KeywordAction} is successful.
+	 * @throws DuplicateKeyException 
+	 */
+	public void testDeleteWithKeywordAction() throws DuplicateKeyException {
+		Group myGroup = new Group(getRootGroup(), "My Group");
+		groupDao.saveGroup(myGroup);
+		
+		Keyword keyword = new Keyword("key", "A test keyword");
+		keywordDao.saveKeyword(keyword);
+		
+		KeywordAction action = KeywordAction.createGroupJoinAction(keyword, myGroup, 0, Long.MAX_VALUE);
+		keywordActionDao.saveKeywordAction(action);
+		
+		groupDao.deleteGroup(myGroup, false);
+	}
+	
+	/**
+	 * Test deleting a group which has members.
+	 * @throws DuplicateKeyException 
+	 */
+	public void testDeleteWithMembers() throws DuplicateKeyException {
+		Group myGroup = new Group(getRootGroup(), "My Group");
+		groupDao.saveGroup(myGroup);
+		
+		Contact contact = new Contact("Alice", "123465789", null, null, null, true);
+		contactDao.saveContact(contact);
+		
+		groupMembershipDao.addMember(myGroup, contact);
+		
+		groupDao.deleteGroup(myGroup, false);
+	}
+	
 //> TEST SETUP/TEARDOWN
-	/** @see net.frontlinesms.junit.HibernateTestCase#doTearDown() */
+
 	@Override
 	public void doTearDown() throws Exception {
-		this.test.tearDown();
+	}
+
+	@Override
+	public void test() throws Throwable {
+		// FIXME this method should not be necessary
 	}
 	
 //> ACCESSORS
 	/** @param d The DAO to use for the test. */
 	@Required
-	public void setGroupDao(GroupDao d)
-	{
-		// we can just set the DAO once in the test
-		test.setDao(d);
+	public void setGroupDao(GroupDao d) {
+		this.groupDao = d;
+	}
+
+	@Required
+	public void setContactDao(ContactDao contactDao) {
+		this.contactDao = contactDao;
+	}
+
+	@Required
+	public void setGroupMembershipDao(GroupMembershipDao groupMembershipDao) {
+		this.groupMembershipDao = groupMembershipDao;
+	}
+
+	@Required
+	public void setKeywordActionDao(KeywordActionDao keywordActionDao) {
+		this.keywordActionDao = keywordActionDao;
+	}
+
+	@Required
+	public void setKeywordDao(KeywordDao keywordDao) {
+		this.keywordDao = keywordDao;
+	}
+	
+	private Group getRootGroup() {
+		return new Group(null, null);
 	}
 }

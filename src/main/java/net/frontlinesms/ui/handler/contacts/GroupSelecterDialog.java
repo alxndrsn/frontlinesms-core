@@ -25,23 +25,26 @@ public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSe
 	 * Init with default title
 	 * @param rootGroups
 	 */
-	public void init(Group...rootGroups) {
-		init(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_GROUP), rootGroups);
+	public void init(Group rootGroup) {
+		init(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_GROUP), rootGroup);
 	}
 	
-	public void init(String title, Group...rootGroups) {
+	public void init(String title, Group rootGroup) {
 		// TODO init
 		dialogComponent = ui.loadComponentFromFile(XML_LAYOUT_GROUP_SELECTER_DIALOG, this);
 		this.setTitle(title);
 		
 		this.selecter = new GroupSelecterPanel(ui, this);
-		selecter.init(rootGroups);
+		selecter.init(rootGroup);
 		selecter.refresh();
 		
 		Object selecterPanel = selecter.getPanelComponent();
 		ui.setColspan(selecterPanel, 2);
 		ui.setWeight(selecterPanel, 1, 1);
 		ui.add(dialogComponent, selecterPanel, 0);
+		
+		// Disable the DONE button until the user has selected something
+		setDoneButtonEnabled(false);
 	}
 
 	private void setTitle(String title) {
@@ -53,9 +56,10 @@ public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSe
 	}
 
 	public void groupSelectionChanged(Group selectedGroup) {
-		// ignore this
+		// Once a group other than the root is selected, we want to allow the DONE button to be clicked
+		setDoneButtonEnabled(!selectedGroup.isRoot());
 	}
-	
+
 //> UI EVENT METHODS
 	public void done() {
 		removeDialog();
@@ -64,5 +68,11 @@ public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSe
 	
 	public void removeDialog() {
 		ui.removeDialog(this.dialogComponent);
+	}
+	
+//> UI HELPER METHODS
+	/** Enable or disable the DONE button */
+	private void setDoneButtonEnabled(boolean enabled) {
+		ui.setEnabled(ui.find(this.dialogComponent, "btGroupSelecterDone"), enabled);
 	}
 }

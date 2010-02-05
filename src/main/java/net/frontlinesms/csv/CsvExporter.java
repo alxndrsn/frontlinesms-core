@@ -194,7 +194,7 @@ public class CsvExporter {
 	 * @param contactFormat The desired contact format.
 	 * @throws IOException
 	 */
-	public static void exportContacts(File exportFile, List<? extends Contact> contacts, CsvRowFormat contactFormat) throws IOException {
+	public static void exportContacts(File exportFile, List<? extends Contact> contacts, GroupMembershipDao groupMembershipDao, CsvRowFormat contactFormat) throws IOException {
 		LOG.trace("ENTER");
 		LOG.debug("Contact format [" + contactFormat + "]");
 		LOG.debug("Filename [" + exportFile.getAbsolutePath() + "]");
@@ -219,7 +219,7 @@ public class CsvExporter {
 					CsvUtils.MARKER_CONTACT_EMAIL, contact.getEmailAddress(),
 					CsvUtils.MARKER_CONTACT_STATUS, Boolean.toString(contact.isActive()),
 					CsvUtils.MARKER_CONTACT_NOTES, contact.getNotes(),
-					CsvUtils.MARKER_CONTACT_GROUPS, Utils.contactGroupsAsString(contact, GROUPS_DELIMITER));
+					CsvUtils.MARKER_CONTACT_GROUPS, Utils.contactGroupsAsString(groupMembershipDao.getGroups(contact), GROUPS_DELIMITER));
 			}
 		} finally {
 			if(out!= null) out.close();

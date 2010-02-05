@@ -10,7 +10,6 @@ import static net.frontlinesms.FrontlineSMSConstants.COMMON_GROUP;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_CONTACTS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUPS_AND_CONTACTS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUP_ALREADY_EXISTS;
-import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_IMPOSSIBLE_TO_CREATE_A_GROUP_HERE;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_REMOVING_CONTACTS;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BUTTON_YES;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_MANAGER_CONTACT_FILTER;
@@ -27,7 +26,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_SEND_
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_VIEW_CONTACT_BUTTON;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -37,6 +35,7 @@ import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;
+import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BaseTabHandler;
@@ -71,6 +70,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	private final GroupDao groupDao;
 	/** Data access object for {@link Contact}s */
 	private final ContactDao contactDao;
+	private final GroupMembershipDao groupMembershipDao;
 	
 	
 //> CACHED THINLET UI COMPONENTS
@@ -91,10 +91,11 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 * @param contactDao {@link #contactDao}
 	 * @param groupDao {@link #groupDao}
 	 */
-	public ContactsTabHandler(UiGeneratorController ui, ContactDao contactDao, GroupDao groupDao) {
+	public ContactsTabHandler(UiGeneratorController ui) {
 		super(ui);
-		this.contactDao = contactDao;
-		this.groupDao = groupDao;
+		this.contactDao = ui.getFrontlineController().getContactDao();
+		this.groupDao = ui.getFrontlineController().getGroupDao();
+		this.groupMembershipDao = ui.getFrontlineController().getGroupMembershipDao();
 		this.groupSelecter = new GroupSelecterPanel(ui, this);
 	}
 	
@@ -160,7 +161,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		if(selectedGroup == null) {
 			return PagedListDetails.EMPTY;
 		} else {
-			int totalItemCount = selectedGroup.getAllMembersCount();
+			int totalItemCount = groupMembershipDao.getMemberCount(selectedGroup);
 			
 			// TODO fix filtering
 			
@@ -171,7 +172,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	//		List<Contact> contacts = (this.contactNameFilter == null || this.contactNameFilter.length() == 0) 
 	//				? this.contactDao.getAllContacts(startIndex, limit)
 	//				: this.contactDao.getContactsFilteredByName(this.contactNameFilter, startIndex, limit);
-			List<Contact> contacts = selectedGroup.getAllMembers(startIndex, limit);
+			List<Contact> contacts = groupMembershipDao.getMembers(selectedGroup, startIndex, limit);
 			Object[] listItems = toThinletComponents(contacts);
 			
 			return new PagedListDetails(totalItemCount, listItems);
@@ -192,7 +193,8 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	/** Show editor for new contact. */
 	public void showNewContactDialog() {
 		ContactEditor editor = new ContactEditor(ui, this);
-		editor.show(this.groupSelecter.getSelectedGroup());
+		Group selectedGroup = this.groupSelecter.getSelectedGroup();
+		editor.show(selectedGroup);
 	}
 	
 	/**
@@ -272,7 +274,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			if (menuRemove != null) {
 				Contact c = this.ui.getContact(this.ui.getSelectedItem(list));
 				this.ui.removeAll(menuRemove);
-				Collection<Group> groups = c.getGroups();
+				List<Group> groups = this.groupMembershipDao.getGroups(c);
 				for (Group g : groups) {
 					Object menuItem = Thinlet.create(Thinlet.MENUITEM);
 					this.ui.setText(menuItem, g.getName());
@@ -301,8 +303,9 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 					this.ui.setVisible(o, !this.ui.isDefaultGroup(g));
 				}
 				
+				// FIXME this is superfluous - always sets vis to true
 				if (COMPONENT_NEW_GROUP.equals(name)) {
-					this.ui.setVisible(o, g!=this.ui.getUnnamedContacts() && g!=this.ui.getUngroupedContacts());
+					this.ui.setVisible(o, true);
 				}
 			}
 		}
@@ -359,7 +362,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			if (this.ui.isAttachment(component, Contact.class)) {
 				Contact contact = this.ui.getContact(component);
 				LOG.debug("Adding Contact [" + contact.getName() + "] to [" + destination + "]");
-				if(destination.addDirectMember(contact)) {
+				if(this.groupMembershipDao.addMember(destination, contact)) {
 					groupDao.updateGroup(destination);
 				}
 			}
@@ -393,13 +396,14 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 				LOG.debug("Removing group [" + selectedGroup.getName() + "] from database");
 				groupDao.deleteGroup(selectedGroup, removeContactsAlso);
 			} else {
-				if (removeContactsAlso) {
-					LOG.debug("Group not destroyable, removing contacts...");
-					for (Contact c : selectedGroup.getDirectMembers()) {
-						LOG.debug("Removing contact [" + c.getName() + "] from database");
-						contactDao.deleteContact(c);
-					}
-				}
+				throw new IllegalStateException();
+//				if (removeContactsAlso) {
+//					LOG.debug("Group not destroyable, removing contacts...");
+//					for (Contact c : selectedGroup.getDirectMembers()) {
+//						LOG.debug("Removing contact [" + c.getName() + "] from database");
+//						contactDao.deleteContact(c);
+//					}
+//				}
 			}
 		}
 		
@@ -417,10 +421,9 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	public void removeFromGroup(Object selectedGroup) {
 		Group g = this.ui.getGroup(selectedGroup);
 		Contact c = this.ui.getContact(this.ui.getSelectedItem(contactListComponent));
-		if(g.removeContact(c)) {
-			this.groupDao.updateGroup(g);
+		if(this.groupMembershipDao.removeMember(g, c)) {
+			this.refresh();
 		}
-		this.refresh();
 	}
 
 	/** Removes the selected contacts of the supplied contact list component. */
@@ -465,14 +468,10 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			String parentGroupName = selectedParentGroup == null ? "null" : selectedParentGroup.getName();
 			LOG.debug("Parent group [" + parentGroupName + "]");
 		}
-		if(selectedParentGroup == this.ui.getRootGroup()) {
-			selectedParentGroup = null;
+		if(selectedParentGroup == null) {
+			selectedParentGroup = ui.getRootGroup();
 		}
-		if (selectedParentGroup == this.ui.getUnnamedContacts() || selectedParentGroup == this.ui.getUngroupedContacts()) {
-			this.ui.alert(InternationalisationUtils.getI18NString(MESSAGE_IMPOSSIBLE_TO_CREATE_A_GROUP_HERE));
-			if (dialog != null) this.ui.remove(dialog);
-			return;
-		}
+
 		LOG.debug("Group Name [" + newGroupName + "]");
 		try {
 			if(LOG.isDebugEnabled()) LOG.debug("Creating group with name: " + newGroupName + " and parent: " + selectedParentGroup);

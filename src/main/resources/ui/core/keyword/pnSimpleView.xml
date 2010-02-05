@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <panel bottom="5" columns="1" gap="10" left="5" name="pnKeywordActionsSimple" right="5" top="5" weightx="1" weighty="1">
-    <panel icon="/icons/keywordAction.png" text="i18n.common.keyword.actions" border="true" bottom="5" columns="2" gap="20" left="5" right="5" top="5" weightx="1">
+    <panel icon="/icons/keywordAction.png" text="i18n.common.keyword.actions" border="true" bottom="5" columns="3" gap="20" left="5" right="5" top="5" weightx="1">
         <label icon="/icons/keyword.png" text="i18n.sentence.all.incoming.messages"/>
-        <textfield name="tfKeyword"/>
+        <textfield name="tfKeyword" colspan="2"/>
+        
         <checkbox icon="/icons/sms_autoReply.png" name="cbAutoReply" text="i18n.sentence.send.this.message.auto.reply" valign="top"/>
-        <textarea name="tfAutoReply" weightx="1" action="autoReplyChanged(this.text, cbAutoReply)"/>
-        <checkbox icon="/icons/group_join.png" name="cbJoinGroup" text="i18n.sentence.add.sender.to.group"/>
-        <combobox editable="false" name="cbGroupsToJoin"/>
-        <checkbox icon="/icons/group_leave.png" name="cbLeaveGroup" text="i18n.sentence.remove.sender.from.group"/>
-        <combobox editable="false" name="cbGroupsToLeave"/>
+        <textarea name="tfAutoReply" weightx="1" action="autoReplyChanged(this.text, cbAutoReply)" colspan="2"/>
+        
+        <label icon="/icons/group_join.png" text="i18n.sentence.add.sender.to.group"/>
+        <label name="lbJoinGroup" text="(none)" />
+       	<button name="btJoinGroupSelect" text="Select" type="link" action="selectJoinGroup" halign="left"/>
+        <button name="btJoinGroupRemove" text="Remove" type="link" action="removeJoinGroup" halign="left" visible="false"/>
+        
+        <label icon="/icons/group_leave.png" text="i18n.sentence.remove.sender.from.group"/>
+        <label name="lbLeaveGroup" text="(none)" />
+        <button name="btLeaveGroupSelect" text="Select" type="link" action="selectLeaveGroup" halign="left"/>
+        <button name="btLeaveGroupRemove" text="Remove" type="link" action="removeLeaveGroup" halign="left" visible="false"/>
+        
         <panel colspan="3" gap="5" halign="right">
             <button action="keywordTab_doSave(pnKeywordActionsSimple)" icon="/icons/tick.png" name="btSave" text="i18n.action.save"/>
             <button action="keywordTab_doClear(pnKeywordActionsSimple)" icon="/icons/clear.png" name="btClear" text="i18n.action.clear"/>

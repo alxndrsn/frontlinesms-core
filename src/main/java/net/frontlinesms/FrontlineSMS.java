@@ -89,6 +89,8 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	private KeywordDao keywordDao;
 	/** Data Access Object for {@link Group}s */
 	private GroupDao groupDao;
+	/** Data Access Object for {@link Group}s */
+	private GroupMembershipDao groupMembershipDao;
 	/** Data Access Object for {@link Contact}s */
 	private ContactDao contactDao;
 	/** Data Access Object for {@link Message}s */
@@ -158,6 +160,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		
 		LOG.info("Getting DAOs from application context...");
 		groupDao = (GroupDao) applicationContext.getBean("groupDao");
+		groupMembershipDao = (GroupMembershipDao) applicationContext.getBean("groupMembershipDao");
 		contactDao = (ContactDao) applicationContext.getBean("contactDao");
 		keywordDao = (KeywordDao) applicationContext.getBean("keywordDao");
 		keywordActionDao = (KeywordActionDao) applicationContext.getBean("keywordActionDao");
@@ -194,7 +197,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 
 		LOG.debug("Initialising incoming message processor...");
 		// Initialise the incoming message processor
-		incomingMessageProcessor = new IncomingMessageProcessor(this, contactDao, keywordDao, keywordActionDao, groupDao, messageDao, emailDao, emailServerManager);
+		incomingMessageProcessor = new IncomingMessageProcessor(this, contactDao, keywordDao, keywordActionDao, groupDao, groupMembershipDao, messageDao, emailDao, emailServerManager);
 		incomingMessageProcessor.start();
 		
 		LOG.debug("Starting Phone Manager...");
@@ -424,6 +427,10 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	/** @return {@link #groupDao} */
 	public GroupDao getGroupDao() {
 		return this.groupDao;
+	}
+	/** @return {@link #groupMembershipDao} */
+	public GroupMembershipDao getGroupMembershipDao() {
+		return this.groupMembershipDao;
 	}
 	/** @return {@link #messageDao} */
 	public MessageDao getMessageDao() {

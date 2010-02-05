@@ -21,6 +21,7 @@ package net.frontlinesms;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.TreeSet;
 
 import javax.swing.UIManager;
 
@@ -31,6 +32,7 @@ import net.frontlinesms.ui.handler.core.DatabaseConnectionFailedDialog;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.LanguageBundle;
 
+import org.apache.commons.collections.list.TreeList;
 import org.apache.log4j.Logger;
 
 import thinlet.Thinlet;
@@ -88,6 +90,25 @@ public class DesktopLauncher {
 				// Auto-detect phones.
 				new UiGeneratorController(frontline, true);
 			}
+			
+//			int count = 100;
+//			long tot = 0;
+//			long min = Long.MAX_VALUE;
+//			long max = 0;
+//			TreeList times = new TreeList(); 
+//			for(int i=0; i<count; ++i) {
+//				long t = timeGetAllContacts(frontline);
+//				min = Math.min(min, t);
+//				max = Math.max(max, t);
+//				times.add(t);
+//				tot += t;
+//			}
+//			System.out.println("Total  : " + tot);
+//			System.out.println("Average: " + (tot*1.0/count));
+//			System.out.println("Min    : " + min);
+//			System.out.println("Max    : " + max);
+//			System.out.println("<25%   : " + times.get(25));
+//			System.out.println(">75%   : " + times.get(75));
 		} catch(Throwable t) {
 			if (frontline != null) 
 				frontline.destroy();
@@ -96,6 +117,18 @@ public class DesktopLauncher {
 			// so that they can give us some feedback :)
 			ErrorUtils.showErrorDialog("Fatal error starting FrontlineSMS!", "A problem ocurred during FrontlineSMS startup.", t, true);
 		} 
+	}
+	
+	private static long timeGetAllContacts(FrontlineSMS frontline) {
+		long start = System.currentTimeMillis();
+		frontline.getContactDao().getAllContacts(0, 100);
+		return System.currentTimeMillis() - start;
+	}
+
+	private static long timeGetAllGroups(FrontlineSMS frontline) {
+		long start = System.currentTimeMillis();
+		frontline.getGroupDao().getAllGroups();
+		return System.currentTimeMillis() - start;
 	}
 
 	private static FrontlineSMS initFrontline() throws Throwable {
