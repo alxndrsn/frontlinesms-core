@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<dialog closable="true" close="removeDialog" bottom="4" gap="8" icon="/icons/status_attention.png" left="4" modal="true" right="4" top="4" columns="2" resizable="true" halign="center">
-    <button action="done" icon="/icons/tick.png" text="i18n.action.ok" halign="center"/>
-    <button action="removeDialog" icon="/icons/cross.png" text="i18n.action.cancel" halign="center"/>
+<dialog closable="true" close="removeDialog" bottom="4" gap="8" icon="/icons/status_attention.png" left="4" modal="true" right="4" top="4" columns="1" resizable="true" halign="center" width="320" height="320">
+	<panel halign="center" gap="8">
+	    <button action="done" icon="/icons/tick.png" text="i18n.action.ok"/>
+	    <button action="removeDialog" icon="/icons/cross.png" text="i18n.action.cancel"/>
+    </panel>
 </dialog>
