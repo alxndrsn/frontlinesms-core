@@ -42,6 +42,9 @@ public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSe
 		ui.setColspan(selecterPanel, 2);
 		ui.setWeight(selecterPanel, 1, 1);
 		ui.add(dialogComponent, selecterPanel, 0);
+		
+		// Disable the DONE button until the user has selected something
+		setDoneButtonEnabled(false);
 	}
 
 	private void setTitle(String title) {
@@ -53,9 +56,10 @@ public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSe
 	}
 
 	public void groupSelectionChanged(Group selectedGroup) {
-		// ignore this
+		// Once a group is selected, we want to allow the DONE button to be clicked
+		setDoneButtonEnabled(true);
 	}
-	
+
 //> UI EVENT METHODS
 	public void done() {
 		removeDialog();
@@ -64,5 +68,11 @@ public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSe
 	
 	public void removeDialog() {
 		ui.removeDialog(this.dialogComponent);
+	}
+	
+//> UI HELPER METHODS
+	/** Enable or disable the DONE button */
+	private void setDoneButtonEnabled(boolean enabled) {
+		ui.setEnabled(ui.find(this.dialogComponent, "btGroupSelecterDone"), enabled);
 	}
 }
