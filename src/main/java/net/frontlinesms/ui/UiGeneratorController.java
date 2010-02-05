@@ -128,8 +128,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	private final GroupMembershipDao groupMembershipDao;
 	/** Data Access Object for {@link Message}s */
 	private final MessageDao messageFactory;
-	/** Data Access Object for {@link Keyword}s */
-	private final KeywordDao keywordDao;
 	/** Data Access Object for {@link SmsModemSettings}s */
 	private final SmsModemSettingsDao phoneDetailsManager;
 
@@ -191,7 +189,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		this.groupDao = frontlineController.getGroupDao();
 		this.groupMembershipDao = frontlineController.getGroupMembershipDao();
 		this.messageFactory = frontlineController.getMessageDao();
-		this.keywordDao = frontlineController.getKeywordDao();
 		this.phoneDetailsManager = frontlineController.getSmsModemSettingsDao();
 		this.pluginManager = frontlineController.getPluginManager();
 		
@@ -540,7 +537,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param type The desired type
 	 */
 	public void showExportWizard(Object list, String type){
-		new ImportExportUiController(this, this.contactDao, this.messageFactory, this.keywordDao).showWizard(true, list, type);
+		new ImportExportUiController(this).showWizard(true, list, type);
 	}
 	
 	/**
@@ -548,7 +545,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param type The desired type
 	 */
 	public void showExportWizard(String type){
-		new ImportExportUiController(this, this.contactDao, this.messageFactory, this.keywordDao).showWizard(true, type);
+		new ImportExportUiController(this).showWizard(true, type);
 	}
 	
 	/**
@@ -557,7 +554,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param type The desired type
 	 */
 	public void showImportWizard(Object list, String type){
-		new ImportExportUiController(this, this.contactDao, this.messageFactory, this.keywordDao).showWizard(false, list, type);
+		new ImportExportUiController(this).showWizard(false, list, type);
 	}
 	
 	/**
@@ -565,7 +562,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param type The desired type (0 for Contacts, 1 for Messages and 2 for Keywords)
 	 */
 	public void showImportWizard(String type){
-		new ImportExportUiController(this, this.contactDao, this.messageFactory, this.keywordDao).showWizard(false, type);
+		new ImportExportUiController(this).showWizard(false, type);
 	}
 
 	/**
