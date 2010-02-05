@@ -66,12 +66,10 @@
 		<resources>
 			<resource>
 				<directory>src/filtered/resources</directory>
-				<targetPath></targetPath>
 				<filtering>true</filtering>
 			</resource>
 			<resource>
 				<directory>src/main/resources</directory>
-				<targetPath></targetPath>
 				<filtering>false</filtering>
 			</resource>
 		</resources>
