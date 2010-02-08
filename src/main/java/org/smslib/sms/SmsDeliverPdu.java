@@ -137,7 +137,7 @@ public class SmsDeliverPdu implements PduComponent {
 		try {
 			return getFromStream(new PduInputStream(hexEncodedPdu));
 		} catch (IOException ex) {
-			throw new PduDecodeException(ex);
+			throw new PduDecodeException(ex, hexEncodedPdu);
 		}
 	}
 	
