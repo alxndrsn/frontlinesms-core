@@ -4,11 +4,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import static org.mockito.Mockito.*;
  
 import thinlet.Thinlet;
 
 import net.frontlinesms.data.domain.Contact;
+import net.frontlinesms.data.domain.Group;
+import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.junit.BaseTestCase;
 import net.frontlinesms.ui.i18n.ClasspathLanguageBundle;
 import net.frontlinesms.ui.i18n.LanguageBundle;
@@ -44,7 +49,7 @@ public class CsvExportTests extends BaseTestCase {
 		// Export a number of contacts to a file, and check that the generated file is as expected.
 		ArrayList<Contact> contacts = new ArrayList<Contact>();
 		contacts.add(new Contact("Test Number", "000", "", "", "", true));
-		contacts.add(new Contact("شئهة", "07890123456", "0987654321", "azim@mo.jo", "", false));
+		contacts.add(new Contact("\u0634\u0626\u0647\u0629", "07890123456", "0987654321", "azim@mo.jo", "", false));
 		contacts.add(new Contact("Sly Eddie", "01234567890", "554466221133", "sly.eddie@ramprakash.co.uk", "Sly Eddie is a sneaky chap.", true));
 		contacts.add(new Contact("Richard E. Grant", "+44852774", "+1800-RICH-ARDE", "", "\"What a piece of work is a man!\"", true));
 
@@ -53,7 +58,13 @@ public class CsvExportTests extends BaseTestCase {
 		Thinlet.DEFAULT_ENGLISH_BUNDLE = englishBundle.getProperties();
 		
 		File generatedFile = super.getOutputFile(this.getClass().getSimpleName() + ".contacts.csv");
-		CsvExporter.exportContacts(generatedFile, contacts, getContactExportRowFormat());
+		
+		// Make a mock groupMembershipDao which will return NO GROUPS for any contact
+		GroupMembershipDao emptyGroupMembershipDao = mock(GroupMembershipDao.class);
+		List<Group> emptyGroupList = Collections.emptyList();
+		when(emptyGroupMembershipDao.getGroups(any(Contact.class))).thenReturn(emptyGroupList);
+		
+		CsvExporter.exportContacts(generatedFile, contacts, emptyGroupMembershipDao, getContactExportRowFormat());
 		assertEquals("Generated CSV file did not contain the expected values.", this.getClass().getResourceAsStream(this.getClass().getSimpleName() + ".contacts.csv"), new FileInputStream(generatedFile));
 	}
 	
