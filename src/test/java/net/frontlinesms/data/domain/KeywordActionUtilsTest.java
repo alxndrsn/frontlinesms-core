@@ -139,6 +139,10 @@ public class KeywordActionUtilsTest extends BaseTestCase {
 	 */
 	private static KeywordAction createAction(String keyword) {
 		Keyword kw = new Keyword(keyword, "a test keyword");
-		return KeywordAction.createGroupLeaveAction(kw, new Group(null, "a test group"), -1, -1);
+		return KeywordAction.createGroupLeaveAction(kw, new Group(getRootGroup(), "a test group"), -1, -1);
+	}
+
+	private static Group getRootGroup() {
+		return new Group(null, null);
 	}
 }
