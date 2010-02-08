@@ -22,14 +22,11 @@ package net.frontlinesms.ui;
 import java.awt.Font;
 import java.awt.Frame;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.frontlinesms.AppProperties;
 import net.frontlinesms.FrontlineSMS;
-import net.frontlinesms.arcane.ArcaneDataImporter;
-import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.ui.i18n.FileLanguageBundle;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.LanguageBundle;
@@ -53,19 +50,8 @@ public class FirstTimeWizard extends FrontlineUI {
 //> i18N KEYS
 	/** [i18n key] The title of the {@link FirstTimeWizard}'s {@link Frame}. */
 	public static final String I18N_FIRST_TIME_WIZARD_TITLE = "common.first.time.wizard";
-	public static final String MESSAGE_IMPORT_FAILED = "message.import.data.failed";
-	public static final String MESSAGE_IMPORTING_RECEIVED_MESSAGES = "message.importing.received.messages";
-	public static final String MESSAGE_IMPORTING_SENT_MESSAGES = "message.importing.sent.messages";
-	public static final String MESSAGE_IMPORTING_KEYWORDACTIONS = "message.importing.keywordactions";
-	public static final String MESSAGE_IMPORTING_CONTACTS_GROUPS = "message.importing.contacts.groups";
 	
 //> UI COMPONENT NAMES
-	private static final String COMPONENT_PN_BOTTOM = "pnBottom";
-	private static final String COMPONENT_PN_INFO = "pnInfo";
-	private static final String COMPONENT_LB_WAIT = "lbWait";
-	private static final String COMPONENT_STATUS = "status";
-	/** [UI Component name] The progress bar which indicates how far through importing data we got */
-	private static final String COMPONENT_PROGRESS = "progress";
 	private static final String COMPONENT_LANGUAGES_LIST = "languagesList";
 	
 //> UI LAYOUT FILE PATHS
@@ -138,66 +124,6 @@ public class FirstTimeWizard extends FrontlineUI {
 		showPage(currentPageIndex - 1);
 	}
 	
-	public void startImport() {
-		Object progress = find(currentPage, COMPONENT_PROGRESS);
-		Object status = find(currentPage, COMPONENT_STATUS);
-		setInteger(progress, VALUE, 0);
-		setBoolean(progress, VISIBLE, true);
-		setBoolean(status, VISIBLE, true);
-		setBoolean(find(currentPage, COMPONENT_LB_WAIT), VISIBLE, true);
-		
-		deactivate(find(currentPage, COMPONENT_PN_INFO));
-		deactivate(find(currentPage, COMPONENT_PN_BOTTOM));
-	}
-	
-	public void finishImport() {
-		Object progress = find(currentPage, COMPONENT_PROGRESS);
-		Object status = find(currentPage, COMPONENT_STATUS);
-		setVisible(progress, false);
-		setVisible(status, false);
-		setVisible(find(currentPage, COMPONENT_LB_WAIT), false);
-		
-		activate(find(currentPage, COMPONENT_PN_INFO));
-		activate(find(currentPage, COMPONENT_PN_BOTTOM));
-	}
-	
-	public void setImportStatus(String key) {
-		Object progress = find(currentPage, COMPONENT_STATUS);
-		setText(progress, InternationalisationUtils.getI18NString(key));
-	}
-	
-	public void selectedImportData(boolean isImport, final String path) {
-		if (isImport) {
-			new Thread(){
-				public void run() {
-					startImport();
-					try {
-						incProgress();
-						setImportStatus(MESSAGE_IMPORTING_CONTACTS_GROUPS);
-						ArcaneDataImporter importer = new ArcaneDataImporter(frontline, path);
-						importer.importContactsAndGroups();
-						incProgress();
-						setImportStatus(MESSAGE_IMPORTING_KEYWORDACTIONS);
-						importer.importKeywordActions();
-						incProgress();
-						setImportStatus(MESSAGE_IMPORTING_SENT_MESSAGES);
-						importer.importSentMessages();
-						incProgress();
-						setImportStatus(MESSAGE_IMPORTING_RECEIVED_MESSAGES);
-						importer.importReceivedMessages();
-						finishImport();
-						gotoNextPage();
-					} catch(IOException ex) {
-						finishImport();
-						alert(InternationalisationUtils.getI18NString(MESSAGE_IMPORT_FAILED));
-					} 
-				}
-			}.start();
-		} else {
-			gotoNextPage();
-		}
-	}
-	
 	/**
 	 * Start the FrontlineSMS user interface. 
 	 * @throws Throwable if {@link Throwable} was thrown by {@link UiGeneratorController}'s constructor.
@@ -209,12 +135,6 @@ public class FirstTimeWizard extends FrontlineUI {
 		
 		frameLauncher.dispose();
 		new UiGeneratorController(frontline, true);
-	}
-	
-	/** Increment the import progress bar */
-	public void incProgress() {
-		Object progress = find(currentPage, COMPONENT_PROGRESS);
-		setInteger(progress, VALUE, getInteger(progress, VALUE) + 1);
 	}
 
 //> INSTANCE HELPER METHODS
