@@ -14,6 +14,7 @@ src/main/resources/resources.zip
 
 # Temporary working directory
 temp/
+test_temp/
 
 # Ignore log files in the root directory
 *.log
