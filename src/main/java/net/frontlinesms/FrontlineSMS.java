@@ -197,7 +197,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 
 		LOG.debug("Initialising incoming message processor...");
 		// Initialise the incoming message processor
-		incomingMessageProcessor = new IncomingMessageProcessor(this, contactDao, keywordDao, keywordActionDao, groupDao, groupMembershipDao, messageDao, emailDao, emailServerManager);
+		incomingMessageProcessor = new IncomingMessageProcessor(this);
 		incomingMessageProcessor.start();
 		
 		LOG.debug("Starting Phone Manager...");
@@ -457,7 +457,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		return emailDao;
 	}
 	/** @return {@link #emailServerManager} */
-	public EmailServerHandler getEmailServerManager() {
+	public EmailServerHandler getEmailServerHandler() {
 		return emailServerManager;
 	}
 	/** @return {@link #pluginManager} */

@@ -57,47 +57,33 @@ public class IncomingMessageProcessor extends Thread {
 	private final BlockingQueue<IncomingMessageProcessorQueueItem> incomingMessageQueue = new LinkedBlockingQueue<IncomingMessageProcessorQueueItem>();
 	
 //> DATA ACCESS OBJECTS
-	private final FrontlineSMS frontlineSms;
+	private final FrontlineSMS frontline;
 	private final ContactDao contactDao;
 	private final KeywordDao keywordDao;
 	private final KeywordActionDao keywordActionDao;
 	private final GroupDao groupDao;
 	private final GroupMembershipDao groupMembershipDao;
-	private final MessageDao messageFactory;
+	private final MessageDao messageDao;
 	private EmailDao emailDao;
 
 	private UIListener uiListener;
 	/** Set of listeners for incoming message events. */
 	private Set<IncomingMessageListener> incomingMessageListeners = new HashSet<IncomingMessageListener>();
 	
-	private final EmailServerHandler emailServerManager;
+	private final EmailServerHandler emailServerHandler;
 
-	/**
-	 * @param frontlineSms
-	 * @param contactFactory
-	 * @param keywordFactory
-	 * @param keywordActionDao 
-	 * @param groupFactory
-	 * @param messageFactory
-	 * @param emailFactory
-	 * @param emailServerManager
-	 */
-	public IncomingMessageProcessor(FrontlineSMS frontlineSms,
-			ContactDao contactFactory, KeywordDao keywordFactory,
-			KeywordActionDao keywordActionDao, GroupDao groupFactory,
-			GroupMembershipDao groupMembershipDao,
-			MessageDao messageFactory, EmailDao emailFactory,
-			EmailServerHandler emailServerManager) {
+	/** Create a new {@link IncomingMessageProcessor}, and initialise properties. */
+	public IncomingMessageProcessor(FrontlineSMS frontline) {
 		super("Incoming message processor");
-		this.frontlineSms = frontlineSms;
-		this.contactDao = contactFactory;
-		this.keywordDao = keywordFactory;
-		this.keywordActionDao = keywordActionDao;
-		this.groupDao = groupFactory;
-		this.groupMembershipDao = groupMembershipDao;
-		this.messageFactory = messageFactory;
-		this.emailDao = emailFactory;
-		this.emailServerManager = emailServerManager;
+		this.frontline = frontline;
+		this.contactDao = frontline.getContactDao();
+		this.keywordDao = frontline.getKeywordDao();
+		this.keywordActionDao = frontline.getKeywordActionDao();
+		this.groupDao = frontline.getGroupDao();
+		this.groupMembershipDao = frontline.getGroupMembershipDao();
+		this.messageDao = frontline.getMessageDao();
+		this.emailDao = frontline.getEmailDao();
+		this.emailServerHandler = frontline.getEmailServerHandler();
 	}
 	
 	public void setUiListener(UIListener uiListener) {
@@ -155,7 +141,7 @@ public class IncomingMessageProcessor extends Thread {
 								String incomingMessageText = incomingMessage.getText();
 								LOG.debug("It's a incoming message [" + incomingMessageText + "]");
 								incoming = Message.createIncomingMessage(incomingMessage.getDate(), incomingSenderMsisdn, receiver.getMsisdn(), incomingMessageText.trim());
-								messageFactory.saveMessage(incoming);
+								messageDao.saveMessage(incoming);
 								handleTextMessage(incoming);
 							} else {
 								Contact sender = contactDao.getFromMsisdn(incomingSenderMsisdn);
@@ -170,7 +156,7 @@ public class IncomingMessageProcessor extends Thread {
 								
 								// Save the binary message
 								incoming = Message.createBinaryIncomingMessage(incomingMessage.getDate(), incomingSenderMsisdn, receiver.getMsisdn(), -1, incomingMessage.getBinary());
-								messageFactory.saveMessage(incoming);
+								messageDao.saveMessage(incoming);
 							}
 
 							for(IncomingMessageListener listener : this.incomingMessageListeners) {
@@ -206,7 +192,7 @@ public class IncomingMessageProcessor extends Thread {
 		// Here, we strip the first four characters off the originator's number.  This is because we
 		// cannot be sure if the numbers supplied by the PhoneHandler are localised, or international
 		// with or without leading +.
-		Message message = messageFactory.getMessageForStatusUpdate(statusReport.getOriginator().substring(4), incomingMessage.getRefNo());
+		Message message = messageDao.getMessageForStatusUpdate(statusReport.getOriginator().substring(4), incomingMessage.getRefNo());
 		if (message != null) {
 			LOG.debug("It's a delivery report for message [" + message + "]");
 			switch(statusReport.getDeliveryStatus()) {
@@ -274,7 +260,7 @@ public class IncomingMessageProcessor extends Thread {
 			LOG.debug("Message to forward [" + forwardedMessageText + "]");
 			for (Contact contact : this.groupMembershipDao.getActiveMembers(action.getGroup())) {
 				LOG.debug("Sending to [" + contact.getName() + "]");
-				frontlineSms.sendTextMessage(contact.getPhoneNumber(), KeywordAction.KeywordUtils.personaliseMessage(contact, forwardedMessageText));
+				frontline.sendTextMessage(contact.getPhoneNumber(), KeywordAction.KeywordUtils.personaliseMessage(contact, forwardedMessageText));
 			}
 			break;
 		case KeywordAction.TYPE_JOIN: {
@@ -324,7 +310,7 @@ public class IncomingMessageProcessor extends Thread {
 			LOG.debug("It is an auto-reply action!");
 			String reply = KeywordAction.KeywordUtils.getReplyText(action, contactDao.getFromMsisdn(incomingSenderMsisdn), incomingSenderMsisdn, incomingMessageText, null);
 			LOG.debug("Sending [" + reply + "] to [" + incomingSenderMsisdn + "]");
-			Message msgReply = frontlineSms.sendTextMessage(incomingSenderMsisdn, reply);
+			Message msgReply = frontline.sendTextMessage(incomingSenderMsisdn, reply);
 			// FIXME the following two lines should be re-instated once the DAO pattern is finalised:
 			// action.addMessageToAction(incoming);
 			// action.addMessageToAction(msgReply);
@@ -352,7 +338,7 @@ public class IncomingMessageProcessor extends Thread {
 			);
 			emailDao.saveEmail(email);
 			LOG.debug("Sending [" + email.getEmailContent() + "] from [" + email.getEmailFrom().getAccountName() + "] to [" + email.getEmailRecipients() + "]");
-			emailServerManager.sendEmail(email);
+			emailServerHandler.sendEmail(email);
 			break;
 		}
 		
@@ -440,7 +426,7 @@ public class IncomingMessageProcessor extends Thread {
 					//All recipients are in the numbers list now.
 					for (String number : msg.getToNumbers()) {
 						LOG.debug("Sending to [" + number + "]");
-						frontlineSms.sendTextMessage(number, msg.getData());
+						frontline.sendTextMessage(number, msg.getData());
 					}
 				} else {
 					//TODO BINARY MESSAGE
@@ -473,7 +459,7 @@ public class IncomingMessageProcessor extends Thread {
 				|| responseActionType == KeywordAction.EXTERNAL_REPLY_AND_FORWARD) {
 			//Auto reply
 			LOG.debug("Sending to [" + incomingSenderMsisdn + "] as an auto-reply.");
-			frontlineSms.sendTextMessage(incomingSenderMsisdn, message);
+			frontline.sendTextMessage(incomingSenderMsisdn, message);
 		}
 		if (responseActionType == KeywordAction.TYPE_FORWARD 
 				|| responseActionType == KeywordAction.EXTERNAL_REPLY_AND_FORWARD) {
@@ -488,7 +474,7 @@ public class IncomingMessageProcessor extends Thread {
 						//so we don't send the message again.
 						LOG.debug("Sending to contact [" + contact.getName() + "]");
 					}
-					frontlineSms.sendTextMessage(contact.getPhoneNumber(), message);
+					frontline.sendTextMessage(contact.getPhoneNumber(), message);
 				}
 			}
 		}

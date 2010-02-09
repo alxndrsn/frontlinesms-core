@@ -79,7 +79,7 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 	public EmailTabHandler(UiGeneratorController ui) {
 		super(ui);
 		FrontlineSMS frontlineController = ui.getFrontlineController();
-		this.emailManager = frontlineController .getEmailServerManager();
+		this.emailManager = frontlineController .getEmailServerHandler();
 		this.emailDao = frontlineController.getEmailDao();
 		this.emailAccountDao = frontlineController.getEmailAccountFactory();
 	}
