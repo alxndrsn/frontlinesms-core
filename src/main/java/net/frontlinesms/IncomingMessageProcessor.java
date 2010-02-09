@@ -119,66 +119,62 @@ public class IncomingMessageProcessor extends Thread {
 				if(queueItem instanceof IncomingMessageProcessorQueueKiller) {
 					// We have been given a "poisoned" item so must terminate this thread
 					keepAlive = false;
-				} else {
+				} else if(queueItem instanceof IncomingMessageDetails) {
 					try {
 						// We've got a new message, so process it.
 						IncomingMessageDetails incomingMessageDetails = (IncomingMessageDetails) queueItem;
-						CIncomingMessage incomingMessage = incomingMessageDetails.getMessage();
-						SmsDevice receiver = incomingMessageDetails.getReceiver();
-						LOG.trace("Got message from queue: " + receiver.hashCode() + ":" + incomingMessage.hashCode());
-						
-						// Check the incoming message details with the KeywordFactory to make sure there are no details
-						// that should be hidden before creating the message object...
-						String incomingSenderMsisdn = incomingMessage.getOriginator();
-						LOG.debug("Sender [" + incomingSenderMsisdn + "]");
-						if (incomingMessage.getType() == CIncomingMessage.MessageType.StatusReport) {
-							handleStatusReport(incomingMessage);
-						} else {
-							// This is an incoming message, so process accordingly
-							Message incoming;
-							if (incomingMessage.getMessageEncoding() == SmsMessageEncoding.GSM_7BIT || incomingMessage.getMessageEncoding() == SmsMessageEncoding.UCS2) {
-								// Only do the keyword stuff if this isn't a delivery report
-								String incomingMessageText = incomingMessage.getText();
-								LOG.debug("It's a incoming message [" + incomingMessageText + "]");
-								incoming = Message.createIncomingMessage(incomingMessage.getDate(), incomingSenderMsisdn, receiver.getMsisdn(), incomingMessageText.trim());
-								messageDao.saveMessage(incoming);
-								handleTextMessage(incoming);
-							} else {
-								Contact sender = contactDao.getFromMsisdn(incomingSenderMsisdn);
-								if(sender == null) {
-									try {
-										sender = new Contact("", incomingSenderMsisdn, null, null, null, true);
-										contactDao.saveContact(sender);
-									} catch (DuplicateKeyException ex) {
-										LOG.error(ex);
-									}
-								}
-								
-								// Save the binary message
-								incoming = Message.createBinaryIncomingMessage(incomingMessage.getDate(), incomingSenderMsisdn, receiver.getMsisdn(), -1, incomingMessage.getBinary());
-								messageDao.saveMessage(incoming);
-							}
-
-							for(IncomingMessageListener listener : this.incomingMessageListeners) {
-								listener.incomingMessageEvent(incoming);
-							}
-							if (uiListener != null) {
-								uiListener.incomingMessageEvent(incoming);
-							}
-						}
+						processIncomingMessageDetails(incomingMessageDetails);
 					} catch(Throwable t) {
 						// There was a problem processing the message.  At this stage, any issue should be a database
 						// connectivity issue.  Stop processing messages for a while, and re-queue this one.
-						LOG.warn("Error processing message.  It will be queued for re-processing.");
+						LOG.warn("Error processing message.  It will be queued for re-processing.", t);
 						incomingMessageQueue.add(queueItem);
 						Utils.sleep_ignoreInterrupts(THREAD_SLEEP_AFTER_PROCESSING_FAILED);
 					}
+				} else {
+					LOG.error("Unknown queue item type: " + queueItem.getClass());
 				}
 			}
 		}
 		LOG.trace("EXIT");
 	}
 	
+	private void processIncomingMessageDetails(IncomingMessageDetails incomingMessageDetails) {
+		CIncomingMessage incomingMessage = incomingMessageDetails.getMessage();
+		SmsDevice receiver = incomingMessageDetails.getReceiver();
+		LOG.trace("Got message from queue: " + receiver.hashCode() + ":" + incomingMessage.hashCode());
+		
+		// Check the incoming message details with the KeywordFactory to make sure there are no details
+		// that should be hidden before creating the message object...
+		String incomingSenderMsisdn = incomingMessage.getOriginator();
+		LOG.debug("Sender [" + incomingSenderMsisdn + "]");
+		if (incomingMessage.getType() == CIncomingMessage.MessageType.StatusReport) {
+			handleStatusReport(incomingMessage);
+		} else {
+			// This is an incoming message, so process accordingly
+			Message incoming;
+			if (incomingMessage.getMessageEncoding() == SmsMessageEncoding.GSM_7BIT || incomingMessage.getMessageEncoding() == SmsMessageEncoding.UCS2) {
+				if(LOG.isDebugEnabled()) LOG.debug("Incoming text message [" + incomingMessage.getText() + "]");
+				incoming = Message.createIncomingMessage(incomingMessage.getDate(), incomingSenderMsisdn, receiver.getMsisdn(), incomingMessage.getText());
+				messageDao.saveMessage(incoming);
+				handleTextMessage(incoming);
+			} else {
+				if(LOG.isDebugEnabled()) LOG.debug("Incoming binary message: " + incomingMessage.getBinary().length + "b");
+				
+				// Save the binary message
+				incoming = Message.createBinaryIncomingMessage(incomingMessage.getDate(), incomingSenderMsisdn, receiver.getMsisdn(), -1, incomingMessage.getBinary());
+				messageDao.saveMessage(incoming);
+			}
+
+			for(IncomingMessageListener listener : this.incomingMessageListeners) {
+				listener.incomingMessageEvent(incoming);
+			}
+			if (uiListener != null) {
+				uiListener.incomingMessageEvent(incoming);
+			}
+		}
+	}
+
 	/**
 	 * Process an incoming status report.  The status should be set to
 	 * @param incomingMessage The incoming status report.

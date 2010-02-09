@@ -58,6 +58,13 @@ public class CIncomingMessage extends CMessage {
 		this(originator, text, 0, "");
 	}
 	
+	public CIncomingMessage(String originator, byte[] data) {
+		this(MessageType.Incoming, 0, "");
+		super.originator = originator;
+		super.messageBinary = data;
+		this.messageEncoding = SmsMessageEncoding.BINARY_8BIT;
+	}
+	
 	public CIncomingMessage(long date, String originator, String text) {
 		this(originator, text, 0, "");
 		setDate(date);
