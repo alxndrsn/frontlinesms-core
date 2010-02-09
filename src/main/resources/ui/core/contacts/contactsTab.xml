@@ -35,7 +35,6 @@
 	                    <column icon="/icons/user.png" text="i18n.common.name" width="150"/>
 	                    <column icon="/icons/phone_number.png" text="i18n.common.phone.number" width="120"/>
 	                    <column icon="/icons/email.png" text="i18n.common.email.address" width="120"/>
-	                    <column icon="/icons/group.png" text="i18n.common.at.least.one.group"/>
 	                </header>
 	                <popupmenu menushown="populateGroups(this, contactManager_contactList)" name="menu">
 	                    <menu icon="/icons/group_join.png" name="groupsMenu" text="i18n.action.add.to.group"/>
