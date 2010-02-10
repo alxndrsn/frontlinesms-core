@@ -29,7 +29,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 
 import serial.*;
 
@@ -86,7 +88,7 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 	/** List of binary messages queued to be sent. */
 	private final ConcurrentLinkedQueue<Message> binOutbox = new ConcurrentLinkedQueue<Message>();
 	/** List of phone handlers that this manager is currently looking after. */
-	private final Map<String, SmsModem> phoneHandlers = new HashMap<String, SmsModem>();
+	private final ConcurrentMap<String, SmsModem> phoneHandlers = new ConcurrentHashMap<String, SmsModem>();
 	/** Set of SMS internet services */
 	private Set<SmsInternetService> smsInternetServices = new HashSet<SmsInternetService>();
 
@@ -576,12 +578,10 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 			return true;
 		} else {
 			LOG.info("Port currently owned by another process: '" + portIdentifier.getCurrentOwner() + "'");
-			if(!phoneHandlers.containsKey(portName)) {
-				// If we don't have a handle on this port, but it's owned by someone else,
-				// then we add it to the phoneHandlers list anyway so that we can see its
-				// status.
-				phoneHandlers.put(portName, new SmsModem(portName, this));
-			}
+			// If we don't have a handle on this port, but it's owned by someone else,
+			// then we add it to the phoneHandlers list anyway so that we can see its
+			// status.
+			phoneHandlers.putIfAbsent(portName, new SmsModem(portName, this));
 			return false;
 		}
 	}
@@ -645,12 +645,12 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 				SmsModem phoneHandler = new SmsModem(portName, this);
 				phoneHandlers.put(portName, phoneHandler);
 				if(connectToDiscoveredPhones) phoneHandler.start();
-			} else if(!phoneHandlers.containsKey(portName)) {
+			} else {
 				// If we don't have a handle on this port, but it's owned by someone else,
 				// then we add it to the phoneHandlers list anyway so that we can see its
 				// status.
 				LOG.debug("Port currently owned by another process.");
-				phoneHandlers.put(portName, new SmsModem(portName, this));
+				phoneHandlers.putIfAbsent(portName, new SmsModem(portName, this));
 			}
 		}
 	}
