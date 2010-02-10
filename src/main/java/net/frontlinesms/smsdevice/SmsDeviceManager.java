@@ -19,19 +19,8 @@
  */
 package net.frontlinesms.smsdevice;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
+import java.util.*;
+import java.util.concurrent.*;
 
 import serial.*;
 
@@ -106,32 +95,20 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 	 * devices may present multiple virtual COM ports to the app. 
 	 */
 	private final HashSet<String> connectedSerials = new HashSet<String>();
-	/**
-	 * incoming messages available here if you are not using the 
-	 * incoming event notification system.
-	 * 
-	 * TODO: might change this to be more threadsafe, and use accessors
-	 */
-	private final LinkedList<CIncomingMessage> receivedMessages = new LinkedList<CIncomingMessage>();
 	private String[] portIgnoreList;
 
 	private static Logger LOG = Utils.getLogger(SmsDeviceManager.class);
 
 	/**
 	 * Create a polling-variant SMS Handler.
-	 * 
 	 * To add a message listener, setSmsListener() should be called.
 	 */
 	public SmsDeviceManager() {
 		super("SmsDeviceManager");
-		LOG.trace("ENTER");
 
 		// Load the COMM properties file, and extract the IGNORE list from
 		// it - this is a list of COM ports that should be ignored.		
 		this.portIgnoreList = CommProperties.getInstance().getIgnoreList();
-
-		listComPortsAndOwners(false);
-		LOG.trace("EXIT");
 	}
 
 	public void setSmsListener(SmsListener smsListener) {
@@ -148,13 +125,9 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 				listComPortsAndOwners(autoConnectToNewPhones);
 				refreshPhoneList = false;
 			} else {
-				// FIXME why are these 2 separate lists?
-				if (outbox.size() > 0) {
-					sendSmsToPhones();
-				}
-				if (binOutbox.size() > 0) {
-					sendBinarySmsToPhones();
-				}
+				dispatchTextSms();
+				dispatchBinarySms();
+				processModemReceiving();
 				// Individual phones should sleep, so there's no need to do this here!(?)  Here's
 				// a token pause in case things lock up / to stop this thread eating the CPU for
 				// breakfast.
@@ -164,217 +137,9 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 		LOG.trace("EXIT");
 	}
 
-	/**
-	 * FIXME this has a lot of code duplicated from sendBinarySmsToPhones()  Can they be combined?
-	 */
-	private void sendSmsToPhones() {
-		// When there are HTTP Handlers set up for sending, we ONLY use these for sending.
-		// Otherwise, we split the messages between all connected (sending) phones.
-		boolean hasFoundWorkingHttpHandler = false;
-		if (!smsInternetServices.isEmpty()) {
-			// Here we scan through the list of connected phones and determine how many
-			// of them are currently being used for SENDING.  Once we've done this, we 
-			// can assign messages to the sending phones, and poll receiving phones for
-			// incoming messages.
-			Iterator<SmsInternetService> httpHandlers = this.smsInternetServices.iterator();
-
-			List<SmsInternetService> toSend = new ArrayList<SmsInternetService>();
-
-			while (httpHandlers.hasNext()) {
-				SmsInternetService httpService = httpHandlers.next();
-				if (httpService.isConnected() && httpService.isUseForSending()) {
-					toSend.add(httpService);
-				}
-			}
-
-			hasFoundWorkingHttpHandler = !toSend.isEmpty();
-
-			//how many messages per batch?
-			int numberOfMessagesToSendPerPhone = 1;
-			if (toSend.size() != 0) {
-				numberOfMessagesToSendPerPhone = ((outbox.size()%toSend.size() != 0) ? 1:0) +
-				(outbox.size() / toSend.size());
-			}
-
-			for (SmsInternetService serv : toSend) {
-				Message m;
-				//grab a load of messages, try for the number suggested in the numberOfMessagesToSendPerPhone
-				for (int i = 0; i < numberOfMessagesToSendPerPhone; ++i) {
-					if (( m = outbox.poll()) != null) {
-						serv.sendSMS(m);
-						outgoingMessageEvent(serv, m);
-					}
-				}
-			}
-		}
-		if (!hasFoundWorkingHttpHandler) {
-			// Here we scan through the list of connected phones and determine how many
-			// of them are currently being used for SENDING.  Once we've done this, we 
-			// can assign messages to the sending phones, and poll receiving phones for
-			// incoming messages.
-			Iterator<SmsModem> phoneHandlers = this.phoneHandlers.values().iterator();
-
-			//how many messages should be sent on each phone?
-			//how many phones available for sending?
-			int numberOfPhonesForSending = 0;
-
-			while (phoneHandlers.hasNext()) {
-				SmsModem phoneHandler = phoneHandlers.next();
-				if (phoneHandler.isConnected() && phoneHandler.isUseForSending()) numberOfPhonesForSending++;
-			}
-			//how many messages per batch?
-			int numberOfMessagesToSendPerPhone = 1;
-			if (numberOfPhonesForSending != 0) {
-				numberOfMessagesToSendPerPhone = ((outbox.size()%numberOfPhonesForSending != 0) ? 1:0) +
-				(outbox.size() / numberOfPhonesForSending);
-			}
-			//reset iterator
-			phoneHandlers = this.phoneHandlers.values().iterator();
-
-			while (phoneHandlers.hasNext()) {
-				SmsModem phoneHandler = phoneHandlers.next();
-				//check for timeout
-				if(phoneHandler.isRunning() && phoneHandler.isTimedOut()) {
-					LOG.debug("Watchdog from phone [" + phoneHandler.getPort() + "] has timed out! Disconnecting...");
-					// The phone's being unresponsive.  Attempt to disconnect from the phone, remove the serial
-					// number from the duplicates list and then add the phone to the reconnect list so we can
-					// reconnect to it later.  We should also remove the unresponsive phone from the phoneHandlers
-					// list.
-					phoneHandler.disconnect();
-					connectedSerials.remove(phoneHandler.getSerial());
-				} else if(phoneHandler.isConnected()) {
-					// If this handset is connected, we can now use it for sending and/or receiving
-					// messages as appropriate.
-
-					// If this handset is being used to receive, check for incoming messages.
-					if (phoneHandler.isUseForReceiving()) {
-						while (phoneHandler.incomingMessageWaiting()) {
-							incomingMessageEvent(phoneHandler, phoneHandler.nextIncomingMessage());
-						}
-					}
-					// If this handset is being user for sending, and there are messages in the
-					// outbox, then pass the determined number for sending.
-					if (phoneHandler.isUseForSending()) {
-						Message m;
-						//grab a load of messages, try for the number suggested in the numberOfMessagesToSendPerPhone
-						for (int i = 0; i < numberOfMessagesToSendPerPhone; ++i) {
-							if (( m = outbox.poll()) != null) {
-								phoneHandler.sendSMS(m);
-								outgoingMessageEvent(phoneHandler, m);
-							}
-						}
-
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * FIXME this has a lot of code duplicated from sendSmsToPhones()  Can they be combined?
-	 */
-	private void sendBinarySmsToPhones() {
-		// When there are HTTP Handlers set up for sending, we ONLY use these for sending.
-		// Otherwise, we split the messages between all connected (sending) phones.
-		boolean hasFoundWorkingSmsInternetServiceHandler = false;
-		if (!smsInternetServices.isEmpty()) {
-			// Here we scan through the list of connected phones and determine how many
-			// of them are currently being used for SENDING.  Once we've done this, we 
-			// can assign messages to the sending phones, and poll receiving phones for
-			// incoming messages.
-			Iterator<SmsInternetService> smsInternetServicesHandlers = this.smsInternetServices.iterator();
-
-			List<SmsInternetService> toSend = new ArrayList<SmsInternetService>();
-
-			while (smsInternetServicesHandlers.hasNext()) {
-				SmsInternetService smsInternetService = smsInternetServicesHandlers.next();
-				if (smsInternetService.isConnected() && smsInternetService.isUseForSending() && smsInternetService.isBinarySendingSupported()) {
-					toSend.add(smsInternetService);
-				}
-			}
-
-			hasFoundWorkingSmsInternetServiceHandler = !toSend.isEmpty();
-
-			//how many messages per batch?
-			int numberOfMessagesToSendPerPhone = 1;
-			if (toSend.size() != 0) {
-				numberOfMessagesToSendPerPhone = ((binOutbox.size()%toSend.size() != 0) ? 1:0) +
-				(binOutbox.size() / toSend.size());
-			}
-
-			for (SmsInternetService serv : toSend) {
-				Message m;
-				//grab a load of messages, try for the number suggested in the numberOfMessagesToSendPerPhone
-				for (int i = 0; i < numberOfMessagesToSendPerPhone; ++i) {
-					if (( m = binOutbox.poll()) != null) {
-						serv.sendSMS(m);
-						outgoingMessageEvent(serv, m);
-					}
-				}
-			}
-		}
-		if (!hasFoundWorkingSmsInternetServiceHandler) {
-			// Here we scan through the list of connected phones and determine how many
-			// of them are currently being used for SENDING.  Once we've done this, we 
-			// can assign messages to the sending phones, and poll receiving phones for
-			// incoming messages.
-			Iterator<SmsModem> phoneHandlers = this.phoneHandlers.values().iterator();
-
-			//how many messages should be sent on each phone?
-			//how many phones available for sending?
-			int numberOfPhonesForSending = 0;
-
-			while (phoneHandlers.hasNext()) {
-				SmsModem phoneHandler = phoneHandlers.next();
-				if (phoneHandler.isConnected() && phoneHandler.isUseForSending() && phoneHandler.isBinarySendingSupported()) 
-					numberOfPhonesForSending++;
-			}
-			//how many messages per batch?
-			int numberOfMessagesToSendPerPhone = 1;
-			if (numberOfPhonesForSending != 0) {
-				numberOfMessagesToSendPerPhone = ((binOutbox.size()%numberOfPhonesForSending != 0) ? 1:0) +
-				(binOutbox.size() / numberOfPhonesForSending);
-			}
-			//reset iterator
-			phoneHandlers = this.phoneHandlers.values().iterator();
-
-			while (phoneHandlers.hasNext()) {
-				SmsModem phoneHandler = phoneHandlers.next();
-				//check for timeout
-				if(phoneHandler.isRunning() && phoneHandler.isTimedOut()) {
-					LOG.debug("Watchdog from phone [" + phoneHandler.getPort() + "] has timed out! Disconnecting...");
-					// The phone's being unresponsive.  Attempt to disconnect from the phone, remove the serial
-					// number from the duplicates list and then add the phone to the reconnect list so we can
-					// reconnect to it later.  We should also remove the unresponsive phone from the phoneHandlers
-					// list.
-					phoneHandler.disconnect();
-					connectedSerials.remove(phoneHandler.getSerial());
-				} else if(phoneHandler.isConnected()) {
-					// If this handset is connected, we can now use it for sending and/or receiving
-					// messages as appropriate.
-
-					// If this handset is being used to receive, check for incoming messages.
-					if (phoneHandler.isUseForReceiving()) {
-						while (phoneHandler.incomingMessageWaiting()) {
-							incomingMessageEvent(phoneHandler, phoneHandler.nextIncomingMessage());
-						}
-					}
-					// If this handset is being user for sending, and there are messages in the
-					// outbox, then pass the determined number for sending.
-					if (phoneHandler.isUseForSending()) {
-						Message m;
-						//grab a load of messages, try for the number suggested in the numberOfMessagesToSendPerPhone
-						for (int i = 0; i < numberOfMessagesToSendPerPhone; ++i) {
-							if (( m = binOutbox.poll()) != null) {
-								phoneHandler.sendSMS(m);
-								outgoingMessageEvent(phoneHandler, m);
-							}
-						}
-
-					}
-				}
-			}
-		}
+	/** Handle the steps necessary when disconnecting a modem. */
+	private void handleDisconnect(SmsModem modem) {
+		modem.disconnect();
 	}
 	
 	/**
@@ -442,14 +207,16 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 
 	/**
 	 * Remove the supplied message from outbox.
-	 * 
 	 * @param deleted
 	 */
 	public void removeFromOutbox(Message deleted) {
-		LOG.trace("ENTER");
-		outbox.remove(deleted);
-		LOG.debug("Message [" + deleted + "] removed from outbox. Size is [" + outbox.size() + "]");
-		LOG.trace("EXIT");
+		if(outbox.remove(deleted)) {
+			if(LOG.isDebugEnabled()) LOG.debug("Message [" + deleted + "] removed from outbox. Size is [" + outbox.size() + "]");
+		} else if(binOutbox.remove(deleted)) {
+			if(LOG.isDebugEnabled()) LOG.debug("Message [" + deleted + "] removed from outbox. Size is [" + binOutbox.size() + "]");
+		} else {
+			if(LOG.isInfoEnabled()) LOG.info("Attempt to delete message found in neither outbox nor binOutbox.");
+		}
 	}
 
 	/**
@@ -462,8 +229,7 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 		for(SmsModem p : phoneHandlers.values()) {
 			p.setDetecting(false);
 			p.setAutoReconnect(false);
-			p.disconnect();
-			connectedSerials.remove(p.getSerial());
+			handleDisconnect(p);
 		}
 		
 		// Stop all SMS Internet Services
@@ -476,7 +242,6 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 		// If we've got a higher-level listener attached to this, pass the message 
 		// up to there.  Otherwise, add it to our internal list
 		if (smsListener != null) smsListener.incomingMessageEvent(receiver, msg);
-		else receivedMessages.add(msg);
 	}
 
 	public void outgoingMessageEvent(SmsDevice sender, Message msg) {
@@ -612,12 +377,10 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 
 	private void disconnectPhone(SmsModem modem) {
 		modem.setAutoReconnect(false);
-		modem.disconnect();
-		connectedSerials.remove(modem.getSerial());
+		handleDisconnect(modem);
 	}
 
 	public void stopDetection(String port) {
-		// FIXME is this thread-safe?  Should really get handler ONCE and then call methods.
 		SmsModem smsModem = phoneHandlers.get(port);
 		if(smsModem != null) {
 			smsModem.setDetecting(false);
@@ -657,5 +420,127 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 
 	public Collection<SmsInternetService> getSmsInternetServices() {
 		return this.smsInternetServices;
+	}
+
+	/**
+	 * Polls all {@link SmsModem}s that are set to receive messages, and processes any
+	 * messages they've received.
+	 */
+	private void processModemReceiving() {
+		Collection<SmsModem> receiveModems = getSmsModemsForReceiving();
+		for(SmsModem modem : receiveModems) {
+			CIncomingMessage receivedMessage;
+			while((receivedMessage = modem.nextIncomingMessage()) != null) {
+				incomingMessageEvent(modem, receivedMessage);
+			}
+		}
+	}
+	
+	/** @return all {@link SmsModem}s that are currently connected and receiving messages. */
+	private Collection<SmsModem> getSmsModemsForReceiving() {
+		HashSet<SmsModem> receivers = new HashSet<SmsModem>();
+		for(SmsModem modem : this.phoneHandlers.values()) {
+			if(modem.isRunning() && modem.isTimedOut()) {
+				// The phone's being unresponsive.  Attempt to disconnect from the phone, remove the serial
+				// number from the duplicates list and then add the phone to the reconnect list so we can
+				// reconnect to it later.  We should also remove the unresponsive phone from the phoneHandlers
+				// list.
+				if(LOG.isDebugEnabled()) LOG.debug("Watchdog from phone [" + modem.getPort() + "] has timed out! Disconnecting...");
+				handleDisconnect(modem);
+			} else if(modem.isConnected() && modem.isUseForReceiving()) {
+				receivers.add(modem);
+			}
+		}
+		return receivers;
+	}
+
+//> SMS DISPATCH METHODS
+	/** Dispatch all messages in {@link #outbox} to suitable {@link SmsDevice}s */
+	private void dispatchTextSms() {
+		List<Message> messages = removeAll(this.outbox);
+		dispatchSms(messages, false);
+	}
+	
+	/** Dispatch all messages in {@link #binOutbox} to suitable {@link SmsDevice}s */
+	private void dispatchBinarySms() {
+		List<Message> messages = removeAll(this.binOutbox);
+		dispatchSms(messages, true);
+	}
+	
+	/**
+	 * @param messages messages to dispatch
+	 * @param binary <code>true</code> if the messages are binary, <code>false</code> if they are text
+	 */
+	private void dispatchSms(List<Message> messages, boolean binary) {
+		// Try dispatching to SmsInternetServices
+		List<SmsInternetService> internetServices = getSmsInternetServicesForSending(binary);
+		int serviceCount = internetServices.size();
+		if(serviceCount > 0) {
+			// We have some SMS Internet services to send with.  These are assumed to be higher priority
+			// than Sms Modems, so send all messages with the internet services.
+			dispatchSms(internetServices, messages);
+		} else {
+			// There are no available SMS Internet Services, so dispatch to SmsModems
+			List<SmsModem> sendingModems = getSmsModemsForSending(binary);
+			dispatchSms(sendingModems, messages);
+		}		
+	}
+
+	/**
+	 * Dispatch some SMS {@link Message}s to some {@link SmsDevice}s. 
+	 * @param devices
+	 * @param messages
+	 */
+	private void dispatchSms(List<? extends SmsDevice> devices, List<Message> messages) {
+		int deviceCount = devices.size();
+		int messageIndex = -1;
+		for(Message m : messages) {
+			SmsDevice device = devices.get(++messageIndex % deviceCount);
+			// Presumably the device will complain somehow if it is no longer connected
+			// etc.  TODO we should actually check what happens!
+			device.sendSMS(m);
+			outgoingMessageEvent(device, m);
+		}
+	}
+
+	/** Removes and returns all messages currently available in a list. */
+	private List<Message> removeAll(ConcurrentLinkedQueue<Message> outbox) {
+		LinkedList<Message> retrieved = new LinkedList<Message>();
+		Message m;
+		while((m=outbox.poll())!=null) retrieved.add(m);
+		return retrieved;
+	}
+
+	/** @param binary <code>true</code> to get services for sending binary, <code>false</code> for services to send text  
+	 * @return all {@link SmsInternetService} which are available for sending messages. */
+	private List<SmsInternetService> getSmsInternetServicesForSending(boolean binary) {
+		ArrayList<SmsInternetService> senders = new ArrayList<SmsInternetService>();
+		for(SmsInternetService service : this.smsInternetServices) {
+			if(service.isConnected() && service.isUseForSending() &&
+					(!binary || service.isBinarySendingSupported())) {
+				senders.add(service);
+			}
+		}
+		return senders;
+	}
+	
+	/** @param binary <code>true</code> to get phones for sending binary, <code>false</code> for phones to send text 
+	 * @return all {@link SmsModem} which are available for sending messages. */
+	private List<SmsModem> getSmsModemsForSending(boolean binary) {
+		ArrayList<SmsModem> senders = new ArrayList<SmsModem>();
+		for(SmsModem modem : this.phoneHandlers.values()) {
+			if(modem.isRunning() && modem.isTimedOut()) {
+				// The phone's being unresponsive.  Attempt to disconnect from the phone, remove the serial
+				// number from the duplicates list and then add the phone to the reconnect list so we can
+				// reconnect to it later.  We should also remove the unresponsive phone from the phoneHandlers
+				// list.
+				if(LOG.isDebugEnabled()) LOG.debug("Watchdog from phone [" + modem.getPort() + "] has timed out! Disconnecting...");
+				handleDisconnect(modem);
+			} else if(modem.isConnected() && modem.isUseForSending() &&
+					(!binary || modem.isBinarySendingSupported())) {
+				senders.add(modem);
+			}
+		}
+		return senders;
 	}
 }

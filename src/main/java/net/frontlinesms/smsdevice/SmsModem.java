@@ -195,15 +195,7 @@ public class SmsModem extends Thread implements SmsDevice {
 		return this.statusDetail;
 	}
 
-	/**
-	 * @return true if there are waiting messages, false otherwise.
-	 */
-	public boolean incomingMessageWaiting() {
-		return !inbox.isEmpty();
-	}
-	/**
-	 * @return the next incoming message, waiting to be read.
-	 */
+	/** @return the next incoming message, or <code>null</code> if none is available */
 	public CIncomingMessage nextIncomingMessage() {
 		return inbox.poll();
 	}

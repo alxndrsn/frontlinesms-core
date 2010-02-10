@@ -202,6 +202,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		
 		LOG.debug("Starting Phone Manager...");
 		smsDeviceManager = new SmsDeviceManager();
+		smsDeviceManager.listComPortsAndOwners(false);
 		smsDeviceManager.setSmsListener(this);
 		smsDeviceManager.start();
 
