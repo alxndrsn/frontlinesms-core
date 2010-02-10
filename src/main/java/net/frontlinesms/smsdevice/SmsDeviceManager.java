@@ -119,22 +119,30 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 		LOG.trace("ENTER");
 		running = true;
 		while (running) {
-			if (refreshPhoneList) {
-				LOG.debug("Refreshing phone list...");
-				// N.B. why is this not using the value from autoConnectToNewPhones? 
-				listComPortsAndOwners(autoConnectToNewPhones);
-				refreshPhoneList = false;
-			} else {
-				dispatchTextSms();
-				dispatchBinarySms();
-				processModemReceiving();
-				// Individual phones should sleep, so there's no need to do this here!(?)  Here's
-				// a token pause in case things lock up / to stop this thread eating the CPU for
-				// breakfast.
-				Utils.sleep_ignoreInterrupts(10);
-			}
+			doRun();
 		}
 		LOG.trace("EXIT");
+	}
+
+	/**
+	 * Run the looped behaviour from {@link #run()} once.
+	 * This method is separated for simple, unthreaded unit testing.
+	 */
+	void doRun() {
+		if (refreshPhoneList) {
+			LOG.debug("Refreshing phone list...");
+			// N.B. why is this not using the value from autoConnectToNewPhones? 
+			listComPortsAndOwners(autoConnectToNewPhones);
+			refreshPhoneList = false;
+		} else {
+			dispatchTextSms();
+			dispatchBinarySms();
+			processModemReceiving();
+			// Individual phones should sleep, so there's no need to do this here!(?)  Here's
+			// a token pause in case things lock up / to stop this thread eating the CPU for
+			// breakfast.
+			Utils.sleep_ignoreInterrupts(10);
+		}
 	}
 
 	/** Handle the steps necessary when disconnecting a modem. */
