@@ -367,19 +367,20 @@ public class IncomingMessageProcessor extends Thread {
 				incomingMessageText
 		);
 		LOG.debug("Command to be executed [" + cmd + "]");
-		String response = null;
 
 		if (action.getExternalCommandResponseType() != KeywordAction.EXTERNAL_RESPONSE_LIST_COMMANDS) {
-			LOG.debug("Response will be plain text or nothing at all.");
 			//Executes the command and handle the response as plain text, or no response at all.
+			String response;
+			LOG.debug("Response will be plain text or nothing at all.");
+			boolean waitForResponse = action.getExternalCommandResponseType() == KeywordAction.EXTERNAL_RESPONSE_PLAIN_TEXT;
 			if (action.getExternalCommandType() == KeywordAction.EXTERNAL_HTTP_REQUEST) {
 				LOG.debug("Executing HTTP request...");
-				response = Utils.makeHttpRequest(cmd, action.getExternalCommandResponseType() == KeywordAction.EXTERNAL_RESPONSE_PLAIN_TEXT);
+				response = Utils.makeHttpRequest(cmd, waitForResponse);
 			} else {
 				LOG.debug("Executing external program...");
-				response = Utils.executeExternalProgram(cmd, action.getExternalCommandResponseType() == KeywordAction.EXTERNAL_RESPONSE_PLAIN_TEXT);
+				response = Utils.executeExternalProgram(cmd, waitForResponse);
 			}
-			if (action.getExternalCommandResponseType() == KeywordAction.EXTERNAL_RESPONSE_PLAIN_TEXT) {
+			if (waitForResponse) {
 				LOG.debug("Response [" + response + "]");
 				handleResponse(action, incomingSenderMsisdn, response);
 			}
