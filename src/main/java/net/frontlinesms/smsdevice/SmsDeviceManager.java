@@ -33,6 +33,7 @@ import net.frontlinesms.smsdevice.internet.SmsInternetService;
 import org.apache.log4j.Logger;
 import org.smslib.CIncomingMessage;
 import org.smslib.handler.CATHandler;
+import org.smslib.util.GsmAlphabet;
 
 /**
  * SmsHandler should be run as a separate thread.
@@ -68,12 +69,12 @@ import org.smslib.handler.CATHandler;
  * 
  * @author Ben Whitaker ben(at)masabi(dot)com
  * @author Alex Anderson alex(at)masabi(dot)com
- * 
- * FIXME need to add checks for UCS-2 support before sending UCS-2 messages
  */
 public class SmsDeviceManager extends Thread implements SmsListener {
-	/** List of messages queued to be sent. */
-	private final ConcurrentLinkedQueue<Message> outbox = new ConcurrentLinkedQueue<Message>();
+	/** List of GSM 7bit text messages queued to be sent. */
+	private final ConcurrentLinkedQueue<Message> gsm7bitOutbox = new ConcurrentLinkedQueue<Message>();
+	/** List of UCS2 text messages queued to be sent. */
+	private final ConcurrentLinkedQueue<Message> ucs2Outbox = new ConcurrentLinkedQueue<Message>();
 	/** List of binary messages queued to be sent. */
 	private final ConcurrentLinkedQueue<Message> binOutbox = new ConcurrentLinkedQueue<Message>();
 	/** List of phone handlers that this manager is currently looking after. */
@@ -135,7 +136,8 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 			listComPortsAndOwners(autoConnectToNewPhones);
 			refreshPhoneList = false;
 		} else {
-			dispatchTextSms();
+			dispatchGsm7bitTextSms();
+			dispatchUcs2TextSms();
 			dispatchBinarySms();
 			processModemReceiving();
 			// Individual phones should sleep, so there's no need to do this here!(?)  Here's
@@ -202,13 +204,22 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 	public void sendSMS(Message outgoingMessage) {
 		LOG.trace("ENTER");
 		outgoingMessage.setStatus(Message.STATUS_OUTBOX);
-		if (outgoingMessage.isBinaryMessage()) {
+		switch(MessageType.get(outgoingMessage)) {
+		case BINARY:
 			binOutbox.add(outgoingMessage);
 			LOG.debug("Message added to binOutbox. Size is [" + binOutbox.size() + "]");
-		} else {
-			outbox.add(outgoingMessage);
-			LOG.debug("Message added to outbox. Size is [" + outbox.size() + "]");
+			break;
+		case GSM7BIT_TEXT:
+			gsm7bitOutbox.add(outgoingMessage);
+			LOG.debug("Message added to outbox. Size is [" + gsm7bitOutbox.size() + "]");
+			break;
+		case UCS2_TEXT:
+			ucs2Outbox.add(outgoingMessage);
+			LOG.debug("Message added to outbox. Size is [" + ucs2Outbox.size() + "]");
+			break;
+		default: throw new IllegalStateException();
 		}
+		
 		if (smsListener != null) smsListener.outgoingMessageEvent(null, outgoingMessage);
 		LOG.trace("EXIT");
 	}
@@ -218,8 +229,10 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 	 * @param deleted
 	 */
 	public void removeFromOutbox(Message deleted) {
-		if(outbox.remove(deleted)) {
-			if(LOG.isDebugEnabled()) LOG.debug("Message [" + deleted + "] removed from outbox. Size is [" + outbox.size() + "]");
+		if(gsm7bitOutbox.remove(deleted)) {
+			if(LOG.isDebugEnabled()) LOG.debug("Message [" + deleted + "] removed from outbox. Size is [" + gsm7bitOutbox.size() + "]");
+		} else if(ucs2Outbox.remove(deleted)) {
+			if(LOG.isDebugEnabled()) LOG.debug("Message [" + deleted + "] removed from outbox. Size is [" + ucs2Outbox.size() + "]");
 		} else if(binOutbox.remove(deleted)) {
 			if(LOG.isDebugEnabled()) LOG.debug("Message [" + deleted + "] removed from outbox. Size is [" + binOutbox.size() + "]");
 		} else {
@@ -463,25 +476,31 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 	}
 
 //> SMS DISPATCH METHODS
+	/** Dispatch all messages in {@link #gsm7bitOutbox} to suitable {@link SmsDevice}s */
+	private void dispatchGsm7bitTextSms() {
+		List<Message> messages = removeAll(this.gsm7bitOutbox);
+		dispatchSms(messages, MessageType.GSM7BIT_TEXT);
+	}
+	
 	/** Dispatch all messages in {@link #outbox} to suitable {@link SmsDevice}s */
-	private void dispatchTextSms() {
-		List<Message> messages = removeAll(this.outbox);
-		dispatchSms(messages, false);
+	private void dispatchUcs2TextSms() {
+		List<Message> messages = removeAll(this.ucs2Outbox);
+		dispatchSms(messages, MessageType.UCS2_TEXT);
 	}
 	
 	/** Dispatch all messages in {@link #binOutbox} to suitable {@link SmsDevice}s */
 	private void dispatchBinarySms() {
 		List<Message> messages = removeAll(this.binOutbox);
-		dispatchSms(messages, true);
+		dispatchSms(messages, MessageType.BINARY);
 	}
 	
 	/**
 	 * @param messages messages to dispatch
 	 * @param binary <code>true</code> if the messages are binary, <code>false</code> if they are text
 	 */
-	private void dispatchSms(List<Message> messages, boolean binary) {
+	private void dispatchSms(List<Message> messages, MessageType messageType) {
 		// Try dispatching to SmsInternetServices
-		List<SmsInternetService> internetServices = getSmsInternetServicesForSending(binary);
+		List<SmsInternetService> internetServices = getSmsInternetServicesForSending(messageType);
 		int serviceCount = internetServices.size();
 		if(serviceCount > 0) {
 			// We have some SMS Internet services to send with.  These are assumed to be higher priority
@@ -489,7 +508,7 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 			dispatchSms(internetServices, messages);
 		} else {
 			// There are no available SMS Internet Services, so dispatch to SmsModems
-			List<SmsModem> sendingModems = getSmsModemsForSending(binary);
+			List<SmsModem> sendingModems = getSmsModemsForSending(messageType);
 			dispatchSms(sendingModems, messages);
 		}		
 	}
@@ -519,22 +538,32 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 		return retrieved;
 	}
 
-	/** @param binary <code>true</code> to get services for sending binary, <code>false</code> for services to send text  
-	 * @return all {@link SmsInternetService} which are available for sending messages. */
-	private List<SmsInternetService> getSmsInternetServicesForSending(boolean binary) {
+	/** @return all {@link SmsInternetService} which are available for sending messages. */
+	private List<SmsInternetService> getSmsInternetServicesForSending(MessageType messageType) {
 		ArrayList<SmsInternetService> senders = new ArrayList<SmsInternetService>();
 		for(SmsInternetService service : this.smsInternetServices) {
-			if(service.isConnected() && service.isUseForSending() &&
-					(!binary || service.isBinarySendingSupported())) {
-				senders.add(service);
+			if(service.isConnected() && service.isUseForSending()) {
+				boolean addService;
+				switch(messageType) {
+				case BINARY:
+					addService = service.isBinarySendingSupported();
+					break;
+				case UCS2_TEXT:
+					addService = service.isUcs2SendingSupported();
+					break;
+				case GSM7BIT_TEXT:
+					addService = true;
+					break;
+				default: throw new IllegalStateException();
+				}
+				if(addService) senders.add(service);
 			}
 		}
 		return senders;
 	}
 	
-	/** @param binary <code>true</code> to get phones for sending binary, <code>false</code> for phones to send text 
-	 * @return all {@link SmsModem} which are available for sending messages. */
-	private List<SmsModem> getSmsModemsForSending(boolean binary) {
+	/** @return all {@link SmsModem} which are available for sending messages. */
+	private List<SmsModem> getSmsModemsForSending(MessageType messageType) {
 		ArrayList<SmsModem> senders = new ArrayList<SmsModem>();
 		for(SmsModem modem : this.phoneHandlers.values()) {
 			if(modem.isRunning() && modem.isTimedOut()) {
@@ -544,11 +573,39 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 				// list.
 				if(LOG.isDebugEnabled()) LOG.debug("Watchdog from phone [" + modem.getPort() + "] has timed out! Disconnecting...");
 				handleDisconnect(modem);
-			} else if(modem.isConnected() && modem.isUseForSending() &&
-					(!binary || modem.isBinarySendingSupported())) {
-				senders.add(modem);
+			} else if(modem.isConnected() && modem.isUseForSending()) {
+				boolean addModem;
+				switch(messageType) {
+				case BINARY:
+					addModem = modem.isBinarySendingSupported();
+					break;
+				case UCS2_TEXT:
+					addModem = modem.isUcs2SendingSupported();
+					break;
+				case GSM7BIT_TEXT:
+					addModem = true;
+					break;
+				default: throw new IllegalStateException();
+				}
+				if(addModem) senders.add(modem);
 			}
 		}
 		return senders;
+	}
+}
+
+enum MessageType {
+	GSM7BIT_TEXT,
+	UCS2_TEXT,
+	BINARY;
+	
+	public static MessageType get(Message message) {
+		if(message.isBinaryMessage()) {
+			return BINARY;
+		} else if(GsmAlphabet.areAllCharactersValidGSM(message.getTextContent())) {
+			return GSM7BIT_TEXT;
+		} else {
+			return UCS2_TEXT;
+		}
 	}
 }
