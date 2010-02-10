@@ -80,7 +80,7 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 	/** List of phone handlers that this manager is currently looking after. */
 	private final ConcurrentMap<String, SmsModem> phoneHandlers = new ConcurrentHashMap<String, SmsModem>();
 	/** Set of SMS internet services */
-	private Set<SmsInternetService> smsInternetServices = new HashSet<SmsInternetService>();
+	private Set<SmsInternetService> smsInternetServices = new  CopyOnWriteArraySet<SmsInternetService>();
 
 	/** Listener to be passed SMS Listener events from this */
 	private SmsListener smsListener;
