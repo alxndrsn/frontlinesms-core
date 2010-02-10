@@ -499,18 +499,20 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 	 * @param binary <code>true</code> if the messages are binary, <code>false</code> if they are text
 	 */
 	private void dispatchSms(List<Message> messages, MessageType messageType) {
-		// Try dispatching to SmsInternetServices
-		List<SmsInternetService> internetServices = getSmsInternetServicesForSending(messageType);
-		int serviceCount = internetServices.size();
-		if(serviceCount > 0) {
-			// We have some SMS Internet services to send with.  These are assumed to be higher priority
-			// than Sms Modems, so send all messages with the internet services.
-			dispatchSms(internetServices, messages);
-		} else {
-			// There are no available SMS Internet Services, so dispatch to SmsModems
-			List<SmsModem> sendingModems = getSmsModemsForSending(messageType);
-			dispatchSms(sendingModems, messages);
-		}		
+		if(messages.size() > 0) {
+			// Try dispatching to SmsInternetServices
+			List<SmsInternetService> internetServices = getSmsInternetServicesForSending(messageType);
+			int serviceCount = internetServices.size();
+			if(serviceCount > 0) {
+				// We have some SMS Internet services to send with.  These are assumed to be higher priority
+				// than Sms Modems, so send all messages with the internet services.
+				dispatchSms(internetServices, messages);
+			} else {
+				// There are no available SMS Internet Services, so dispatch to SmsModems
+				List<SmsModem> sendingModems = getSmsModemsForSending(messageType);
+				dispatchSms(sendingModems, messages);
+			}		
+		}
 	}
 
 	/**
