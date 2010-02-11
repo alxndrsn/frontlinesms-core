@@ -510,7 +510,9 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 			} else {
 				// There are no available SMS Internet Services, so dispatch to SmsModems
 				List<SmsModem> sendingModems = getSmsModemsForSending(messageType);
-				dispatchSms(sendingModems, messages);
+				if(sendingModems.size() > 0) {
+					dispatchSms(sendingModems, messages);
+				}
 			}		
 		}
 	}

@@ -216,6 +216,16 @@ public class SmsDeviceManagerTest extends BaseTestCase {
 		verify(modemWith3Messages, times(4)).nextIncomingMessage();
 	}
 	
+	/** Tests that when there are no SMS devices, the messages are left in outbox. */
+	public void testNoSmsDevices() {
+		SmsDeviceManager manager = new SmsDeviceManager();
+		Message m = Message.createOutgoingMessage(System.currentTimeMillis(), "+123456", "+987654", "Hi");
+		manager.sendSMS(m);
+		manager.doRun();
+		
+		assertEquals(Message.STATUS_OUTBOX, m.getStatus());
+	}
+	
 	
 //> PRIVATE HELPER METHODS
 	/** @return a mock {@link SmsInternetService} with certain important methods stubbed */
