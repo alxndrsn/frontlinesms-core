@@ -175,13 +175,17 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		String currentLanguageFile = appProperties.getLanguageFilePath();
 		if (currentLanguageFile != null) {
 			LanguageBundle languageBundle = InternationalisationUtils.getLanguageBundle(new File(currentLanguageFile));
-			FrontlineUI.currentResourceBundle = languageBundle;
-			setResourceBundle(languageBundle.getProperties(), languageBundle.isRightToLeft());
-			Font requestedFont = languageBundle.getFont();
-			if(requestedFont != null) {
-				setFont(new Font(requestedFont.getName(), getFont().getStyle(), getFont().getSize()));
+			if(languageBundle == null) {
+				LOG.warn("Could not find language bundle at: " + currentLanguageFile);
+			} else {
+				FrontlineUI.currentResourceBundle = languageBundle;
+				setResourceBundle(languageBundle.getProperties(), languageBundle.isRightToLeft());
+				Font requestedFont = languageBundle.getFont();
+				if(requestedFont != null) {
+					setFont(new Font(requestedFont.getName(), getFont().getStyle(), getFont().getSize()));
+				}
+				LOG.debug("Loaded language from file: " + currentLanguageFile);
 			}
-			LOG.debug("Loaded language from file: " + currentLanguageFile);
 		}
 		
 		this.phoneManager = frontlineController.getSmsDeviceManager();
