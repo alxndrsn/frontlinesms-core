@@ -1252,10 +1252,7 @@ public class CService {
 			}
 			switch (answer) {
 				case 0:
-					log.warn("GSM: Auto-registration disabled! Ignoring it...");
-					// Changing this to test if the GSM Network Auto-Registration disabled option needs to stop the process.
-					//throw new GsmNetworkRegistrationException("GSM Network Auto-Registration disabled!");
-					return true;
+					throw new GsmNetworkRegistrationException("GSM Network Auto-Registration disabled!");
 				case 1:
 					log.info("GSM: Registered to home network.");
 					return true;
