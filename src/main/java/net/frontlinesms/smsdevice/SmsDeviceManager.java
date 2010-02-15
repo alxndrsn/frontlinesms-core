@@ -121,6 +121,11 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 		running = true;
 		while (running) {
 			doRun();
+			
+			// Individual phones should sleep, so there's no need to do this here!(?)  Here's
+			// a token pause in case things lock up / to stop this thread eating the CPU for
+			// breakfast.
+			Utils.sleep_ignoreInterrupts(10);
 		}
 		LOG.trace("EXIT");
 	}
@@ -140,10 +145,6 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 			dispatchUcs2TextSms();
 			dispatchBinarySms();
 			processModemReceiving();
-			// Individual phones should sleep, so there's no need to do this here!(?)  Here's
-			// a token pause in case things lock up / to stop this thread eating the CPU for
-			// breakfast.
-			Utils.sleep_ignoreInterrupts(10);
 		}
 	}
 

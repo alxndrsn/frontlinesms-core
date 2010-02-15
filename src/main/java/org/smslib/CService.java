@@ -1405,6 +1405,8 @@ public class CService {
 		private volatile boolean stopped;
 
 		public CKeepAliveThread() {
+			super(serialDriver.getPort() + " KeepAlive");
+			
 			stopFlag = false;
 			stopped = false;
 		}
@@ -1448,6 +1450,8 @@ public class CService {
 		private volatile boolean stopped;
 
 		public CReceiveThread() {
+			super(serialDriver.getPort() + " Receive");
+			
 			stopFlag = false;
 			stopped = false;
 		}
