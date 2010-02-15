@@ -157,8 +157,8 @@
 				<version>2.3</version>
 				<configuration>
 					<xmlOutput>true</xmlOutput>
-					<!-- Optional derectory to put findbugs xdoc xml report -->
-					<xmlOutputDirectory>target/site</xmlOutputDirectory>
+					<findbugsXmlOutput>true</findbugsXmlOutput>
+					<findbugsXmlWithMessages>true</findbugsXmlWithMessages>
 				</configuration>
 			</plugin>
 		</plugins>
