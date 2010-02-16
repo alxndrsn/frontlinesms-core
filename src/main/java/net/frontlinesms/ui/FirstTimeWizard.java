@@ -134,7 +134,7 @@ public class FirstTimeWizard extends FrontlineUI {
 		appProperties.saveToDisk();
 		
 		frameLauncher.dispose();
-		new UiGeneratorController(frontline, true);
+		new UiGeneratorController(frontline, false);
 	}
 
 //> INSTANCE HELPER METHODS

@@ -134,8 +134,9 @@ public class SmsModem extends Thread implements SmsDevice {
 	 * Create a new instance {@link SmsModem}
 	 * @param portName the name of the port which this modem is found on.  Value for {@link #portName}
 	 * @param smsListener the value for {@link #smsListener} 
+	 * @throws NoSuchPortException 
 	 */
-	public SmsModem(String portName, SmsListener smsListener) {
+	public SmsModem(String portName, SmsListener smsListener) throws NoSuchPortException {
 		super("SmsModem :: " + portName);
 		/*
 		 * Make this into a daemon thread - we never know when it may get blocked in native code.  Indeed this can be
@@ -156,14 +157,18 @@ public class SmsModem extends Thread implements SmsDevice {
 
 		//sets up the phone handler on a certain port, it will attempt to auto-detect the phone
 		try {
-			String currentOwner = CommPortIdentifier.getPortIdentifier(this.portName).getCurrentOwner();
-			if(currentOwner == null) currentOwner = "";
-			
-			this.setStatus(SmsModemStatus.OWNED_BY_SOMEONE_ELSE, currentOwner);
-		} catch (NoSuchPortException e) {
-			LOG.debug("Error getting owner from port", e);
+			CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(this.portName);
+			if(portIdentifier.isCurrentlyOwned()) {
+				String currentOwner = portIdentifier.getCurrentOwner();
+				if(currentOwner == null) {
+					currentOwner = "?";
+				}
+				this.setStatus(SmsModemStatus.OWNED_BY_SOMEONE_ELSE, currentOwner);
+			}
+		} catch (NoSuchPortException ex) {
+			LOG.debug("Error getting owner from port", ex);
 			//doesn't matter if it doesn't get this message
-			// TODO surely this NoSuchPortException should be thrown
+			throw ex;
 		}
 	}
 	
@@ -448,6 +453,7 @@ public class SmsModem extends Thread implements SmsDevice {
 
 	public void run() {
 		LOG.trace("ENTER");
+		
 		if(autoDetect) running = _doDetection();
 		else running = true;
 		while (running) {

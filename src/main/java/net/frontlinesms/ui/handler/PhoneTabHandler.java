@@ -488,16 +488,8 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 
 			SmsDevice[] smsDevices = phoneManager.getAllPhones().toArray(new SmsDevice[0]);
 			
-			for (int i = 0; i < smsDevices.length; i++) {
-				SmsDevice smsDevice = smsDevices[i];
-			}
-			
 			// Sort the SmsDevices by port name
 			Arrays.sort(smsDevices, SMS_DEVICE_COMPARATOR);
-
-			for (int i = 0; i < smsDevices.length; i++) {
-				SmsDevice smsDevice = smsDevices[i];
-			}
 			
 			// Add the SmsDevices to the relevant tables
 			for (SmsDevice dev : smsDevices) {
@@ -525,8 +517,9 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 		Object row = ui.createTableRow(dev);
 
 // FIXME these now share getMsisdn() code.
-		String statusString, fromMsisdn, makeAndModel, serial, port, baudRate;
-		String icon;
+		final String fromMsisdn = dev.getMsisdn();
+		final String statusString, makeAndModel, serial, port, baudRate;
+		final String icon;
 		if (dev instanceof SmsModem) {
 			SmsModem handset = (SmsModem) dev;
 			if(handset.isConnected()) {
@@ -539,7 +532,6 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 
 			port = handset.getPort();
 			baudRate = Integer.toString(handset.getBaudRate());
-			fromMsisdn = handset.getMsisdn();
 			makeAndModel = Utils.getManufacturerAndModel(handset.getManufacturer(), handset.getModel());
 			serial = handset.getSerial();
 			
@@ -554,7 +546,6 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 			
 			port = serv.isEncrypted() ? "HTTPS" : "HTTP";
 			baudRate = "";
-			fromMsisdn = serv.getMsisdn();
 			makeAndModel = SmsInternetServiceSettingsHandler.getProviderName(serv.getClass());
 			serial = serv.getIdentifier();
 			statusString = getSmsDeviceStatusAsString(serv);

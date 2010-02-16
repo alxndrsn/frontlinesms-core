@@ -425,17 +425,22 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 		LOG.debug("Port Name [" + portName + "]");
 		if(!shouldIgnore(portName) && portIdentifier.getPortType() == CommPortIdentifier.PORT_SERIAL) {
 			LOG.debug("It is a suitable port.");
-			if(!portIdentifier.isCurrentlyOwned()) {
-				LOG.debug("Connecting to port...");
-				SmsModem phoneHandler = new SmsModem(portName, this);
-				phoneHandlers.put(portName, phoneHandler);
-				if(connectToDiscoveredPhones) phoneHandler.start();
-			} else {
-				// If we don't have a handle on this port, but it's owned by someone else,
-				// then we add it to the phoneHandlers list anyway so that we can see its
-				// status.
-				LOG.debug("Port currently owned by another process.");
-				phoneHandlers.putIfAbsent(portName, new SmsModem(portName, this));
+			try {
+				SmsModem modem = new SmsModem(portName, this);
+				if(!portIdentifier.isCurrentlyOwned()) {
+					LOG.debug("Connecting to port...");
+					SmsModem phoneHandler = modem;
+					phoneHandlers.put(portName, phoneHandler);
+					if(connectToDiscoveredPhones) phoneHandler.start();
+				} else {
+					// If we don't have a handle on this port, but it's owned by someone else,
+					// then we add it to the phoneHandlers list anyway so that we can see its
+					// status.
+					LOG.debug("Port currently owned by another process.");
+					phoneHandlers.putIfAbsent(portName, modem);
+				}
+			} catch(NoSuchPortException ex) {
+				LOG.warn("Port is no longer available.", ex);
 			}
 		}
 	}
