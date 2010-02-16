@@ -6,13 +6,13 @@ package net.frontlinesms.smsdevice;
 import java.io.*;
 import java.util.*;
 
-import javax.comm.CommDriver;
-
 import net.frontlinesms.CommUtils;
 
 import serial.*;
 
 /**
+ * A commandline utility for detecting connected AT devices.
+ * The detection workflow was taken from ComTest in SMSLib.
  * @author Alex Anderson alex@frontlinesms.com
  */
 public class AllModemsDetector {
@@ -200,19 +200,6 @@ class Utils {
 			Thread.sleep(millis);
 		} catch(InterruptedException ex) {
 			// ignore
-		}
-	}
-
-	/** This methods allows initialisation of javax.comm serial drivers without the need for javax.comm.properties to be in the expected location */
-	public static final boolean initSerialDriver(String drivername) {
-		CommDriver driver;
-		try {
-			driver = (CommDriver) Class.forName(drivername).newInstance();
-			driver.initialize();
-			return true;
-		} catch (Throwable t) {
-			t.printStackTrace();
-			return false;
 		}
 	}
 	
