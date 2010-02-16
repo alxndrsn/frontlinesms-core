@@ -21,6 +21,8 @@
 
 package org.smslib;
 
+import java.util.Arrays;
+
 import org.smslib.sms.SmsMessageEncoding;
 import org.smslib.util.TpduUtils;
 
@@ -260,7 +262,7 @@ public abstract class CMessage {
 			CIncomingMessage msg = (CIncomingMessage) this;
 			str += " Memory Index: " + msg.getMemIndex();
 			str += "\n";
-			str += " Multi-part Memory Index: " + msg.getMpMemIndex();
+			str += " Multi-part Memory Index: " + Arrays.toString(msg.getMpMemIndex());
 			str += "\n";
 			str += " Memory Location: " + msg.getMemLocation();
 			str += "\n";

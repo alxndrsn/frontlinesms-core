@@ -57,9 +57,9 @@ public class FileLanguageBundle extends LanguageBundle {
 			pw = new PrintWriter(osw);
 			layout.format(pw, this.getProperties(), true);
 		} finally {
-			if(pw != null) try { pw.close(); } catch(Exception ex) {}
-			if(osw != null) try { osw.close(); } catch(Exception ex) {}
-			if(fos != null) try { fos.close(); } catch(Exception ex) {}
+			pw.close();
+			if(osw != null) try { osw.close(); } catch(IOException ex) {}
+			if(fos != null) try { fos.close(); } catch(IOException ex) {}
 		}
 	}
 

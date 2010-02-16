@@ -53,13 +53,16 @@ import thinlet.Thinlet;
  * @author Alex alex@frontlinesms.com
  */
 public class ContactsTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterPanelOwner, ContactEditorOwner {
-//> STATIC CONSTANTS
+	//> STATIC CONSTANTS
 	/** UI XML File Path: the Home Tab itself */
 	private static final String UI_FILE_CONTACTS_TAB = "/ui/core/contacts/contactsTab.xml";
 	private static final String UI_FILE_DELETE_OPTION_DIALOG_FORM = "/ui/dialog/deleteOptionDialogForm.xml"; // TODO move this to the correct path
 	private static final String UI_FILE_NEW_GROUP_FORM = "/ui/dialog/newGroupForm.xml"; // TODO move this to the correct path
 	
 	private static final String COMPONENT_GROUP_SELECTER_CONTAINER = "pnGroupsContainer";
+	private static final String COMPONENT_CONTACTS_PANEL = "pnContacts";
+	private static final String COMPONENT_DELETE_BUTTON = "deleteButton";
+	private static final String COMPONENT_SEND_SMS_BUTTON_GROUP_SIDE = "sendSMSButtonGroupSide";
 	
 //> INSTANCE PROPERTIES
 	/** Logging object */
@@ -124,13 +127,13 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 
 		Group g = this.groupSelecter.getSelectedGroup();
 		String toSet = InternationalisationUtils.getI18NString(COMMON_CONTACTS_IN_GROUP, g.getName());
-		this.ui.setText(find("pnContacts"), toSet); // FIXME this should be a constant
+		this.ui.setText(find(COMPONENT_CONTACTS_PANEL), toSet);
 		
 		Object buttonPanelContainer = find(COMPONENT_GROUP_SELECTER_CONTAINER);
-		Object deleteButton = this.ui.find(buttonPanelContainer, "deleteButton"); // FIXME this should be a constant
+		Object deleteButton = this.ui.find(buttonPanelContainer, COMPONENT_DELETE_BUTTON);
 		this.ui.setEnabled(deleteButton, !this.ui.isDefaultGroup(g));
 		
-		Object sms = this.ui.find(buttonPanelContainer, "sendSMSButtonGroupSide"); // FIXME this should be a constant
+		Object sms = this.ui.find(buttonPanelContainer, COMPONENT_SEND_SMS_BUTTON_GROUP_SIDE);
 		this.ui.setEnabled(sms, g != null);
 		
 		updateContactList();
@@ -407,7 +410,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			}
 		}
 		
-		Object sms = ui.find(find(COMPONENT_GROUP_SELECTER_CONTAINER), "sendSMSButtonGroupSide");
+		Object sms = ui.find(find(COMPONENT_GROUP_SELECTER_CONTAINER), COMPONENT_SEND_SMS_BUTTON_GROUP_SIDE);
 		ui.setEnabled(sms, selectedGroup != null);
 		ui.alert(InternationalisationUtils.getI18NString(MESSAGE_GROUPS_AND_CONTACTS_DELETED));
 		refresh();

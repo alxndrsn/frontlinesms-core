@@ -36,9 +36,9 @@ public class SMSGatewayProxy
 		sLogParams =  "clientid=" + sClientId;
 		sLogParams += "&clientver=" + sClientVer;
 
-		if ( sAppId!="" ) sLogParams += "&appid=" + sAppId;
-		if ( sAppVer!="" ) sLogParams += "&appver=" + sAppVer;
-		if ( sAppLic!="" ) sLogParams += "&applic=" + sAppLic;
+		if (sAppId != null && sAppId.length() > 0) sLogParams += "&appid=" + sAppId;
+		if (sAppVer != null && sAppVer.length() > 0) sLogParams += "&appver=" + sAppVer;
+		if (sAppLic != null && sAppLic.length() > 0) sLogParams += "&applic=" + sAppLic;
 
 		m_SMSGatewayService.SetOnceOnlyLogParams ( sLogParams );
 	}
