@@ -6,19 +6,26 @@ package thinlet;
 import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.Toolkit;
+import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.HashMap;
 
 /**
- * Manages icons used by a Thinlet instance.
- * @author Alex
+ * Manages icons used by a Thinlet instance.  This class ensures that only one instance of an
+ * image should be held in memory at any one time.
+ * @author Alex alex@frontlinesms.com
  */
 public class IconManager {
 	/** Thinlet object that owns this manager. */
 	private final Thinlet thinlet;
-	/** Icons stored by the manager. */
-	private final HashMap<String, Image> icons = new HashMap<String, Image>();
+	/**
+	 * Icons stored by the manager.  We use weak references to the icons here so that if
+	 * an icon is no longer used in the UI, it can be garbage collected.  Otherwise, we only
+	 * ever need to keep one copy of a particular image in memory at any one time.
+	 */
+	private final HashMap<String, WeakIconReference> icons = new HashMap<String, WeakIconReference>();
 
 //> CONSTRUCTORS
 	/**
@@ -40,12 +47,24 @@ public class IconManager {
 			return null;
 		}
 		
-		if(!icons.containsKey(location)) {
-			// The icon is not loaded yet, so load it now.
-			this.icons.put(location, this.getIcon(location, true));
+		WeakIconReference ref = this.icons.get(location);
+
+		Image icon = null;
+		if(ref != null) {
+			// At this point, the weak reference may have been cleared, so we need to
+			// be ready to reload the icon and create a new WeakReference if that's the
+			// case.
+			icon = ref.get();
 		}
 		
-		return this.icons.get(location);
+		if(icon == null) {
+			// Either there was no icon reference available in the map, or the reference
+			// had been cleared.
+			icon = this.getIcon(location, true);
+			this.icons.put(location, new WeakIconReference(icon));
+		}
+		
+		return icon;
 	}
 
 	/**
@@ -70,8 +89,9 @@ public class IconManager {
 			}
 		} catch (Throwable e) {}
 		if (image == null) {
+			InputStream is = null;
 			try {
-				InputStream is = getClass().getResourceAsStream(path);
+				is = getClass().getResourceAsStream(path);
 				if (is != null) {
 					byte[] data = new byte[is.available()];
 					is.read(data, 0, data.length);
@@ -81,7 +101,9 @@ public class IconManager {
 				else { // contributed by Wolf Paulus
 					image = Toolkit.getDefaultToolkit().getImage(new URL(path));
 				}
-			} catch (Throwable e) {}
+			} catch (Throwable e) {
+				if(is!=null) try { is.close(); } catch(IOException ex) { /* ignore */ }
+			}
 		}
 		if (preload && (image != null)) {
 			MediaTracker mediatracker = new MediaTracker(this.thinlet);
@@ -92,5 +114,16 @@ public class IconManager {
 			//imagepool.put(path, image);
 		} 
 		return image;
+	}
+}
+
+/**
+ * {@link WeakReference} to an {@link Image}.  Specifically used here to reference an
+ * icon.
+ * @author Alex alex@frontlinesms.com
+ */
+class WeakIconReference extends WeakReference<Image> {
+	public WeakIconReference(Image referent) {
+		super(referent);
 	}
 }
