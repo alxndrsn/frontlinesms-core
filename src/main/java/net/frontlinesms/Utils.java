@@ -45,12 +45,9 @@ import net.frontlinesms.resources.ResourceUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import static net.frontlinesms.FrontlineSMSConstants.*;
-
 /**
  * Class containing general helper methods that have nowhere better to live.
- * 
- * @author Alex Anderson alex(at)masabi(dot)com
+ * @author Alex Anderson alex@frontlinesms.com
  */
 public class Utils {
 	
