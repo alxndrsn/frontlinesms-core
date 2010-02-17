@@ -502,7 +502,8 @@ public class SmsModem extends Thread implements SmsDevice {
 						resetWatchdog();
 					}
 				} catch(UnrecognizedHandlerProtocolException ex) {
-					LOG.debug("Invalid protocol", ex);
+					LOG.debug("Invalid message protocol specified for device.", ex);
+					disconnect(true);
 				} catch(UnableToReconnectException ex) {
 					LOG.debug("Fatal exception in device communication.", ex);
 					this.setAutoReconnect(false);
@@ -605,9 +606,9 @@ public class SmsModem extends Thread implements SmsDevice {
 				// If the phone returns an OK, then it looks like it works at this baud
 				// rate.  Save this as the fastest speed, and then search at the next speed.
 				if (response.contains("OK")) {
-					phoneFound = true;
 					maxBaudRate = currentBaudRate;
 					setStatus(SmsModemStatus.DETECTED, Integer.toString(currentBaudRate));
+					phoneFound = true;
 				} 
 			} catch(IOException ex) {
 				// TODO Here, we've caught an IOException.  This could be something
@@ -720,42 +721,39 @@ public class SmsModem extends Thread implements SmsDevice {
 		while (messageList.size() > 0) {
 			resetWatchdog();
 			CIncomingMessage msg = (CIncomingMessage) messageList.removeFirst();
-			try {
-				LOG.debug("- From [" + msg.getOriginator() + "]"
-						+ "\n -Message [" + msg.getText() + "]"
-						+ "\n -ID [" + msg.getId() + "]"
-						+ "\n -Mem Index [" + msg.getMemIndex() + "]"
-						+ "\n -Mem Location [" + msg.getMemLocation() + "]"
-						+ "\n -Message Encoding [" + msg.getMessageEncoding() + "]"
-						+ "\n -Protocol ID [" + msg.getPid() + "]"
-						+ "\n -Reference Number [" + msg.getRefNo() + "]"
-						+ "\n -Type [" + msg.getType() + "]"
-						+ "\n -Date [" + msg.getDate() + "]");
 
-				if (msisdn != null && msisdn.length() != 0) {
-					msg.setId(msisdn);
-				} else if (serialNumber != null && serialNumber.length() != 0) {
-					msg.setId(serialNumber);
-				} else if (imsiNumber != null) {
-					msg.setId(imsiNumber);
-				}
-				LOG.debug("Changed ID [" + msg.getId() + "]");
+			LOG.debug("- From [" + msg.getOriginator() + "]"
+					+ "\n -Message [" + msg.getText() + "]"
+					+ "\n -ID [" + msg.getId() + "]"
+					+ "\n -Mem Index [" + msg.getMemIndex() + "]"
+					+ "\n -Mem Location [" + msg.getMemLocation() + "]"
+					+ "\n -Message Encoding [" + msg.getMessageEncoding() + "]"
+					+ "\n -Protocol ID [" + msg.getPid() + "]"
+					+ "\n -Reference Number [" + msg.getRefNo() + "]"
+					+ "\n -Type [" + msg.getType() + "]"
+					+ "\n -Date [" + msg.getDate() + "]");
 
-				if (smsListener != null) {
-					if (useDeliveryReports || msg.getType() != CIncomingMessage.MessageType.StatusReport) {
-						smsListener.incomingMessageEvent(this, msg);
-					}
-				} else inbox.add(msg);
-
-				if (isDeleteMessagesAfterReceiving() || msg.getType() == CIncomingMessage.MessageType.StatusReport) {
-					//delete msg if is supposed to do it, or if it is a delivery report.
-					LOG.debug("Removing message [" + msg.getId() + "] from phone.");
-					cService.deleteMessage(msg);
-				}
-			} catch (Exception e) {
-				//couldn't process message
-				LOG.info("Unable to process message.", e);
+			if (msisdn != null && msisdn.length() != 0) {
+				msg.setId(msisdn);
+			} else if (serialNumber != null && serialNumber.length() != 0) {
+				msg.setId(serialNumber);
+			} else if (imsiNumber != null) {
+				msg.setId(imsiNumber);
 			}
+			LOG.debug("Changed ID [" + msg.getId() + "]");
+
+			if (smsListener != null) {
+				if (useDeliveryReports || msg.getType() != CIncomingMessage.MessageType.StatusReport) {
+					smsListener.incomingMessageEvent(this, msg);
+				}
+			} else inbox.add(msg);
+
+			if (isDeleteMessagesAfterReceiving() || msg.getType() == CIncomingMessage.MessageType.StatusReport) {
+				//delete msg if is supposed to do it, or if it is a delivery report.
+				LOG.debug("Removing message [" + msg.getId() + "] from phone.");
+				cService.deleteMessage(msg);
+			}
+			
 			resetWatchdog();
 		}
 

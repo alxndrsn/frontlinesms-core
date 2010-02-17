@@ -103,12 +103,12 @@ public class CSerialDriver implements SerialPortEventListener {
 		 * There is no handling for these notifications except for logging, so I have
 		 * removed setting them.  Also, some combination of these notifications cause
 		 * my machine to lock up if certain devices are attached.
+			serialPort.notifyOnOutputEmpty(true);
+			serialPort.notifyOnBreakInterrupt(true);
+			serialPort.notifyOnFramingError(true);
+			serialPort.notifyOnOverrunError(true);
+			serialPort.notifyOnParityError(true);
 		 */
-//		serialPort.notifyOnOutputEmpty(true);
-//		serialPort.notifyOnBreakInterrupt(true);
-//		serialPort.notifyOnFramingError(true);
-//		serialPort.notifyOnOverrunError(true);
-//		serialPort.notifyOnParityError(true);
 		serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN);
 		serialPort.setSerialPortParams(getBaud(), SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 		serialPort.setInputBufferSize(BUFFER_SIZE);

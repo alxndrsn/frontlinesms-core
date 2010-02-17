@@ -629,7 +629,9 @@ public class CService {
 		// should send it a "join" to kill it off.
 		if(keepAliveThread!=null && !keepAliveThread.isStopped()) {
 			keepAliveThread.interrupt();
-			try { keepAliveThread.join(); } catch(InterruptedException ex) {}
+			// We no longer join() on the keepAliveThread, as this has a tendency to block
+			// indefinitely if the device has been disconnected unexpectedly.
+			//try { keepAliveThread.join(); } catch(InterruptedException ex) {}
 		}
 
 		receiveThread = null;
@@ -1413,9 +1415,9 @@ public class CService {
 
 		public void killMe() {
 			stopFlag = true;
-			synchronized (_SYNC_) {
-				this.interrupt();
-			}
+			// This is no longer synchronized on _SYNC_, as _SYNC_ is not released by the write method
+			// if there is a problem writing to a device (e.g. the device is disconnected unexpectedly).
+			this.interrupt();
 		}
 
 		public boolean isStopped() {
