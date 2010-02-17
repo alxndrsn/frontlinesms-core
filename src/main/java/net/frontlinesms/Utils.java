@@ -244,7 +244,6 @@ public class Utils {
 
 	/**
 	 * Decodes the supplied string from Base64.
-	 * FIXME should re-implement this so we are not relying on com.sun package
 	 * @param passwordEncrypted
 	 * @return decoded value of the supplied base64 string
 	 */
@@ -281,16 +280,18 @@ public class Utils {
 	private static final String[] BROWSERS = {"epiphany", "firefox", "mozilla", "konqueror", "netscape", "opera", "links", "lynx"};
 
 	/**
-	 * This method assumes that any URLs starting with something other than http:// are
+	 * <p>This method assumes that any URLs starting with something other than http:// are
 	 * links to the FrontlineSMS help manual.  On Linux and Windows machines, this is
-	 * assumed to be local.  On Mac OSX, we link to a website.
-	 * FIXME where did this code come from?
+	 * assumed to be local.  On Mac OSX, we link to a website.</p>
+	 * <p>This code was adapted from http://www.centerkey.com/java/browser/.  The original code
+	 * is in the public domain.</p>
 	 * @param url
 	 */
 	@SuppressWarnings("unchecked")
 	public static void openExternalBrowser(String url) {
 		String os = System.getProperty("os.name").toLowerCase();
 		Runtime rt = Runtime.getRuntime();
+	
 		try {
 			if (os.startsWith("win")) {
 				LOG.info("Attempting to open URL with Windows-specific code");
@@ -310,7 +311,7 @@ public class Utils {
 					LOG.debug("Rewriting local url '" + url + "'...");
 					String workingDirectory = System.getProperty("user.dir");
 					LOG.debug("Working directory: '" + workingDirectory + "'");
-//					url = workingDirectory + "/FrontlineSMS.app/Contents/Resources/" + url;
+					// url = workingDirectory + "/FrontlineSMS.app/Contents/Resources/" + url;
 					url = "http://www.frontlinesms.com/" + url;
 					LOG.debug("URL rewritten as '" + url + "'");
 				}
