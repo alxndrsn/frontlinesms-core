@@ -40,6 +40,8 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 
 	public static final String MESSAGE_EXISTENT_CONTACT = "message.contact.already.exists";
 
+	private static final String COMPONENT_SAVE_BUTTON = "btSave";
+
 //> INSTANCE PROPERTIES
 	private Logger LOG = Logger.getLogger(this.getClass());
 	private UiGeneratorController ui;
@@ -89,6 +91,7 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	
 	/** Adds {@link #dialogComponent} to {@link #ui} */
 	private void showDialog() {
+		validateRequiredFields();
 		ui.add(this.dialogComponent);
 	}
 
@@ -161,6 +164,12 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	}
 	
 //> UI EVENT METHODS
+	/** Checks the contents of required fields, and if they aren't all set, disables the save button. */
+	public void validateRequiredFields() {
+		boolean enableSaveButton = isRequiredFieldsFilled();
+		ui.setEnabled(find(COMPONENT_SAVE_BUTTON), enableSaveButton);
+	}
+	
 	/**
 	 * Updates or create a contact with the details added by the user. <br>
 	 * This method is used by advanced mode, and also Contact Merge
@@ -168,6 +177,13 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	 * @param contactDetailsDialog
 	 */
 	public void save() {
+		if(!isRequiredFieldsFilled()) {
+			// Certain required details are missing.  The save button should not be enabled
+			// at this point, but this method may be called from UI components' "perform"
+			// methods.
+			return;
+		}
+		
 		// Extract the new details of the contact from the UI
 		String name = getText(COMPONENT_CONTACT_NAME);
 		String msisdn = getText(COMPONENT_CONTACT_MOBILE_MSISDN);
@@ -258,8 +274,15 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	}
 	
 //> UI HELPER METHODS
+	/** Find a component in the contact edit dialog. */
 	private Object find(String componentName) {
 		return this.ui.find(this.dialogComponent, componentName);
+	}
+	
+	/** Check if all required fields have been filled */
+	private boolean isRequiredFieldsFilled() {
+		return ui.getText(find(COMPONENT_CONTACT_NAME)).trim().length() > 0
+				&& ui.getText(find(COMPONENT_CONTACT_MOBILE_MSISDN)).trim().length() > 0;
 	}
 	
 	/**
