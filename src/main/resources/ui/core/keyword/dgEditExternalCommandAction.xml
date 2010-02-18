@@ -18,9 +18,9 @@
         <separator colspan="2"/>
         <label text="i18n.common.response.type"/>
         <panel gap="10">
-            <checkbox action="activate(pnResponse)" group="responseType" icon="/icons/externalCommand_plaintText.png" name="rbPlainText" selected="true" text="i18n.common.plain.text" weightx="1"/>
-            <checkbox action="deactivate(pnResponse)" group="responseType" icon="/icons/externalCommand_listCommands.png" name="rbFrontlineCommands" text="i18n.common.frontline.commands" weightx="1"/>
-            <checkbox action="deactivate(pnResponse)" group="responseType" icon="/icons/externalCommand_noResponse.png" name="rbNoResponse" text="i18n.common.do.not.wait.response" weightx="1"/>
+            <checkbox action="setResponseType('simple')" group="responseType" icon="/icons/externalCommand_plaintText.png" name="rbPlainText" selected="true" text="i18n.common.plain.text" weightx="1"/>
+            <checkbox action="setResponseType('commands')" group="responseType" icon="/icons/externalCommand_listCommands.png" name="rbFrontlineCommands" text="i18n.common.frontline.commands" weightx="1"/>
+            <checkbox action="setResponseType('none')" group="responseType" icon="/icons/externalCommand_noResponse.png" name="rbNoResponse" text="i18n.common.do.not.wait.response" weightx="1"/>
         </panel>
         <panel border="true" bottom="5" colspan="2" columns="1" gap="10" left="5" name="pnResponse" right="5" text="i18n.common.what.to.do.response" top="5" weighty="1">
             <label icon="/icons/message.png" text="i18n.common.message"/>
@@ -29,7 +29,7 @@
                 <button action="addConstantToCommand(tfMessage.text,tfMessage, 4)" icon="/icons/externalCommand_response.png" name="btIncludeResponse" text="i18n.action.include.response" valign="center"/>
             </panel>
             <checkbox icon="/icons/sms_autoReply.png" name="cbAutoReply" selected="true" text="i18n.common.send.auto.reply" weightx="1"/>
-            <checkbox action="controlExternalCommandResponseType(groupList, this.selected)" icon="/icons/sms_autoForward.png" name="cbForward" text="i18n.common.forward.to.group" weightx="1"/>
+            <checkbox action="handleForwardChanged(this.selected)" icon="/icons/sms_autoForward.png" name="cbForward" text="i18n.common.forward.to.group" weightx="1"/>
             <list enabled="false" name="groupList" weightx="1"/>
         </panel>
     </panel>

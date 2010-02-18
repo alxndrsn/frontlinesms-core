@@ -6,15 +6,6 @@ package net.frontlinesms.ui.handler.keyword;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_GROUP_SELECTED_TO_FWD;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_START_DATE_AFTER_END;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_AUTO_REPLY;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_FORWARD;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_EXTERNAL_COMMAND_GROUP_LIST;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_RESPONSE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RB_FRONTLINE_COMMANDS;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RB_NO_RESPONSE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RB_PLAIN_TEXT;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RB_TYPE_COMMAND_LINE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RB_TYPE_HTTP;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_COMMAND;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE;
 
 import java.util.List;
@@ -33,7 +24,18 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  */
 public class ExternalCommandActionDialog extends BaseActionDialog {
 	/** UI XML Layout file for editing external command actions */
-	public static final String UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM = "/ui/core/keyword/dgEditExternalCommandAction.xml";
+	private static final String UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM = "/ui/core/keyword/dgEditExternalCommandAction.xml";
+	
+	private static final String COMPONENT_EXTERNAL_COMMAND_GROUP_LIST = "groupList";
+	private static final String COMPONENT_PN_RESPONSE = "pnResponse";
+	private static final String COMPONENT_RB_FRONTLINE_COMMANDS = "rbFrontlineCommands";
+	private static final String COMPONENT_RB_PLAIN_TEXT = "rbPlainText";
+	private static final String COMPONENT_RB_NO_RESPONSE = "rbNoResponse";
+	private static final String COMPONENT_RB_TYPE_COMMAND_LINE = "rbTypeCL";
+	private static final String COMPONENT_RB_TYPE_HTTP = "rbTypeHTTP";
+	private static final String COMPONENT_TF_COMMAND = "tfCommand";
+	private static final String COMPONENT_CB_FORWARD = "cbForward";
+	
 	/** DAO for {@link Group}s */
 	private final GroupDao groupDao;
 
@@ -119,7 +121,7 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 			initDateFields();
 		}
 	}
-
+	
 	/** @see net.frontlinesms.ui.handler.keyword.BaseActionDialog#getLayoutFilePath() */
 	@Override
 	protected String getLayoutFilePath() {
@@ -235,12 +237,33 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 	}
 	
 	/**
-	 * Activates or deactivates the supplied panel according to user selection.
-	 * @param list
+	 * Activates or deactivates the group selection list.
 	 * @param selected
 	 */
-	public void controlExternalCommandResponseType(Object list, boolean selected) {
-		if (selected) {
+	public void handleForwardChanged(boolean selected) {
+		activateGroupList(selected);
+	}
+	
+	public void setResponseType(String type) {
+		if(type.equals("simple")) {
+			// Enable the response panel
+			ui.activate(find(COMPONENT_PN_RESPONSE));
+			
+			// Enable or disable the group list as appropriate
+			boolean forwardCheckboxChecked = ui.isSelected(find(COMPONENT_CB_FORWARD));
+			if(forwardCheckboxChecked) {
+				activateGroupList(true);
+			}
+		} else {
+			// Disable the response panel
+			ui.deactivate(find(COMPONENT_PN_RESPONSE));
+		}
+	}
+	
+//> UI HELPER METHODS
+	private void activateGroupList(boolean activate) {
+		Object list = find(COMPONENT_EXTERNAL_COMMAND_GROUP_LIST);
+		if (activate) {
 			ui.activate(list);
 		} else {
 			ui.deactivate(list);

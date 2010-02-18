@@ -101,17 +101,8 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_MI_DELETE = "miDelete";
 	public static final String COMPONENT_MI_EDIT = "miEdit";
 	public static final String COMPONENT_TF_RECIPIENT = "tfRecipient";
-	public static final String COMPONENT_RB_NO_RESPONSE = "rbNoResponse";
-	public static final String COMPONENT_PN_RESPONSE = "pnResponse";
-	public static final String COMPONENT_RB_TYPE_COMMAND_LINE = "rbTypeCL";
 	public static final String COMPONENT_TF_MESSAGE = "tfMessage";
-	public static final String COMPONENT_CB_FORWARD = "cbForward";
 	public static final String COMPONENT_CB_AUTO_REPLY = "cbAutoReply";
-	public static final String COMPONENT_RB_FRONTLINE_COMMANDS = "rbFrontlineCommands";
-	public static final String COMPONENT_RB_PLAIN_TEXT = "rbPlainText";
-	public static final String COMPONENT_TF_COMMAND = "tfCommand";
-	public static final String COMPONENT_RB_TYPE_HTTP = "rbTypeHTTP";
-	public static final String COMPONENT_EXTERNAL_COMMAND_GROUP_LIST = COMPONENT_GROUP_LIST;
 	public static final String COMPONENT_TF_END_DATE = "tfEndDate";
 	public static final String COMPONENT_TF_START_DATE = "tfStartDate";
 	public static final String COMPONENT_RADIO_BUTTON_ACTIVE = "rb_active";

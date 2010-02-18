@@ -34,10 +34,8 @@ import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
-import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.KeywordActionDao;
 import net.frontlinesms.data.repository.KeywordDao;
-import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.handler.ComponentPagingHandler;
@@ -69,7 +67,6 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	public static final String COMPONENT_TF_KEYWORD = "tfKeyword";
 	public static final String COMPONENT_CB_ACTION_TYPE = "cbActionType";
 
-	private GroupDao groupDao;
 	private KeywordDao keywordDao;
 	private KeywordActionDao keywordActionDao;
 
@@ -83,7 +80,6 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		super(ui);
 		
 		FrontlineSMS frontlineController = ui.getFrontlineController();
-		this.groupDao = frontlineController.getGroupDao();
 		this.keywordDao = frontlineController.getKeywordDao();
 		this.keywordActionDao = frontlineController.getKeywordActionDao(); 
 	}
