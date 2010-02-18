@@ -56,14 +56,9 @@ public class Contact {
 		/** @see EntityField#getFieldName() */
 		public String getFieldName() { return this.fieldName; }
 	}
-
-	public long getId() {
-		return this.id;
-	}
 	
 //> INSTANCE PROPERTIES
 	/** Unique id for this entity.  This is for hibernate usage. */
-	@SuppressWarnings("unused")
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name=COLUMN_ID,unique=true,nullable=false,updatable=false)
 	private long id;
@@ -104,6 +99,11 @@ public class Contact {
 	}
 	
 //> ACCESSOR METHODS
+	/** @return the database ID of this contact */
+	public long getId() {
+		return this.id;
+	}
+	
 	/**
 	 * Returns this contact's name, or if none is set, his phone number.
 	 * @return a string representing this contact.
@@ -213,7 +213,6 @@ public class Contact {
 	/** @see Object#toString() */
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
 		return this.getClass().getName() + "[" +
 				"name=" + this.name + ";"+
 				"phoneNumber=" + this.phoneNumber + ";"+
@@ -222,24 +221,18 @@ public class Contact {
 				"notes=" + this.notes +
 				"]";
 	}
-	
-	/** @see java.lang.Object#hashCode() */
+
+	/** Generates a hashcode for the {@link Contact} using the {@link #phoneNumber} field. */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (active ? 1231 : 1237);
 		result = prime * result
-				+ ((emailAddress == null) ? 0 : emailAddress.hashCode());
-		result = prime * result + ((phoneNumber == null) ? 0 : phoneNumber.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((notes == null) ? 0 : notes.hashCode());
-		result = prime * result
-				+ ((otherPhoneNumber == null) ? 0 : otherPhoneNumber.hashCode());
+				+ ((phoneNumber == null) ? 0 : phoneNumber.hashCode());
 		return result;
 	}
 
-	/** @see java.lang.Object#equals(java.lang.Object) */
+	/** Checks that the two {@link Contact}s have the same {@link #phoneNumber} */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -249,32 +242,10 @@ public class Contact {
 		if (getClass() != obj.getClass())
 			return false;
 		Contact other = (Contact) obj;
-		if (active != other.active)
-			return false;
-		if (emailAddress == null) {
-			if (other.emailAddress != null)
-				return false;
-		} else if (!emailAddress.equals(other.emailAddress))
-			return false;
 		if (phoneNumber == null) {
 			if (other.phoneNumber != null)
 				return false;
 		} else if (!phoneNumber.equals(other.phoneNumber))
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (notes == null) {
-			if (other.notes != null)
-				return false;
-		} else if (!notes.equals(other.notes))
-			return false;
-		if (otherPhoneNumber == null) {
-			if (other.otherPhoneNumber != null)
-				return false;
-		} else if (!otherPhoneNumber.equals(other.otherPhoneNumber))
 			return false;
 		return true;
 	}

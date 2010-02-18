@@ -188,7 +188,7 @@ public class IncomingMessageProcessor extends Thread {
 		// Here, we strip the first four characters off the originator's number.  This is because we
 		// cannot be sure if the numbers supplied by the PhoneHandler are localised, or international
 		// with or without leading +.
-		Message message = messageDao.getMessageForStatusUpdate(statusReport.getOriginator().substring(4), incomingMessage.getRefNo());
+		Message message = messageDao.getMessageForStatusUpdate(statusReport.getOriginator(), incomingMessage.getRefNo());
 		if (message != null) {
 			LOG.debug("It's a delivery report for message [" + message + "]");
 			switch(statusReport.getDeliveryStatus()) {

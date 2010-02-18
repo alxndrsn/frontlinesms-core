@@ -19,7 +19,6 @@
  */
 package net.frontlinesms.data.repository;
 
-import java.util.Collection;
 import java.util.List;
 
 import net.frontlinesms.data.DuplicateKeyException;

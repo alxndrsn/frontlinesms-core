@@ -83,7 +83,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	/** @see MessageDao#getMessageForStatusUpdate(String, int) */
 	public Message getMessageForStatusUpdate(String targetMsisdnSuffix, int smscReference) {
 		DetachedCriteria criteria = super.getCriterion();
-		criteria.add(Restrictions.like(Field.RECIPIENT_MSISDN.getFieldName(), '%' + targetMsisdnSuffix));
+		criteria.add(Restrictions.eq(Field.RECIPIENT_MSISDN.getFieldName(), targetMsisdnSuffix));
 		criteria.add(Restrictions.eq(Field.SMSC_REFERENCE.getFieldName(), smscReference));
 		return super.getUnique(criteria);
 	}
@@ -219,8 +219,8 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 		String keywordString = keyword.getKeyword();
 		// FIXME this should be case-insensitive
 		Criterion matchKeyword = Restrictions.or(
-				Restrictions.eq(Field.MESSAGE_CONTENT.getFieldName(), keywordString),
-				Restrictions.like(Field.MESSAGE_CONTENT.getFieldName(), keywordString + ' '));
+				Restrictions.ilike(Field.MESSAGE_CONTENT.getFieldName(), keywordString), // This should match the keyword exactly, case insensitive
+				Restrictions.ilike(Field.MESSAGE_CONTENT.getFieldName(), keywordString + ' '));
 		criteria.add(matchKeyword);
 	}
 	
@@ -235,16 +235,14 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 		if(!sender && !receiver) {
 			throw new IllegalStateException("This neither sender nor receiver matching is requested.");
 		}
-		// TODO make sure that this size is the same as in the old implementation
-		String msisdnLike = '%' + phoneNumber.substring(Math.min(5, phoneNumber.length()));
-		SimpleExpression likeSender = Restrictions.like(Field.SENDER_MSISDN.getFieldName(), msisdnLike);
-		SimpleExpression likeReceiver = Restrictions.like(Field.RECIPIENT_MSISDN.getFieldName(), msisdnLike);
+		SimpleExpression eqSender = Restrictions.eq(Field.SENDER_MSISDN.getFieldName(), phoneNumber);
+		SimpleExpression eqReceiver = Restrictions.eq(Field.RECIPIENT_MSISDN.getFieldName(), phoneNumber);
 		if(sender && receiver) {
-			criteria.add(Restrictions.or(likeSender, likeReceiver));
+			criteria.add(Restrictions.or(eqSender, eqReceiver));
 		} else if(sender) {
-			criteria.add(likeSender);
+			criteria.add(eqSender);
 		} else if(receiver) {
-			criteria.add(likeReceiver);
+			criteria.add(eqReceiver);
 		}
 	}
 	
