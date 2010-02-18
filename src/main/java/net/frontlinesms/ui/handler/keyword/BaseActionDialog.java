@@ -1,5 +1,14 @@
 package net.frontlinesms.ui.handler.keyword;
 
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_UNDEFINED;
+import static net.frontlinesms.FrontlineSMSConstants.DEFAULT_END_DATE;
+import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_WRONG_FORMAT_DATE;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_END_DATE;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_START_DATE;
+
+import java.text.ParseException;
+import java.util.Date;
+
 import org.apache.log4j.Logger;
 
 import net.frontlinesms.Utils;
@@ -9,6 +18,7 @@ import net.frontlinesms.data.domain.KeywordAction;
 import net.frontlinesms.data.repository.KeywordActionDao;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
  * Base class containing shared attributes and behaviour of {@link KeywordAction} edit dialogs. 
@@ -140,6 +150,61 @@ public abstract class BaseActionDialog implements ThinletUiEventHandler {
 	 */
 	protected Object find(String componentName) {
 		return ui.find(this.dialogComponent, componentName);
+	}
+	
+	/**
+	 * If a {@link KeywordAction} is being edited, this will initialise the date fields with the
+	 * values attached to that action.
+	 */
+	protected void initDateFields() {
+		if(isEditing()) {
+			KeywordAction action = getTargetObject(KeywordAction.class);
+			
+			// Set the start date textfield
+			ui.setText(find(COMPONENT_TF_START_DATE), InternationalisationUtils.getDateFormat().format(action.getStartDate()));
+			
+			// Set the end date textfield
+			Object endDateTextfield = find(COMPONENT_TF_END_DATE);
+			long endDate = action.getEndDate();
+			String endDateAsString;
+			if (endDate == DEFAULT_END_DATE) {
+				endDateAsString = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
+			} else {
+				endDateAsString = InternationalisationUtils.getDateFormat().format(endDate);
+			}
+			ui.setText(endDateTextfield, endDateAsString);
+		}
+	}
+	
+	protected long getEnteredStartDate() throws DialogValidationException {
+		String startDate = ui.getText(find(COMPONENT_TF_START_DATE));
+		if (startDate.length() == 0) {
+			log.debug("No start date set, so we set to [" + InternationalisationUtils.getDefaultStartDate() + "]");
+			return System.currentTimeMillis();
+		} else {
+			try {
+				Date ds = InternationalisationUtils.parseDate(startDate); 
+				return ds.getTime();
+			} catch (ParseException ex) {
+				throw new DialogValidationException("Wrong format for date", ex, InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
+			}
+		}
+	}
+	protected long getEnteredEndDate() throws DialogValidationException {
+		String endDate = ui.getText(find(COMPONENT_TF_END_DATE));
+		
+		if(endDate.length() == 0 || endDate.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
+			log.debug("End date not set, so we set to the default.");
+			return DEFAULT_END_DATE;
+		} else {
+			
+		}
+		try {
+			Date de = InternationalisationUtils.parseDate(endDate);
+			return de.getTime();
+		} catch (ParseException ex) {
+			throw new DialogValidationException("Wrong format for date", ex, InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
+		}
 	}
 	
 //> UI PASSTHROUGH METHODS

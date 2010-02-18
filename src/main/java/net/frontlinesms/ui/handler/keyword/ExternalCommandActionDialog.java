@@ -3,11 +3,8 @@
  */
 package net.frontlinesms.ui.handler.keyword;
 
-import static net.frontlinesms.FrontlineSMSConstants.COMMON_UNDEFINED;
-import static net.frontlinesms.FrontlineSMSConstants.DEFAULT_END_DATE;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_GROUP_SELECTED_TO_FWD;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_START_DATE_AFTER_END;
-import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_WRONG_FORMAT_DATE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_AUTO_REPLY;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_FORWARD;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_EXTERNAL_COMMAND_GROUP_LIST;
@@ -18,15 +15,10 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RB_PL
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RB_TYPE_COMMAND_LINE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RB_TYPE_HTTP;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_COMMAND;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_END_DATE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_START_DATE;
 
-import java.text.ParseException;
-import java.util.Date;
 import java.util.List;
 
-import net.frontlinesms.Utils;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
@@ -124,16 +116,7 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 				ui.deactivate(pnResponse);
 			}
 			
-			//START and END dates
-			ui.setText(find(COMPONENT_TF_START_DATE), InternationalisationUtils.getDateFormat().format(action.getStartDate()));
-			Object endDate = find(COMPONENT_TF_END_DATE);
-			String toSet = "";
-			if (action.getEndDate() == DEFAULT_END_DATE) {
-				toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
-			} else {
-				toSet = InternationalisationUtils.getDateFormat().format(action.getEndDate());
-			}
-			ui.setText(endDate, toSet);
+			initDateFields();
 		}
 	}
 
@@ -149,37 +132,22 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 	 */
 	public void save() {
 		log.trace("ENTER");
-		String startDate = ui.getText(find(COMPONENT_TF_START_DATE));
-		String endDate = ui.getText(find(COMPONENT_TF_END_DATE));
-		log.debug("Start Date [" + startDate + "]");
-		log.debug("End Date [" + endDate + "]");
-		if (startDate.equals("")) {
-			log.debug("No start date set, so we set to [" + InternationalisationUtils.getDefaultStartDate() + "]");
-			startDate = InternationalisationUtils.getDefaultStartDate();
-		}
-		long start;
-		long end;
+
+		long start, end;
 		try {
-			Date ds = InternationalisationUtils.parseDate(startDate); 
-			if (!endDate.equals("") && !endDate.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
-				Date de = InternationalisationUtils.parseDate(endDate);
-				if (!Utils.validateDates(ds, de)) {
-					log.debug("Start date is not before the end date");
-					ui.alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
-					log.trace("EXIT");
-					return;
-				}
-				end = de.getTime();
-			} else {
-				end = DEFAULT_END_DATE;
-			}
-			start = ds.getTime();
-		} catch (ParseException e) {
-			log.debug("Wrong format for date", e);
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
+			start = getEnteredStartDate();
+			end = getEnteredEndDate();
+		} catch(DialogValidationException ex) {
+			ui.alert(ex.getUserMessage());
+			return;
+		}
+		if(end < start) {
+			log.debug("Start date is not before the end date");
+			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
 			log.trace("EXIT");
 			return;
-		} 
+		}
+		
 		int commandType = ui.isSelected(find(COMPONENT_RB_TYPE_HTTP)) ? KeywordAction.EXTERNAL_HTTP_REQUEST : KeywordAction.EXTERNAL_COMMAND_LINE;
 		String commandLine = ui.getText(find(COMPONENT_TF_COMMAND));
 		int responseType = KeywordAction.EXTERNAL_RESPONSE_DONT_WAIT;

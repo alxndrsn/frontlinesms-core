@@ -126,16 +126,6 @@ public class Utils {
 	}
 
 	/**
-	 * Compares the two supplied dates.
-	 * @param startDate Start date
-	 * @param endDate End Data
-	 * @return <code>true</code> if the start date is before the end date; <code>false</code> otherwise.
-	 */
-	public static boolean validateDates(Date startDate, Date endDate) {
-		return startDate.compareTo(endDate) <= 0;
-	}
-
-	/**
 	 * This method makes a http request and returns the response according to the supplied parameter.
 	 * @param url URL to connect.
 	 * @param waitForResponse <code>true</code> if this method should block and return the http response body; <code>false</code> otherwise

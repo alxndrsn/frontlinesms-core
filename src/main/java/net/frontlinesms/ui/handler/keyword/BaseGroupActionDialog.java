@@ -3,21 +3,13 @@
  */
 package net.frontlinesms.ui.handler.keyword;
 
-import static net.frontlinesms.FrontlineSMSConstants.COMMON_UNDEFINED;
-import static net.frontlinesms.FrontlineSMSConstants.DEFAULT_END_DATE;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_GROUP_CREATED_BY_USERS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_GROUP_SELECTED_TO_FWD;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_START_DATE_AFTER_END;
-import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_WRONG_FORMAT_DATE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_GROUP_SELECTER_TITLE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_END_DATE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_START_DATE;
 
-import java.text.ParseException;
-import java.util.Date;
 import java.util.List;
 
-import net.frontlinesms.Utils;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
@@ -81,19 +73,8 @@ abstract class BaseGroupActionDialog extends BaseActionDialog {
 			}
 			ui.add(list, item);
 		}
-		if (this.isEditing()) {
-			log.trace("UiGeneratorController.showGroupSelecter() : ADDING THE DATES COMPONENT.");
-			KeywordAction action = super.getTargetObject(KeywordAction.class);
-			ui.setText(find(COMPONENT_TF_START_DATE), InternationalisationUtils.getDateFormat().format(action.getStartDate()));
-			Object endDate = find(COMPONENT_TF_END_DATE);
-			String toSet = "";
-			if (action.getEndDate() == DEFAULT_END_DATE) {
-				toSet = InternationalisationUtils.getI18NString(COMMON_UNDEFINED);
-			} else {
-				toSet = InternationalisationUtils.getDateFormat().format(action.getEndDate());
-			}
-			ui.setText(endDate, toSet);
-		}
+		
+		initDateFields();
 	}
 	
 //> UI EVENT METHODS
@@ -116,37 +97,22 @@ abstract class BaseGroupActionDialog extends BaseActionDialog {
 			log.trace("EXIT");
 			return;
 		}
-		String startDate = ui.getText(ui.find(super.getDialogComponent(), COMPONENT_TF_START_DATE));
-		String endDate = ui.getText(ui.find(super.getDialogComponent(), COMPONENT_TF_END_DATE));
-		log.debug("Start Date [" + startDate + "]");
-		log.debug("End Date [" + endDate + "]");
-		if (startDate.equals("")) {
-			log.debug("No start date set, so we set to [" + InternationalisationUtils.getDefaultStartDate() + "]");
-			startDate = InternationalisationUtils.getDefaultStartDate();
-		}
-		long start;
-		long end;
+
+		long start, end;
 		try {
-			Date ds = InternationalisationUtils.parseDate(startDate); 
-			if (!endDate.equals("") && !endDate.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
-				Date de = InternationalisationUtils.parseDate(endDate);
-				if (!Utils.validateDates(ds, de)) {
-					log.debug("Start date is not before the end date");
-					ui.alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
-					log.trace("EXIT");
-					return;
-				}
-				end = de.getTime();
-			} else {
-				end = DEFAULT_END_DATE;
-			}
-			start = ds.getTime();
-		} catch (ParseException e) {
-			log.debug("Wrong format for date", e);
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
+			start = getEnteredStartDate();
+			end = getEnteredEndDate();
+		} catch(DialogValidationException ex) {
+			ui.alert(ex.getUserMessage());
+			return;
+		}
+		if(end < start) {
+			log.debug("Start date is not before the end date");
+			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
 			log.trace("EXIT");
 			return;
-		} 
+		}
+		
 		KeywordAction action;
 		boolean isNew = false;
 		if (isEditing()) {
