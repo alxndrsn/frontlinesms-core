@@ -13,8 +13,8 @@ import org.apache.log4j.Logger;
 import net.frontlinesms.junit.BaseTestCase;
 
 /**
+ * Tests for {@link CService}.
  * @author Alex
- *
  */
 public class CServiceTest extends BaseTestCase {
 	

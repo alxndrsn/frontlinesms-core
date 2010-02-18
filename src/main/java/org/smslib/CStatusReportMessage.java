@@ -57,9 +57,6 @@ public class CStatusReportMessage extends CIncomingMessage {
 		this.dateReceived = dateReceived;
 		messageText = "";
 		status = DeliveryStatus.Unknown;
-
-		// TODO why is this helpful?
-		setDate(null);
 	}
 	
 	/**
@@ -138,30 +135,6 @@ public class CStatusReportMessage extends CIncomingMessage {
 				status = DeliveryStatus.Aborted;
 				break;
 		}
-		
-//		if ((i & 0x60) == 0)
-//		{
-//			text = "00 - Succesful Delivery.";
-//			status = DeliveryStatus.Delivered;
-//		}
-//		if ((i & 0x20) == 0x20)
-//		{
-//			text = "01 - Errors, will retry dispatch.";
-//			status = DeliveryStatus.KeepTrying;
-//		}
-//		if ((i & 0x40) == 0x40)
-//		{
-//			text = "02 - Errors, stopped retrying dispatch.";
-//			status = DeliveryStatus.Aborted;
-//		}
-//		if ((i & 0x60) == 0x60)
-//		{
-//			text = "03 - Errors, stopped retrying dispatch.";
-//			status = DeliveryStatus.Aborted;
-//		}
-
-		// TODO why is this helpful?
-		setDate(null);
 	}
 	
 //> ACCESSORS

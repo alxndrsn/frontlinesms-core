@@ -169,10 +169,8 @@ public abstract class CMessage {
 		return date;
 	}
 
-	/**
-	 * TODO not sure why it's useful to set the date to <code>null</code>; maybe this should be prevented.
-	 * @param date */
-	public void setDate(Long date) {
+	/** @param date */
+	public void setDate(long date) {
 		this.date = date;
 	}
 
