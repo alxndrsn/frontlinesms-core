@@ -21,7 +21,6 @@ package net.frontlinesms;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.TreeSet;
 
 import javax.swing.UIManager;
 
@@ -32,8 +31,8 @@ import net.frontlinesms.ui.handler.core.DatabaseConnectionFailedDialog;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.LanguageBundle;
 
-import org.apache.commons.collections.list.TreeList;
 import org.apache.log4j.Logger;
+import org.springframework.dao.DataAccessException;
 
 import thinlet.Thinlet;
 
@@ -113,10 +112,12 @@ public class DesktopLauncher {
 					frontline.initApplicationContext();
 					frontline.getContactDao().getContactByName("test");
 					connected = true;
-				} catch(Exception ex) {
+				} catch(DataAccessException ex) {
 					LOG.warn("Problem testing database connection.", ex);
 					frontline.deinitApplicationContext();
 					DatabaseConnectionFailedDialog.create(ex).acquireSettings();
+				} catch(Exception ex) {
+					ErrorUtils.showErrorDialog("Error initialising application.", ex.getMessage(), ex, true);
 				}
 			}
 			
