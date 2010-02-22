@@ -52,6 +52,15 @@ public enum GsmAlphabetBaseTable implements GsmCharacterTable {
 		return characters[byteValue];
 	}
 	
+	public int getByteValue(char character) {
+		for (int i = 0; i < characters.length; i++) {
+			if(characters[i] == character) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
 //> STATIC HELPERS
 	public static final GsmAlphabetBaseTable getFromNli(int nli) {
 		for(GsmAlphabetBaseTable table : values()) {

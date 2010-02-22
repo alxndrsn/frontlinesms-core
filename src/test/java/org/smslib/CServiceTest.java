@@ -9,6 +9,7 @@ import java.io.StringReader;
 import java.lang.reflect.Field;
 
 import org.apache.log4j.Logger;
+import org.smslib.handler.CATHandler_Mock;
 
 import net.frontlinesms.junit.BaseTestCase;
 
@@ -27,6 +28,8 @@ public class CServiceTest extends BaseTestCase {
 	private MockSerialDriver serialDriver; 
 	
 //> TEST METHODS
+	/** Set up the Service we will use.
+	 * N.B. This loads {@link CATHandler_Mock} by reflection. */
 	@Override
 	protected void setUp() throws Exception {
 		this.service = new CService(PORT, BAUD, "Masabi", "Test Service", "Mock");

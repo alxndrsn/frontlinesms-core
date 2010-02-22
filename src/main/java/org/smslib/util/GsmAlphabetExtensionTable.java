@@ -80,6 +80,16 @@ public enum GsmAlphabetExtensionTable implements GsmCharacterTable {
 		return ' ';
 	}
 	
+	public int getByteValue(char character) {
+		for (int i = 0; i < this.characters.length; i++) {
+			GsmCharacter c = this.characters[i];
+			if(c.getCharacter() == character) {
+				return c.getByteValue();
+			}
+		}
+		return -1;
+	}
+	
 //> STATIC HELPERS
 	/** @throws UnsupportedLanguageException if the supplied NLI is not supported */
 	public static final GsmAlphabetExtensionTable getFromNli(int nli) {
