@@ -54,8 +54,8 @@ public class GsmAlphabetTest extends BaseTestCase {
 		String myString = GsmAlphabet.bytesToString(bytes);
 		try {
 			myAssertEquals("Generated strings not equal.",
-					myString,
-					cString);
+					cString,
+					myString);
 		} catch(ComparisonFailure c) {
 			log.debug("cString  : " + cString);
 			log.debug("myString : " + myString);
