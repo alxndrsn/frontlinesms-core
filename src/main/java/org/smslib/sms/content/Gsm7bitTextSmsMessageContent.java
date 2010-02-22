@@ -4,6 +4,8 @@
 package org.smslib.sms.content;
 
 import org.smslib.util.GsmAlphabet;
+import org.smslib.util.GsmAlphabetBaseTable;
+import org.smslib.util.GsmAlphabetExtensionTable;
 
 /**
  * @author Alex
@@ -51,11 +53,13 @@ public class Gsm7bitTextSmsMessageContent implements TextSmsMessageContent {
 	 * @param udWithoutHeader
 	 * @param udhLength
 	 * @param msSeptetCount
+	 * @param baseTable 
+	 * @param shiftTable 
 	 * @return a text message using the {@link GsmAlphabet}, decoded from the supplied data
 	 */
-	public static Gsm7bitTextSmsMessageContent getFromMs(byte[] udWithoutHeader, int udhLength, int msSeptetCount) {
+	public static Gsm7bitTextSmsMessageContent getFromMs(GsmAlphabetBaseTable baseTable, GsmAlphabetExtensionTable shiftTable, byte[] udWithoutHeader, int udhLength, int msSeptetCount) {
 		int skipBit = GsmAlphabet.calculateBitSkip(udhLength);
-		String messageContent = GsmAlphabet.bytesToString(GsmAlphabet.octetStream2septetStream(udWithoutHeader, skipBit, msSeptetCount));
+		String messageContent = GsmAlphabet.bytesToString(GsmAlphabet.octetStream2septetStream(udWithoutHeader, skipBit, msSeptetCount), baseTable, shiftTable);
 		return new Gsm7bitTextSmsMessageContent(messageContent);
 	}
 }

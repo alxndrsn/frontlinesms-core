@@ -8,6 +8,11 @@ import org.apache.log4j.Logger;
 import org.smslib.sms.content.BinarySmsMessageContent;
 import org.smslib.sms.content.Gsm7bitTextSmsMessageContent;
 import org.smslib.sms.content.Ucs2TextSmsMessageContent;
+import org.smslib.sms.header.NliLockingShift;
+import org.smslib.sms.header.NliSingleShift;
+import org.smslib.util.GsmAlphabetBaseTable;
+import org.smslib.util.GsmAlphabetExtensionTable;
+import org.smslib.util.TpduUtils;
 
 /**
  * The UD part of an SMS message
@@ -80,8 +85,9 @@ public class UserData implements PduComponent {
 		UserData userData = new UserData();
 
 		int udhLength = 0;
+		UserDataHeader header = null;
 		if(hasUdh) {
-			UserDataHeader header = UserDataHeader.getFromStream(in);
+			header = UserDataHeader.getFromStream(in);
 			userData.setHeader(header);
 			udhLength = header.getLength();
 		}
@@ -109,9 +115,32 @@ public class UserData implements PduComponent {
 			throw new PduDecodeException("There were unexpected bytes at the end of this message.");
 		} catch(EOFException ex) { /* Stream ends where we expected it to. */ }
 		
-		userData.setMessage(createEmmEss(messageEncoding, udWithoutHeader, udhLength, msSeptetCount));
+		if(messageEncoding == SmsMessageEncoding.GSM_7BIT) {
+			GsmAlphabetBaseTable baseAlphabetTable = getGsmAlphabetBaseTable(header);
+			GsmAlphabetExtensionTable extendedAlphabetTable = getGsmAlphabetExtensionTable(header);
+			
+			userData.setMessage(createEmmEss(baseAlphabetTable, extendedAlphabetTable, udWithoutHeader, udhLength, msSeptetCount));
+		} else {
+			userData.setMessage(createEmmEss(messageEncoding, udWithoutHeader));
+		}
 		
 		return userData;
+	}
+
+	/**
+	 * Creates a new {@link SmsMessageContent} from the supplied binary UD content
+	 * @param messageEncoding
+	 * @param udWithoutHeader the content of the UD, not including the UD-Header
+	 * @return message content of the supplied UD, decoded in the appropriate form
+	 */
+	private static SmsMessageContent createEmmEss(SmsMessageEncoding messageEncoding, byte[] udWithoutHeader) {
+		assert(messageEncoding != SmsMessageEncoding.GSM_7BIT) : "This method should not be used for GSM 7bit messages."; 
+		if(messageEncoding == SmsMessageEncoding.UCS2) {
+			return Ucs2TextSmsMessageContent.getFromMs(udWithoutHeader);
+		} else {
+			// Treat custom message encoding as binary 
+			return BinarySmsMessageContent.getFromMs(udWithoutHeader);
+		}
 	}
 	
 	/**
@@ -122,15 +151,38 @@ public class UserData implements PduComponent {
 	 * @param msSeptetCount
 	 * @return message content of the supplied UD, decoded in the appropriate form
 	 */
-	private static SmsMessageContent createEmmEss(SmsMessageEncoding messageEncoding, byte[] udWithoutHeader, int udhLength, int msSeptetCount) {
-		if(messageEncoding == SmsMessageEncoding.GSM_7BIT) {
-			// The position of the MS data actually depends on the length of the UDH, for some reason
-			return Gsm7bitTextSmsMessageContent.getFromMs(udWithoutHeader, udhLength, msSeptetCount);
-		} else if(messageEncoding == SmsMessageEncoding.UCS2) {
-			return Ucs2TextSmsMessageContent.getFromMs(udWithoutHeader);
-		} else {
-			// Treat custom message encoding as binary 
-			return BinarySmsMessageContent.getFromMs(udWithoutHeader);
-		}
+	private static SmsMessageContent createEmmEss(GsmAlphabetBaseTable baseTable, GsmAlphabetExtensionTable shiftTable, byte[] udWithoutHeader, int udhLength, int msSeptetCount) {
+		// The position of the MS data actually depends on the length of the UDH, for some reason
+		return Gsm7bitTextSmsMessageContent.getFromMs(baseTable, shiftTable, udWithoutHeader, udhLength, msSeptetCount);
+	}
+	
+	private static GsmAlphabetExtensionTable getGsmAlphabetExtensionTable(UserDataHeader header) {
+		int nliToUse = TpduUtils.TP_UDH_IEI_NLI_DEFAULT;
+		if(header != null) {
+			for(UserDataHeaderPart part : header.getParts()) {
+				if(part instanceof NliSingleShift) {
+					int nliOfPart = ((NliSingleShift) part).getNli();
+					if(GsmAlphabetExtensionTable.isNliSupported(nliOfPart)) {
+						nliToUse = nliOfPart;
+					}
+				}
+			}
+		} 
+		return GsmAlphabetExtensionTable.getFromNli(nliToUse);
+	}
+
+	private static GsmAlphabetBaseTable getGsmAlphabetBaseTable(UserDataHeader header) {
+		int nliToUse = TpduUtils.TP_UDH_IEI_NLI_DEFAULT;
+		if(header != null) {
+			for(UserDataHeaderPart part : header.getParts()) {
+				if(part instanceof NliLockingShift) {
+					int nliOfPart = ((NliLockingShift) part).getNli();
+					if(GsmAlphabetExtensionTable.isNliSupported(nliOfPart)) {
+						nliToUse = nliOfPart;
+					}
+				}
+			}
+		} 
+		return GsmAlphabetBaseTable.getFromNli(nliToUse);
 	}
 }

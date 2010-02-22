@@ -55,18 +55,6 @@ public class GsmAlphabet {
 		}
 		return true;
 	}
-	
-	/**
-	 * Removes non-GSM 7bit alphabet characters in a string, replacing with spaces as per the spec.
-	 * @param unescaped An unescaped string.
-	 * @return The same string, with spaces in place of invalid characters.
-	 */
-	public static String convertInvalidGSMCharactersToSpaces(String unescaped)
-	{
-		// perform GSM charset escaping by converting to 7bit values in a byte array, then converting back to a string...
-		//  - note the most elegant solution, but means we don't have to reinvent wheel
-		return bytesToString(stringToBytes(unescaped));
-	}
 
 
 	/**

@@ -84,6 +84,8 @@ public class UserDataHeader implements PduComponent {
 			// This is part of a multipart/concatenated message
 		case TpduUtils.TP_UDH_IEI_CONCAT_SMS_16BIT:
 			return IeConcat16bit.getFromStream(in);
+		case TpduUtils.TP_UDH_IEI_NATIONAL_LANGUAGE_SINGLE_SHIFT:
+			return NliSingleShift.getFromStream(in);
 		case TpduUtils.TP_UDH_IEI_WIRELESS_MESSAGE_CONTROL_PROTOCOL:
 			// N.B. No devices we have used will allow access to the WAP SI inbox using AT commands, so this is much of a muchness right now
 			/* Drop through to unknown handling */

@@ -676,29 +676,6 @@ public final class TpduUtils {
 		if (((partSize * (partNo - 1)) + partSize) > encodedText.length()) return encodedText.substring(partSize * (partNo - 1));
 		else return encodedText.substring(partSize * (partNo - 1), (partSize * (partNo - 1)) + partSize);
 	}
-
-	/**
-	 * Generate the PDUs for a standard text SMS message, with no SMSC Number,
-	 * maximum message validity, no special TP-Protocol-Identifier, a concat reference number of
-	 * zero, and source and destination ports of zero.
-	 * 
-	 * The character encoding of the text is set to {@link SmsMessageEncoding#GSM_7BIT} unless there are characters
-	 * outside of this alphabet.  If that is the case, {@link SmsMessageEncoding#UCS2} is used.
-	 * 
-	 * @param messageText
-	 * @param recipientMsisdn
-	 * @param requestStatusReport
-	 * @return
-	 */
-	public static String[] generatePdus(String messageText, String recipientMsisdn, boolean requestStatusReport) {
-		if(GsmAlphabet.areAllCharactersValidGSM(messageText)) {
-			return generatePdus_gsm7bit(messageText, "",
-					recipientMsisdn, 0, 0, 0, requestStatusReport, 0, 0, getDcsByte(SmsMessageEncoding.GSM_7BIT));
-		} else {
-			return generatePdus_ucs2(messageText, "",
-					recipientMsisdn, 0, 0, 0, requestStatusReport, 0, 0, getDcsByte(SmsMessageEncoding.UCS2));
-		}
-	}
 	
 	/**
 	 * Splits an octet stream into the separate parts that would be the payloads of

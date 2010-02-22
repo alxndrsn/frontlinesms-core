@@ -71,6 +71,7 @@ public class SmsDeliverPduTest extends BaseTestCase {
 			SmsMessageContent messageContent = pdu.getUserData().getMessage();
 			assertEquals("Message content was not the expected type.", Gsm7bitTextSmsMessageContent.class, messageContent.getClass());
 			Gsm7bitTextSmsMessageContent textContent = (Gsm7bitTextSmsMessageContent) messageContent;
+			System.out.println(testData.getMessageText());
 			assertEquals("Message content decoded incorrectly.", testData.getMessageText(), textContent.getContent());
 		}
 	}
