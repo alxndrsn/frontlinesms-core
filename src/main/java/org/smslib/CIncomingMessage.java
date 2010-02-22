@@ -28,6 +28,8 @@ import java.util.List;
 import org.smslib.sms.PduInputStream;
 import org.smslib.sms.SmsMessageEncoding;
 import org.smslib.util.GsmAlphabet;
+import org.smslib.util.GsmAlphabetBaseTable;
+import org.smslib.util.GsmAlphabetExtensionTable;
 import org.smslib.util.TpduUtils;
 
 /**
@@ -134,6 +136,10 @@ public class CIncomingMessage extends CMessage {
 			/** [TP-UDL: TP-User-Data-Length] Length of the UD, specific to the encoding. */
 			int userDataLength = in.read();
 			
+			// National language identifiers to use if we decode using 7-bit GSM
+			int nliBase = TpduUtils.TP_UDH_IEI_NLI_DEFAULT;
+			int nliExtension = TpduUtils.TP_UDH_IEI_NLI_DEFAULT;
+			
 			int udhLength;
 			if (hasUdh) {
 				udhLength = in.read();
@@ -160,6 +166,20 @@ public class CIncomingMessage extends CMessage {
 						this.mpMaxNo = in.read();
 						this.mpSeqNo = in.read();
 						break;
+					case TpduUtils.TP_UDH_IEI_NATIONAL_LANGUAGE_SINGLE_SHIFT:
+						int readNliExtension = in.read();
+						// Only used NLIs that we can support
+						if(GsmAlphabetExtensionTable.isNliSupported(readNliExtension)) {
+							nliExtension = readNliExtension;
+						}
+						break;
+					case TpduUtils.TP_UDH_IEI_NATIONAL_LANGUAGE_LOCKING_SHIFT:
+						int readNliBase = in.read();
+						// Only used NLIs that we can support
+						if(GsmAlphabetBaseTable.isNliSupported(readNliBase)) {
+							nliBase = readNliBase;
+						}
+						break;
 					case TpduUtils.TP_UDH_IEI_WIRELESS_MESSAGE_CONTROL_PROTOCOL:
 						// N.B. No devices we have used will allow access to the WAP SI inbox using AT commands, so this is much of a muchness right now
 						/* Drop through to unknown handling */
@@ -178,8 +198,6 @@ public class CIncomingMessage extends CMessage {
 			} else {
 				udhLength = 0;
 			}
-
-			int skipBit = GsmAlphabet.calculateBitSkip(udhLength);
 			
 			/** For GSM 7-bit encoded messages, we need to know the number of septets comprising the actual message. */
 			int msSeptetCount = 0; 
@@ -206,7 +224,9 @@ public class CIncomingMessage extends CMessage {
 			
 			if(messageEncoding == SmsMessageEncoding.GSM_7BIT) {
 				// The position of the MS data actually depends on the length of the UDH, for some reason
-				String messageText = GsmAlphabet.bytesToString(GsmAlphabet.octetStream2septetStream(udWithoutHeader, skipBit, msSeptetCount));
+				int skipBit = GsmAlphabet.calculateBitSkip(udhLength);
+				String messageText = GsmAlphabet.bytesToString(GsmAlphabet.octetStream2septetStream(udWithoutHeader, skipBit, msSeptetCount),
+						nliBase, nliExtension);
 				this.messageText = messageText;
 			} else if(messageEncoding == SmsMessageEncoding.UCS2) {
 				this.messageText = TpduUtils.decodeUcs2Text(udWithoutHeader);

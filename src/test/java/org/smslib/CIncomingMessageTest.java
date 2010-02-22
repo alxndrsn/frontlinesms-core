@@ -37,8 +37,14 @@ public class CIncomingMessageTest extends BaseTestCase {
 			String pdu = testData.getMessagePdu();
 			String expectedText = testData.getMessageText();
 			log.info("Testing message " + pdu + "'"+expectedText+"'");
-			CIncomingMessage message = new CIncomingMessage(pdu, 0, "");
-			assertEquals("GSM 7-bit Message not decoded by old implementation.", expectedText, message.getText());
+			
+			try {
+				CIncomingMessage message = new CIncomingMessage(pdu, 0, "");
+				assertEquals("GSM 7-bit Message not decoded by old implementation.", expectedText, message.getText());
+			} catch(MessageDecodeException ex) {
+				CIncomingMessage message = new CIncomingMessage(pdu, 0, "");
+				throw new RuntimeException("Failed to decode PDU: '" + pdu + "'", ex);
+			}
 		}
 	}
 	
@@ -61,13 +67,18 @@ public class CIncomingMessageTest extends BaseTestCase {
 	 * Tests unicode messages on the new implementation.
 	 * @throws Throwable 
 	 */
-	public void testUnicodeMessages() throws Throwable {
+	public void testUnicodeMessages()  {
 		for (int i = 0; i < IncomingTextSmsTestData.UCS2_MESSAGES.length; i++) {
 			IncomingTextSmsTestData testData = IncomingTextSmsTestData.UCS2_MESSAGES[i];
 			String pdu = testData.getMessagePdu();
 			String expectedText = testData.getMessageText();
-			CIncomingMessage newImplementation = new CIncomingMessage(pdu, 0, null);
-			assertEquals("Simple UCS-2 Message not decoded by new implementation.", expectedText, newImplementation.getText());
+			
+			try {
+				CIncomingMessage incomingMessage = new CIncomingMessage(pdu, 0, null);
+				assertEquals("Simple UCS-2 Message not decoded by new implementation.", expectedText, incomingMessage.getText());
+			} catch(MessageDecodeException ex) {
+				throw new RuntimeException("Unexpected exception decoding PDU '" + pdu + "'" + "; expected text: '" + expectedText + "'", ex);
+			}
 		}
 	}
 	

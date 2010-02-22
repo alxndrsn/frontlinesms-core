@@ -347,6 +347,19 @@ public class GsmAlphabet {
 		return text.toString();
 	}
 	
+	public static String bytesToString(byte[] bytes, int baseNli, int extensionNli) {
+		GsmAlphabetBaseTable baseTable = GsmAlphabetBaseTable.getFromNli(baseNli);
+		GsmAlphabetExtensionTable shiftTable = GsmAlphabetExtensionTable.getFromNli(extensionNli);
+		
+		StringBuffer text = new StringBuffer(bytes.length);
+		for (int i = 0; i < bytes.length; i++) {
+			if(bytes[i] == ESCAPE_SHIFT) {
+				text.append(shiftTable.getCharacter(bytes[++i]));
+			} else text.append(baseTable.getCharacter(bytes[i]));
+		}
+		return text.toString();
+	}
+	
 	/**
 	 * Gets the character value for an extended byte value found in a 7-bit GSM string.  The byte
 	 * code provided to this method is preceded by {@value #ESCAPE_SHIFT} in the 7-bit GSM string.

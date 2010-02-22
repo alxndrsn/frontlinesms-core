@@ -37,8 +37,7 @@ public class SmsDeliverPduTest extends BaseTestCase {
 		for(String hexPdu : BAD_PDUS) {
 			try {
 				log.trace("Attempting to decode bad PDU: " + hexPdu);
-				@SuppressWarnings("unused")
-				SmsDeliverPdu pdu = SmsDeliverPdu.getFromHex(hexPdu);
+				SmsDeliverPdu.getFromHex(hexPdu);
 				fail("Decoding should have thrown a " + PduDecodeException.class.getSimpleName() + " for pdu: [" + hexPdu + "]");
 			} catch (PduDecodeException ex) {
 				/* this exception is expected */

@@ -98,6 +98,52 @@ public final class TpduUtils {
 	public static final int TP_UDH_IEI_CONCAT_SMS_8BIT_LENGTH = 3;
 	/** TP-UDH [IEI: Information-Element-Identifier] Concatenated short message, 8-bit reference number. */
 	public static final int TP_UDH_IEI_WIRELESS_MESSAGE_CONTROL_PROTOCOL = 0x09;
+	/** TP-UDH [IEI: Information-Element-Identifier] National Language Single Shift
+	 * Indicates a national language SINGLE shift table should be used instead of the standard GSM 7-bit extension table.
+	 *   "The total length of the IE is 1 octet: octet 1=National Language Identifier. 
+	 *   A receiving entity shall ignore (i.e. skip over and commence processing at the next information element) this
+	 *   information element if the value of the National Language Identifier is not described in 3GPP TS 23.038 [9].
+	 *   If this IE is duplicated within different segments of a concatenated message then a receiving entity shall 
+	 *   process each segment individually.
+	 *   If this IE is not included within a segment of a concatenated message then the receiving entity shall use the
+	 *   GSM 7 bit default alphabet extension table for this segment.
+	 *   In the event that this IE is duplicated within one segment of a concatenated message or a single message then
+	 *   a receiving entity shall use the last occurrence of the IE.
+	 *   In the event that this IE is received within a single message or a segment of a concatenated message, in which
+	 *   the DCS has indicated UCS-2 encoding, then the receiving entity shall ignore this IE." */
+	public static final int TP_UDH_IEI_NATIONAL_LANGUAGE_SINGLE_SHIFT = 0x24;
+	public static final int TP_UDH_IEI_NATIONAL_LANGUAGE_LOCKING_SHIFT = 0x25;
+	/** [National Language Identifier] Default
+	 * This is not the official value for the default NLI - this cannot be explicitly specified.  This value should only
+	 * be used internally to indicate the default language, and should never be written to an SMS */
+	public static final int TP_UDH_IEI_NLI_DEFAULT = -1;
+	/** [National Language Identifier] Turkish */
+	public static final int TP_UDH_IEI_NLI_TURKISH = 0x01;
+	/** [National Language Identifier] Spanish */
+	public static final int TP_UDH_IEI_NLI_SPANISH = 0x02;
+	/** [National Language Identifier] Portuguese */
+	public static final int TP_UDH_IEI_NLI_PORTUGUESE = 0x03;
+	/** [National Language Identifier] Bengali */
+	public static final int TP_UDH_IEI_NLI_BENGALI = 0x04;
+	/** [National Language Identifier] Gujarati */
+	public static final int TP_UDH_IEI_NLI_GUJARATI = 0x05;
+	/** [National Language Identifier] Hindi */
+	public static final int TP_UDH_IEI_NLI_HINDI = 0x06;
+	/** [National Language Identifier] Kannada */
+	public static final int TP_UDH_IEI_NLI_KANNADA = 0x07;
+	/** [National Language Identifier] Malayalam */
+	public static final int TP_UDH_IEI_NLI_MALAYALAM = 0x08;
+	/** [National Language Identifier] Oriya */
+	public static final int TP_UDH_IEI_NLI_ORIYA = 0x09;
+	/** [National Language Identifier] Punjabi */
+	public static final int TP_UDH_IEI_NLI_PUNJABI = 0x0a;
+	/** [National Language Identifier] Tamil */
+	public static final int TP_UDH_IEI_NLI_TAMIL = 0x0b;
+	/** [National Language Identifier] Telugu */
+	public static final int TP_UDH_IEI_NLI_TELUGU = 0x0c;
+	/** [National Language Identifier] Urdu */
+	public static final int TP_UDH_IEI_NLI_URDU = 0x0d;
+
 	
 	/**
 	 * Array containing the characters allowable in the GSM Semi-Octet format.
