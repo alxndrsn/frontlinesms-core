@@ -38,6 +38,9 @@
 			<separator />
 			<menuitem icon="/icons/group.png" text="Show group selecter" action="showGroupSelecter"/>
 			
+			<separator />
+			<menuitem icon="/icons/sms_receive.png" text="Generate incoming SMS" action="dbgGenerateIncomingSms"/>
+			<menuitem icon="/icons/sms_send.png" text="Generate outgoing SMS" action="dbgGenerateOutgoingSms"/>
 		</menu>
 		<menu text="i18n.menubar.help">
 			<menuitem icon="/icons/help.png" text="i18n.menuitem.help.manual" action="showHelpPage('help-menu.htm')"/>

@@ -69,6 +69,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.LanguageBundle;
 
 import org.apache.log4j.Logger;
+import org.smslib.CIncomingMessage;
 
 import thinlet.FrameLauncher;
 import thinlet.Thinlet;
@@ -1731,6 +1732,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 	}
 	
+//> DEBUG METHODS
 	/** UI Event method: Generate test data 
 	 * @throws IOException */
 	public void generateTestData() throws IOException {
@@ -1750,5 +1752,15 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	public void groupSelectionChanged(Group selectedGroup) {
 		System.out.println("GROUP SELECTION IS NOW: " + selectedGroup);
+	}
+	
+	public void dbgGenerateIncomingSms() {
+		this.frontlineController.incomingMessageEvent(FrontlineSMS.EMULATOR, new CIncomingMessage("+123456789", "Test incoming SMS"));
+	}
+	
+	public void dbgGenerateOutgoingSms() {
+		Message testMessage = Message.createOutgoingMessage(System.currentTimeMillis(), null, "+123456789", "Test outgoing SMS");
+		this.messageFactory.saveMessage(testMessage);
+		this.frontlineController.outgoingMessageEvent(FrontlineSMS.EMULATOR, testMessage);
 	}
 }
