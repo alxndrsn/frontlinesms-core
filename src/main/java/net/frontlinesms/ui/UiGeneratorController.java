@@ -633,7 +633,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			}
 		}
 		
-		MessagePanelHandler messagePanelController = new MessagePanelHandler(this);
+		MessagePanelHandler messagePanelController = MessagePanelHandler.create(this);
 		// We need to add the message panel to the dialog before setting the send button method
 		add(dialog, messagePanelController.getPanel());
 		messagePanelController.setSendButtonMethod(this, dialog, "sendMessage(composeMessageDialog, composeMessage_to, tfMessage)");

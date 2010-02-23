@@ -42,11 +42,11 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 
 //> INSTANCE PROPERTIES
 	/** Logging obhect */
-	private final Logger LOG = Utils.getLogger(this.getClass());
+	private final Logger log = Utils.getLogger(this.getClass());
 	/** The {@link UiGeneratorController} that shows the tab. */
 	private final UiGeneratorController uiController;
 	/** The parent component */
-	private final Object messagePanel;
+	private Object messagePanel;
 	/** The number of people the current SMS will be sent to */
 	private int numberToSend = 1;
 
@@ -54,9 +54,14 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	/**
 	 * @param uiController
 	 */
-	public MessagePanelHandler(UiGeneratorController uiController) {
+	private MessagePanelHandler(UiGeneratorController uiController) {
 		this.uiController = uiController;
+	}
+	
+	private synchronized void init() {
+		assert(this.messagePanel == null) : "This has already been initialised.";
 		this.messagePanel = uiController.loadComponentFromFile(UI_FILE_MESSAGE_PANEL, this);
+		messageChanged("");
 	}
 
 //> ACCESSORS
@@ -201,6 +206,15 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	}
 
 //> STATIC FACTORIES
+	/**
+	 * Create and initialise a new {@link MessagePanelHandler}.
+	 * @return a new, initialised instance of {@link MessagePanelHandler}
+	 */
+	public static final MessagePanelHandler create(UiGeneratorController ui) {
+		MessagePanelHandler handler = new MessagePanelHandler(ui);
+		handler.init();
+		return handler;
+	}
 
 //> STATIC HELPER METHODS
 }

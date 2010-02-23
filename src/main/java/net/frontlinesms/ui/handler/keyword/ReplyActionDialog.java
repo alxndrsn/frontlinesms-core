@@ -48,7 +48,7 @@ public class ReplyActionDialog extends BaseActionDialog {
 	 */
 	protected void _init() {
 		// Load the reply form from file.
-		MessagePanelHandler messagePanelController = new MessagePanelHandler(this.ui);
+		MessagePanelHandler messagePanelController = MessagePanelHandler.create(this.ui);
 		Object pnMessage = messagePanelController.getPanel();
 		// FIX 0000542
 		Object pnBottom = ui.find(pnMessage, COMPONENT_PN_BOTTOM);

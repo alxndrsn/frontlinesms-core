@@ -12,15 +12,11 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import org.apache.log4j.Logger;
-
 import net.frontlinesms.FrontlineSMSConstants;
-import net.frontlinesms.Utils;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.ui.Event;
 import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.Icon;
-import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.UiProperties;
@@ -54,8 +50,6 @@ public class HomeTabHandler extends BaseTabHandler {
 
 
 //> INSTANCE PROPERTIES
-	/** The number of people the current SMS will be sent to */
-	private int numberToSend = 1;
 
 //> CONSTRUCTORS
 	/**
@@ -137,7 +131,6 @@ public class HomeTabHandler extends BaseTabHandler {
 		Contact selectedContact = ui.getContact(selectedItem);
 		ui.setText(tfRecipient, selectedContact.getPhoneNumber());
 		ui.remove(dialog);
-		this.numberToSend = 1;
 		ui.updateCost();
 	}
 
@@ -171,7 +164,7 @@ public class HomeTabHandler extends BaseTabHandler {
 		Object tabComponent = ui.loadComponentFromFile(UI_FILE_HOME_TAB, this);
 		
 		Object pnSend = ui.find(tabComponent, UiGeneratorControllerConstants.COMPONENT_PN_SEND);
-		Object pnMessage = new MessagePanelHandler(this.ui).getPanel();
+		Object pnMessage = MessagePanelHandler.create(this.ui).getPanel();
 		ui.add(pnSend, pnMessage);
 		
 		refreshLogoVisibility(tabComponent);
