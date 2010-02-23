@@ -28,11 +28,32 @@ public class ExtendedThinlet extends Thinlet {
 	 * @param parent
 	 * @param value
 	 */
-	private final void setEnabledRecursively(Object parent, boolean value) {
+	public final void setEnabledRecursively(Object parent, boolean value) {
 		setEnabled(parent, value);
 		for(Object component : getItems(parent)) {
 			if(!getClass(parent).equals(TABLE)) setEnabledRecursively(component, value);
 		}
+	}
+	
+	/**
+	 * Recursively sets a boolean attribute on a UI component and all its sub-components.
+	 * @param parent
+	 * @param value
+	 */
+	public final void setEditableRecursively(Object parent, boolean value) {
+		setEditable(parent, value);
+		for(Object component : getItems(parent)) {
+			if(!getClass(parent).equals(TABLE)) setEditableRecursively(component, value);
+		}
+	}
+	
+	/**
+	 *Sets the Editable property of a component
+	 * @param component
+	 * @param value
+	 */
+	public void setEditable(Object component, boolean value) {
+		super.setBoolean(component, "editable", value);
 	}
 
 //> COMPONENT ACCESSORS
@@ -220,6 +241,28 @@ public class ExtendedThinlet extends Thinlet {
 	 */
 	public void setPerform(Object component, String methodCall, Object root, Object handler) {
 		setMethod(component, Thinlet.PERFORM, methodCall, root, handler);
+	}
+	
+	/**
+	 * Set the INSERT method of a component
+	 * @param component
+	 * @param methodCall
+	 * @param root
+	 * @param handler
+	 */
+	public void setInsert(Object component, String methodCall, Object root, Object handler) {
+		setMethod(component, Thinlet.INSERT, methodCall, root, handler);
+	}
+	
+	/**
+	 * Set the REMOVE method of a component
+	 * @param component
+	 * @param methodCall
+	 * @param root
+	 * @param handler
+	 */
+	public void setRemove(Object component, String methodCall, Object root, Object handler) {
+		setMethod(component, Thinlet.REMOVE, methodCall, root, handler);
 	}
 	
 	/**

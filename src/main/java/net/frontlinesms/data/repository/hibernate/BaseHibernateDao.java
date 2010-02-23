@@ -8,6 +8,9 @@ import java.util.List;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.EntityField;
 import net.frontlinesms.data.Order;
+import net.frontlinesms.events.EventNotifier;
+import net.frontlinesms.events.impl.DidSaveNotification;
+import net.frontlinesms.events.impl.WillDeleteWarning;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,6 +36,8 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	private final Class<E> clazz;
 	/** The unqualified name of {@link #clazz} */
 	private final String className;
+	/**EventNotifier that sends out FrontlineEvents**/
+	private EventNotifier eventNotifier;
 	
 	/**
 	 * @param clazz
@@ -40,6 +45,10 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	protected BaseHibernateDao(Class<E> clazz) {
 		this.clazz = clazz;
 		this.className = clazz.getName();
+	}
+	
+	public void setEventNotifier(EventNotifier eventNotifier){
+		this.eventNotifier = eventNotifier;
 	}
 	
 	/**
@@ -50,6 +59,7 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 		log.trace("Saving entity: " + entity);
 		this.getHibernateTemplate().save(entity);
 		log.trace("Entity saved.");
+		eventNotifier.triggerEvent(new DidSaveNotification<E>("Thing saved:" + entity.toString(),entity));
 	}
 	
 	/**
@@ -113,6 +123,7 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	 * @param entity entity to delete
 	 */
 	protected void delete(E entity) {
+		eventNotifier.triggerEvent(new WillDeleteWarning<E>("Thing will be deleted:" + entity.toString(),entity));
 		log.trace("Deleting entity: " + entity);
 		this.getHibernateTemplate().delete(entity);
 		log.trace("Entity deleted.");

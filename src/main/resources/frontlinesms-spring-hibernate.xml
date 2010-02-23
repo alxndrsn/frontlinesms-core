@@ -19,17 +19,23 @@
 
 	<bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager" parent="sessionFactoryAware"/>
 
-	<bean id="contactDao" class="net.frontlinesms.data.repository.hibernate.HibernateContactDao" parent="sessionFactoryAware"/>
-	<bean id="emailDao" class="net.frontlinesms.data.repository.hibernate.HibernateEmailDao" parent="sessionFactoryAware"/>
-	<bean id="emailAccountDao" class="net.frontlinesms.data.repository.hibernate.HibernateEmailAccountDao" parent="sessionFactoryAware"/>
-	<bean id="groupDao" class="net.frontlinesms.data.repository.hibernate.HibernateGroupDao" parent="sessionFactoryAware"/>
-	<bean id="groupMembershipDao" class="net.frontlinesms.data.repository.hibernate.HibernateGroupMembershipDao" parent="sessionFactoryAware"/>
-	<bean id="keywordDao" class="net.frontlinesms.data.repository.hibernate.HibernateKeywordDao" parent="sessionFactoryAware"/>
-	<bean id="keywordActionDao" class="net.frontlinesms.data.repository.hibernate.HibernateKeywordActionDao" parent="sessionFactoryAware"/>
-	<bean id="messageDao" class="net.frontlinesms.data.repository.hibernate.HibernateMessageDao" parent="sessionFactoryAware"/>
-	<bean id="smsInternetServiceSettingsDao" class="net.frontlinesms.data.repository.hibernate.HibernateSmsInternetServiceSettingsDao" parent="sessionFactoryAware"/>
-	<bean id="smsModemSettingsDao" class="net.frontlinesms.data.repository.hibernate.HibernateSmsModemSettingsDao" parent="sessionFactoryAware"/>
-
+	<bean id="contactDao" class="net.frontlinesms.data.repository.hibernate.HibernateContactDao" parent="baseHibernateDao"/>
+	<bean id="emailDao" class="net.frontlinesms.data.repository.hibernate.HibernateEmailDao" parent="baseHibernateDao"/>
+	<bean id="emailAccountDao" class="net.frontlinesms.data.repository.hibernate.HibernateEmailAccountDao" parent="baseHibernateDao"/>
+	<bean id="groupDao" class="net.frontlinesms.data.repository.hibernate.HibernateGroupDao" parent="baseHibernateDao"/>
+	<bean id="groupMembershipDao" class="net.frontlinesms.data.repository.hibernate.HibernateGroupMembershipDao" parent="baseHibernateDao"/>
+	<bean id="keywordDao" class="net.frontlinesms.data.repository.hibernate.HibernateKeywordDao" parent="baseHibernateDao"/>
+	<bean id="keywordActionDao" class="net.frontlinesms.data.repository.hibernate.HibernateKeywordActionDao" parent="baseHibernateDao"/>
+	<bean id="messageDao" class="net.frontlinesms.data.repository.hibernate.HibernateMessageDao" parent="baseHibernateDao"/>
+	<bean id="smsInternetServiceSettingsDao" class="net.frontlinesms.data.repository.hibernate.HibernateSmsInternetServiceSettingsDao" parent="baseHibernateDao"/>
+	<bean id="smsModemSettingsDao" class="net.frontlinesms.data.repository.hibernate.HibernateSmsModemSettingsDao" parent="baseHibernateDao"/>
+	<bean id="eventNotifier" class="net.frontlinesms.events.impl.FrontlineEventNotifier"/>
+	
+	<bean id="baseHibernateDao" abstract="true">
+		<property name="sessionFactory" ref="sessionFactory"/>
+		<property name="eventNotifier" ref="eventNotifier"/>
+	</bean>
+	
 	<bean id="sessionFactoryAware" abstract="true">
 		<property name="sessionFactory" ref="sessionFactory"/>
 	</bean>
