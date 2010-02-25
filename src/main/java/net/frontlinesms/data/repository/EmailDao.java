@@ -55,7 +55,7 @@ public interface EmailDao {
 	 * @param status
 	 * @return all emails with the supplied statuses 
 	 */
-	public Collection<Email> getEmailsForStatus(Integer[] status);
+	public Collection<Email> getEmailsForStatus(Email.Status[] status);
 	
 	/** @return all emails */
 	public Collection<Email> getAllEmails();

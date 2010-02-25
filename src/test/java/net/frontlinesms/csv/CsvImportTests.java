@@ -105,7 +105,7 @@ public class CsvImportTests extends TestCase {
 							}
 						}
 					}
-					throw new IllegalArgumentException("Line contents differ in '" + importTestFile + "', read:###\n" + toString(readLine) + "\n###\n" + toString(expectedLine) + "\n###");
+					fail("Line contents differ in '" + importTestFile + "', read:###\n" + toString(readLine) + "\n###\n" + toString(expectedLine) + "\n###");
 				}
 			}
 		}

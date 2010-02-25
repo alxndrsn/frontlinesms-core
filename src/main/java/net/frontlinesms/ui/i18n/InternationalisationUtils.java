@@ -19,6 +19,12 @@
  */
 package net.frontlinesms.ui.i18n;
  
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_FAILED;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_OUTBOX;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_PENDING;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_RETRYING;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_SENT;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -40,6 +46,7 @@ import java.util.MissingResourceException;
 
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.Utils;
+import net.frontlinesms.data.domain.Email;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.ui.FrontlineUI;
 
@@ -358,6 +365,28 @@ public class InternationalisationUtils {
 				// this key does not appear in the language bundle, so add it with the value from the map
 				destination.put(key, source.get(key));
 			}
+		}
+	}
+
+	/**
+	 * Get the status of a {@link Email} as a {@link String}.
+	 * @param email
+	 * @return {@link String} representation of the status.
+	 */
+	public static final String getEmailStatusAsString(Email email) {
+		switch(email.getStatus()) {
+		case OUTBOX:
+			return getI18NString(COMMON_OUTBOX);
+		case PENDING:
+			return getI18NString(COMMON_PENDING);
+		case SENT:
+			return getI18NString(COMMON_SENT);
+		case RETRYING:
+			return getI18NString(COMMON_RETRYING);
+		case FAILED:
+			return getI18NString(COMMON_FAILED);
+		default:
+			return "(unknown)";
 		}
 	}
 }

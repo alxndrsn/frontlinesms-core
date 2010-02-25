@@ -85,7 +85,7 @@ public class EmailSender extends Thread {
 	 */
 	public void sendEmail(Email email) {
 		LOG.trace("ENTER");
-		email.setStatus(Email.STATUS_PENDING);
+		email.setStatus(Email.Status.PENDING);
 		outbox.add(email);
 		LOG.debug("E-mail added to outbox. Size is [" + outbox.size() + "]");
 		if (emailListener != null) {
@@ -186,16 +186,16 @@ public class EmailSender extends Thread {
 			
 			if (everythingOk) {
 				email.setDate(sent);
-				email.setStatus(Email.STATUS_SENT);
+				email.setStatus(Email.Status.SENT);
 				LOG.debug("E-mail [" + email + "] was sent!");
 			} else if (connectionOk || retries == 0) {
 				//Failed to send this e-mail, due to either sending failure or no more retries.
 				LOG.debug("E-mail [" + email + "] was not sent! Setting status to FAILED.");
-				email.setStatus(Email.STATUS_FAILED);
+				email.setStatus(Email.Status.FAILED);
 			} else {
 				//We still have some retries for this server, so we should re-try to send e-mails.
 				LOG.debug("E-mail [" + email + "] was not sent! Setting status to RE-TRYING.");
-				email.setStatus(Email.STATUS_RETRYING);
+				email.setStatus(Email.Status.RETRYING);
 				toAdd.add(email);
 			}
 			

@@ -221,7 +221,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 
 		LOG.debug("Re-Loading e-mails to outbox.");
 		//We need to reload all email, which status is RETRYING, to the outbox.
-		for (Email m : emailDao.getEmailsForStatus(new Integer[] {Email.STATUS_RETRYING, Email.STATUS_PENDING, Email.STATUS_OUTBOX})) {
+		for (Email m : emailDao.getEmailsForStatus(new Email.Status[] {Email.Status.RETRYING, Email.Status.PENDING, Email.Status.OUTBOX})) {
 			emailServerManager.sendEmail(m);
 		}
 	}

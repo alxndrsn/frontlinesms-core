@@ -73,26 +73,29 @@ public class Email {
 	}
 	
 //> CONSTANTS
+	public enum Status {
+		/** outgoing email that is created, and will be sent when the server is available */
+		OUTBOX,
+		/** outgoing email successfully delivered*/
+		SENT,
+		/** outgoing email failed*/
+		FAILED,
+		/** outgoing email pending*/
+		PENDING,
+		/** outgoing email re-trying*/
+		RETRYING
+	}
+
+//> INSTANCE PROPERTIES
 	/** Unique id for this entity.  This is for hibernate usage. */
 	@SuppressWarnings("unused")
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(unique=true,nullable=false,updatable=false)
 	private long id;
-	/** outgoing email that is created, and will be sent when the server is available */
-	public static final int STATUS_OUTBOX = 2;
-	/** outgoing email successfully delivered*/
-	public static final int STATUS_SENT = 4;	
-	/** outgoing email failed*/
-	public static final int STATUS_FAILED = 9;	
-	/** outgoing email pending*/
-	public static final int STATUS_PENDING = 3;
-	/** outgoing email re-trying*/
-	public static final int STATUS_RETRYING = 6;
-
-//> INSTANCE PROPERTIES
+	
 	/** Status of this email */
 	@Column(name=COLUMN_STATUS)
-	private int status;
+	private Status status;
 	
 	/** Subject line of the email */
 	@Column(name=COLUMN_SUBJECT)
@@ -159,7 +162,7 @@ public class Email {
 	 * Gets the status of this Email.  Should be one of the Email.STATUS_ constants.
 	 * @return {@link #status}
 	 */
-	public int getStatus() {
+	public Status getStatus() {
 		return this.status;
 	}
 	
@@ -167,7 +170,7 @@ public class Email {
 	 * sets the type of this Email.  Should be one of the Email.STATUS_ constants.
 	 * @param messageStatus new value for {@link #status}
 	 */
-	public void setStatus(int messageStatus) {
+	public void setStatus(Status messageStatus) {
 		this.status = messageStatus;
 	}
 
@@ -227,7 +230,6 @@ public class Email {
 		result = prime * result + (int) (date ^ (date >>> 32));
 		result = prime * result
 				+ ((recipients == null) ? 0 : recipients.hashCode());
-		result = prime * result + status;
 		result = prime * result + ((subject == null) ? 0 : subject.hashCode());
 		return result;
 	}
@@ -253,8 +255,6 @@ public class Email {
 			if (other.recipients != null)
 				return false;
 		} else if (!recipients.equals(other.recipients))
-			return false;
-		if (status != other.status)
 			return false;
 		if (subject == null) {
 			if (other.subject != null)

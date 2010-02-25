@@ -1110,28 +1110,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				return "(unknown)";
 		}
 	}
-	
-	/**
-	 * Get the status of a {@link Email} as a {@link String}.
-	 * @param email
-	 * @return {@link String} representation of the status.
-	 */
-	public static final String getEmailStatusAsString(Email email) {
-		switch(email.getStatus()) {
-		case Email.STATUS_OUTBOX:
-			return InternationalisationUtils.getI18NString(COMMON_OUTBOX);
-		case Email.STATUS_PENDING:
-			return InternationalisationUtils.getI18NString(COMMON_PENDING);
-		case Email.STATUS_SENT:
-			return InternationalisationUtils.getI18NString(COMMON_SENT);
-		case Email.STATUS_RETRYING:
-			return InternationalisationUtils.getI18NString(COMMON_RETRYING);
-		case Email.STATUS_FAILED:
-			return InternationalisationUtils.getI18NString(COMMON_FAILED);
-		default:
-			return "(unknown)";
-		}
-	}
 
 	/**
 	 * Gets a short description of a keyword-action.
@@ -1362,7 +1340,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public Object getRow(Email email) {
 		Object row = createTableRow(email);
 
-		add(row, createTableCell(getEmailStatusAsString(email)));
+		add(row, createTableCell(InternationalisationUtils.getEmailStatusAsString(email)));
 		if (email.getDate() == DEFAULT_END_DATE) {
 			add(row, createTableCell(""));
 		} else {
@@ -1411,7 +1389,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		if (currentTab.equals(TAB_EMAIL_LOG)) {
 			this.emailTabHandler.outgoingEmailEvent(sender, email);
 		}
-		if (email.getStatus() == Email.STATUS_SENT) {
+		if (email.getStatus() == Email.Status.SENT) {
 			newEvent(new Event(Event.TYPE_OUTGOING_EMAIL, InternationalisationUtils.getI18NString(COMMON_E_MAIL) + ": " + email.getEmailContent()));
 		}
 		LOG.trace("EXIT");

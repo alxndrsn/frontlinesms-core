@@ -39,8 +39,8 @@ public class HibernateEmailDao extends BaseHibernateDao<Email> implements EmailD
 		return super.countAll();
 	}
 
-	/** @see EmailDao#getEmailsForStatus(Integer[]) */
-	public Collection<Email> getEmailsForStatus(Integer[] status) {
+	/** @see EmailDao#getEmailsForStatus(Email.Status[]) */
+	public Collection<Email> getEmailsForStatus(Email.Status[] status) {
 		DetachedCriteria criteria = super.getCriterion();
 		criteria.add(Restrictions.in(Field.STATUS.getFieldName(), status));
 		return super.getList(criteria);

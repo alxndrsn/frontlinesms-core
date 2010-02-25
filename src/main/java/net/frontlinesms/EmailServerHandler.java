@@ -122,7 +122,7 @@ public class EmailServerHandler extends Thread implements EmailListener {
 	 */
 	public void sendEmail(Email outgoing) {
 		LOG.trace("ENTER");
-		outgoing.setStatus(Email.STATUS_OUTBOX);
+		outgoing.setStatus(Email.Status.OUTBOX);
 		outbox.add(outgoing);
 		if (emailListener != null) {
 			emailListener.outgoingEmailEvent(null, outgoing);

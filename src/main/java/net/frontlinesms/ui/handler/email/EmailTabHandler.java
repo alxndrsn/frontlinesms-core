@@ -11,21 +11,17 @@ import static net.frontlinesms.FrontlineSMSConstants.COMMON_STATUS;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_SUBJECT;
 import static net.frontlinesms.FrontlineSMSConstants.PROPERTY_FIELD;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 
 import thinlet.Thinlet;
 import thinlet.ThinletText;
 import net.frontlinesms.EmailSender;
 import net.frontlinesms.EmailServerHandler;
 import net.frontlinesms.FrontlineSMS;
-import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Email;
 import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.domain.Email.Field;
-import net.frontlinesms.data.repository.EmailAccountDao;
 import net.frontlinesms.data.repository.EmailDao;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BaseTabHandler;
@@ -61,10 +57,7 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 	/** DAO for {@link Email}s */
 	private EmailDao emailDao;
 	/** DAO for {@link EmailAccount}s */
-	private EmailAccountDao emailAccountDao;
 	
-	/** Thinlet UI Tab component */
-	private Object tabComponent;
 	/** Thinlet UI Component: list of emails */
 	private Object emailListComponent;
 	/** Paging handler for {@link #emailListComponent} */
@@ -81,7 +74,6 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 		FrontlineSMS frontlineController = ui.getFrontlineController();
 		this.emailManager = frontlineController .getEmailServerHandler();
 		this.emailDao = frontlineController.getEmailDao();
-		this.emailAccountDao = frontlineController.getEmailAccountFactory();
 	}
 	
 //> ACCESSORS
@@ -181,11 +173,11 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 		for (Object o : selected) {
 			Email toBeRemoved = ui.getEmail(o);
 			log.debug("E-mail [" + toBeRemoved + "]");
-			int status = toBeRemoved.getStatus();
-			if (status != Email.STATUS_PENDING 
-					&& status != Email.STATUS_RETRYING) {
+			Email.Status status = toBeRemoved.getStatus();
+			if (status != Email.Status.PENDING 
+					&& status != Email.Status.RETRYING) {
 				log.debug("Removing from database..");
-				if (status == Email.STATUS_OUTBOX) {
+				if (status == Email.Status.OUTBOX) {
 					emailManager.removeFromOutbox(toBeRemoved);
 				}
 				emailDao.deleteEmail(toBeRemoved);
@@ -194,7 +186,6 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 				log.debug("E-mail status is [" + toBeRemoved.getStatus() + "]. Do not remove...");
 			}
 		}
-		updatePageAfterDeletion(numberRemoved, emailListComponent);
 		if (numberRemoved > 0) {
 			updateEmailList();
 		}
@@ -213,10 +204,10 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 		Object[] selected = ui.getSelectedItems(emailListComponent);
 		for (Object o : selected) {
 			Email toBeReSent = ui.getEmail(o);
-			int status = toBeReSent.getStatus();
-			if (status == Email.STATUS_FAILED) {
+			Email.Status status = toBeReSent.getStatus();
+			if (status == Email.Status.FAILED) {
 				emailManager.sendEmail(toBeReSent);
-			} else if (status == Email.STATUS_SENT ) {
+			} else if (status == Email.Status.SENT ) {
 				Email newEmail = new Email(toBeReSent.getEmailFrom(), toBeReSent.getEmailRecipients(), toBeReSent.getEmailSubject(), toBeReSent.getEmailContent());
 				emailDao.saveEmail(newEmail);
 				emailManager.sendEmail(newEmail);
@@ -257,16 +248,6 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 	}
 	
 //> UI HELPER METHODS
-	/**
-	 * @param numberRemoved
-	 */
-	private void updatePageAfterDeletion(int numberRemoved, Object list) {
-		int limit = this.emailListPager.getMaxItemsPerPage();
-		int count = ui.getItems(this.emailListComponent).length;
-		if (numberRemoved == ui.getItems(list).length) {
-			// TODO possibly turn back a page
-		}
-	}
 	
 //> LISTENER EVENT METHODS
 	public synchronized void outgoingEmailEvent(EmailSender sender, Email email) {
@@ -286,7 +267,7 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 		} else {
 			int limit = this.emailListPager.getMaxItemsPerPage();
 			//Adding
-			if (ui.getItems(emailListComponent).length < limit && email.getStatus() == Email.STATUS_OUTBOX) {
+			if (ui.getItems(emailListComponent).length < limit && email.getStatus() == Email.Status.OUTBOX) {
 				ui.add(emailListComponent, ui.getRow(email));
 			}
 		}
