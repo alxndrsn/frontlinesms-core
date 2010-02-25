@@ -8,7 +8,19 @@ package org.smslib.util;
  */
 public enum GsmAlphabetBaseTable implements GsmCharacterTable {
 	DEFAULT(TpduUtils.TP_UDH_IEI_NLI_DEFAULT,
-			'@', '£', '$', '¥', 'è', 'é', 'ù', 'ì', 'ò', 'Ç', '\n', 'Ø', 'ø', '\r', 'Å', 'å',
+			'@', '£', '$', 
+				'\u00A5', // YEN SIGN
+				'\u00E8', // LATIN SMALL LETTER E WITH GRAVE
+				'\u00E9', // LATIN SMALL LETTER E WITH ACUTE
+				'\u00F9', // LATIN SMALL LETTER U WITH GRAVE
+				'\u00EC', // LATIN SMALL LETTER I WITH GRAVE
+				'\u00F2', // LATIN SMALL LETTER O WITH GRAVE
+				'\u00C7', // LATIN CAPITAL LETTER C WITH CEDILLA
+			                                   '\n',
+				                       			'\u00D8', // LATIN CAPITAL LETTER O WITH STROKE
+				                       			'\u00F8', // LATIN SMALL LETTER O WITH STROKE
+				                                               '\r', 'Å', 'å',
+			// Codes: 0x10-0x1f
 			'\u0394', // GREEK CAPITAL LETTER DELTA
 			'_',
 			'\u03A6', // GREEK CAPITAL LETTER PHI
@@ -25,17 +37,23 @@ public enum GsmAlphabetBaseTable implements GsmCharacterTable {
 			'\u00E6', // LATIN SMALL LETTER AE
 			'\u00DF', // LATIN SMALL LETTER SHARP S (German)
 			                                                                           'É',
+			// Codes: 0x20-0x2f                                                                      
 			' ', '!', '"', '#', '¤', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/',
+			// Codes: 0x30-0x3f
 			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?',
-			'¡', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',  
+			// Codes: 0x40-0x4f
+			'¡', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
+			// Codes: 0x50-0x5f
 			'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
 			'\u00C4', // LATIN CAPITAL LETTER A WITH DIAERESIS
 			'\u00D6', // LATIN CAPITAL LETTER O WITH DIAERESIS
 			'\u00D1', // LATIN CAPITAL LETTER N WITH TILDE
 			'\u00DC', // LATIN CAPITAL LETTER U WITH DIAERESIS
 			'\u00A7', // SECTION SIGN
+			// Codes: 0x60-0x6f
 			'\u00BF', // INVERTED QUESTION MARK
 			     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+			// Codes: 0x70-0x7f     
 			'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ä', 'ö', 'ñ', 'ü', 'à'
 		);
 	
