@@ -200,15 +200,14 @@ public class CsvUtils {
 					// We've finished this value, so we should continue to the next one
 					readStrings.add(lastValue.toString());
 					lastValue.delete(0, Integer.MAX_VALUE);
-				} else if(read == CR) {
-					// At this stage, if \n is not the character we have read, we have broken
-					// the reader, as we cannot add this read character back to the stream, and
-					// it may be part of the next line.
-					if(reader.read() != LF)
-						throw new CsvParseException("CR found without newline!  Check the spec and implement this proplerly");
-					// we've finished the line, with a new value!
-					readStrings.add(lastValue.toString());
-					return readStrings.toArray(new String[readStrings.size()]);
+				} else if(read == CR || read == LF) {
+					// In case we are seeing combinations like CRLF, or only CR or LF alone, accept all and ignore empty lines
+
+					if(lastValue.length() > 0) {
+						// we've finished the line, with a new value!
+						readStrings.add(lastValue.toString());
+						return readStrings.toArray(new String[readStrings.size()]);
+					}
 				} else {
 					lastValue.append((char)read);
 				}

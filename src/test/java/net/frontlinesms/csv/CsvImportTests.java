@@ -87,7 +87,11 @@ public class CsvImportTests extends TestCase {
 			++lineIndex;
 			log.trace("Readline: " + lineIndex + ": " + toString(readLine));
 			String[] expectedLine = expectedLines[lineIndex];
-			if(expectedLine.length != readLine.length) throw new IllegalArgumentException("Not enough lines in read line: " + readLine.length + " (read:###\n" + toString(readLine) + "\n###\n" + toString(expectedLine) + "\n###)");
+			assertEquals("Incorrect element count in '" + importTestFile + ":" + lineIndex + "'" +
+							"\n### READ ###\n" + toString(readLine) +
+							"\n### EXPECTED ###\n" + toString(expectedLine),
+					expectedLine.length,
+					readLine.length);
 			for (int i = 0; i < expectedLine.length; i++) {
 				if(!Arrays.deepEquals(readLine, expectedLine)) {
 					for (int j = 0; j < expectedLine.length; j++) {
@@ -101,7 +105,7 @@ public class CsvImportTests extends TestCase {
 							}
 						}
 					}
-					throw new IllegalArgumentException("Line contents differ, read:###\n" + toString(readLine) + "\n###\n" + toString(expectedLine) + "\n###");
+					throw new IllegalArgumentException("Line contents differ in '" + importTestFile + "', read:###\n" + toString(readLine) + "\n###\n" + toString(expectedLine) + "\n###");
 				}
 			}
 		}
