@@ -21,12 +21,21 @@ public enum GsmAlphabetBaseTable implements GsmCharacterTable {
 			'\u0398', // GREEK CAPITAL LETTER THETA
 			'\u039E', // GREEK CAPITAL LETTER XI
 			'\u00A0', // Escape to alphabet extension or national language single shift table.  "A receiving entity which does not understand the meaning of this escape mechanism shall display it as a space character."
-			                                                            'Æ', 'æ', 'ß', 'É',
+			'\u00C6', // LATIN CAPITAL LETTER AE
+			'\u00E6', // LATIN SMALL LETTER AE
+			'\u00DF', // LATIN SMALL LETTER SHARP S (German)
+			                                                                           'É',
 			' ', '!', '"', '#', '¤', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/',
 			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?',
 			'¡', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',  
-			'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'Ä', 'Ö', 'Ñ', 'Ü', '§',
-			'¿', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+			'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+			'\u00C4', // LATIN CAPITAL LETTER A WITH DIAERESIS
+			'\u00D6', // LATIN CAPITAL LETTER O WITH DIAERESIS
+			'\u00D1', // LATIN CAPITAL LETTER N WITH TILDE
+			'\u00DC', // LATIN CAPITAL LETTER U WITH DIAERESIS
+			'\u00A7', // SECTION SIGN
+			'\u00BF', // INVERTED QUESTION MARK
+			     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
 			'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ä', 'ö', 'ñ', 'ü', 'à'
 		);
 	
