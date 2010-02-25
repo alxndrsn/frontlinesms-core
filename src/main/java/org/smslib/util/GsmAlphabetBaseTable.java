@@ -41,7 +41,9 @@ public enum GsmAlphabetBaseTable implements GsmCharacterTable {
 					'\u00DF', // LATIN SMALL LETTER SHARP S (German)
 					'\u00C9', // LATIN CAPITAL LETTER E WITH ACUTE
 			// Codes: 0x20-0x2f                                                                      
-			' ', '!', '"', '#', '¤', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/',
+			' ', '!', '"', '#',
+					'\u00A4', // CURRENCY SIGN
+			                         '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/',
 			// Codes: 0x30-0x3f
 			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?',
 			// Codes: 0x40-0x4f
