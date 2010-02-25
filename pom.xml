@@ -99,6 +99,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<argLine>-enableassertions</argLine>
+					<forkMode>always</forkMode>
 				</configuration>
 			</plugin>
 			
