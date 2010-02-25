@@ -8,35 +8,38 @@ package org.smslib.util;
  */
 public enum GsmAlphabetBaseTable implements GsmCharacterTable {
 	DEFAULT(TpduUtils.TP_UDH_IEI_NLI_DEFAULT,
+			// Codes: 0x00-0x0f
 			'@', '£', '$', 
-				'\u00A5', // YEN SIGN
-				'\u00E8', // LATIN SMALL LETTER E WITH GRAVE
-				'\u00E9', // LATIN SMALL LETTER E WITH ACUTE
-				'\u00F9', // LATIN SMALL LETTER U WITH GRAVE
-				'\u00EC', // LATIN SMALL LETTER I WITH GRAVE
-				'\u00F2', // LATIN SMALL LETTER O WITH GRAVE
-				'\u00C7', // LATIN CAPITAL LETTER C WITH CEDILLA
+					'\u00A5', // YEN SIGN
+					'\u00E8', // LATIN SMALL LETTER E WITH GRAVE
+					'\u00E9', // LATIN SMALL LETTER E WITH ACUTE
+					'\u00F9', // LATIN SMALL LETTER U WITH GRAVE
+					'\u00EC', // LATIN SMALL LETTER I WITH GRAVE
+					'\u00F2', // LATIN SMALL LETTER O WITH GRAVE
+					'\u00C7', // LATIN CAPITAL LETTER C WITH CEDILLA
 			                                   '\n',
-				                       			'\u00D8', // LATIN CAPITAL LETTER O WITH STROKE
-				                       			'\u00F8', // LATIN SMALL LETTER O WITH STROKE
-				                                               '\r', 'Å', 'å',
+	       			'\u00D8', // LATIN CAPITAL LETTER O WITH STROKE
+	       			'\u00F8', // LATIN SMALL LETTER O WITH STROKE
+				                                               '\r',
+	       			'\u00C5', // LATIN CAPITAL LETTER A WITH RING ABOVE
+	    			'\u00E5', // LATIN SMALL LETTER A WITH RING ABOVE
 			// Codes: 0x10-0x1f
 			'\u0394', // GREEK CAPITAL LETTER DELTA
-			'_',
-			'\u03A6', // GREEK CAPITAL LETTER PHI
-			'\u0393', // GREEK CAPITAL LETTER GAMMA
-			'\u039B', // GREEK CAPITAL LETTER LAMDA
-			'\u03A9', // GREEK CAPITAL LETTER OMEGA
-			'\u03A0', // GREEK CAPITAL LETTER PI
-			'\u03A8', // GREEK CAPITAL LETTER PSI
-			'\u03A3', // GREEK CAPITAL LETTER SIGMA
-			'\u0398', // GREEK CAPITAL LETTER THETA
-			'\u039E', // GREEK CAPITAL LETTER XI
-			'\u00A0', // Escape to alphabet extension or national language single shift table.  "A receiving entity which does not understand the meaning of this escape mechanism shall display it as a space character."
-			'\u00C6', // LATIN CAPITAL LETTER AE
-			'\u00E6', // LATIN SMALL LETTER AE
-			'\u00DF', // LATIN SMALL LETTER SHARP S (German)
-			                                                                           'É',
+					'_',
+					'\u03A6', // GREEK CAPITAL LETTER PHI
+					'\u0393', // GREEK CAPITAL LETTER GAMMA
+					'\u039B', // GREEK CAPITAL LETTER LAMDA
+					'\u03A9', // GREEK CAPITAL LETTER OMEGA
+					'\u03A0', // GREEK CAPITAL LETTER PI
+					'\u03A8', // GREEK CAPITAL LETTER PSI
+					'\u03A3', // GREEK CAPITAL LETTER SIGMA
+					'\u0398', // GREEK CAPITAL LETTER THETA
+					'\u039E', // GREEK CAPITAL LETTER XI
+					'\u00A0', // Escape to alphabet extension or national language single shift table.  "A receiving entity which does not understand the meaning of this escape mechanism shall display it as a space character."
+					'\u00C6', // LATIN CAPITAL LETTER AE
+					'\u00E6', // LATIN SMALL LETTER AE
+					'\u00DF', // LATIN SMALL LETTER SHARP S (German)
+					'\u00C9', // LATIN CAPITAL LETTER E WITH ACUTE
 			// Codes: 0x20-0x2f                                                                      
 			' ', '!', '"', '#', '¤', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/',
 			// Codes: 0x30-0x3f
@@ -45,16 +48,21 @@ public enum GsmAlphabetBaseTable implements GsmCharacterTable {
 			'¡', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
 			// Codes: 0x50-0x5f
 			'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-			'\u00C4', // LATIN CAPITAL LETTER A WITH DIAERESIS
-			'\u00D6', // LATIN CAPITAL LETTER O WITH DIAERESIS
-			'\u00D1', // LATIN CAPITAL LETTER N WITH TILDE
-			'\u00DC', // LATIN CAPITAL LETTER U WITH DIAERESIS
-			'\u00A7', // SECTION SIGN
+					'\u00C4', // LATIN CAPITAL LETTER A WITH DIAERESIS
+					'\u00D6', // LATIN CAPITAL LETTER O WITH DIAERESIS
+					'\u00D1', // LATIN CAPITAL LETTER N WITH TILDE
+					'\u00DC', // LATIN CAPITAL LETTER U WITH DIAERESIS
+					'\u00A7', // SECTION SIGN
 			// Codes: 0x60-0x6f
 			'\u00BF', // INVERTED QUESTION MARK
 			     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
 			// Codes: 0x70-0x7f     
-			'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ä', 'ö', 'ñ', 'ü', 'à'
+			'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+					'\u00E4', // LATIN SMALL LETTER A WITH DIAERESIS
+					'\u00F6', // LATIN SMALL LETTER O WITH DIAERESIS
+					'\u00F1', // LATIN SMALL LETTER N WITH TILDE
+					'\u00FC', // LATIN SMALL LETTER U WITH DIAERESIS
+					'\u00E0' // LATIN SMALL LETTER A WITH GRAVE
 		);
 	
 //> PROPERTIES
