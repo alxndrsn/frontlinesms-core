@@ -7,9 +7,17 @@ package org.smslib.util;
  * @author Alex Anderson
  */
 public enum GsmAlphabetBaseTable implements GsmCharacterTable {
+	/*
+	 * It's important to unicode-encode characters here to make the build portable between
+	 * different computers who assume different encodings when reading the source files. 
+	 */
+	
+	/** The default GSM 7bit alphabet base table. */
 	DEFAULT(TpduUtils.TP_UDH_IEI_NLI_DEFAULT,
 			// Codes: 0x00-0x0f
-			'@', '£', '$', 
+			'@',
+			'\u00A3', // POUND SIGN
+			     '$', 
 					'\u00A5', // YEN SIGN
 					'\u00E8', // LATIN SMALL LETTER E WITH GRAVE
 					'\u00E9', // LATIN SMALL LETTER E WITH ACUTE
