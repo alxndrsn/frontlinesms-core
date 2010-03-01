@@ -36,19 +36,6 @@ public class HibernateGroupDaoTest extends HibernateTestCase {
 	private KeywordActionDao keywordActionDao;
 
 //> TEST METHODS
-//	/** @see HibernateTestCase#test() */
-//	public void test() throws DuplicateKeyException {
-//		test.test();
-//	}
-//	/** @see ReusableGroupDaoTest#testCascadingDelete() */
-//	public void testCascadingDelete() throws DuplicateKeyException {
-//		test.testCascadingDelete();
-//	}
-//	/** @see ReusableGroupDaoTest#testChildDelete() */
-//	public void testChildDelete() throws DuplicateKeyException {
-//		test.testChildDelete();
-//	}
-	
 	public void testDelete() throws DuplicateKeyException {
 		Group myGroup = new Group(getRootGroup(), "My Team");
 		groupDao.saveGroup(myGroup);
@@ -170,15 +157,6 @@ public class HibernateGroupDaoTest extends HibernateTestCase {
 	}
 	
 //> TEST SETUP/TEARDOWN
-
-	@Override
-	public void doTearDown() throws Exception {
-	}
-
-	@Override
-	public void test() throws Throwable {
-		// FIXME this method should not be necessary
-	}
 	
 //> ACCESSORS
 	/** @param d The DAO to use for the test. */
