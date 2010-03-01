@@ -5,6 +5,7 @@ package net.frontlinesms.data.repository.hibernate;
 
 import net.frontlinesms.junit.HibernateTestCase;
 
+import net.frontlinesms.data.domain.KeywordAction;
 import net.frontlinesms.data.repository.KeywordActionDao;
 
 import org.springframework.beans.factory.annotation.Required;
@@ -19,8 +20,7 @@ public class HibernateKeywordActionDaoTest extends HibernateTestCase {
 	private KeywordActionDao actionDao;
 
 //> TEST METHODS
-
-//> TEST SETUP/TEARDOWN
+	// TODO test all factory methods
 	
 //> ACCESSORS
 	/** @param d The DAO to use for the test. */
