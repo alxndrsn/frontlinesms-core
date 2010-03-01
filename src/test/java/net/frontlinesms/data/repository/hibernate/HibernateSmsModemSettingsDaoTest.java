@@ -5,8 +5,7 @@ package net.frontlinesms.data.repository.hibernate;
 
 import net.frontlinesms.junit.HibernateTestCase;
 
-import net.frontlinesms.data.DuplicateKeyException;
-import net.frontlinesms.data.repository.ReusableSmsModemSettingsDaoTest;
+import net.frontlinesms.data.domain.SmsModemSettings;
 import net.frontlinesms.data.repository.SmsModemSettingsDao;
 
 import org.springframework.beans.factory.annotation.Required;
@@ -16,29 +15,54 @@ import org.springframework.beans.factory.annotation.Required;
  * @author Alex
  */
 public class HibernateSmsModemSettingsDaoTest extends HibernateTestCase {
-//> PROPERTIES
-	/** Embedded shared test code from InMemoryDownloadDaoTest - Removes need to CopyAndPaste shared test code */
-	private final ReusableSmsModemSettingsDaoTest test = new ReusableSmsModemSettingsDaoTest() { /* nothing needs to be added */ };
+//> CONSTANTS
+	private static final String SERIAL_ONE = "Serial ONE";
+	
+	private static final String SERIAL_TWO = "Serial TWO";
+	
+//> INSTANCE PROPERTIES
+	/** Instance of this DAO implementation we are testing. */
+	private SmsModemSettingsDao dao;
 
 //> TEST METHODS
-	/** @see HibernateTestCase#test() */
-	public void test() throws DuplicateKeyException {
-		test.test();
-	}
+	/**
+	 * Test everything all at once!
+	 */
+	public void test() {
+		SmsModemSettings settingsOne = new SmsModemSettings(SERIAL_ONE, true, false, true, false);
+		
+		assertNull(dao.getSmsModemSettings(SERIAL_ONE));
+		
+		dao.saveSmsModemSettings(settingsOne);
+		
+		assertEquals(settingsOne, dao.getSmsModemSettings(SERIAL_ONE));
 
-//> TEST SETUP/TEARDOWN
-	/** @see net.frontlinesms.junit.HibernateTestCase#doTearDown() */
-	@Override
-	public void doTearDown() throws Exception {
-		this.test.tearDown();
+		SmsModemSettings settingsTwo = new SmsModemSettings(SERIAL_TWO, false, true, false, true);
+		
+		assertNull(dao.getSmsModemSettings(SERIAL_TWO));
+		
+		dao.saveSmsModemSettings(settingsTwo);
+
+		assertEquals(settingsOne, dao.getSmsModemSettings(SERIAL_ONE));
+		assertEquals(settingsTwo, dao.getSmsModemSettings(SERIAL_TWO));
+
+		SmsModemSettings settingsOneFetched = dao.getSmsModemSettings(SERIAL_ONE);
+		assertEquals(settingsOne, settingsOneFetched);
+		SmsModemSettings settingsTwoFetched = dao.getSmsModemSettings(SERIAL_TWO);
+		assertEquals(settingsTwo, settingsTwoFetched);
+
+		assertTrue(settingsOne.useForSending());
+		settingsOne.setUseForSending(false);
+		dao.updateSmsModemSettings(settingsOne);
+		settingsOne = dao.getSmsModemSettings(SERIAL_ONE);
+		assertFalse(settingsOne.useForSending());
 	}
 	
 //> ACCESSORS
 	/** @param d The DAO to use for the test. */
 	@Required
-	public void setSmsModemSettingsDao(SmsModemSettingsDao d)
-	{
+	public void setSmsModemSettingsDao(SmsModemSettingsDao d) {
 		// we can just set the DAO once in the test
-		test.setDao(d);
+		this.dao = d;
 	}
 }
