@@ -121,8 +121,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 * This method updated the contact list according to the new selection.
 	 */
 	public void groupSelectionChanged(Group selectedGroup) {
-		System.out.println("Group selected: " + selectedGroup);
-		LOG.trace("ENTER");
+		if(LOG.isTraceEnabled()) System.out.println("Group selected: " + selectedGroup);
 		this.ui.setText(this.ui.find(COMPONENT_CONTACT_MANAGER_CONTACT_FILTER), "");
 
 		Group g = this.groupSelecter.getSelectedGroup();
@@ -137,7 +136,6 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		this.ui.setEnabled(sms, g != null);
 		
 		updateContactList();
-		LOG.trace("EXIT");
 	}
 	
 //> CONTACT EDITING METHODS
