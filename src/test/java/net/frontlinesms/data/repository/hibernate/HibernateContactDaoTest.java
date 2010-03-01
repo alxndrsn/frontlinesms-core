@@ -50,8 +50,6 @@ public class HibernateContactDaoTest extends HibernateTestCase {
 	}
 
 //> TEST SETUP/TEARDOWN
-	public void doTearDown() throws Exception {/*TODO remove*/};
-	@Override public void test() throws Throwable {/*TODO remove*/}
 	
 //> ACCESSORS
 	/** @param d The DAO to use for the test. */

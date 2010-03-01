@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static org.mockito.Mockito.*;
  
 import thinlet.Thinlet;
 
@@ -17,6 +15,8 @@ import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.junit.BaseTestCase;
 import net.frontlinesms.ui.i18n.ClasspathLanguageBundle;
 import net.frontlinesms.ui.i18n.LanguageBundle;
+
+import static org.mockito.Mockito.*;
 
 /**
  * Test class for {@link CsvExporter}

@@ -46,12 +46,6 @@ public class HibernateKeywordDao extends BaseHibernateDao<Keyword> implements Ke
 
 	/** @see KeywordDao#getFromMessageText(String) */
 	public Keyword getFromMessageText(String messageText) {
-		/*
-		 * FIXME Get hibernate to do the keyword sorting and selection for us.
-		 * As a simple solution, could we create a query which searches for all keywords which match the first
-		 * 0-N words in the message text, order them by keyword character length, and return the top result?
-		 */
-		messageText = messageText.trim().toUpperCase();
 		List<Keyword> results = super.getAll();
 		if(results.size() == 0) return null;
 		Keyword longest = null;

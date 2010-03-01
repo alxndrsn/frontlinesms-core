@@ -76,7 +76,69 @@ public class KeywordTest extends BaseTestCase {
 		testGoodKeyword("yes!");
 		testGoodKeyword("Создать внешнюю команду");
 	}
-
+	
+	/**
+	 * Test {@link Keyword#hashCode()} and {@link Keyword#equals(Object)} methods work as expected.
+	 */
+	public void testHashcodeEquals() {
+		// Keyword.hashcode() and Keyword.equals() should depend ONLY on the keyword.keyword field
+		final String descriptionA = "a description";
+		final String descriptionB = "a different description";
+		Keyword keyword1 = new Keyword("hello", descriptionA);
+		
+		// Test that comparison to self passes
+		assertEqualsHashcodeTrue(keyword1, keyword1);
+		
+		// Test that comparison to a keyword with the same .keyword and .description fields passes
+		assertEqualsHashcodeTrue(keyword1, new Keyword("hello", descriptionA));
+		
+		// Test that comparison to a keyword with a different .descriptin but same .keyword field passes
+		assertEqualsHashcodeTrue(keyword1, new Keyword("hello", descriptionB));
+		
+		// test that comparison with null fails
+		assertEqualsHashcodeFalse(keyword1, null);
+		
+		// test that comparison fails if the description is the same but the keyword different
+		assertEqualsHashcodeFalse(keyword1, new Keyword("goodbye", descriptionA));
+		
+		// test that comparison with a different keyword fails
+		assertEqualsHashcodeFalse(keyword1, new Keyword("goodbye", descriptionB));
+	}
+	
+	public void testConstructor() {
+		final String testKeyword = "keyword";
+		final String testDescription = "description";
+		final Keyword keyword = new Keyword(testKeyword , testDescription );
+		
+		// N.B. Keyword will be converted to UPPER CASE when created
+		assertEquals(testKeyword.toUpperCase(), keyword.getKeyword());
+		assertEquals(testDescription, keyword.getDescription());
+	}
+	
+	public void testDescriptionAccessors() {
+		final Keyword keyword = new Keyword();
+		final String testDescription = "description";
+		keyword.setDescription(testDescription);
+		assertEquals(testDescription, keyword.getDescription());
+	}
+	
+	/**
+	 * Test the {@link Keyword#matches(String)} method.
+	 */
+	public void testMatches() {
+		final String description = "whatever";
+		Keyword one = new Keyword("one", description);
+		assertTrue(one.matches("one"));
+		assertTrue(one.matches("One"));
+		assertTrue(one.matches("onE"));
+		assertTrue(one.matches("ONE"));
+		assertTrue(one.matches("One "));
+		assertTrue(one.matches("One and some more words"));
+		assertTrue(one.matches(" One"));
+		assertFalse(one.matches("oneno"));
+		assertFalse(one.matches("ONEno"));
+	}
+	
 //> INSTANCE HELPER METHODS
 	/**
 	 * Tests creation of a keyword with a String which should be rejected.

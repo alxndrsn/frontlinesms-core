@@ -89,11 +89,10 @@ public class Keyword {
 	 * N.B. it may be the case that this keyword matches BUT SO DOES A LONGER KEYWORD.
 	 * @param messageContent message content to check this keyword against.
 	 * @return <code>true</code> if the message content matches this keyword; <code>false</code> otherwise.
-	 * FIXME this is only used by {@link InMemoryKeywordDao} so should be moved there
 	 */
 	public boolean matches(String messageContent) {
 		if(messageContent != null) {
-			messageContent = messageContent.toUpperCase();
+			messageContent = messageContent.trim().toUpperCase();
 			String keywordString = this.getKeyword();
 			if(messageContent.startsWith(keywordString + ' ')
 						|| messageContent.equals(keywordString)) {

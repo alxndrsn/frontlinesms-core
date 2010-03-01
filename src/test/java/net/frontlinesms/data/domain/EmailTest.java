@@ -3,8 +3,9 @@
  */
 package net.frontlinesms.data.domain;
 
-import static org.mockito.Mockito.*;
 import net.frontlinesms.junit.BaseTestCase;
+
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for the {@link Email} entity class.
