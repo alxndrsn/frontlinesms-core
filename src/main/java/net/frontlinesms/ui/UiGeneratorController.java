@@ -1119,7 +1119,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	private String getActionDescription(KeywordAction action) {
 		StringBuilder ret = new StringBuilder("");
 		switch (action.getType()) {
-			case KeywordAction.TYPE_FORWARD:
+			case TYPE_FORWARD:
 				ret.append(InternationalisationUtils.getI18NString(ACTION_FORWARD));
 				ret.append(": \"");
 				ret.append(KeywordAction.KeywordUtils.getForwardText(action, DEMO_SENDER, DEMO_SENDER.getPhoneNumber(), action.getKeyword().getKeyword() +  DEMO_MESSAGE_TEXT_INCOMING));
@@ -1129,29 +1129,29 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				ret.append(action.getGroup().getName());
 				ret.append("\"");
 				break;
-			case KeywordAction.TYPE_JOIN:
+			case TYPE_JOIN:
 				ret.append(InternationalisationUtils.getI18NString(COMMON_JOIN));
 				ret.append(": ");
 				ret.append(action.getGroup().getName());
 				break;
-			case KeywordAction.TYPE_LEAVE:
+			case TYPE_LEAVE:
 				ret.append(InternationalisationUtils.getI18NString(COMMON_LEAVE));
 				ret.append(": ");
 				ret.append(action.getGroup().getName());
 				break;
-			case KeywordAction.TYPE_REPLY:
+			case TYPE_REPLY:
 				ret.append(InternationalisationUtils.getI18NString(COMMON_REPLY));
 				ret.append(": ");
 				ret.append(KeywordAction.KeywordUtils.getReplyText(action, DEMO_SENDER, DEMO_SENDER.getPhoneNumber(), DEMO_MESSAGE_TEXT_INCOMING, DEMO_MESSAGE_KEYWORD));
 				break;
-			case KeywordAction.TYPE_EXTERNAL_CMD:
-				if (action.getExternalCommandType() == KeywordAction.EXTERNAL_HTTP_REQUEST) {
+			case TYPE_EXTERNAL_CMD:
+				if (action.getExternalCommandType() == KeywordAction.ExternalCommandType.EXTERNAL_HTTP_REQUEST) {
 					ret.append(InternationalisationUtils.getI18NString(COMMON_HTTP_REQUEST));
 				} else {
 					ret.append(InternationalisationUtils.getI18NString(COMMON_EXTERNAL_COMMAND));
 				}
 				break;
-			case KeywordAction.TYPE_EMAIL:
+			case TYPE_EMAIL:
 				ret.append(InternationalisationUtils.getI18NString(COMMON_E_MAIL));
 				ret.append(": ");
 				ret.append(KeywordAction.KeywordUtils.getReplyText(action, DEMO_SENDER, DEMO_SENDER.getPhoneNumber(), action.getKeyword().getKeyword() + DEMO_MESSAGE_TEXT_INCOMING, DEMO_MESSAGE_KEYWORD));
@@ -1227,25 +1227,25 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		Object row = createTableRow(action);
 		String icon;
 		switch(action.getType()) {
-		case KeywordAction.TYPE_FORWARD:
+		case TYPE_FORWARD:
 			icon = Icon.ACTION_FORWARD;
 			break;
-		case KeywordAction.TYPE_JOIN:
+		case TYPE_JOIN:
 			icon = Icon.ACTION_JOIN;
 			break;
-		case KeywordAction.TYPE_LEAVE:
+		case TYPE_LEAVE:
 			icon = Icon.ACTION_LEAVE;
 			break;
-		case KeywordAction.TYPE_REPLY:
+		case TYPE_REPLY:
 			icon = Icon.ACTION_REPLY;
 			break;
-		case KeywordAction.TYPE_EXTERNAL_CMD:
-			if (action.getExternalCommandType() == KeywordAction.EXTERNAL_COMMAND_LINE) 
+		case TYPE_EXTERNAL_CMD:
+			if (action.getExternalCommandType() == KeywordAction.ExternalCommandType.EXTERNAL_COMMAND_LINE) 
 				icon = Icon.ACTION_EXTERNAL_COMMAND;
 			else 
 				icon = Icon.ACTION_HTTP_REQUEST;
 			break;
-		case KeywordAction.TYPE_EMAIL:
+		case TYPE_EMAIL:
 			icon = Icon.ACTION_EMAIL;
 			break;
 		default:

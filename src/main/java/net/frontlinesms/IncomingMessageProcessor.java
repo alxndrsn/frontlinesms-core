@@ -28,6 +28,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import net.frontlinesms.data.domain.*;
+import net.frontlinesms.data.domain.KeywordAction.ExternalCommandResponseActionType;
+import net.frontlinesms.data.domain.KeywordAction.ExternalCommandResponseType;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.data.*;
 import net.frontlinesms.listener.IncomingMessageListener;
@@ -249,7 +251,7 @@ public class IncomingMessageProcessor extends Thread {
 		String incomingSenderMsisdn = incoming.getSenderMsisdn();
 		String incomingMessageText = incoming.getTextContent();
 		switch (action.getType()) {
-		case KeywordAction.TYPE_FORWARD:
+		case TYPE_FORWARD:
 			// Generate a message, and then forward it to the group attached to this action.
 			LOG.debug("It is a forward action!");
 			String forwardedMessageText = KeywordAction.KeywordUtils.getForwardText(action, contactDao.getFromMsisdn(incomingSenderMsisdn), incomingSenderMsisdn, incomingMessageText);
@@ -259,7 +261,7 @@ public class IncomingMessageProcessor extends Thread {
 				frontline.sendTextMessage(contact.getPhoneNumber(), KeywordAction.KeywordUtils.personaliseMessage(contact, forwardedMessageText));
 			}
 			break;
-		case KeywordAction.TYPE_JOIN: {
+		case TYPE_JOIN: {
 			LOG.debug("It is a group join action!");
 			
 			// If the contact does not exist, we need to persist him so that we can add him to a group.
@@ -287,7 +289,7 @@ public class IncomingMessageProcessor extends Thread {
 				throw new RuntimeException(ex);
 			}
 		}	break;
-		case KeywordAction.TYPE_LEAVE: {
+		case TYPE_LEAVE: {
 			LOG.debug("It is a group leave action!");
 			Contact contact = contactDao.getFromMsisdn(incomingSenderMsisdn);
 			if (contact != null) {
@@ -301,17 +303,15 @@ public class IncomingMessageProcessor extends Thread {
 				}
 			}
 		}	break;
-		case KeywordAction.TYPE_REPLY:
+		case TYPE_REPLY:
 			// Generate a message, and then send it back to the sender of the received message.
 			LOG.debug("It is an auto-reply action!");
 			String reply = KeywordAction.KeywordUtils.getReplyText(action, contactDao.getFromMsisdn(incomingSenderMsisdn), incomingSenderMsisdn, incomingMessageText, null);
 			LOG.debug("Sending [" + reply + "] to [" + incomingSenderMsisdn + "]");
 			Message msgReply = frontline.sendTextMessage(incomingSenderMsisdn, reply);
-			// FIXME the following two lines should be re-instated once the DAO pattern is finalised:
-			// action.addMessageToAction(incoming);
-			// action.addMessageToAction(msgReply);
+			// TODO should the message be tied to the action somehow?
 			break;
-		case KeywordAction.TYPE_EXTERNAL_CMD:
+		case TYPE_EXTERNAL_CMD:
 			// Executes a external command
 			LOG.debug("It is an external command action!");
 			try {
@@ -324,7 +324,7 @@ public class IncomingMessageProcessor extends Thread {
 				LOG.debug("Problem executing external command.", e);
 			}
 			break;
-		case KeywordAction.TYPE_EMAIL:
+		case TYPE_EMAIL:
 			LOG.debug("It is an e-mail action!");
 			Email email = new Email(
 					action.getEmailAccount(),
@@ -368,12 +368,12 @@ public class IncomingMessageProcessor extends Thread {
 		);
 		LOG.debug("Command to be executed [" + cmd + "]");
 
-		if (action.getExternalCommandResponseType() != KeywordAction.EXTERNAL_RESPONSE_LIST_COMMANDS) {
+		if (action.getExternalCommandResponseType() != ExternalCommandResponseType.EXTERNAL_RESPONSE_LIST_COMMANDS) {
 			//Executes the command and handle the response as plain text, or no response at all.
 			String response;
 			LOG.debug("Response will be plain text or nothing at all.");
-			boolean waitForResponse = action.getExternalCommandResponseType() == KeywordAction.EXTERNAL_RESPONSE_PLAIN_TEXT;
-			if (action.getExternalCommandType() == KeywordAction.EXTERNAL_HTTP_REQUEST) {
+			boolean waitForResponse = action.getExternalCommandResponseType() == ExternalCommandResponseType.EXTERNAL_RESPONSE_PLAIN_TEXT;
+			if (action.getExternalCommandType() == KeywordAction.ExternalCommandType.EXTERNAL_HTTP_REQUEST) {
 				LOG.debug("Executing HTTP request...");
 				response = Utils.makeHttpRequest(cmd, waitForResponse);
 			} else {
@@ -382,13 +382,13 @@ public class IncomingMessageProcessor extends Thread {
 			}
 			if (waitForResponse) {
 				LOG.debug("Response [" + response + "]");
-				handleResponse(action, incomingSenderMsisdn, response);
+				handleExternalCommandResponse(action, incomingSenderMsisdn, response);
 			}
 		} else {
 			//LIST OF COMMANDS TO EXECUTE
 			LOG.debug("Response will be an XML with Frontline Commands.");
 			InputStream toRead = null;
-			if (action.getExternalCommandType() == KeywordAction.EXTERNAL_HTTP_REQUEST) {
+			if (action.getExternalCommandType() == KeywordAction.ExternalCommandType.EXTERNAL_HTTP_REQUEST) {
 				LOG.debug("Executing HTTP request...");
 				toRead = Utils.makeHttpRequest(cmd);
 			} else {
@@ -439,33 +439,34 @@ public class IncomingMessageProcessor extends Thread {
 	 * @param incomingSenderMsisdn
 	 * @param response
 	 */
-	private void handleResponse(KeywordAction action, String incomingSenderMsisdn,
+	private void handleExternalCommandResponse(KeywordAction action, String incomingSenderMsisdn,
 			String response) {
+		assert(action.getType() == KeywordAction.Type.TYPE_EXTERNAL_CMD) : "This method should only be called on external command actions.";
 		// PLAIN TEXT RESPONSE so we need to verify if the user wants
 		// to auto reply forward the response
 		LOG.trace("ENTER");
-		int responseActionType = action.getCommandResponseActionType();
-		if (responseActionType == KeywordAction.EXTERNAL_DO_NOTHING) {
+		ExternalCommandResponseActionType responseActionType = action.getCommandResponseActionType();
+		if (responseActionType == KeywordAction.ExternalCommandResponseActionType.EXTERNAL_DO_NOTHING) {
 			LOG.debug("Nothing to do with the response!");
 			LOG.trace("EXIT");
 			return;
 		}
 		String message = KeywordAction.KeywordUtils.getExternalCommandReplyMessage(action, response);
 		LOG.debug("Message to forward [" + message + "]");
-		if (responseActionType == KeywordAction.TYPE_REPLY 
-				|| responseActionType == KeywordAction.EXTERNAL_REPLY_AND_FORWARD) {
+		if (responseActionType == KeywordAction.ExternalCommandResponseActionType.TYPE_REPLY 
+				|| responseActionType == KeywordAction.ExternalCommandResponseActionType.EXTERNAL_REPLY_AND_FORWARD) {
 			//Auto reply
 			LOG.debug("Sending to [" + incomingSenderMsisdn + "] as an auto-reply.");
 			frontline.sendTextMessage(incomingSenderMsisdn, message);
 		}
-		if (responseActionType == KeywordAction.TYPE_FORWARD 
-				|| responseActionType == KeywordAction.EXTERNAL_REPLY_AND_FORWARD) {
+		if (responseActionType == KeywordAction.ExternalCommandResponseActionType.TYPE_FORWARD 
+				|| responseActionType == KeywordAction.ExternalCommandResponseActionType.EXTERNAL_REPLY_AND_FORWARD) {
 			//Forwarding to a group
 			Group fwd = action.getGroup();
 			LOG.debug("Forwarding to group [" + fwd.getName() + "]");
 			for(Contact contact : this.groupMembershipDao.getActiveMembers(fwd)) {
 				if (contact.isActive()) {
-					if (responseActionType != KeywordAction.EXTERNAL_REPLY_AND_FORWARD 
+					if (responseActionType != KeywordAction.ExternalCommandResponseActionType.EXTERNAL_REPLY_AND_FORWARD 
 							|| !contact.getPhoneNumber().equalsIgnoreCase(incomingSenderMsisdn)) {
 						//If we have already replied to the sender and he/she is on the group to forward
 						//so we don't send the message again.

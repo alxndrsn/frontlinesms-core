@@ -66,5 +66,5 @@ public interface KeywordActionDao {
 	 * @param actionType the type of the action to fetch
 	 * @return The action of the specified type, or <code>null</code> if there is none available
 	 */
-	public KeywordAction getAction(Keyword keyword, int actionType);
+	public KeywordAction getAction(Keyword keyword, KeywordAction.Type actionType);
 }

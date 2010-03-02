@@ -31,7 +31,7 @@ public class HibernateKeywordActionDao extends BaseHibernateDao<KeywordAction> i
 	/** @see KeywordActionDao#getReplyActions() */
 	public Collection<KeywordAction> getReplyActions() {
 		DetachedCriteria criteria = super.getCriterion();
-		criteria.add(Restrictions.eq(KeywordAction.Field.TYPE.getFieldName(), KeywordAction.TYPE_REPLY));
+		criteria.add(Restrictions.eq(KeywordAction.Field.TYPE.getFieldName(), KeywordAction.Type.TYPE_REPLY));
 		return super.getList(criteria);
 	}
 
@@ -45,8 +45,8 @@ public class HibernateKeywordActionDao extends BaseHibernateDao<KeywordAction> i
 		super.updateWithoutDuplicateHandling(action);
 	}
 
-	/** @see net.frontlinesms.data.repository.KeywordActionDao#getAction(net.frontlinesms.data.domain.Keyword, int) */
-	public KeywordAction getAction(Keyword keyword, int actionType) {
+	/** @see net.frontlinesms.data.repository.KeywordActionDao#getAction(net.frontlinesms.data.domain.Keyword, KeywordAction.Type) */
+	public KeywordAction getAction(Keyword keyword, KeywordAction.Type actionType) {
 		DetachedCriteria criteria = super.getCriterion();
 		criteria.add(Restrictions.eq(KeywordAction.Field.KEYWORD.getFieldName(), keyword));
 		criteria.add(Restrictions.eq(KeywordAction.Field.TYPE.getFieldName(), actionType));

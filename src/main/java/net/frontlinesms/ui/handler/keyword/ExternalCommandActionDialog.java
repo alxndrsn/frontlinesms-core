@@ -13,6 +13,9 @@ import java.util.List;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
+import net.frontlinesms.data.domain.KeywordAction.ExternalCommandResponseActionType;
+import net.frontlinesms.data.domain.KeywordAction.ExternalCommandResponseType;
+import net.frontlinesms.data.domain.KeywordAction.ExternalCommandType;
 import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
@@ -68,15 +71,15 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 			KeywordAction action = super.getTargetObject(KeywordAction.class);
 			
 			//COMMAND TYPE
-			ui.setSelected(find(COMPONENT_RB_TYPE_HTTP), action.getExternalCommandType() == KeywordAction.EXTERNAL_HTTP_REQUEST);
-			ui.setSelected(find(COMPONENT_RB_TYPE_COMMAND_LINE), action.getExternalCommandType() == KeywordAction.EXTERNAL_COMMAND_LINE);
+			ui.setSelected(find(COMPONENT_RB_TYPE_HTTP), action.getExternalCommandType() == KeywordAction.ExternalCommandType.EXTERNAL_HTTP_REQUEST);
+			ui.setSelected(find(COMPONENT_RB_TYPE_COMMAND_LINE), action.getExternalCommandType() == KeywordAction.ExternalCommandType.EXTERNAL_COMMAND_LINE);
 			
 			//COMMAND
 			ui.setText(find(COMPONENT_TF_COMMAND), action.getUnformattedCommand());
 			
 			Object pnResponse = find(COMPONENT_PN_RESPONSE);
 			//RESPONSE TYPE
-			if (action.getExternalCommandResponseType() == KeywordAction.EXTERNAL_RESPONSE_PLAIN_TEXT) {
+			if (action.getExternalCommandResponseType() == ExternalCommandResponseType.EXTERNAL_RESPONSE_PLAIN_TEXT) {
 				log.debug("Setting up dialog for PLAIN TEXT response.");
 				ui.setSelected(find(COMPONENT_RB_PLAIN_TEXT), true);
 				ui.setSelected(find(COMPONENT_RB_FRONTLINE_COMMANDS), false);
@@ -86,11 +89,11 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 				ui.deactivate(list);
 				//RESPONSE PANEL
 				ui.setText(find(COMPONENT_TF_MESSAGE), action.getUnformattedCommandText());
-				int responseActionType = action.getCommandResponseActionType();
+				ExternalCommandResponseActionType responseActionType = action.getCommandResponseActionType();
 				ui.setSelected(find(COMPONENT_CB_AUTO_REPLY),
-							responseActionType == KeywordAction.TYPE_REPLY || responseActionType == KeywordAction.EXTERNAL_REPLY_AND_FORWARD);
+							responseActionType == KeywordAction.ExternalCommandResponseActionType.TYPE_REPLY || responseActionType == KeywordAction.ExternalCommandResponseActionType.EXTERNAL_REPLY_AND_FORWARD);
 			
-				if (responseActionType == KeywordAction.TYPE_FORWARD || responseActionType == KeywordAction.EXTERNAL_REPLY_AND_FORWARD) {
+				if (responseActionType == KeywordAction.ExternalCommandResponseActionType.TYPE_FORWARD || responseActionType == KeywordAction.ExternalCommandResponseActionType.EXTERNAL_REPLY_AND_FORWARD) {
 					ui.setSelected(find(COMPONENT_CB_FORWARD), true);
 					ui.activate(list);
 					//Select group
@@ -104,7 +107,7 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 						}
 					}
 				}
-			} else if (action.getExternalCommandResponseType() == KeywordAction.EXTERNAL_RESPONSE_LIST_COMMANDS) {
+			} else if (action.getExternalCommandResponseType() == ExternalCommandResponseType.EXTERNAL_RESPONSE_LIST_COMMANDS) {
 				log.debug("Setting up dialog for LIST COMMANDS response.");
 				ui.setSelected(find(COMPONENT_RB_PLAIN_TEXT), false);
 				ui.setSelected(find(COMPONENT_RB_FRONTLINE_COMMANDS), true);
@@ -150,13 +153,13 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 			return;
 		}
 		
-		int commandType = ui.isSelected(find(COMPONENT_RB_TYPE_HTTP)) ? KeywordAction.EXTERNAL_HTTP_REQUEST : KeywordAction.EXTERNAL_COMMAND_LINE;
+		ExternalCommandType commandType = ui.isSelected(find(COMPONENT_RB_TYPE_HTTP)) ? KeywordAction.ExternalCommandType.EXTERNAL_HTTP_REQUEST : KeywordAction.ExternalCommandType.EXTERNAL_COMMAND_LINE;
 		String commandLine = ui.getText(find(COMPONENT_TF_COMMAND));
-		int responseType = KeywordAction.EXTERNAL_RESPONSE_DONT_WAIT;
+		ExternalCommandResponseType responseType = ExternalCommandResponseType.EXTERNAL_RESPONSE_DONT_WAIT;
 		if (ui.isSelected(find(COMPONENT_RB_PLAIN_TEXT))) {
-			responseType = KeywordAction.EXTERNAL_RESPONSE_PLAIN_TEXT;
+			responseType = ExternalCommandResponseType.EXTERNAL_RESPONSE_PLAIN_TEXT;
 		} else if (ui.isSelected(find(COMPONENT_RB_FRONTLINE_COMMANDS))) {
-			responseType = KeywordAction.EXTERNAL_RESPONSE_LIST_COMMANDS;
+			responseType = ExternalCommandResponseType.EXTERNAL_RESPONSE_LIST_COMMANDS;
 		}
 		
 		log.debug("Command type [" + commandType + "]");
@@ -165,27 +168,27 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 		
 		Group group = null;
 		String message = null;
-		int responseActionType = KeywordAction.EXTERNAL_DO_NOTHING; 
-		if (responseType == KeywordAction.EXTERNAL_RESPONSE_PLAIN_TEXT) {
+		KeywordAction.ExternalCommandResponseActionType responseActionType = KeywordAction.ExternalCommandResponseActionType.EXTERNAL_DO_NOTHING; 
+		if (responseType == ExternalCommandResponseType.EXTERNAL_RESPONSE_PLAIN_TEXT) {
 			boolean reply = ui.isSelected(find(COMPONENT_CB_AUTO_REPLY));
 			boolean fwd = ui.isSelected(find(COMPONENT_CB_FORWARD));
 			
 			if (reply && fwd) {
-				responseActionType = KeywordAction.EXTERNAL_REPLY_AND_FORWARD;
+				responseActionType = KeywordAction.ExternalCommandResponseActionType.EXTERNAL_REPLY_AND_FORWARD;
 			} else if (reply) {
-				responseActionType = KeywordAction.TYPE_REPLY;
+				responseActionType = KeywordAction.ExternalCommandResponseActionType.TYPE_REPLY;
 			} else if (fwd) {
-				responseActionType = KeywordAction.TYPE_FORWARD;
+				responseActionType = KeywordAction.ExternalCommandResponseActionType.TYPE_FORWARD;
 			}
 			log.debug("Response Action type [" + responseActionType + "]");
-			if (responseActionType == KeywordAction.TYPE_REPLY 
-					|| responseActionType == KeywordAction.TYPE_FORWARD
-					|| responseActionType == KeywordAction.EXTERNAL_REPLY_AND_FORWARD) {
+			if (responseActionType == KeywordAction.ExternalCommandResponseActionType.TYPE_REPLY 
+					|| responseActionType == KeywordAction.ExternalCommandResponseActionType.TYPE_FORWARD
+					|| responseActionType == KeywordAction.ExternalCommandResponseActionType.EXTERNAL_REPLY_AND_FORWARD) {
 				message = ui.getText(find(COMPONENT_TF_MESSAGE));
 				log.debug("Message [" + message + "]");
 			}
-			if (responseActionType == KeywordAction.TYPE_FORWARD 
-					|| responseActionType == KeywordAction.EXTERNAL_REPLY_AND_FORWARD) {
+			if (responseActionType == KeywordAction.ExternalCommandResponseActionType.TYPE_FORWARD 
+					|| responseActionType == KeywordAction.ExternalCommandResponseActionType.EXTERNAL_REPLY_AND_FORWARD) {
 				group = ui.getGroup(ui.getSelectedItem(find(COMPONENT_EXTERNAL_COMMAND_GROUP_LIST)));
 				if (group == null) {
 					log.debug("No group selected to forward");

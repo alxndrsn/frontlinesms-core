@@ -32,7 +32,7 @@ public class HibernateKeywordActionDaoTest extends HibernateTestCase {
 		KeywordAction action = KeywordAction.createReplyAction(this.testKeyword, "some reply text", 14343274L, 21340345L);
 		this.keywordActionDao.saveKeywordAction(action);
 		
-		assertEquals(action, this.keywordActionDao.getAction(testKeyword, KeywordAction.TYPE_REPLY));
+		assertEquals(action, this.keywordActionDao.getAction(testKeyword, KeywordAction.Type.TYPE_REPLY));
 		List<KeywordAction> retrievedActionList = this.keywordActionDao.getActions(testKeyword);
 		assertEquals(1, retrievedActionList.size());
 		assertEquals(action, retrievedActionList.get(0));
@@ -40,7 +40,7 @@ public class HibernateKeywordActionDaoTest extends HibernateTestCase {
 		this.keywordActionDao.deleteKeywordAction(action);
 		
 		assertEquals(0, this.keywordActionDao.getActions(testKeyword).size());
-		assertNull(this.keywordActionDao.getAction(testKeyword, KeywordAction.TYPE_REPLY));
+		assertNull(this.keywordActionDao.getAction(testKeyword, KeywordAction.Type.TYPE_REPLY));
 	}
 	
 //> INIT METHODS

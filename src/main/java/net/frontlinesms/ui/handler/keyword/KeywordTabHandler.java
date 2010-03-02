@@ -301,7 +301,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		} else {
 			// Editing an existent keyword.  This keyword may already have actions applied to it, so
 			// we need to check for actions and update them as appropriate.
-			KeywordAction replyAction = this.keywordActionDao.getAction(keyword, KeywordAction.TYPE_REPLY);
+			KeywordAction replyAction = this.keywordActionDao.getAction(keyword, KeywordAction.Type.TYPE_REPLY);
 			if (replyAction != null) {
 				if (replyText == null) {
 					// The reply action has been removed
@@ -314,7 +314,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 				}
 			}
 			
-			KeywordAction joinAction = this.keywordActionDao.getAction(keyword, KeywordAction.TYPE_JOIN);
+			KeywordAction joinAction = this.keywordActionDao.getAction(keyword, KeywordAction.Type.TYPE_JOIN);
 			if (joinAction != null) {
 				if (joinGroup == null) {
 					// Previous join action has been removed, so delete it.
@@ -328,7 +328,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 				}
 			}
 			
-			KeywordAction leaveAction = this.keywordActionDao.getAction(keyword, KeywordAction.TYPE_LEAVE);
+			KeywordAction leaveAction = this.keywordActionDao.getAction(keyword, KeywordAction.Type.TYPE_LEAVE);
 			if (leaveAction != null) {
 				if (leaveGroup == null) {
 					keywordActionDao.deleteKeywordAction(leaveAction);
@@ -471,12 +471,12 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 			Collection<KeywordAction> actions = this.keywordActionDao.getActions(keyword);
 			boolean simple = actions.size() <= 3;
 			if (simple) {
-				int previousType = -1;
+				KeywordAction.Type previousType = null;
 				for (KeywordAction action : actions) {
-					int type = action.getType();
-					if (type != KeywordAction.TYPE_REPLY
-							&& type != KeywordAction.TYPE_JOIN
-							&& type != KeywordAction.TYPE_LEAVE) {
+					KeywordAction.Type type = action.getType();
+					if (type != KeywordAction.Type.TYPE_REPLY
+							&& type != KeywordAction.Type.TYPE_JOIN
+							&& type != KeywordAction.Type.TYPE_LEAVE) {
 						simple = false;
 						break;
 					}
@@ -504,15 +504,15 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 				String key = keyword.getKeyword().length() == 0 ? "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">" : keyword.getKeyword();
 				ui.setText(tfKeyword, key);
 				for (KeywordAction action : actions) {
-					int type = action.getType();
-					if (type == KeywordAction.TYPE_REPLY) {
+					KeywordAction.Type type = action.getType();
+					if (type == KeywordAction.Type.TYPE_REPLY) {
 						Object cbReply = ui.find(panel, COMPONENT_CB_AUTO_REPLY);
 						Object tfReply = ui.find(panel, COMPONENT_TF_AUTO_REPLY);
 						ui.setSelected(cbReply, true);
 						ui.setText(tfReply, action.getUnformattedReplyText());
-					} else if (type == KeywordAction.TYPE_JOIN) {
+					} else if (type == KeywordAction.Type.TYPE_JOIN) {
 						setJoinGroupDisplay(action.getGroup());
-					} else if (type == KeywordAction.TYPE_LEAVE) {
+					} else if (type == KeywordAction.Type.TYPE_LEAVE) {
 						setLeaveGroupDisplay(action.getGroup());
 					}
 				}
@@ -593,22 +593,22 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	private void showActionEditDialog(KeywordAction action) {
 		BaseActionDialog dialog;
 		switch (action.getType()) {
-			case KeywordAction.TYPE_FORWARD:
+			case TYPE_FORWARD:
 				dialog = new ForwardActionDialog(ui, this);
 				break;
-			case KeywordAction.TYPE_JOIN: 
+			case TYPE_JOIN: 
 				dialog = new JoinGroupActionDialog(ui, this);
 				break;
-			case KeywordAction.TYPE_LEAVE: 
+			case TYPE_LEAVE: 
 				dialog = new JoinGroupActionDialog(ui, this);
 				break;
-			case KeywordAction.TYPE_REPLY:
+			case TYPE_REPLY:
 				dialog = new ReplyActionDialog(ui, this);
 				break;
-			case KeywordAction.TYPE_EXTERNAL_CMD:
+			case TYPE_EXTERNAL_CMD:
 				dialog = new ExternalCommandActionDialog(ui, this);
 				break;
-			case KeywordAction.TYPE_EMAIL:
+			case TYPE_EMAIL:
 				dialog = new EmailActionDialog(ui, this);
 				break;
 			default: throw new IllegalStateException();

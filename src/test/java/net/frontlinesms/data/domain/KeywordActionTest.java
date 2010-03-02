@@ -3,6 +3,10 @@
  */
 package net.frontlinesms.data.domain;
 
+import net.frontlinesms.data.domain.KeywordAction.ExternalCommandResponseActionType;
+import net.frontlinesms.data.domain.KeywordAction.ExternalCommandResponseType;
+import net.frontlinesms.data.domain.KeywordAction.ExternalCommandType;
+import net.frontlinesms.data.domain.KeywordAction.Type;
 import net.frontlinesms.junit.BaseTestCase;
 
 import static org.mockito.Mockito.*;
@@ -17,38 +21,40 @@ public class KeywordActionTest extends BaseTestCase {
 	private static final long TEST_END_DATE = 0;
 
 	public void testCommandLineAccessors() {
-		KeywordAction action = new KeywordAction(KeywordAction.TYPE_EXTERNAL_CMD);
+		KeywordAction action = new KeywordAction(KeywordAction.Type.TYPE_EXTERNAL_CMD);
 		final String commandLine = "run.exe -message=Whatever";
 		action.setCommandLine(commandLine);
 		assertEquals(commandLine, action.getUnformattedCommand());
 	}
 	
 	public void testCommandResponseActionTypeAccessors() {
-		KeywordAction action = new KeywordAction(KeywordAction.TYPE_EXTERNAL_CMD);
-//		action.setCommandResponseActionType(type);
-		fail("Convert actions to enum before testing fully");
+		for(ExternalCommandResponseActionType responseType : ExternalCommandResponseActionType.values()) {
+			KeywordAction action = new KeywordAction(KeywordAction.Type.TYPE_EXTERNAL_CMD);
+			action.setCommandResponseActionType(responseType);
+			assertEquals(responseType, action.getCommandResponseActionType());
+		}
 	}
 	
 	public void testCommandTextAccessors() {
-		KeywordAction action = new KeywordAction(KeywordAction.TYPE_EXTERNAL_CMD);
+		KeywordAction action = new KeywordAction(KeywordAction.Type.TYPE_EXTERNAL_CMD);
 		final String commandText = "Here is some text to reply with.";
 		action.setCommandText(commandText);
 		assertEquals(commandText, action.getUnformattedCommandText());
 	}
 	public void testEmailAccountAccessors() {
-		KeywordAction action = new KeywordAction(KeywordAction.TYPE_EMAIL);
+		KeywordAction action = new KeywordAction(KeywordAction.Type.TYPE_EMAIL);
 		final EmailAccount emailAccount = mock(EmailAccount.class);
 		action.setEmailAccount(emailAccount);
 		assertEquals(emailAccount, action.getEmailAccount());
 	}
 	public void testEmailRecipientsAccessors() {
-		KeywordAction action = new KeywordAction(KeywordAction.TYPE_EMAIL);
+		KeywordAction action = new KeywordAction(KeywordAction.Type.TYPE_EMAIL);
 		final String recipients = "test1@frontlinesms.com, test@example.com";
 		action.setEmailRecipients(recipients);
 		assertEquals(recipients, action.getEmailRecipients());
 	}
 	public void testEmailSubjectAccessors() {
-		KeywordAction action = new KeywordAction(KeywordAction.TYPE_EMAIL);
+		KeywordAction action = new KeywordAction(KeywordAction.Type.TYPE_EMAIL);
 		final String emailSubject = "Example subject of an email.";
 		action.setEmailSubject(emailSubject);
 		assertEquals(emailSubject, action.getEmailSubject());
@@ -72,34 +78,40 @@ public class KeywordActionTest extends BaseTestCase {
 		testEndDate(123893475984L);
 	}
 	public void testExternalCommandResponseTypeAccessors() {
-		KeywordAction action = new KeywordAction();
-		fail("Convert to enum before testing fully.");
+		for(ExternalCommandResponseType responseType : ExternalCommandResponseType.values()) {
+			KeywordAction action = new KeywordAction(Type.TYPE_EXTERNAL_CMD);
+			action.setExternalCommandResponseType(responseType);
+			assertEquals(responseType, action.getExternalCommandResponseType());
+		}
 	}
 	public void testExternalCommandTypeAccessors() {
-		KeywordAction action = new KeywordAction();
-		fail("Convert to enum before testing fully.");
+		for(ExternalCommandType commandType : ExternalCommandType.values()) {
+			KeywordAction action = new KeywordAction(Type.TYPE_EXTERNAL_CMD);
+			action.setExternalCommandType(commandType);
+			assertEquals(commandType, action.getExternalCommandType());
+		}
 	}
 	public void testGroupAccessors() {
-		KeywordAction action = new KeywordAction();
+		KeywordAction action = new KeywordAction(Type.TYPE_JOIN);
 		final Group group = mock(Group.class);
 		action.setGroup(group);
 		assertEquals(group, action.getGroup());
 	}
 	public void testForwardTextAccessors() {
-		KeywordAction action = new KeywordAction();
+		KeywordAction action = new KeywordAction(Type.TYPE_FORWARD);
 		final String forwardText = "Here is the forward text.";
 		action.setForwardText(forwardText);
 		assertEquals(forwardText, action.getUnformattedForwardText());
 	}
 	public void testReplyTextAccessors() {
 		// Test for reply action
-		KeywordAction replyAction = new KeywordAction(KeywordAction.TYPE_REPLY);
+		KeywordAction replyAction = new KeywordAction(KeywordAction.Type.TYPE_REPLY);
 		final String replyText = "Here is the reply text.";
 		replyAction.setReplyText(replyText);
 		assertEquals(replyText, replyAction.getUnformattedReplyText());
 
 		// Test for email action
-		KeywordAction emailAction = new KeywordAction(KeywordAction.TYPE_EMAIL);
+		KeywordAction emailAction = new KeywordAction(KeywordAction.Type.TYPE_EMAIL);
 		emailAction.setReplyText(replyText);
 		assertEquals(replyText, emailAction.getUnformattedReplyText());
 	}
@@ -114,7 +126,7 @@ public class KeywordActionTest extends BaseTestCase {
 		final long end = TEST_END_DATE;
 		KeywordAction action = KeywordAction.createEmailAction(keyword, replyText, account, to, subject, start, end);
 
-		assertEquals(KeywordAction.TYPE_EMAIL, action.getType());
+		assertEquals(KeywordAction.Type.TYPE_EMAIL, action.getType());
 		assertEquals(keyword, action.getKeyword());
 		assertEquals(replyText, action.getUnformattedReplyText());
 		assertEquals(account, action.getEmailAccount());
@@ -127,16 +139,16 @@ public class KeywordActionTest extends BaseTestCase {
 	public void testExternalCommandActionFactory() {
 		final Keyword keyword = mock(Keyword.class);
 		final String commandLine = "\"Test command.exe\" -arg1 /switch1 --longarg1 SOMETHING extrA";
-		final int commandType = 123; // FIXME use a real type
-		final int responseType = 123; // FIXME use a real type
-		final int responseActionType = 123; // FIXME use a real type
+		final ExternalCommandType commandType = ExternalCommandType.EXTERNAL_COMMAND_LINE;
+		final ExternalCommandResponseType responseType = ExternalCommandResponseType.EXTERNAL_RESPONSE_PLAIN_TEXT; // FIXME use a real type
+		final ExternalCommandResponseActionType responseActionType = ExternalCommandResponseActionType.EXTERNAL_REPLY_AND_FORWARD; // FIXME use a real type
 		final String commandMsg = "";
 		final Group toFwd = mock(Group.class);
 		final long start = TEST_START_DATE;
 		final long end = TEST_END_DATE;
 		KeywordAction action = KeywordAction.createExternalCommandAction(keyword, commandLine, commandType, responseType, responseActionType, commandMsg, toFwd, start, end);
 
-		assertEquals(KeywordAction.TYPE_EXTERNAL_CMD, action.getType());
+		assertEquals(KeywordAction.Type.TYPE_EXTERNAL_CMD, action.getType());
 		assertEquals(keyword, action.getKeyword());
 		assertEquals(commandLine, action.getUnformattedCommand());
 		assertEquals(commandType, action.getExternalCommandType());
@@ -156,7 +168,7 @@ public class KeywordActionTest extends BaseTestCase {
 		final long end = TEST_END_DATE;
 		KeywordAction action = KeywordAction.createForwardAction(keyword, group, forwardText, start, end);
 
-		assertEquals(KeywordAction.TYPE_FORWARD, action.getType());
+		assertEquals(KeywordAction.Type.TYPE_FORWARD, action.getType());
 		assertEquals(keyword, action.getKeyword());
 		assertEquals(group, action.getGroup());
 		assertEquals(forwardText, action.getUnformattedForwardText());
@@ -171,7 +183,7 @@ public class KeywordActionTest extends BaseTestCase {
 		final long end = TEST_END_DATE;
 		KeywordAction action = KeywordAction.createGroupJoinAction(keyword, group, start, end);
 
-		assertEquals(KeywordAction.TYPE_JOIN, action.getType());
+		assertEquals(KeywordAction.Type.TYPE_JOIN, action.getType());
 		assertEquals(keyword, action.getKeyword());
 		assertEquals(group, action.getGroup());
 		assertEquals(start, action.getStartDate());
@@ -185,7 +197,7 @@ public class KeywordActionTest extends BaseTestCase {
 		final long end = TEST_END_DATE;
 		KeywordAction action = KeywordAction.createGroupLeaveAction(keyword, group, start, end);
 
-		assertEquals(KeywordAction.TYPE_LEAVE, action.getType());
+		assertEquals(KeywordAction.Type.TYPE_LEAVE, action.getType());
 		assertEquals(keyword, action.getKeyword());
 		assertEquals(group, action.getGroup());
 		assertEquals(start, action.getStartDate());
@@ -199,7 +211,7 @@ public class KeywordActionTest extends BaseTestCase {
 		final long end = TEST_END_DATE;
 		KeywordAction action = KeywordAction.createReplyAction(keyword, replyText, start, end);
 
-		assertEquals(KeywordAction.TYPE_REPLY, action.getType());
+		assertEquals(KeywordAction.Type.TYPE_REPLY, action.getType());
 		assertEquals(keyword, action.getKeyword());
 		assertEquals(replyText, action.getUnformattedReplyText());
 		assertEquals(start, action.getStartDate());
