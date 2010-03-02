@@ -55,6 +55,14 @@ public class KeywordAction {
 	 * This constructor should <b>not</b> be used in factory methods.
 	 */
 	KeywordAction() {}
+	
+	/**
+	 * Constructor for <b>unit tests only</b>.
+	 */
+	KeywordAction(int type) {
+		if(type < TYPE_FORWARD || type > TYPE_EMAIL) throw new IllegalArgumentException();
+		this.type = type;
+	}
 
 	/**
 	 * Creates a new keyword action and sets the keyword for it. 
@@ -333,20 +341,6 @@ public class KeywordAction {
 		return this.keyword;
 	}
 	
-//> PRIVATE ACCESSORS
-	/** @param type value for {@link #type} */
-	private void setType(int type) {
-		this.type = type;
-	}
-	/** @param keyword value for {@link #keyword} */
-	private void setKeyword(Keyword keyword) {
-		this.keyword = keyword;
-	}
-	/** @param counter value for {@link #counter} */
-	private void setCounter(int counter) {
-		this.counter = counter;
-	}
-
 //> STATIC HELPER METHODS
 	public static class KeywordUtils {
 		public static final String personaliseMessage(Contact contact, String messageText) {

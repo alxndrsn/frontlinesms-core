@@ -9,4 +9,8 @@
 	<bean id="keywordActionDao" class="net.frontlinesms.data.repository.hibernate.HibernateKeywordActionDao">
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
+	
+	<bean id="keywordDao" class="net.frontlinesms.data.repository.hibernate.HibernateKeywordDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
 </beans>
