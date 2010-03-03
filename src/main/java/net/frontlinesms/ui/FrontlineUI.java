@@ -22,12 +22,10 @@ package net.frontlinesms.ui;
 import java.awt.Image;
 
 import net.frontlinesms.ErrorUtils;
-import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.Utils;
 import net.frontlinesms.ui.i18n.LanguageBundle;
 
 import org.apache.log4j.Logger;
-import org.springframework.context.ConfigurableApplicationContext;
 
 import thinlet.FrameLauncher;
 
