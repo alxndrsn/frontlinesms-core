@@ -99,7 +99,13 @@ public class FileChooser implements ThinletUiEventHandler {
 		Collections.sort(files, new Utils.FileComparator());
 		for (File child : files) {
 			if (child.isDirectory() || (!child.isDirectory() && ui.getProperty(dialog, PROPERTY_TYPE).equals(DIALOG_MODE_OPEN))) {
-				Object item = ui.createListItem(child.getName(), child);
+				String label = child.getName();
+				if(label == null || label.length()==0) {
+					// "Roots", e.g. the disk drives on a windows system, will often return nothing for getName().
+					// In this case, we need to get the path instead.
+					label = child.getPath();
+				}
+				Object item = ui.createListItem(label, child);
 				ui.setAttachedObject(item, child);
 				if (child.isDirectory()) {
 					if(log.isDebugEnabled()) log.debug("Directory [" + child.getAbsolutePath() + "]");
