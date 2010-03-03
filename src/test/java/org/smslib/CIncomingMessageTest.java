@@ -42,8 +42,7 @@ public class CIncomingMessageTest extends BaseTestCase {
 				CIncomingMessage message = new CIncomingMessage(pdu, 0, "");
 				assertEquals("GSM 7-bit Message not decoded by old implementation.", expectedText, message.getText());
 			} catch(MessageDecodeException ex) {
-				CIncomingMessage message = new CIncomingMessage(pdu, 0, "");
-				throw new RuntimeException("Failed to decode PDU: '" + pdu + "'", ex);
+				fail("Failed to decode PDU: '" + pdu + "'");
 			}
 		}
 	}
