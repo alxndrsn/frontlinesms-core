@@ -119,7 +119,6 @@ public class ImportExportUiController implements ThinletUiEventHandler {
 	/** Export entity type: {@link Message} */
 	private static final String TYPE_MESSAGE = "messages";
 	/** Export entity type: {@link Keyword} */
-	@SuppressWarnings("unused")
 	private static final String TYPE_KEYWORD = "keywords";
 
 //> INSTANCE PROPERTIES
@@ -265,15 +264,15 @@ public class ImportExportUiController implements ThinletUiEventHandler {
 				//CONTACTS
 				log.debug("Exporting all contacts..");
 				exportContacts(this.contactDao.getAllContacts(), dataPath);
-			} else if (getType() == TYPE_MESSAGE) {
+			} else if (getType().equals(TYPE_MESSAGE)) {
 				//MESSAGES
 				log.debug("Exporting all messages..");
 				exportMessages(this.messageDao.getAllMessages(), dataPath);
-			} else {
+			} else if (getType().equals(TYPE_KEYWORD)) {
 				//KEYWORDS
 				log.debug("Exporting all keywords..");
 				exportKeywords(this.keywordDao.getAllKeywords(), dataPath);
-			}
+			} else throw new IllegalStateException("Unknown export type: " + getType());
 
 			uiController.removeDialog(wizardDialog);
 		} catch(IOException ex) {
