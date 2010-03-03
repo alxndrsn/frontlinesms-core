@@ -82,7 +82,7 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		throw new IllegalStateException("NYI");
 	}
 	
-	/** @return a single group selected in the tree */
+	/** @return a single group selected in the tree, or <code>null</code> if none is selected */
 	public Group getSelectedGroup() {
 		assert(!this.allowMultipleSelections) : "Cannot get a single selection if multiple groups are selectable.";
 		return ui.getAttachedObject(ui.getSelectedItem(this.getGroupTreeComponent()), Group.class);

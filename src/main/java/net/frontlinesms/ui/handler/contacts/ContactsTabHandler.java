@@ -125,15 +125,23 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		this.ui.setText(this.ui.find(COMPONENT_CONTACT_MANAGER_CONTACT_FILTER), "");
 
 		Group g = this.groupSelecter.getSelectedGroup();
-		String toSet = InternationalisationUtils.getI18NString(COMMON_CONTACTS_IN_GROUP, g.getName());
-		this.ui.setText(find(COMPONENT_CONTACTS_PANEL), toSet);
+		String contactsPanelTitle;
+		boolean enableDeleteButton;
+		if(g == null) {
+			contactsPanelTitle = "";
+			enableDeleteButton = false;
+		} else {
+			contactsPanelTitle = InternationalisationUtils.getI18NString(COMMON_CONTACTS_IN_GROUP, g.getName());
+			enableDeleteButton = !this.ui.isDefaultGroup(g);
+		}
+		this.ui.setText(find(COMPONENT_CONTACTS_PANEL), contactsPanelTitle);
 		
 		Object buttonPanelContainer = find(COMPONENT_GROUP_SELECTER_CONTAINER);
 		Object deleteButton = this.ui.find(buttonPanelContainer, COMPONENT_DELETE_BUTTON);
-		this.ui.setEnabled(deleteButton, !this.ui.isDefaultGroup(g));
+		this.ui.setEnabled(deleteButton, enableDeleteButton);
 		
-		Object sms = this.ui.find(buttonPanelContainer, COMPONENT_SEND_SMS_BUTTON_GROUP_SIDE);
-		this.ui.setEnabled(sms, g != null);
+		Object btSendSmsToGroup = this.ui.find(buttonPanelContainer, COMPONENT_SEND_SMS_BUTTON_GROUP_SIDE);
+		this.ui.setEnabled(btSendSmsToGroup, g != null);
 		
 		updateContactList();
 	}

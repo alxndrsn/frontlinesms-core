@@ -156,9 +156,9 @@ class ATDeviceDetector extends Thread {
 				this.exceptionMessage = ex.getMessage();
 			} finally {
 				// Close any open streams
-				if(out != null) try { out.close(); } catch(Exception ex) {}
-				if(in != null) try { in.close(); } catch(Exception ex) {}
-				if(serialPort != null) try { serialPort.close(); } catch(Exception ex) {}
+				if(out != null) try { out.close(); } catch(Exception ex) { log.warn("Error closing output stream.", ex); }
+				if(in != null) try { in.close(); } catch(Exception ex) { log.warn("Error closing input stream.", ex); }
+				if(serialPort != null) try { serialPort.close(); } catch(Exception ex) { log.warn("Error closing serial port.", ex); }
 			}
 		}
 		finished = true;
@@ -251,6 +251,8 @@ class Logger {
 	
 	public void info(String s) { out("INFO", s); }
 	public void info(String message, Throwable t) { out("INFO", message, t); }
+
+	public void warn(String message, Throwable t) { out("WARN", message, t); }
 	
 	private void out(String level, String message) { out(level, message, null); }
 	private void out(String level, String message, Throwable t) {

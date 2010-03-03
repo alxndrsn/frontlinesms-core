@@ -140,17 +140,22 @@ public class Utils {
 		int rc = conn.getResponseCode();
 		LOG.debug("RC = " + rc);
 		if (rc == HttpURLConnection.HTTP_OK) {
-			InputStream input = conn.getInputStream();
-			LOG.debug("Wait for response [" + waitForResponse + "]");
-			if (waitForResponse) {
-				// Don't check the MIME type here - we don't want to confuse anybody
-				// Get response data.
-				BufferedReader inputData = new BufferedReader(new InputStreamReader(input));
-				StringBuilder sb = new StringBuilder();
-				while (null != (str = inputData.readLine())) {
-					sb.append(str + "\n");
+			InputStream input = null;
+			try {
+				input = conn.getInputStream();
+				LOG.debug("Wait for response [" + waitForResponse + "]");
+				if (waitForResponse) {
+					// Don't check the MIME type here - we don't want to confuse anybody
+					// Get response data.
+					BufferedReader inputData = new BufferedReader(new InputStreamReader(input));
+					StringBuilder sb = new StringBuilder();
+					while (null != (str = inputData.readLine())) {
+						sb.append(str + "\n");
+					}
+					str = sb.toString();
 				}
-				str = sb.toString();
+			} finally {
+				if(input != null) try { input.close(); } catch(IOException ex) { LOG.warn("Exception closing HTTP input stream.", ex); }
 			}
 		}
 		LOG.trace("EXIT");
@@ -204,12 +209,18 @@ public class Utils {
 			int exit = p.waitFor();
 			LOG.debug("Process exit value [" + exit + "]");
 			if (exit == 0) {
-				BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-				StringBuilder sb = new StringBuilder();
-				while (null != ((str = br.readLine()))) {
-					sb.append(str + "\n");
+				InputStream inputStream = null;
+				try {
+					inputStream = p.getInputStream();
+					BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+					StringBuilder sb = new StringBuilder();
+					while (null != ((str = br.readLine()))) {
+						sb.append(str + "\n");
+					}
+					str = sb.toString();
+				} finally {
+					if(inputStream != null) try { inputStream.close(); } catch(IOException ex) { LOG.warn("Error closing external program input stream.", ex); }
 				}
-				str = sb.toString();
 			}
 		}
 		LOG.trace("EXIT");
