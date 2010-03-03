@@ -103,7 +103,7 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	 * @param textFieldToBeSet The text field whose value should be sert to the chosen file
 	 */
 	public void showSaveModeFileChooser(Object textFieldToBeSet) {
-		new FileChooser(this).showSaveModeFileChooser(textFieldToBeSet);
+		FileChooser.showSaveModeFileChooser(this, textFieldToBeSet);
 	}
 	
 	/**
@@ -113,7 +113,7 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	 * @param textFieldToBeSet The text field whose value should be sert to the chosen file
 	 */
 	public void showOpenModeFileChooser(Object textFieldToBeSet) {
-		new FileChooser(this).showOpenModeFileChooser(textFieldToBeSet);
+		FileChooser.showOpenModeFileChooser(this, textFieldToBeSet);
 	}
 
 	/**

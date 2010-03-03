@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<dialog closable="true" close="removeDialog(this)" bottom="4" columns="4" gap="4" height="500" icon="/icons/file.png" left="4" modal="true" name="fileChooserForm" resizable="true" right="4" text="i18n.common.file.chooser" top="4" width="500">
-    <label colspan="2" name="lbDirectory"/>
-    <button action="goUp(fileChooser_list, fileChooserForm)" colspan="2" icon="/icons/fileChooser_goUp.png" text="i18n.action.go.up.directory" weightx="1"/>
-    <list colspan="4" name="fileChooser_list" perform="fileList_doubleClicked(this, fileChooserForm)" rowspan="20" weightx="1" weighty="1"/>
+<dialog closable="true" close="remove" bottom="4" columns="4" gap="4" height="500" icon="/icons/file.png" left="4" modal="true" name="fileChooserForm" resizable="true" right="4" text="i18n.common.file.chooser" top="4" width="500">
+    <label colspan="2" name="lbTitle"/>
+    <button action="goUp" colspan="2" icon="/icons/fileChooser_goUp.png" text="i18n.action.go.up.directory" weightx="1" name="btGoUp"/>
+    <list colspan="4" name="lsFiles" perform="handleListExecute" rowspan="20" weightx="1" weighty="1" action="handleListSelectionChanged"/>
     <label text="i18n.common.filename"/>
-    <textfield columns="30" name="tfFilename" perform="goToDir(this, fileChooser_list, fileChooserForm)" weightx="2"/>
-    <button action="doSelection(fileChooser_list, fileChooserForm, tfFilename.text)" icon="/icons/tick.png" name="btOpenOrDone" text="i18n.action.done" weightx="1"/>
-    <button action="removeDialog(fileChooserForm)" icon="/icons/cross.png" text="i18n.action.cancel"/>
+    <textfield columns="30" name="tfFilename" perform="goToDir" weightx="2"/>
+    <button action="done" icon="/icons/tick.png" name="btDone" text="i18n.action.done" weightx="1"/>
+    <button action="remove" icon="/icons/cross.png" text="i18n.action.cancel"/>
 </dialog>

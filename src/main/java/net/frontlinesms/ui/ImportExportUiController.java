@@ -75,9 +75,9 @@ public class ImportExportUiController implements ThinletUiEventHandler {
 	
 //> THINLET COMPONENT NAMES
 	/** Thinlet Component Name: TODO document */
-	private static final String COMPONENT_CB_NOTES = "cbNotes";
+	private static final String COMPONENT_CB_NOTES = "cbContactNotes";
 	/** Thinlet Component Name: TODO document */
-	private static final String COMPONENT_CB_EMAIL = "cbEmail";
+	private static final String COMPONENT_CB_EMAIL = "cbContactEmail";
 	/** Thinlet Component Name: TODO document */
 	private static final String COMPONENT_CB_OTHER_PHONE = "cbOtherPhone";
 	/** Thinlet Component Name: TODO document */

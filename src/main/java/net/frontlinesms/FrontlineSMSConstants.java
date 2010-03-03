@@ -238,7 +238,6 @@ public final class FrontlineSMSConstants {
 	public static final String MESSAGE_SEND_CONSOLE_LOADED = "message.send.console.loaded";
 	public static final String MESSAGE_CONTACT_MANAGER_LOADED = "message.contact.manager.loaded";
 	public static final String MESSAGE_NO_FILE_SELECTED = "message.no.file.selected";
-	public static final String MESSAGE_IMPOSSIBLE_TO_GO_UP_A_DIRECTORY = "message.impossible.to.go.up";
 	public static final String MESSAGE_DIRECTORY_NOT_FOUND = "message.directory.not.found";
 	public static final String MESSAGE_NO_GROUP_SELECTED_TO_FWD = "message.no.group.selected";
 	public static final String MESSAGE_NO_CONTACT_SELECTED = "message.no.contact.selected";

@@ -125,7 +125,7 @@ public class CsvUtils {
 	
 	/**
 	 * Escapes a String for use as a CSV cell value.
-	 * @param value
+	 * @param value <code>null</code> values will be treated as empty strings
 	 * @return intput {@link String} escaped for outputting as a single value of a CSV file
 	 */
 	static String escapeValue(String value) {
@@ -133,7 +133,8 @@ public class CsvUtils {
 		// in the generated file, but would complicate the code.  It's allowed
 		// in the spec to just include QUOTES around everything, so let's do
 		// that.
-		return QUOTE + value.replaceAll(QUOTE_STRING, DOUBLE_QUOTE_STRING) + QUOTE;
+		String escapedValue = value == null ? "" : value.replaceAll(QUOTE_STRING, DOUBLE_QUOTE_STRING);
+		return QUOTE + escapedValue + QUOTE;
 	}
 
 	/**
