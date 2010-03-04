@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Field;
 
-import org.apache.log4j.Logger;
 import org.smslib.handler.CATHandler_Mock;
 
 import net.frontlinesms.junit.BaseTestCase;
