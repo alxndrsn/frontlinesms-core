@@ -14,8 +14,7 @@ public class DidSaveNotification<E> extends FrontlineEvent {
 	/** the object that was saved **/
 	private E object;
 	
-	public DidSaveNotification(String description, E object) {
-		super(description);
+	public DidSaveNotification(E object) {
 		this.object = object;
 	}
 	

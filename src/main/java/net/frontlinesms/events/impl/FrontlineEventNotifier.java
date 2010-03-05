@@ -1,6 +1,6 @@
 package net.frontlinesms.events.impl;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 import net.frontlinesms.events.EventNotifier;
 import net.frontlinesms.events.EventObserver;
@@ -15,10 +15,10 @@ public class FrontlineEventNotifier implements EventNotifier{
 	/**
 	 * the observers that receive event notifications
 	 */
-	private ArrayList<EventObserver> observers;
+	private HashSet<EventObserver> observers;
 	
 	public FrontlineEventNotifier(){
-		observers = new ArrayList<EventObserver>();
+		observers = new HashSet<EventObserver>();
 	}
 	 
 	/**

@@ -14,8 +14,7 @@ public class WillDeleteWarning<E> extends FrontlineEvent {
 	/** the object that will be deleted**/
 	private E object;
 	
-	public WillDeleteWarning(String description, E object) {
-		super(description);
+	public WillDeleteWarning(E object) {
 		this.object = object;
 	}
 	
