@@ -61,7 +61,7 @@ public class ReplyActionDialog extends BaseActionDialog {
 		// FIX 0000542
 		
 		//Adds the date panel to it
-		ui.addDatePanel(this.getDialogComponent());
+		addDatePanel(this.getDialogComponent());
 		
 		if(isEditing()) {
 			KeywordAction action = getTargetObject(KeywordAction.class);

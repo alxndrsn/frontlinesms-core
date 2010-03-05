@@ -57,7 +57,7 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 	@Override
 	protected void _init() {
 		//Adds the date panel to it
-		ui.addDatePanel(super.getDialogComponent());
+		addDatePanel(super.getDialogComponent());
 		Object list = find(COMPONENT_EXTERNAL_COMMAND_GROUP_LIST);
 		List<Group> userGroups = this.groupDao.getAllGroups();
 		for (Group g : userGroups) {

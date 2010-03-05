@@ -63,7 +63,7 @@ public class EmailActionDialog extends BaseActionDialog {
 	protected void _init() {
 		Object emailForm = super.getDialogComponent();
 		
-		ui.addDatePanel(emailForm);
+		addDatePanel(emailForm);
 		
 		Object list = ui.find(emailForm, COMPONENT_MAIL_LIST);
 		for (EmailAccount acc : emailAccountDao.getAllEmailAccounts()) {

@@ -18,6 +18,7 @@ import net.frontlinesms.data.domain.KeywordAction;
 import net.frontlinesms.data.repository.KeywordActionDao;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
@@ -25,6 +26,10 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * @author aga
  */
 public abstract class BaseActionDialog implements ThinletUiEventHandler {
+	
+//> CONSTANTS
+	/** UI XML Layout file: date panel */
+	public static final String UI_FILE_DATE_PANEL = "/ui/core/keyword/pnDate.xml";
 
 //> INSTANCE PROPERTIES
 	/** Log */
@@ -205,6 +210,12 @@ public abstract class BaseActionDialog implements ThinletUiEventHandler {
 		} catch (ParseException ex) {
 			throw new DialogValidationException("Wrong format for date", ex, InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
 		}
+	}
+
+	protected void addDatePanel(Object dialog) {
+		Object datePanel = ui.loadComponentFromFile(UI_FILE_DATE_PANEL);
+		//Adds to the end of the panel, before the button
+		ui.add(dialog, datePanel, ui.getItems(dialog).length - 2);
 	}
 	
 //> UI PASSTHROUGH METHODS

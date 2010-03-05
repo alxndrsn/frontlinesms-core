@@ -53,7 +53,7 @@ abstract class BaseGroupActionDialog extends BaseActionDialog {
 	/**  */
 	protected final void _init() {
 		//Adds the date panel to it
-		ui.addDatePanel(super.getDialogComponent());
+		addDatePanel(super.getDialogComponent());
 		ui.setText(find(COMPONENT_GROUP_SELECTER_TITLE), getDialogTitle());
 		Object list = find(COMPONENT_GROUP_SELECTER_GROUP_LIST);
 		List<Group> userGroups = this.groupDao.getAllGroups();

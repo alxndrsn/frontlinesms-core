@@ -451,12 +451,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public boolean isDefaultGroup(Group group) {
 		return group == this.rootGroup;
 	}
-
-	public void addDatePanel(Object dialog) {
-		Object datePanel = loadComponentFromFile(UI_FILE_DATE_PANEL);
-		//Adds to the end of the panel, before the button
-		add(dialog, datePanel, getItems(dialog).length - 2);
-	}
 	
 	/**
 	 * Selects the supplied object. If not found, none is selected.

@@ -59,7 +59,7 @@ public class ForwardActionDialog extends BaseActionDialog {
 		ui.setText(find(COMPONENT_FORWARD_FORM_TITLE), title);
 
 		// Add the date panel, and set dates
-		ui.addDatePanel(super.getDialogComponent());
+		addDatePanel(super.getDialogComponent());
 		initDateFields();
 		
 		// Update the group list
