@@ -46,7 +46,7 @@ import org.smslib.util.TpduUtils;
  */
 public class CService {
 	/** Dummy synchronization object. */
-	private Object _SYNC_ = null;
+	private final Object _SYNC_ = new Object();
 
 	/** Holds values representing the modem protocol used. */
 	public static class Protocol {
@@ -109,7 +109,7 @@ public class CService {
 
 	private volatile boolean connected;
 
-	private CDeviceInfo deviceInfo;
+	private final CDeviceInfo deviceInfo;
 
 	private CKeepAliveThread keepAliveThread;
 
@@ -124,6 +124,13 @@ public class CService {
 	/** List of incomplete multipart message parts. */
 	private final LinkedList<LinkedList<CIncomingMessage>> mpMsgList = new LinkedList<LinkedList<CIncomingMessage>>();
 
+	/** Constructor used for Unit Tests. */
+	CService(AbstractATHandler atHanndler) {
+		log = Logger.getLogger(CService.class);
+		this.atHandler = atHanndler;
+		this.deviceInfo = new CDeviceInfo();
+	}
+	
 	/**
 	 * CService constructor.
 	 * 
@@ -138,8 +145,6 @@ public class CService {
 	 * @param catHandlerAlias TODO
 	 */
 	public CService(String port, int baud, String gsmDeviceManufacturer, String gsmDeviceModel, String catHandlerAlias) {
-		if (_SYNC_ == null) _SYNC_ = new Object();
-		
 		smscNumber = "";
 
 		serialDriver = new CSerialDriver(port, baud, this);
@@ -1082,9 +1087,9 @@ public class CService {
 					/** Number of octets encoded SMSC number occupies */
 					int smscLen = (smscNumberCharacterCount + 1/* avoid rounding error */) >> 1;
 					// 1 extra octet containing number encoding info
-					--smscLen;
+					++smscLen;
 					// 1 extra octet containing smsc length
-					--smscLen;
+					++smscLen;
 					// Subtract octet count of the SMSC Number from the pdu's octet count
 					pduLength -= smscLen;
 				}
