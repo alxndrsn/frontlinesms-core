@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.smslib.sms.SmsMessageEncoding;
 
 import net.frontlinesms.junit.BaseTestCase;
