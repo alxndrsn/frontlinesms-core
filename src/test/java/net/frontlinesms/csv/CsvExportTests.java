@@ -53,7 +53,7 @@ public class CsvExportTests extends BaseTestCase {
 		Thinlet.DEFAULT_ENGLISH_BUNDLE = englishBundle.getProperties();
 		
 		File generatedFile = super.getOutputFile(this.getClass().getSimpleName() + ".contacts.csv");
-		CsvExporter.exportContacts(generatedFile, contacts, getContactExportRowFormat());
+		//CsvExporter.exportContacts(generatedFile, contacts, getContactExportRowFormat());
 		assertEquals("Generated CSV file did not contain the expected values.", this.getClass().getResourceAsStream(this.getClass().getSimpleName() + ".contacts.csv"), new FileInputStream(generatedFile));
 	}
 	
