@@ -55,7 +55,7 @@ public class ArcaneDataImporter {
 					contactDao.saveContact(contact);
 				}
 				Group newGroup = extractGroup(arcaneContact);
-				newGroup.addDirectMember(contact);
+				//newGroup.addDirectMember(contact);
 				groupDao.updateGroup(newGroup);
 			}
 		} catch(DuplicateKeyException ex) {
@@ -70,22 +70,22 @@ public class ArcaneDataImporter {
 		Group parent;
 		String groupName;
 		String[] groups = groupString.split("\\\\", 2);
-		if(groups.length == 1) {
-			parent = null;
-			groupName = groups[0];
-		} else {
-			parent = groupDao.getGroupByName(groups[0]);
-			if(parent == null) {
-				parent = new Group(null, groups[0]);
-				groupDao.saveGroup(parent);
-			}
-			groupName = groups[1];
-		}
-		group = groupDao.getGroupByName(groupName);
-		if(group == null) {
-			group = new Group(parent, groupName);
-			groupDao.saveGroup(group);
-		}
+//		if(groups.length == 1) {
+//			parent = null;
+//			groupName = groups[0];
+//		} else {
+//		//	parent = groupDao.getGroupByName(groups[0]);
+////			if(parent == null) {
+////				parent = new Group(null, groups[0]);
+////				groupDao.saveGroup(parent);
+////			}
+//			groupName = groups[1];
+//		}
+//		//group = groupDao.getGroupByName(groupName);
+//		if(group == null) {
+//			//group = new Group(parent, groupName);
+//			groupDao.saveGroup(group);
+//		}
 		return group;
 	}
 	
