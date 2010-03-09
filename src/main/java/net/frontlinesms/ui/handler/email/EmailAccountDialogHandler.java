@@ -53,8 +53,9 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 	
 	private Object dialogComponent;
 	
-	public EmailAccountDialogHandler(UiGeneratorController ui, FrontlineSMS frontlineController) {
+	public EmailAccountDialogHandler(UiGeneratorController ui) {
 		this.ui = ui;
+		FrontlineSMS frontlineController = ui.getFrontlineController();
 		this.emailAccountDao = frontlineController.getEmailAccountFactory();
 		this.emailManager = frontlineController.getEmailServerHandler();
 	}
