@@ -524,7 +524,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	/** Shows a general dialog asking the user to confirm his action. */
-	public void showConfirmationDialog(String methodToBeCalled, Object handler, String confirmationMessageKey) {
+	public void showConfirmationDialog(String methodToBeCalled, ThinletUiEventHandler handler, String confirmationMessageKey) {
 		Object conf = loadComponentFromFile(UI_FILE_CONFIRMATION_DIALOG_FORM);
 		setMethod(find(conf, COMPONENT_BT_CONTINUE), ATTRIBUTE_ACTION, methodToBeCalled, conf, handler);
 		setText(find(conf, "lbText"), InternationalisationUtils.getI18NString(confirmationMessageKey));
