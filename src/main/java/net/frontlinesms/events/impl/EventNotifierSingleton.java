@@ -1,12 +1,12 @@
 package net.frontlinesms.events.impl;
 
-import net.frontlinesms.events.EventNotifier;
+import net.frontlinesms.events.EventBus;
 
 public class EventNotifierSingleton {
 
-	private static EventNotifier dispatcher = new FrontlineEventNotifier();
+	private static EventBus dispatcher = new FrontlineEventBus();
 	
-	public static EventNotifier getEventNotifier(){
+	public static EventBus getEventNotifier(){
 		return dispatcher;
 	}
 }

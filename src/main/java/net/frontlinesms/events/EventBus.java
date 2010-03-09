@@ -1,13 +1,14 @@
 package net.frontlinesms.events;
 
 /**
- * An interface for the central event dispatcher, responsible for notifying
- * objects when noteworthy events happen in FrontlineSMS core, like deletions
- * or saves of objects
+ * An interface for the central event bus, responsible for passing notifications to 
+ * listeners when noteworthy events happen in FrontlineSMS core, like deletions
+ * or saves of objects. The event bus can also be used for inter-plugin communication.
+ * All implementing classes should be thread safe
  * @author Dieterich
  *
  */
-public interface EventNotifier {
+public interface EventBus {
 
 	/**
 	 * Adds an observer to the observers list

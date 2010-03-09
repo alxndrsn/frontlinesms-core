@@ -1,27 +1,16 @@
 package net.frontlinesms.events.impl;
 
-import net.frontlinesms.events.FrontlineEvent;
-
 /**
- * A notification that is fired immediately before an object is deleted. Generics are used
- * so that this notification can be used for any type
+ * A notification that is fired immediately before an object is deleted from the database. 
+ * Generics are used so that this notification can be used for any type
  * @author Dieterich
  *
- * @param <E> the Class of the object that will be deleted
+ * @param <E> the class of the object that will be deleted
  */
-public class WillDeleteWarning<E> extends FrontlineEvent {
+public class WillDeleteWarning<E> extends DatabaseNotification<E> {
 
-	/** the object that will be deleted**/
-	private E object;
-	
-	public WillDeleteWarning(E object) {
-		this.object = object;
+	public WillDeleteWarning(E object){
+		super(object);
 	}
 	
-	/**
-	 * @return the object that will be deleted
-	 */
-	public E getObjectBeingDeleted(){
-		return object;
-	}
 }

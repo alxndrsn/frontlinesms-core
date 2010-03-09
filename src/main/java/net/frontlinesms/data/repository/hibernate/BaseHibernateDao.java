@@ -8,7 +8,7 @@ import java.util.List;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.EntityField;
 import net.frontlinesms.data.Order;
-import net.frontlinesms.events.EventNotifier;
+import net.frontlinesms.events.EventBus;
 import net.frontlinesms.events.impl.DidDeleteNotification;
 import net.frontlinesms.events.impl.DidSaveNotification;
 import net.frontlinesms.events.impl.DidUpdateNotification;
@@ -39,7 +39,7 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	/** The unqualified name of {@link #clazz} */
 	private final String className;
 	/**EventNotifier that sends out FrontlineEvents**/
-	private EventNotifier eventNotifier;
+	private EventBus eventNotifier;
 	
 	/**
 	 * @param clazz
@@ -49,7 +49,7 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 		this.className = clazz.getName();
 	}
 	
-	public void setEventNotifier(EventNotifier eventNotifier){
+	public void setEventNotifier(EventBus eventNotifier){
 		this.eventNotifier = eventNotifier;
 	}
 	

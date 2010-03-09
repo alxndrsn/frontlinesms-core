@@ -1,21 +1,16 @@
 package net.frontlinesms.events.impl;
 
-import net.frontlinesms.events.FrontlineEvent;
+/**
+ * This event is sent to the event bus when an entity
+ * is deleted from the database
+ * @author Dieterich
+ *
+ * @param <E> the class of the recently deleted entity
+ */
+public class DidDeleteNotification<E> extends DatabaseNotification<E> {
 
-public class DidDeleteNotification<E> extends FrontlineEvent {
-
-	
-	/** the object that was saved **/
-	private E object;
-	
 	public DidDeleteNotification(E object) {
-		this.object = object;
+		super(object);
 	}
-	
-	/**
-	 * @return the object that was just deleted
-	 */
-	public E getDeletedObject(){
-		return object;
-	}
+
 }

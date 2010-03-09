@@ -1,31 +1,16 @@
 package net.frontlinesms.events.impl;
 
-import net.frontlinesms.events.FrontlineEvent;
+/**
+ * This notification is sent to the event bus when an object in the database
+ * is updated
+ * @author Dieterich
+ *
+ * @param <E> the class of the object that was updated
+ */
+public class DidUpdateNotification<E> extends DatabaseNotification<E> {
 
-public class DidUpdateNotification<E> extends FrontlineEvent {
-
-	/**
-	 * The object that this notification is about, which has presumably just been updated
-	 */
-	private E updatedObject;
-	
-	/**
-	 * @return the subject of this notification
-	 */
-	public E getUpdatedObject() {
-		return updatedObject;
-	}
-
-	/**
-	 * Sets the object that this notification is about
-	 * @param updatedObject
-	 */
-	public void setUpdatedObject(E updatedObject) {
-		this.updatedObject = updatedObject;
-	}
-
-	public DidUpdateNotification(E updatedObject) {
-		this.updatedObject = updatedObject;
+	public DidUpdateNotification(E object) {
+		super(object);
 	}
 
 }
