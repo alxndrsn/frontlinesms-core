@@ -116,6 +116,8 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private static final String COMPONENT_CB_RECEIVED = "cbReceived";
 	/** Thinlet Component Name: TODO document */
 	private static final String COMPONENT_CB_SENT = "cbSent";
+	/** Thinlet component name: button for executing EXPORT action */
+	private static final String COMPONENT_BT_DO_EXPORT = "btDoExport";
 	
 //> STATIC CONSTANTS
 	/** Export entity type: {@link Contact} */
@@ -199,7 +201,6 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		_showWizard();
 	}
 	
-//> PUBLIC UI METHODS
 	/**
 	 * Setup the details of the dialog.
 	 * @param export value for {@link #export}
@@ -210,6 +211,12 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		this.export = export;
 		this.type = type;
 		this.attachedObject = attachedObject;
+	}
+
+//> PUBLIC UI METHODS
+	public void filenameModified(String text) {
+		boolean enableExport = Utils.getFilenameWithoutExtension(new File(text)).length() > 0;
+		uiController.setEnabled(uiController.find(this.wizardDialog, COMPONENT_BT_DO_EXPORT), enableExport);
 	}
 	
 	/**

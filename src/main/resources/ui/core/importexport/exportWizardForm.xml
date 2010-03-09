@@ -6,11 +6,11 @@
     
     <panel bottom="3" gap="5" top="3">
         <label text="i18n.common.filename"/>
-        <textfield columns="26" name="tfFilename" weightx="1"/>
+        <textfield columns="26" name="tfFilename" weightx="1" action="filenameModified(this.text)"/>
         <button action="showSaveModeFileChooser(tfFilename)" icon="/icons/browse.png" text="i18n.action.browse" weightx="1"/>
     </panel>
     <panel gap="5" halign="center">
-        <button action="doExport(tfFilename.text)" halign="right" icon="/icons/export.png" text="i18n.common.export"/>
+        <button action="doExport(tfFilename.text)" halign="right" icon="/icons/export.png" text="i18n.common.export" name="btDoExport" enabled="false"/>
     	<button action="removeDialog(exportWizardDialog)" halign="left" icon="/icons/cross.png" text="i18n.action.cancel"/>
     </panel>
 </dialog>
