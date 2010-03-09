@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui;
+package net.frontlinesms.ui.handler;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +22,10 @@ import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
+import net.frontlinesms.ui.FrontlineUI;
+import net.frontlinesms.ui.ThinletUiEventHandler;
+import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
@@ -30,7 +34,7 @@ import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
  * @author Alex
  */
 @TextResourceKeyOwner(prefix="MESSAGE_")
-public class ImportExportUiController implements ThinletUiEventHandler {
+public class ImportExportDialogHandler implements ThinletUiEventHandler {
 //> STATIC CONSTANTS
 	
 //> I18N KEYS
@@ -153,7 +157,7 @@ public class ImportExportUiController implements ThinletUiEventHandler {
 	 * @param messageDao 
 	 * @param keywordDao 
 	 */
-	public ImportExportUiController(UiGeneratorController uiController) {
+	public ImportExportDialogHandler(UiGeneratorController uiController) {
 		this.uiController = uiController;
 		this.contactDao = uiController.getFrontlineController().getContactDao();
 		this.groupMembershipDao = uiController.getFrontlineController().getGroupMembershipDao();
