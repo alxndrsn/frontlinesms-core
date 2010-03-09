@@ -444,7 +444,7 @@ public class Utils {
 	 */
 	public static String getFilenameWithoutExtension(File file) {
 		String filename = file.getName();
-		int dotIndex = filename.indexOf('.');
+		int dotIndex = filename.lastIndexOf('.');
 		if(dotIndex > -1) filename = filename.substring(0, dotIndex);
 		return filename;
 	}

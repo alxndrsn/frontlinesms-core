@@ -15,6 +15,7 @@ public class UtilsTest extends BaseTestCase {
 	public void testGetFilenameWithoutExtension() {
 		testGetFilenameWithoutExtension("a.b", "a");
 		testGetFilenameWithoutExtension("/a/b/c/whatever.text", "whatever");
+		testGetFilenameWithoutExtension("/a/b/c/whatever.text.hahahahaha", "whatever.text");
 		testGetFilenameWithoutExtension("/a/b/c/whatever.text etc", "whatever");
 		testGetFilenameWithoutExtension("C:/Program Files/My Program/filename.ext", "filename");
 		testGetFilenameWithoutExtension("C:/Program Files/My Program/filename with space.ext", "filename with space");
