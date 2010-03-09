@@ -21,44 +21,40 @@ public class PopUtilsTest extends BaseTestCase {
 	 * @throws IOException 
 	 */
 	public void testGetMessageTextFromMultipart() throws MessagingException, IOException {
-		String content = "Message Content";
-		String desiredContentType = "text/plain";
-		String invalidContentType = "text/html";
-		MockMailMultipart mult = new MockMailMultipart();
-		MockBodyPart bp = new MockBodyPart(content, invalidContentType);	
-		mult.addBodyPart(bp);
-		bp = new MockBodyPart(content, desiredContentType);
-		mult.addBodyPart(bp);
-		String text = PopUtils.getMessageText(mult, desiredContentType);
-		assertEquals("Checking getting a text from a multipart " + invalidContentType + " and " + desiredContentType + " content", content, text);
+		final String invalidContentType = "text/html";
+		final String expectedContent = "Message Content";
+		final String unexpectedContent = "Bad Message Content";
+		final String desiredContentType = "text/plain";
+		
+		// Multipart
+		testGetMessageTextFromMultipart(desiredContentType, expectedContent,
+				new MockBodyPart(unexpectedContent, invalidContentType),
+				new MockBodyPart(expectedContent, desiredContentType));
 		
 		// Reverse the order
-		mult = new MockMailMultipart();
-		bp = new MockBodyPart(content, desiredContentType);
-		mult.addBodyPart(bp);
-		bp = new MockBodyPart(content, invalidContentType);
-		mult.addBodyPart(bp);
-		text = PopUtils.getMessageText(mult, desiredContentType);
-		assertEquals("Checking getting a text from a multipart " + desiredContentType + " and " + invalidContentType + " content", content, text);
+		testGetMessageTextFromMultipart(desiredContentType, expectedContent,
+				new MockBodyPart(expectedContent, desiredContentType),
+				new MockBodyPart(unexpectedContent, invalidContentType));
+
+		// Plain text
+		testGetMessageTextFromMultipart(desiredContentType, expectedContent,
+				new MockBodyPart(expectedContent, desiredContentType));
 		
 		// Empty multipart
-		mult = new MockMailMultipart();
-		text = PopUtils.getMessageText(mult, desiredContentType);
-		assertNull("Checking getting a text from a multipart without content", text);
-		
-		// Plain text
-		mult = new MockMailMultipart();
-		bp = new MockBodyPart(content, desiredContentType);
-		mult.addBodyPart(bp);
-		text = PopUtils.getMessageText(mult, desiredContentType);
-		assertEquals("Checking getting a text from a multipart " + desiredContentType, content, text);
+		testGetMessageTextFromMultipart(desiredContentType, null);
 		
 		// Html
-		mult = new MockMailMultipart();
-		bp = new MockBodyPart(content, invalidContentType);
-		mult.addBodyPart(bp);
-		text = PopUtils.getMessageText(mult, desiredContentType);
-		assertNull("Checking getting a text from a multipart " + invalidContentType, text);
+		testGetMessageTextFromMultipart(desiredContentType, null,
+				new MockBodyPart(unexpectedContent, invalidContentType));
+	}
+	
+	private void testGetMessageTextFromMultipart(String desiredContentType, String expectedTextContent, BodyPart... bodyParts) throws MessagingException, IOException {
+		MockMailMultipart mult = new MockMailMultipart();
+		for(BodyPart bp : bodyParts) {
+			mult.addBodyPart(bp);
+		}
+		String actualTextContent = PopUtils.getMessageText(mult, desiredContentType);
+		assertEquals("Checking getting a text from a multipart " + desiredContentType, expectedTextContent, actualTextContent);
 	}
 	
 	/**
