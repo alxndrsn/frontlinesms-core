@@ -39,7 +39,7 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	/** The unqualified name of {@link #clazz} */
 	private final String className;
 	/**EventNotifier that sends out FrontlineEvents**/
-	private EventBus eventNotifier;
+	private EventBus eventBus;
 	
 	/**
 	 * @param clazz
@@ -49,8 +49,8 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 		this.className = clazz.getName();
 	}
 	
-	public void setEventNotifier(EventBus eventNotifier){
-		this.eventNotifier = eventNotifier;
+	public void setEventBus(EventBus eventBus){
+		this.eventBus = eventBus;
 	}
 	
 	/**
@@ -61,7 +61,7 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 		log.trace("Saving entity: " + entity);
 		this.getHibernateTemplate().save(entity);
 		log.trace("Entity saved.");
-		eventNotifier.triggerEvent(new DidSaveNotification<E>(entity));
+		eventBus.triggerEvent(new DidSaveNotification<E>(entity));
 	}
 	
 	/**
@@ -118,7 +118,7 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 		log.trace("Updating entity: " + entity);
 		this.getHibernateTemplate().update(entity);
 		log.trace("Entity updated.");
-		eventNotifier.triggerEvent(new DidUpdateNotification<E>(entity));
+		eventBus.triggerEvent(new DidUpdateNotification<E>(entity));
 	}
 	
 	/**
@@ -126,11 +126,11 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	 * @param entity entity to delete
 	 */
 	protected void delete(E entity) {
-		eventNotifier.triggerEvent(new WillDeleteWarning<E>(entity));
+		eventBus.triggerEvent(new WillDeleteWarning<E>(entity));
 		log.trace("Deleting entity: " + entity);
 		this.getHibernateTemplate().delete(entity);
 		log.trace("Entity deleted.");
-		eventNotifier.triggerEvent(new DidDeleteNotification<E>(entity));
+		eventBus.triggerEvent(new DidDeleteNotification<E>(entity));
 	}
 	
 	/**

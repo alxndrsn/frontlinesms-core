@@ -12,11 +12,11 @@
 	<context:annotation-config/>
 	<tx:annotation-driven />
 
-	<bean id="eventNotifier" class="net.frontlinesms.events.impl.FrontlineEventNotifier"/>
+	<bean id="eventBus" class="net.frontlinesms.events.impl.FrontlineEventBus"/>
 	
 	<bean id="baseHibernateDao" abstract="true">
 		<property name="sessionFactory" ref="sessionFactory"/>
-		<property name="eventNotifier" ref="eventNotifier"/>
+		<property name="eventBus" ref="eventBus"/>
 	</bean>
 
 	<!-- set up hibernate on HSQL -->

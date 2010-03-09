@@ -29,11 +29,11 @@
 	<bean id="messageDao" class="net.frontlinesms.data.repository.hibernate.HibernateMessageDao" parent="baseHibernateDao"/>
 	<bean id="smsInternetServiceSettingsDao" class="net.frontlinesms.data.repository.hibernate.HibernateSmsInternetServiceSettingsDao" parent="baseHibernateDao"/>
 	<bean id="smsModemSettingsDao" class="net.frontlinesms.data.repository.hibernate.HibernateSmsModemSettingsDao" parent="baseHibernateDao"/>
-	<bean id="eventNotifier" class="net.frontlinesms.events.impl.FrontlineEventNotifier"/>
+	<bean id="eventBus" class="net.frontlinesms.events.impl.FrontlineEventBus"/>
 	
 	<bean id="baseHibernateDao" abstract="true">
 		<property name="sessionFactory" ref="sessionFactory"/>
-		<property name="eventNotifier" ref="eventNotifier"/>
+		<property name="eventBus" ref="eventBus"/>
 	</bean>
 	
 	<bean id="sessionFactoryAware" abstract="true">
