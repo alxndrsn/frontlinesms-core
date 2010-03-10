@@ -523,20 +523,25 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		add(conf);
 	}
 	
-	/** Shows a general dialog asking the user to confirm his action. */
-	public void showConfirmationDialog(String methodToBeCalled, ThinletUiEventHandler handler, String confirmationMessageKey) {
+	/**
+	 * Shows a general dialog asking the user to confirm his action.
+	 * @return the confirmation dialog
+	 */
+	public Object showConfirmationDialog(String methodToBeCalled, ThinletUiEventHandler handler, String confirmationMessageKey) {
 		Object conf = loadComponentFromFile(UI_FILE_CONFIRMATION_DIALOG_FORM);
 		setMethod(find(conf, COMPONENT_BT_CONTINUE), ATTRIBUTE_ACTION, methodToBeCalled, conf, handler);
 		setText(find(conf, "lbText"), InternationalisationUtils.getI18NString(confirmationMessageKey));
 		add(conf);
+		return conf;
 	}
 	
 	/**
 	 * Shows the export wizard dialog, according to the supplied type.
 	 * @param list The list to get selected items from.
-	 * @param type The desired type
+	 * @param typeName The desired type
 	 */
-	public void showExportWizard(Object list, String type){
+	public void showExportWizard(Object list, String typeName){
+		ImportExportDialogHandler.EntityType type = ImportExportDialogHandler.EntityType.getFromString(typeName);
 		new ImportExportDialogHandler(this).showWizard(true, list, type);
 	}
 	
@@ -544,7 +549,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Shows the export wizard dialog, according to the supplied type.
 	 * @param type The desired type
 	 */
-	public void showExportWizard(String type){
+	public void showExportWizard(String typeName){
+		ImportExportDialogHandler.EntityType type = ImportExportDialogHandler.EntityType.getFromString(typeName);
 		new ImportExportDialogHandler(this).showWizard(true, type);
 	}
 	
@@ -553,7 +559,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param list The list to get selected items from.
 	 * @param type The desired type
 	 */
-	public void showImportWizard(Object list, String type){
+	public void showImportWizard(Object list, String typeName){
+		ImportExportDialogHandler.EntityType type = ImportExportDialogHandler.EntityType.getFromString(typeName);
 		new ImportExportDialogHandler(this).showWizard(false, list, type);
 	}
 	
@@ -561,7 +568,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Shows the import wizard dialog, according to the supplied type.
 	 * @param type The desired type (0 for Contacts, 1 for Messages and 2 for Keywords)
 	 */
-	public void showImportWizard(String type){
+	public void showImportWizard(String typeName){
+		ImportExportDialogHandler.EntityType type = ImportExportDialogHandler.EntityType.getFromString(typeName);
 		new ImportExportDialogHandler(this).showWizard(false, type);
 	}
 
