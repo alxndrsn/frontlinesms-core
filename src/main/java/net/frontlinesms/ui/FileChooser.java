@@ -4,6 +4,8 @@
 package net.frontlinesms.ui;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,25 +18,19 @@ import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
- * @author kadu
- * @author alex
+ * @author kadu <kadu@masabi.com>
+ * @author Alex Anderson <alex@frontlinesms.com>
  */
-public class FileChooser implements ThinletUiEventHandler {
+public abstract class FileChooser implements ThinletUiEventHandler {
 //> UI FILES
 	/** Thinlet UI layout File: file choosing dialog */
 	private static final String UI_FILE_FILE_CHOOSER_FORM = "/ui/core/util/dgFileChooser.xml";
 	
-//> CONSTANTS
-	private enum Mode {
-		OPEN, SAVE;
-	}
-	
 //> INSTANCE PROPERTIES
 	private Logger log = Utils.getLogger(this.getClass());
-	private final FrontlineUI ui;
+	final FrontlineUI ui;
 	private final Mode mode;
 	private File currentDirectory;
-	private final Object targetTextfield;
 	
 //> UI COMPONENTS
 	private Object dialogComponent;
@@ -45,14 +41,12 @@ public class FileChooser implements ThinletUiEventHandler {
 	private Object btDone;
 	
 //> CONSTRUCTORS
-	private FileChooser(Mode mode, FrontlineUI ui, Object targetTextfield) {
+	FileChooser(Mode mode, FrontlineUI ui) {
 		assert(mode != null) : "Must specify a mode.";
 		assert(ui != null) : "Must supply a UI controller.";
-		assert(targetTextfield != null) : "Must supply a target textfield.";
 		
 		this.mode = mode;
 		this.ui = ui;
-		this.targetTextfield = targetTextfield;
 	}
 	
 //> UI EVENT METHODS
@@ -128,9 +122,12 @@ public class FileChooser implements ThinletUiEventHandler {
 	}
 	
 	private void choosingCompleted(String selectedFilePath) {
-		ui.setText(this.targetTextfield, selectedFilePath);
+		setTextfield(selectedFilePath);
 		remove();
 	}
+	
+	/** Set the textfield value by whatever means seems approprate */
+	protected abstract void setTextfield(String selectedFilePath);
 	
 	/** 
 	 * Updates the file list with the contents of the supplied file.
@@ -212,12 +209,24 @@ public class FileChooser implements ThinletUiEventHandler {
 //> STATIC FACTORIES
 	/**
 	 * Event fired when the browse button is pressed, during an export action. 
-	 * This method opens a fileChooser, showing only directories.
+	 * This method opens a fileChooser, showing directories and files.
 	 * The user will select a directory and write the file name he/she wants.
 	 * @param targetTextfield The text field whose value should be sert to the chosen file
 	 */
 	public static void showSaveModeFileChooser(FrontlineUI ui, Object targetTextfield) {
 		showFileChooser(Mode.SAVE, ui, targetTextfield);
+	}
+
+	/**
+	 * Event fired when the browse button is pressed, during an export action. 
+	 * This method opens a fileChooser, showing directories and files.
+	 * The user will select a directory and write the file name he/she wants.
+	 * @param targetTextfield The text field whose value should be sert to the chosen file
+	 * @param eventHandler 
+	 * @param setMethodName 
+	 */
+	public static void showSaveModeFileChooser(FrontlineUI ui, ThinletUiEventHandler eventHandler, String setMethodName) {
+		showFileChooser(Mode.SAVE, ui, eventHandler, setMethodName);
 	}
 	
 	/**
@@ -230,9 +239,63 @@ public class FileChooser implements ThinletUiEventHandler {
 		showFileChooser(Mode.OPEN, ui, targetTextfield);
 	}
 
+	private static void showFileChooser(Mode mode, FrontlineUI ui, ThinletUiEventHandler eventHandler, String setMethodName) {
+		FileChooser chooser = new SetterCallingFileChooser(mode, ui, eventHandler, setMethodName);
+		chooser.show();
+	}
 
 	private static void showFileChooser(Mode mode, FrontlineUI ui, Object targetTextfield) {
-		FileChooser chooser = new FileChooser(mode, ui, targetTextfield);
+		FileChooser chooser = new DirectSetFileChooser(mode, ui, targetTextfield);
 		chooser.show();
+	}
+}
+
+enum Mode {
+	OPEN, SAVE;
+}
+
+class DirectSetFileChooser extends FileChooser {
+	private final Object targetTextfield;
+	
+	public DirectSetFileChooser(Mode mode, FrontlineUI ui, Object targetTextfield) {
+		super(mode, ui);
+		assert(targetTextfield != null) : "Must supply a target textfield.";
+		this.targetTextfield = targetTextfield;
+	}
+	
+	@Override
+	protected void setTextfield(String selectedFilePath) {
+		ui.setText(this.targetTextfield, selectedFilePath);	
+	}
+}
+
+class SetterCallingFileChooser extends FileChooser {
+	private final ThinletUiEventHandler eventHandler;
+	private final Method setMethod;
+
+	public SetterCallingFileChooser(Mode mode, FrontlineUI ui, ThinletUiEventHandler eventHandler, String setMethodName) {
+		super(mode, ui);
+		
+		this.eventHandler = eventHandler;
+		
+		try {
+			this.setMethod = eventHandler.getClass().getMethod(setMethodName, String.class);
+			assert(setMethod != null) : "";
+		} catch (SecurityException ex) {
+			throw new AssertionError(ex.getMessage());
+		} catch (NoSuchMethodException ex) {
+			throw new AssertionError(ex.getMessage());
+		}
+	}
+	
+	@Override
+	public void setTextfield(String selectedFilePath) {
+		try {
+			setMethod.invoke(this.eventHandler, selectedFilePath);
+		} catch (IllegalAccessException ex) {
+			throw new IllegalStateException(ex);
+		} catch (InvocationTargetException ex) {
+			throw new IllegalStateException(ex);
+		}
 	}
 }

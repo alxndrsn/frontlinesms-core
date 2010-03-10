@@ -17,6 +17,7 @@ import net.frontlinesms.data.repository.EmailAccountDao;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.contacts.ContactSelecter;
+import net.frontlinesms.ui.handler.email.EmailAccountDialogHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
@@ -65,7 +66,21 @@ public class EmailActionDialog extends BaseActionDialog {
 		
 		addDatePanel(emailForm);
 		
-		Object list = ui.find(emailForm, COMPONENT_MAIL_LIST);
+		refreshEmailAccountList();
+		
+		if(isEditing()) {
+			KeywordAction action = super.getTargetObject(KeywordAction.class);
+			
+			ui.setText(find(COMPONENT_TF_SUBJECT), action.getEmailSubject());
+			ui.setText(find(COMPONENT_TF_MESSAGE), action.getUnformattedReplyText());
+			ui.setText(find(COMPONENT_TF_RECIPIENT), action.getEmailRecipients());
+			
+			initDateFields();
+		}
+	}
+	
+	private void refreshEmailAccountList() {
+		Object list = find(COMPONENT_MAIL_LIST);
 		for (EmailAccount acc : emailAccountDao.getAllEmailAccounts()) {
 			log.debug("Adding existent e-mail account [" + acc.getAccountName() + "] to list");
 			Object item = ui.createListItem(acc.getAccountName(), acc);
@@ -75,16 +90,6 @@ public class EmailActionDialog extends BaseActionDialog {
 				log.debug("Selecting the current account for this e-mail [" + acc.getAccountName() + "]");
 				ui.setSelected(item, true);
 			}
-		}
-		
-		if(isEditing()) {
-			KeywordAction action = super.getTargetObject(KeywordAction.class);
-			
-			ui.setText(ui.find(emailForm, COMPONENT_TF_SUBJECT), action.getEmailSubject());
-			ui.setText(ui.find(emailForm, COMPONENT_TF_MESSAGE), action.getUnformattedReplyText());
-			ui.setText(ui.find(emailForm, COMPONENT_TF_RECIPIENT), action.getEmailRecipients());
-			
-			initDateFields();
 		}
 	}
 
@@ -210,6 +215,7 @@ public class EmailActionDialog extends BaseActionDialog {
 //> UI PASSTHROUGH METHODS
 	/** Show the email account settings dialog. */
 	public void showEmailAccountsSettings() {
-		this.ui.showEmailAccountsSettings();
+		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this.ui);
+		ui.add(emailAccountDialogHandler.getDialog());
 	}
 }

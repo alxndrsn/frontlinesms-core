@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui;
+package net.frontlinesms.ui.handler;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +22,11 @@ import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
+import net.frontlinesms.ui.FileChooser;
+import net.frontlinesms.ui.FrontlineUI;
+import net.frontlinesms.ui.ThinletUiEventHandler;
+import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
@@ -30,7 +35,7 @@ import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
  * @author Alex
  */
 @TextResourceKeyOwner(prefix="MESSAGE_")
-public class ImportExportUiController implements ThinletUiEventHandler {
+public class ImportExportDialogHandler implements ThinletUiEventHandler {
 //> STATIC CONSTANTS
 	
 //> I18N KEYS
@@ -60,6 +65,8 @@ public class ImportExportUiController implements ThinletUiEventHandler {
 	private static final String MESSAGE_IMPORT_TASK_FAILED = "message.import.failed";
 	/** I18n Text Key: TODO document */
 	private static final String MESSAGE_IMPORT_TASK_SUCCESSFUL = "message.import.successful";
+	/** i18n Text Key: "A file with this name already exists.  Would you like to overwrite it?" */
+	private static final String MESSAGE_CONFIRM_FILE_OVERWRITE = "message.file.overwrite.confirm";
 	
 //> THINLET LAYOUT DEFINITION FILES
 	/** UI XML File Path: This is the outline for the dialog for EXPORTING */
@@ -74,7 +81,7 @@ public class ImportExportUiController implements ThinletUiEventHandler {
 	private static final String UI_FILE_OPTIONS_PANEL_KEYWORD = "/ui/core/importexport/pnKeywordDetails.xml";
 	
 //> THINLET COMPONENT NAMES
-	/** Thinlet Component Name: TODO document */
+	/** Thinlet Component Name: Checkbox to indicate whether a contact's "notes" field should be exported. */
 	private static final String COMPONENT_CB_NOTES = "cbContactNotes";
 	/** Thinlet Component Name: TODO document */
 	private static final String COMPONENT_CB_EMAIL = "cbContactEmail";
@@ -112,6 +119,8 @@ public class ImportExportUiController implements ThinletUiEventHandler {
 	private static final String COMPONENT_CB_RECEIVED = "cbReceived";
 	/** Thinlet Component Name: TODO document */
 	private static final String COMPONENT_CB_SENT = "cbSent";
+	/** Thinlet component name: button for executing EXPORT action */
+	private static final String COMPONENT_BT_DO_EXPORT = "btDoExport";
 	
 //> STATIC CONSTANTS
 	/** Export entity type: {@link Contact} */
@@ -153,7 +162,7 @@ public class ImportExportUiController implements ThinletUiEventHandler {
 	 * @param messageDao 
 	 * @param keywordDao 
 	 */
-	public ImportExportUiController(UiGeneratorController uiController) {
+	public ImportExportDialogHandler(UiGeneratorController uiController) {
 		this.uiController = uiController;
 		this.contactDao = uiController.getFrontlineController().getContactDao();
 		this.groupMembershipDao = uiController.getFrontlineController().getGroupMembershipDao();
@@ -195,7 +204,6 @@ public class ImportExportUiController implements ThinletUiEventHandler {
 		_showWizard();
 	}
 	
-//> PUBLIC UI METHODS
 	/**
 	 * Setup the details of the dialog.
 	 * @param export value for {@link #export}
@@ -206,6 +214,12 @@ public class ImportExportUiController implements ThinletUiEventHandler {
 		this.export = export;
 		this.type = type;
 		this.attachedObject = attachedObject;
+	}
+
+//> PUBLIC UI METHODS
+	public void filenameModified(String text) {
+		boolean enableExport = Utils.getFilenameWithoutExtension(new File(text)).length() > 0;
+		uiController.setEnabled(uiController.find(this.wizardDialog, COMPONENT_BT_DO_EXPORT), enableExport);
 	}
 	
 	/**
@@ -241,21 +255,27 @@ public class ImportExportUiController implements ThinletUiEventHandler {
 	 * Executes the export action.
 	 * @param dataPath The path to the file to export data to.
 	 */
-	public void doExport(String dataPath) {
+	public void handleDoExport(String dataPath) {
 		log.trace("ENTER");
-		// Make sure that a file has been selected to export to.
-		if (dataPath.equals("")) {
-			log.debug("dataPath is blank.");
-			uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_FILENAME));
-			log.trace("EXIT");
-			return;
-		}
+		
 		log.debug("Filename is [" + dataPath + "] before [" + CsvExporter.CSV_EXTENSION + "] check.");
 		if (!dataPath.endsWith(CsvExporter.CSV_EXTENSION)) {
 			dataPath += CsvExporter.CSV_EXTENSION;
 		}
 		log.debug("Filename is [" + dataPath + "] after [" + CsvExporter.CSV_EXTENSION + "] check.");
 		
+		// Check if the file already exists.  If it does, show a warning.
+		File csvFile = new File(dataPath);
+		if(csvFile.exists() && csvFile.isFile()) {
+			// show confirmation dialog
+			uiController.showConfirmationDialog("doExport('" + dataPath + "')",
+					this, MESSAGE_CONFIRM_FILE_OVERWRITE);
+		} else {
+			doExport(dataPath);
+		}
+	}
+	
+	public void doExport(String dataPath) {
 		try {
 			if (this.attachedObject != null) {
 				log.debug("Exporting selected objects...");
@@ -560,7 +580,12 @@ public class ImportExportUiController implements ThinletUiEventHandler {
 	/** @param textFieldToBeSet Thinlet textfield whose value will be set with the selected file
 	 * @see FrontlineUI#showOpenModeFileChooser(Object) */
 	public void showSaveModeFileChooser(Object textFieldToBeSet) {
-		this.uiController.showSaveModeFileChooser(textFieldToBeSet);
+		FileChooser.showSaveModeFileChooser(this.uiController, this, "setFilename");
+	}
+	
+	public void setFilename(String filename) {
+		uiController.setText(uiController.find(this.wizardDialog, "tfFilename"), filename);
+		filenameModified(filename);
 	}
 
 //> STATIC FACTORIES

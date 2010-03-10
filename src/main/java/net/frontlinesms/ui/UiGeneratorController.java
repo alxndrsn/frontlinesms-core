@@ -54,6 +54,7 @@ import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.*;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
 import net.frontlinesms.ui.handler.HomeTabHandler;
+import net.frontlinesms.ui.handler.ImportExportDialogHandler;
 import net.frontlinesms.ui.handler.PhoneTabHandler;
 import net.frontlinesms.ui.handler.contacts.ContactsTabHandler;
 import net.frontlinesms.ui.handler.contacts.GroupSelecterPanel;
@@ -523,7 +524,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	/** Shows a general dialog asking the user to confirm his action. */
-	public void showConfirmationDialog(String methodToBeCalled, Object handler, String confirmationMessageKey) {
+	public void showConfirmationDialog(String methodToBeCalled, ThinletUiEventHandler handler, String confirmationMessageKey) {
 		Object conf = loadComponentFromFile(UI_FILE_CONFIRMATION_DIALOG_FORM);
 		setMethod(find(conf, COMPONENT_BT_CONTINUE), ATTRIBUTE_ACTION, methodToBeCalled, conf, handler);
 		setText(find(conf, "lbText"), InternationalisationUtils.getI18NString(confirmationMessageKey));
@@ -536,7 +537,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param type The desired type
 	 */
 	public void showExportWizard(Object list, String type){
-		new ImportExportUiController(this).showWizard(true, list, type);
+		new ImportExportDialogHandler(this).showWizard(true, list, type);
 	}
 	
 	/**
@@ -544,7 +545,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param type The desired type
 	 */
 	public void showExportWizard(String type){
-		new ImportExportUiController(this).showWizard(true, type);
+		new ImportExportDialogHandler(this).showWizard(true, type);
 	}
 	
 	/**
@@ -553,7 +554,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param type The desired type
 	 */
 	public void showImportWizard(Object list, String type){
-		new ImportExportUiController(this).showWizard(false, list, type);
+		new ImportExportDialogHandler(this).showWizard(false, list, type);
 	}
 	
 	/**
@@ -561,7 +562,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param type The desired type (0 for Contacts, 1 for Messages and 2 for Keywords)
 	 */
 	public void showImportWizard(String type){
-		new ImportExportUiController(this).showWizard(false, type);
+		new ImportExportDialogHandler(this).showWizard(false, type);
 	}
 
 	/**
@@ -775,7 +776,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Shows the email accounts settings dialog.
 	 */
 	public void showEmailAccountsSettings() {
-		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this, this.frontlineController);
+		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this);
 		add(emailAccountDialogHandler.getDialog());
 	}
 

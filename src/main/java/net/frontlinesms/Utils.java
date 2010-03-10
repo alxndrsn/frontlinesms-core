@@ -437,4 +437,15 @@ public class Utils {
 		} catch (UnsupportedEncodingException e) { /* This will never happen - UTF-8 should always be supported by every JVM. */ }
 		return string;
 	}
+
+	/**
+	 * Gets the name of the supplied file without the extension.
+	 * @param file
+	 */
+	public static String getFilenameWithoutExtension(File file) {
+		String filename = file.getName();
+		int dotIndex = filename.lastIndexOf('.');
+		if(dotIndex > -1) filename = filename.substring(0, dotIndex);
+		return filename;
+	}
 }
