@@ -29,9 +29,12 @@ public final class UiProperties extends UserHomeFilePropertySet {
 
 	/** Property Key (boolean) indicating if the logo is visible */
 	private static final String KEY_HOMETABLOGO_VISIBLE = "hometab.logo.visible";
+	/** Property Key (boolean) indicating if the logo is the default logo */
+	private static final String KEY_HOMETABLOGO_CUSTOM = "hometab.logo.custom";
 	/** Property Key (String) indicating the path to image file containing the logo. */
 	private static final String KEY_HOMETABLOGO_SOURCE = "hometab.logo.source";
-
+	/** Property Key (String) indicating if the custom logo should keep its original size. */
+	private static final String KEY_HOMETABLOGO_KEEP_ORIGINAL_SIZE = "hometab.logo.keeporiginalsize";
 	/** Property key (double) the price per SMS */
 	private static final String KEY_SMS_COST = "sms.cost";
 	
@@ -108,7 +111,7 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	/** @return <code>true</code> if the logo should be shown on the home tab; <code>false</code> otherwise */
 	public boolean isHometabLogoVisible() {
 		Boolean visible = super.getPropertyAsBoolean(KEY_HOMETABLOGO_VISIBLE);
-		return visible == null || visible.booleanValue();
+		return visible != null && !visible.booleanValue();
 	}
 	/**
 	 * Set visibility of the logo on the home tab.
@@ -117,6 +120,37 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	public void setHometabLogoVisible(boolean visible) {
 		super.setProperty(KEY_HOMETABLOGO_VISIBLE, String.valueOf(visible));
 	}
+	
+	/** @return <code>true</code> if the logo shown on the home tab is the default logo; <code>false</code> otherwise */
+	public boolean isHometabCustomLogo() {
+		Boolean isCustom = super.getPropertyAsBoolean(KEY_HOMETABLOGO_CUSTOM);
+		return isCustom == null || isCustom.booleanValue();
+	}
+	
+	
+	/**
+	 * Set logo on the home tab (default or custom).
+	 * @param isCustomLogo value for property {@link #KEY_HOMETABLOGO_CUSTOM}
+	 */
+	public void setHometabCustomLogo(boolean isCustomLogo) {
+		super.setProperty(KEY_HOMETABLOGO_CUSTOM, String.valueOf(isCustomLogo));
+	}
+	
+
+	/** @return <code>true</code> if the custom logo should keep its original size; <code>false</code> otherwise */
+	public boolean isHometabLogoOriginalSizeKept() {
+		Boolean isOriginalSizeKept = super.getPropertyAsBoolean(KEY_HOMETABLOGO_KEEP_ORIGINAL_SIZE);
+		return isOriginalSizeKept == null || isOriginalSizeKept.booleanValue();
+	}
+	
+	/**
+	 * Set whether the custom logo should keep its original size.
+	 * @param isOriginalSizeKept value for property {@link #KEY_HOMETABLOGO_KEEP_ORIGINAL_SIZE}
+	 */
+	public void setHometabLogoOriginalSizeKept(boolean isOriginalSizeKept) {
+		super.setProperty(KEY_HOMETABLOGO_KEEP_ORIGINAL_SIZE, String.valueOf(isOriginalSizeKept));
+	}
+	
 	
 	/** @return the path to the file containing the logo to display on the home tab */
 	public String getHomtabLogoPath() {
