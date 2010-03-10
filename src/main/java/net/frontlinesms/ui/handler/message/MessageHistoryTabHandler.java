@@ -129,9 +129,6 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 //> CONSTRUCTORS
 	/**
 	 * @param ui value for {@link #ui}
-	 * @param contactDao value for {@link #contactDao}
-	 * @param keywordDao value for {@link #keywordDao}
-	 * @param messageDao value for {@link #messageDao}
 	 */
 	public MessageHistoryTabHandler(UiGeneratorController ui) {
 		super(ui);

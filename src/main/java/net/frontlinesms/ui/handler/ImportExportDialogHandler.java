@@ -172,9 +172,6 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	/**
 	 * Create a new instance of this controller.
 	 * @param uiController 
-	 * @param contactDao 
-	 * @param messageDao 
-	 * @param keywordDao 
 	 */
 	public ImportExportDialogHandler(UiGeneratorController uiController) {
 		this.uiController = uiController;
