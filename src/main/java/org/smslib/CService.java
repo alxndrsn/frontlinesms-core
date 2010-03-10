@@ -1398,7 +1398,7 @@ public class CService {
 		int index = (i + 1) * 2;
 
 		i = Integer.parseInt(pdu.substring(index, index + 2), 16);
-		return (i & 0x02) == 2;
+		return (i & TpduUtils.TP_MTI_MASK) == TpduUtils.TP_MTI_MT_STATUS_REPORT;
 	}
 
 	public boolean received(CIncomingMessage message) {
