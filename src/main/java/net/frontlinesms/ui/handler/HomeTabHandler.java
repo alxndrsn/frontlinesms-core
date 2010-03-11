@@ -53,6 +53,10 @@ public class HomeTabHandler extends BaseTabHandler {
 
 	/** Default FrontlineSMS home logo */
 	private static final String FRONTLINE_LOGO = "/icons/frontlineSMS_logo.png";
+	/** Max FrontlineSMS home logo width */
+	private static final double FRONTLINE_LOGO_MAX_WIDTH = 484.0;
+	/** Max FrontlineSMS home logo height */
+	private static final double FRONTLINE_LOGO_MAX_HEIGHT = 300.0;
 
 
 //> INSTANCE PROPERTIES
@@ -233,7 +237,30 @@ public class HomeTabHandler extends BaseTabHandler {
 				// Absolute or relative path provided
 				try {
 					BufferedImage homeTabLogoImage = ImageIO.read(new File(imageLocation));
-					ui.setIcon(lbLogo, homeTabLogoImage);
+					
+					// If the "Keep original size" box is unchecked, we resize the image
+					if (!UiProperties.getInstance().isHometabLogoOriginalSizeKept())
+					{
+						int width = homeTabLogoImage.getWidth();
+						int height = homeTabLogoImage.getHeight();
+						
+						if (height > FRONTLINE_LOGO_MAX_HEIGHT)
+						{
+							width *= (FRONTLINE_LOGO_MAX_HEIGHT / height);
+							height = (int)FRONTLINE_LOGO_MAX_HEIGHT;
+						}
+						else
+						{
+							height *= (FRONTLINE_LOGO_MAX_WIDTH / width);
+							width = (int)(FRONTLINE_LOGO_MAX_WIDTH);
+						}
+						
+						ui.setIcon(lbLogo, homeTabLogoImage.getScaledInstance(width, height, BufferedImage.SCALE_SMOOTH));
+					}
+					else
+						ui.setIcon(lbLogo, homeTabLogoImage);
+
+					
 					useDefault = false;
 				} catch (IOException e) {
 					// We are unable to find the specified image, using the default
