@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <panel name="pnMessage" columns="1" gap="2">
+    <panel columns="1" gap="6" name="pnSend">
+        <panel name="pnMessageRecipient" gap="10">
+            <label icon="/icons/sms_receive.png" text="i18n.common.to"/>
+            <textfield action="recipientChanged(this.text, tfMessage.text)" columns="20" name="tfRecipient"/>
+            <button action="selectMessageRecipient" icon="/icons/user_receiver.png"/>
+        </panel>
+    </panel>
     <panel gap="5" weightx="1">
         <label text="i18n.sentence.remaining.characters"/>
         <label font="bold" name="lbRemainingChars" text="160"/>
@@ -10,7 +17,7 @@
             <label icon="/icons/sms_disabled.png" name="lbThird"/>
         </panel>
     </panel>
-    <textarea action="messageChanged(this.text)" rows="10" columns="40" name="tfMessage"/>
+    <textarea action="messageChanged(tfRecipient.text, this.text)" rows="10" columns="40" name="tfMessage"/>
     <panel name="pnBottom" gap="13" weightx="1">
         <panel halign="left" weightx="1">
             <button icon="/icons/sms_send.png" name="btSend" text="i18n.common.send" enabled="false"

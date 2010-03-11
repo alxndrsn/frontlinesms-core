@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dialog closable="true" bottom="5" close="removeDialog(this)" columns="1" gap="5" icon="/icons/frontline_home_settings.png" left="5" modal="true" name="homeTabLogoDialog" right="5" text="i18n.hometab.logo.settings" top="5">
-    <checkbox action="setHomeTabCustomLogo(pnImgSource, cbHomeTabLogoCustom.selected)" icon="/icons/visible.png" group="logo_type" name="cbHomeTabLogoVisible" text="i18n.hometab.logo.settings.invisible"/>
-    <checkbox action="setHomeTabCustomLogo(pnImgSource, cbHomeTabLogoCustom.selected)" group="logo_type" name="cbHomeTabLogoDefault" text="i18n.hometab.logo.settings.usedefault"/>
-    <checkbox action="setHomeTabCustomLogo(pnImgSource, this.selected)" group="logo_type" name="cbHomeTabLogoCustom" text="i18n.hometab.logo.settings.usecustom"/>
+    <checkbox action="setHomeTabCustomLogo(pnCustomImage, cbHomeTabLogoCustom.selected)" icon="/icons/visible.png" group="logo_type" name="cbHomeTabLogoVisible" text="i18n.hometab.logo.settings.invisible"/>
+    <checkbox action="setHomeTabCustomLogo(pnCustomImage, cbHomeTabLogoCustom.selected)" group="logo_type" name="cbHomeTabLogoDefault" text="i18n.hometab.logo.settings.usedefault"/>
+    <checkbox action="setHomeTabCustomLogo(pnCustomImage, this.selected)" group="logo_type" name="cbHomeTabLogoCustom" text="i18n.hometab.logo.settings.usecustom"/>
     
-    <panel name="pnImgSource" gap="5" weightx="1" columns="3">
+    <panel name="pnCustomImage" gap="5" weightx="1" columns="3">
         <label icon="/icons/image.png" text="i18n.common.image.source"/>
         <textfield columns="50" name="tfImageSource" weightx="1"/>
         <button action="showOpenModeFileChooser(tfImageSource)" icon="/icons/browse.png" name="btBrowse" text="i18n.action.browse"/>

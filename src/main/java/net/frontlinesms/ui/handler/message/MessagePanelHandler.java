@@ -21,7 +21,9 @@ import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.UiProperties;
+import net.frontlinesms.ui.handler.contacts.ContactSelecter;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 import org.apache.log4j.Logger;
@@ -49,19 +51,24 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	private Object messagePanel;
 	/** The number of people the current SMS will be sent to */
 	private int numberToSend = 1;
+	/** The boolean changing whether the recipient field should be displayed */
+	private boolean shouldDisplayRecipientField;
 
 //> CONSTRUCTORS
 	/**
 	 * @param uiController
 	 */
-	private MessagePanelHandler(UiGeneratorController uiController) {
+	private MessagePanelHandler(UiGeneratorController uiController, boolean shouldDisplay) {
 		this.uiController = uiController;
+		this.shouldDisplayRecipientField = shouldDisplay;
 	}
 	
 	private synchronized void init() {
 		assert(this.messagePanel == null) : "This has already been initialised.";
 		this.messagePanel = uiController.loadComponentFromFile(UI_FILE_MESSAGE_PANEL, this);
-		messageChanged("");
+		Object 	pnRecipient = uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_PN_MESSAGE_RECIPIENT);
+		uiController.setVisible(pnRecipient, shouldDisplayRecipientField);
+		messageChanged("", "");
 	}
 
 //> ACCESSORS
@@ -97,30 +104,79 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	}
 	
 	/**
-	 * Event triggered when the message details have changed
-	 * @param panel TODO this should be removed
-	 * @param text the new text value for the message body
+	 * Event triggered when the message recipient has changed
+	 * @param text the new text value for the message recipient
 	 * 
 	 */
-	public void messageChanged(String text) {
-		int textLength = text.length();
-		if (textLength == 0) {
+	public void recipientChanged(String recipient, String message) {
+		int recipientLength = recipient.length(),
+			messageLength = message.length();
+		
+		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
+		boolean shouldEnableSendButton = (sendButton != null && recipientLength > 0 && messageLength > 0);
+		uiController.setEnabled(sendButton, shouldEnableSendButton);
+	}
+	
+	/** Method which triggers showing of the contact selecter. */
+	public void selectMessageRecipient() {
+		ContactSelecter contactSelecter = new ContactSelecter(this.uiController);
+		contactSelecter.show(InternationalisationUtils.getI18NString(FrontlineSMSConstants.SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "setRecipientTextfield(contactSelecter_contactList, contactSelecter)", null, this);
+	}
+	
+	/**
+	 * Sets the phone number of the selected contact.
+	 * 
+	 * This method is triggered by the contact selected, as detailed in {@link #selectMessageRecipient()}.
+	 * 
+	 * @param contactSelecter_contactList
+	 * @param dialog
+	 */
+	public void setRecipientTextfield(Object contactSelecter_contactList, Object dialog) {
+		Object 	tfRecipient = uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_TF_RECIPIENT),
+				tfMessage	= uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE);
+		Object selectedItem = uiController.getSelectedItem(contactSelecter_contactList);
+		if (selectedItem == null) {
+			uiController.alert(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_NO_CONTACT_SELECTED));
+			return;
+		}
+		Contact selectedContact = uiController.getContact(selectedItem);
+		uiController.setText(tfRecipient, selectedContact.getPhoneNumber());
+		uiController.remove(dialog);
+		uiController.updateCost();
+		
+		// The recipient text has changed, we check whether the send button should be enabled
+		this.recipientChanged(uiController.getText(tfRecipient), uiController.getText(tfMessage));
+	}
+	
+	/**
+	 * Event triggered when the message details have changed
+	 * @param panel TODO this should be removed
+	 * @param message the new text value for the message body
+	 * 
+	 */
+	public void messageChanged(String recipient, String message) {
+		int recipientLength = recipient.length(),
+			messageLength = message.length();
+		
+		if (messageLength == 0) {
 			clearMessageComponent();
 			return;
 		}
-		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
-		if (sendButton != null) uiController.setEnabled(sendButton, true);
 		
-		boolean areAllCharactersValidGSM = GsmAlphabet.areAllCharactersValidGSM(text);
+		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
+		boolean shouldEnableSendButton = (sendButton != null && (!shouldDisplayRecipientField || recipientLength > 0));
+		uiController.setEnabled(sendButton, shouldEnableSendButton);
+		
+		boolean areAllCharactersValidGSM = GsmAlphabet.areAllCharactersValidGSM(message);
 
 		int total;
 		if(areAllCharactersValidGSM) total = Message.SMS_MULTIPART_LENGTH_LIMIT * Message.SMS_LIMIT;
 		else total = Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * Message.SMS_LIMIT;
 		
-		if (textLength > total) {
+		if (messageLength > total) {
 			uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_REMAINING_CHARS), "0");
 			Object tfMessage = uiController.find(this.messagePanel, COMPONENT_TF_MESSAGE);
-			uiController.setText(tfMessage, text.substring(0, textLength - 1));
+			uiController.setText(tfMessage, message.substring(0, messageLength - 1));
 		} else {
 			int singleMessageCharacterLimit;
 			int multipartMessageCharacterLimit;
@@ -136,19 +192,19 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 			
 			int numberOfMsgs;
 			int remaining;
-			if (textLength <= singleMessageCharacterLimit) {
+			if (messageLength <= singleMessageCharacterLimit) {
 				//First message
-				remaining = (textLength % singleMessageCharacterLimit) == 0 ? 0
-						: singleMessageCharacterLimit - (textLength % singleMessageCharacterLimit);
-				numberOfMsgs = textLength == 0 ? 0 : 1;
-			} else if (textLength <= (2*multipartMessageCharacterLimit)) {
+				remaining = (messageLength % singleMessageCharacterLimit) == 0 ? 0
+						: singleMessageCharacterLimit - (messageLength % singleMessageCharacterLimit);
+				numberOfMsgs = messageLength == 0 ? 0 : 1;
+			} else if (messageLength <= (2*multipartMessageCharacterLimit)) {
 				numberOfMsgs = 2;
-				int charCount = textLength - multipartMessageCharacterLimit;
+				int charCount = messageLength - multipartMessageCharacterLimit;
 				remaining = (charCount % multipartMessageCharacterLimit) == 0 ? 0
 						: multipartMessageCharacterLimit - (charCount % multipartMessageCharacterLimit);
 			} else {
 				numberOfMsgs = 3;
-				int charCount = textLength - (2*multipartMessageCharacterLimit);
+				int charCount = messageLength - (2*multipartMessageCharacterLimit);
 				remaining = (charCount % multipartMessageCharacterLimit) == 0 ? 0
 						: multipartMessageCharacterLimit - (charCount % multipartMessageCharacterLimit);
 			}
@@ -194,6 +250,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	 * @param panel
 	 */
 	private void clearMessageComponent() {
+		uiController.setText(uiController.find(this.messagePanel, COMPONENT_TF_RECIPIENT), "");
 		uiController.setText(uiController.find(this.messagePanel, COMPONENT_TF_MESSAGE), "");
 		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_REMAINING_CHARS), String.valueOf(Message.SMS_LENGTH_LIMIT));
 		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_MSG_NUMBER), "0");
@@ -210,8 +267,8 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	 * Create and initialise a new {@link MessagePanelHandler}.
 	 * @return a new, initialised instance of {@link MessagePanelHandler}
 	 */
-	public static final MessagePanelHandler create(UiGeneratorController ui) {
-		MessagePanelHandler handler = new MessagePanelHandler(ui);
+	public static final MessagePanelHandler create(UiGeneratorController ui, boolean shouldDisplayRecipientField) {
+		MessagePanelHandler handler = new MessagePanelHandler(ui, shouldDisplayRecipientField);
 		handler.init();
 		return handler;
 	}

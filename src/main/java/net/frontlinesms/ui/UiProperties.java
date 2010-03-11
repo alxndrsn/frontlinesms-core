@@ -123,8 +123,7 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	
 	/** @return <code>true</code> if the logo shown on the home tab is the default logo; <code>false</code> otherwise */
 	public boolean isHometabCustomLogo() {
-		Boolean isCustom = super.getPropertyAsBoolean(KEY_HOMETABLOGO_CUSTOM);
-		return isCustom == null || isCustom.booleanValue();
+		return super.getPropertyAsBoolean(KEY_HOMETABLOGO_CUSTOM, true);
 	}
 	
 	
@@ -139,8 +138,7 @@ public final class UiProperties extends UserHomeFilePropertySet {
 
 	/** @return <code>true</code> if the custom logo should keep its original size; <code>false</code> otherwise */
 	public boolean isHometabLogoOriginalSizeKept() {
-		Boolean isOriginalSizeKept = super.getPropertyAsBoolean(KEY_HOMETABLOGO_KEEP_ORIGINAL_SIZE);
-		return isOriginalSizeKept == null || isOriginalSizeKept.booleanValue();
+		return super.getPropertyAsBoolean(KEY_HOMETABLOGO_KEEP_ORIGINAL_SIZE, true);
 	}
 	
 	/**
@@ -148,7 +146,7 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	 * @param isOriginalSizeKept value for property {@link #KEY_HOMETABLOGO_KEEP_ORIGINAL_SIZE}
 	 */
 	public void setHometabLogoOriginalSizeKept(boolean isOriginalSizeKept) {
-		super.setProperty(KEY_HOMETABLOGO_KEEP_ORIGINAL_SIZE, String.valueOf(isOriginalSizeKept));
+		super.setPropertyAsBoolean(KEY_HOMETABLOGO_KEEP_ORIGINAL_SIZE, isOriginalSizeKept);
 	}
 	
 	
