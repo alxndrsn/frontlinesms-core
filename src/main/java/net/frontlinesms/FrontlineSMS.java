@@ -24,6 +24,7 @@ import java.util.*;
 
 import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
+import net.frontlinesms.data.domain.Message.Type;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.listener.*;
 import net.frontlinesms.plugins.PluginController;
@@ -215,7 +216,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 
 		LOG.debug("Re-Loading messages to outbox.");
 		//We need to reload all messages, which status is OUTBOX, to the outbox.
-		for (Message m : messageDao.getMessages(Message.TYPE_OUTBOUND, new Integer[] { Message.STATUS_OUTBOX, Message.STATUS_PENDING})) {
+		for (Message m : messageDao.getMessages(Type.TYPE_OUTBOUND, new Integer[] { Message.STATUS_OUTBOX, Message.STATUS_PENDING})) {
 			smsDeviceManager.sendSMS(m);
 		}
 

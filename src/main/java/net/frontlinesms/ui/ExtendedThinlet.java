@@ -242,14 +242,6 @@ public class ExtendedThinlet extends Thinlet {
 	}
 	
 	/**
-	 * Sets the given property pair (key and value) for the component
-	 * @deprecated this should be protected, and specific uses exposed
-	 */
-	public void setBoolean(Object component, String key, boolean value) {
-		super.setBoolean(component, key, value);
-	}
-	
-	/**
 	 * Sets the horizontal alignment of a component.
 	 * @param component The component whose horizontal align will be set.
 	 * @param align The alignment value, e.g. {@link ThinletText#LEFT}

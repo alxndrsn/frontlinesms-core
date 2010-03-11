@@ -137,6 +137,31 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	}
 	
 	/**
+	 * Gets a list of E matching the supplied HQL query.
+	 * @param hqlQuery HQL query
+	 * @param values values to insert into the HQL query
+	 * @return a list of Es matching the supplied query
+	 */
+	@SuppressWarnings("unchecked")
+	protected List<E> getList(String hqlQuery, Object... values) {
+		return this.getHibernateTemplate().find(hqlQuery, values);
+	}
+	
+	/**
+	 * Gets a list of E matching the supplied HQL query.
+	 * @param hqlQuery HQL query
+	 * @param startIndex
+	 * @param limit
+	 * @param values values to insert into the HQL query
+	 * @return a list of Es matching the supplied query
+	 */
+	@SuppressWarnings("unchecked")
+	protected List<E> getList(String hqlQuery, int startIndex, int limit, Object... values) {
+		List<E> list = getList(hqlQuery, values);
+		return list.subList(startIndex, Math.min(list.size(), startIndex + limit));
+	}
+	
+	/**
 	 * Gets total number of this entity saved in the database.
 	 * @return total number of this entity saved in the database
 	 */

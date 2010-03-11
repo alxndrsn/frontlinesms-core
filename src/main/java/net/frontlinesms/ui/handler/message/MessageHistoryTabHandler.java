@@ -39,6 +39,7 @@ import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.data.domain.Message.Field;
+import net.frontlinesms.data.domain.Message.Type;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordDao;
@@ -129,9 +130,6 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 //> CONSTRUCTORS
 	/**
 	 * @param ui value for {@link #ui}
-	 * @param contactDao value for {@link #contactDao}
-	 * @param keywordDao value for {@link #keywordDao}
-	 * @param messageDao value for {@link #messageDao}
 	 */
 	public MessageHistoryTabHandler(UiGeneratorController ui) {
 		super(ui);
@@ -296,7 +294,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		if (selectedItem == null) {
 			return 0;
 		} else {
-			final int messageType = getSelectedMessageType();
+			final Message.Type messageType = getSelectedMessageType();
 			int selectedIndex = ui.getSelectedIndex(filterList);
 			if (selectedIndex == 0) {
 				return messageDao.getMessageCount(messageType, messageHistoryStart, messageHistoryEnd);
@@ -331,7 +329,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		if (selectedItem == null) {
 			return Collections.emptyList();
 		} else {
-			int messageType = getSelectedMessageType();
+			Message.Type messageType = getSelectedMessageType();
 			Order order = getMessageSortOrder();
 			Field field = getMessageSortField();
 			
@@ -348,11 +346,11 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 					// A Group was selected
 					Group selectedGroup = ui.getGroup(selectedItem);
 					return messageDao.getMessages(messageType, getPhoneNumbers(selectedGroup), messageHistoryStart, messageHistoryEnd);
-				} else /* (filterClass == Keyword.class) */ {
+				} else if (filterClass == Keyword.class) {
 					// Keyword Selected
 					Keyword k = ui.getKeyword(selectedItem);
 					return messageDao.getMessagesForKeyword(messageType, k, field, order, messageHistoryStart, messageHistoryEnd, startIndex, limit);
-				}
+				} else throw new IllegalStateException("Unknown filter class: " + filterClass.getName());
 			}
 		}
 	}
@@ -382,15 +380,15 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	}
 	
 	/** @return he type(s) of messages to display in the message list */
-	private int getSelectedMessageType() {
+	private Message.Type getSelectedMessageType() {
 		boolean showSentMessages = ui.isSelected(showSentMessagesComponent);
 		boolean showReceivedMessages = ui.isSelected(showReceivedMessagesComponent);
-		int messageType;
+		Message.Type messageType;
 		if (showSentMessages && showReceivedMessages) { 
-			messageType = Message.TYPE_ALL;
+			messageType = Type.TYPE_ALL;
 		} else if (showSentMessages) {
-			messageType = Message.TYPE_OUTBOUND;
-		} else messageType = Message.TYPE_RECEIVED;
+			messageType = Type.TYPE_OUTBOUND;
+		} else messageType = Type.TYPE_RECEIVED;
 		return messageType;
 	}
 	
@@ -622,10 +620,10 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			boolean sentMessagesSelected = false;
 			for(Object selectedComponent : selectedItems) {
 				Message attachedMessage = ui.getAttachedObject(selectedComponent, Message.class);
-				if(attachedMessage.getType() == Message.TYPE_RECEIVED) {
+				if(attachedMessage.getType() == Type.TYPE_RECEIVED) {
 					receivedMessagesSelected = true;
 				}
-				if(attachedMessage.getType() == Message.TYPE_OUTBOUND) {
+				if(attachedMessage.getType() == Type.TYPE_OUTBOUND) {
 					sentMessagesSelected = true;
 				}
 			}
@@ -673,7 +671,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		Object sel = ui.getSelectedItem(contactListComponent); // TODO doesn't seem to do anything for keyword list
 		boolean sent = ui.isSelected(showSentMessagesComponent);
 		boolean received = ui.isSelected(showReceivedMessagesComponent);
-		if (sel != null && ((sent && message.getType() == Message.TYPE_OUTBOUND) || (received && message.getType() == Message.TYPE_RECEIVED))) {
+		if (sel != null && ((sent && message.getType() == Type.TYPE_OUTBOUND) || (received && message.getType() == Type.TYPE_RECEIVED))) {
 			boolean toAdd = false;
 			if (ui.getSelectedIndex(contactListComponent) == 0) {
 				toAdd = true;
@@ -716,7 +714,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 					LOG.debug("There's space! Adding...");
 					ui.add(messageListComponent, ui.getRow(message));
 					ui.setEnabled(messageListComponent, true);
-					if (message.getType() == Message.TYPE_OUTBOUND) {
+					if (message.getType() == Type.TYPE_OUTBOUND) {
 						numberToSend += message.getNumberOfSMS();
 						updateMessageHistoryCost();
 					}
