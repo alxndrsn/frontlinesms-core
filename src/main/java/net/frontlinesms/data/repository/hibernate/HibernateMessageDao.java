@@ -3,8 +3,8 @@
  */
 package net.frontlinesms.data.repository.hibernate;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.hibernate.criterion.Criterion;
@@ -12,6 +12,7 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.SimpleExpression;
 
+import net.frontlinesms.data.EntityField;
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Email;
 import net.frontlinesms.data.domain.Keyword;
@@ -138,84 +139,30 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 
 	/** @see MessageDao#getMessagesForKeyword(int, Keyword, Field, Order, Long, Long, int, int) */
 	public List<Message> getMessagesForKeyword(Message.Type messageType, Keyword keyword, Field sortBy, Order order, Long start, Long end, int startIndex, int limit) {
-		DetachedCriteria criteria = super.getSortCriterion(sortBy, order);
-		addTypeCriteria(criteria, messageType);
-		addDateCriteria(criteria, start, end);
-		addKeywordMatchCriteria(criteria, keyword);
-		return getList(criteria);
+		PartialQuery<Message> q = createQueryStringForKeyword(messageType, keyword);
+		q.appendWhereOrAnd();
+		q.append("(message." + Message.Field.DATE.getFieldName() + ">=?", start);
+		q.append("AND message." + Message.Field.DATE.getFieldName() + "<=?)", end);
+		
+		q.addSorting(sortBy, order);
+		
+		return super.getList(q.getQueryString(), startIndex, limit, q.getInsertValues());
 	}
 
 	/** @see MessageDao#getMessagesForKeyword(int, Keyword) */
 	@SuppressWarnings("unchecked")
 	public List<Message> getMessagesForKeyword(Message.Type messageType, Keyword keyword) {
-//		DetachedCriteria criteria = super.getCriterion();
-//		addTypeCriteria(criteria, messageType);
-//		addKeywordMatchCriteria(criteria, keyword);
-//		return getList(criteria);
-
-		// remember whether we've added a WHERE clause
-		boolean whereAdded = false;
-		
-		// Build a list of values to insert into the query string
-		List<Object> insertValues = new ArrayList<Object>();
-		String queryString = "SELECT message FROM Message message ";
-		
-		if(messageType != Message.Type.TYPE_ALL) {
-			if(!whereAdded) {
-				queryString += "WHERE ";
-				whereAdded = true;
-			}
-			queryString += "message.type=? ";
-			insertValues.add(messageType);
-		}
-		
-		if(keyword.getKeyword().length() > 0) {
-			if(!whereAdded) {
-				queryString += "WHERE (";
-				whereAdded = true;
-			} else {
-				queryString += "AND (";
-			}
-			queryString += "UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ? " +
-					"OR UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ? + ' %') ";
-			insertValues.add(keyword.getKeyword());
-			insertValues.add(keyword.getKeyword());
-		}
-		
-		List<String> similarKeywords = getSimilarKeywords(keyword);
-		if(similarKeywords.size() > 0) {
-			// Build the query to ignore messages that match similar keywords
-			if(!whereAdded) {
-				queryString += "WHERE (";
-				whereAdded = true;
-			} else {
-				queryString += "AND (";
-			}
-			for(int i=0; i<similarKeywords.size(); ++i) {
-				if(i > 0) {
-					queryString += "AND ";
-				}
-				queryString += "NOT (" +
-						"UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ? " +
-						"OR UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ? + ' %') ";
-				
-				String similarKeyword = similarKeywords.get(i);
-				insertValues.add(similarKeyword);
-				insertValues.add(similarKeyword);
-			}
-			queryString += ")";
-		}
-		
-		return (List<Message>) this.getHibernateTemplate().find(queryString, insertValues.toArray());
+		PartialQuery q = createQueryStringForKeyword(messageType, keyword);
+		return super.getList(q.getQueryString(), q.getInsertValues());
 	}
 	
 	List<String> getSimilarKeywords(Keyword keyword) {
 		if(keyword.getKeyword().length() == 0) {
 			// Get all keywords apart from the blank one
-			List<String> allKeywordsExceptBlank = this.getHibernateTemplate().find("SELECT keyword FROM Keyword WHERE LENGTH(keyword.keyword) > 0");
+			List<String> allKeywordsExceptBlank = this.getHibernateTemplate().find("SELECT k.keyword FROM Keyword AS k WHERE LENGTH(k.keyword) > 0");
 			return allKeywordsExceptBlank;
 		} else {
-			List<String> similarKeywords = this.getHibernateTemplate().find("SELECT keyword FROM Keyword WHERE keyword.keyword LIKE ?+' %'", keyword.getKeyword());
+			List<String> similarKeywords = this.getHibernateTemplate().find("SELECT k.keyword FROM Keyword  AS k WHERE k.keyword LIKE ?+' %'", keyword.getKeyword());
 			for(String k : similarKeywords) {
 				System.out.println("Similar keyword: " + k);
 			}
@@ -385,5 +332,103 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	 */
 	private void addStatusCriteria(DetachedCriteria criteria, Integer[] statuses) {
 		criteria.add(Restrictions.in(Field.STATUS.getFieldName(), statuses));
+	}
+	
+	/**
+	 * 
+	 */
+	private PartialQuery<Message> createQueryStringForKeyword(Message.Type messageType, Keyword keyword) {
+		PartialQuery<Message> q = new PartialQuery<Message>();
+		// Build a list of values to insert into the query string
+		q.append("SELECT message FROM Message message");
+		
+		if(messageType != Message.Type.TYPE_ALL) {
+			q.append("WHERE");
+			q.append("message.type=?", messageType);
+		}
+		
+		if(keyword.getKeyword().length() > 0) {
+			q.appendWhereOrAnd();
+			q.append("(UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ?", keyword.getKeyword());
+			q.append("OR UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ? + ' %')", keyword.getKeyword());
+		}
+		
+		List<String> similarKeywords = getSimilarKeywords(keyword);
+		if(similarKeywords.size() > 0) {
+			// Build the query to ignore messages that match similar keywords
+			q.appendWhereOrAnd();
+			for(int i=0; i<similarKeywords.size(); ++i) {
+				if(i > 0) {
+					q.append("AND");
+				}
+				
+				String similarKeyword = similarKeywords.get(i);
+				q.append("NOT (UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ?", similarKeyword);
+				q.append("OR UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ? + ' %')", similarKeyword);
+				
+			}
+		}
+		
+		return q;
+	}
+}
+
+class PartialQuery<E> {
+	private boolean whereAdded;
+	private final StringBuilder queryStringBuilder = new StringBuilder();
+	private final LinkedList<Object> insertValues = new LinkedList<Object>();
+	
+	private EntityField<E> orderBy; 
+	private Order order;
+	
+	boolean isWhereClauseAdded() {
+		return this.whereAdded;
+	}
+	String getQueryString() {
+		String queryString = this.queryStringBuilder.toString();
+		
+		// Add sorting if required
+		if(orderBy != null) {
+			queryString += "ORDER BY " + orderBy.getFieldName() + " " + order.toHqlString() + " ";
+		}
+		
+		return queryString;
+	}
+	Object[] getInsertValues() {
+		return this.insertValues.toArray(new Object[0]);
+	}
+	
+	public void appendWhereOrAnd() {
+		if(!isWhereClauseAdded()) {
+			this.append("WHERE");
+		} else {
+			this.append("AND");
+		}
+	}
+	
+	public void append(String s) {
+		this.queryStringBuilder.append(s);
+		this.queryStringBuilder.append(' ');
+		
+		if(s.contains("WHERE")) {
+			assert(whereAdded == false) : "CANNOT INSERT 2 WHERE CLAUSES INTO ONE QUERY";
+			whereAdded = true;
+		}
+	}
+	
+	public void append(EntityField<E> field) {
+		this.queryStringBuilder.append(field.getFieldName());
+	}
+	
+	public void append(String s, Object... insertValues) {
+		this.append(s);
+		for(Object insertValue : insertValues) {
+			this.insertValues.add(insertValue);
+		}
+	}
+
+	public void addSorting(EntityField<E> orderBy, Order order) {
+		this.orderBy = orderBy;
+		this.order = order;
 	}
 }

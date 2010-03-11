@@ -3,11 +3,15 @@
  */
 package net.frontlinesms.data.repository.hibernate;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import net.frontlinesms.junit.HibernateTestCase;
 
 import net.frontlinesms.data.DuplicateKeyException;
+import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.data.domain.Message.Type;
@@ -26,6 +30,12 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 //> STATIC CONSTANTS
 	private static final String ARTHUR = "+44123456789";
 	private static final String BERNADETTE = "+447890123456";
+
+	private static final long DATE_1970 = createDate(1970);
+	private static final long DATE_1980 = createDate(1980);
+	private static final long DATE_1990 = createDate(1990);
+	private static final long DATE_2000 = createDate(2000);
+	private static final long DATE_2010 = createDate(2010);
 	
 //> INSTANCE PROPERTIES
 	/** Logging object */
@@ -91,6 +101,102 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 		}
 	}
 	
+	public void testGetMessagesForKeywordWithParameters() throws DuplicateKeyException {
+		createKeywords("", "test", "test complex", "distraction");
+		createMessagesWithParameters("", "test", "test complex", "distraction");
+		testGetMessagesForKeywordWithParameters("", "test", "test complex", "distraction");
+	}
+	
+	private void testGetMessagesForKeywordWithParameters(String... keywords) {
+		for(String keyword : keywords) {
+			// Test sorting messages by date ASCENDING
+			// 1. get all messages
+			testGetMessagesForKeywordWithParameters(keyword, 20, Long.MIN_VALUE, Long.MAX_VALUE);
+			testGetMessagesForKeywordWithParameters(keyword, 20, DATE_1970, DATE_2010);
+			
+			// 2. get ranges of messages
+			testGetMessagesForKeywordWithParameters(keyword, 12, Long.MIN_VALUE, DATE_1990);
+			testGetMessagesForKeywordWithParameters(keyword, 8, DATE_2000, Long.MAX_VALUE);
+			testGetMessagesForKeywordWithParameters(keyword, 8, DATE_1980, DATE_1990);
+		}
+	}
+	
+	private void testGetMessagesForKeywordWithParameters(String keyword, int totalMessageCount, long startDate, long endDate) {
+		testGetMessagesForKeywordWithParameters(keyword, totalMessageCount, startDate, endDate, 0, 100);
+		testGetMessagesForKeywordWithParameters(keyword, totalMessageCount, startDate, endDate, 0, totalMessageCount);
+		testGetMessagesForKeywordWithParameters(keyword, totalMessageCount, startDate, endDate, 0, totalMessageCount/2);
+		testGetMessagesForKeywordWithParameters(keyword, totalMessageCount, startDate, endDate, 1, 2);
+		testGetMessagesForKeywordWithParameters(keyword, totalMessageCount, startDate, endDate, totalMessageCount, 100);
+	}
+	
+	private void testGetMessagesForKeywordWithParameters(String keyword, int totalMessageCount, long startDate, long endDate, int startIndex, int limit) {
+		// Adjust the expected message count to take into account the paging
+		int expectedMessageCount = Math.min(totalMessageCount-startIndex, limit);
+		
+		// Test ascending
+		{
+			List<Message> dateAscMessages = this.dao.getMessagesForKeyword(Message.Type.TYPE_ALL, new Keyword(keyword, ""),
+					Message.Field.DATE, Order.ASCENDING, startDate, endDate, startIndex, limit);
+			assertEquals("Messages for keyword '" + keyword + "' " +
+					"start=" + startIndex + ";limit=" + limit,
+					expectedMessageCount, dateAscMessages.size());
+			long lastDate = startDate;
+			for(Message m : dateAscMessages) {
+				assertTrue(m.getTextContent().startsWith(keyword));
+				assertTrue(lastDate <= m.getDate());
+				lastDate = m.getDate();
+			}
+		}
+			
+		// Test descending
+		{
+			List<Message> dateDescMessages = this.dao.getMessagesForKeyword(Message.Type.TYPE_ALL, new Keyword(keyword, ""),
+					Message.Field.DATE, Order.DESCENDING, startDate, endDate, startIndex, limit);
+			assertEquals("Messages for keyword '" + keyword + "' " +
+					"start=" + startIndex + ";limit=" + limit,
+					expectedMessageCount, dateDescMessages.size());
+			long lastDate = endDate;
+			for(Message m : dateDescMessages) {
+				assertTrue(m.getTextContent().startsWith(keyword));
+				assertTrue(lastDate >= m.getDate());
+				lastDate = m.getDate();
+			}
+		}
+	}
+	
+	private void createMessagesWithParameters(String... keywords) {
+		for(String keyword : keywords) {
+			String prefix = keyword.length() > 0 ? keyword + " " : "";
+			
+			createMessages(prefix + "A 1970", DATE_1970);
+			createMessages(prefix + "B 1970", DATE_1970);
+			createMessages(prefix + "A 1980", DATE_1980);
+			createMessages(prefix + "B 1980", DATE_1980);
+			createMessages(prefix + "A 1990", DATE_1990);
+			createMessages(prefix + "B 1990", DATE_1990);
+			createMessages(prefix + "A 2000", DATE_2000);
+			createMessages(prefix + "B 2000", DATE_2000);
+			createMessages(prefix + "A 2010", DATE_2010);
+			createMessages(prefix + "B 2010", DATE_2010);
+		}
+	}
+	
+	/**
+	 * Create an incoming and outgoing message sent in a particular year.
+	 * @param textContent
+	 * @param date
+	 */
+	private void createMessages(String messageContent, long date) {
+		final String senderMsisdn = "test sender";
+		final String recipientMsisdn = "test recipient";
+		
+		Message incomingMessage = Message.createIncomingMessage(date, senderMsisdn, recipientMsisdn, messageContent);
+		this.dao.saveMessage(incomingMessage);
+		
+		Message outgoingMessage = Message.createOutgoingMessage(date, senderMsisdn, recipientMsisdn, messageContent);
+		this.dao.saveMessage(outgoingMessage);
+	}
+	
 	/**
 	 * Test {@link MessageDao#getMessagesForKeyword(int, net.frontlinesms.data.domain.Keyword)}.
 	 * @throws DuplicateKeyException 
@@ -98,8 +204,6 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 	public void testGetMessagesForKeyword() throws DuplicateKeyException {
 		// Create a number of keywords and messages, and perform queries over them
 		createKeywords("", "te", "test", "test complex", "test other complex", "test complex again", "distraction", "another distraction");
-		
-		testKz("", "te", "test", "test complex", "distraction", "another distraction");
 		
 		createMessages(
 				"",															// -> ""
@@ -120,14 +224,6 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 		testGetMessagesForKeyword("test other complex", 0);
 		testGetMessagesForKeyword("distraction", 0);
 		testGetMessagesForKeyword("another distraction", 0);
-	}
-	
-	@Deprecated
-	private void testKz(String... keywords) {
-		for(String keyword : keywords) {
-			System.out.println("Keyword: " + keyword);
-			dao.getMessagesForKeyword(Message.Type.TYPE_ALL, new Keyword(keyword, ""));
-		}
 	}
 	
 	/**
@@ -178,7 +274,7 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 		this.dao.saveMessage(m);
 	}
 
-	//> INSTANCE HELPER METHODS
+//> INSTANCE HELPER METHODS
 	/**
 	 * Check that various methods agree with each other.
 	 */
@@ -195,5 +291,14 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 	@Required
 	public void setKeywordDao(KeywordDao keywordDao) {
 		this.keywordDao = keywordDao;
+	}
+	
+//> STATIC HELPER METHODS
+	/** Create a date in millis */
+	private static long createDate(int year) {
+		Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+		c.setTimeInMillis(0);
+		c.set(Calendar.YEAR, year);
+		return c.getTimeInMillis();
 	}
 }

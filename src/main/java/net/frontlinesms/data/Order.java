@@ -28,9 +28,15 @@ import org.hibernate.criterion.Criterion;
  */
 public enum Order {
 	/** Order from least to greatest. */
-	ASCENDING,
+	ASCENDING("ASC"),
 	/** Order from greatest to least. */
-	DESCENDING;
+	DESCENDING("DESC");
+	
+	private final String hqlEquivalent;
+	
+	private Order(String hqlEquivalent) {
+		this.hqlEquivalent = hqlEquivalent;
+	}
 	
 	/**
 	 * Creates a criteria to sort a particular property by.
@@ -41,5 +47,9 @@ public enum Order {
 		if(this==ASCENDING) return org.hibernate.criterion.Order.asc(propertyName);
 		if(this==DESCENDING) return org.hibernate.criterion.Order.desc(propertyName);
 		throw new IllegalStateException("Unknown order: " + this);
+	}
+	
+	public String toHqlString() {
+		return this.hqlEquivalent;
 	}
 }
