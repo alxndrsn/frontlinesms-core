@@ -29,7 +29,7 @@
 				<checkboxmenuitem action="tabsChanged(this)" name="miEmail" icon="/icons/email.png" text="i18n.tab.email"/>
 			</menu>
 			<separator />
-			<menuitem icon="/icons/frontline_icon.png" text="i18n.hometab.settings" name="menu_showHometabSettings" action="showHomeTabSettings()"/>
+			<menuitem icon="/icons/frontline_icon.png" text="i18n.hometab.logo.settings" name="menu_showHometabSettings" action="showHomeTabSettings()"/>
 		</menu>
 		<menu text="i18n.menubar.debug">
 			<menuitem icon="/icons/database_execute.png" text="i18n.menuitem.debug.data.generate" action="generateTestData"/>

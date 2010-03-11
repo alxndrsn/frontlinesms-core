@@ -64,6 +64,7 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_PN_KEYWORD_ACTIONS_ADVANCED = "pnKeywordActionsAdvanced";
 	public static final String COMPONENT_CONTACT_SELECTER = "contactSelecter";
 	public static final String COMPONENT_CONTACT_MANAGER_CONTACT_FILTER = "contactManager_contactFilter";
+	public static final String COMPONENT_PN_MESSAGE_RECIPIENT = "pnMessageRecipient";
 	public static final String COMPONENT_MI_SEND_SMS = "miSendSMS";
 	public static final String COMPONENT_NEW_GROUP = "newGroup";
 	public static final String COMPONENT_PN_BOTTOM = "pnBottom";

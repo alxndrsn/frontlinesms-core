@@ -20,7 +20,6 @@ import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.UiProperties;
-import net.frontlinesms.ui.handler.contacts.ContactSelecter;
 import net.frontlinesms.ui.handler.message.MessagePanelHandler;
 import net.frontlinesms.ui.i18n.FileLanguageBundle;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -48,6 +47,8 @@ public class HomeTabHandler extends BaseTabHandler {
 	private static final String COMPONENT_CB_HOME_TAB_USE_CUSTOM_LOGO = "cbHomeTabLogoCustom";
 	/** Thinlet Component Name: Settings dialog: checkbox used to choose a custom logo */
 	private static final String COMPONENT_CB_HOME_TAB_LOGO_KEEP_ORIGINAL_SIZE = "cbHomeTabLogoKeepOriginalSize";
+	/** Thinlet Component Name: Settings dialog: panel grouping the path of the image file for the logo */
+	private static final String COMPONENT_PN_CUSTOM_IMAGE = "pnCustomImage";
 	/** Thinlet Component Name: Settings dialog: textfield inidicating the path of the image file for the logo */
 	private static final String COMPONENT_TF_IMAGE_SOURCE = "tfImageSource";
 
@@ -87,20 +88,14 @@ public class HomeTabHandler extends BaseTabHandler {
 			log.debug("Keep original size: " + isOriginalSizeKept);
 		log.debug("Image location [" + imageLocation + "]");
 		
-		if (visible)
-			ui.setSelected(ui.find(homeTabSettings, (isCustomLogo ? COMPONENT_CB_HOME_TAB_USE_CUSTOM_LOGO : COMPONENT_CB_HOME_TAB_USE_DEFAULT_LOGO)), true);
-		else
-			ui.setSelected(ui.find(homeTabSettings, COMPONENT_CB_HOME_TAB_LOGO_VISIBLE), true);
-		
+		ui.setSelected(ui.find(homeTabSettings, (!visible ? COMPONENT_CB_HOME_TAB_LOGO_VISIBLE : (isCustomLogo ? COMPONENT_CB_HOME_TAB_USE_CUSTOM_LOGO : COMPONENT_CB_HOME_TAB_USE_DEFAULT_LOGO))), true);
 		ui.setSelected(ui.find(homeTabSettings, COMPONENT_CB_HOME_TAB_LOGO_KEEP_ORIGINAL_SIZE), isOriginalSizeKept);
-		setHomeTabCustomLogo(ui.find(homeTabSettings, "pnImgSource"), isCustomLogo && visible);
+		
+		setHomeTabCustomLogo(ui.find(homeTabSettings, COMPONENT_PN_CUSTOM_IMAGE), isCustomLogo && visible);
 		
 		if (imageLocation != null && imageLocation.length() > 0) {
 			ui.setText(ui.find(homeTabSettings, COMPONENT_TF_IMAGE_SOURCE), imageLocation);
 		}
-		
-		
-		//setHomeTab(ui.find(homeTabSettings, "pnImgSource"), !isDefaultLogo);
 		
 		ui.add(homeTabSettings);
 		log.trace("EXIT");
@@ -168,11 +163,6 @@ public class HomeTabHandler extends BaseTabHandler {
 		ui.updateCost();
 	}
 
-	/** Method which triggers showing of the contact selecter. */
-	public void selectMessageRecipient() {
-		ContactSelecter contactSelecter = new ContactSelecter(ui);
-		contactSelecter.show(InternationalisationUtils.getI18NString(FrontlineSMSConstants.SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "setRecipientTextfield(contactSelecter_contactList, contactSelecter)", null, this);
-	}
 	
 //> UI PASSTHRU METHODS TO UiGC
 	/**
@@ -198,7 +188,9 @@ public class HomeTabHandler extends BaseTabHandler {
 		Object tabComponent = ui.loadComponentFromFile(UI_FILE_HOME_TAB, this);
 		
 		Object pnSend = ui.find(tabComponent, UiGeneratorControllerConstants.COMPONENT_PN_SEND);
-		Object pnMessage = MessagePanelHandler.create(this.ui).getPanel();
+		
+		boolean shouldDisplayRecipientField = true;
+		Object pnMessage = MessagePanelHandler.create(this.ui, shouldDisplayRecipientField).getPanel();
 		ui.add(pnSend, pnMessage);
 		
 		refreshLogoVisibility(tabComponent);
@@ -244,13 +236,23 @@ public class HomeTabHandler extends BaseTabHandler {
 						int width = homeTabLogoImage.getWidth();
 						int height = homeTabLogoImage.getHeight();
 						
-						if (height > FRONTLINE_LOGO_MAX_HEIGHT)
-						{
-							width *= (FRONTLINE_LOGO_MAX_HEIGHT / height);
-							height = (int)FRONTLINE_LOGO_MAX_HEIGHT;
+						if (height > FRONTLINE_LOGO_MAX_HEIGHT) {
+							if (width > FRONTLINE_LOGO_MAX_WIDTH) {
+								if (width / FRONTLINE_LOGO_MAX_WIDTH > height / FRONTLINE_LOGO_MAX_HEIGHT) {
+									height *= (FRONTLINE_LOGO_MAX_WIDTH / width);
+									width = (int)(FRONTLINE_LOGO_MAX_WIDTH);
+								}
+								else {
+									width *= (FRONTLINE_LOGO_MAX_HEIGHT / height);
+									height = (int)FRONTLINE_LOGO_MAX_HEIGHT;
+								}
+							}
+							else {
+								width *= (FRONTLINE_LOGO_MAX_HEIGHT / height);
+								height = (int)FRONTLINE_LOGO_MAX_HEIGHT;
+							}
 						}
-						else
-						{
+						else if (width > FRONTLINE_LOGO_MAX_WIDTH) {
 							height *= (FRONTLINE_LOGO_MAX_WIDTH / width);
 							width = (int)(FRONTLINE_LOGO_MAX_WIDTH);
 						}

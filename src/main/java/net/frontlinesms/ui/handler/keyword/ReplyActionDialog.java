@@ -48,7 +48,8 @@ public class ReplyActionDialog extends BaseActionDialog {
 	 */
 	protected void _init() {
 		// Load the reply form from file.
-		MessagePanelHandler messagePanelController = MessagePanelHandler.create(this.ui);
+		boolean shouldDisplayRecipientField = false;
+		MessagePanelHandler messagePanelController = MessagePanelHandler.create(this.ui, shouldDisplayRecipientField);
 		Object pnMessage = messagePanelController.getPanel();
 		// FIX 0000542
 		Object pnBottom = ui.find(pnMessage, COMPONENT_PN_BOTTOM);
@@ -68,7 +69,7 @@ public class ReplyActionDialog extends BaseActionDialog {
 			
 			// Set the initial value of the reply text
 			ui.setText(find(COMPONENT_TF_MESSAGE), action.getUnformattedReplyText());
-			messagePanelController.messageChanged(action.getUnformattedReplyText());
+			messagePanelController.messageChanged("", action.getUnformattedReplyText());
 			
 			initDateFields();
 		}

@@ -11,12 +11,7 @@
 	        </panel>
 	        <separator/>
 	        <panel columns="1" gap="6" name="pnSend">
-	            <label weightx="1" font="20 bold" icon="/icons/big_sms_send.png" text="i18n.action.send.sms"/>
-	            <panel gap="10">
-	                <label icon="/icons/sms_receive.png" text="i18n.common.to"/>
-	                <textfield columns="20" name="tfRecipient"/>
-	                <button action="selectMessageRecipient" icon="/icons/user_receiver.png"/>
-	            </panel>
+	            <label weightx="1" font="20 bold" icon="/icons/big_sms_send.png" text="i18n.action.send.sms"/>       
 	        </panel>
 	    </panel>
 	    <separator weighty="1"/>
