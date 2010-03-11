@@ -16,6 +16,7 @@ import net.frontlinesms.data.domain.Email;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.data.domain.Message.Field;
+import net.frontlinesms.data.domain.Message.Type;
 import net.frontlinesms.data.repository.MessageDao;
 
 /**
@@ -39,7 +40,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getAllMessages(int, Field, Order, Long, Long, int, int) */
-	public List<Message> getAllMessages(int messageType, Field sortBy, Order order, Long start, Long end, int startIndex, int limit) {
+	public List<Message> getAllMessages(Message.Type messageType, Field sortBy, Order order, Long start, Long end, int startIndex, int limit) {
 		DetachedCriteria criteria = super.getSortCriterion(sortBy, order);
 		addTypeCriteria(criteria, messageType);
 		addDateCriteria(criteria, start, end);
@@ -47,7 +48,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessageCount(int, Integer[]) */
-	public int getMessageCount(int messageType, Integer[] messageStati) {
+	public int getMessageCount(Message.Type messageType, Integer[] messageStati) {
 		DetachedCriteria criteria = DetachedCriteria.forClass(Email.class);
 		addStatusCriteria(criteria, messageStati);
 		addTypeCriteria(criteria, messageType);
@@ -55,7 +56,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessageCount(int, Long, Long) */
-	public int getMessageCount(int messageType, Long start, Long end) {
+	public int getMessageCount(Message.Type messageType, Long start, Long end) {
 		DetachedCriteria criteria = super.getCriterion();
 		addDateCriteria(criteria, start, end);
 		addTypeCriteria(criteria, messageType);
@@ -63,7 +64,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessageCount(int, Keyword, Long, Long) */
-	public int getMessageCount(int messageType, Keyword keyword, Long start, Long end) {
+	public int getMessageCount(Message.Type messageType, Keyword keyword, Long start, Long end) {
 		DetachedCriteria criteria = super.getCriterion();
 		addDateCriteria(criteria, start, end);
 		addTypeCriteria(criteria, messageType);
@@ -72,7 +73,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessageCountForMsisdn(int, String, Long, Long) */
-	public int getMessageCountForMsisdn(int messageType, String phoneNumber, Long start, Long end) {
+	public int getMessageCountForMsisdn(Message.Type messageType, String phoneNumber, Long start, Long end) {
 		DetachedCriteria criteria = super.getCriterion();
 		addTypeCriteria(criteria, messageType);
 		addDateCriteria(criteria, start, end);
@@ -89,14 +90,14 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessages(int, Field, Order) */
-	public List<Message> getMessages(int messageType, Field sortBy, Order order) {
+	public List<Message> getMessages(Message.Type messageType, Field sortBy, Order order) {
 		DetachedCriteria criteria = super.getSortCriterion(sortBy, order);
 		addTypeCriteria(criteria, messageType);
 		return getList(criteria);
 	}
 
 	/** @see MessageDao#getMessagesForKeyword(int, Keyword, Field, Order, Long, Long, int, int) */
-	public List<Message> getMessages(int messageType, Keyword keyword, Field sortBy, Order order) {
+	public List<Message> getMessages(Message.Type messageType, Keyword keyword, Field sortBy, Order order) {
 		DetachedCriteria criteria = getSortCriterion(sortBy, order);
 		addTypeCriteria(criteria, messageType);
 		addKeywordMatchCriteria(criteria, keyword);
@@ -104,27 +105,27 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessages(int, Integer[]) */
-	public Collection<Message> getMessages(int messageType, Integer[] status) {
+	public Collection<Message> getMessages(Message.Type messageType, Integer[] status) {
 		DetachedCriteria criteria = super.getCriterion();
 		addTypeCriteria(criteria, messageType);
 		addStatusCriteria(criteria, status);
 		return getList(criteria);
 	}
 	
-	public int getMessageCount(int messageType, List<String> phoneNumbers,
+	public int getMessageCount(Message.Type messageType, List<String> phoneNumbers,
 			Long messageHistoryStart, Long messageHistoryEnd) {
 		return super.getCount(getCriteria(messageType, phoneNumbers,
 				messageHistoryStart, messageHistoryEnd));
 	}
 	
-	public List<Message> getMessages(int messageType,
+	public List<Message> getMessages(Message.Type messageType,
 			List<String> phoneNumbers, Long messageHistoryStart,
 			Long messageHistoryEnd) {
 		return super.getList(getCriteria(messageType, phoneNumbers,
 				messageHistoryStart, messageHistoryEnd));
 	}
 
-	private DetachedCriteria getCriteria(int messageType,
+	private DetachedCriteria getCriteria(Message.Type messageType,
 			List<String> phoneNumbers, Long messageHistoryStart,
 			Long messageHistoryEnd) {
 		DetachedCriteria criteria = super.getCriterion();
@@ -135,7 +136,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessagesForKeyword(int, Keyword, Field, Order, Long, Long, int, int) */
-	public List<Message> getMessagesForKeyword(int messageType, Keyword keyword, Field sortBy, Order order, Long start, Long end, int startIndex, int limit) {
+	public List<Message> getMessagesForKeyword(Message.Type messageType, Keyword keyword, Field sortBy, Order order, Long start, Long end, int startIndex, int limit) {
 		DetachedCriteria criteria = super.getSortCriterion(sortBy, order);
 		addTypeCriteria(criteria, messageType);
 		addDateCriteria(criteria, start, end);
@@ -144,7 +145,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessagesForKeyword(int, Keyword) */
-	public List<Message> getMessagesForKeyword(int messageType, Keyword keyword) {
+	public List<Message> getMessagesForKeyword(Message.Type messageType, Keyword keyword) {
 		DetachedCriteria criteria = super.getCriterion();
 		addTypeCriteria(criteria, messageType);
 		addKeywordMatchCriteria(criteria, keyword);
@@ -152,7 +153,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessagesForMsisdn(int, String, Field, Order, Long, Long, int, int) */
-	public List<Message> getMessagesForMsisdn(int messageType, String phoneNumber, Field sortBy, Order order, Long start, Long end, int startIndex, int limit) {
+	public List<Message> getMessagesForMsisdn(Message.Type messageType, String phoneNumber, Field sortBy, Order order, Long start, Long end, int startIndex, int limit) {
 		DetachedCriteria criteria = super.getSortCriterion(sortBy, order);
 		addTypeCriteria(criteria, messageType);
 		addDateCriteria(criteria, start, end);
@@ -161,7 +162,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessagesForMsisdn(int, String, Field, Order, Long, Long) */
-	public List<Message> getMessagesForMsisdn(int messageType, String phoneNumber, Field sortBy, Order order, Long start, Long end) {
+	public List<Message> getMessagesForMsisdn(Message.Type messageType, String phoneNumber, Field sortBy, Order order, Long start, Long end) {
 		DetachedCriteria criteria = super.getSortCriterion(sortBy, order);
 		addTypeCriteria(criteria, messageType);
 		addDateCriteria(criteria, start, end);
@@ -170,7 +171,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessagesForStati(int, Integer[], Field, Order, int, int) */
-	public List<Message> getMessagesForStati(int messageType, Integer[] messageStati, Field sortBy, Order order, int startIndex, int limit) {
+	public List<Message> getMessagesForStati(Message.Type messageType, Integer[] messageStati, Field sortBy, Order order, int startIndex, int limit) {
 		DetachedCriteria criteria = super.getSortCriterion(sortBy, order);
 		addTypeCriteria(criteria, messageType);
 		addStatusCriteria(criteria, messageStati);
@@ -300,8 +301,8 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	 * @param criteria
 	 * @param messageType 
 	 */
-	private void addTypeCriteria(DetachedCriteria criteria, int messageType) {
-		if(messageType != Message.TYPE_ALL) {
+	private void addTypeCriteria(DetachedCriteria criteria, Message.Type messageType) {
+		if(messageType != Type.TYPE_ALL) {
 			criteria.add(Restrictions.eq(Field.TYPE.getFieldName(), messageType));
 		}
 	}

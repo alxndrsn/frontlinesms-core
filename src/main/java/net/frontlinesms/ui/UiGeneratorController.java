@@ -43,6 +43,7 @@ import net.frontlinesms.PluginManager;
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
+import net.frontlinesms.data.domain.Message.Type;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.debug.RandomDataGenerator;
 import net.frontlinesms.listener.EmailListener;
@@ -672,7 +673,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				Message message = (Message) attachedItem;
 				// We should only attempt to reply to messages we have received - otherwise
 				// we could end up texting ourselves a lot!
-				if(message.getType() == Message.TYPE_RECEIVED) {
+				if(message.getType() == Type.TYPE_RECEIVED) {
 					String senderMsisdn = message.getSenderMsisdn();
 					Contact contact = contactDao.getFromMsisdn(senderMsisdn);
 					if(contact != null) {
@@ -898,7 +899,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		saveWindowSize();
 		boolean somethingToDo = false;
 		
-		Collection<Message> pending = messageFactory.getMessages(Message.TYPE_OUTBOUND, new Integer[] {Message.STATUS_PENDING});
+		Collection<Message> pending = messageFactory.getMessages(Type.TYPE_OUTBOUND, new Integer[] {Message.STATUS_PENDING});
 		if(LOG.isDebugEnabled()) LOG.debug("Pending Messages size [" + pending.size() + "]");
 		if (pending.size() > 0) {
 			showPendingMessages(pending);
@@ -910,7 +911,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	public void close() {
 		LOG.trace("ENTER");
-		Collection<Message> pending = messageFactory.getMessages(Message.TYPE_OUTBOUND, new Integer[] {Message.STATUS_PENDING});
+		Collection<Message> pending = messageFactory.getMessages(Type.TYPE_OUTBOUND, new Integer[] {Message.STATUS_PENDING});
 		LOG.debug("Pending Messages size [" + pending.size() + "]");
 		if (pending.size() > 0) {
 			showPendingMessages(pending);
@@ -930,7 +931,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Method called when the user make the final decision to close the app.
 	 */
 	public void exit() {
-		for (Message m : messageFactory.getMessages(Message.TYPE_OUTBOUND, new Integer[] {Message.STATUS_PENDING})) {
+		for (Message m : messageFactory.getMessages(Type.TYPE_OUTBOUND, new Integer[] {Message.STATUS_PENDING})) {
 			m.setStatus(Message.STATUS_OUTBOX);
 		}
 		saveWindowSize();
@@ -1283,7 +1284,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		Object row = createTableRow(message);
 
 		String icon;
-		if (message.getType() == Message.TYPE_RECEIVED) {
+		if (message.getType() == Type.TYPE_RECEIVED) {
 			icon = Icon.SMS_RECEIVE;
 		} else {
 			icon = Icon.SMS_SEND;

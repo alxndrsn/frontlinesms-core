@@ -41,16 +41,18 @@ public class Message {
 	private static final String COLUMN_TEXT_CONTENT = "textContent";
 	
 //> CONSTANTS
-	/** Constant used to represent all kinds of messages */
-	public static final int TYPE_ALL = -1;
-	/** Constant used to represent an unknown type of message */
-	public static final int TYPE_UNKNOWN = 0;
-	/** Constant used to represent a message of type: received */
-	public static final int TYPE_RECEIVED = 1;
-	/** Constant used to represent a message of type: outbound */
-	public static final int TYPE_OUTBOUND = 2;
-	/** Constant used to represent a message of type: delivery report */
-	public static final int TYPE_DELIVERY_REPORT = 3;
+	public enum Type {
+		/** This is a pseudo-message type, used as a blanket for all types. */
+		TYPE_ALL,
+		/** Message type: unknown */
+		TYPE_UNKNOWN,
+		/** Message type: received */
+		TYPE_RECEIVED,
+		/** Message type: outbound */
+		TYPE_OUTBOUND,
+		/** Message type: delivery report */
+		TYPE_DELIVERY_REPORT;
+	}
 	
 	/** Number of times a failed message send is retried before status is set to STATUS_FAILED */
 	public static final int MAX_RETRIES = 2;
@@ -114,7 +116,7 @@ public class Message {
 	/** Unique id for this entity.  This is for hibernate usage. */
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY) @Column(unique=true,nullable=false,updatable=false) @SuppressWarnings("unused")
 	private long id;
-	private int type;
+	private Type type;
 	private int retriesRemaining;
 	private int status;
 	private String recipientMsisdn;
@@ -139,7 +141,7 @@ public class Message {
 	 * Gets the type of this Message.  Should be one of the Message.TYPE_ constants.
 	 * @return
 	 */
-	public int getType() {
+	public Type getType() {
 		return this.type;
 	}
 	
@@ -316,7 +318,7 @@ public class Message {
 	 */
 	public static Message createBinaryIncomingMessage(long dateReceived, String senderMsisdn, String recipientMsisdn, int recipientPort, byte[] content) {
 		Message m = new Message();
-		m.type = Message.TYPE_RECEIVED;
+		m.type = Type.TYPE_RECEIVED;
 		m.status = Message.STATUS_RECEIVED;
 		m.date = dateReceived;
 		m.senderMsisdn = senderMsisdn;
@@ -340,7 +342,7 @@ public class Message {
 	 */
 	public static Message createBinaryOutgoingMessage(long dateSent, String senderMsisdn, String recipientMsisdn, int recipientPort, byte[] content) {
 		Message m = new Message();
-		m.type = Message.TYPE_OUTBOUND;
+		m.type = Type.TYPE_OUTBOUND;
 		m.status = Message.STATUS_DRAFT;
 		m.date = dateSent;
 		m.senderMsisdn = senderMsisdn;
@@ -361,7 +363,7 @@ public class Message {
 	 */
 	public static Message createOutgoingMessage(long dateSent, String senderMsisdn, String recipientMsisdn, String messageContent) {
 		Message m = new Message();
-		m.type = Message.TYPE_OUTBOUND;
+		m.type = Type.TYPE_OUTBOUND;
 		m.status = Message.STATUS_DRAFT;
 		m.date = dateSent;
 		m.senderMsisdn = senderMsisdn;
@@ -380,7 +382,7 @@ public class Message {
 	 */
 	public static Message createIncomingMessage(long dateReceived, String senderMsisdn, String recipientMsisdn, String messageContent) {
 		Message m = new Message();
-		m.type = Message.TYPE_RECEIVED;
+		m.type = Type.TYPE_RECEIVED;
 		m.status = Message.STATUS_RECEIVED;
 		m.date = dateReceived;
 		m.senderMsisdn = senderMsisdn;
@@ -409,7 +411,7 @@ public class Message {
 		result = prime * result + smsPartsCount;
 		result = prime * result + smscReference;
 		result = prime * result + status;
-		result = prime * result + type;
+		result = prime * result + type.hashCode();
 		return result;
 	}
 
