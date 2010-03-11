@@ -8,6 +8,11 @@ import java.util.List;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.EntityField;
 import net.frontlinesms.data.Order;
+import net.frontlinesms.events.EventBus;
+import net.frontlinesms.events.impl.DidDeleteNotification;
+import net.frontlinesms.events.impl.DidSaveNotification;
+import net.frontlinesms.events.impl.DidUpdateNotification;
+import net.frontlinesms.events.impl.WillDeleteWarning;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,6 +38,8 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	private final Class<E> clazz;
 	/** The unqualified name of {@link #clazz} */
 	private final String className;
+	/**EventNotifier that sends out FrontlineEvents**/
+	private EventBus eventBus;
 	
 	/**
 	 * @param clazz
@@ -40,6 +47,10 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	protected BaseHibernateDao(Class<E> clazz) {
 		this.clazz = clazz;
 		this.className = clazz.getName();
+	}
+	
+	public void setEventBus(EventBus eventBus){
+		this.eventBus = eventBus;
 	}
 	
 	/**
@@ -50,6 +61,7 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 		log.trace("Saving entity: " + entity);
 		this.getHibernateTemplate().save(entity);
 		log.trace("Entity saved.");
+		eventBus.triggerEvent(new DidSaveNotification<E>(entity));
 	}
 	
 	/**
@@ -106,6 +118,7 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 		log.trace("Updating entity: " + entity);
 		this.getHibernateTemplate().update(entity);
 		log.trace("Entity updated.");
+		eventBus.triggerEvent(new DidUpdateNotification<E>(entity));
 	}
 	
 	/**
@@ -113,9 +126,11 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	 * @param entity entity to delete
 	 */
 	protected void delete(E entity) {
+		eventBus.triggerEvent(new WillDeleteWarning<E>(entity));
 		log.trace("Deleting entity: " + entity);
 		this.getHibernateTemplate().delete(entity);
 		log.trace("Entity deleted.");
+		eventBus.triggerEvent(new DidDeleteNotification<E>(entity));
 	}
 	
 	/**

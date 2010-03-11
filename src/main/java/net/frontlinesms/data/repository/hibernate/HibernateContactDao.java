@@ -2,14 +2,14 @@ package net.frontlinesms.data.repository.hibernate;
 
 import java.util.List;
 
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Restrictions;
-import org.springframework.transaction.annotation.Transactional;
-
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Contact.Field;
 import net.frontlinesms.data.repository.ContactDao;
+
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Hibernate implementation of {@link ContactDao}.
@@ -17,6 +17,7 @@ import net.frontlinesms.data.repository.ContactDao;
  */
 public class HibernateContactDao extends BaseHibernateDao<Contact> implements ContactDao {
 	/** Create a new instance of this DAO. */
+		
 	public HibernateContactDao() {
 		super(Contact.class);
 	}
