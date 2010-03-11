@@ -21,3 +21,10 @@ test_temp/
 
 # Ignore binary libraries placed in the home directory to allow for JNI access
 *.dll
+
+# Added on OSX Eclipse as entries above not effective
+/.settings
+/target
+/.classpath
+/.project
+/.classpath
