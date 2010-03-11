@@ -61,13 +61,46 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 		assertEquals(0, dao.getSMSCount(startTime, Long.MAX_VALUE));
 	}
 	
+	public void testGetSimilarKeywords() throws DuplicateKeyException {
+		// Create a number of keywords and messages, and perform queries over them
+		createKeywords("", "te", "test", "test complex", "test other complex", "test complex again", "distraction", "another distraction");
+		testGetSimilarKeywords("", "te", "test", "test complex", "test other complex", "test complex again", "distraction", "another distraction");
+		testGetSimilarKeywords("te");
+		testGetSimilarKeywords("test", "test complex", "test other complex", "test complex again");
+		testGetSimilarKeywords("test complex", "test complex again");
+		testGetSimilarKeywords("test other complex");
+		testGetSimilarKeywords("test complex again");
+		testGetSimilarKeywords("distraction");
+		testGetSimilarKeywords("another distraction");
+	}
+	
+	private void testGetSimilarKeywords(String keyword, String... expectedMatches) {
+		HibernateMessageDao dao = (HibernateMessageDao) this.dao;
+		
+		// Convert expectedMathches to upper case
+		for (int i = 0; i < expectedMatches.length; i++) {
+			expectedMatches[i] = expectedMatches[i].toUpperCase();
+		}
+		
+		List<String> actualMatches = dao.getSimilarKeywords(new Keyword(keyword, "test keyword: trying to get similar."));
+		assertEquals("Unexpected results for keyword '" + keyword + "'",
+				expectedMatches.length, actualMatches.size());
+		for (int i = 0; i < expectedMatches.length; i++) {
+			assertEquals("Unexpected keyword match for '" + keyword + "' at index: " + i,
+					expectedMatches[i], actualMatches.get(i));
+		}
+	}
+	
 	/**
 	 * Test {@link MessageDao#getMessagesForKeyword(int, net.frontlinesms.data.domain.Keyword)}.
 	 * @throws DuplicateKeyException 
 	 */
 	public void testGetMessagesForKeyword() throws DuplicateKeyException {
 		// Create a number of keywords and messages, and perform queries over them
-		createKeywords("", "te", "test", "test complex");
+		createKeywords("", "te", "test", "test complex", "test other complex", "test complex again", "distraction", "another distraction");
+		
+		testKz("", "te", "test", "test complex", "distraction", "another distraction");
+		
 		createMessages(
 				"",															// -> ""
 				"te",														// -> "te"
@@ -83,7 +116,18 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 		testGetMessagesForKeyword("", 3);
 		testGetMessagesForKeyword("te", 1);
 		testGetMessagesForKeyword("test", 3);
-		testGetMessagesForKeyword("test complex", 3);
+		testGetMessagesForKeyword("test complex", 2);
+		testGetMessagesForKeyword("test other complex", 0);
+		testGetMessagesForKeyword("distraction", 0);
+		testGetMessagesForKeyword("another distraction", 0);
+	}
+	
+	@Deprecated
+	private void testKz(String... keywords) {
+		for(String keyword : keywords) {
+			System.out.println("Keyword: " + keyword);
+			dao.getMessagesForKeyword(Message.Type.TYPE_ALL, new Keyword(keyword, ""));
+		}
 	}
 	
 	/**
@@ -100,9 +144,9 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 		int allMessageCount = allMessagesForBlankKeyword.size();
 		int incomingMessageCount = incomingMessagesForBlankKeyword.size();
 		int outgoingMessageCount = outgoingMessagesForBlankKeyword.size();
-		assertTrue(incomingMessageCount == outgoingMessageCount);
-		assertTrue(allMessageCount == 2 * incomingMessageCount);
-		assertEquals(expectedMessageCount, incomingMessageCount);	
+		assertTrue("Message count mismatch for keyword: '" + keywordString + "'", incomingMessageCount == outgoingMessageCount);
+		assertTrue("Message count mismatch for keyword: '" + keywordString + "'", allMessageCount == 2 * incomingMessageCount);
+		assertEquals("Unexpected message count for keyword: '" + keywordString + "'", expectedMessageCount, incomingMessageCount);	
 	}
 	
 	/** TODO may not be necessary to create keywords. */

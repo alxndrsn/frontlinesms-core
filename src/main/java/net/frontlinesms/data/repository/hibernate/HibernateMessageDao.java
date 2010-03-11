@@ -3,6 +3,7 @@
  */
 package net.frontlinesms.data.repository.hibernate;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -145,11 +146,81 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessagesForKeyword(int, Keyword) */
+	@SuppressWarnings("unchecked")
 	public List<Message> getMessagesForKeyword(Message.Type messageType, Keyword keyword) {
-		DetachedCriteria criteria = super.getCriterion();
-		addTypeCriteria(criteria, messageType);
-		addKeywordMatchCriteria(criteria, keyword);
-		return getList(criteria);
+//		DetachedCriteria criteria = super.getCriterion();
+//		addTypeCriteria(criteria, messageType);
+//		addKeywordMatchCriteria(criteria, keyword);
+//		return getList(criteria);
+
+		// remember whether we've added a WHERE clause
+		boolean whereAdded = false;
+		
+		// Build a list of values to insert into the query string
+		List<Object> insertValues = new ArrayList<Object>();
+		String queryString = "SELECT message FROM Message message ";
+		
+		if(messageType != Message.Type.TYPE_ALL) {
+			if(!whereAdded) {
+				queryString += "WHERE ";
+				whereAdded = true;
+			}
+			queryString += "message.type=? ";
+			insertValues.add(messageType);
+		}
+		
+		if(keyword.getKeyword().length() > 0) {
+			if(!whereAdded) {
+				queryString += "WHERE (";
+				whereAdded = true;
+			} else {
+				queryString += "AND (";
+			}
+			queryString += "UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ? " +
+					"OR UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ? + ' %') ";
+			insertValues.add(keyword.getKeyword());
+			insertValues.add(keyword.getKeyword());
+		}
+		
+		List<String> similarKeywords = getSimilarKeywords(keyword);
+		if(similarKeywords.size() > 0) {
+			// Build the query to ignore messages that match similar keywords
+			if(!whereAdded) {
+				queryString += "WHERE (";
+				whereAdded = true;
+			} else {
+				queryString += "AND (";
+			}
+			for(int i=0; i<similarKeywords.size(); ++i) {
+				if(i > 0) {
+					queryString += "AND ";
+				}
+				queryString += "NOT (" +
+						"UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ? " +
+						"OR UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ? + ' %') ";
+				
+				String similarKeyword = similarKeywords.get(i);
+				insertValues.add(similarKeyword);
+				insertValues.add(similarKeyword);
+			}
+			queryString += ")";
+		}
+		
+		return (List<Message>) this.getHibernateTemplate().find(queryString, insertValues.toArray());
+	}
+	
+	List<String> getSimilarKeywords(Keyword keyword) {
+		if(keyword.getKeyword().length() == 0) {
+			// Get all keywords apart from the blank one
+			List<String> allKeywordsExceptBlank = this.getHibernateTemplate().find("SELECT keyword FROM Keyword WHERE LENGTH(keyword.keyword) > 0");
+			return allKeywordsExceptBlank;
+		} else {
+			List<String> similarKeywords = this.getHibernateTemplate().find("SELECT keyword FROM Keyword WHERE keyword.keyword LIKE ?+' %'", keyword.getKeyword());
+			for(String k : similarKeywords) {
+				System.out.println("Similar keyword: " + k);
+			}
+			return similarKeywords;
+		}
 	}
 
 	/** @see MessageDao#getMessagesForMsisdn(int, String, Field, Order, Long, Long, int, int) */
