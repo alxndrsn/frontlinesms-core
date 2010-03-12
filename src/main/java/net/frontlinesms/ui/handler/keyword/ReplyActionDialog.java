@@ -48,7 +48,7 @@ public class ReplyActionDialog extends BaseActionDialog {
 	 */
 	protected void _init() {
 		// Load the reply form from file.
-		boolean shouldDisplayRecipientField = false;
+		final boolean shouldDisplayRecipientField = false;
 		MessagePanelHandler messagePanelController = MessagePanelHandler.create(this.ui, shouldDisplayRecipientField);
 		Object pnMessage = messagePanelController.getPanel();
 		// FIX 0000542

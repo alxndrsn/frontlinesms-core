@@ -91,6 +91,7 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_TF_START_TIME = "tfStartTime";
 	public static final String COMPONENT_RB_HTTP = "rbHTTP";
 	public static final String COMPONENT_LB_TEXT = "lbText";
+	public static final String COMPONENT_LB_TOO_MANY_MESSAGES = "lbTooManyMessages";
 	public static final String COMPONENT_BT_EDIT = "btEdit";
 	public static final String COMPONENT_LB_LIST = "lbList";
 	public static final String COMPONENT_GROUP_LIST = "groupList";

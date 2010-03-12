@@ -24,6 +24,7 @@
             		action="send"/>
         </panel>
         <panel gap="11" halign="right" top="3" weightx="1">
+        	<label font="bold" name="lbTooManyMessages" text="i18n.sentence.too.many.messages"/>
             <label icon="/icons/money.png" text="i18n.common.estimated.cost"/>
             <label font="bold" name="lbEstimatedMoney"/>
         </panel>

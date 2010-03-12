@@ -189,7 +189,7 @@ public class HomeTabHandler extends BaseTabHandler {
 		
 		Object pnSend = ui.find(tabComponent, UiGeneratorControllerConstants.COMPONENT_PN_SEND);
 		
-		boolean shouldDisplayRecipientField = true;
+		final boolean shouldDisplayRecipientField = true;
 		Object pnMessage = MessagePanelHandler.create(this.ui, shouldDisplayRecipientField).getPanel();
 		ui.add(pnSend, pnMessage);
 		

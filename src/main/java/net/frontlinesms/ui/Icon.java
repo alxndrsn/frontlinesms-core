@@ -58,6 +58,8 @@ public class Icon {
 	public static final String TICK = "/icons/live.png";
 	public static final String CANCEL = "/icons/dormant.png";
 	public static final String SMS = "/icons/sms.png";
+	public static final String SMS_ADD = "/icons/sms_add.png";
+	public static final String SMS_DELETE = "/icons/sms_delete.png";
 	public static final String SMS_ERROR = "/icons/sms_error.png";
 	public static final String SMS_DISABLED = "/icons/sms_disabled.png";
 	public static final String EMAIL_SEND = "/icons/email_send.png";

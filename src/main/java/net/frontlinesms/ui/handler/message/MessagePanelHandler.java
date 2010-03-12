@@ -11,8 +11,11 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_MS
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_REMAINING_CHARS;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_SECOND;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_THIRD;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_TOO_MANY_MESSAGES;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_RECIPIENT;
+
+import java.awt.Color;
 
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.Utils;
@@ -66,8 +69,11 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	private synchronized void init() {
 		assert(this.messagePanel == null) : "This has already been initialised.";
 		this.messagePanel = uiController.loadComponentFromFile(UI_FILE_MESSAGE_PANEL, this);
-		Object 	pnRecipient = uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_PN_MESSAGE_RECIPIENT);
+		Object 	pnRecipient 		= uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_PN_MESSAGE_RECIPIENT),
+				lbTooManyMessages 	= uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_LB_TOO_MANY_MESSAGES);
 		uiController.setVisible(pnRecipient, shouldDisplayRecipientField);
+		uiController.setVisible(lbTooManyMessages, false);
+		uiController.setColor(lbTooManyMessages, "foreground", Color.RED);
 		messageChanged("", "");
 	}
 
@@ -113,7 +119,15 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 			messageLength = message.length();
 		
 		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
-		boolean shouldEnableSendButton = (sendButton != null && recipientLength > 0 && messageLength > 0);
+		
+		int totalLengthAllowed;
+		if(GsmAlphabet.areAllCharactersValidGSM(message))totalLengthAllowed = Message.SMS_MULTIPART_LENGTH_LIMIT * Message.SMS_LIMIT;
+		else totalLengthAllowed = Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * Message.SMS_LIMIT;
+		
+		boolean shouldEnableSendButton = (sendButton != null
+											&& messageLength <= totalLengthAllowed
+											&& recipientLength > 0
+											&& messageLength > 0);
 		uiController.setEnabled(sendButton, shouldEnableSendButton);
 	}
 	
@@ -164,36 +178,50 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		}
 		
 		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
-		boolean shouldEnableSendButton = (sendButton != null && (!shouldDisplayRecipientField || recipientLength > 0));
+		boolean areAllCharactersValidGSM = GsmAlphabet.areAllCharactersValidGSM(message);
+		int totalLengthAllowed;
+		if(areAllCharactersValidGSM) totalLengthAllowed = Message.SMS_MULTIPART_LENGTH_LIMIT * Message.SMS_LIMIT;
+		else totalLengthAllowed = Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * Message.SMS_LIMIT;
+		
+		boolean shouldEnableSendButton = (sendButton != null 
+											&& messageLength <= totalLengthAllowed
+											&& (!shouldDisplayRecipientField || recipientLength > 0));
 		uiController.setEnabled(sendButton, shouldEnableSendButton);
 		
-		boolean areAllCharactersValidGSM = GsmAlphabet.areAllCharactersValidGSM(message);
-
-		int total;
-		if(areAllCharactersValidGSM) total = Message.SMS_MULTIPART_LENGTH_LIMIT * Message.SMS_LIMIT;
-		else total = Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * Message.SMS_LIMIT;
 		
-		if (messageLength > total) {
-			uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_REMAINING_CHARS), "0");
-			Object tfMessage = uiController.find(this.messagePanel, COMPONENT_TF_MESSAGE);
-			uiController.setText(tfMessage, message.substring(0, messageLength - 1));
+		int singleMessageCharacterLimit;
+		int multipartMessageCharacterLimit;
+		if(areAllCharactersValidGSM) {
+			singleMessageCharacterLimit = Message.SMS_LENGTH_LIMIT;
+			multipartMessageCharacterLimit = Message.SMS_MULTIPART_LENGTH_LIMIT;
 		} else {
-			int singleMessageCharacterLimit;
-			int multipartMessageCharacterLimit;
-			if(areAllCharactersValidGSM) {
-				singleMessageCharacterLimit = Message.SMS_LENGTH_LIMIT;
-				multipartMessageCharacterLimit = Message.SMS_MULTIPART_LENGTH_LIMIT;
-			} else {
-				// It appears there are some unicode-only characters here.  We should therefore
-				// treat this message as if it will be sent as unicode.
-				singleMessageCharacterLimit = Message.SMS_LENGTH_LIMIT_UCS2;
-				multipartMessageCharacterLimit = Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2;
-			}
+			// It appears there are some unicode-only characters here.  We should therefore
+			// treat this message as if it will be sent as unicode.
+			singleMessageCharacterLimit = Message.SMS_LENGTH_LIMIT_UCS2;
+			multipartMessageCharacterLimit = Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2;
+		}
+		
+		Object 	tfMessage = uiController.find(this.messagePanel, COMPONENT_TF_MESSAGE),
+				lbTooManyMessages = uiController.find(this.messagePanel, COMPONENT_LB_TOO_MANY_MESSAGES);
+		
+		int numberOfMsgs, remaining;
+		double costEstimate;
+		
+		
+		if (messageLength > totalLengthAllowed) {
+			remaining = 0;
+			numberOfMsgs = (int)Math.ceil(messageLength / multipartMessageCharacterLimit) + 1;
+			costEstimate = 0;
 			
-			int numberOfMsgs;
-			int remaining;
+			uiController.setVisible(lbTooManyMessages, true);
+			uiController.setColor(tfMessage, "foreground", Color.RED);
+		} 
+		else {
+			uiController.setVisible(lbTooManyMessages, false);
+			uiController.setColor(tfMessage, "foreground", Color.BLACK);
+
 			if (messageLength <= singleMessageCharacterLimit) {
-				//First message
+			//First message
 				remaining = (messageLength % singleMessageCharacterLimit) == 0 ? 0
 						: singleMessageCharacterLimit - (messageLength % singleMessageCharacterLimit);
 				numberOfMsgs = messageLength == 0 ? 0 : 1;
@@ -202,25 +230,27 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 				int charCount = messageLength - multipartMessageCharacterLimit;
 				remaining = (charCount % multipartMessageCharacterLimit) == 0 ? 0
 						: multipartMessageCharacterLimit - (charCount % multipartMessageCharacterLimit);
-			} else {
+			} else { //if (messageLength <= (3*multipartMessageCharacterLimit)) {
 				numberOfMsgs = 3;
-				int charCount = messageLength - (2*multipartMessageCharacterLimit);
+				int charCount = messageLength - multipartMessageCharacterLimit;
 				remaining = (charCount % multipartMessageCharacterLimit) == 0 ? 0
 						: multipartMessageCharacterLimit - (charCount % multipartMessageCharacterLimit);
 			}
 
-			uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_REMAINING_CHARS), String.valueOf(remaining));
-			uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_MSG_NUMBER), String.valueOf(numberOfMsgs));
-			uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_FIRST), Icon.SMS_DISABLED);
-			uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS_DISABLED);
-			uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS_DISABLED);
-			if (numberOfMsgs >= 1) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_FIRST), Icon.SMS);
-			if (numberOfMsgs >= 2) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS);
-			if (numberOfMsgs >= 3) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS);
-			
-			double value = numberOfMsgs * this.getCostPerSms() * this.numberToSend;
-			uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(value));
+			costEstimate = numberOfMsgs * this.getCostPerSms() * this.numberToSend;
 		}
+		
+		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_REMAINING_CHARS), String.valueOf(remaining));
+		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_MSG_NUMBER), String.valueOf(numberOfMsgs));
+		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_FIRST), Icon.SMS_DISABLED);
+		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS_DISABLED);
+		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS_DISABLED);
+		if (numberOfMsgs >= 1) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_FIRST), Icon.SMS);
+		if (numberOfMsgs >= 2) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS);
+		if (numberOfMsgs == 3) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS);
+		if (numberOfMsgs > 3) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS_DELETE);
+		
+		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(costEstimate));
 	}
 	
 	/**

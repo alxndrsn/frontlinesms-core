@@ -628,7 +628,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			}
 		}
 		
-		boolean shouldDisplayRecipientField = false;
+		final boolean shouldDisplayRecipientField = false;
 		MessagePanelHandler messagePanelController = MessagePanelHandler.create(this, shouldDisplayRecipientField);
 		// We need to add the message panel to the dialog before setting the send button method
 		add(dialog, messagePanelController.getPanel());
