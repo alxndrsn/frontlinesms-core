@@ -146,6 +146,9 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_DATABASE_CONNECTION_FAILED = "common.db.connection.failed";
 	public static final String COMMON_ATTENTION = "common.attention";
 	
+	public static final String EVENT_DESCRIPTION = "event.description";
+	public static final String EVENT_DESCRIPTION_MULTI_RECIPIENTS = "event.description.multi.recipients";	
+	
 	public static final String MESSAGE_GROUP_NO_MEMBERS = "message.no.members";
 	public static final String MESSAGE_KEYWORD_EXISTS = "message.keyword.already.exists";
 	public static final String MESSAGE_KEYWORD_SAVED = "message.keyword.saved";

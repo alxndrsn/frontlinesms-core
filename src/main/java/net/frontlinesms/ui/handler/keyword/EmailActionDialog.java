@@ -140,7 +140,7 @@ public class EmailActionDialog extends BaseActionDialog {
 	public void save() {
 		log.trace("ENTER");
 		String message = ui.getText(find(COMPONENT_TF_MESSAGE));
-		String recipients = ui.getText(find(COMPONENT_TF_RECIPIENT));
+		String recipients = ui.getText(find(COMPONENT_TF_RECIPIENT)).replace(',', ';');
 		String subject = ui.getText(find(COMPONENT_TF_SUBJECT));
 		log.debug("Message [" + message + "]");
 		log.debug("Recipients [" + recipients + "]");

@@ -98,8 +98,8 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	 * Extract message details from the controls in the panel, and send an SMS.
 	 */
 	public void send() {
-		String recipient = uiController.getText(uiController.find("tfRecipient"));
-		String message = uiController.getText(uiController.find("tfMessage"));
+		String recipient = uiController.getText(uiController.find(COMPONENT_TF_RECIPIENT));
+		String message = uiController.getText(uiController.find(COMPONENT_TF_MESSAGE));
 		
 		if (recipient.equals("")) {
 			uiController.alert(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_BLANK_PHONE_NUMBER));

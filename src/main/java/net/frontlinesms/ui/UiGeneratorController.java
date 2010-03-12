@@ -1386,7 +1386,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			this.emailTabHandler.outgoingEmailEvent(sender, email);
 		}
 		if (email.getStatus() == Email.Status.SENT) {
-			newEvent(new Event(Event.TYPE_OUTGOING_EMAIL, InternationalisationUtils.getI18NString(COMMON_E_MAIL) + ": " + email.getEmailContent()));
+			String[] recipients = email.getEmailRecipients().split(";");
+			String strRecipients = recipients[0] + (recipients.length > 1 ? InternationalisationUtils.getI18NString(EVENT_DESCRIPTION_MULTI_RECIPIENTS, recipients.length) : ""); 
+			
+			newEvent(new Event(Event.TYPE_OUTGOING_EMAIL, InternationalisationUtils.getI18NString(EVENT_DESCRIPTION, strRecipients, email.getEmailContent())));
 		}
 		LOG.trace("EXIT");
 	}
@@ -1453,7 +1456,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		if (currentTab.equals(TAB_MESSAGE_HISTORY)) {
 			this.messageTabController.incomingMessageEvent(message);
 		}
-		newEvent(new Event(Event.TYPE_INCOMING_MESSAGE, InternationalisationUtils.getI18NString(COMMON_MESSAGE) + ": " + message.getTextContent()));
+		Contact sender = contactDao.getFromMsisdn(message.getSenderMsisdn());
+		String strSender = (sender == null ? message.getSenderMsisdn() : sender.getName());
+		
+		newEvent(new Event(Event.TYPE_INCOMING_MESSAGE, InternationalisationUtils.getI18NString(EVENT_DESCRIPTION, strSender, message.getTextContent())));
 		setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGE_RECEIVED));
 		LOG.trace("EXIT");
 	}
@@ -1463,11 +1469,15 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		LOG.debug("Message [" + message.getTextContent() + "], Status [" + message.getStatus() + "]");
 		if (currentTab.equals(TAB_MESSAGE_HISTORY)) {
 			this.messageTabController.outgoingMessageEvent(message);
-		} 
+		}
+		
+		Contact recipient = contactDao.getFromMsisdn(message.getRecipientMsisdn());
+		String strRecipient = (recipient == null ? message.getRecipientMsisdn() : recipient.getName());
+		
 		if (message.getStatus() == Message.STATUS_SENT) {
-			newEvent(new Event(Event.TYPE_OUTGOING_MESSAGE, InternationalisationUtils.getI18NString(COMMON_MESSAGE) + ": " + message.getTextContent()));
+			newEvent(new Event(Event.TYPE_OUTGOING_MESSAGE, InternationalisationUtils.getI18NString(EVENT_DESCRIPTION, strRecipient, message.getTextContent())));
 		} else if (message.getStatus() == Message.STATUS_FAILED) {
-			newEvent(new Event(Event.TYPE_OUTGOING_MESSAGE_FAILED, InternationalisationUtils.getI18NString(COMMON_MESSAGE) + ": " + message.getTextContent()));
+			newEvent(new Event(Event.TYPE_OUTGOING_MESSAGE_FAILED, InternationalisationUtils.getI18NString(EVENT_DESCRIPTION, strRecipient, message.getTextContent())));
 		}
 		LOG.trace("ENTER");
 	}
