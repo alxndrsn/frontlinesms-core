@@ -35,7 +35,7 @@ public class HibernateContactDao extends BaseHibernateDao<Contact> implements Co
 	@Transactional
 	public void deleteContact(Contact contact) {
 		// Delete all group memberships associated with this contact
-		super.getHibernateTemplate().bulkUpdate("DELETE FROM GroupMembership WHERE contact_contact_id='" + contact.getId() + "'");
+		super.getHibernateTemplate().bulkUpdate("DELETE FROM GroupMembership WHERE contact=?", contact);
 		
 		// Delete the contact
 		super.delete(contact);
