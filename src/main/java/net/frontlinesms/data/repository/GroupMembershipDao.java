@@ -27,9 +27,12 @@ public interface GroupMembershipDao {
 	/** @return all groups this contact is a <b>direct</b> member of */
 	public List<Group> getGroups(Contact contact);
 	
-	/** @return all members of the supplied group and its subgroup whose name or
+	/** @return Count of all members of the supplied group and its subgroups whose name or
 	 * phone number matches the <code>filterString</code> */
-	public List<Contact> getFilteredMembers(Group group, String filterString);
+	public int getFilteredMemberCount(final Group group, String contactFilterString);
+	/** @return all members of the supplied group and its subgroups whose name or
+	 * phone number matches the <code>filterString</code> */
+	public List<Contact> getFilteredMembers(Group group, String filterString, int startIndex, int limit);
 
 	/** 
 	 * Add a contact to a group

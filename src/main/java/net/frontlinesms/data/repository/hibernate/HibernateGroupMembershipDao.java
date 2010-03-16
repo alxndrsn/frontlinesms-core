@@ -83,7 +83,14 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 			return getList(Contact.class, queryString, new Object[]{group, childPath});
 		}
 	}
-	
+
+	/** @see GroupMembershipDao#getFilteredMembers(Group, String) */
+	public List<Contact> getFilteredMembers(final Group group, String contactFilterString, int startIndex, int limit) {
+		// TODO this is quite an ugly way of doing limits
+		List<Contact> filteredMembers = getFilteredMembers(group, contactFilterString);
+		int toIndex = Math.min(filteredMembers.size(), startIndex + limit);
+		return filteredMembers.subList(startIndex, toIndex);
+	}
 	/** @see GroupMembershipDao#getFilteredMembers(Group, String) */
 	public List<Contact> getFilteredMembers(final Group group, String contactFilterString) {
 		contactFilterString = contactFilterString.length() == 0 ? "%" : "%" + contactFilterString + "%";
@@ -97,6 +104,22 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 					" AND (LOWER(mem.contact.name) LIKE LOWER(?) OR LOWER(mem.contact.phoneNumber) LIKE LOWER(?))";
 			String childPath = group.getPath() + Group.PATH_SEPARATOR + "%";
 			return getList(Contact.class, queryString, group, childPath, contactFilterString, contactFilterString);
+		}
+	}
+	
+	/** @see GroupMembershipDao#getFilteredMemberCount(Group, String) */
+	public int getFilteredMemberCount(final Group group, String contactFilterString) {
+		contactFilterString = contactFilterString.length() == 0 ? "%" : "%" + contactFilterString + "%";
+		
+		if(group.isRoot()) {
+			String queryString = "SELECT COUNT(DISTINCT c) FROM Contact AS c WHERE LOWER(c.name) LIKE LOWER(?) OR LOWER(c.phoneNumber) LIKE LOWER(?)";
+			return super.getCount(queryString, contactFilterString, contactFilterString);
+		} else {
+			String queryString = "SELECT COUNT(DISTINCT mem.contact) FROM GroupMembership AS mem WHERE " +
+					"(mem.group=? OR mem.group.path LIKE ?)" +
+					" AND (LOWER(mem.contact.name) LIKE LOWER(?) OR LOWER(mem.contact.phoneNumber) LIKE LOWER(?))";
+			String childPath = group.getPath() + Group.PATH_SEPARATOR + "%";
+			return super.getCount(queryString, group, childPath, contactFilterString, contactFilterString);
 		}
 	}
 

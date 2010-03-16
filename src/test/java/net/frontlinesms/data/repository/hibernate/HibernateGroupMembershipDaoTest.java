@@ -114,7 +114,9 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 	}
 	
 	private void testFiltering(Group group, String filterString, Contact... expectedContacts) {
-		List<Contact> actualResults = this.dao.getFilteredMembers(group, filterString);
+		assertEquals(expectedContacts.length, this.dao.getFilteredMemberCount(group, filterString));
+		
+		List<Contact> actualResults = this.dao.getFilteredMembers(group, filterString, 0, expectedContacts.length);
 		
 		for(Contact c : actualResults) {
 			System.out.println(c.getName());
