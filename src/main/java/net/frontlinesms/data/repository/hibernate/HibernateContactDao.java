@@ -71,7 +71,7 @@ public class HibernateContactDao extends BaseHibernateDao<Contact> implements Co
 
 	private DetachedCriteria getNameFilterCriteria(String contactNameFilter) {
 		DetachedCriteria criteria = super.getCriterion();
-		criteria.add(Restrictions.ilike(Contact.Field.NAME.getFieldName(), contactNameFilter + '%'));
+		criteria.add(Restrictions.ilike(Contact.Field.NAME.getFieldName(), '%' + contactNameFilter + '%'));
 		return criteria;
 	}
 
