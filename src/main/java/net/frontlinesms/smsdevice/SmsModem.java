@@ -803,17 +803,16 @@ public class SmsModem extends Thread implements SmsDevice {
 				message.setDispatchDate(cMessage.getDispatchDate());
 				message.setSmscReference(cMessage.getRefNo());
 				message.setStatus(Message.STATUS_SENT);
-				LOG.debug("Message [" + message + "] was sent!");
+				if(LOG.isDebugEnabled()) LOG.debug("Message [" + message.getTextContent() + "] was sent to [" + message.getRecipientMsisdn() + "]");
 			} else {
 				//message not sent
 				//failed to send
 				message.setStatus(Message.STATUS_FAILED);
-				LOG.debug("Message [" + message + "] was not sent!");
+				if(LOG.isDebugEnabled()) LOG.debug("Message [" + message + "] failed to send to [" + message.getRecipientMsisdn() + "]");
 			}
 		} catch(Exception ex) {
 			message.setStatus(Message.STATUS_FAILED);
-			LOG.debug("Failed to send message [" + message + "]", ex);
-			LOG.info("Failed to send message");
+			if(LOG.isInfoEnabled()) LOG.info("Message [" + message + "] failed to send to [" + message.getRecipientMsisdn() + "]", ex);
 			throw new IOException();
 		} finally {
 			if (smsListener != null) {
@@ -984,17 +983,16 @@ public class SmsModem extends Thread implements SmsDevice {
 						message.setDispatchDate(cMessage.getDispatchDate());
 						message.setSmscReference(cMessage.getRefNo());
 						message.setStatus(Message.STATUS_SENT);
-						LOG.debug("Message [" + message + "] was sent!");
+						if(LOG.isDebugEnabled()) LOG.debug("Message [" + message.getTextContent() + "] was sent to [" + message.getRecipientMsisdn() + "]");
 					} else {
 						//message not sent
 						//failed to send
 						message.setStatus(Message.STATUS_FAILED);
-						LOG.debug("Message [" + message + "] was not sent!");
+						if(LOG.isDebugEnabled()) LOG.debug("Message [" + message + "] failed to send to [" + message.getRecipientMsisdn() + "]");
 					}
 				} catch(Exception ex) {
 					message.setStatus(Message.STATUS_FAILED);
-					LOG.debug("Failed to send message [" + message + "]", ex);
-					LOG.info("Failed to send message");
+					if(LOG.isInfoEnabled()) LOG.info("Message [" + message + "] failed to send to [" + message.getRecipientMsisdn() + "]", ex);
 				} finally {
 					if (smsListener != null) {
 						smsListener.outgoingMessageEvent(this, message);
