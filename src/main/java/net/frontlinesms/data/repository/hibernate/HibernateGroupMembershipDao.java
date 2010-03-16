@@ -42,17 +42,21 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 	}
 
 	/** @see GroupMembershipDao#getActiveMembers(Group) */
-	@SuppressWarnings("unchecked")
 	public List<Contact> getActiveMembers(Group group) {
-		// FIXME make this prepared
-		return this.getHibernateTemplate().find("SELECT mem.contact FROM GroupMembership AS mem, Contact AS c WHERE mem.group='" + group.getPath() + "' AND c.active=TRUE");
+		if(group.isRoot()) {
+			String queryString = "SELECT c FROM Contact AS c WHERE c.active=TRUE";
+			return getList(Contact.class, queryString);
+		} else {
+			String queryString = "SELECT DISTINCT mem.contact FROM GroupMembership AS mem, Contact AS c WHERE c.active=TRUE AND (mem.group=? OR mem.group.path LIKE ?)";
+			String childPath = group.getPath() + Group.PATH_SEPARATOR + "%";
+			return getList(Contact.class, queryString, group, childPath);
+		}
 	}
 
 	/** @see GroupMembershipDao#getGroups(Contact) */
-	@SuppressWarnings("unchecked")
 	public List<Group> getGroups(Contact contact) {
-		// FIXME make this prepared
-		return this.getHibernateTemplate().find("SELECT mem.group FROM GroupMembership AS mem WHERE mem.contact='" + contact.getId() + "'");
+		String queryString = "SELECT mem.group FROM GroupMembership AS mem WHERE mem.contact=?";
+		return getList(Group.class, queryString, contact);
 	}
 
 	/** @see GroupMembershipDao#getMemberCount(Group) */
@@ -62,30 +66,37 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 			crit.setProjection(Projections.rowCount());
 			return DataAccessUtils.intResult(this.getHibernateTemplate().findByCriteria(crit));
 		} else {
-			DetachedCriteria crit = super.getCriterion();
-			crit.add(Restrictions.eq("group", group));
-			return super.getCount(crit);
+//			DetachedCriteria crit = super.getCriterion();
+//			crit.add(Restrictions.eq("group", group));
+//			return super.getCount(crit);
+			String childPath = group.getPath() + Group.PATH_SEPARATOR + "%";
+			String queryString = "SELECT COUNT(DISTINCT mem.contact) " +
+//					"DISTINCT mem.contact " +
+					"FROM GroupMembership AS mem WHERE mem.group=? OR mem.group.path LIKE ?";
+			return super.getCount(queryString, group, childPath);
 		}
 	}
 
 	/** @see GroupMembershipDao#getMembers(Group) */
-	@SuppressWarnings("unchecked")
 	public List<Contact> getMembers(Group group) {
 		if(group.isRoot()) {
-			return this.getHibernateTemplate().findByCriteria(DetachedCriteria.forClass(Contact.class));
+			return getList(Contact.class, DetachedCriteria.forClass(Contact.class));
 		} else {
-			String queryString = "SELECT DISTINCT mem.contact FROM GroupMembership AS mem"
-					+ " WHERE "
-					+ "mem.group=:path"
-					+ " OR "
-					+ "mem.group.path LIKE :childPath"
-					;
+//			String queryString = "SELECT DISTINCT mem.contact FROM GroupMembership AS mem"
+//					+ " WHERE "
+//					+ "mem.group=:path"
+//					+ " OR "
+//					+ "mem.group.path LIKE :childPath"
+//					;
 			String childPath = group.getPath() + Group.PATH_SEPARATOR + "%";
-			String[] paramNames = new String[]{"path", "childPath"};
-			Object[] paramValues = new Object[]{group, childPath};
-			return super.getHibernateTemplate().findByNamedParam(queryString,
-					paramNames,
-					paramValues);
+//			String[] paramNames = new String[]{"path", "childPath"};
+//			Object[] paramValues = new Object[]{group, childPath};
+//			return super.getHibernateTemplate().findByNamedParam(queryString,
+//					paramNames,
+//					paramValues);
+//			
+			String queryString = "SELECT DISTINCT mem.contact FROM GroupMembership AS mem WHERE mem.group=? OR mem.group.path LIKE ?";
+			return getList(Contact.class, queryString, new Object[]{group, childPath});
 		}
 	}
 
@@ -98,8 +109,11 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 
 	/** @see GroupMembershipDao#isMember(Group, Contact) */
 	public boolean isMember(Group group, Contact contact) {
-		DetachedCriteria crit = getMembershipCriteria(group, contact);
-		return super.getCount(crit) == 1;
+		if(group.isRoot()) return true;
+		
+		String childPath = group.getPath() + Group.PATH_SEPARATOR + "%";
+		String queryString = "SELECT COUNT(*) FROM GroupMembership AS mem WHERE mem.contact=? AND (mem.group=? OR mem.group.path LIKE ?)";
+		return super.getCount(queryString, contact, group, childPath) > 0;
 	}
 
 	/** @see GroupMembershipDao#removeMember(Group, Contact) */
@@ -121,5 +135,26 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 		crit.add(Restrictions.eq("contact", contact));
 		crit.add(Restrictions.eq("group", group));
 		return crit;
+	}
+
+	/**
+	 * Gets a list of E matching the supplied criteria.
+	 * @param criteria
+	 * @return a list of Es matching the supplied criteria
+	 */
+	@SuppressWarnings("unchecked")
+	protected <T> List<T> getList(Class<T> entityClass, DetachedCriteria criteria) {
+		return this.getHibernateTemplate().findByCriteria(criteria);
+	}
+	
+	/**
+	 * Gets a list of E matching the supplied HQL query.
+	 * @param hqlQuery HQL query
+	 * @param values values to insert into the HQL query
+	 * @return a list of Es matching the supplied query
+	 */
+	@SuppressWarnings("unchecked")
+	protected <T> List<T> getList(Class<T> entityClass, String hqlQuery, Object... values) {
+		return this.getHibernateTemplate().find(hqlQuery, values);
 	}
 }

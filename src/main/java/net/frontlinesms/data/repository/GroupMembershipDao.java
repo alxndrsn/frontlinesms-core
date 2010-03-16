@@ -24,7 +24,7 @@ public interface GroupMembershipDao {
 
 	/**
 	 * @param contact
-	 * @return all groups this contact is a direct member of
+	 * @return all groups this contact is a <b>direct</b> member of
 	 */
 	public List<Group> getGroups(Contact contact);
 

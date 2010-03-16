@@ -170,7 +170,6 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	 * @param values values to insert into the HQL query
 	 * @return a list of Es matching the supplied query
 	 */
-	@SuppressWarnings("unchecked")
 	protected List<E> getList(String hqlQuery, int startIndex, int limit, Object... values) {
 		List<E> list = getList(hqlQuery, values);
 		return list.subList(startIndex, Math.min(list.size(), startIndex + limit));
@@ -263,5 +262,14 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	protected int getCount(DetachedCriteria criteria) {
 		criteria.setProjection(Projections.rowCount());
 		return DataAccessUtils.intResult(this.getHibernateTemplate().findByCriteria(criteria));
+	}
+
+	/**
+	 * Gets a count of the results for the supplied HQL query string.  The HQL query should
+	 * be a COUNT statement.
+	 */
+	protected int getCount(String queryString, Object... values) {
+		List<?> results = getHibernateTemplate().find(queryString, values);
+		return DataAccessUtils.intResult(results);
 	}
 }
