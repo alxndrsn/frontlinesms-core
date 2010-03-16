@@ -4,7 +4,9 @@
 package net.frontlinesms.data.repository.hibernate;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Contact;
@@ -42,16 +44,97 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 		testRelationship(group);
 	}
 	
+	public void testFiltering() throws DuplicateKeyException {
+		// Create the groups
+		Group parent = createGroup("parent");
+		Group child1 = createGroup(parent, "child1");
+		Group child2 = createGroup(parent, "child2");
+
+		// Create the contacts
+		Contact alice = createContact("Alice", "+123456789", child1);
+		Contact arnold = createContact("Arnold", "0123456789", child1);
+		Contact brigitte = createContact("Brigitte", "+111555999", child2);
+		Contact brian = createContact("Brian", "0111555999", child2);
+		Contact caroline = createContact("Caroline", "+987654321", parent);
+		Contact charles = createContact("Charles", "0987654321", parent);
+		Contact xuxa = createContact("Xuxa", "+111555000");
+		Contact xavier = createContact("Xavier", "0111555000");
+
+		// Test empty filter
+		testFiltering(getRootGroup(), "",
+				alice, arnold, brigitte, brian, caroline, charles, xuxa, xavier);
+		testFiltering(parent, "",
+				alice, arnold, brigitte, brian, caroline, charles);
+		testFiltering(child1, "",
+				alice, arnold);
+		testFiltering(child2, "",
+				brigitte, brian);
+		
+		// Test filtering by phone number
+		testFiltering(getRootGroup(), "0",
+				arnold, brian, charles, xuxa, xavier);
+		testFiltering(parent, "0",
+				arnold, brian, charles);
+		testFiltering(child1, "0",
+				arnold);
+		testFiltering(child2, "0",
+				brian);
+		
+		testFiltering(getRootGroup(), "123",
+				alice, arnold);
+		testFiltering(parent, "123",
+				alice, arnold);
+		testFiltering(child1, "123",
+				alice, arnold);
+		testFiltering(child2, "123");
+		
+		// Test filtering by name
+		testFiltering(getRootGroup(), "a",
+				alice, arnold, brian, caroline, charles, xuxa, xavier);
+		testFiltering(parent, "a",
+				alice, arnold, brian, caroline, charles);
+		testFiltering(child1, "a",
+				alice, arnold);
+		testFiltering(child2, "a",
+				brian);
+
+		testFiltering(getRootGroup(), "li",
+				alice, caroline);
+		testFiltering(parent, "li",
+				alice, caroline);
+		testFiltering(child1, "li",
+				alice);
+		testFiltering(child2, "li");
+
+		testFiltering(getRootGroup(), "xuxa", 
+				xuxa);
+		testFiltering(parent, "xuxa");
+		testFiltering(child1, "xuxa");
+		testFiltering(child2, "xuxa");
+	}
+	
+	private void testFiltering(Group group, String filterString, Contact... expectedContacts) {
+		List<Contact> actualResults = this.dao.getFilteredMembers(group, filterString);
+		assertEquals("Incorrect number of contacts retrieved for filter '" + filterString + "' on group '" + group.getPath() + "'", 
+				expectedContacts.length, actualResults.size());
+		
+		Set<Contact> expectedResults = new HashSet<Contact>();
+		for(Contact expected : expectedContacts) expectedResults.add(expected);
+		for(Contact actual : actualResults) {
+			assertTrue("Unexpected contact in results: " + actual.getName(), expectedResults.remove(actual));
+		}
+		if(expectedResults.size() > 0) {
+			String missingContacts = "";
+			for(Contact c : expectedResults) missingContacts += ", " + c.getName();
+			fail("Expected results where not found in retrieved results: " + missingContacts.substring(2));
+		}
+	}
+	
 	public void testSubgroups() throws DuplicateKeyException {
 		// Create the groups
 		Group parent = createGroup("parent");
 		Group child1 = createGroup(parent, "child1");
 		Group child2 = createGroup(parent, "child2");
-		
-//		for(Group g : this.groupDao.getAllGroups()) {
-//			System.out.println(g.getPath());
-//		}
-//		System.exit(21);
 
 		// Check they are all empty
 		testRelationship(parent);
@@ -81,6 +164,13 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 	private Contact createContact(String name, Group... groups) throws DuplicateKeyException {
 		// Make a phone number up that should be unique
 		String phoneNumber = Integer.toString(name.hashCode());
+		return createContact(name, phoneNumber, groups);
+	}
+	
+	/** Creates a contact with specified name and phone number. 
+	 * @throws DuplicateKeyException */
+	private Contact createContact(String name, String phoneNumber, Group... groups) throws DuplicateKeyException {
+		// Make a phone number up that should be unique
 		Contact contact = new Contact(name, phoneNumber, null, null, null, true);
 		this.contactDao.saveContact(contact);
 		

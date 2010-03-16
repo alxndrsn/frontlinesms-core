@@ -66,12 +66,8 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 			crit.setProjection(Projections.rowCount());
 			return DataAccessUtils.intResult(this.getHibernateTemplate().findByCriteria(crit));
 		} else {
-//			DetachedCriteria crit = super.getCriterion();
-//			crit.add(Restrictions.eq("group", group));
-//			return super.getCount(crit);
 			String childPath = group.getPath() + Group.PATH_SEPARATOR + "%";
 			String queryString = "SELECT COUNT(DISTINCT mem.contact) " +
-//					"DISTINCT mem.contact " +
 					"FROM GroupMembership AS mem WHERE mem.group=? OR mem.group.path LIKE ?";
 			return super.getCount(queryString, group, childPath);
 		}
@@ -82,27 +78,30 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 		if(group.isRoot()) {
 			return getList(Contact.class, DetachedCriteria.forClass(Contact.class));
 		} else {
-//			String queryString = "SELECT DISTINCT mem.contact FROM GroupMembership AS mem"
-//					+ " WHERE "
-//					+ "mem.group=:path"
-//					+ " OR "
-//					+ "mem.group.path LIKE :childPath"
-//					;
 			String childPath = group.getPath() + Group.PATH_SEPARATOR + "%";
-//			String[] paramNames = new String[]{"path", "childPath"};
-//			Object[] paramValues = new Object[]{group, childPath};
-//			return super.getHibernateTemplate().findByNamedParam(queryString,
-//					paramNames,
-//					paramValues);
-//			
 			String queryString = "SELECT DISTINCT mem.contact FROM GroupMembership AS mem WHERE mem.group=? OR mem.group.path LIKE ?";
 			return getList(Contact.class, queryString, new Object[]{group, childPath});
+		}
+	}
+	
+	/** @see GroupMembershipDao#getFilteredMembers(Group, String) */
+	public List<Contact> getFilteredMembers(final Group group, String contactFilterString) {
+		contactFilterString = contactFilterString.length() == 0 ? "%" : "%" + contactFilterString + "%";
+		
+		if(group.isRoot()) {
+			String queryString = "SELECT c FROM Contact AS c WHERE c.name LIKE ? OR c.phoneNumber LIKE ?";
+			return getList(Contact.class, queryString, contactFilterString, contactFilterString);
+		} else {
+			String queryString = "SELECT mem.contact FROM GroupMembership AS mem WHERE " +
+					"(mem.group=? OR mem.group.path LIKE ?)" +
+					" AND (mem.contact.name LIKE ? OR mem.contact.phoneNumber LIKE ?)";
+			String childPath = group.getPath() + Group.PATH_SEPARATOR + "%";
+			return getList(Contact.class, queryString, group, childPath, contactFilterString, contactFilterString);
 		}
 	}
 
 	/** @see GroupMembershipDao#getMembers(Group, int, int) */
 	public List<Contact> getMembers(Group group, int startIndex, int limit) {
-		// TODO Auto-generated method stub
 		List<Contact> allMembers = getMembers(group);
 		return allMembers.subList(startIndex, Math.min(allMembers.size(), startIndex + limit));
 	}

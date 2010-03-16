@@ -13,7 +13,6 @@ import thinlet.Thinlet;
 import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.repository.unmodifiable.UnmodifiableGroupDao;
-import net.frontlinesms.data.repository.unmodifiable.UnmodifiableGroupMembershipDao;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BasePanelHandler;
@@ -33,7 +32,6 @@ public class GroupSelecterPanel extends BasePanelHandler {
 	private GroupSelecterPanelOwner owner;
 
 	private UnmodifiableGroupDao groupDao;
-	private UnmodifiableGroupMembershipDao groupMembershipDao;
 	
 	private boolean allowMultipleSelections;
 
@@ -69,19 +67,12 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		
 		FrontlineSMS frontlineController = ((UiGeneratorController) super.ui).getFrontlineController();
 		this.groupDao = new UnmodifiableGroupDao(frontlineController.getGroupDao());
-		this.groupMembershipDao = new UnmodifiableGroupMembershipDao(frontlineController.getGroupMembershipDao());
 		
 		ui.removeAll(groupTree);
 		ui.add(groupTree, createNode(rootGroup, true));
 	}
 	
 //> ACCESSORS
-	private void setAllowMultipleSelections(boolean allowMultipleSelections) {
-		this.allowMultipleSelections = allowMultipleSelections;
-		// TODO set selection option of group tree appropriately
-		throw new IllegalStateException("NYI");
-	}
-	
 	/** @return a single group selected in the tree, or <code>null</code> if none is selected */
 	public Group getSelectedGroup() {
 		assert(!this.allowMultipleSelections) : "Cannot get a single selection if multiple groups are selectable.";
