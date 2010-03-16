@@ -89,12 +89,12 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 		contactFilterString = contactFilterString.length() == 0 ? "%" : "%" + contactFilterString + "%";
 		
 		if(group.isRoot()) {
-			String queryString = "SELECT c FROM Contact AS c WHERE c.name LIKE ? OR c.phoneNumber LIKE ?";
+			String queryString = "SELECT c FROM Contact AS c WHERE LOWER(c.name) LIKE LOWER(?) OR LOWER(c.phoneNumber) LIKE LOWER(?)";
 			return getList(Contact.class, queryString, contactFilterString, contactFilterString);
 		} else {
 			String queryString = "SELECT mem.contact FROM GroupMembership AS mem WHERE " +
 					"(mem.group=? OR mem.group.path LIKE ?)" +
-					" AND (mem.contact.name LIKE ? OR mem.contact.phoneNumber LIKE ?)";
+					" AND (LOWER(mem.contact.name) LIKE LOWER(?) OR LOWER(mem.contact.phoneNumber) LIKE LOWER(?))";
 			String childPath = group.getPath() + Group.PATH_SEPARATOR + "%";
 			return getList(Contact.class, queryString, group, childPath, contactFilterString, contactFilterString);
 		}
