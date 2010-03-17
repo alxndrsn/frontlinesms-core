@@ -66,7 +66,7 @@ public class DatabaseConnectionFailedDialog extends FrontlineUI implements Datab
 //> PUBLIC UI METHODS
 	/** Show the database settings panel. */
 	public void showSettingsPage() {
-		DatabaseSettingsPanel settingsPanel = DatabaseSettingsPanel.createNew(this);
+		DatabaseSettingsPanel settingsPanel = DatabaseSettingsPanel.createNew(this, null);
 		settingsPanel.setCancelEnabled(false);
 		settingsPanel.setSettingsChangedCallbackListener(this);
 		this.removeAll(dialogComponent);

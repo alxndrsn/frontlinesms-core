@@ -3,6 +3,7 @@
  */
 package net.frontlinesms.ui.handler.core;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,14 +53,14 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 	 * Initialise the UI.
 	 * @param restartRequired
 	 */
-	private void init() {
+	private void init(String selectedPath) {
 		super.loadPanel(XML_SETTINGS_PANEL);
 		
 		// Populate combobox
-		String selectedDatabaseConfigPath = AppProperties.getInstance().getDatabaseConfigPath();
+		String selectedDatabaseConfigPath = (selectedPath == null ? AppProperties.getInstance().getDatabaseConfigPath() : selectedPath);
 		List<DatabaseSettings> databaseSettings = DatabaseSettings.getSettings();
 		Object settingsSelection = getConfigFileSelecter();
-		for(int settingsIndex=0; settingsIndex<databaseSettings.size(); ++settingsIndex) {
+		for(int settingsIndex = 0; settingsIndex < databaseSettings.size(); ++settingsIndex) {
 			DatabaseSettings settings = databaseSettings.get(settingsIndex);
 			Object comboBox = createComboBox(settings);
 			ui.add(settingsSelection, comboBox);
@@ -145,11 +146,11 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 	
 //> UI EVENT METHODS
 	public void configFileChanged() {
-		Object selected = ui.getSelectedItem(getConfigFileSelecter());
-		if(selected != null) {
-			setSelectedConfigFile(ui.getAttachedObject(selected, DatabaseSettings.class));
-			
-			refreshSettingsPanel();
+		String selected = ui.getText(ui.getSelectedItem(getConfigFileSelecter()));
+		
+		if (selected != null) {
+			this.openNewDialog(selected);
+			this.removeDialog();
 		}
 	}
 	
@@ -240,10 +241,15 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 	}
 	
 //> STATIC FACTORIES
-	public static DatabaseSettingsPanel createNew(FrontlineUI ui) {
+	public static DatabaseSettingsPanel createNew(FrontlineUI ui, String selectedPath) {
 		DatabaseSettingsPanel panel = new DatabaseSettingsPanel(ui);
-		panel.init();
+		panel.init(selectedPath);
 		return panel;
+	}
+	
+	public void openNewDialog(String selectedPath) {
+		DatabaseSettingsPanel databaseSettings = DatabaseSettingsPanel.createNew(ui, selectedPath);
+		databaseSettings.showAsDialog();
 	}
 }
 

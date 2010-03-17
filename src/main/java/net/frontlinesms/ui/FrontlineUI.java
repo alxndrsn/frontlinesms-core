@@ -19,6 +19,7 @@
  */
 package net.frontlinesms.ui;
 
+import java.awt.Dimension;
 import java.awt.Image;
 
 import net.frontlinesms.ErrorUtils;

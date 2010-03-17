@@ -1438,7 +1438,6 @@ public class Thinlet extends Container implements Runnable, Serializable, Thinle
 			int weightx = getInteger(comp, ATTRIBUTE_WEIGHT_X, 0);
 			int weighty = getInteger(comp, ATTRIBUTE_WEIGHT_Y, 0);
 			Dimension d = getPreferredSize(comp);
-
 			if (colspan == 1) {
 				grid[0][x] = Math.max(grid[0][x], d.width); // columnwidths
 				grid[2][x] = Math.max(grid[2][x], weightx); // columnweights
