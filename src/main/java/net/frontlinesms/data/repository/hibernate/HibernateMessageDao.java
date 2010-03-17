@@ -143,7 +143,6 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 		q.appendWhereOrAnd();
 		q.append("(message." + Message.Field.DATE.getFieldName() + ">=?", start);
 		q.append("AND message." + Message.Field.DATE.getFieldName() + "<=?)", end);
-		String pwals = q.getQueryString();
 		q.addSorting(sortBy, order);
 		return super.getList(q.getQueryString(), startIndex, limit, q.getInsertValues());
 	}
