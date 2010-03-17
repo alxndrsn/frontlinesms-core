@@ -93,8 +93,7 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 	}
 	/** @see GroupMembershipDao#getFilteredMembers(Group, String) */
 	public List<Contact> getFilteredMembers(final Group group, String contactFilterString) {
-		contactFilterString = contactFilterString.length() == 0 ? "%" : "%" + contactFilterString + "%";
-		
+		contactFilterString = getMemberFilterLikeString(contactFilterString);
 		if(group.isRoot()) {
 			String queryString = "SELECT c FROM Contact AS c WHERE LOWER(c.name) LIKE LOWER(?) OR LOWER(c.phoneNumber) LIKE LOWER(?)";
 			return getList(Contact.class, queryString, contactFilterString, contactFilterString);
@@ -109,8 +108,7 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 	
 	/** @see GroupMembershipDao#getFilteredMemberCount(Group, String) */
 	public int getFilteredMemberCount(final Group group, String contactFilterString) {
-		contactFilterString = contactFilterString.length() == 0 ? "%" : "%" + contactFilterString + "%";
-		
+		contactFilterString = getMemberFilterLikeString(contactFilterString);
 		if(group.isRoot()) {
 			String queryString = "SELECT COUNT(DISTINCT c) FROM Contact AS c WHERE LOWER(c.name) LIKE LOWER(?) OR LOWER(c.phoneNumber) LIKE LOWER(?)";
 			return super.getCount(queryString, contactFilterString, contactFilterString);
@@ -151,6 +149,16 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 	}
 
 //> PRIVATE HELPER METHODS
+	/** Convert the filterString passed from the UI to {@link #getFilteredMemberCount(Group, String)}
+	 * and {@link #getFilteredMembers(Group, String)} to the pattern for matching in the LIKE clause. */
+	private String getMemberFilterLikeString(String contactFilterString) {
+		if(contactFilterString == null || contactFilterString.length() == 0) {
+			return "%";
+		} else {
+			return "%" + contactFilterString + "%";
+		}
+	}
+	
 	/** @return criteria for fetching a {@link GroupMembership} entity */
 	private DetachedCriteria getMembershipCriteria(Group group, Contact contact) {
 		DetachedCriteria crit = super.getCriterion();

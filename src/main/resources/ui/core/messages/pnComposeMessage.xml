@@ -19,12 +19,12 @@
     </panel>
     <textarea action="messageChanged(tfRecipient.text, this.text)" rows="10" columns="40" name="tfMessage"/>
     <panel name="pnBottom" gap="13" weightx="1">
-        <panel halign="left" weightx="1">
+        <panel gap="8" halign="left" weightx="1">
             <button icon="/icons/sms_send.png" name="btSend" text="i18n.common.send" enabled="false"
             		action="send"/>
-        </panel>
-        <panel gap="11" halign="right" top="3" weightx="1">
         	<label font="bold" name="lbTooManyMessages" text="i18n.sentence.too.many.messages"/>
+        </panel>
+        <panel gap="8" halign="right" top="3" weightx="1">
             <label icon="/icons/money.png" text="i18n.common.estimated.cost"/>
             <label font="bold" name="lbEstimatedMoney"/>
         </panel>
