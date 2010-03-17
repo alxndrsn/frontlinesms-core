@@ -143,9 +143,8 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 		q.appendWhereOrAnd();
 		q.append("(message." + Message.Field.DATE.getFieldName() + ">=?", start);
 		q.append("AND message." + Message.Field.DATE.getFieldName() + "<=?)", end);
-		
+		String pwals = q.getQueryString();
 		q.addSorting(sortBy, order);
-		
 		return super.getList(q.getQueryString(), startIndex, limit, q.getInsertValues());
 	}
 
@@ -162,7 +161,8 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 			List<String> allKeywordsExceptBlank = this.getHibernateTemplate().find("SELECT k.keyword FROM Keyword AS k WHERE LENGTH(k.keyword) > 0");
 			return allKeywordsExceptBlank;
 		} else {
-			List<String> similarKeywords = this.getHibernateTemplate().find("SELECT k.keyword FROM Keyword  AS k WHERE k.keyword LIKE ?+' %'", keyword.getKeyword());
+			String likeKeyword = keyword.getKeyword() + " %";
+			List<String> similarKeywords = this.getHibernateTemplate().find("SELECT k.keyword FROM Keyword  AS k WHERE k.keyword LIKE ?", likeKeyword);
 			for(String k : similarKeywords) {
 				System.out.println("Similar keyword: " + k);
 			}
@@ -349,8 +349,10 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 		
 		if(keyword.getKeyword().length() > 0) {
 			q.appendWhereOrAnd();
+			String likeKeyword = keyword.getKeyword() + " %";
+			
 			q.append("(UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ?", keyword.getKeyword());
-			q.append("OR UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ? + ' %')", keyword.getKeyword());
+			q.append("OR UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ?)", likeKeyword);
 		}
 		
 		List<String> similarKeywords = getSimilarKeywords(keyword);
@@ -363,8 +365,10 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 				}
 				
 				String similarKeyword = similarKeywords.get(i);
+				String likeSimilarKeyword = similarKeyword + " %";
+				
 				q.append("NOT (UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ?", similarKeyword);
-				q.append("OR UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ? + ' %')", similarKeyword);
+				q.append("OR UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ?)", likeSimilarKeyword);
 				
 			}
 		}
