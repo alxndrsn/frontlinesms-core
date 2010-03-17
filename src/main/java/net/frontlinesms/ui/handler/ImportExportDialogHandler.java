@@ -18,6 +18,7 @@ import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.Message;
+import net.frontlinesms.data.domain.Message.Type;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordDao;
@@ -123,12 +124,24 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private static final String COMPONENT_BT_DO_EXPORT = "btDoExport";
 	
 //> STATIC CONSTANTS
-	/** Export entity type: {@link Contact} */
-	private static final String TYPE_CONTACT = "contacts";
-	/** Export entity type: {@link Message} */
-	private static final String TYPE_MESSAGE = "messages";
-	/** Export entity type: {@link Keyword} */
-	private static final String TYPE_KEYWORD = "keywords";
+	public enum EntityType {
+		/** Export entity type: {@link Contact} */
+		CONTACTS,
+		/** Export entity type: {@link Message} */
+		MESSAGES,
+		/** Export entity type: {@link Keyword} */
+		KEYWORDS;
+		
+		/**  */
+		public static EntityType getFromString(String typeName) {
+			for(EntityType type : values()) {
+				if(type.name().toLowerCase().equals(typeName)) {
+					return type;
+				}
+			}
+			throw new IllegalStateException("Unrecognized type: " + typeName);
+		}
+	}
 
 //> INSTANCE PROPERTIES
 	/** Logging object */
@@ -146,11 +159,13 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	
 	/** Dialog for gathering details of the export or import */
 	private Object wizardDialog;
+	/** Used to store the confirmation dialog while it is being displayed, so that we can remove it later. */
+	private Object confirmationDialog;
 
 	/** Marks whether we are importing or exporting.  <code>true</code> indicates export, <code>false</code> indicates import. */
 	private boolean export;
 	/** The type of object we are dealing with, one of {@link #TYPE_CONTACT}, {@link #TYPE_KEYWORD}, {@link #TYPE_MESSAGE}. */
-	private String type; // TODO can change this from String to Class for added safety
+	private EntityType type;
 	/** The objects we are exporting - a selection of thinlet components with attached {@link Contact}s, {@link Keyword}s or {@link Message}s */
 	private Object attachedObject;
 
@@ -158,9 +173,6 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	/**
 	 * Create a new instance of this controller.
 	 * @param uiController 
-	 * @param contactDao 
-	 * @param messageDao 
-	 * @param keywordDao 
 	 */
 	public ImportExportDialogHandler(UiGeneratorController uiController) {
 		this.uiController = uiController;
@@ -172,7 +184,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	
 //> ACCESSORS
 	/** @return The type of object we are dealing with, one of {@link #TYPE_CONTACT}, {@link #TYPE_KEYWORD}, {@link #TYPE_MESSAGE}. */
-	private String getType() {
+	private EntityType getType() {
 		return this.type;
 	}
 
@@ -183,7 +195,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	 * @param list The list to get selected items from.
 	 * @param type The desired type ({@link #TYPE_CONTACT} for Contacts, {@link #TYPE_MESSAGE} for Messages and {@link #TYPE_KEYWORD} for Keywords)
 	 */
-	public void showWizard(boolean export, Object list, String type){
+	public void showWizard(boolean export, Object list, EntityType type){
 		Object[] selected = uiController.getSelectedItems(list);
 		if (selected.length == 0) {
 			// If there are no highlighted items to export, don't do anything
@@ -199,7 +211,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	 * @param export 
 	 * @param type The desired type ({@link #TYPE_CONTACT} for Contacts, {@link #TYPE_MESSAGE} for Messages and {@link #TYPE_KEYWORD} for Keywords)
 	 */
-	public void showWizard(boolean export, String type){
+	public void showWizard(boolean export, EntityType type){
 		init(export, type, null);
 		_showWizard();
 	}
@@ -210,7 +222,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	 * @param type value for {@link #type}
 	 * @param attachedObject value for {@link #attachedObject}
 	 */
-	private void init(boolean export, String type, Object attachedObject) {
+	private void init(boolean export, EntityType type, Object attachedObject) {
 		this.export = export;
 		this.type = type;
 		this.attachedObject = attachedObject;
@@ -238,7 +250,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		
 		try {
 			// Do the import
-			if(getType().equals(TYPE_CONTACT)) {
+			if(type == EntityType.CONTACTS) {
 				CsvRowFormat rowFormat = getRowFormatForContact();
 				CsvImporter.importContacts(new File(dataPath), this.contactDao, rowFormat);
 			} else throw new IllegalStateException("Import is not supported for: " + getType());
@@ -268,7 +280,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		File csvFile = new File(dataPath);
 		if(csvFile.exists() && csvFile.isFile()) {
 			// show confirmation dialog
-			uiController.showConfirmationDialog("doExport('" + dataPath + "')",
+			this.confirmationDialog = uiController.showConfirmationDialog("doExport('" + dataPath + "')",
 					this, MESSAGE_CONFIRM_FILE_OVERWRITE);
 		} else {
 			doExport(dataPath);
@@ -276,19 +288,24 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	}
 	
 	public void doExport(String dataPath) {
+		if(this.confirmationDialog != null) {
+			uiController.remove(this.confirmationDialog);
+			this.confirmationDialog = null;
+		}
+		
 		try {
 			if (this.attachedObject != null) {
 				log.debug("Exporting selected objects...");
 				doExportSelected(wizardDialog, dataPath, (Object[])this.attachedObject);
-			} else if (getType().equals(TYPE_CONTACT)) {
+			} else if (type == EntityType.CONTACTS) {
 				//CONTACTS
 				log.debug("Exporting all contacts..");
 				exportContacts(this.contactDao.getAllContacts(), dataPath);
-			} else if (getType().equals(TYPE_MESSAGE)) {
+			} else if (type == EntityType.MESSAGES) {
 				//MESSAGES
 				log.debug("Exporting all messages..");
 				exportMessages(this.messageDao.getAllMessages(), dataPath);
-			} else if (getType().equals(TYPE_KEYWORD)) {
+			} else if (type == EntityType.KEYWORDS) {
 				//KEYWORDS
 				log.debug("Exporting all keywords..");
 				exportKeywords(this.keywordDao.getAllKeywords(), dataPath);
@@ -353,7 +370,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		//KEYWORDS
 		log.debug("Exporting all keywords..");
 		
-		int messageType = getMessageType();
+		Message.Type messageType = getMessageType();
 		CsvRowFormat rowFormat = getRowFormatForKeyword(messageType);
 		if (!rowFormat.hasMarkers()) {
 			uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_FIELD_SELECTED));
@@ -371,17 +388,17 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	 */
 	private String getWizardTitleI18nKey() {
 		if(this.export) {
-			if (getType().equals(TYPE_CONTACT)) {
+			if (type == EntityType.CONTACTS) {
 				return MESSAGE_EXPORTING_SELECTED_CONTACTS;
-			} else if (type.equals(TYPE_MESSAGE)) {
+			} else if (type == EntityType.MESSAGES) {
 				return MESSAGE_EXPORTING_SELECTED_MESSAGES;
 			} else {
 				return MESSAGE_EXPORTING_SELECTED_KEYWORDS;
 			}
 		} else {
-			if (getType().equals(TYPE_CONTACT)) {
+			if (type == EntityType.CONTACTS) {
 				return MESSAGE_IMPORTING_SELECTED_CONTACTS;
-			} else if (type.equals(TYPE_MESSAGE)) {
+			} else if (type == EntityType.MESSAGES) {
 				return MESSAGE_IMPORTING_SELECTED_MESSAGES;
 			} else {
 				return MESSAGE_IMPORTING_SELECTED_KEYWORDS;
@@ -393,13 +410,13 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private void _showWizard() {
 		// Load the correct export wizard pane
 		String uiFile;
-		if (getType().equals(TYPE_CONTACT)) {
+		if (type == EntityType.CONTACTS) {
 			uiFile = UI_FILE_OPTIONS_PANEL_CONTACT;
-		} else if (type.equals(TYPE_MESSAGE)) {
+		} else if (type == EntityType.MESSAGES) {
 			uiFile = UI_FILE_OPTIONS_PANEL_MESSAGE;
-		} else {
+		} else if(type == EntityType.KEYWORDS) {
 			uiFile = UI_FILE_OPTIONS_PANEL_KEYWORD;
-		}
+		} else throw new IllegalStateException("Unrecognized type: " + type);
 		
 		// Load the import/export wizard, and save it to the class reference
 		this.wizardDialog = uiController.loadComponentFromFile(this.export ? UI_FILE_EXPORT_WIZARD_FORM : UI_FILE_IMPORT_WIZARD_FORM, this);
@@ -440,11 +457,11 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	 */
 	private void doExportSelected(Object exportDialog, String filename, Object[] selected) throws IOException {
 		log.trace("ENTER");
-		if (getType().equals(TYPE_CONTACT)) {
+		if (type == EntityType.CONTACTS) {
 			//CONTACTS
 			log.debug("Exporting selected contacts...");
 			exportContacts(getSelected(Contact.class, selected), filename);
-		} else if (getType().equals(TYPE_MESSAGE)) {
+		} else if (type == EntityType.MESSAGES) {
 			//MESSAGES
 			log.debug("Exporting selected messages...");
 			exportMessages(getSelected(Message.class, selected), filename);
@@ -458,50 +475,43 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 
 	/**
 	 * Get the type of {@link Message} that has been selected to export.
-	 * @return {@link Message#TYPE_ALL}, {@link Message#TYPE_ALL}, {@link Message#TYPE_ALL} or -1
-	 * TODO why is this allowed to return -1?  Is this possible?
+	 * @return {@link Type#TYPE_ALL}, {@link Type#TYPE_ALL}, {@link Type#TYPE_ALL} or <code>null</code> if the user would not like any messages.
 	 */
-	private final int getMessageType() {
+	private final Message.Type getMessageType() {
 		boolean sent = isChecked(COMPONENT_CB_SENT);
 		boolean received = isChecked(COMPONENT_CB_RECEIVED);
 		
-		int type = -1;
-		if (sent && received) { 
-			type = Message.TYPE_ALL;
+		if (sent && received) {
+			return Type.TYPE_ALL;
 		} else if (sent) {
-			type = Message.TYPE_OUTBOUND;
+			return Type.TYPE_OUTBOUND;
 		} else if (received) {
-			type = Message.TYPE_RECEIVED;
-		}
-
-		if(log.isDebugEnabled()) log.debug("Message Type: " + type);
-		
-		return type;
+			return Type.TYPE_RECEIVED;
+		} else return null;
 	}
 	
 	/**
 	 * Creates an export row format for keywords.
-	 * @param type Type of {@link Message} to export, e.g. {@link Message#TYPE_RECEIVED}
+	 * @param type Type of {@link Message} to export, e.g. {@link Type#TYPE_RECEIVED}
 	 * @return The row format for exporting {@link Keyword}s to CSV
 	 */
-	private CsvRowFormat getRowFormatForKeyword(int type) {
+	private CsvRowFormat getRowFormatForKeyword(Message.Type type) {
 		CsvRowFormat rowFormat = new CsvRowFormat();
 		addMarker(rowFormat, CsvUtils.MARKER_KEYWORD_KEY, COMPONENT_CB_KEYWORD);
 		addMarker(rowFormat, CsvUtils.MARKER_KEYWORD_DESCRIPTION, COMPONENT_CB_DESCRIPTION);
 
-		if (type != -1) {
-			if (type == Message.TYPE_ALL) {
-				rowFormat.addMarker(CsvUtils.MARKER_MESSAGE_TYPE);
-			}
-			addMarker(rowFormat, CsvUtils.MARKER_MESSAGE_DATE, COMPONENT_CB_DATE);
-			addMarker(rowFormat, CsvUtils.MARKER_MESSAGE_CONTENT, COMPONENT_CB_CONTENT);
-			addMarker(rowFormat, CsvUtils.MARKER_SENDER_NUMBER, COMPONENT_CB_SENDER);
-			addMarker(rowFormat, CsvUtils.MARKER_RECIPIENT_NUMBER, COMPONENT_CB_RECIPIENT);
-			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NAME, COMPONENT_CB_CONTACT_NAME);
-			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE, COMPONENT_CB_CONTACT_OTHER_NUMBER);
-			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_EMAIL, COMPONENT_CB_CONTACT_EMAIL);
-			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NOTES, COMPONENT_CB_CONTACT_NOTES);
+		if (type == Type.TYPE_ALL) {
+			rowFormat.addMarker(CsvUtils.MARKER_MESSAGE_TYPE);
 		}
+		addMarker(rowFormat, CsvUtils.MARKER_MESSAGE_DATE, COMPONENT_CB_DATE);
+		addMarker(rowFormat, CsvUtils.MARKER_MESSAGE_CONTENT, COMPONENT_CB_CONTENT);
+		addMarker(rowFormat, CsvUtils.MARKER_SENDER_NUMBER, COMPONENT_CB_SENDER);
+		addMarker(rowFormat, CsvUtils.MARKER_RECIPIENT_NUMBER, COMPONENT_CB_RECIPIENT);
+		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NAME, COMPONENT_CB_CONTACT_NAME);
+		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE, COMPONENT_CB_CONTACT_OTHER_NUMBER);
+		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_EMAIL, COMPONENT_CB_CONTACT_EMAIL);
+		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NOTES, COMPONENT_CB_CONTACT_NOTES);
+	
 		return rowFormat;
 	}
 	

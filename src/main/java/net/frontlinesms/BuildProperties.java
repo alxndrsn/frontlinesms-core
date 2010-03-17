@@ -4,9 +4,6 @@
 package net.frontlinesms;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import net.frontlinesms.resources.ClasspathPropertySet;
 

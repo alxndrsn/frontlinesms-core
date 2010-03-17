@@ -6331,7 +6331,7 @@ public class Thinlet extends Container implements Runnable, Serializable, Thinle
 	/**
 	 * Sets the given property pair (key and value) for the component
 	 */
-	protected void setChoice(Object component, String key, String value) {
+	public void setChoice(Object component, String key, String value) {
 		Object[] definition = getDefinition(getClass(component), key, CHOICE);
 		String[] values = (String[]) definition[3];
 		if (setChoice(component, (String) definition[1],

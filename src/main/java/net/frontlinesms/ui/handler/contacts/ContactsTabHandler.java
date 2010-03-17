@@ -83,7 +83,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	/** Handler for paging of {@link #contactListComponent} */
 	private ComponentPagingHandler contactListPager;
 	/** String to filter the contacts by */
-	private String contactNameFilter;
+	private String contactFilter;
 
 	private final GroupSelecterPanel groupSelecter;
 
@@ -170,18 +170,8 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		if(selectedGroup == null) {
 			return PagedListDetails.EMPTY;
 		} else {
-			int totalItemCount = groupMembershipDao.getMemberCount(selectedGroup);
-			
-			// TODO fix filtering
-			
-	//		int totalItemCount = (this.contactNameFilter == null || this.contactNameFilter.length() == 0) 
-	//				? this.contactDao.getContactCount()
-	//				: this.contactDao.getContactsFilteredByNameCount(this.contactNameFilter);
-	//		
-	//		List<Contact> contacts = (this.contactNameFilter == null || this.contactNameFilter.length() == 0) 
-	//				? this.contactDao.getAllContacts(startIndex, limit)
-	//				: this.contactDao.getContactsFilteredByName(this.contactNameFilter, startIndex, limit);
-			List<Contact> contacts = groupMembershipDao.getMembers(selectedGroup, startIndex, limit);
+			int totalItemCount = groupMembershipDao.getFilteredMemberCount(selectedGroup, this.contactFilter);
+			List<Contact> contacts = groupMembershipDao.getFilteredMembers(selectedGroup, contactFilter, startIndex, limit);
 			Object[] listItems = toThinletComponents(contacts);
 			
 			return new PagedListDetails(totalItemCount, listItems);
@@ -341,7 +331,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 * @param contactFilter The new filter.
 	 */	
 	public void setContactFilter(String contactFilter) {
-		this.contactNameFilter = contactFilter;
+		this.contactFilter = contactFilter;
 	}
 
 	/**

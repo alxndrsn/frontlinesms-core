@@ -6,6 +6,7 @@ package net.frontlinesms.ui;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -280,7 +281,8 @@ class SetterCallingFileChooser extends FileChooser {
 		
 		try {
 			this.setMethod = eventHandler.getClass().getMethod(setMethodName, String.class);
-			assert(setMethod != null) : "";
+			assert(setMethod != null) : "Must provide a valid setMethod name.";
+			assert(!Modifier.isStatic(setMethod.getModifiers())) : "Set method must be an instance method.";
 		} catch (SecurityException ex) {
 			throw new AssertionError(ex.getMessage());
 		} catch (NoSuchMethodException ex) {
