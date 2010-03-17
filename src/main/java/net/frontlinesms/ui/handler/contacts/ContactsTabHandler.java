@@ -122,8 +122,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 */
 	public void groupSelectionChanged(Group selectedGroup) {
 		if(LOG.isTraceEnabled()) System.out.println("Group selected: " + selectedGroup);
-		this.ui.setText(this.ui.find(COMPONENT_CONTACT_MANAGER_CONTACT_FILTER), "");
-
+		
 		Group g = this.groupSelecter.getSelectedGroup();
 		String contactsPanelTitle;
 		boolean enableDeleteButton;
