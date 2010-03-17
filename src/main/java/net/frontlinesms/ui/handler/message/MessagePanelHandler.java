@@ -289,6 +289,8 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS_DISABLED);
 		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS_DISABLED);
 		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(0));
+		uiController.setVisible(uiController.find(this.messagePanel, COMPONENT_LB_TOO_MANY_MESSAGES), false);
+
 		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
 		if (sendButton != null) uiController.setEnabled(sendButton, false);
 	}
