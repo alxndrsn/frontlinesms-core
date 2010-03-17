@@ -60,6 +60,16 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 		Contact xuxa = createContact("Xuxa", "+111555000");
 		Contact xavier = createContact("Xavier", "0111555000");
 
+		// Test null filter
+		testFiltering(getRootGroup(), null,
+				alice, arnold, brigitte, brian, caroline, charles, xuxa, xavier);
+		testFiltering(parent, null,
+				alice, arnold, brigitte, brian, caroline, charles);
+		testFiltering(child1, null,
+				alice, arnold);
+		testFiltering(child2, null,
+				brigitte, brian);
+
 		// Test empty filter
 		testFiltering(getRootGroup(), "",
 				alice, arnold, brigitte, brian, caroline, charles, xuxa, xavier);
