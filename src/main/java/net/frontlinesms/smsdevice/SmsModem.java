@@ -67,10 +67,7 @@ public class SmsModem extends Thread implements SmsDevice {
 	private static Logger LOG = Utils.getLogger(SmsModem.class);
 		
 //> PROPERTIES
-	private static HashMap<String, String> cathandlerAliases = initAliasesFromFile(ResourceUtils.getConfigDirectoryPath() + "conf/CATHandlerAliases.txt");
-	private static HashMap<String, String> manufacturerAliases = initAliasesFromFile(ResourceUtils.getConfigDirectoryPath() + "conf/manufacturerAliases.txt");
-	private static HashMap<String, String> modelAliases = initAliasesFromFile(ResourceUtils.getConfigDirectoryPath() + "conf/modelAliases.txt");
-
+	
 	/**
 	 * Watchdog to monitor when a phone handler has lost communication with the phone
 	 */
@@ -550,19 +547,19 @@ public class SmsModem extends Thread implements SmsDevice {
 
 	private final void setManufacturer(String manufacturer) {
 		LOG.debug("Manufacturer before translation [" + manufacturer + "]");
-		this.manufacturer = translateManufacturer(manufacturer);
+		this.manufacturer = CatHandlerAliasMatcher.getInstance().translateManufacturer(manufacturer);
 		LOG.debug("Manufacturer after translation [" + this.manufacturer + "]");
 	}
 
 	private final void setModel(String model) {
 		LOG.debug("Model before translation [" + model + "]");
-		this.model = translateModel(manufacturer, model);
+		this.model = CatHandlerAliasMatcher.getInstance().translateModel(manufacturer, model);
 		LOG.debug("Model after translation [" + this.model + "]");
 		setPreferredCatHandler();
 	}
 
 	private final void setPreferredCatHandler() {
-		this.preferredCATHandler = translateCATHandlerModel(manufacturer, model);
+		this.preferredCATHandler = CatHandlerAliasMatcher.getInstance().translateCATHandlerModel(manufacturer, model);
 		LOG.debug("Preferred CAT Handler [" + this.preferredCATHandler + "]");
 	}
 
@@ -1010,74 +1007,6 @@ public class SmsModem extends Thread implements SmsDevice {
 	}
 	
 //> STATIC HELPER METHODS
-	/**
-	 * Loads a translation map from a file of the following format: 
-	 *	Split the line.  It should be of the following format:
-	 *	<officialName><whiteSpace><alternateName1>,<alternateName2>,...,<alternateNameN>
-	 * TODO this kind of thing should probably be done by the manager, or even at the UI layer.
-	 * @param fileName name of the file to load the aliases from
-	 * @return
-	 */
-	private static final HashMap<String, String> initAliasesFromFile(String filename) {
-		String[] fileContents = ResourceUtils.getUsefulLines(filename);
-		
-		// map from alternate names to offical names.
-		HashMap<String, String> map = new HashMap<String, String>();
-		for(String line : fileContents) {
-			// Split the line.  It should be of the following format:
-			// 	<officialName>		<alternateName1>,<alternateName2>,...,<alternateNameN>
-			String[] words = line.split("\\s", 2);
-			String officialName = words[0];
-			map.put(officialName.toLowerCase(), officialName);
-			if (words.length > 1) {
-				words = words[1].split(",");
-				for (String word : words) {
-					map.put(word.trim().toLowerCase(), officialName);
-				}
-			}
-		}
-		
-		return map;
-	}
+	
 
-	/**
-	 * Attempts to get a mapping from a particular make and model to a CATHandler
-	 * 
-	 * @param manufacturer
-	 * @param model 
-	 * @return
-	 */
-	private static final String translateCATHandlerModel(String manufacturer, String model) {
-		String lookupString = manufacturer.toLowerCase() + "_" + model.toLowerCase();
-		String catHandler = cathandlerAliases.get(lookupString);
-		return catHandler;
-	}
-
-	/**
-	 * Translates the manufacture to a user-friendly string.
-	 * 
-	 * @param manufacturer
-	 * @return
-	 */
-	private static final String translateManufacturer(String manufacturer) {
-		manufacturer = manufacturer.trim();
-		String alias = manufacturerAliases.get(manufacturer.toLowerCase());
-		if(alias == null) return manufacturer;
-		else return alias;
-	}
-
-	/**
-	 * Translates the model to a user-friendly string.
-	 * 
-	 * @param model
-	 * @return
-	 */
-	private static final String translateModel(String manufacturer, String model) {
-		model = model.trim();
-		model = model.replace("\\s", "");
-		model = model.replace(manufacturer, "");
-		String alias = modelAliases.get(model.toLowerCase());
-		if (alias == null) return model;
-		else return alias;
-	}
 }
