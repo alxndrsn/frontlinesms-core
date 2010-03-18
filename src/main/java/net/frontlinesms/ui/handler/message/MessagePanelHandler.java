@@ -71,6 +71,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		assert(this.messagePanel == null) : "This has already been initialised.";
 		this.messagePanel = uiController.loadComponentFromFile(UI_FILE_MESSAGE_PANEL, this);
 		Object 	pnRecipient 		= uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_PN_MESSAGE_RECIPIENT),
+				pnMessage	 		= uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_PN_MESSAGE),
 				lbTooManyMessages 	= uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_LB_TOO_MANY_MESSAGES);
 		uiController.setVisible(pnRecipient, shouldDisplayRecipientField);
 		uiController.setVisible(lbTooManyMessages, false);
