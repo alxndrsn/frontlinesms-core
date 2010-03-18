@@ -29,10 +29,10 @@ import org.smslib.CService;
 /**
  * CAT Handler for Huawei modems.
  */
-public class CATHandler_huawei extends CATHandler
+public class CATHandler_Huawei extends CATHandler
 {
 	/** @see CATHandler#CATHandler(CSerialDriver, Logger, CService) */
-	public CATHandler_huawei (CSerialDriver serialDriver, Logger log, CService srv) {
+	public CATHandler_Huawei (CSerialDriver serialDriver, Logger log, CService srv) {
 		super(serialDriver, log, srv);
 	}
 

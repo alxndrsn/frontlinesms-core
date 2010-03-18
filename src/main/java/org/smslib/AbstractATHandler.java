@@ -240,7 +240,7 @@ abstract public class AbstractATHandler {
 	@SuppressWarnings("unchecked")
 	private static final Class[] HANDLERS = {
 		CATHandler.class,
-		CATHandler_huawei.class,
+		CATHandler_Huawei.class,
 		CATHandler_Motorola_RAZRV3x.class,
 		CATHandler_Nokia_S40_3ed.class,
 		CATHandler_Samsung.class,
