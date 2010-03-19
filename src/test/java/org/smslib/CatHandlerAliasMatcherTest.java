@@ -4,9 +4,7 @@ import junit.framework.TestCase;
 import net.frontlinesms.smsdevice.CatHandlerAliasMatcher;
 
 /**
- * 
  * @author @author Morgan Belkadi <morgan@frontlinesms.com>
- *
  */
 
 public class CatHandlerAliasMatcherTest extends TestCase {
