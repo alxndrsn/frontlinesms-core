@@ -16,8 +16,8 @@
 	
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
 		<property name="driverClass" value="com.mysql.jdbc.Driver"/>
-		<property name="url" value="jdbc:mysql://localhost:3306/frontlinesms"/>
-		<property name="username" value="frontline"/>
-		<property name="password" value="secret"/>
+		<property name="url" value="jdbc:mysql://${server.name}:${server.port}/${database.name}"/>
+		<property name="username" value="${username}"/>
+		<property name="password" value="${password}"/>
 	</bean>
 </beans>

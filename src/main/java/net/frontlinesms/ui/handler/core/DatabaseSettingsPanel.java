@@ -33,6 +33,8 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 	private static final String COMPONENT_SETTINGS_PANEL = "pnSettings";
 	/** UI Component: cancel button */
 	private static final String COMPONENT_CANCEL_BUTTON = "btCancel";
+	/** The constant property key for database passwords */
+	private static final String PASSWORD_PROPERTY_KEY = "password";
 
 //> INSTANCE PROPERTIES
 	/** The settings currently selected in the combobox */
@@ -97,9 +99,6 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 	}
 
 //> INSTANCE HELPER METHODS
-	private void setSelectedConfigFile(DatabaseSettings settings) {
-		this.selectedSettings = settings;
-	}
 	
 //> UI HELPER METHODS
 	/** Refresh the panel containing settings specific to the currently-selected {@link DatabaseSettings}. */
@@ -113,7 +112,10 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 			// TODO would be nice to set icons for the different settings
 			ui.add(settingsPanel, ui.createLabel(key));
 			// TODO may want to set the types of these, e.g. password, number etc.
-			ui.add(settingsPanel, ui.createTextfield(key, this.selectedSettings.getPropertyValue(key)));
+			if (key.equals(PASSWORD_PROPERTY_KEY))
+				ui.add(settingsPanel, ui.createPasswordfield(key, this.selectedSettings.getPropertyValue(key)));
+			else
+				ui.add(settingsPanel, ui.createTextfield(key, this.selectedSettings.getPropertyValue(key)));
 		}
 	}
 
