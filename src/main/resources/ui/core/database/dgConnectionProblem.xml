@@ -2,8 +2,8 @@
 <panel bottom="10" columns="1" gap="10" left="10" right="10" top="10" halign="center">
     <panel columns="2" gap="6" weightx="1" halign="center">
         <label colspan="2" text="There was a problem connecting to the database." icon="/icons/help.png"/>
-        <button text="Retry Connection" icon="/icons/refresh.png" action="reconnect"/>
-        <button text="Change Settings" icon="/icons/right.png" action="showSettingsPage"/>
+        <button text="i18n.common.db.retry" icon="/icons/refresh.png" action="reconnect"/>
+        <button text="i18n.common.db.change.settings" icon="/icons/right.png" action="showSettingsPage"/>
     </panel>
     <panel columns="1" gap="6" weightx="2">
     	<label text="i18n.common.error" icon="/icons/error.png"/>
