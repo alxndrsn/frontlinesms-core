@@ -3,14 +3,12 @@
  */
 package net.frontlinesms.ui.handler.core;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.frontlinesms.AppProperties;
 import net.frontlinesms.ui.DatabaseSettings;
 import net.frontlinesms.ui.FrontlineUI;
-import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BasePanelHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
@@ -39,6 +37,8 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 //> INSTANCE PROPERTIES
 	/** The settings currently selected in the combobox */
 	private DatabaseSettings selectedSettings;
+	/** A boolean saying whether or not the application must restart after the changes */
+	private boolean needToRestartApplication;
 	
 	/** Dialog UI Component.  This should only be used if {@link #showAsDialog()} is called, and then should only be used by {@link #removeDialog()}. */
 	private Object dialogComponent;
@@ -218,7 +218,8 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 		// must restart FrontlineSMS for the changes to take effect.  In a perfect world,
 		// we would AUTOMATICALLY restart here, but this is not quite trivial, so is not
 		// implemented at this stage.
-		ui.alert("Settings saved.  Please restart FrontlineSMS immediately."); // FIXME i18n
+		if (needToRestartApplication)
+			ui.alert("Settings saved.  Please restart FrontlineSMS immediately."); // FIXME i18n
 		
 		removeDialog();	
 	}
@@ -227,8 +228,9 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 	 * Show this panel as a dialog.  The dialog will be removed by default by the removeDialog method.
 	 * @param titleI18nKey
 	 */
-	public void showAsDialog() {
+	public void showAsDialog(boolean needToRestartApplication) {
 		this.settingsChangedCallbackListener = this;
+		this.needToRestartApplication = needToRestartApplication;
 		
 		Object dialogComponent = ui.createDialog(InternationalisationUtils.getI18NString(I18N_KEY_DATABASE_CONFIG));
 		ui.add(dialogComponent, this.getPanelComponent());
@@ -251,7 +253,7 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 	
 	public void openNewDialog(String selectedPath) {
 		DatabaseSettingsPanel databaseSettings = DatabaseSettingsPanel.createNew(ui, selectedPath);
-		databaseSettings.showAsDialog();
+		databaseSettings.showAsDialog(needToRestartApplication);
 	}
 }
 

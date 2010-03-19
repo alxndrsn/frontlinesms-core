@@ -5,4 +5,8 @@
         <button text="Retry Connection" icon="/icons/refresh.png" action="reconnect"/>
         <button text="Change Settings" icon="/icons/right.png" action="showSettingsPage"/>
     </panel>
+    <panel columns="1" gap="6" weightx="2">
+    	<label text="i18n.common.error" icon="/icons/error.png"/>
+    	<textarea rows="10" columns="49" name="textErrorMessage" editable="false"/>
+    </panel>
 </panel>

@@ -141,6 +141,7 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_PROPERTIES = "common.properties";
 	public static final String COMMON_TYPE = "common.type";
 	public static final String COMMON_DATABASE_CONFIG = "common.database.config";
+	public static final String COMMON_DATABASE_CONNECTION_PROBLEM = "common.db.connection.problem";
 	public static final String COMMON_CONNECTION_FAILED = "common.connection.failed";
 	public static final String COMMON_CONNECTION_OK = "common.connection.ok";
 	public static final String COMMON_DATABASE_CONNECTION_FAILED = "common.db.connection.failed";
