@@ -18,6 +18,7 @@ import net.frontlinesms.junit.HibernateTestCase;
 
 /**
  * @author Alex Anderson <alex@frontlinesms.com>
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 	/** The dao for managing group memberships. */

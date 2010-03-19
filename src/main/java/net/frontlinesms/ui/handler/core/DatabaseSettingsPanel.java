@@ -16,6 +16,7 @@ import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 /**
  * Thinlet UI Component event handler for displaying and modifying database settings.
  * @author aga
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 @TextResourceKeyOwner
 public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseSettingsChangedCallbackListener {

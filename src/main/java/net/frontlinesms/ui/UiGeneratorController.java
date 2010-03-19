@@ -94,10 +94,8 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.*;
  * We're now in the process of separating this class into smaller classes which control separate,
  * modular parts of the UI, e.g. the {@link HomeTabHandler}.
  * 
- * @author Alex Anderson 
- * <li> alex(at)masabi(dot)com
- * @author Carlos Eduardo Genz
- * <li> kadu(at)masabi(dot)com
+ * @author Alex Anderson  alex(at)masabi(dot)com
+ * @author Carlos Eduardo Genz kadu(at)masabi(dot)com
  */
 @SuppressWarnings("serial")
 public class UiGeneratorController extends FrontlineUI implements EmailListener, UIListener, SingleGroupSelecterPanelOwner {

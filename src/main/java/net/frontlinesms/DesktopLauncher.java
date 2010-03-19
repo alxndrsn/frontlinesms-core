@@ -42,7 +42,6 @@ import thinlet.Thinlet;
  * control the service.  If any unhandled exceptions occur either starting the
  * FrontlineSMS service or opening the GUI, they will be diaplyed in an AWT window
  * so that they can easily be reported back to the development team.
- * 
  * N.B. Error messages CANNOT be i18ned in this class, as there may have been an error
  * loading language packs.
  * 

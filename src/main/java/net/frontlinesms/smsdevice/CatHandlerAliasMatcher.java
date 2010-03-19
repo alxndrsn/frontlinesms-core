@@ -13,7 +13,6 @@ public class CatHandlerAliasMatcher {
 									manufacturerAliases,
 									modelAliases;
 
-
 	/** Create a new Cat Handler Alias Matcher. */
 	private CatHandlerAliasMatcher() {
 		super();

@@ -3,6 +3,12 @@ package org.smslib;
 import junit.framework.TestCase;
 import net.frontlinesms.smsdevice.CatHandlerAliasMatcher;
 
+/**
+ * 
+ * @author @author Morgan Belkadi <morgan@frontlinesms.com>
+ *
+ */
+
 public class CatHandlerAliasMatcherTest extends TestCase {
 	/**
 	 * Test parsing of AT+CGMI responses in the {@link CService} class.

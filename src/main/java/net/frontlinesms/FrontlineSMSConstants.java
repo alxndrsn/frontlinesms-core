@@ -27,6 +27,7 @@ import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 		"SENTENCE_", "SMS_DEVICE_STATUS_", "SMS_MODEM_STATUS_", "TOOLTIP_",
 		// Those following are individual keys, rather than actual prefixes
 		"MONTH_KEYS", "UNKNOWN_NAME", "UNKNOWN_NOTES"})
+		
 public final class FrontlineSMSConstants {
 	/** String for displaying the version of the application.  This has 1 substitution variable. */
 	public static final String I18N_APP_VERSION = "application.version";

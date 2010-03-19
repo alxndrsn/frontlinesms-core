@@ -20,7 +20,6 @@ import net.frontlinesms.data.repository.GroupMembershipDao;
 
 /**
  * @author aga
- *
  */
 public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembership> implements GroupMembershipDao {
 

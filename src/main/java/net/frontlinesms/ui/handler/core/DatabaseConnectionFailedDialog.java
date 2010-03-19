@@ -30,7 +30,6 @@ public class DatabaseConnectionFailedDialog extends FrontlineUI implements Datab
 	private final Object LOCK = new Object();
 	/** For {@link #acq} to check if it should keep blocking. */
 	private boolean keepBlocking;
-	private Object dialogComponent;
 	
 //> CONSTRUCTORS
 	/** private constructor to enforce use of factories */
@@ -75,11 +74,7 @@ public class DatabaseConnectionFailedDialog extends FrontlineUI implements Datab
 	public void showSettingsPage() {
 		DatabaseSettingsPanel settingsPanel = DatabaseSettingsPanel.createNew(this, null);
 		settingsPanel.setCancelEnabled(false);
-		/*
-		settingsPanel.setSettingsChangedCallbackListener(this);
-		this.removeAll(dialogComponent);
-		this.add(dialogComponent, settingsPanel.getPanelComponent());
-		*/
+
 		boolean needToRestartApplication = false;
 		settingsPanel.showAsDialog(needToRestartApplication);
 	}
@@ -95,7 +90,6 @@ public class DatabaseConnectionFailedDialog extends FrontlineUI implements Datab
 		// Display the UI for re-attempting connection
 		DatabaseConnectionFailedDialog ui = new DatabaseConnectionFailedDialog();
 		Object problemDialog = ui.loadComponentFromFile(UI_FILE_CONNECTION_PROBLEM_DIALOG);
-		ui.dialogComponent = problemDialog;
 		ui.setText(ui.find(problemDialog, COMPONENT_DATABASE_PROBLEM_TEXT_ERROR_MESSAGE), ex.getMessage());
 		
 		// TODO show details of the exception
