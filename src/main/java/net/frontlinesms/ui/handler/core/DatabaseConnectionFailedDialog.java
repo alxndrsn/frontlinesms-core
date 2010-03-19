@@ -6,7 +6,6 @@ package net.frontlinesms.ui.handler.core;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_DATABASE_CONNECTION_PROBLEM;
 
 import thinlet.FrameLauncher;
-import net.frontlinesms.ErrorUtils;
 import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
