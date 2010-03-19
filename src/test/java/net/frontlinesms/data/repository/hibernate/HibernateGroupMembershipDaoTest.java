@@ -123,6 +123,88 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 		testFiltering(child2, "xuxa");
 	}
 	
+	public void testDistinctFiltering() throws DuplicateKeyException {
+		// Create the groups
+		Group parent = createGroup("parent");
+		Group child1 = createGroup(parent, "child1");
+		Group child2 = createGroup(parent, "child2");
+
+		// Create the contacts
+		Contact alice = createContact("Alice", "+123456789", child1);
+		Contact arnold = createContact("Arnold", "0123456789", child1);
+		Contact brigitte = createContact("Brigitte", "+111555999", child2);
+		Contact brian = createContact("Brian", "0111555999", child2);
+		Contact caroline = createContact("Caroline", "+987654321", parent);
+		Contact charles = createContact("Charles", "0987654321", parent);
+		Contact xuxa = createContact("Xuxa", "+111555000");
+		Contact xavier = createContact("Xavier", "0111555000");
+		
+		dao.addMember(child2, alice);
+		dao.addMember(child1, brian);
+
+		// Test null filter
+		testFiltering(getRootGroup(), null,
+				alice, arnold, brigitte, brian, caroline, charles, xuxa, xavier);
+		testFiltering(parent, null,
+				alice, arnold, brigitte, brian, caroline, charles);
+		testFiltering(child1, null,
+				alice, arnold, brian);
+		testFiltering(child2, null,
+				brigitte, brian, alice);
+
+		// Test empty filter
+		testFiltering(getRootGroup(), "",
+				alice, arnold, brigitte, brian, caroline, charles, xuxa, xavier);
+		testFiltering(parent, "",
+				alice, arnold, brigitte, brian, caroline, charles);
+		testFiltering(child1, "",
+				alice, arnold, brian);
+		testFiltering(child2, "",
+				brigitte, brian, alice);
+		
+		// Test filtering by phone number
+		testFiltering(getRootGroup(), "0",
+				arnold, brian, charles, xuxa, xavier);
+		testFiltering(parent, "0",
+				arnold, brian, charles);
+		testFiltering(child1, "0",
+				arnold, brian);
+		testFiltering(child2, "0",
+				brian);
+		
+		testFiltering(getRootGroup(), "123",
+				alice, arnold);
+		testFiltering(parent, "123",
+				alice, arnold);
+		testFiltering(child1, "123",
+				alice, arnold);
+		testFiltering(child2, "123", alice);
+		
+		// Test filtering by name
+		testFiltering(getRootGroup(), "a",
+				alice, arnold, brian, caroline, charles, xuxa, xavier);
+		testFiltering(parent, "a",
+				alice, arnold, brian, caroline, charles);
+		testFiltering(child1, "a",
+				alice, arnold, brian);
+		testFiltering(child2, "a",
+				brian, alice);
+
+		testFiltering(getRootGroup(), "li",
+				alice, caroline);
+		testFiltering(parent, "li",
+				alice, caroline);
+		testFiltering(child1, "li",
+				alice);
+		testFiltering(child2, "li", alice);
+
+		testFiltering(getRootGroup(), "xuxa", 
+				xuxa);
+		testFiltering(parent, "xuxa");
+		testFiltering(child1, "xuxa");
+		testFiltering(child2, "xuxa");
+	}
+	
 	private void testFiltering(Group group, String filterString, Contact... expectedContacts) {
 		assertEquals(expectedContacts.length, this.dao.getFilteredMemberCount(group, filterString));
 		
@@ -146,6 +228,8 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 			fail("Expected results where not found in retrieved results: " + missingContacts.substring(2));
 		}
 	}
+	
+	
 	
 	public void testSubgroups() throws DuplicateKeyException {
 		// Create the groups

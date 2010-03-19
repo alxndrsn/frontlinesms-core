@@ -44,7 +44,7 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 	/** @see GroupMembershipDao#getActiveMembers(Group) */
 	public List<Contact> getActiveMembers(Group group) {
 		if(group.isRoot()) {
-			String queryString = "SELECT c FROM Contact AS c WHERE c.active=TRUE";
+			String queryString = "SELECT DISTINCT c FROM Contact AS c WHERE c.active=TRUE";
 			return getList(Contact.class, queryString);
 		} else {
 			String queryString = "SELECT DISTINCT mem.contact FROM GroupMembership AS mem, Contact AS c WHERE c.active=TRUE AND (mem.group=? OR mem.group.path LIKE ?)";
@@ -95,10 +95,10 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 	public List<Contact> getFilteredMembers(final Group group, String contactFilterString) {
 		contactFilterString = getMemberFilterLikeString(contactFilterString);
 		if(group.isRoot()) {
-			String queryString = "SELECT c FROM Contact AS c WHERE LOWER(c.name) LIKE LOWER(?) OR LOWER(c.phoneNumber) LIKE LOWER(?)";
+			String queryString = "SELECT DISTINCT c FROM Contact AS c WHERE LOWER(c.name) LIKE LOWER(?) OR LOWER(c.phoneNumber) LIKE LOWER(?)";
 			return getList(Contact.class, queryString, contactFilterString, contactFilterString);
 		} else {
-			String queryString = "SELECT mem.contact FROM GroupMembership AS mem WHERE " +
+			String queryString = "SELECT DISTINCT mem.contact FROM GroupMembership AS mem WHERE " +
 					"(mem.group=? OR mem.group.path LIKE ?)" +
 					" AND (LOWER(mem.contact.name) LIKE LOWER(?) OR LOWER(mem.contact.phoneNumber) LIKE LOWER(?))";
 			String childPath = group.getPath() + Group.PATH_SEPARATOR + "%";
