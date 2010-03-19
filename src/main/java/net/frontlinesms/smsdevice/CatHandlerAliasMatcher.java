@@ -1,7 +1,6 @@
 package net.frontlinesms.smsdevice;
 
 import java.util.HashMap;
-
 import net.frontlinesms.resources.ResourceUtils;
 
 
