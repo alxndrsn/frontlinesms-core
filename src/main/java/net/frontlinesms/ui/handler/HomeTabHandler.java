@@ -27,6 +27,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
 /**
  * Event handler for the Home tab and associated dialogs
  * @author Alex
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 public class HomeTabHandler extends BaseTabHandler {
 //> STATIC CONSTANTS
