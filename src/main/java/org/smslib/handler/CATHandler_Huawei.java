@@ -27,6 +27,7 @@ import org.smslib.CSerialDriver;
 import org.smslib.CService;
 
 /**
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  * CAT Handler for Huawei modems.
  */
 public class CATHandler_Huawei extends CATHandler
