@@ -27,7 +27,7 @@
 	        <panel name="pnMessageList" columns="2" gap="9" left="9" right="9">
 	            <panel colspan="2" gap="8" weightx="1">
 	                <checkbox action="toggleMessageListOptions(this" icon="/icons/sms_receive.png" name="receivedMessagesToggle" selected="true" text="i18n.common.received"/>
-	                <checkbox action="toggleMessageListOptions(this)" icon="/icons/sms_send.png" name="sentMessagesToggle" selected="true" text="i18n.common.sent"/>
+	                <checkbox action="toggleMessageListOptions(this)" icon="/icons/sms_send.png" name="sentMessagesToggle" selected="true" text="i18n.common.sent.checkbox"/>
 	                <panel halign="right" weightx="1" gap="10">
 		                <label icon="/icons/date_start.png" text="i18n.common.from"/>
 		                <panel>
