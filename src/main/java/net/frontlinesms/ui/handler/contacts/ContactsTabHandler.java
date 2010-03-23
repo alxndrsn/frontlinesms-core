@@ -427,6 +427,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	/** Removes the selected contacts of the supplied contact list component. */
 	public void deleteSelectedContacts() {
 		LOG.trace("ENTER");
+		Group selectedGroup = this.groupSelecter.getSelectedGroup();
 		this.ui.removeConfirmationDialog();
 		this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_REMOVING_CONTACTS));
 		final Object[] selected = this.ui.getSelectedItems(contactListComponent);
@@ -437,6 +438,8 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		}
 		ui.alert(InternationalisationUtils.getI18NString(MESSAGE_CONTACTS_DELETED));
 		refresh();
+		this.groupSelecter.selectGroup(selectedGroup);
+		
 		LOG.trace("EXIT");
 	}
 
