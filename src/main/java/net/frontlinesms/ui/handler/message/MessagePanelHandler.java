@@ -212,7 +212,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		
 		if (messageLength > totalLengthAllowed) {
 			remaining = 0;
-			numberOfMsgs = (int)Math.ceil(messageLength / multipartMessageCharacterLimit) + 1;
+			numberOfMsgs = (int)Math.ceil((double)messageLength / (double)multipartMessageCharacterLimit) + 1;
 			costEstimate = 0;
 			
 			uiController.setVisible(lbTooManyMessages, true);

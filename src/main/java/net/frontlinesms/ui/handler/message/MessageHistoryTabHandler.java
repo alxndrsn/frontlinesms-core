@@ -422,7 +422,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			newEnd = InternationalisationUtils.parseDate(tfEndDateValue).getTime() + MILLIS_PER_DAY;
 		} catch (ParseException ex) {}
 		
-		if (newStart != messageHistoryStart || newEnd != messageHistoryEnd) {
+		if (newStart != null && newEnd != null && (!newStart.equals(messageHistoryStart) || !newEnd.equals(messageHistoryEnd))) {
 			messageHistoryStart = newStart;
 			messageHistoryEnd = newEnd;
 			updateMessageList();
