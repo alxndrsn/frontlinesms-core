@@ -27,6 +27,7 @@ import serial.*;
 import net.frontlinesms.CommUtils;
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.domain.Message;
+import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
 
@@ -88,8 +89,10 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 	private boolean running;	
 	/** If set TRUE, then thread will automatically try to connect to newly-detected devices. */ 
 	private boolean autoConnectToNewPhones;
-	/** Signals to thread that it should search the serial ports for connected devices. */
 	private boolean refreshPhoneList;
+	/** Data Access Object for {@link Message}s */
+	private MessageDao messageDao;
+
 
 	/**
 	 * Set containing all serial numbers of discovered phones.  Necessary because bluetooth/USB
@@ -115,6 +118,10 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 	public void setSmsListener(SmsListener smsListener) {
 		this.smsListener = smsListener;
 	}
+	
+	public void setMessageDao(MessageDao messageDao) {
+		this.messageDao = messageDao;
+	}
 
 	public void run() {
 		LOG.trace("ENTER");
@@ -125,7 +132,7 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 			// Individual phones should sleep, so there's no need to do this here!(?)  Here's
 			// a token pause in case things lock up / to stop this thread eating the CPU for
 			// breakfast.
-			Utils.sleep_ignoreInterrupts(10);
+			Utils.sleep_ignoreInterrupts(1000);
 		}
 		LOG.trace("EXIT");
 	}
@@ -482,6 +489,7 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 	}
 
 //> SMS DISPATCH METHODS
+	
 	/** Dispatch all messages in {@link #gsm7bitOutbox} to suitable {@link SmsDevice}s */
 	private void dispatchGsm7bitTextSms() {
 		List<Message> messages = removeAll(this.gsm7bitOutbox);
@@ -516,10 +524,31 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 			} else {
 				// There are no available SMS Internet Services, so dispatch to SmsModems
 				List<SmsModem> sendingModems = getSmsModemsForSending(messageType);
+				int i = sendingModems.size();
 				if(sendingModems.size() > 0) {
 					dispatchSms(sendingModems, messages);
+				} else {
+					// The messages cannot be sent
+					// We put them back in their outbox 
+					getOutboxFromType(messageType).addAll(messages);
 				}
 			}		
+		}
+	}
+	
+	/**
+	 * 
+	 * @param messageType The {@link MessageType}
+	 * @return The outbox corresponding to the {@link MessageType}
+	 */
+	private ConcurrentLinkedQueue<Message> getOutboxFromType(MessageType messageType) {
+		switch (messageType) {
+		case BINARY:
+			return binOutbox;
+		case UCS2_TEXT:
+			return ucs2Outbox;
+		default:
+			return gsm7bitOutbox;
 		}
 	}
 
@@ -535,6 +564,8 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 			SmsDevice device = devices.get(++messageIndex % deviceCount);
 			// Presumably the device will complain somehow if it is no longer connected
 			// etc.  TODO we should actually check what happens!
+			//m.setStatus(Message.STATUS_PENDING);
+			//messageDao.updateMessage(m);
 			device.sendSMS(m);
 			outgoingMessageEvent(device, m);
 		}
