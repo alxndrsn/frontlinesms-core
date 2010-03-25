@@ -27,7 +27,6 @@ import serial.*;
 import net.frontlinesms.CommUtils;
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.domain.Message;
-import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
 
@@ -518,7 +517,6 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 			} else {
 				// There are no available SMS Internet Services, so dispatch to SmsModems
 				List<SmsModem> sendingModems = getSmsModemsForSending(messageType);
-				int i = sendingModems.size();
 				if(sendingModems.size() > 0) {
 					dispatchSms(sendingModems, messages);
 				} else {
