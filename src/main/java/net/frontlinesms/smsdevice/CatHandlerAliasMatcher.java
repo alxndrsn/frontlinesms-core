@@ -13,13 +13,17 @@ public class CatHandlerAliasMatcher {
 									manufacturerAliases,
 									modelAliases;
 
+	public void initAliases(String resourcesDirectory) {
+		cathandlerAliases = initAliasesFromFile(resourcesDirectory + "conf/CATHandlerAliases.txt");
+		manufacturerAliases = initAliasesFromFile(resourcesDirectory + "conf/manufacturerAliases.txt");
+		modelAliases = initAliasesFromFile(resourcesDirectory + "conf/modelAliases.txt");
+	}
+
 	/** Create a new Cat Handler Alias Matcher. */
 	private CatHandlerAliasMatcher() {
 		super();
 		
-		cathandlerAliases = initAliasesFromFile(ResourceUtils.getConfigDirectoryPath() + "conf/CATHandlerAliases.txt");
-		manufacturerAliases = initAliasesFromFile(ResourceUtils.getConfigDirectoryPath() + "conf/manufacturerAliases.txt");
-		modelAliases = initAliasesFromFile(ResourceUtils.getConfigDirectoryPath() + "conf/modelAliases.txt");
+		this.initAliases (ResourceUtils.getConfigDirectoryPath());
 	}
 	
 	/**

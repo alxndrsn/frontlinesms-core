@@ -28,6 +28,8 @@ public class CatHandlerAliasMatcherTest extends TestCase {
 	 * @param expectedManufacturer The manufacturer string that we expect the CatHandlerAliasMatcher to return.
 	 */
 	private void testTranslateManufacturer(String manufacturer, String expectedManufacturer) {
+		// We first set the local path, to complete our tests properly
+		CatHandlerAliasMatcher.getInstance().initAliases("src/main/resources/resources/");
 		String actualManufacturer = CatHandlerAliasMatcher.getInstance().translateManufacturer(manufacturer);
 		assertEquals(expectedManufacturer, actualManufacturer);
 	}

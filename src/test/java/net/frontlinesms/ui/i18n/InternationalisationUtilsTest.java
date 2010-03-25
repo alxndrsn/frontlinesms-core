@@ -60,7 +60,6 @@ public class InternationalisationUtilsTest extends BaseTestCase {
 		log.warn("This test has been disabled as it needs modifications to its implementation.");
 		for(LanguageBundle bungle : getLanguageBundles()) {
 			log.info("Testing " + bungle.getLanguageName());
-			System.err.println("Testing " + bungle.getLanguageName());
 			
 			String formatString = bungle.getValue(FrontlineSMSConstants.DATEFORMAT_YMD);
 			DateFormat dateFormat = new SimpleDateFormat(formatString);
