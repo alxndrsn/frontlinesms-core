@@ -3,6 +3,7 @@
  */
 package net.frontlinesms.data.repository.hibernate;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -95,10 +96,8 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 		List<String> actualMatches = dao.getSimilarKeywords(new Keyword(keyword, "test keyword: trying to get similar."));
 		assertEquals("Unexpected results for keyword '" + keyword + "'",
 				expectedMatches.length, actualMatches.size());
-		for (int i = 0; i < expectedMatches.length; i++) {
-			assertEquals("Unexpected keyword match for '" + keyword + "' at index: " + i,
-					expectedMatches[i], actualMatches.get(i));
-		}
+		
+		assertEqualsIgnoreOrder(keyword, expectedMatches, actualMatches);
 	}
 	
 	public void testGetMessagesForKeywordWithParameters() throws DuplicateKeyException {
@@ -300,5 +299,13 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 		c.setTimeInMillis(0);
 		c.set(Calendar.YEAR, year);
 		return c.getTimeInMillis();
+	}
+	
+	static final <T> void assertEqualsIgnoreOrder(String keyword, T[] expected, List<T> actual) {
+		List<T> tempActual = new ArrayList<T>(actual);
+		assertEquals("Incorrect object count for " + keyword, expected.length, actual.size());
+		for (int i = 0; i < expected.length; i++) {
+			assertTrue("Unexpected keyword match for '" + keyword + "' at index: " + i, tempActual.remove(expected[i]));
+		}
 	}
 }

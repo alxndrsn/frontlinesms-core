@@ -307,8 +307,8 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 	 */
 	private void testRelationship(Group group, Contact... members) {
 		assertEquals("Incorrect members count for group: " + group.getPath(), members.length, this.dao.getMemberCount(group));
-		assertEquals("groupMembershipDao.getMembers(Group) for group " + group.getPath(), members, this.dao.getMembers(group));
-		assertEquals("groupMembershipDao.getMembers(Group, int, int) for group " + group.getPath(), members, this.dao.getMembers(group, 0, members.length));
+		assertEqualsIgnoreOrder("groupMembershipDao.getMembers(Group) fooooor group " + group.getPath(), members, this.dao.getMembers(group));
+		assertEqualsIgnoreOrder("groupMembershipDao.getMembers(Group, int, int) for group " + group.getPath(), members, this.dao.getMembers(group, 0, members.length));
 		
 		for(Contact contact : members) {
 //			assertTrue(dao.getGroups(contact).contains(group));
@@ -320,7 +320,7 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 		for(Contact member : members) {
 			if(member.isActive()) expectedActiveMembers.add(member);
 		}
-		assertEquals(expectedActiveMembers, dao.getActiveMembers(group));
+		assertEqualsIgnoreOrder("active members", expectedActiveMembers.toArray(new Contact[0]), dao.getActiveMembers(group));
 	}
 	
 	private Group getRootGroup() {
@@ -346,6 +346,14 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 		assertEquals("Incorrect object count in " + name, expected.length, actual.size());
 		for (int i = 0; i < expected.length; i++) {
 			assertEquals("Incorrect value in " + name + " at index " + i, expected[i], actual.get(i));
+		}
+	}
+	
+	static final <T> void assertEqualsIgnoreOrder(String name, T[] expected, List<T> actual) {
+		List<T> tempActual = new ArrayList<T>(actual);
+		assertEquals("Incorrect object count in " + name, expected.length, actual.size());
+		for (int i = 0; i < expected.length; i++) {
+			assertTrue("Incorrect value in " + name + " at index " + i, tempActual.remove(expected[i]));
 		}
 	}
 }

@@ -19,7 +19,7 @@
 		<property name="eventBus" ref="eventBus"/>
 	</bean>
 
-	<!-- set up hibernate on HSQL -->
+	<!-- set up hibernate on h2 -->
 	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
 		<property name="configLocation">
@@ -31,18 +31,17 @@
 		<property name="hibernateProperties">
 			<!-- the 'update' setting ought to recreate the schema on every run -->
 			<value>
-				hibernate.dialect = org.hibernate.dialect.HSQLDialect
+				hibernate.dialect = org.hibernate.dialect.H2Dialect
 				hibernate.hbm2ddl.auto = update
 			</value>
 		</property>
 	</bean>
-	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName" value="org.hsqldb.jdbcDriver" />
-		<property name="url" value="jdbc:hsqldb:mem:test" />
-		<property name="username" value="sa" />
-		<property name="password" value="" />
-	</bean>
 	
+	<bean id="dataSource" class="org.h2.jdbcx.JdbcDataSource">
+      <property name="URL" value="jdbc:h2:${datadir}/db/ipt;auto_server=true"/>
+      <property name="user" value="sa"/>
+      <property name="password" value=""/>
+  </bean>
 	<bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>

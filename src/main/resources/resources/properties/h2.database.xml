@@ -4,7 +4,7 @@
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans	http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-	<!-- Configuration for in-memory HSQL database. -->
+	<!-- Configuration for in-memory h2 database. -->
 
 	<bean id="hibernateProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 		<property name="properties">
