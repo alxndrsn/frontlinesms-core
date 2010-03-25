@@ -190,8 +190,9 @@ public class HomeTabHandler extends BaseTabHandler {
 		
 		Object pnSend = ui.find(tabComponent, UiGeneratorControllerConstants.COMPONENT_PN_SEND);
 		
-		final boolean shouldDisplayRecipientField = true;
-		Object pnMessage = MessagePanelHandler.create(this.ui, shouldDisplayRecipientField).getPanel();
+		final boolean 	shouldDisplayRecipientField = true,
+						shouldCheckMaxMessageLength = true;
+		Object pnMessage = MessagePanelHandler.create(this.ui, shouldDisplayRecipientField, shouldCheckMaxMessageLength).getPanel();
 		ui.add(pnSend, pnMessage);
 		
 		refreshLogoVisibility(tabComponent);

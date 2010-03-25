@@ -55,27 +55,32 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	private Object messagePanel;
 	/** The number of people the current SMS will be sent to */
 	private int numberToSend = 1;
-	/** The boolean changing whether the recipient field should be displayed */
+	/** The boolean stipulating whether the recipient field should be displayed */
 	private boolean shouldDisplayRecipientField;
+	/** The boolean stipulating whether we should check the length of the message (we don't in the auto-reply, for example) */
+	private boolean shouldCheckMaxMessageLength;
 
 //> CONSTRUCTORS
 	/**
 	 * @param uiController
 	 */
-	private MessagePanelHandler(UiGeneratorController uiController, boolean shouldDisplay) {
+	private MessagePanelHandler(UiGeneratorController uiController, boolean shouldDisplay, boolean shouldCheckMaxMessageLength) {
 		this.uiController = uiController;
 		this.shouldDisplayRecipientField = shouldDisplay;
+		this.shouldCheckMaxMessageLength = shouldCheckMaxMessageLength;
 	}
 	
 	private synchronized void init() {
 		assert(this.messagePanel == null) : "This has already been initialised.";
 		this.messagePanel = uiController.loadComponentFromFile(UI_FILE_MESSAGE_PANEL, this);
 		Object 	pnRecipient 		= uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_PN_MESSAGE_RECIPIENT),
-				pnMessage	 		= uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_PN_MESSAGE),
 				lbTooManyMessages 	= uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_LB_TOO_MANY_MESSAGES);
 		uiController.setVisible(pnRecipient, shouldDisplayRecipientField);
-		uiController.setVisible(lbTooManyMessages, false);
-		uiController.setColor(lbTooManyMessages, "foreground", Color.RED);
+		
+		if (shouldCheckMaxMessageLength) {
+			uiController.setVisible(lbTooManyMessages, false);
+			uiController.setColor(lbTooManyMessages, "foreground", Color.RED);
+		}
 		messageChanged("", "");
 	}
 
@@ -182,13 +187,15 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
 		boolean areAllCharactersValidGSM = GsmAlphabet.areAllCharactersValidGSM(message);
 		int totalLengthAllowed;
-		if(areAllCharactersValidGSM) totalLengthAllowed = Message.SMS_MULTIPART_LENGTH_LIMIT * Message.SMS_LIMIT;
-		else totalLengthAllowed = Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * Message.SMS_LIMIT;
+		if(areAllCharactersValidGSM) totalLengthAllowed = Message.SMS_LENGTH_LIMIT + Message.SMS_MULTIPART_LENGTH_LIMIT * (Message.SMS_LIMIT - 1);
+		else totalLengthAllowed = Message.SMS_LENGTH_LIMIT + Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * (Message.SMS_LIMIT - 1);
 		
 		boolean shouldEnableSendButton = (sendButton != null 
 											&& messageLength <= totalLengthAllowed
 											&& (!shouldDisplayRecipientField || recipientLength > 0));
-		uiController.setEnabled(sendButton, shouldEnableSendButton);
+		
+		if (sendButton != null)
+			uiController.setEnabled(sendButton, shouldEnableSendButton);
 		
 		
 		int singleMessageCharacterLimit;
@@ -209,36 +216,30 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		int numberOfMsgs, remaining;
 		double costEstimate;
 		
-		
-		if (messageLength > totalLengthAllowed) {
+		if (shouldCheckMaxMessageLength && messageLength > totalLengthAllowed) {
 			remaining = 0;
-			numberOfMsgs = (int)Math.ceil((double)messageLength / (double)multipartMessageCharacterLimit) + 1;
 			costEstimate = 0;
+			numberOfMsgs = (int)Math.ceil((double)messageLength / (double)multipartMessageCharacterLimit);
 			
 			uiController.setVisible(lbTooManyMessages, true);
 			uiController.setColor(tfMessage, "foreground", Color.RED);
-		} 
-		else {
-			uiController.setVisible(lbTooManyMessages, false);
-			uiController.setColor(tfMessage, "foreground", Color.BLACK);
-
-			if (messageLength <= singleMessageCharacterLimit) {
-			//First message
-				remaining = (messageLength % singleMessageCharacterLimit) == 0 ? 0
-						: singleMessageCharacterLimit - (messageLength % singleMessageCharacterLimit);
-				numberOfMsgs = messageLength == 0 ? 0 : 1;
-			} else if (messageLength <= (2*multipartMessageCharacterLimit)) {
-				numberOfMsgs = 2;
-				int charCount = messageLength - multipartMessageCharacterLimit;
-				remaining = (charCount % multipartMessageCharacterLimit) == 0 ? 0
-						: multipartMessageCharacterLimit - (charCount % multipartMessageCharacterLimit);
-			} else { //if (messageLength <= (3*multipartMessageCharacterLimit)) {
-				numberOfMsgs = 3;
-				int charCount = messageLength - multipartMessageCharacterLimit;
-				remaining = (charCount % multipartMessageCharacterLimit) == 0 ? 0
-						: multipartMessageCharacterLimit - (charCount % multipartMessageCharacterLimit);
+		} else {
+			if (shouldCheckMaxMessageLength) {
+				uiController.setVisible(lbTooManyMessages, false);
+				uiController.setColor(tfMessage, "foreground", Color.BLACK);
 			}
-
+			
+			if (messageLength <= singleMessageCharacterLimit) {
+				numberOfMsgs = messageLength == 0 ? 0 : 1;
+				remaining = (messageLength % singleMessageCharacterLimit) == 0 ? 0
+						: singleMessageCharacterLimit - (messageLength % singleMessageCharacterLimit);	
+			} else {
+				int charCount = messageLength - singleMessageCharacterLimit;
+				numberOfMsgs = (int)Math.ceil((double)charCount / (double)multipartMessageCharacterLimit) + 1;
+				remaining = (charCount % multipartMessageCharacterLimit) == 0 ? 0
+						: multipartMessageCharacterLimit - ((charCount % multipartMessageCharacterLimit));
+			}
+			
 			costEstimate = numberOfMsgs * this.getCostPerSms() * this.numberToSend;
 		}
 		
@@ -250,7 +251,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		if (numberOfMsgs >= 1) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_FIRST), Icon.SMS);
 		if (numberOfMsgs >= 2) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS);
 		if (numberOfMsgs == 3) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS);
-		if (numberOfMsgs > 3) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS_DELETE);
+		if (numberOfMsgs > 3) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), (shouldCheckMaxMessageLength ? Icon.SMS_DELETE : Icon.SMS));
 		
 		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(costEstimate));
 	}
@@ -290,7 +291,8 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS_DISABLED);
 		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS_DISABLED);
 		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(0));
-		uiController.setVisible(uiController.find(this.messagePanel, COMPONENT_LB_TOO_MANY_MESSAGES), false);
+		if (shouldCheckMaxMessageLength) // Otherwise this component doesn't exist
+			uiController.setVisible(uiController.find(this.messagePanel, COMPONENT_LB_TOO_MANY_MESSAGES), false);
 
 		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
 		if (sendButton != null) uiController.setEnabled(sendButton, false);
@@ -301,8 +303,8 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	 * Create and initialise a new {@link MessagePanelHandler}.
 	 * @return a new, initialised instance of {@link MessagePanelHandler}
 	 */
-	public static final MessagePanelHandler create(UiGeneratorController ui, boolean shouldDisplayRecipientField) {
-		MessagePanelHandler handler = new MessagePanelHandler(ui, shouldDisplayRecipientField);
+	public static final MessagePanelHandler create(UiGeneratorController ui, boolean shouldDisplayRecipientField, boolean checkMaxMessageLength) {
+		MessagePanelHandler handler = new MessagePanelHandler(ui, shouldDisplayRecipientField, checkMaxMessageLength);
 		handler.init();
 		return handler;
 	}
