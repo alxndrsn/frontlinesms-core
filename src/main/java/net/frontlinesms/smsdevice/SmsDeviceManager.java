@@ -90,8 +90,6 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 	/** If set TRUE, then thread will automatically try to connect to newly-detected devices. */ 
 	private boolean autoConnectToNewPhones;
 	private boolean refreshPhoneList;
-	/** Data Access Object for {@link Message}s */
-	private MessageDao messageDao;
 
 
 	/**
@@ -117,10 +115,6 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 
 	public void setSmsListener(SmsListener smsListener) {
 		this.smsListener = smsListener;
-	}
-	
-	public void setMessageDao(MessageDao messageDao) {
-		this.messageDao = messageDao;
 	}
 
 	public void run() {

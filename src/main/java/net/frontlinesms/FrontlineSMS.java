@@ -205,7 +205,6 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		smsDeviceManager = new SmsDeviceManager();
 		smsDeviceManager.listComPortsAndOwners(false);
 		smsDeviceManager.setSmsListener(this);
-		smsDeviceManager.setMessageDao(this.messageDao);
 		smsDeviceManager.start();
 
 		initSmsInternetServices();
