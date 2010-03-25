@@ -12,7 +12,6 @@ public class CatHandlerAliasMatcherTest extends TestCase {
 	 * Test parsing of AT+CGMI responses in the {@link CService} class.
 	 */
 	public void testTranslateManufacturer() {
-		testTranslateManufacturer("Sony Ericsson", "SonyEricsson");
 		testTranslateManufacturer("nokia", "Nokia");
 		testTranslateManufacturer("MotorolaCECopyright2000", "Motorola");
 		testTranslateManufacturer("Lucky GoldStar", "LG");
@@ -20,6 +19,7 @@ public class CatHandlerAliasMatcherTest extends TestCase {
 		testTranslateManufacturer("SamsungElectronicsCorporation", "Samsung");
 		testTranslateManufacturer("huawei", "Huawei");
 		testTranslateManufacturer("^RSSI huawei", "Huawei");
+		testTranslateManufacturer("Sony Ericsson", "SonyEricsson");
 	}
 	
 	/**
