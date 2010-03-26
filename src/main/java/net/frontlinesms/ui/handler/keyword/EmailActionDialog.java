@@ -103,7 +103,8 @@ public class EmailActionDialog extends BaseActionDialog {
 	/** Invoked when the user decides to send a mail specifically to one contact. */
 	public void selectMailRecipient() {
 		ContactSelecter contactSelecter = new ContactSelecter(ui);
-		contactSelecter.show(InternationalisationUtils.getI18NString(SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "setMailRecipient(contactSelecter_contactList, contactSelecter)", this.getDialogComponent(), this);
+		final boolean shouldHaveEmail   = true;
+		contactSelecter.show(InternationalisationUtils.getI18NString(SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "setMailRecipient(contactSelecter_contactList, contactSelecter)", this.getDialogComponent(), this, shouldHaveEmail);
 	}
 	
 	/**

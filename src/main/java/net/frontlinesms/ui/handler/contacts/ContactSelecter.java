@@ -3,6 +3,7 @@
  */
 package net.frontlinesms.ui.handler.contacts;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import thinlet.Thinlet;
@@ -39,7 +40,10 @@ public class ContactSelecter implements ThinletUiEventHandler, PagedComponentIte
 	
 	/** The dialog we are displaying. */
 	private Object selecterDialog;
-	private ComponentPagingHandler selecterPager; 
+	private ComponentPagingHandler selecterPager;
+
+	/** A boolean used to know if only contact with an e-mail address should be displayed */
+	private boolean shouldHaveEmail; 
 	
 //> CONSTRUCTORS
 	public ContactSelecter(UiGeneratorController ui) {
@@ -55,8 +59,9 @@ public class ContactSelecter implements ThinletUiEventHandler, PagedComponentIte
 	 * @param attachment
 	 * @param handler
 	 */
-	public void show(String title, String callbackMethodName, Object attachment, ThinletUiEventHandler handler) {
+	public void show(String title, String callbackMethodName, Object attachment, ThinletUiEventHandler handler, boolean shouldHaveEmail) {
 		this.selecterDialog = ui.loadComponentFromFile(UI_FILE_CONTACT_SELECTER, this);
+		this.shouldHaveEmail = shouldHaveEmail;
 		ui.setText(ui.find(selecterDialog, COMPONENT_CONTACT_SELECTER_TITLE), title);
 		Object contactList = ui.find(selecterDialog, COMPONENT_CONTACT_SELECTER_CONTACT_LIST);
 		ui.setPerform(contactList, callbackMethodName, selecterDialog, handler);
@@ -79,14 +84,15 @@ public class ContactSelecter implements ThinletUiEventHandler, PagedComponentIte
 	public PagedListDetails getListDetails(Object list, int startIndex, int limit) {
 		int totalItemCount = this.contactDao.getContactCount();
 		
-		List<Contact> contacts = this.contactDao.getAllContacts(startIndex, limit);
-		Object[] components = new Object[contacts.size()];
-		for (int i = 0; i < components.length; i++) {
-			Contact contact = contacts.get(i);
-			components[i] = ui.createListItem(contact);
+		List<Contact> contacts  = this.contactDao.getAllContacts(startIndex, limit);
+		List<Object> components = new ArrayList<Object>();
+		
+		for (Contact contact : contacts) {
+			if (!shouldHaveEmail || (contact.getEmailAddress() != null && !contact.getEmailAddress().equals("")))
+				components.add(ui.createListItem(contact));
 		}
 		
-		return new PagedListDetails(totalItemCount, components);
+		return new PagedListDetails(totalItemCount, components.toArray());
 	}
 	
 //> UI EVENT METHODS
