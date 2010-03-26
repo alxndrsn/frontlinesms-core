@@ -48,9 +48,9 @@ public class ReplyActionDialog extends BaseActionDialog {
 	 */
 	protected void _init() {
 		// Load the reply form from file.
-		final boolean 	shouldDisplayRecipientField = false,
-						shouldCheckMaxMessageLength = false;
-		final int		numberOfRecipients			= 1;
+		final boolean shouldDisplayRecipientField = false;
+		final boolean shouldCheckMaxMessageLength = false;
+		final int numberOfRecipients = 1;
 		
 		MessagePanelHandler messagePanelController = MessagePanelHandler.create(this.ui, shouldDisplayRecipientField, shouldCheckMaxMessageLength, numberOfRecipients);
 		Object pnMessage = messagePanelController.getPanel();

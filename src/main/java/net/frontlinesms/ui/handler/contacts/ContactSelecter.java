@@ -85,7 +85,7 @@ public class ContactSelecter implements ThinletUiEventHandler, PagedComponentIte
 		int totalItemCount = this.contactDao.getContactCount();
 		
 		List<Contact> contacts  = this.contactDao.getAllContacts(startIndex, limit);
-		List<Object> components = new ArrayList<Object>();
+		List<Object> components = new ArrayList<Object>(contacts.size());
 		
 		for (Contact contact : contacts) {
 			if (!shouldHaveEmail || (contact.getEmailAddress() != null && !contact.getEmailAddress().equals("")))

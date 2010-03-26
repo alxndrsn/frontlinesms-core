@@ -55,7 +55,7 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		groupTreeComponent = super.find(COMPONENT_GROUP_TREE);
 		
 		// add nodes for group tree
-		this.rootGroup = rootGroup;
+		this.setRootGroup(rootGroup);
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		this.groupDao = new UnmodifiableGroupDao(frontlineController.getGroupDao());
 		
 		ui.removeAll(groupTree);
-		ui.add(groupTree, createNode(rootGroup, true));
+		ui.add(groupTree, createNode(getRootGroup(), true));
 	}
 	
 //> ACCESSORS
@@ -189,5 +189,13 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		}
 		LOG.trace("EXIT");
 		return node;
+	}
+
+	public void setRootGroup(Group rootGroup) {
+		this.rootGroup = rootGroup;
+	}
+
+	public Group getRootGroup() {
+		return rootGroup;
 	}
 }

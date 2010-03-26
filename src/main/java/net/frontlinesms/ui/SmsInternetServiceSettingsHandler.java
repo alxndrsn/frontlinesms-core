@@ -492,7 +492,7 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 	public void showContacts(Object button) {
 		Object textField = controller.getAttachedObject(button);
 		ContactSelecter contactSelecter = new ContactSelecter(controller);
-		final boolean shouldHaveEmail   = false;
+		final boolean shouldHaveEmail = false;
 		contactSelecter.show(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SENDER_NUMBER), "setContactNumber(contactSelecter_contactList, contactSelecter)", textField, this, shouldHaveEmail);
 	}
 

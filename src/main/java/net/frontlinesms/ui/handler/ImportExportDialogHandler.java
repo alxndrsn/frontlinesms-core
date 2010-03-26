@@ -68,6 +68,8 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private static final String MESSAGE_IMPORT_TASK_SUCCESSFUL = "message.import.successful";
 	/** i18n Text Key: "A file with this name already exists.  Would you like to overwrite it?" */
 	private static final String MESSAGE_CONFIRM_FILE_OVERWRITE = "message.file.overwrite.confirm";
+	/** i18n Text Key: "The directory you entered doesn't exist" */
+	private static final String MESSAGE_BAD_DIRECTORY = "message.bad.directory";
 	
 //> THINLET LAYOUT DEFINITION FILES
 	/** UI XML File Path: This is the outline for the dialog for EXPORTING */
@@ -270,20 +272,26 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	public void handleDoExport(String dataPath) {
 		log.trace("ENTER");
 		
-		log.debug("Filename is [" + dataPath + "] before [" + CsvExporter.CSV_EXTENSION + "] check.");
-		if (!dataPath.endsWith(CsvExporter.CSV_EXTENSION)) {
-			dataPath += CsvExporter.CSV_EXTENSION;
-		}
-		log.debug("Filename is [" + dataPath + "] after [" + CsvExporter.CSV_EXTENSION + "] check.");
-		
 		// Check if the file already exists.  If it does, show a warning.
-		File csvFile = new File(dataPath);
-		if(csvFile.exists() && csvFile.isFile()) {
-			// show confirmation dialog
-			this.confirmationDialog = uiController.showConfirmationDialog("doExport('" + dataPath + "')",
-					this, MESSAGE_CONFIRM_FILE_OVERWRITE);
+		if (!dataPath.contains(File.separator) || !(new File(dataPath.substring(0, dataPath.lastIndexOf(File.separator))).isDirectory())) {
+			this.uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_BAD_DIRECTORY));
+		} else if (dataPath.substring(dataPath.lastIndexOf(File.separator), dataPath.length()).equals(File.separator)) {
+			this.uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_FILENAME));
 		} else {
-			doExport(dataPath);
+			log.debug("Filename is [" + dataPath + "] before [" + CsvExporter.CSV_EXTENSION + "] check.");
+			if (!dataPath.endsWith(CsvExporter.CSV_EXTENSION)) {
+				dataPath += CsvExporter.CSV_EXTENSION;
+			}
+			log.debug("Filename is [" + dataPath + "] after [" + CsvExporter.CSV_EXTENSION + "] check.");
+			
+			File csvFile = new File(dataPath);
+			if(csvFile.exists() && csvFile.isFile()) {
+				// show confirmation dialog
+				this.confirmationDialog = uiController.showConfirmationDialog("doExport('" + dataPath + "')",
+						this, MESSAGE_CONFIRM_FILE_OVERWRITE);
+			} else {
+				doExport(dataPath);
+			}
 		}
 	}
 	

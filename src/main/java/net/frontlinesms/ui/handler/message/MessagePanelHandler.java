@@ -144,7 +144,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	/** Method which triggers showing of the contact selecter. */
 	public void selectMessageRecipient() {
 		ContactSelecter contactSelecter = new ContactSelecter(this.uiController);
-		final boolean shouldHaveEmail   = false;
+		final boolean shouldHaveEmail = false;
 		contactSelecter.show(InternationalisationUtils.getI18NString(FrontlineSMSConstants.SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "setRecipientTextfield(contactSelecter_contactList, contactSelecter)", null, this, shouldHaveEmail);
 	}
 	

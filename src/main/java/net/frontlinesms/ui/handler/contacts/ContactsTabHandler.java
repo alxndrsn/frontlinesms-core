@@ -122,15 +122,14 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	public void groupSelectionChanged(Group selectedGroup) {
 		if(LOG.isTraceEnabled()) System.out.println("Group selected: " + selectedGroup);
 		
-		Group g = this.groupSelecter.getSelectedGroup();
 		String contactsPanelTitle;
 		boolean enableDeleteButton;
-		if(g == null) {
+		if(selectedGroup == null) {
 			contactsPanelTitle = "";
 			enableDeleteButton = false;
 		} else {
-			contactsPanelTitle = InternationalisationUtils.getI18NString(COMMON_CONTACTS_IN_GROUP, g.getName());
-			enableDeleteButton = !this.ui.isDefaultGroup(g);
+			contactsPanelTitle = InternationalisationUtils.getI18NString(COMMON_CONTACTS_IN_GROUP, selectedGroup.getName());
+			enableDeleteButton = !this.ui.isDefaultGroup(selectedGroup);
 		}
 		this.ui.setText(find(COMPONENT_CONTACTS_PANEL), contactsPanelTitle);
 		
@@ -139,7 +138,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		this.ui.setEnabled(deleteButton, enableDeleteButton);
 		
 		Object btSendSmsToGroup = this.ui.find(buttonPanelContainer, COMPONENT_SEND_SMS_BUTTON_GROUP_SIDE);
-		this.ui.setEnabled(btSendSmsToGroup, g != null);
+		this.ui.setEnabled(btSendSmsToGroup, selectedGroup != null);
 		
 		updateContactList();
 	}
@@ -407,6 +406,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 				//Inside a default group
 				LOG.debug("Removing group [" + selectedGroup.getName() + "] from database");
 				groupDao.deleteGroup(selectedGroup, removeContactsAlso);
+				this.groupSelecter.selectGroup(groupSelecter.getRootGroup());
 			} else {
 				throw new IllegalStateException();
 //				if (removeContactsAlso) {
@@ -497,6 +497,9 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			this.groupSelecter.addGroup(g);
 			
 			if (dialog != null) this.ui.remove(dialog);
+			this.updateGroupList();
+			this.groupSelecter.selectGroup(g);
+			
 			LOG.debug("Group created successfully!");
 		} catch (DuplicateKeyException e) {
 			LOG.debug("A group with this name already exists.", e);
