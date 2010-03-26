@@ -59,15 +59,18 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	private boolean shouldDisplayRecipientField;
 	/** The boolean stipulating whether we should check the length of the message (we don't in the auto-reply, for example) */
 	private boolean shouldCheckMaxMessageLength;
+	/** The number of recipients, used to estimate the cost of the message */
+	private int numberOfRecipients;
 
 //> CONSTRUCTORS
 	/**
 	 * @param uiController
 	 */
-	private MessagePanelHandler(UiGeneratorController uiController, boolean shouldDisplay, boolean shouldCheckMaxMessageLength) {
-		this.uiController = uiController;
+	private MessagePanelHandler(UiGeneratorController uiController, boolean shouldDisplay, boolean shouldCheckMaxMessageLength, int numberOfRecipients) {
+		this.uiController 				 = uiController;
 		this.shouldDisplayRecipientField = shouldDisplay;
 		this.shouldCheckMaxMessageLength = shouldCheckMaxMessageLength;
+		this.numberOfRecipients 		 = numberOfRecipients; 
 	}
 	
 	private synchronized void init() {
@@ -197,7 +200,6 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		if (sendButton != null)
 			uiController.setEnabled(sendButton, shouldEnableSendButton);
 		
-		
 		int singleMessageCharacterLimit;
 		int multipartMessageCharacterLimit;
 		if(areAllCharactersValidGSM) {
@@ -242,6 +244,9 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 			
 			costEstimate = numberOfMsgs * this.getCostPerSms() * this.numberToSend;
 		}
+		
+		// The message will actually cost {numberOfRecipients} times the calculated cost
+		costEstimate *= numberOfRecipients;
 		
 		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_REMAINING_CHARS), String.valueOf(remaining));
 		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_MSG_NUMBER), String.valueOf(numberOfMsgs));
@@ -303,8 +308,8 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	 * Create and initialise a new {@link MessagePanelHandler}.
 	 * @return a new, initialised instance of {@link MessagePanelHandler}
 	 */
-	public static final MessagePanelHandler create(UiGeneratorController ui, boolean shouldDisplayRecipientField, boolean checkMaxMessageLength) {
-		MessagePanelHandler handler = new MessagePanelHandler(ui, shouldDisplayRecipientField, checkMaxMessageLength);
+	public static final MessagePanelHandler create(UiGeneratorController ui, boolean shouldDisplayRecipientField, boolean checkMaxMessageLength, int numberOfRecipients) {
+		MessagePanelHandler handler = new MessagePanelHandler(ui, shouldDisplayRecipientField, checkMaxMessageLength, numberOfRecipients);
 		handler.init();
 		return handler;
 	}

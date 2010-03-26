@@ -12,7 +12,6 @@ import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUPS_AND_CONTACTS
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUP_ALREADY_EXISTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_REMOVING_CONTACTS;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BUTTON_YES;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_MANAGER_CONTACT_FILTER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_MANAGER_CONTACT_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_DELETE_NEW_CONTACT;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_GROUPS_MENU;
@@ -196,16 +195,31 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	}
 	
 	/**
-	 * Shows the delete option dialog, which asks the user if he/she wants to remove
-	 * the selected contacts from database.
-	 * @param list
+	 * Shows the delete option dialog
+	 * If the group contains contacts, it asks the user if he/she wants to remove the selected contacts from database.
+	 * Otherwise, it only shows a confirmation dialog
 	 */
 	public void showDeleteOptionDialog() {
 		Group g = this.groupSelecter.getSelectedGroup();
 		if (!this.ui.isDefaultGroup(g)) {
-			Object deleteDialog = ui.loadComponentFromFile(UI_FILE_DELETE_OPTION_DIALOG_FORM, this);
-			ui.add(deleteDialog);
+			if (groupMembershipDao.getMemberCount(g) > 0) {
+				// If the group is not empty, we ask if the user also wants to delete the contacts
+				Object deleteDialog = ui.loadComponentFromFile(UI_FILE_DELETE_OPTION_DIALOG_FORM, this);
+				ui.add(deleteDialog);
+			} else {
+				// Otherwise, the
+				showConfirmationDialog("deleteSelectedGroup");
+			}
 		}
+	}
+	
+	/**
+	 * Launches the deletion of the selected group
+	 * if the user confirmed it in the confirm dialog
+	 */
+	public void deleteSelectedGroup () {
+		this.ui.removeConfirmationDialog();
+		removeSelectedFromGroupList(null, null);
 	}
 
 	/**
@@ -501,6 +515,9 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	/** Updates the group tree. */
 	private void updateGroupList() {
 		this.groupSelecter.refresh();
+		Object btSendSmsToGroup = ui.find(find(COMPONENT_GROUP_SELECTER_CONTAINER), COMPONENT_SEND_SMS_BUTTON_GROUP_SIDE);
+		this.ui.setEnabled(btSendSmsToGroup, this.groupSelecter.getSelectedGroup() != null);
+		
 		updateContactList();
 	}
 	

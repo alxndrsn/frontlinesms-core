@@ -598,6 +598,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	public void show_composeMessageForm(Group group) {
+		if (group == null) return;
+		
 		LOG.debug("Getting contacts from Group [" + group.getName() + "]");
 		
 		HashSet<Object> recipients = new HashSet<Object>();
@@ -637,7 +639,9 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		
 		final boolean 	shouldDisplayRecipientField = false,
 						shouldCheckMaxMessageLength = true;
-		MessagePanelHandler messagePanelController = MessagePanelHandler.create(this, shouldDisplayRecipientField, shouldCheckMaxMessageLength);
+		final int		numberOfRecipients			= recipients.size();
+		
+		MessagePanelHandler messagePanelController = MessagePanelHandler.create(this, shouldDisplayRecipientField, shouldCheckMaxMessageLength, numberOfRecipients);
 		this.setWidth(dialog, 450);
 		this.setHeight(dialog, 405);
 		// We need to add the message panel to the dialog before setting the send button method
