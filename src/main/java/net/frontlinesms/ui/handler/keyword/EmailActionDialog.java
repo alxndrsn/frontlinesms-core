@@ -79,8 +79,9 @@ public class EmailActionDialog extends BaseActionDialog {
 		}
 	}
 	
-	private void refreshEmailAccountList() {
+	public void refreshEmailAccountList() {
 		Object list = find(COMPONENT_MAIL_LIST);
+		this.ui.removeAll(list);
 		for (EmailAccount acc : emailAccountDao.getAllEmailAccounts()) {
 			log.debug("Adding existent e-mail account [" + acc.getAccountName() + "] to list");
 			Object item = ui.createListItem(acc.getAccountName(), acc);
@@ -216,7 +217,7 @@ public class EmailActionDialog extends BaseActionDialog {
 //> UI PASSTHROUGH METHODS
 	/** Show the email account settings dialog. */
 	public void showEmailAccountsSettings() {
-		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this.ui);
+		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this.ui, this);
 		ui.add(emailAccountDialogHandler.getDialog());
 	}
 }

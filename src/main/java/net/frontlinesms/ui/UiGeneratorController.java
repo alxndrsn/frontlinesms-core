@@ -791,7 +791,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Shows the email accounts settings dialog.
 	 */
 	public void showEmailAccountsSettings() {
-		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this);
+		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this, null);
 		add(emailAccountDialogHandler.getDialog());
 	}
 
