@@ -122,9 +122,9 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 		while (running) {
 			doRun();
 			
-			// Individual phones should sleep, so there's no need to do this here!(?)  Here's
-			// a token pause in case things lock up / to stop this thread eating the CPU for
-			// breakfast.
+			// Sleep for a second to ensure lists are not constantly being reshuffled.  Processing dispatch
+			// and received messages is not really time-critical, otherwise it might be worth sleeping for
+			// less time.
 			Utils.sleep_ignoreInterrupts(1000);
 		}
 		LOG.trace("EXIT");
@@ -539,8 +539,9 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 			return binOutbox;
 		case UCS2_TEXT:
 			return ucs2Outbox;
-		default:
+		case GSM7BIT_TEXT:
 			return gsm7bitOutbox;
+		default: throw new IllegalStateException("Unrecognized message type: " + messageType);
 		}
 	}
 
@@ -556,8 +557,6 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 			SmsDevice device = devices.get(++messageIndex % deviceCount);
 			// Presumably the device will complain somehow if it is no longer connected
 			// etc.  TODO we should actually check what happens!
-			//m.setStatus(Message.STATUS_PENDING);
-			//messageDao.updateMessage(m);
 			device.sendSMS(m);
 			outgoingMessageEvent(device, m);
 		}
