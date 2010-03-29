@@ -126,6 +126,9 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	private Long messageHistoryEnd;
 	/** The number of people the current SMS will be sent to */
 	private int numberToSend = 1;
+	/** The selected lines in the left panel  */
+	private Group selectedGroup;
+	private int selectedListIndex;
 	
 //> CONSTRUCTORS
 	/**
@@ -150,7 +153,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	 * @param component group list or contact list
 	 */
 	public void doShowMessageHistory(Object component) {
-		Object attachment = ui.getAttachedObject(ui.getSelectedItem(component));
+		Object attachment =  ui.getAttachedObject(ui.getSelectedItem(component));
 		
 		boolean isGroup = attachment instanceof Group;
 		boolean isContact = attachment instanceof Contact;
@@ -225,6 +228,8 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 //> GROUP SELECTER METHODS
 	/** @see SingleGroupSelecterPanelOwner#groupSelectionChanged(Group) */
 	public void groupSelectionChanged(Group selectedGroup) {
+		this.selectedGroup = selectedGroup;
+		
 		updateMessageList();
 	}
 	
@@ -412,18 +417,25 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	 */
 	public void messageHistoryDateChanged() {
 		Long newStart = null;
+		String tfStartDateValue = ui.getText(find(COMPONENT_TF_START_DATE));
+		String tfEndDateValue = ui.getText(find(COMPONENT_TF_END_DATE));
 		try {
-			String tfStartDateValue = ui.getText(find(COMPONENT_TF_START_DATE));
 			newStart = InternationalisationUtils.parseDate(tfStartDateValue).getTime();
 		} catch (ParseException ex) {}
 		Long newEnd = null;
 		try {
-			String tfEndDateValue = ui.getText(find(COMPONENT_TF_END_DATE));
 			newEnd = InternationalisationUtils.parseDate(tfEndDateValue).getTime() + MILLIS_PER_DAY;
 		} catch (ParseException ex) {}
 		
-		if (newStart != null && newEnd != null && (!newStart.equals(messageHistoryStart) || !newEnd.equals(messageHistoryEnd))) {
+		if (tfStartDateValue.equals("") || tfEndDateValue.equals("")) {
+			updateMessageList();
+		}
+		
+		if ((newStart != null && !newStart.equals(messageHistoryStart)) || tfStartDateValue.equals("")) {
 			messageHistoryStart = newStart;
+			updateMessageList();
+		}
+		if ((newEnd != null && !newEnd.equals(messageHistoryEnd)) || tfEndDateValue.equals("")) {
 			messageHistoryEnd = newEnd;
 			updateMessageList();
 		}
@@ -460,13 +472,21 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	
 	/** Update the list of messages. */
 	public void updateMessageList() {
+		boolean showGroups = getMessageHistoryFilterType() == Group.class;
+		Object filterList = getMessageHistoryFilterList();
+		if (filterList != null && !showGroups)
+			this.selectedListIndex = ui.getSelectedIndex(filterList);
+		
 		this.messagePagingHandler.setCurrentPage(0);
 		this.messagePagingHandler.refresh();
+		updateMessageHistoryCost();
 	}
 	
 	/** Reset the message history filter. */
 	private void resetMessageHistoryFilter() {
 		Class<?> filterClass = getMessageHistoryFilterType();
+		Object filterList = getMessageHistoryFilterList();
+		
 		boolean showGroups = filterClass == Group.class;
 		boolean showContacts = filterClass == Contact.class;
 		boolean showKeywords = filterClass == Keyword.class;
@@ -485,6 +505,13 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		ui.setVisible(find(COMPONENT_GROUP_PANEL), showGroups);
 		ui.setVisible(find(COMPONENT_CONTACT_PANEL), showContacts);
 		ui.setVisible(find(COMPONENT_KEYWORD_PANEL), showKeywords);
+		
+		if (filterList != null) {
+			if (showGroups)
+				groupSelecter.selectGroup(selectedGroup);
+			else
+				this.ui.setSelectedIndex(filterList, selectedListIndex);
+		}
 	}
 
 	public void lsContacts_enableSend(Object popUp) {

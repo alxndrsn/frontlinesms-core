@@ -17,6 +17,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_AU
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORDS_DIVIDER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORD_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_MENU_ITEM_CREATE;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_MI_EDIT;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_BUTTON_DONE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_DESCRIPTION;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_KEYWORD;
@@ -656,6 +657,9 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 			}
 			ui.add(table, ui.getRow(action), index);
 		}
+		// We make the buttons visible or not depending on the selected item
+		Object list = find(COMPONENT_ACTION_LIST);
+		enableKeywordActionFields(list, find(COMPONENT_KEY_ACT_PANEL));
 	}
 
 	private void setJoinGroupDisplay(Group group) {

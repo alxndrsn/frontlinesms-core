@@ -111,16 +111,21 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 			// Test sorting messages by date ASCENDING
 			// 1. get all messages
 			testGetMessagesForKeywordWithParameters(keyword, 20, Long.MIN_VALUE, Long.MAX_VALUE);
+			testGetMessagesForKeywordWithParameters(keyword, 20, null, null);
+			testGetMessagesForKeywordWithParameters(keyword, 20, Long.MIN_VALUE, null);
+			testGetMessagesForKeywordWithParameters(keyword, 20, null, Long.MAX_VALUE);
 			testGetMessagesForKeywordWithParameters(keyword, 20, DATE_1970, DATE_2010);
 			
 			// 2. get ranges of messages
 			testGetMessagesForKeywordWithParameters(keyword, 12, Long.MIN_VALUE, DATE_1990);
+			testGetMessagesForKeywordWithParameters(keyword, 12, null, DATE_1990);
 			testGetMessagesForKeywordWithParameters(keyword, 8, DATE_2000, Long.MAX_VALUE);
+			testGetMessagesForKeywordWithParameters(keyword, 8, DATE_2000, null);
 			testGetMessagesForKeywordWithParameters(keyword, 8, DATE_1980, DATE_1990);
 		}
 	}
 	
-	private void testGetMessagesForKeywordWithParameters(String keyword, int totalMessageCount, long startDate, long endDate) {
+	private void testGetMessagesForKeywordWithParameters(String keyword, int totalMessageCount, Long startDate, Long endDate) {
 		testGetMessagesForKeywordWithParameters(keyword, totalMessageCount, startDate, endDate, 0, 100);
 		testGetMessagesForKeywordWithParameters(keyword, totalMessageCount, startDate, endDate, 0, totalMessageCount);
 		testGetMessagesForKeywordWithParameters(keyword, totalMessageCount, startDate, endDate, 0, totalMessageCount/2);
@@ -128,7 +133,7 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 		testGetMessagesForKeywordWithParameters(keyword, totalMessageCount, startDate, endDate, totalMessageCount, 100);
 	}
 	
-	private void testGetMessagesForKeywordWithParameters(String keyword, int totalMessageCount, long startDate, long endDate, int startIndex, int limit) {
+	private void testGetMessagesForKeywordWithParameters(String keyword, int totalMessageCount, Long startDate, Long endDate, int startIndex, int limit) {
 		// Adjust the expected message count to take into account the paging
 		int expectedMessageCount = Math.min(totalMessageCount-startIndex, limit);
 		
@@ -139,10 +144,18 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 			assertEquals("Messages for keyword '" + keyword + "' " +
 					"start=" + startIndex + ";limit=" + limit,
 					expectedMessageCount, dateAscMessages.size());
-			long lastDate = startDate;
+			
+			Long lastDate = null;
+			if (startDate != null) {
+				lastDate = startDate;
+			}
+			
 			for(Message m : dateAscMessages) {
+				if (lastDate == null) {
+					lastDate = m.getDate();
+				}
 				assertTrue(m.getTextContent().startsWith(keyword));
-				assertTrue(lastDate <= m.getDate());
+				assertTrue(lastDate + " is supposed to be lower greater than " + m.getDate(), lastDate <= m.getDate());
 				lastDate = m.getDate();
 			}
 		}
@@ -154,10 +167,17 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 			assertEquals("Messages for keyword '" + keyword + "' " +
 					"start=" + startIndex + ";limit=" + limit,
 					expectedMessageCount, dateDescMessages.size());
-			long lastDate = endDate;
+			Long lastDate = null;
+			if (endDate != null) {
+				lastDate = endDate;
+			}
+			
 			for(Message m : dateDescMessages) {
+				if (lastDate == null) {
+					lastDate = m.getDate();
+				}
 				assertTrue(m.getTextContent().startsWith(keyword));
-				assertTrue(lastDate >= m.getDate());
+				assertTrue(lastDate + " is supposed to be greater than " + m.getDate(), lastDate >= m.getDate());
 				lastDate = m.getDate();
 			}
 		}

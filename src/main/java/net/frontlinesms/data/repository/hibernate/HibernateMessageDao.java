@@ -140,9 +140,20 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	/** @see MessageDao#getMessagesForKeyword(int, Keyword, Field, Order, Long, Long, int, int) */
 	public List<Message> getMessagesForKeyword(Message.Type messageType, Keyword keyword, Field sortBy, Order order, Long start, Long end, int startIndex, int limit) {
 		PartialQuery<Message> q = createQueryStringForKeyword(messageType, keyword);
-		q.appendWhereOrAnd();
-		q.append("(message." + Message.Field.DATE.getFieldName() + ">=?", start);
-		q.append("AND message." + Message.Field.DATE.getFieldName() + "<=?)", end);
+		
+		if (start != null) {
+			q.appendWhereOrAnd();
+			if (end != null) {
+				q.append("(message." + Message.Field.DATE.getFieldName() + ">=? AND message." + Message.Field.DATE.getFieldName() + "<=?)", start, end);
+			} else {
+				q.append("(message." + Message.Field.DATE.getFieldName() + ">=?)", start);	
+			}			
+		} else if (end != null) {
+			q.appendWhereOrAnd();
+			q.append("(message." + Message.Field.DATE.getFieldName() + "<=?)", end);
+		}
+		
+		
 		q.addSorting(sortBy, order);
 		return super.getList(q.getQueryString(), startIndex, limit, q.getInsertValues());
 	}

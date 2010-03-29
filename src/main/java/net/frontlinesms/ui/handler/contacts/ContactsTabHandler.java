@@ -85,6 +85,9 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	private String contactFilter;
 
 	private final GroupSelecterPanel groupSelecter;
+	
+	/** The selected group in the left panel  */
+	private Group selectedGroup;
 
 //> CONSTRUCTORS
 	/**
@@ -121,6 +124,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 */
 	public void groupSelectionChanged(Group selectedGroup) {
 		if(LOG.isTraceEnabled()) System.out.println("Group selected: " + selectedGroup);
+		this.selectedGroup = selectedGroup;
 		
 		String contactsPanelTitle;
 		boolean enableDeleteButton;
@@ -518,6 +522,8 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	/** Updates the group tree. */
 	private void updateGroupList() {
 		this.groupSelecter.refresh();
+		this.groupSelecter.selectGroup(selectedGroup);
+			
 		Object btSendSmsToGroup = ui.find(find(COMPONENT_GROUP_SELECTER_CONTAINER), COMPONENT_SEND_SMS_BUTTON_GROUP_SIDE);
 		this.ui.setEnabled(btSendSmsToGroup, this.groupSelecter.getSelectedGroup() != null);
 		

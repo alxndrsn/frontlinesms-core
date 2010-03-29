@@ -93,6 +93,8 @@ public class GroupSelecterPanel extends BasePanelHandler {
 
 	/** @return Recursively search for the group in the tree */
 	public void selectGroup(Group g) {
+		if (g == null) return;
+		
 		this.ui.setSelectedItem(getGroupTreeComponent(), getNodeForGroup(getGroupTreeComponent(), g));
 		this.selectionChanged();
 	}
