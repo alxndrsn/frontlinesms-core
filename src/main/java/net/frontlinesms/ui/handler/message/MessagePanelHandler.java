@@ -80,7 +80,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 				lbTooManyMessages 	= uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_LB_TOO_MANY_MESSAGES);
 		uiController.setVisible(pnRecipient, shouldDisplayRecipientField);
 		
-		if (shouldCheckMaxMessageLength) {
+		if (lbTooManyMessages != null) {
 			uiController.setVisible(lbTooManyMessages, false);
 			uiController.setColor(lbTooManyMessages, "foreground", Color.RED);
 		}
@@ -134,11 +134,11 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		if(GsmAlphabet.areAllCharactersValidGSM(message))totalLengthAllowed = Message.SMS_MULTIPART_LENGTH_LIMIT * Message.SMS_LIMIT;
 		else totalLengthAllowed = Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * Message.SMS_LIMIT;
 		
-		boolean shouldEnableSendButton = (sendButton != null
-											&& messageLength <= totalLengthAllowed
+		boolean shouldEnableSendButton = ((!shouldCheckMaxMessageLength || messageLength <= totalLengthAllowed)
 											&& recipientLength > 0
 											&& messageLength > 0);
-		uiController.setEnabled(sendButton, shouldEnableSendButton);
+		if (sendButton != null)
+			uiController.setEnabled(sendButton, shouldEnableSendButton);
 	}
 	
 	/** Method which triggers showing of the contact selecter. */
@@ -194,8 +194,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		if(areAllCharactersValidGSM) totalLengthAllowed = Message.SMS_LENGTH_LIMIT + Message.SMS_MULTIPART_LENGTH_LIMIT * (Message.SMS_LIMIT - 1);
 		else totalLengthAllowed = Message.SMS_LENGTH_LIMIT + Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * (Message.SMS_LIMIT - 1);
 		
-		boolean shouldEnableSendButton = (sendButton != null 
-											&& messageLength <= totalLengthAllowed
+		boolean shouldEnableSendButton = ((!shouldCheckMaxMessageLength || messageLength <= totalLengthAllowed)
 											&& (!shouldDisplayRecipientField || recipientLength > 0));
 		
 		if (sendButton != null)
@@ -257,7 +256,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		if (numberOfMsgs >= 1) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_FIRST), Icon.SMS);
 		if (numberOfMsgs >= 2) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS);
 		if (numberOfMsgs == 3) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS);
-		if (numberOfMsgs > 3) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), (shouldCheckMaxMessageLength ? Icon.SMS_DELETE : Icon.SMS));
+		if (numberOfMsgs > 3) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS_ADD);
 		
 		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(costEstimate));
 	}

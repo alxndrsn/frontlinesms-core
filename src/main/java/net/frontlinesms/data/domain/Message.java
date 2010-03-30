@@ -79,7 +79,7 @@ public class Message {
 	public static final int STATUS_FAILED = 9;
 
 	/** The maximum number of parts in an SMS message.  TODO rename this SMS_PART_LIMIT */
-	public static final int SMS_LIMIT = 3;
+	public static final int SMS_LIMIT = 255;
 	/** Maximum number of characters that can be fit into a single 7-bit GSM SMS message. TODO this value should probably be fetched from {@link TpduUtils}. */
 	public static final int SMS_LENGTH_LIMIT = 160;
 	/** Maximum number of characters that can be fit in one part of a multipart 7-bit GSM SMS message.  TODO this number is incorrect, I suspect.  The value should probably be fetched from {@link TpduUtils}. */
@@ -88,6 +88,8 @@ public class Message {
 	public static final int SMS_LENGTH_LIMIT_UCS2 = 70;
 	/** Maximum number of characters that can be fit in one part of a multipart UCS-2 SMS message.  TODO this number is incorrect, I suspect.  The value should probably be fetched from {@link TpduUtils}. */
 	public static final int SMS_MULTIPART_LENGTH_LIMIT_UCS2 = 60;
+	/** Maximum number of characters that can be fit in a whole SMS */
+	public static final int SMS_MAX_CHARACTERS = 39015;
 	
 
 
@@ -127,7 +129,7 @@ public class Message {
 	private long dispatchDate;
 	private String senderMsisdn;
 	/** Text content of this message. */
-	@Column(name=COLUMN_TEXT_CONTENT, length=480)
+	@Column(name=COLUMN_TEXT_CONTENT, length=SMS_MAX_CHARACTERS)
 	private String textMessageContent;
 	/** Binary content of this message. */
 	private byte[] binaryMessageContent;

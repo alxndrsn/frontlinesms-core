@@ -638,7 +638,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 		
 		final boolean shouldDisplayRecipientField = false;
-		final boolean shouldCheckMaxMessageLength = true;
+		final boolean shouldCheckMaxMessageLength = false;
 		final int numberOfRecipients = recipients.size();
 		
 		MessagePanelHandler messagePanelController = MessagePanelHandler.create(this, shouldDisplayRecipientField, shouldCheckMaxMessageLength, numberOfRecipients);
