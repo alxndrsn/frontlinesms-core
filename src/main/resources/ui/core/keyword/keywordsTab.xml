@@ -9,7 +9,7 @@
 	                    <menuitem action="showMessageHistory(keywordList)" icon="/icons/history.png" name="miViewMsgs" text="i18n.action.view.messages"/>
 	                    <separator name="sp1"/>
 	                    <menuitem action="keywordManager_edit(keywordList)" icon="/icons/keyword_edit.png" name="miEdit" text="i18n.action.edit"/>
-	                    <menuitem action="showConfirmationDialog('removeSelectedFromKeywordList')" icon="/icons/keyword_delete.png" name="miDelete" text="i18n.action.delete.selected"/>
+	                    <menuitem action="showConfirmationDialog('removeSelectedFromKeywordList')" icon="/icons/keyword_delete.png" name="miDelete" text="i18n.action.delete"/>
 	                    <menuitem action="showExportWizard(keywordList)" icon="/icons/export.png" name="miExport" text="i18n.action.export.selected"/>
 	                    <separator name="sp2"/>
 	                    <menuitem action="show_createKeywordForm(keywordList)" icon="/icons/keyword_add.png" name="miCreate" text="i18n.action.new.keyword"/>
