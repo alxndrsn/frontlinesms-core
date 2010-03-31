@@ -501,8 +501,8 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			this.groupSelecter.addGroup(g);
 			
 			if (dialog != null) this.ui.remove(dialog);
+			this.selectedGroup = g;
 			this.updateGroupList();
-			this.groupSelecter.selectGroup(g);
 			
 			LOG.debug("Group created successfully!");
 		} catch (DuplicateKeyException e) {

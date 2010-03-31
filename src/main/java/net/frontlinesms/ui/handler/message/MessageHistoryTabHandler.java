@@ -128,7 +128,8 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	private int numberToSend = 1;
 	/** The selected lines in the left panel  */
 	private Group selectedGroup;
-	private int selectedListIndex;
+	private Contact selectedContact;
+	private Keyword selectedKeyword;
 	
 //> CONSTRUCTORS
 	/**
@@ -472,10 +473,19 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	
 	/** Update the list of messages. */
 	public void updateMessageList() {
-		boolean showGroups = getMessageHistoryFilterType() == Group.class;
+		Class<?> filterClass = getMessageHistoryFilterType();
 		Object filterList = getMessageHistoryFilterList();
-		if (filterList != null && !showGroups)
-			this.selectedListIndex = ui.getSelectedIndex(filterList);
+		
+		boolean showGroups = filterClass == Group.class;
+		boolean showContacts = filterClass == Contact.class;
+		boolean showKeywords = filterClass == Keyword.class;
+		if (filterList != null && !showGroups) {
+			//this.selectedListIndex = ui.getSelectedIndex(filterList);
+			if (showContacts)
+				this.selectedContact = ui.getAttachedObject(ui.getSelectedItem(filterList), Contact.class);
+			else if (showKeywords)
+				this.selectedKeyword = ui.getAttachedObject(ui.getSelectedItem(filterList), Keyword.class);
+		}
 		
 		this.messagePagingHandler.setCurrentPage(0);
 		this.messagePagingHandler.refresh();
@@ -507,11 +517,35 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		ui.setVisible(find(COMPONENT_KEYWORD_PANEL), showKeywords);
 		
 		if (filterList != null) {
-			if (showGroups)
+			if (showGroups) {
 				groupSelecter.selectGroup(selectedGroup);
-			else
-				this.ui.setSelectedIndex(filterList, selectedListIndex);
+			} else if (showContacts) {
+				this.ui.setSelectedItem(filterList, getListItemForObject(filterList, selectedContact));
+			} else if (showKeywords) {
+				this.ui.setSelectedItem(filterList, getListItemForObject(filterList, selectedKeyword));
+			}
+			updateMessageList();
 		}
+	}
+	
+	/**
+	 * Gets the list item we are currently displaying for an object (Contact or Keyword so far).
+	 * @param filterList The list in which we're looking for the selected item
+	 * @param selected The selected object which should match an item in the list
+	 * @return 
+	 */
+	private Object getListItemForObject(Object filterList, Object selected) {
+		if (selected == null) return null;
+		
+		Object ret = null;
+		for (Object o : this.ui.getItems(filterList)) {
+			Object k = ui.getAttachedObject(o);
+			if (k != null && k.equals(selected)) {
+				ret = o;
+				break;
+			}
+		}
+		return ret;
 	}
 
 	public void lsContacts_enableSend(Object popUp) {
