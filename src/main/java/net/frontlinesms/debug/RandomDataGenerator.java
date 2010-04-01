@@ -129,12 +129,12 @@ public class RandomDataGenerator {
 		String messageContent = "";
 		while(--wordCount >= 0) {
 			String nextWord = getRandomMessageWord();
-			if((messageContent + nextWord).length() <= Message.SMS_MAX_CHARACTERS)
+			if((messageContent + nextWord).length() <= 480)
 				messageContent += nextWord;
 			else break;
 			
 			if(wordCount > 1) {
-				if(messageContent.length() < Message.SMS_MAX_CHARACTERS)
+				if(messageContent.length() < 480)
 					messageContent += " ";
 				else break;
 			}

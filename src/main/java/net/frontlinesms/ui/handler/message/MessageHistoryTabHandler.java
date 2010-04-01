@@ -154,7 +154,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	 * @param component group list or contact list
 	 */
 	public void doShowMessageHistory(Object component) {
-		Object attachment =  ui.getAttachedObject(ui.getSelectedItem(component));
+		Object attachment = ui.getAttachedObject(ui.getSelectedItem(component));
 		
 		boolean isGroup = attachment instanceof Group;
 		boolean isContact = attachment instanceof Contact;
@@ -428,15 +428,12 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			newEnd = InternationalisationUtils.parseDate(tfEndDateValue).getTime() + MILLIS_PER_DAY;
 		} catch (ParseException ex) {}
 		
-		if (tfStartDateValue.equals("") || tfEndDateValue.equals("")) {
-			updateMessageList();
-		}
-		
-		if ((newStart != null && !newStart.equals(messageHistoryStart)) || tfStartDateValue.equals("")) {
+		// We refresh the list once if one of the date fields changed to either a valid or an empty date 
+		if ((newStart != null && !newStart.equals(messageHistoryStart)) || (tfStartDateValue.equals("") && messageHistoryStart != null)) {
 			messageHistoryStart = newStart;
 			updateMessageList();
 		}
-		if ((newEnd != null && !newEnd.equals(messageHistoryEnd)) || tfEndDateValue.equals("")) {
+		if ((newEnd != null && !newEnd.equals(messageHistoryEnd)) || (tfEndDateValue.equals("") && messageHistoryEnd != null)) {
 			messageHistoryEnd = newEnd;
 			updateMessageList();
 		}
@@ -476,11 +473,10 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		Class<?> filterClass = getMessageHistoryFilterType();
 		Object filterList = getMessageHistoryFilterList();
 		
-		boolean showGroups = filterClass == Group.class;
-		boolean showContacts = filterClass == Contact.class;
-		boolean showKeywords = filterClass == Keyword.class;
-		if (filterList != null && !showGroups) {
-			//this.selectedListIndex = ui.getSelectedIndex(filterList);
+		if (filterList != null) {
+			// We save the selected item in the contacts/keywords list
+			boolean showContacts = filterClass == Contact.class;
+			boolean showKeywords = filterClass == Keyword.class;
 			if (showContacts)
 				this.selectedContact = ui.getAttachedObject(ui.getSelectedItem(filterList), Contact.class);
 			else if (showKeywords)
@@ -501,8 +497,9 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		boolean showContacts = filterClass == Contact.class;
 		boolean showKeywords = filterClass == Keyword.class;
 		
+
+		// We clear and reload the displayed list/tree
 		if(showGroups) {
-			// Clear and reload the group list
 			groupSelecter.refresh();
 		} else if(showContacts) {
 			this.contactListPagingHandler.refresh();
@@ -516,6 +513,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		ui.setVisible(find(COMPONENT_CONTACT_PANEL), showContacts);
 		ui.setVisible(find(COMPONENT_KEYWORD_PANEL), showKeywords);
 		
+		// We select the right item in the displayed list, i.e. the one previously selected, if there was one
 		if (filterList != null) {
 			if (showGroups) {
 				groupSelecter.selectGroup(selectedGroup);
