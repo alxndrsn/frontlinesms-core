@@ -18,7 +18,6 @@ import net.frontlinesms.data.domain.KeywordAction;
 import net.frontlinesms.data.repository.KeywordActionDao;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
-import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
@@ -94,6 +93,9 @@ public abstract class BaseActionDialog implements ThinletUiEventHandler {
 		this.dialogComponent = ui.loadComponentFromFile(getLayoutFilePath(), this);
 	}
 	
+	/** Perform any post-removal tasks, such as cleaning up references to this instance. */
+	protected abstract void handleRemoved();
+	
 //> ACCESSORS
 	/** @return the path to the Thinlet XML layout file for this dialog */
 	protected abstract String getLayoutFilePath();
@@ -145,6 +147,7 @@ public abstract class BaseActionDialog implements ThinletUiEventHandler {
 	/** Remove the dialog from display. */
 	public void removeDialog() {
 		ui.remove(this.dialogComponent);
+		this.handleRemoved();
 	}
 	
 //> UI HELPER METHODS

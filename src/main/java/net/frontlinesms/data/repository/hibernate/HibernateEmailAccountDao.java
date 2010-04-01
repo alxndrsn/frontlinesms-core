@@ -21,7 +21,7 @@ public class HibernateEmailAccountDao extends BaseHibernateDao<EmailAccount> imp
 	
 	/** @see EmailAccountDao#deleteEmailAccount(EmailAccount) */
 	public void deleteEmailAccount(EmailAccount account) {
-		this.getHibernateTemplate().delete(account);
+		super.delete(account);
 	}
 
 	/** @see EmailAccountDao#getAllEmailAccounts() */

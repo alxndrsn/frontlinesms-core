@@ -77,6 +77,11 @@ abstract class BaseGroupActionDialog extends BaseActionDialog {
 		initDateFields();
 	}
 	
+	@Override
+	protected void handleRemoved() {
+		// no special action required
+	}
+	
 //> UI EVENT METHODS
 	public abstract void save();
 	

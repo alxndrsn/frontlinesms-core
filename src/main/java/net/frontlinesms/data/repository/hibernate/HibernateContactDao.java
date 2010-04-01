@@ -58,8 +58,6 @@ public class HibernateContactDao extends BaseHibernateDao<Contact> implements Co
 	public List<Contact> getAllContactsSorted(int startIndex, int limit, Field sortBy, Order order) {
 		DetachedCriteria criteria = super.getSortCriterion(sortBy, order);
 		return super.getList(criteria, startIndex, limit);
-		
-		//return super.getAll(startIndex, limit);
 	}
 
 	/** @see ContactDao#getContactByName(String) */

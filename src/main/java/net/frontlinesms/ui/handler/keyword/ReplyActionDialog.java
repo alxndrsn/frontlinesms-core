@@ -77,6 +77,11 @@ public class ReplyActionDialog extends BaseActionDialog {
 			initDateFields();
 		}
 	}
+
+	@Override
+	protected void handleRemoved() {
+		// no special action required
+	}
 	
 //> UI EVENT HANDLERS
 	
