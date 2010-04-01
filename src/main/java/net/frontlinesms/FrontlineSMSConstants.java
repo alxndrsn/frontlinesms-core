@@ -91,6 +91,7 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_OUTBOX = "common.type.outbox";
 	public static final String COMMON_RECEIVED = "common.received";
 	public static final String COMMON_DORMANT = "common.dormant";
+	public static final String COMMON_DRAFT = "common.draft";
 	public static final String COMMON_ACTIVE = "common.active";
 	public static final String COMMON_LIVE = "common.live";
 	public static final String COMMON_TO_GROUP = "common.to.group";

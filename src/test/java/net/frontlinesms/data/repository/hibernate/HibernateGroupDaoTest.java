@@ -47,14 +47,14 @@ public class HibernateGroupDaoTest extends HibernateTestCase {
 		// Delete
 		final int BEFORE_DELETE_GROUP_COUNT = 2;
 		groupDao.deleteGroup(myGroup, false);
-		assertTrue("Group has not been deleted. Expected: <1> group left. Experienced:<" + groupDao.getGroupCount() + ">", groupDao.getGroupCount() < BEFORE_DELETE_GROUP_COUNT);
+		assertTrue("Group has not been deleted. Expected: <1> group left, but was: <" + groupDao.getGroupCount() + ">", groupDao.getGroupCount() < BEFORE_DELETE_GROUP_COUNT);
 		assertNull("Wrong group has been deleted", groupDao.getGroupByPath(myGroup.getPath()));
 		assertTrue("Contact has been deleted and wasn't supposed to", contactDao.getFromMsisdn(george.getPhoneNumber()).equals(george));
 		
 		
 		final int AFTER_FIRST_DELETE_GROUP_COUNT = 1;
 		groupDao.deleteGroup(myGroup2, true);
-		assertTrue("Group has not been deleted. Expected: <0> groups left. Experienced:<" + groupDao.getGroupCount() + ">", groupDao.getGroupCount() < AFTER_FIRST_DELETE_GROUP_COUNT);
+		assertTrue("Group has not been deleted. Expected: <0> groups left, but was: <" + groupDao.getGroupCount() + ">", groupDao.getGroupCount() < AFTER_FIRST_DELETE_GROUP_COUNT);
 		assertNull("Wrong group has been deleted", groupDao.getGroupByPath(myGroup.getPath()));
 		assertNull("Contact has not been deleted and was supposed to", contactDao.getFromMsisdn(abitbol.getPhoneNumber()));
 	}

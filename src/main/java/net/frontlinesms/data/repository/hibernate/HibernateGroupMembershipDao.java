@@ -13,9 +13,11 @@ import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import net.frontlinesms.data.DuplicateKeyException;
+import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.GroupMembership;
+import net.frontlinesms.data.domain.Contact.Field;
 import net.frontlinesms.data.repository.GroupMembershipDao;
 
 /**
@@ -100,6 +102,41 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 			String queryString = "SELECT DISTINCT mem.contact FROM GroupMembership AS mem WHERE " +
 					"(mem.group=? OR mem.group.path LIKE ?)" +
 					" AND (LOWER(mem.contact.name) LIKE LOWER(?) OR LOWER(mem.contact.phoneNumber) LIKE LOWER(?))";
+			String childPath = group.getPath() + Group.PATH_SEPARATOR + "%";
+			return getList(Contact.class, queryString, group, childPath, contactFilterString, contactFilterString);
+		}
+	}
+	
+	/** @see GroupMembershipDao#getFilteredMembersSorted(Group, String) */
+	public List<Contact> getFilteredMembersSorted(final Group group, String contactFilterString, Field sortBy, Order order, int startIndex, int limit) {
+		// TODO this is quite an ugly way of doing limits
+		List<Contact> filteredMembers = getFilteredMembersSorted(group, contactFilterString, sortBy, order);
+		int toIndex = Math.min(filteredMembers.size(), startIndex + limit);
+		return filteredMembers.subList(startIndex, toIndex);
+	}
+	
+	/** @see GroupMembershipDao#getFilteredMembersSorted(Group, String) */
+	public List<Contact> getFilteredMembersSorted(final Group group, String contactFilterString, Field sortBy, Order order) {
+		contactFilterString = getMemberFilterLikeString(contactFilterString);
+		if (group.isRoot()) {
+			String queryString = "SELECT DISTINCT c FROM Contact AS c WHERE LOWER(c.name) LIKE LOWER(?) OR LOWER(c.phoneNumber) LIKE LOWER(?)";
+			if (sortBy != null) {
+				String strSortBy = sortBy.getFieldName();
+				if (sortBy.equals(Field.EMAIL_ADDRESS))
+					strSortBy += ", " + Field.NAME.getFieldName();
+				queryString += " ORDER BY " + strSortBy + " " + order.toHqlString();
+			}
+			return getList(Contact.class, queryString, contactFilterString, contactFilterString);
+		} else {
+			String queryString = "SELECT DISTINCT mem.contact FROM GroupMembership AS mem WHERE " +
+					"(mem.group=? OR mem.group.path LIKE ?)" +
+					" AND (LOWER(mem.contact.name) LIKE LOWER(?) OR LOWER(mem.contact.phoneNumber) LIKE LOWER(?))";
+			if (sortBy != null) {
+				String strSortBy = sortBy.getFieldName();
+				if (sortBy.equals(Field.EMAIL_ADDRESS))
+					strSortBy += ", mem.contact." + Field.NAME.getFieldName();
+				queryString += " ORDER BY mem.contact." + strSortBy + " " + order.toHqlString();
+			}
 			String childPath = group.getPath() + Group.PATH_SEPARATOR + "%";
 			return getList(Contact.class, queryString, group, childPath, contactFilterString, contactFilterString);
 		}

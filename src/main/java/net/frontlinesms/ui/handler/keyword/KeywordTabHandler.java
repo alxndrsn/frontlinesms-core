@@ -17,7 +17,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_AU
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORDS_DIVIDER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORD_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_MENU_ITEM_CREATE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_MI_EDIT;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_BUTTON_DONE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_DESCRIPTION;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_KEYWORD;
@@ -563,6 +562,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	 */
 	private void updateKeywordList() {
 		this.keywordListPagingHandler.refresh();
+		enableKeywordFields(ui.find(COMPONENT_KEY_PANEL));
 	}
 
 	/**

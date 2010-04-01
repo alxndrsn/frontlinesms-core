@@ -1098,7 +1098,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public static final String getMessageStatusAsString(Message message) {
 		switch(message.getStatus()) {
 			case Message.STATUS_DRAFT:
-				return "(draft)";
+				return InternationalisationUtils.getI18NString(COMMON_DRAFT);
 			case Message.STATUS_RECEIVED:
 				return InternationalisationUtils.getI18NString(COMMON_RECEIVED);
 			case Message.STATUS_OUTBOX:

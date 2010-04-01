@@ -6,11 +6,20 @@ package net.frontlinesms.ui.handler.contacts;
 // TODO remove static imports
 import static net.frontlinesms.FrontlineSMSConstants.ACTION_ADD_TO_GROUP;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_CONTACTS_IN_GROUP;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_DATE;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_E_MAIL_ADDRESS;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_GROUP;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_MESSAGE;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_NAME;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_PHONE_NUMBER;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_RECIPIENT;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_SENDER;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_STATUS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_CONTACTS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUPS_AND_CONTACTS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUP_ALREADY_EXISTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_REMOVING_CONTACTS;
+import static net.frontlinesms.FrontlineSMSConstants.PROPERTY_FIELD;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BUTTON_YES;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_MANAGER_CONTACT_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_DELETE_NEW_CONTACT;
@@ -30,8 +39,10 @@ import java.util.List;
 
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.DuplicateKeyException;
+import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
+import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
@@ -46,6 +57,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import org.apache.log4j.Logger;
 
 import thinlet.Thinlet;
+import thinlet.ThinletText;
 
 /**
  * Event handler for the Contacts tab and associated dialogs.
@@ -172,7 +184,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			return PagedListDetails.EMPTY;
 		} else {
 			int totalItemCount = groupMembershipDao.getFilteredMemberCount(selectedGroup, this.contactFilter);
-			List<Contact> contacts = groupMembershipDao.getFilteredMembers(selectedGroup, contactFilter, startIndex, limit);
+			List<Contact> contacts = groupMembershipDao.getFilteredMembersSorted(selectedGroup, contactFilter, Contact.Field.NAME, Order.ASCENDING, startIndex, limit);
 			Object[] listItems = toThinletComponents(contacts);
 			
 			return new PagedListDetails(totalItemCount, listItems);
@@ -593,7 +605,24 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		Object pnContacts = this.ui.find(tabComponent, COMPONENT_PN_CONTACTS);
 		this.ui.add(pnContacts, this.contactListPager.getPanel());
 		
+		//initContactTableForSorting();
+		
 		return tabComponent;
+	}
+	
+	/** Initialise the message table's HEADER component for sorting the table. */
+	private void initContactTableForSorting() {
+		Object header = Thinlet.get(contactListComponent, ThinletText.HEADER);
+		for (Object o : ui.getItems(header)) {
+			String text = ui.getString(o, Thinlet.TEXT);
+			// Here, the FIELD property is set on each column of the message table.  These field objects are
+			// then used for easy sorting of the message table.
+			if(text != null) {
+				if (text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_NAME))) ui.putProperty(o, PROPERTY_FIELD, Message.Field.STATUS);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_PHONE_NUMBER))) ui.putProperty(o, PROPERTY_FIELD, Message.Field.DATE);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_E_MAIL_ADDRESS))) ui.putProperty(o, PROPERTY_FIELD, Message.Field.SENDER_MSISDN);
+			}
+		}
 	}
 
 //> STATIC FACTORIES

@@ -264,8 +264,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	/** @return {@link PagedListDetails} for {@link #contactListComponent} */
 	private PagedListDetails getContactListPagingDetails(int startIndex, int limit) {
 		int totalItemCount = this.contactDao.getContactCount();
-		
-		List<Contact> contacts = this.contactDao.getAllContacts(startIndex, limit);
+		List<Contact> contacts = this.contactDao.getAllContactsSorted(startIndex, limit, Contact.Field.NAME, Order.ASCENDING);
 		Object[] contactRows = new Object[contacts.size() + 1];
 		contactRows[0] = getAllMessagesListItem();
 		for (int i = 0; i < contacts.size(); i++) {
@@ -275,6 +274,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		
 		return new PagedListDetails(totalItemCount, contactRows);
 	}
+
 
 	/** @return {@link PagedListDetails} for {@link #messageListComponent} */
 	private PagedListDetails getMessageListPagingDetails(int startIndex, int limit) {

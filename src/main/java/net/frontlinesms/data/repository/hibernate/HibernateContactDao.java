@@ -3,6 +3,7 @@ package net.frontlinesms.data.repository.hibernate;
 import java.util.List;
 
 import net.frontlinesms.data.DuplicateKeyException;
+import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Contact.Field;
 import net.frontlinesms.data.repository.ContactDao;
@@ -13,7 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Hibernate implementation of {@link ContactDao}.
- * @author Alex
+ * @author Alex Anderson <alex@frontlinesms.com>
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 public class HibernateContactDao extends BaseHibernateDao<Contact> implements ContactDao {
 	/** Create a new instance of this DAO. */
@@ -50,6 +52,14 @@ public class HibernateContactDao extends BaseHibernateDao<Contact> implements Co
 	/** @see ContactDao#getAllContacts(int, int) */
 	public List<Contact> getAllContacts(int startIndex, int limit) {
 		return super.getAll(startIndex, limit);
+	}
+	
+	/** @see ContactDao#getAllContacts(int, int, Order) */
+	public List<Contact> getAllContactsSorted(int startIndex, int limit, Field sortBy, Order order) {
+		DetachedCriteria criteria = super.getSortCriterion(sortBy, order);
+		return super.getList(criteria, startIndex, limit);
+		
+		//return super.getAll(startIndex, limit);
 	}
 
 	/** @see ContactDao#getContactByName(String) */

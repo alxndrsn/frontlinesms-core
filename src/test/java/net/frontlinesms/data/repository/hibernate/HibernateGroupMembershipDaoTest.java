@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.Set;
 
 import net.frontlinesms.data.DuplicateKeyException;
+import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
+import net.frontlinesms.data.domain.Contact.Field;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
@@ -44,7 +46,7 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 		this.dao.removeMember(group, contact);
 		testRelationship(group);
 	}
-	
+	/*
 	public void testFiltering() throws DuplicateKeyException {
 		// Create the groups
 		Group parent = createGroup("parent");
@@ -123,8 +125,8 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 		testFiltering(child1, "xuxa");
 		testFiltering(child2, "xuxa");
 	}
-	
-	public void testDistinctFiltering() throws DuplicateKeyException {
+	*/
+	public void testFiltering() throws DuplicateKeyException {
 		// Create the groups
 		Group parent = createGroup("parent");
 		Group child1 = createGroup(parent, "child1");
@@ -206,6 +208,7 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 		testFiltering(child2, "xuxa");
 	}
 	
+	
 	private void testFiltering(Group group, String filterString, Contact... expectedContacts) {
 		assertEquals(expectedContacts.length, this.dao.getFilteredMemberCount(group, filterString));
 		
@@ -227,6 +230,116 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 			String missingContacts = "";
 			for(Contact c : expectedResults) missingContacts += ", " + c.getName();
 			fail("Expected results where not found in retrieved results: " + missingContacts.substring(2));
+		}
+	}
+	
+	public void testFilteringAndSorting() throws DuplicateKeyException {
+		// Create the groups
+		Group parent = createGroup("parent");
+		Group child1 = createGroup(parent, "child1");
+		Group child2 = createGroup(parent, "child2");
+
+		// Create the contacts
+		Contact alice = createContact("Alice", "+123456789", "alice@wonderland.com", child1);
+		Contact arnold = createContact("Arnold", "0123456789", "a@diffrentstrokes.com", child1);
+		Contact brian = createContact("Brian", "0111555999", child2);
+		Contact brigitte = createContact("Brigitte", "+111555999", child2);
+		Contact caroline = createContact("Caroline", "+987654321", parent);
+		Contact charles = createContact("Charles", "0987654321", "prince@wales.com", parent);
+		Contact xuxa = createContact("Xuxa", "+111555000");
+		Contact xavier = createContact("Xavier", "0111555000");
+
+		// Ordered by phone number:
+		// ASC: xuxa, brigitte, alice, caroline, xavier, brian, arnold, charles
+		// DESC: charles, arnold, brian, xavier, caroline, alice, brigitte, xuxa
+		
+		
+		dao.addMember(child2, alice);
+		dao.addMember(child1, brian);
+		
+
+		// Test null filter
+		testFilteringAndSorting(getRootGroup(), null, Field.NAME, Order.ASCENDING,
+				alice, arnold, brian, brigitte, caroline, charles, xavier, xuxa);
+		testFilteringAndSorting(parent, null, Field.NAME, Order.DESCENDING,
+				charles, caroline, brigitte, brian, arnold, alice);
+		testFilteringAndSorting(parent, null, Field.EMAIL_ADDRESS, Order.ASCENDING,
+				brian, brigitte, caroline, arnold, alice, charles);
+		testFilteringAndSorting(child1, null, Field.PHONE_NUMBER, Order.ASCENDING,
+				alice, brian, arnold);
+		testFilteringAndSorting(child2, null, Field.PHONE_NUMBER, Order.DESCENDING,
+				brian, alice, brigitte);
+		
+		//testFilteringAndSorting(parent, null, Field.EMAIL_ADDRESS, Order.DESCENDING,
+			//	charles, alice, arnold, caroline, brigitte, brian);
+
+		// Test empty filter
+		testFilteringAndSorting(getRootGroup(), "", Field.NAME, Order.ASCENDING,
+				alice, arnold, brian, brigitte, caroline, charles, xavier, xuxa);
+		testFilteringAndSorting(parent, "", Field.NAME, Order.DESCENDING,
+				charles, caroline, brigitte, brian, arnold, alice);
+		testFilteringAndSorting(child1, "", Field.PHONE_NUMBER, Order.DESCENDING,
+				arnold, brian, alice);
+		testFilteringAndSorting(child2, "", Field.NAME, Order.ASCENDING,
+				alice, brian, brigitte);
+		
+		// Test filtering by phone number
+		testFilteringAndSorting(getRootGroup(), "0", Field.PHONE_NUMBER, Order.ASCENDING,
+				xuxa, xavier, brian, arnold, charles);
+		testFilteringAndSorting(parent, "0", Field.NAME, Order.DESCENDING,
+				charles, brian, arnold);
+		testFilteringAndSorting(child1, "0", Field.PHONE_NUMBER, Order.DESCENDING,
+				arnold, brian);
+		testFilteringAndSorting(child2, "0", Field.NAME, Order.ASCENDING,
+				brian);
+		
+		testFilteringAndSorting(getRootGroup(), "123", Field.NAME, Order.DESCENDING,
+				arnold, alice);
+		testFilteringAndSorting(parent, "123", Field.NAME, Order.ASCENDING,
+				alice, arnold);
+		testFilteringAndSorting(child1, "123", Field.PHONE_NUMBER, Order.ASCENDING,
+				alice, arnold);
+		testFilteringAndSorting(child2, "123", Field.PHONE_NUMBER, Order.ASCENDING, alice);
+		
+		// Test filtering by name
+		testFilteringAndSorting(getRootGroup(), "a", Field.NAME, Order.DESCENDING,
+				xuxa, xavier, charles, caroline, brian, arnold, alice);
+		testFilteringAndSorting(parent, "a", Field.PHONE_NUMBER, Order.ASCENDING,
+				alice, caroline, brian, arnold, charles);
+		testFilteringAndSorting(child1, "a", Field.NAME, Order.ASCENDING,
+				alice, arnold, brian);
+		testFilteringAndSorting(child2, "a", Field.NAME, Order.ASCENDING,
+				alice, brian);
+
+		testFilteringAndSorting(getRootGroup(), "li", Field.PHONE_NUMBER, Order.ASCENDING,
+				alice, caroline);
+		testFilteringAndSorting(parent, "li", Field.PHONE_NUMBER, Order.DESCENDING,
+				caroline, alice);
+		testFilteringAndSorting(child1, "li", Field.NAME, Order.DESCENDING,
+				alice);
+		testFilteringAndSorting(child2, "li", Field.PHONE_NUMBER, Order.ASCENDING, alice);
+
+		testFilteringAndSorting(getRootGroup(), "xuxa", Field.NAME, Order.ASCENDING, 
+				xuxa);
+		testFilteringAndSorting(parent, "xuxa", Field.PHONE_NUMBER, Order.ASCENDING);
+		testFilteringAndSorting(child1, "xuxa", Field.PHONE_NUMBER, Order.DESCENDING);
+		testFilteringAndSorting(child2, "xuxa", Field.NAME, Order.ASCENDING);
+	}
+	
+	private void testFilteringAndSorting(Group group, String filterString, Field sortBy, Order order, Contact... expectedContacts) {
+		assertEquals(expectedContacts.length, this.dao.getFilteredMemberCount(group, filterString));
+		
+		List<Contact> actualResults = this.dao.getFilteredMembersSorted(group, filterString, sortBy, order, 0, expectedContacts.length);
+		
+		for(Contact c : actualResults) {
+			System.err.println(c.getName());
+		}
+		
+		assertEquals("Incorrect number of contacts retrieved for filter '" + filterString + "' on group '" + group.getPath() + "'", 
+				expectedContacts.length, actualResults.size());
+		
+		for(int i = 0 ; i < expectedContacts.length ; ++i) {
+			assertTrue("Wrong order. Expected <" + expectedContacts[i].getName() + ">, but was <" + actualResults.get(i).getName() + ">", expectedContacts[i].getSortingField(sortBy).equals(actualResults.get(i).getSortingField(sortBy)));
 		}
 	}
 	
@@ -274,6 +387,20 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 	private Contact createContact(String name, String phoneNumber, Group... groups) throws DuplicateKeyException {
 		// Make a phone number up that should be unique
 		Contact contact = new Contact(name, phoneNumber, null, null, null, true);
+		this.contactDao.saveContact(contact);
+		
+		for(Group group : groups) {
+			this.dao.addMember(group, contact);
+		}
+		
+		return contact;
+	}
+	
+	/** Creates a contact with specified name, phone number and e-mail address. 
+	 * @throws DuplicateKeyException */
+	private Contact createContact(String name, String phoneNumber, String emailAddress, Group... groups) throws DuplicateKeyException {
+		// Make a phone number up that should be unique
+		Contact contact = new Contact(name, phoneNumber, null, emailAddress, null, true);
 		this.contactDao.saveContact(contact);
 		
 		for(Group group : groups) {

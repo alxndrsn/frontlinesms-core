@@ -5,8 +5,10 @@ package net.frontlinesms.data.repository;
 
 import java.util.List;
 
+import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
+import net.frontlinesms.data.domain.Contact.Field;
 
 /**
  * @author Alex
@@ -30,10 +32,15 @@ public interface GroupMembershipDao {
 	/** @return Count of all members of the supplied group and its subgroups whose name or
 	 * phone number matches the <code>filterString</code> */
 	public int getFilteredMemberCount(final Group group, String contactFilterString);
+	
 	/** @return all members of the supplied group and its subgroups whose name or
 	 * phone number matches the <code>filterString</code> */
 	public List<Contact> getFilteredMembers(Group group, String filterString, int startIndex, int limit);
 
+	/** @return Count of all members of the supplied group and its subgroups whose name or
+	 * phone number matches the <code>filterString</code>, sorted by the order asked */
+	public List<Contact> getFilteredMembersSorted(final Group group, String contactFilterString, Field sortBy, Order order, int startIndex, int limit);
+	
 	/** 
 	 * Add a contact to a group
 	 * @return <code>true</code> if the contact was added to the group, <code>false</code> if he was already a member
