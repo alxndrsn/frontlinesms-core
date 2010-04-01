@@ -326,6 +326,7 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 		testFilteringAndSorting(child2, "xuxa", Field.NAME, Order.ASCENDING);
 	}
 	
+	/** @param expectedContacts an array containing the contacts we expect in the result, in the order that they should be returned in */
 	private void testFilteringAndSorting(Group group, String filterString, Field sortBy, Order order, Contact... expectedContacts) {
 		assertEquals(expectedContacts.length, this.dao.getFilteredMemberCount(group, filterString));
 		
