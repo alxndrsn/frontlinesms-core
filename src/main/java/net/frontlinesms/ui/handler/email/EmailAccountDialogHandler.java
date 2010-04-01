@@ -207,6 +207,7 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 				acc.setAccountServer(server);
 				acc.setUseSSL(useSSL);
 				acc.setAccountServerPort(serverPort);
+				emailAccountDao.updateEmailAccount(acc);
 				
 				Object tableToAdd = ui.find(ui.find("emailConfigDialog"), COMPONENT_ACCOUNTS_LIST);
 				int index = ui.getSelectedIndex(tableToAdd);
