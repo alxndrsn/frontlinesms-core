@@ -53,14 +53,12 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 	private EmailServerHandler emailManager;
 	
 	private Object dialogComponent;
-	private EmailActionDialog emailActionDialog;
 	
-	public EmailAccountDialogHandler(UiGeneratorController ui, EmailActionDialog emailActionDialog) {
+	public EmailAccountDialogHandler(UiGeneratorController ui) {
 		this.ui = ui;
 		FrontlineSMS frontlineController = ui.getFrontlineController();
 		this.emailAccountDao = frontlineController.getEmailAccountFactory();
 		this.emailManager = frontlineController.getEmailServerHandler();
-		this.emailActionDialog = emailActionDialog;
 	}
 	
 	public Object getDialog() {
@@ -79,9 +77,6 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 		for (EmailAccount acc : emailAccountDao.getAllEmailAccounts()) {
 			this.ui.add(table, ui.getRow(acc));
 		}
-		
-		if (emailActionDialog != null)
-			this.emailActionDialog.refreshEmailAccountList();
 	}
 
 //> UI EVENT METHODS

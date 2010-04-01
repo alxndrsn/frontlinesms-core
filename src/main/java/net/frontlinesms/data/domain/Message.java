@@ -88,7 +88,7 @@ public class Message {
 	public static final int SMS_LENGTH_LIMIT_UCS2 = 70;
 	/** Maximum number of characters that can be fit in one part of a multipart UCS-2 SMS message.  TODO this number is incorrect, I suspect.  The value should probably be fetched from {@link TpduUtils}. */
 	public static final int SMS_MULTIPART_LENGTH_LIMIT_UCS2 = 60;
-	/** Maximum number of characters that can be fit in a whole SMS */
+	/** Maximum number of characters that can be fit into a 255-part GSM 7bit message */
 	public static final int SMS_MAX_CHARACTERS = 39015;
 	
 

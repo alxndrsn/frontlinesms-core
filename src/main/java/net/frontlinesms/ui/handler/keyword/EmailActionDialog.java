@@ -14,6 +14,10 @@ import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
 import net.frontlinesms.data.repository.EmailAccountDao;
+import net.frontlinesms.events.EventBus;
+import net.frontlinesms.events.EventObserver;
+import net.frontlinesms.events.FrontlineEvent;
+import net.frontlinesms.events.impl.DatabaseNotification;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.contacts.ContactSelecter;
@@ -25,7 +29,7 @@ import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
  * @author Alex alex@frontlinesms.com
  */
 @TextResourceKeyOwner(prefix="MESSAGE_")
-public class EmailActionDialog extends BaseActionDialog {
+public class EmailActionDialog extends BaseActionDialog implements EventObserver {
 	
 //> CONSTANTS
 	/** UI Layout file path: Email Action dialog */
@@ -56,6 +60,9 @@ public class EmailActionDialog extends BaseActionDialog {
 	EmailActionDialog(UiGeneratorController ui, KeywordTabHandler owner) {
 		super(ui, owner);
 		this.emailAccountDao = ui.getFrontlineController().getEmailAccountFactory();
+		
+		// register with the eventbus to receive notification of new email accounts
+		ui.getFrontlineController().getEventBus().registerObserver(this);
 	}
 	
 //> INSTANCE METHODS
@@ -98,6 +105,21 @@ public class EmailActionDialog extends BaseActionDialog {
 	@Override
 	protected String getLayoutFilePath() {
 		return UI_FILE_NEW_KACTION_EMAIL_FORM;
+	}
+	
+	@Override
+	protected void handleRemoved() {
+		// Stop listening for events
+		ui.getFrontlineController().getEventBus().unregisterObserver(this);
+	}
+	
+	/** Handle notifications from the {@link EventBus} */
+	public void notify(FrontlineEvent event) {
+		if(event instanceof DatabaseNotification<?>) {
+			if(((DatabaseNotification<?>)event).getDatabaseEntity() instanceof EmailAccount) {
+				this.refreshEmailAccountList();
+			}
+		}
 	}
 
 //> UI EVENT METHODS
@@ -217,7 +239,7 @@ public class EmailActionDialog extends BaseActionDialog {
 //> UI PASSTHROUGH METHODS
 	/** Show the email account settings dialog. */
 	public void showEmailAccountsSettings() {
-		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this.ui, this);
+		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this.ui);
 		ui.add(emailAccountDialogHandler.getDialog());
 	}
 }

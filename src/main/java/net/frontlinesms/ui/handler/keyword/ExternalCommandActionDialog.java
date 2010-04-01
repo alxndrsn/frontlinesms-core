@@ -130,6 +130,11 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 	protected String getLayoutFilePath() {
 		return UI_FILE_NEW_KACTION_EXTERNAL_COMMAND_FORM;
 	}
+	
+	@Override
+	protected void handleRemoved() {
+		// no special action required
+	}
 
 //> UI EVENT METHODS
 	/**
