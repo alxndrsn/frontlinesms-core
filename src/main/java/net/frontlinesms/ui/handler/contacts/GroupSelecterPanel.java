@@ -186,7 +186,7 @@ public class GroupSelecterPanel extends BasePanelHandler {
 			node = groupTreeComponent;
 		} else {
 			node = ui.createNode(toSet, group);
-
+			
 			if(ui.getBoolean(node, Thinlet.EXPANDED)
 					/*&& groupDao.hasDescendants(group)*/) {
 				ui.setIcon(node, Icon.FOLDER_OPEN);
