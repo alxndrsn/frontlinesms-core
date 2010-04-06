@@ -253,6 +253,14 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 		dialog.show();
 	}
 
+	private Group getFirstChildOfRoot() {
+		Object[] children = ui.getItems(ui.getRootGroup());
+		if (children.length == 0)
+			return null;
+		else
+			return ui.getAttachedObject(children[0], Group.class);
+	}
+
 	/**
 	 * Update the icon for active/dormant.
 	 * @param radioButton

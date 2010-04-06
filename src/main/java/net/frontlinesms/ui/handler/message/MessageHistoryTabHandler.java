@@ -523,7 +523,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 
 		// We clear and reload the displayed list/tree
 		if(showGroups) {
-			groupSelecter.refresh();
+			groupSelecter.refresh(true);
 		} else if(showContacts) {
 			this.contactListPagingHandler.refresh();
 		} else if(showKeywords) {

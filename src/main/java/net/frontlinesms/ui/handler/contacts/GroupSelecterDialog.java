@@ -36,7 +36,7 @@ public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSe
 		
 		this.selecter = new GroupSelecterPanel(ui, this);
 		selecter.init(rootGroup);
-		selecter.refresh();
+		selecter.refresh(false);
 		
 		Object selecterPanel = selecter.getPanelComponent();
 		ui.setColspan(selecterPanel, 2);
