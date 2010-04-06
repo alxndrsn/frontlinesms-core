@@ -319,6 +319,29 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 				}
 			}
 		}
+		
+//		if (selectedItem == null) {
+//			return 0;
+//		} else {
+//			final Message.Type messageType = getSelectedMessageType();
+//			int selectedIndex = ui.getSelectedIndex(filterList);
+//			if (selectedIndex == 0) {
+//				return messageDao.getMessageCount(messageType, messageHistoryStart, messageHistoryEnd);
+//			} else {
+//				if(filterClass == Contact.class) {
+//					Contact c = ui.getContact(selectedItem);
+//					return messageDao.getMessageCountForMsisdn(messageType, c.getPhoneNumber(), messageHistoryStart, messageHistoryEnd);
+//				} else if(filterClass == Group.class) {
+//					// A Group was selected
+//					Group selectedGroup = ui.getGroup(selectedItem);
+//					return messageDao.getMessageCount(messageType, getPhoneNumbers(selectedGroup), messageHistoryStart, messageHistoryEnd);
+//				} else /* (filterClass == Keyword.class) */ {
+//					// Keyword Selected
+//					Keyword k = ui.getKeyword(selectedItem);
+//					return messageDao.getMessageCount(messageType, k, messageHistoryStart, messageHistoryEnd);
+//				}
+//			}
+//		}
 	}
 	
 	/**

@@ -116,7 +116,21 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 			return;
 		} 
 		this.uiController.getFrontlineController().sendTextMessage(recipient, message);
-		clearMessageComponent();
+		
+		// We clear the components
+		uiController.setText(uiController.find(this.messagePanel, COMPONENT_TF_RECIPIENT), "");
+		uiController.setText(uiController.find(this.messagePanel, COMPONENT_TF_MESSAGE), "");
+		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_REMAINING_CHARS), String.valueOf(Message.SMS_LENGTH_LIMIT));
+		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_MSG_NUMBER), "0");
+		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_FIRST), Icon.SMS_DISABLED);
+		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS_DISABLED);
+		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS_DISABLED);
+		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(0));
+		if (shouldCheckMaxMessageLength) // Otherwise this component doesn't exist
+			uiController.setVisible(uiController.find(this.messagePanel, COMPONENT_LB_TOO_MANY_MESSAGES), false);
+
+		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
+		if (sendButton != null) uiController.setEnabled(sendButton, false);
 	}
 	
 	/**
@@ -182,19 +196,19 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	public void messageChanged(String recipient, String message) {
 		int recipientLength = recipient.length(),
 			messageLength = message.length();
-		
+		/*
 		if (messageLength == 0) {
 			clearMessageComponent();
 			return;
 		}
-		
+		*/
 		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
 		boolean areAllCharactersValidGSM = GsmAlphabet.areAllCharactersValidGSM(message);
 		int totalLengthAllowed;
 		if(areAllCharactersValidGSM) totalLengthAllowed = Message.SMS_LENGTH_LIMIT + Message.SMS_MULTIPART_LENGTH_LIMIT * (Message.SMS_LIMIT - 1);
 		else totalLengthAllowed = Message.SMS_LENGTH_LIMIT + Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * (Message.SMS_LIMIT - 1);
 		
-		boolean shouldEnableSendButton = ((!shouldCheckMaxMessageLength || messageLength <= totalLengthAllowed)
+		boolean shouldEnableSendButton = (messageLength > 0 && (!shouldCheckMaxMessageLength || messageLength <= totalLengthAllowed)
 											&& (!shouldDisplayRecipientField || recipientLength > 0));
 		
 		if (sendButton != null)
@@ -282,26 +296,6 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	}
 
 //> INSTANCE HELPER METHODS
-	/**
-	 * Clear the details of a message component.
-	 * At some point, this should be nicely refactored so that a message component has its own controller.
-	 * @param panel
-	 */
-	private void clearMessageComponent() {
-		uiController.setText(uiController.find(this.messagePanel, COMPONENT_TF_RECIPIENT), "");
-		uiController.setText(uiController.find(this.messagePanel, COMPONENT_TF_MESSAGE), "");
-		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_REMAINING_CHARS), String.valueOf(Message.SMS_LENGTH_LIMIT));
-		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_MSG_NUMBER), "0");
-		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_FIRST), Icon.SMS_DISABLED);
-		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS_DISABLED);
-		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS_DISABLED);
-		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(0));
-		if (shouldCheckMaxMessageLength) // Otherwise this component doesn't exist
-			uiController.setVisible(uiController.find(this.messagePanel, COMPONENT_LB_TOO_MANY_MESSAGES), false);
-
-		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
-		if (sendButton != null) uiController.setEnabled(sendButton, false);
-	}
 
 //> STATIC FACTORIES
 	/**
