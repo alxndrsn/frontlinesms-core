@@ -54,6 +54,7 @@ public class RandomDataGenerator {
 	 */
 	public void generate(int count) {
 		// Generate contacts
+		
 		List<Contact> contacts = generateContacts(count);
 		persistContacts(contacts);
 		
@@ -109,7 +110,7 @@ public class RandomDataGenerator {
 		MessageDao messageDao = frontlineController.getMessageDao();
 		while(--count >= 0) {
 			String messageContent = generateMessageContent();
-			Message message = Message.createIncomingMessage(randy.nextLong(), getRandomContactPhoneNumber(), LOCAL_PHONE_NUMBER, messageContent);
+			Message message = Message.createIncomingMessage((953550030 + (Math.abs(randy.nextLong()) % 315532800)) * 1000, getRandomContactPhoneNumber(), LOCAL_PHONE_NUMBER, messageContent);
 			messageDao.saveMessage(message);
 		}
 	}
@@ -118,7 +119,7 @@ public class RandomDataGenerator {
 		MessageDao messageDao = frontlineController.getMessageDao();
 		while(--count >= 0) {
 			String messageContent = generateMessageContent();
-			Message message = Message.createOutgoingMessage(randy.nextLong(), LOCAL_PHONE_NUMBER, getRandomContactPhoneNumber(), messageContent);
+			Message message = Message.createOutgoingMessage((953550030 + (Math.abs(randy.nextLong()) % 315532800)) * 1000, LOCAL_PHONE_NUMBER, getRandomContactPhoneNumber(), messageContent);
 			messageDao.saveMessage(message);
 		}
 	}
@@ -128,7 +129,7 @@ public class RandomDataGenerator {
 		String messageContent = "";
 		while(--wordCount >= 0) {
 			String nextWord = getRandomMessageWord();
-			if((messageContent + nextWord).length() <=480)
+			if((messageContent + nextWord).length() <= 480)
 				messageContent += nextWord;
 			else break;
 			

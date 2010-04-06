@@ -11,8 +11,11 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_MS
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_REMAINING_CHARS;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_SECOND;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_THIRD;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_TOO_MANY_MESSAGES;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_RECIPIENT;
+
+import java.awt.Color;
 
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.Utils;
@@ -21,7 +24,10 @@ import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.UiProperties;
+import net.frontlinesms.ui.handler.contacts.ContactSelecter;
+import net.frontlinesms.ui.handler.core.DatabaseSettingsPanel;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 import org.apache.log4j.Logger;
@@ -49,19 +55,36 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	private Object messagePanel;
 	/** The number of people the current SMS will be sent to */
 	private int numberToSend = 1;
+	/** The boolean stipulating whether the recipient field should be displayed */
+	private boolean shouldDisplayRecipientField;
+	/** The boolean stipulating whether we should check the length of the message (we don't in the auto-reply, for example) */
+	private boolean shouldCheckMaxMessageLength;
+	/** The number of recipients, used to estimate the cost of the message */
+	private int numberOfRecipients;
 
 //> CONSTRUCTORS
 	/**
 	 * @param uiController
 	 */
-	private MessagePanelHandler(UiGeneratorController uiController) {
-		this.uiController = uiController;
+	private MessagePanelHandler(UiGeneratorController uiController, boolean shouldDisplay, boolean shouldCheckMaxMessageLength, int numberOfRecipients) {
+		this.uiController 				 = uiController;
+		this.shouldDisplayRecipientField = shouldDisplay;
+		this.shouldCheckMaxMessageLength = shouldCheckMaxMessageLength;
+		this.numberOfRecipients 		 = numberOfRecipients; 
 	}
 	
 	private synchronized void init() {
 		assert(this.messagePanel == null) : "This has already been initialised.";
 		this.messagePanel = uiController.loadComponentFromFile(UI_FILE_MESSAGE_PANEL, this);
-		messageChanged("");
+		Object 	pnRecipient 		= uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_PN_MESSAGE_RECIPIENT),
+				lbTooManyMessages 	= uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_LB_TOO_MANY_MESSAGES);
+		uiController.setVisible(pnRecipient, shouldDisplayRecipientField);
+		
+		if (lbTooManyMessages != null) {
+			uiController.setVisible(lbTooManyMessages, false);
+			uiController.setColor(lbTooManyMessages, "foreground", Color.RED);
+		}
+		messageChanged("", "");
 	}
 
 //> ACCESSORS
@@ -85,8 +108,8 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	 * Extract message details from the controls in the panel, and send an SMS.
 	 */
 	public void send() {
-		String recipient = uiController.getText(uiController.find("tfRecipient"));
-		String message = uiController.getText(uiController.find("tfMessage"));
+		String recipient = uiController.getText(uiController.find(COMPONENT_TF_RECIPIENT));
+		String message = uiController.getText(uiController.find(COMPONENT_TF_MESSAGE));
 		
 		if (recipient.equals("")) {
 			uiController.alert(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_BLANK_PHONE_NUMBER));
@@ -97,74 +120,145 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	}
 	
 	/**
-	 * Event triggered when the message details have changed
-	 * @param panel TODO this should be removed
-	 * @param text the new text value for the message body
+	 * Event triggered when the message recipient has changed
+	 * @param text the new text value for the message recipient
 	 * 
 	 */
-	public void messageChanged(String text) {
-		int textLength = text.length();
-		if (textLength == 0) {
+	public void recipientChanged(String recipient, String message) {
+		int recipientLength = recipient.length(),
+			messageLength = message.length();
+		
+		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
+		
+		int totalLengthAllowed;
+		if(GsmAlphabet.areAllCharactersValidGSM(message))totalLengthAllowed = Message.SMS_MULTIPART_LENGTH_LIMIT * Message.SMS_LIMIT;
+		else totalLengthAllowed = Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * Message.SMS_LIMIT;
+		
+		boolean shouldEnableSendButton = ((!shouldCheckMaxMessageLength || messageLength <= totalLengthAllowed)
+											&& recipientLength > 0
+											&& messageLength > 0);
+		if (sendButton != null)
+			uiController.setEnabled(sendButton, shouldEnableSendButton);
+	}
+	
+	/** Method which triggers showing of the contact selecter. */
+	public void selectMessageRecipient() {
+		ContactSelecter contactSelecter = new ContactSelecter(this.uiController);
+		final boolean shouldHaveEmail = false;
+		contactSelecter.show(InternationalisationUtils.getI18NString(FrontlineSMSConstants.SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "setRecipientTextfield(contactSelecter_contactList, contactSelecter)", null, this, shouldHaveEmail);
+	}
+	
+	/**
+	 * Sets the phone number of the selected contact.
+	 * 
+	 * This method is triggered by the contact selected, as detailed in {@link #selectMessageRecipient()}.
+	 * 
+	 * @param contactSelecter_contactList
+	 * @param dialog
+	 */
+	public void setRecipientTextfield(Object contactSelecter_contactList, Object dialog) {
+		Object 	tfRecipient = uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_TF_RECIPIENT),
+				tfMessage	= uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE);
+		Object selectedItem = uiController.getSelectedItem(contactSelecter_contactList);
+		if (selectedItem == null) {
+			uiController.alert(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_NO_CONTACT_SELECTED));
+			return;
+		}
+		Contact selectedContact = uiController.getContact(selectedItem);
+		uiController.setText(tfRecipient, selectedContact.getPhoneNumber());
+		uiController.remove(dialog);
+		uiController.updateCost();
+		
+		// The recipient text has changed, we check whether the send button should be enabled
+		this.recipientChanged(uiController.getText(tfRecipient), uiController.getText(tfMessage));
+	}
+	
+	/**
+	 * Event triggered when the message details have changed
+	 * @param panel TODO this should be removed
+	 * @param message the new text value for the message body
+	 * 
+	 */
+	public void messageChanged(String recipient, String message) {
+		int recipientLength = recipient.length(),
+			messageLength = message.length();
+		
+		if (messageLength == 0) {
 			clearMessageComponent();
 			return;
 		}
+		
 		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
-		if (sendButton != null) uiController.setEnabled(sendButton, true);
+		boolean areAllCharactersValidGSM = GsmAlphabet.areAllCharactersValidGSM(message);
+		int totalLengthAllowed;
+		if(areAllCharactersValidGSM) totalLengthAllowed = Message.SMS_LENGTH_LIMIT + Message.SMS_MULTIPART_LENGTH_LIMIT * (Message.SMS_LIMIT - 1);
+		else totalLengthAllowed = Message.SMS_LENGTH_LIMIT + Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * (Message.SMS_LIMIT - 1);
 		
-		boolean areAllCharactersValidGSM = GsmAlphabet.areAllCharactersValidGSM(text);
-
-		int total;
-		if(areAllCharactersValidGSM) total = Message.SMS_MULTIPART_LENGTH_LIMIT * Message.SMS_LIMIT;
-		else total = Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * Message.SMS_LIMIT;
+		boolean shouldEnableSendButton = ((!shouldCheckMaxMessageLength || messageLength <= totalLengthAllowed)
+											&& (!shouldDisplayRecipientField || recipientLength > 0));
 		
-		if (textLength > total) {
-			uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_REMAINING_CHARS), "0");
-			Object tfMessage = uiController.find(this.messagePanel, COMPONENT_TF_MESSAGE);
-			uiController.setText(tfMessage, text.substring(0, textLength - 1));
+		if (sendButton != null)
+			uiController.setEnabled(sendButton, shouldEnableSendButton);
+		
+		int singleMessageCharacterLimit;
+		int multipartMessageCharacterLimit;
+		if(areAllCharactersValidGSM) {
+			singleMessageCharacterLimit = Message.SMS_LENGTH_LIMIT;
+			multipartMessageCharacterLimit = Message.SMS_MULTIPART_LENGTH_LIMIT;
 		} else {
-			int singleMessageCharacterLimit;
-			int multipartMessageCharacterLimit;
-			if(areAllCharactersValidGSM) {
-				singleMessageCharacterLimit = Message.SMS_LENGTH_LIMIT;
-				multipartMessageCharacterLimit = Message.SMS_MULTIPART_LENGTH_LIMIT;
-			} else {
-				// It appears there are some unicode-only characters here.  We should therefore
-				// treat this message as if it will be sent as unicode.
-				singleMessageCharacterLimit = Message.SMS_LENGTH_LIMIT_UCS2;
-				multipartMessageCharacterLimit = Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2;
-			}
-			
-			int numberOfMsgs;
-			int remaining;
-			if (textLength <= singleMessageCharacterLimit) {
-				//First message
-				remaining = (textLength % singleMessageCharacterLimit) == 0 ? 0
-						: singleMessageCharacterLimit - (textLength % singleMessageCharacterLimit);
-				numberOfMsgs = textLength == 0 ? 0 : 1;
-			} else if (textLength <= (2*multipartMessageCharacterLimit)) {
-				numberOfMsgs = 2;
-				int charCount = textLength - multipartMessageCharacterLimit;
-				remaining = (charCount % multipartMessageCharacterLimit) == 0 ? 0
-						: multipartMessageCharacterLimit - (charCount % multipartMessageCharacterLimit);
-			} else {
-				numberOfMsgs = 3;
-				int charCount = textLength - (2*multipartMessageCharacterLimit);
-				remaining = (charCount % multipartMessageCharacterLimit) == 0 ? 0
-						: multipartMessageCharacterLimit - (charCount % multipartMessageCharacterLimit);
-			}
-
-			uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_REMAINING_CHARS), String.valueOf(remaining));
-			uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_MSG_NUMBER), String.valueOf(numberOfMsgs));
-			uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_FIRST), Icon.SMS_DISABLED);
-			uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS_DISABLED);
-			uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS_DISABLED);
-			if (numberOfMsgs >= 1) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_FIRST), Icon.SMS);
-			if (numberOfMsgs >= 2) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS);
-			if (numberOfMsgs >= 3) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS);
-			
-			double value = numberOfMsgs * this.getCostPerSms() * this.numberToSend;
-			uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(value));
+			// It appears there are some unicode-only characters here.  We should therefore
+			// treat this message as if it will be sent as unicode.
+			singleMessageCharacterLimit = Message.SMS_LENGTH_LIMIT_UCS2;
+			multipartMessageCharacterLimit = Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2;
 		}
+		
+		Object 	tfMessage = uiController.find(this.messagePanel, COMPONENT_TF_MESSAGE),
+				lbTooManyMessages = uiController.find(this.messagePanel, COMPONENT_LB_TOO_MANY_MESSAGES);
+		
+		int numberOfMsgs, remaining;
+		double costEstimate;
+		
+		if (shouldCheckMaxMessageLength && messageLength > totalLengthAllowed) {
+			remaining = 0;
+			costEstimate = 0;
+			numberOfMsgs = (int)Math.ceil((double)messageLength / (double)multipartMessageCharacterLimit);
+			
+			uiController.setVisible(lbTooManyMessages, true);
+			uiController.setColor(tfMessage, "foreground", Color.RED);
+		} else {
+			if (shouldCheckMaxMessageLength) {
+				uiController.setVisible(lbTooManyMessages, false);
+				uiController.setColor(tfMessage, "foreground", Color.BLACK);
+			}
+			
+			if (messageLength <= singleMessageCharacterLimit) {
+				numberOfMsgs = messageLength == 0 ? 0 : 1;
+				remaining = (messageLength % singleMessageCharacterLimit) == 0 ? 0
+						: singleMessageCharacterLimit - (messageLength % singleMessageCharacterLimit);	
+			} else {
+				int charCount = messageLength - singleMessageCharacterLimit;
+				numberOfMsgs = (int)Math.ceil((double)charCount / (double)multipartMessageCharacterLimit) + 1;
+				remaining = (charCount % multipartMessageCharacterLimit) == 0 ? 0
+						: multipartMessageCharacterLimit - ((charCount % multipartMessageCharacterLimit));
+			}
+			
+			costEstimate = numberOfMsgs * this.getCostPerSms() * this.numberToSend;
+		}
+		
+		// The message will actually cost {numberOfRecipients} times the calculated cost
+		costEstimate *= numberOfRecipients;
+		
+		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_REMAINING_CHARS), String.valueOf(remaining));
+		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_MSG_NUMBER), String.valueOf(numberOfMsgs));
+		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_FIRST), Icon.SMS_DISABLED);
+		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS_DISABLED);
+		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS_DISABLED);
+		if (numberOfMsgs >= 1) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_FIRST), Icon.SMS);
+		if (numberOfMsgs >= 2) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS);
+		if (numberOfMsgs == 3) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS);
+		if (numberOfMsgs > 3) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS_ADD);
+		
+		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(costEstimate));
 	}
 	
 	/**
@@ -194,6 +288,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	 * @param panel
 	 */
 	private void clearMessageComponent() {
+		uiController.setText(uiController.find(this.messagePanel, COMPONENT_TF_RECIPIENT), "");
 		uiController.setText(uiController.find(this.messagePanel, COMPONENT_TF_MESSAGE), "");
 		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_REMAINING_CHARS), String.valueOf(Message.SMS_LENGTH_LIMIT));
 		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_MSG_NUMBER), "0");
@@ -201,6 +296,9 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS_DISABLED);
 		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS_DISABLED);
 		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(0));
+		if (shouldCheckMaxMessageLength) // Otherwise this component doesn't exist
+			uiController.setVisible(uiController.find(this.messagePanel, COMPONENT_LB_TOO_MANY_MESSAGES), false);
+
 		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
 		if (sendButton != null) uiController.setEnabled(sendButton, false);
 	}
@@ -210,8 +308,8 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	 * Create and initialise a new {@link MessagePanelHandler}.
 	 * @return a new, initialised instance of {@link MessagePanelHandler}
 	 */
-	public static final MessagePanelHandler create(UiGeneratorController ui) {
-		MessagePanelHandler handler = new MessagePanelHandler(ui);
+	public static final MessagePanelHandler create(UiGeneratorController ui, boolean shouldDisplayRecipientField, boolean checkMaxMessageLength, int numberOfRecipients) {
+		MessagePanelHandler handler = new MessagePanelHandler(ui, shouldDisplayRecipientField, checkMaxMessageLength, numberOfRecipients);
 		handler.init();
 		return handler;
 	}

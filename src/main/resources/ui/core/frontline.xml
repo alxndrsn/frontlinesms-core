@@ -29,18 +29,18 @@
 				<checkboxmenuitem action="tabsChanged(this)" name="miEmail" icon="/icons/email.png" text="i18n.tab.email"/>
 			</menu>
 			<separator />
-			<menuitem icon="/icons/frontline_icon.png" text="i18n.hometab.settings" name="menu_showHometabSettings" action="showHomeTabSettings()"/>
+			<menuitem icon="/icons/frontline_icon.png" text="i18n.hometab.logo.settings" name="menu_showHometabSettings" action="showHomeTabSettings()"/>
 		</menu>
 		<menu text="i18n.menubar.debug">
 			<menuitem icon="/icons/database_execute.png" text="i18n.menuitem.debug.data.generate" action="generateTestData"/>
 			
 			<!-- This separator and below are for dev. -->
 			<separator />
-			<menuitem icon="/icons/group.png" text="Show group selecter" action="showGroupSelecter"/>
+			<menuitem icon="/icons/group.png" text="i18n.menuitem.show.group.selecter" action="showGroupSelecter"/>
 			
 			<separator />
-			<menuitem icon="/icons/sms_receive.png" text="Generate incoming SMS" action="dbgGenerateIncomingSms"/>
-			<menuitem icon="/icons/sms_send.png" text="Generate outgoing SMS" action="dbgGenerateOutgoingSms"/>
+			<menuitem icon="/icons/sms_receive.png" text="i18n.menuitem.generate.incoming.sms" action="dbgGenerateIncomingSms"/>
+			<menuitem icon="/icons/sms_send.png" text="i18n.menuitem.generate.outgoing.sms" action="dbgGenerateOutgoingSms"/>
 		</menu>
 		<menu text="i18n.menubar.help">
 			<menuitem icon="/icons/help.png" text="i18n.menuitem.help.manual" action="showHelpPage('help-menu.htm')"/>

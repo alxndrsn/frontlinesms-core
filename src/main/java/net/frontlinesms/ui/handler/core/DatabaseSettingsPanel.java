@@ -9,7 +9,6 @@ import java.util.List;
 import net.frontlinesms.AppProperties;
 import net.frontlinesms.ui.DatabaseSettings;
 import net.frontlinesms.ui.FrontlineUI;
-import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BasePanelHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
@@ -17,6 +16,7 @@ import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 /**
  * Thinlet UI Component event handler for displaying and modifying database settings.
  * @author aga
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 @TextResourceKeyOwner
 public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseSettingsChangedCallbackListener {
@@ -32,10 +32,14 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 	private static final String COMPONENT_SETTINGS_PANEL = "pnSettings";
 	/** UI Component: cancel button */
 	private static final String COMPONENT_CANCEL_BUTTON = "btCancel";
+	/** The constant property key for database passwords */
+	private static final String PASSWORD_PROPERTY_KEY = "password";
 
 //> INSTANCE PROPERTIES
 	/** The settings currently selected in the combobox */
 	private DatabaseSettings selectedSettings;
+	/** A boolean saying whether or not the application must restart after the changes */
+	private boolean needToRestartApplication;
 	
 	/** Dialog UI Component.  This should only be used if {@link #showAsDialog()} is called, and then should only be used by {@link #removeDialog()}. */
 	private Object dialogComponent;
@@ -52,14 +56,14 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 	 * Initialise the UI.
 	 * @param restartRequired
 	 */
-	private void init() {
+	private void init(String selectedPath) {
 		super.loadPanel(XML_SETTINGS_PANEL);
 		
 		// Populate combobox
-		String selectedDatabaseConfigPath = AppProperties.getInstance().getDatabaseConfigPath();
+		String selectedDatabaseConfigPath = (selectedPath == null ? AppProperties.getInstance().getDatabaseConfigPath() : selectedPath);
 		List<DatabaseSettings> databaseSettings = DatabaseSettings.getSettings();
 		Object settingsSelection = getConfigFileSelecter();
-		for(int settingsIndex=0; settingsIndex<databaseSettings.size(); ++settingsIndex) {
+		for(int settingsIndex = 0; settingsIndex < databaseSettings.size(); ++settingsIndex) {
 			DatabaseSettings settings = databaseSettings.get(settingsIndex);
 			Object comboBox = createComboBox(settings);
 			ui.add(settingsSelection, comboBox);
@@ -96,9 +100,6 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 	}
 
 //> INSTANCE HELPER METHODS
-	private void setSelectedConfigFile(DatabaseSettings settings) {
-		this.selectedSettings = settings;
-	}
 	
 //> UI HELPER METHODS
 	/** Refresh the panel containing settings specific to the currently-selected {@link DatabaseSettings}. */
@@ -112,7 +113,10 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 			// TODO would be nice to set icons for the different settings
 			ui.add(settingsPanel, ui.createLabel(key));
 			// TODO may want to set the types of these, e.g. password, number etc.
-			ui.add(settingsPanel, ui.createTextfield(key, this.selectedSettings.getPropertyValue(key)));
+			if (key.equals(PASSWORD_PROPERTY_KEY))
+				ui.add(settingsPanel, ui.createPasswordfield(key, this.selectedSettings.getPropertyValue(key)));
+			else
+				ui.add(settingsPanel, ui.createTextfield(key, this.selectedSettings.getPropertyValue(key)));
 		}
 	}
 
@@ -145,11 +149,11 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 	
 //> UI EVENT METHODS
 	public void configFileChanged() {
-		Object selected = ui.getSelectedItem(getConfigFileSelecter());
-		if(selected != null) {
-			setSelectedConfigFile(ui.getAttachedObject(selected, DatabaseSettings.class));
-			
-			refreshSettingsPanel();
+		String selected = ui.getText(ui.getSelectedItem(getConfigFileSelecter()));
+		
+		if (selected != null) {
+			this.openNewDialog(selected);
+			this.removeDialog();
 		}
 	}
 	
@@ -215,7 +219,8 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 		// must restart FrontlineSMS for the changes to take effect.  In a perfect world,
 		// we would AUTOMATICALLY restart here, but this is not quite trivial, so is not
 		// implemented at this stage.
-		ui.alert("Settings saved.  Please restart FrontlineSMS immediately."); // FIXME i18n
+		if (needToRestartApplication)
+			ui.alert("Settings saved.  Please restart FrontlineSMS immediately."); // FIXME i18n
 		
 		removeDialog();	
 	}
@@ -224,8 +229,9 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 	 * Show this panel as a dialog.  The dialog will be removed by default by the removeDialog method.
 	 * @param titleI18nKey
 	 */
-	public void showAsDialog() {
+	public void showAsDialog(boolean needToRestartApplication) {
 		this.settingsChangedCallbackListener = this;
+		this.needToRestartApplication = needToRestartApplication;
 		
 		Object dialogComponent = ui.createDialog(InternationalisationUtils.getI18NString(I18N_KEY_DATABASE_CONFIG));
 		ui.add(dialogComponent, this.getPanelComponent());
@@ -240,10 +246,15 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 	}
 	
 //> STATIC FACTORIES
-	public static DatabaseSettingsPanel createNew(FrontlineUI ui) {
+	public static DatabaseSettingsPanel createNew(FrontlineUI ui, String selectedPath) {
 		DatabaseSettingsPanel panel = new DatabaseSettingsPanel(ui);
-		panel.init();
+		panel.init(selectedPath);
 		return panel;
+	}
+	
+	public void openNewDialog(String selectedPath) {
+		DatabaseSettingsPanel databaseSettings = DatabaseSettingsPanel.createNew(ui, selectedPath);
+		databaseSettings.showAsDialog(needToRestartApplication);
 	}
 }
 

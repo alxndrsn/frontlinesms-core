@@ -282,6 +282,8 @@ public class CATHandler extends AbstractATHandler {
 				throw new UnrecognizedHandlerProtocolException(messageProtocol);
 		}
 	}
+	
+	
 
 	protected boolean deleteMessage(int memIndex, String memLocation) throws IOException
 	{
@@ -318,7 +320,7 @@ public class CATHandler extends AbstractATHandler {
 	 * @return The response to the issued command, verbatim
 	 * @throws IOException if access to {@link AbstractATHandler#serialDriver} throws an {@link IOException}
 	 */
-	private String serialSendReceive(String command) throws IOException {
+	protected String serialSendReceive(String command) throws IOException {
 		if(TRACE) log.info("ISSUING COMMAND: " + command);
 		if(TRACE) System.out.println("[" + Thread.currentThread().getName() + "] ISSUING COMMAND: " + command);
 		serialDriver.send(command + END_OF_LINE);

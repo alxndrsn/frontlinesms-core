@@ -24,7 +24,9 @@ import java.util.*;
 
 import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
+import net.frontlinesms.data.domain.Message.Type;
 import net.frontlinesms.data.repository.*;
+import net.frontlinesms.events.EventBus;
 import net.frontlinesms.listener.*;
 import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginControllerProperties;
@@ -122,6 +124,8 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	private UIListener uiListener;
 	/** Listener for {@link SmsDevice} events. */
 	private SmsDeviceEventListener smsDeviceEventListener;
+	/** Main {@link EventBus} through which all core events should be channelled. */
+	private EventBus eventBus;
 	
 //> INITIALISATION METHODS
 	/** The application context describing dependencies of the application. */
@@ -169,6 +173,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		emailAccountDao = (EmailAccountDao) applicationContext.getBean("emailAccountDao");
 		smsInternetServiceSettingsDao = (SmsInternetServiceSettingsDao) applicationContext.getBean("smsInternetServiceSettingsDao");
 		smsModemSettingsDao = (SmsModemSettingsDao) applicationContext.getBean("smsModemSettingsDao");
+		eventBus = (EventBus) applicationContext.getBean("eventBus");
 	}
 	
 	/** Deinitialise {@link #applicationContext}. */
@@ -215,7 +220,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 
 		LOG.debug("Re-Loading messages to outbox.");
 		//We need to reload all messages, which status is OUTBOX, to the outbox.
-		for (Message m : messageDao.getMessages(Message.TYPE_OUTBOUND, new Integer[] { Message.STATUS_OUTBOX, Message.STATUS_PENDING})) {
+		for (Message m : messageDao.getMessages(Type.TYPE_OUTBOUND, new Integer[] { Message.STATUS_OUTBOX, Message.STATUS_PENDING})) {
 			smsDeviceManager.sendSMS(m);
 		}
 
@@ -456,6 +461,10 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	/** @return {@link #emailDao} */
 	public EmailDao getEmailDao() {
 		return emailDao;
+	}
+	/** @return {@link #eventBus} */
+	public EventBus getEventBus() {
+		return eventBus;
 	}
 	/** @return {@link #emailServerManager} */
 	public EmailServerHandler getEmailServerHandler() {

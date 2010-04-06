@@ -43,6 +43,7 @@ import net.frontlinesms.PluginManager;
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
+import net.frontlinesms.data.domain.Message.Type;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.debug.RandomDataGenerator;
 import net.frontlinesms.listener.EmailListener;
@@ -93,10 +94,8 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.*;
  * We're now in the process of separating this class into smaller classes which control separate,
  * modular parts of the UI, e.g. the {@link HomeTabHandler}.
  * 
- * @author Alex Anderson 
- * <li> alex(at)masabi(dot)com
- * @author Carlos Eduardo Genz
- * <li> kadu(at)masabi(dot)com
+ * @author Alex Anderson  alex(at)masabi(dot)com
+ * @author Carlos Eduardo Genz kadu(at)masabi(dot)com
  */
 @SuppressWarnings("serial")
 public class UiGeneratorController extends FrontlineUI implements EmailListener, UIListener, SingleGroupSelecterPanelOwner {
@@ -523,20 +522,25 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		add(conf);
 	}
 	
-	/** Shows a general dialog asking the user to confirm his action. */
-	public void showConfirmationDialog(String methodToBeCalled, ThinletUiEventHandler handler, String confirmationMessageKey) {
+	/**
+	 * Shows a general dialog asking the user to confirm his action.
+	 * @return the confirmation dialog
+	 */
+	public Object showConfirmationDialog(String methodToBeCalled, ThinletUiEventHandler handler, String confirmationMessageKey) {
 		Object conf = loadComponentFromFile(UI_FILE_CONFIRMATION_DIALOG_FORM);
 		setMethod(find(conf, COMPONENT_BT_CONTINUE), ATTRIBUTE_ACTION, methodToBeCalled, conf, handler);
 		setText(find(conf, "lbText"), InternationalisationUtils.getI18NString(confirmationMessageKey));
 		add(conf);
+		return conf;
 	}
 	
 	/**
 	 * Shows the export wizard dialog, according to the supplied type.
 	 * @param list The list to get selected items from.
-	 * @param type The desired type
+	 * @param typeName The desired type
 	 */
-	public void showExportWizard(Object list, String type){
+	public void showExportWizard(Object list, String typeName){
+		ImportExportDialogHandler.EntityType type = ImportExportDialogHandler.EntityType.getFromString(typeName);
 		new ImportExportDialogHandler(this).showWizard(true, list, type);
 	}
 	
@@ -544,7 +548,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Shows the export wizard dialog, according to the supplied type.
 	 * @param type The desired type
 	 */
-	public void showExportWizard(String type){
+	public void showExportWizard(String typeName){
+		ImportExportDialogHandler.EntityType type = ImportExportDialogHandler.EntityType.getFromString(typeName);
 		new ImportExportDialogHandler(this).showWizard(true, type);
 	}
 	
@@ -553,7 +558,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param list The list to get selected items from.
 	 * @param type The desired type
 	 */
-	public void showImportWizard(Object list, String type){
+	public void showImportWizard(Object list, String typeName){
+		ImportExportDialogHandler.EntityType type = ImportExportDialogHandler.EntityType.getFromString(typeName);
 		new ImportExportDialogHandler(this).showWizard(false, list, type);
 	}
 	
@@ -561,7 +567,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Shows the import wizard dialog, according to the supplied type.
 	 * @param type The desired type (0 for Contacts, 1 for Messages and 2 for Keywords)
 	 */
-	public void showImportWizard(String type){
+	public void showImportWizard(String typeName){
+		ImportExportDialogHandler.EntityType type = ImportExportDialogHandler.EntityType.getFromString(typeName);
 		new ImportExportDialogHandler(this).showWizard(false, type);
 	}
 
@@ -591,6 +598,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	public void show_composeMessageForm(Group group) {
+		if (group == null) return;
+		
 		LOG.debug("Getting contacts from Group [" + group.getName() + "]");
 		
 		HashSet<Object> recipients = new HashSet<Object>();
@@ -628,7 +637,13 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			}
 		}
 		
-		MessagePanelHandler messagePanelController = MessagePanelHandler.create(this);
+		final boolean shouldDisplayRecipientField = false;
+		final boolean shouldCheckMaxMessageLength = false;
+		final int numberOfRecipients = recipients.size();
+		
+		MessagePanelHandler messagePanelController = MessagePanelHandler.create(this, shouldDisplayRecipientField, shouldCheckMaxMessageLength, numberOfRecipients);
+		this.setWidth(dialog, 450);
+		this.setHeight(dialog, 405);
 		// We need to add the message panel to the dialog before setting the send button method
 		add(dialog, messagePanelController.getPanel());
 		messagePanelController.setSendButtonMethod(this, dialog, "sendMessage(composeMessageDialog, composeMessage_to, tfMessage)");
@@ -664,7 +679,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				Message message = (Message) attachedItem;
 				// We should only attempt to reply to messages we have received - otherwise
 				// we could end up texting ourselves a lot!
-				if(message.getType() == Message.TYPE_RECEIVED) {
+				if(message.getType() == Type.TYPE_RECEIVED) {
 					String senderMsisdn = message.getSenderMsisdn();
 					Contact contact = contactDao.getFromMsisdn(senderMsisdn);
 					if(contact != null) {
@@ -890,7 +905,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		saveWindowSize();
 		boolean somethingToDo = false;
 		
-		Collection<Message> pending = messageFactory.getMessages(Message.TYPE_OUTBOUND, new Integer[] {Message.STATUS_PENDING});
+		Collection<Message> pending = messageFactory.getMessages(Type.TYPE_OUTBOUND, new Integer[] {Message.STATUS_PENDING});
 		if(LOG.isDebugEnabled()) LOG.debug("Pending Messages size [" + pending.size() + "]");
 		if (pending.size() > 0) {
 			showPendingMessages(pending);
@@ -902,7 +917,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	public void close() {
 		LOG.trace("ENTER");
-		Collection<Message> pending = messageFactory.getMessages(Message.TYPE_OUTBOUND, new Integer[] {Message.STATUS_PENDING});
+		Collection<Message> pending = messageFactory.getMessages(Type.TYPE_OUTBOUND, new Integer[] {Message.STATUS_PENDING});
 		LOG.debug("Pending Messages size [" + pending.size() + "]");
 		if (pending.size() > 0) {
 			showPendingMessages(pending);
@@ -922,7 +937,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Method called when the user make the final decision to close the app.
 	 */
 	public void exit() {
-		for (Message m : messageFactory.getMessages(Message.TYPE_OUTBOUND, new Integer[] {Message.STATUS_PENDING})) {
+		for (Message m : messageFactory.getMessages(Type.TYPE_OUTBOUND, new Integer[] {Message.STATUS_PENDING})) {
 			m.setStatus(Message.STATUS_OUTBOX);
 		}
 		saveWindowSize();
@@ -1083,7 +1098,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public static final String getMessageStatusAsString(Message message) {
 		switch(message.getStatus()) {
 			case Message.STATUS_DRAFT:
-				return "(draft)";
+				return InternationalisationUtils.getI18NString(COMMON_DRAFT);
 			case Message.STATUS_RECEIVED:
 				return InternationalisationUtils.getI18NString(COMMON_RECEIVED);
 			case Message.STATUS_OUTBOX:
@@ -1275,7 +1290,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		Object row = createTableRow(message);
 
 		String icon;
-		if (message.getType() == Message.TYPE_RECEIVED) {
+		if (message.getType() == Type.TYPE_RECEIVED) {
 			icon = Icon.SMS_RECEIVE;
 		} else {
 			icon = Icon.SMS_SEND;
@@ -1385,7 +1400,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			this.emailTabHandler.outgoingEmailEvent(sender, email);
 		}
 		if (email.getStatus() == Email.Status.SENT) {
-			newEvent(new Event(Event.TYPE_OUTGOING_EMAIL, InternationalisationUtils.getI18NString(COMMON_E_MAIL) + ": " + email.getEmailContent()));
+			String[] recipients = email.getEmailRecipients().split(";");
+			String strRecipients = recipients[0] + (recipients.length > 1 ? InternationalisationUtils.getI18NString(EVENT_DESCRIPTION_MULTI_RECIPIENTS, recipients.length) : ""); 
+			
+			newEvent(new Event(Event.TYPE_OUTGOING_EMAIL, InternationalisationUtils.getI18NString(EVENT_DESCRIPTION, strRecipients, email.getEmailContent())));
 		}
 		LOG.trace("EXIT");
 	}
@@ -1452,7 +1470,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		if (currentTab.equals(TAB_MESSAGE_HISTORY)) {
 			this.messageTabController.incomingMessageEvent(message);
 		}
-		newEvent(new Event(Event.TYPE_INCOMING_MESSAGE, InternationalisationUtils.getI18NString(COMMON_MESSAGE) + ": " + message.getTextContent()));
+		Contact sender = contactDao.getFromMsisdn(message.getSenderMsisdn());
+		String strSender = (sender == null ? message.getSenderMsisdn() : sender.getName());
+		
+		newEvent(new Event(Event.TYPE_INCOMING_MESSAGE, InternationalisationUtils.getI18NString(EVENT_DESCRIPTION, strSender, message.getTextContent())));
 		setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGE_RECEIVED));
 		LOG.trace("EXIT");
 	}
@@ -1462,11 +1483,15 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		LOG.debug("Message [" + message.getTextContent() + "], Status [" + message.getStatus() + "]");
 		if (currentTab.equals(TAB_MESSAGE_HISTORY)) {
 			this.messageTabController.outgoingMessageEvent(message);
-		} 
+		}
+		
+		Contact recipient = contactDao.getFromMsisdn(message.getRecipientMsisdn());
+		String strRecipient = (recipient == null ? message.getRecipientMsisdn() : recipient.getName());
+		
 		if (message.getStatus() == Message.STATUS_SENT) {
-			newEvent(new Event(Event.TYPE_OUTGOING_MESSAGE, InternationalisationUtils.getI18NString(COMMON_MESSAGE) + ": " + message.getTextContent()));
+			newEvent(new Event(Event.TYPE_OUTGOING_MESSAGE, InternationalisationUtils.getI18NString(EVENT_DESCRIPTION, strRecipient, message.getTextContent())));
 		} else if (message.getStatus() == Message.STATUS_FAILED) {
-			newEvent(new Event(Event.TYPE_OUTGOING_MESSAGE_FAILED, InternationalisationUtils.getI18NString(COMMON_MESSAGE) + ": " + message.getTextContent()));
+			newEvent(new Event(Event.TYPE_OUTGOING_MESSAGE_FAILED, InternationalisationUtils.getI18NString(EVENT_DESCRIPTION, strRecipient, message.getTextContent())));
 		}
 		LOG.trace("ENTER");
 	}
@@ -1688,8 +1713,9 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	public void showDatabaseConfigDialog() {
-		DatabaseSettingsPanel databaseSettings = DatabaseSettingsPanel.createNew(this);
-		databaseSettings.showAsDialog();
+		DatabaseSettingsPanel databaseSettings = DatabaseSettingsPanel.createNew(this, null);
+		boolean needToRestartApplication = true;
+		databaseSettings.showAsDialog(needToRestartApplication);
 	}
 	
 	/** Reloads the ui. */

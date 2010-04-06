@@ -9,8 +9,8 @@
     </table>
     <label text="i18n.sentence.pending.messages"/>
     <panel gap="5" halign="center">
-    	<button icon="/icons/vote_yes.png" text="i18n.action.yes" action="exit"/>
-        <button icon="/icons/vote_no.png" text="i18n.action.no" action="removeDialog(pendingMessagesDialog)"/>
-        <button action="removeDialog(pendingMessagesDialog)" icon="/icons/cross.png" text="i18n.action.cancel"/>
+    	<button icon="/icons/tick.png" text="i18n.action.yes" action="exit"/>
+        <button icon="/icons/cross.png" text="i18n.action.no" action="removeDialog(pendingMessagesDialog)"/>
+        <button action="removeDialog(pendingMessagesDialog)" text="i18n.action.cancel"/>
     </panel>
 </dialog>

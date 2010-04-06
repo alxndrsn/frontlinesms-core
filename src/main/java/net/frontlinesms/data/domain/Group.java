@@ -129,8 +129,7 @@ public class Group {
 		if(this.isRoot()) {
 			return null;
 		} else {
-			String parentPath = getParentPath(this.path);
-			if(parentPath.length() == 0) {
+			if(this.parentPath.length() == 0) {
 				return new Group(null, null);
 			} else {
 				return new Group(parentPath);

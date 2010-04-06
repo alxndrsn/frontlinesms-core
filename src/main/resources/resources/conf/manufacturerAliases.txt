@@ -13,3 +13,4 @@ LG				LuckyGoldstar, Lucky Goldstar
 Symbian
 Samsung			SamsungElectronics, SamsungElectronicsCorporation
 Siemens
+Huawei

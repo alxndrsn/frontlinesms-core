@@ -8,6 +8,7 @@ import net.frontlinesms.junit.BaseTestCase;
 import org.apache.log4j.Logger;
 import org.smslib.handler.CATHandler;
 import org.smslib.handler.CATHandler_SonyEricsson;
+import org.smslib.handler.CATHandler_Huawei;
 
 import static org.mockito.Mockito.*;
 
@@ -20,8 +21,10 @@ public class AbstractATHandlerTest extends BaseTestCase {
 	 * Test the loading of {@link CATHandler}s by {@link AbstractATHandler#load(CSerialDriver, Logger, CService, String, String, String)}.
 	 */
 	public void testLoad() {
+		// N.B. The manufacturer names used here ARE case-sensitive.
 		testLoad(CATHandler.class, "", "");
 		testLoad(CATHandler_SonyEricsson.class, "SonyEricsson", "K800i");
+		testLoad(CATHandler_Huawei.class, "Huawei", "E1550");
 		// More mapping tests should be added here
 	}
 	

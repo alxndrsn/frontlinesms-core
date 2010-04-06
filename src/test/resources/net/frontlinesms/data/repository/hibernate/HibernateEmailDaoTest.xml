@@ -6,11 +6,8 @@
 	<!-- import an in-memory database and related hibernate paraphenalia -->
 	<import resource="classpath:frontlinesms-spring-hibernate-junit.xml" />
 	
-	<bean id="emailDao" class="net.frontlinesms.data.repository.hibernate.HibernateEmailDao">
-		<property name="sessionFactory" ref="sessionFactory" />
-	</bean>
+	<bean id="emailDao" class="net.frontlinesms.data.repository.hibernate.HibernateEmailDao" parent="baseHibernateDao"/>
+
 	
-	<bean id="emailAccountDao" class="net.frontlinesms.data.repository.hibernate.HibernateEmailAccountDao">
-		<property name="sessionFactory" ref="sessionFactory" />
-	</bean>
+	<bean id="emailAccountDao" class="net.frontlinesms.data.repository.hibernate.HibernateEmailAccountDao" parent="baseHibernateDao"/>
 </beans>

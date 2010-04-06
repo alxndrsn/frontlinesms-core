@@ -33,19 +33,19 @@ public final class TpduUtils {
 //> [TP-MTI: TP-Message-Type-Indicator] Parameter describing the message type.
 	// bits 1-0 of the first byte of the TPDU: xxxxxxXX
 	/** Mask to extract MTI from the first byte of a TPDU */
-	static final int TP_MTI_MASK = 0x3;
+	public static final int TP_MTI_MASK = 0x3; // TODO this should be private
 	/** 2-bit value indicating an MO message is of type SMS-DELIVER-REPORT */
 	static final int TP_MTI_MO_DELIVER_REPORT = 0x0;
 	/** 2-bit value indicating an MO message is of type SMS-SUBMIT */
 	static final int TP_MTI_MO_SUBMIT = 0x1;
-	/** 2-bit value indicating an MO message is of type SMS-STATUS-REPORT */
-	static final int TP_MTI_MO_STATUS_REPORT = 0x2;
+	/** 2-bit value indicating an MO message is of type SMS-COMMAND */
+	static final int TP_MTI_MO_COMMAND = 0x2;
 	/** 2-bit value indicating an MT message is of type SMS-DELIVER */
 	static final int TP_MTI_MT_DELIVER = 0x0;
 	/** 2-bit value indicating an MT message is of type SMS-SUBMIT-REPORT */
 	static final int TP_MTI_MT_SUBMIT_REPORT = 0x1;
-	/** 2-bit value indicating an MT message is of type SMS-COMMAND */
-	static final int TP_MTI_MT_COMMAND = 0x2;
+	/** 2-bit value indicating an MT message is of type SMS-STATUS-REPORT */
+	public static final int TP_MTI_MT_STATUS_REPORT = 0x2; // TODO this should be private
 //> [TP-VPF: TP-Validity-Period-Format] Parameter indicating whether or not the TP-VP field is present.
 	/** Shift to insert a VPF value */
 	private static final int TP_VPF_SHIFT = 3;

@@ -6,13 +6,21 @@ package net.frontlinesms.ui.handler.contacts;
 // TODO remove static imports
 import static net.frontlinesms.FrontlineSMSConstants.ACTION_ADD_TO_GROUP;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_CONTACTS_IN_GROUP;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_DATE;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_E_MAIL_ADDRESS;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_GROUP;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_MESSAGE;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_NAME;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_PHONE_NUMBER;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_RECIPIENT;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_SENDER;
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_STATUS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_CONTACTS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUPS_AND_CONTACTS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUP_ALREADY_EXISTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_REMOVING_CONTACTS;
+import static net.frontlinesms.FrontlineSMSConstants.PROPERTY_FIELD;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BUTTON_YES;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_MANAGER_CONTACT_FILTER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_MANAGER_CONTACT_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_DELETE_NEW_CONTACT;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_GROUPS_MENU;
@@ -31,8 +39,10 @@ import java.util.List;
 
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.DuplicateKeyException;
+import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
+import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
@@ -47,6 +57,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import org.apache.log4j.Logger;
 
 import thinlet.Thinlet;
+import thinlet.ThinletText;
 
 /**
  * Event handler for the Contacts tab and associated dialogs.
@@ -83,9 +94,12 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	/** Handler for paging of {@link #contactListComponent} */
 	private ComponentPagingHandler contactListPager;
 	/** String to filter the contacts by */
-	private String contactNameFilter;
+	private String contactFilter;
 
 	private final GroupSelecterPanel groupSelecter;
+	
+	/** The selected group in the left panel  */
+	private Group selectedGroup;
 
 //> CONSTRUCTORS
 	/**
@@ -122,17 +136,16 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 */
 	public void groupSelectionChanged(Group selectedGroup) {
 		if(LOG.isTraceEnabled()) System.out.println("Group selected: " + selectedGroup);
-		this.ui.setText(this.ui.find(COMPONENT_CONTACT_MANAGER_CONTACT_FILTER), "");
-
-		Group g = this.groupSelecter.getSelectedGroup();
+		this.selectedGroup = selectedGroup;
+		
 		String contactsPanelTitle;
 		boolean enableDeleteButton;
-		if(g == null) {
+		if(selectedGroup == null) {
 			contactsPanelTitle = "";
 			enableDeleteButton = false;
 		} else {
-			contactsPanelTitle = InternationalisationUtils.getI18NString(COMMON_CONTACTS_IN_GROUP, g.getName());
-			enableDeleteButton = !this.ui.isDefaultGroup(g);
+			contactsPanelTitle = InternationalisationUtils.getI18NString(COMMON_CONTACTS_IN_GROUP, selectedGroup.getName());
+			enableDeleteButton = !this.ui.isDefaultGroup(selectedGroup);
 		}
 		this.ui.setText(find(COMPONENT_CONTACTS_PANEL), contactsPanelTitle);
 		
@@ -141,7 +154,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		this.ui.setEnabled(deleteButton, enableDeleteButton);
 		
 		Object btSendSmsToGroup = this.ui.find(buttonPanelContainer, COMPONENT_SEND_SMS_BUTTON_GROUP_SIDE);
-		this.ui.setEnabled(btSendSmsToGroup, g != null);
+		this.ui.setEnabled(btSendSmsToGroup, selectedGroup != null);
 		
 		updateContactList();
 	}
@@ -170,18 +183,8 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		if(selectedGroup == null) {
 			return PagedListDetails.EMPTY;
 		} else {
-			int totalItemCount = groupMembershipDao.getMemberCount(selectedGroup);
-			
-			// TODO fix filtering
-			
-	//		int totalItemCount = (this.contactNameFilter == null || this.contactNameFilter.length() == 0) 
-	//				? this.contactDao.getContactCount()
-	//				: this.contactDao.getContactsFilteredByNameCount(this.contactNameFilter);
-	//		
-	//		List<Contact> contacts = (this.contactNameFilter == null || this.contactNameFilter.length() == 0) 
-	//				? this.contactDao.getAllContacts(startIndex, limit)
-	//				: this.contactDao.getContactsFilteredByName(this.contactNameFilter, startIndex, limit);
-			List<Contact> contacts = groupMembershipDao.getMembers(selectedGroup, startIndex, limit);
+			int totalItemCount = groupMembershipDao.getFilteredMemberCount(selectedGroup, this.contactFilter);
+			List<Contact> contacts = groupMembershipDao.getFilteredMembersSorted(selectedGroup, contactFilter, Contact.Field.NAME, Order.ASCENDING, startIndex, limit);
 			Object[] listItems = toThinletComponents(contacts);
 			
 			return new PagedListDetails(totalItemCount, listItems);
@@ -207,16 +210,31 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	}
 	
 	/**
-	 * Shows the delete option dialog, which asks the user if he/she wants to remove
-	 * the selected contacts from database.
-	 * @param list
+	 * Shows the delete option dialog
+	 * If the group contains contacts, it asks the user if he/she wants to remove the selected contacts from database.
+	 * Otherwise, it only shows a confirmation dialog
 	 */
 	public void showDeleteOptionDialog() {
 		Group g = this.groupSelecter.getSelectedGroup();
 		if (!this.ui.isDefaultGroup(g)) {
-			Object deleteDialog = ui.loadComponentFromFile(UI_FILE_DELETE_OPTION_DIALOG_FORM, this);
-			ui.add(deleteDialog);
+			if (groupMembershipDao.getMemberCount(g) > 0) {
+				// If the group is not empty, we ask if the user also wants to delete the contacts
+				Object deleteDialog = ui.loadComponentFromFile(UI_FILE_DELETE_OPTION_DIALOG_FORM, this);
+				ui.add(deleteDialog);
+			} else {
+				// Otherwise, the
+				showConfirmationDialog("deleteSelectedGroup");
+			}
 		}
+	}
+	
+	/**
+	 * Launches the deletion of the selected group
+	 * if the user confirmed it in the confirm dialog
+	 */
+	public void deleteSelectedGroup () {
+		this.ui.removeConfirmationDialog();
+		removeSelectedFromGroupList(null, null);
 	}
 
 	/**
@@ -341,7 +359,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 * @param contactFilter The new filter.
 	 */	
 	public void setContactFilter(String contactFilter) {
-		this.contactNameFilter = contactFilter;
+		this.contactFilter = contactFilter;
 	}
 
 	/**
@@ -404,6 +422,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 				//Inside a default group
 				LOG.debug("Removing group [" + selectedGroup.getName() + "] from database");
 				groupDao.deleteGroup(selectedGroup, removeContactsAlso);
+				this.groupSelecter.selectGroup(groupSelecter.getRootGroup());
 			} else {
 				throw new IllegalStateException();
 //				if (removeContactsAlso) {
@@ -438,6 +457,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	/** Removes the selected contacts of the supplied contact list component. */
 	public void deleteSelectedContacts() {
 		LOG.trace("ENTER");
+		Group selectedGroup = this.groupSelecter.getSelectedGroup();
 		this.ui.removeConfirmationDialog();
 		this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_REMOVING_CONTACTS));
 		final Object[] selected = this.ui.getSelectedItems(contactListComponent);
@@ -448,6 +468,8 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		}
 		ui.alert(InternationalisationUtils.getI18NString(MESSAGE_CONTACTS_DELETED));
 		refresh();
+		this.groupSelecter.selectGroup(selectedGroup);
+		
 		LOG.trace("EXIT");
 	}
 
@@ -491,6 +513,9 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			this.groupSelecter.addGroup(g);
 			
 			if (dialog != null) this.ui.remove(dialog);
+			this.selectedGroup = g;
+			this.updateGroupList();
+			
 			LOG.debug("Group created successfully!");
 		} catch (DuplicateKeyException e) {
 			LOG.debug("A group with this name already exists.", e);
@@ -509,6 +534,11 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	/** Updates the group tree. */
 	private void updateGroupList() {
 		this.groupSelecter.refresh();
+		this.groupSelecter.selectGroup(selectedGroup);
+			
+		Object btSendSmsToGroup = ui.find(find(COMPONENT_GROUP_SELECTER_CONTAINER), COMPONENT_SEND_SMS_BUTTON_GROUP_SIDE);
+		this.ui.setEnabled(btSendSmsToGroup, this.groupSelecter.getSelectedGroup() != null);
+		
 		updateContactList();
 	}
 	
@@ -575,7 +605,24 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		Object pnContacts = this.ui.find(tabComponent, COMPONENT_PN_CONTACTS);
 		this.ui.add(pnContacts, this.contactListPager.getPanel());
 		
+		//initContactTableForSorting();
+		
 		return tabComponent;
+	}
+	
+	/** Initialise the message table's HEADER component for sorting the table. */
+	private void initContactTableForSorting() {
+		Object header = Thinlet.get(contactListComponent, ThinletText.HEADER);
+		for (Object o : ui.getItems(header)) {
+			String text = ui.getString(o, Thinlet.TEXT);
+			// Here, the FIELD property is set on each column of the message table.  These field objects are
+			// then used for easy sorting of the message table.
+			if(text != null) {
+				if (text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_NAME))) ui.putProperty(o, PROPERTY_FIELD, Message.Field.STATUS);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_PHONE_NUMBER))) ui.putProperty(o, PROPERTY_FIELD, Message.Field.DATE);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_E_MAIL_ADDRESS))) ui.putProperty(o, PROPERTY_FIELD, Message.Field.SENDER_MSISDN);
+			}
+		}
 	}
 
 //> STATIC FACTORIES

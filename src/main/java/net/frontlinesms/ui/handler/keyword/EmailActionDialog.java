@@ -14,6 +14,10 @@ import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
 import net.frontlinesms.data.repository.EmailAccountDao;
+import net.frontlinesms.events.EventBus;
+import net.frontlinesms.events.EventObserver;
+import net.frontlinesms.events.FrontlineEvent;
+import net.frontlinesms.events.impl.DatabaseNotification;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.contacts.ContactSelecter;
@@ -25,7 +29,7 @@ import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
  * @author Alex alex@frontlinesms.com
  */
 @TextResourceKeyOwner(prefix="MESSAGE_")
-public class EmailActionDialog extends BaseActionDialog {
+public class EmailActionDialog extends BaseActionDialog implements EventObserver {
 	
 //> CONSTANTS
 	/** UI Layout file path: Email Action dialog */
@@ -56,6 +60,9 @@ public class EmailActionDialog extends BaseActionDialog {
 	EmailActionDialog(UiGeneratorController ui, KeywordTabHandler owner) {
 		super(ui, owner);
 		this.emailAccountDao = ui.getFrontlineController().getEmailAccountFactory();
+		
+		// register with the eventbus to receive notification of new email accounts
+		ui.getFrontlineController().getEventBus().registerObserver(this);
 	}
 	
 //> INSTANCE METHODS
@@ -79,8 +86,9 @@ public class EmailActionDialog extends BaseActionDialog {
 		}
 	}
 	
-	private void refreshEmailAccountList() {
+	public void refreshEmailAccountList() {
 		Object list = find(COMPONENT_MAIL_LIST);
+		this.ui.removeAll(list);
 		for (EmailAccount acc : emailAccountDao.getAllEmailAccounts()) {
 			log.debug("Adding existent e-mail account [" + acc.getAccountName() + "] to list");
 			Object item = ui.createListItem(acc.getAccountName(), acc);
@@ -98,12 +106,28 @@ public class EmailActionDialog extends BaseActionDialog {
 	protected String getLayoutFilePath() {
 		return UI_FILE_NEW_KACTION_EMAIL_FORM;
 	}
+	
+	@Override
+	protected void handleRemoved() {
+		// Stop listening for events
+		ui.getFrontlineController().getEventBus().unregisterObserver(this);
+	}
+	
+	/** Handle notifications from the {@link EventBus} */
+	public void notify(FrontlineEvent event) {
+		if(event instanceof DatabaseNotification<?>) {
+			if(((DatabaseNotification<?>)event).getDatabaseEntity() instanceof EmailAccount) {
+				this.refreshEmailAccountList();
+			}
+		}
+	}
 
 //> UI EVENT METHODS
 	/** Invoked when the user decides to send a mail specifically to one contact. */
 	public void selectMailRecipient() {
 		ContactSelecter contactSelecter = new ContactSelecter(ui);
-		contactSelecter.show(InternationalisationUtils.getI18NString(SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "setMailRecipient(contactSelecter_contactList, contactSelecter)", this.getDialogComponent(), this);
+		final boolean shouldHaveEmail   = true;
+		contactSelecter.show(InternationalisationUtils.getI18NString(SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "setMailRecipient(contactSelecter_contactList, contactSelecter)", this.getDialogComponent(), this, shouldHaveEmail);
 	}
 	
 	/**
@@ -140,7 +164,7 @@ public class EmailActionDialog extends BaseActionDialog {
 	public void save() {
 		log.trace("ENTER");
 		String message = ui.getText(find(COMPONENT_TF_MESSAGE));
-		String recipients = ui.getText(find(COMPONENT_TF_RECIPIENT));
+		String recipients = ui.getText(find(COMPONENT_TF_RECIPIENT)).replace(',', ';');
 		String subject = ui.getText(find(COMPONENT_TF_SUBJECT));
 		log.debug("Message [" + message + "]");
 		log.debug("Recipients [" + recipients + "]");

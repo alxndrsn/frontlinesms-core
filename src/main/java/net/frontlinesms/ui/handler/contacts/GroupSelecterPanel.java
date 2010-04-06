@@ -13,7 +13,6 @@ import thinlet.Thinlet;
 import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.repository.unmodifiable.UnmodifiableGroupDao;
-import net.frontlinesms.data.repository.unmodifiable.UnmodifiableGroupMembershipDao;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BasePanelHandler;
@@ -33,7 +32,6 @@ public class GroupSelecterPanel extends BasePanelHandler {
 	private GroupSelecterPanelOwner owner;
 
 	private UnmodifiableGroupDao groupDao;
-	private UnmodifiableGroupMembershipDao groupMembershipDao;
 	
 	private boolean allowMultipleSelections;
 
@@ -57,7 +55,7 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		groupTreeComponent = super.find(COMPONENT_GROUP_TREE);
 		
 		// add nodes for group tree
-		this.rootGroup = rootGroup;
+		this.setRootGroup(rootGroup);
 	}
 
 	/**
@@ -69,19 +67,12 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		
 		FrontlineSMS frontlineController = ((UiGeneratorController) super.ui).getFrontlineController();
 		this.groupDao = new UnmodifiableGroupDao(frontlineController.getGroupDao());
-		this.groupMembershipDao = new UnmodifiableGroupMembershipDao(frontlineController.getGroupMembershipDao());
 		
 		ui.removeAll(groupTree);
-		ui.add(groupTree, createNode(rootGroup, true));
+		ui.add(groupTree, createNode(getRootGroup(), true));
 	}
 	
 //> ACCESSORS
-	private void setAllowMultipleSelections(boolean allowMultipleSelections) {
-		this.allowMultipleSelections = allowMultipleSelections;
-		// TODO set selection option of group tree appropriately
-		throw new IllegalStateException("NYI");
-	}
-	
 	/** @return a single group selected in the tree, or <code>null</code> if none is selected */
 	public Group getSelectedGroup() {
 		assert(!this.allowMultipleSelections) : "Cannot get a single selection if multiple groups are selectable.";
@@ -98,6 +89,16 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		}
 		return groups;
 	}
+
+
+	/** @return Recursively search for the group in the tree */
+	public void selectGroup(Group g) {
+		if (g == null) return;
+		
+		this.ui.setSelectedItem(getGroupTreeComponent(), getNodeForGroup(getGroupTreeComponent(), g));
+		this.selectionChanged();
+	}
+	
 	
 	/** FIXME this is only here for debug purposes. */
 	@Override
@@ -190,5 +191,13 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		}
 		LOG.trace("EXIT");
 		return node;
+	}
+
+	public void setRootGroup(Group rootGroup) {
+		this.rootGroup = rootGroup;
+	}
+
+	public Group getRootGroup() {
+		return rootGroup;
 	}
 }

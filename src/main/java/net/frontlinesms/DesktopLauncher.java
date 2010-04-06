@@ -21,6 +21,8 @@ package net.frontlinesms;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 import javax.swing.UIManager;
 
@@ -42,7 +44,6 @@ import thinlet.Thinlet;
  * control the service.  If any unhandled exceptions occur either starting the
  * FrontlineSMS service or opening the GUI, they will be diaplyed in an AWT window
  * so that they can easily be reported back to the development team.
- * 
  * N.B. Error messages CANNOT be i18ned in this class, as there may have been an error
  * loading language packs.
  * 
@@ -117,7 +118,7 @@ public class DesktopLauncher {
 					frontline.deinitApplicationContext();
 					DatabaseConnectionFailedDialog.create(ex).acquireSettings();
 				} catch(Exception ex) {
-					ErrorUtils.showErrorDialog("Error initialising application.", ex.getMessage(), ex, true);
+					throw new RuntimeException("Problem initialising application context.", ex);
 				}
 			}
 			

@@ -2,21 +2,24 @@ package net.frontlinesms.data.repository.hibernate;
 
 import java.util.List;
 
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Restrictions;
-import org.springframework.transaction.annotation.Transactional;
-
 import net.frontlinesms.data.DuplicateKeyException;
+import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Contact.Field;
 import net.frontlinesms.data.repository.ContactDao;
 
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.transaction.annotation.Transactional;
+
 /**
  * Hibernate implementation of {@link ContactDao}.
- * @author Alex
+ * @author Alex Anderson <alex@frontlinesms.com>
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 public class HibernateContactDao extends BaseHibernateDao<Contact> implements ContactDao {
 	/** Create a new instance of this DAO. */
+		
 	public HibernateContactDao() {
 		super(Contact.class);
 	}
@@ -35,7 +38,7 @@ public class HibernateContactDao extends BaseHibernateDao<Contact> implements Co
 	@Transactional
 	public void deleteContact(Contact contact) {
 		// Delete all group memberships associated with this contact
-		super.getHibernateTemplate().bulkUpdate("DELETE FROM GroupMembership WHERE contact_contact_id='" + contact.getId() + "'");
+		super.getHibernateTemplate().bulkUpdate("DELETE FROM GroupMembership WHERE contact=?", contact);
 		
 		// Delete the contact
 		super.delete(contact);
@@ -49,6 +52,12 @@ public class HibernateContactDao extends BaseHibernateDao<Contact> implements Co
 	/** @see ContactDao#getAllContacts(int, int) */
 	public List<Contact> getAllContacts(int startIndex, int limit) {
 		return super.getAll(startIndex, limit);
+	}
+	
+	/** @see ContactDao#getAllContacts(int, int, Order) */
+	public List<Contact> getAllContactsSorted(int startIndex, int limit, Field sortBy, Order order) {
+		DetachedCriteria criteria = super.getSortCriterion(sortBy, order);
+		return super.getList(criteria, startIndex, limit);
 	}
 
 	/** @see ContactDao#getContactByName(String) */
@@ -70,7 +79,7 @@ public class HibernateContactDao extends BaseHibernateDao<Contact> implements Co
 
 	private DetachedCriteria getNameFilterCriteria(String contactNameFilter) {
 		DetachedCriteria criteria = super.getCriterion();
-		criteria.add(Restrictions.ilike(Contact.Field.NAME.getFieldName(), contactNameFilter + '%'));
+		criteria.add(Restrictions.ilike(Contact.Field.NAME.getFieldName(), '%' + contactNameFilter + '%'));
 		return criteria;
 	}
 

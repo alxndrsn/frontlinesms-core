@@ -22,7 +22,8 @@ import org.springframework.beans.factory.annotation.Required;
 
 /**
  * Test class for {@link HibernateGroupDao}
- * @author Alex
+ * @author Alex   Anderson <alex@frontlinesms.com>
+ * @author Morgan Belkadi  <morgan@frontlinesms.com>
  */
 public class HibernateGroupDaoTest extends HibernateTestCase {
 //> PROPERTIES
@@ -37,9 +38,25 @@ public class HibernateGroupDaoTest extends HibernateTestCase {
 
 //> TEST METHODS
 	public void testDelete() throws DuplicateKeyException {
-		Group myGroup = new Group(getRootGroup(), "My Team");
-		groupDao.saveGroup(myGroup);
+		Group 	myGroup  = createGroup("My Group"),
+				myGroup2 = createGroup("My Group 2");
+		
+		Contact george  = createContact("George", myGroup),
+				abitbol = createContact("Abitbol", myGroup2);
+		
+		// Delete
+		final int BEFORE_DELETE_GROUP_COUNT = 2;
 		groupDao.deleteGroup(myGroup, false);
+		assertTrue("Group has not been deleted. Expected: <1> group left, but was: <" + groupDao.getGroupCount() + ">", groupDao.getGroupCount() < BEFORE_DELETE_GROUP_COUNT);
+		assertNull("Wrong group has been deleted", groupDao.getGroupByPath(myGroup.getPath()));
+		assertTrue("Contact has been deleted and wasn't supposed to", contactDao.getFromMsisdn(george.getPhoneNumber()).equals(george));
+		
+		
+		final int AFTER_FIRST_DELETE_GROUP_COUNT = 1;
+		groupDao.deleteGroup(myGroup2, true);
+		assertTrue("Group has not been deleted. Expected: <0> groups left, but was: <" + groupDao.getGroupCount() + ">", groupDao.getGroupCount() < AFTER_FIRST_DELETE_GROUP_COUNT);
+		assertNull("Wrong group has been deleted", groupDao.getGroupByPath(myGroup.getPath()));
+		assertNull("Contact has not been deleted and was supposed to", contactDao.getFromMsisdn(abitbol.getPhoneNumber()));
 	}
 	
 	/** Check that deleting a group's child is successful, and does not affect the group itself. 
@@ -154,6 +171,43 @@ public class HibernateGroupDaoTest extends HibernateTestCase {
 		groupMembershipDao.addMember(myGroup, contact);
 		
 		groupDao.deleteGroup(myGroup, false);
+	}
+	
+	private Contact createContact(String name, Group... groups) throws DuplicateKeyException {
+		// Make a phone number up that should be unique
+		String phoneNumber = Integer.toString(name.hashCode());
+		return createContact(name, phoneNumber, groups);
+	}
+	
+	/** Creates a contact with specified name and phone number. 
+	 * @throws DuplicateKeyException */
+	private Contact createContact(String name, String phoneNumber, Group... groups) throws DuplicateKeyException {
+		// Make a phone number up that should be unique
+		Contact contact = new Contact(name, phoneNumber, null, null, null, true);
+		this.contactDao.saveContact(contact);
+		
+		for(Group group : groups) {
+			this.groupMembershipDao.addMember(group, contact);
+		}
+		
+		return contact;
+	}
+	
+	/** Create a top-level group. */
+	private Group createGroup(String name, Contact... contacts) throws DuplicateKeyException {
+		return createGroup(getRootGroup(), name, contacts);
+	}
+	
+	/** Create a group with specified parent. */
+	private Group createGroup(Group parent, String name, Contact... contacts) throws DuplicateKeyException {
+		Group group = new Group(parent, name);
+		this.groupDao.saveGroup(group);
+		
+		for(Contact contact : contacts) {
+			this.groupMembershipDao.addMember(group, contact);
+		}
+		
+		return group;
 	}
 	
 //> TEST SETUP/TEARDOWN

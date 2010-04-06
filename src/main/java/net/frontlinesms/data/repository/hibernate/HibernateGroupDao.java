@@ -11,12 +11,14 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.transaction.annotation.Transactional;
 
 import net.frontlinesms.data.DuplicateKeyException;
+import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.repository.GroupDao;
 
 /**
  * Hibernate implementation of {@link GroupDao}.
- * @author Alex
+ * @author Alex   Anderson <alex@frontlinesms.com>
+ * @author Morgan Belkadi  <morgan@frontlinesms.com>
  */
 public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupDao {
 	/** Create instance of this class */
@@ -33,11 +35,32 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 
 		Object[] paramValues = getPathParamValues(group);
 		
-		// Delete all group memberships for this group and its descendants
-		String groupMembershipQuery = "DELETE from GroupMembership WHERE group_path=? OR group_path LIKE ?";
-		super.getHibernateTemplate().bulkUpdate(groupMembershipQuery, paramValues);
+		if (destroyContacts) {
+			// If the contacts must also be destroyed, we start by selecting them
+			String queryString = "SELECT DISTINCT contact FROM GroupMembership WHERE group_path=? OR group_path LIKE ?";
+			List<Contact> contactsList = getList(Contact.class, queryString, paramValues);
+			
+			// Then we delete all group memberships for the group and its descendants
+			String groupMembershipQuery = "DELETE from GroupMembership WHERE group_path=? OR group_path LIKE ?";
+			super.getHibernateTemplate().bulkUpdate(groupMembershipQuery, paramValues);
+			
+			// Then, for each contact...
+			for (Contact c : contactsList) {
+				// We remove it from each group it's included in
+				groupMembershipQuery = "DELETE from GroupMembership WHERE contact=?";
+				super.getHibernateTemplate().bulkUpdate(groupMembershipQuery, c);
+				
+				// And we delete the contact
+				String deleteContactQuery = "DELETE FROM Contact WHERE id=?";
+				super.getHibernateTemplate().bulkUpdate(deleteContactQuery, c.getId());	
+			}
+		} else {
+			// We just delete all group memberships for the group and its descendants
+			String groupMembershipQuery = "DELETE from GroupMembership WHERE group_path=? OR group_path LIKE ?";
+			super.getHibernateTemplate().bulkUpdate(groupMembershipQuery, paramValues);
+		}
 		
-		// Delete all child groups and the group itself
+		// Finally, we delete all child groups and the group itself
 		String deleteGroupsQuery = "DELETE from " + Group.TABLE_NAME + " WHERE path=? OR path LIKE ?";
 		super.getHibernateTemplate().bulkUpdate(deleteGroupsQuery, paramValues);
 	}
@@ -96,5 +119,16 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 //		criteria.add(Restrictions.like(Group.Field.PATH.getFieldName(), parent.getPath() + Group.PATH_SEPARATOR + "[^" + Group.PATH_SEPARATOR + "]"));
 		criteria.add(Restrictions.eq("parentPath", parent.getPath()));
 		return criteria;
+	}
+	
+	/**
+	 * Gets a list of E matching the supplied HQL query.
+	 * @param hqlQuery HQL query
+	 * @param values values to insert into the HQL query
+	 * @return a list of Es matching the supplied query
+	 */
+	@SuppressWarnings("unchecked")
+	protected <T> List<T> getList(Class<T> entityClass, String hqlQuery, Object... values) {
+		return this.getHibernateTemplate().find(hqlQuery, values);
 	}
 }

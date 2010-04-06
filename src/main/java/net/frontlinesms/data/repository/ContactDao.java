@@ -22,7 +22,9 @@ package net.frontlinesms.data.repository;
 import java.util.List;
 
 import net.frontlinesms.data.DuplicateKeyException;
+import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
+import net.frontlinesms.data.domain.Contact.Field;
 
 /**
  * Factory class for creating instances of the Contact class.
@@ -39,6 +41,15 @@ public interface ContactDao {
 	 * @return a subset of all the contacts
 	 */
 	public List<Contact> getAllContacts(int startIndex, int limit);
+	
+	/**
+	 * Returns all contacts from a particular start index, with a maximum number of returned contacts set.
+	 * @param startIndex index of the first contact to fetch
+	 * @param limit max number of contacts to fetch
+	 * @param order the order to sort by
+	 * @return a subset of all the contacts, ordered by the order asked
+	 */
+	public List<Contact> getAllContactsSorted(int startIndex, int limit, Field sortBy, Order order);
 	
 	/**
 	 * Retrieves the contact with the specified msisdn, or returns NULL if none exists.

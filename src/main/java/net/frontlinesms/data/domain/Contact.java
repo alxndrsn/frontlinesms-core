@@ -26,7 +26,8 @@ import net.frontlinesms.data.EntityField;
 
 /**
  * Data object representing a contact.  A contact is uniquely identified by his phone number.
- * @author Alex
+ * @author Alex Anderson <alex@frontlinesms.com>
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 @Entity
 public class Contact {
@@ -38,6 +39,8 @@ public class Contact {
 	private static final String FIELD_NAME = "name";
 	/** Column name for {@link #phoneNumber} */
 	private static final String FIELD_PHONE_NUMBER = "phoneNumber";
+	/** Column name for {@link #emailAddress} */
+	private static final String FIELD_EMAIL_ADDRESS = "emailAddress";
 	
 //> ENTITY FIELDS
 	/** Details of the fields that this class has. */
@@ -45,7 +48,10 @@ public class Contact {
 		/** field mapping for {@link Contact#name} */
 		NAME(FIELD_NAME),
 		/** field mapping for {@link Contact#phoneNumber} */
-		PHONE_NUMBER(FIELD_PHONE_NUMBER);
+		PHONE_NUMBER(FIELD_PHONE_NUMBER),
+		/** field mapping for {@link Contact#emailAddress} */
+		EMAIL_ADDRESS(FIELD_EMAIL_ADDRESS);
+		
 		/** name of a field */
 		private final String fieldName;
 		/**
@@ -248,5 +254,20 @@ public class Contact {
 		} else if (!phoneNumber.equals(other.phoneNumber))
 			return false;
 		return true;
+	}
+	
+	
+
+	public String getSortingField(Field sortBy) {
+		switch (sortBy) {
+		case NAME:
+			return getName();
+		case PHONE_NUMBER:
+			return getPhoneNumber();
+		case EMAIL_ADDRESS:
+			return getPhoneNumber();
+		default:
+			throw new IllegalStateException("Trying to sort a contact by something different than the name or phone number");
+		}
 	}
 }

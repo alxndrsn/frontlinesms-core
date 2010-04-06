@@ -8,6 +8,11 @@ import java.util.List;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.EntityField;
 import net.frontlinesms.data.Order;
+import net.frontlinesms.events.EventBus;
+import net.frontlinesms.events.impl.DidDeleteNotification;
+import net.frontlinesms.events.impl.DidSaveNotification;
+import net.frontlinesms.events.impl.DidUpdateNotification;
+import net.frontlinesms.events.impl.WillDeleteWarning;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,6 +38,8 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	private final Class<E> clazz;
 	/** The unqualified name of {@link #clazz} */
 	private final String className;
+	/**EventNotifier that sends out FrontlineEvents**/
+	private EventBus eventBus;
 	
 	/**
 	 * @param clazz
@@ -40,6 +47,10 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	protected BaseHibernateDao(Class<E> clazz) {
 		this.clazz = clazz;
 		this.className = clazz.getName();
+	}
+	
+	public void setEventBus(EventBus eventBus){
+		this.eventBus = eventBus;
 	}
 	
 	/**
@@ -50,6 +61,7 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 		log.trace("Saving entity: " + entity);
 		this.getHibernateTemplate().save(entity);
 		log.trace("Entity saved.");
+		eventBus.triggerEvent(new DidSaveNotification<E>(entity));
 	}
 	
 	/**
@@ -106,6 +118,7 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 		log.trace("Updating entity: " + entity);
 		this.getHibernateTemplate().update(entity);
 		log.trace("Entity updated.");
+		eventBus.triggerEvent(new DidUpdateNotification<E>(entity));
 	}
 	
 	/**
@@ -113,9 +126,11 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	 * @param entity entity to delete
 	 */
 	protected void delete(E entity) {
+		eventBus.triggerEvent(new WillDeleteWarning<E>(entity));
 		log.trace("Deleting entity: " + entity);
 		this.getHibernateTemplate().delete(entity);
 		log.trace("Entity deleted.");
+		eventBus.triggerEvent(new DidDeleteNotification<E>(entity));
 	}
 	
 	/**
@@ -134,6 +149,30 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	@SuppressWarnings("unchecked")
 	protected List<E> getList(DetachedCriteria criteria) {
 		return this.getHibernateTemplate().findByCriteria(criteria);
+	}
+	
+	/**
+	 * Gets a list of E matching the supplied HQL query.
+	 * @param hqlQuery HQL query
+	 * @param values values to insert into the HQL query
+	 * @return a list of Es matching the supplied query
+	 */
+	@SuppressWarnings("unchecked")
+	protected List<E> getList(String hqlQuery, Object... values) {
+		return this.getHibernateTemplate().find(hqlQuery, values);
+	}
+	
+	/**
+	 * Gets a list of E matching the supplied HQL query.
+	 * @param hqlQuery HQL query
+	 * @param startIndex
+	 * @param limit
+	 * @param values values to insert into the HQL query
+	 * @return a list of Es matching the supplied query
+	 */
+	protected List<E> getList(String hqlQuery, int startIndex, int limit, Object... values) {
+		List<E> list = getList(hqlQuery, values);
+		return list.subList(startIndex, Math.min(list.size(), startIndex + limit));
 	}
 	
 	/**
@@ -223,5 +262,14 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	protected int getCount(DetachedCriteria criteria) {
 		criteria.setProjection(Projections.rowCount());
 		return DataAccessUtils.intResult(this.getHibernateTemplate().findByCriteria(criteria));
+	}
+
+	/**
+	 * Gets a count of the results for the supplied HQL query string.  The HQL query should
+	 * be a COUNT statement.
+	 */
+	protected int getCount(String queryString, Object... values) {
+		List<?> results = getHibernateTemplate().find(queryString, values);
+		return DataAccessUtils.intResult(results);
 	}
 }

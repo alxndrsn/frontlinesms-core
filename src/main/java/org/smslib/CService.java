@@ -1393,13 +1393,12 @@ public class CService {
 	 * @param pdu
 	 * @return
 	 */
-	private boolean isStatusReportMessage(String pdu) {
+	public static boolean isStatusReportMessage(String pdu) {
 		int i = Integer.parseInt(pdu.substring(0, 2), 16);
 		int index = (i + 1) * 2;
 
 		i = Integer.parseInt(pdu.substring(index, index + 2), 16);
-		if ((i & 0x02) == 2) return true;
-		else return false;
+		return (i & TpduUtils.TP_MTI_MASK) == TpduUtils.TP_MTI_MT_STATUS_REPORT;
 	}
 
 	public boolean received(CIncomingMessage message) {

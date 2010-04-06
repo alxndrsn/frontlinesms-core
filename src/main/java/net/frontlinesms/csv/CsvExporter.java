@@ -29,6 +29,7 @@ import java.util.List;
 
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.domain.*;
+import net.frontlinesms.data.domain.Message.Type;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -150,7 +151,7 @@ public class CsvExporter {
 					CsvUtils.MARKER_CONTACT_NOTES, InternationalisationUtils.getI18NString(COMMON_CONTACT_NOTES));
 			for (Message message : messages) {
 				Contact c;
-				if (message.getType() == Message.TYPE_RECEIVED) {
+				if (message.getType() == Type.TYPE_RECEIVED) {
 					c = contactFactory.getFromMsisdn(message.getSenderMsisdn());
 				} else {
 					c = contactFactory.getFromMsisdn(message.getRecipientMsisdn());
@@ -169,7 +170,7 @@ public class CsvExporter {
 				}
 	
 				CsvUtils.writeLine(out, messageFormat,
-					CsvUtils.MARKER_MESSAGE_TYPE, message.getType() == Message.TYPE_RECEIVED ? InternationalisationUtils.getI18NString(COMMON_RECEIVED) : InternationalisationUtils.getI18NString(COMMON_SENT),
+					CsvUtils.MARKER_MESSAGE_TYPE, message.getType() == Type.TYPE_RECEIVED ? InternationalisationUtils.getI18NString(COMMON_RECEIVED) : InternationalisationUtils.getI18NString(COMMON_SENT),
 					CsvUtils.MARKER_MESSAGE_STATUS, UiGeneratorController.getMessageStatusAsString(message),
 					CsvUtils.MARKER_MESSAGE_DATE, dateFormatter.format(new Date(message.getDate())),
 					CsvUtils.MARKER_MESSAGE_CONTENT, message.getTextContent().replace('\n', ' ').replace('\r', ' '),
@@ -238,7 +239,7 @@ public class CsvExporter {
 	 * @param messageType 
 	 * @throws IOException
 	 */
-	public static void exportKeywords(File exportFile, List<? extends Keyword> keywords, CsvRowFormat rowFormat, ContactDao contactFactory, MessageDao messageFactory, int messageType) throws IOException {
+	public static void exportKeywords(File exportFile, List<? extends Keyword> keywords, CsvRowFormat rowFormat, ContactDao contactFactory, MessageDao messageFactory, Message.Type messageType) throws IOException {
 		LOG.trace("ENTER");
 		LOG.debug("Keyword format [" + rowFormat + "]");
 		LOG.debug("Filename [" + exportFile.getAbsolutePath() + "]");
@@ -262,7 +263,7 @@ public class CsvExporter {
 					CsvUtils.MARKER_CONTACT_EMAIL, 		/*->*/ InternationalisationUtils.getI18NString(COMMON_CONTACT_E_MAIL_ADDRESS),
 					CsvUtils.MARKER_CONTACT_NOTES, 		/*->*/ InternationalisationUtils.getI18NString(COMMON_CONTACT_NOTES));
 			for (Keyword keyword : keywords) {
-				if (messageType == -1) {
+				if (messageType == null) {
 					// User dont want any message from this keywords.
 					CsvUtils.writeLine(out, rowFormat, 
 							CsvUtils.MARKER_KEYWORD_KEY, 		/*->*/ keyword.getKeyword(),
@@ -270,7 +271,7 @@ public class CsvExporter {
 				} else {
 					for (Message message : messageFactory.getMessagesForKeyword(messageType, keyword)) {
 						Contact c;
-						if (message.getType() == Message.TYPE_RECEIVED) {
+						if (message.getType() == Type.TYPE_RECEIVED) {
 							c = contactFactory.getFromMsisdn(message.getSenderMsisdn());
 						} else {
 							c = contactFactory.getFromMsisdn(message.getRecipientMsisdn());
@@ -291,7 +292,7 @@ public class CsvExporter {
 						CsvUtils.writeLine(out, rowFormat, 
 									CsvUtils.MARKER_KEYWORD_KEY,			/*->*/ keyword.getKeyword(),
 									CsvUtils.MARKER_KEYWORD_DESCRIPTION,	/*->*/ keyword.getDescription(),
-									CsvUtils.MARKER_MESSAGE_TYPE,		/*->*/ message.getType() == Message.TYPE_RECEIVED ? InternationalisationUtils.getI18NString(COMMON_RECEIVED) : InternationalisationUtils.getI18NString(COMMON_SENT),
+									CsvUtils.MARKER_MESSAGE_TYPE,		/*->*/ message.getType() == Type.TYPE_RECEIVED ? InternationalisationUtils.getI18NString(COMMON_RECEIVED) : InternationalisationUtils.getI18NString(COMMON_SENT),
 									CsvUtils.MARKER_MESSAGE_DATE, 		/*->*/ dateFormatter.format(new Date(message.getDate())),
 									CsvUtils.MARKER_MESSAGE_CONTENT, 	/*->*/ message.getTextContent().replace('\n', ' ').replace('\r', ' '),
 									CsvUtils.MARKER_SENDER_NUMBER,		/*->*/ message.getSenderMsisdn(),

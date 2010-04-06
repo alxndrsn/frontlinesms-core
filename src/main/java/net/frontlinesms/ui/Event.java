@@ -39,6 +39,7 @@ public class Event {
 	private String description;
 	private long time;
 	
+	
 	public Event(int type, String description) {
 		this.type = type;
 		this.description = description;

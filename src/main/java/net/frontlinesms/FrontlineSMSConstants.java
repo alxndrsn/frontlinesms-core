@@ -27,6 +27,7 @@ import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 		"SENTENCE_", "SMS_DEVICE_STATUS_", "SMS_MODEM_STATUS_", "TOOLTIP_",
 		// Those following are individual keys, rather than actual prefixes
 		"MONTH_KEYS", "UNKNOWN_NAME", "UNKNOWN_NOTES"})
+		
 public final class FrontlineSMSConstants {
 	/** String for displaying the version of the application.  This has 1 substitution variable. */
 	public static final String I18N_APP_VERSION = "application.version";
@@ -90,6 +91,7 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_OUTBOX = "common.type.outbox";
 	public static final String COMMON_RECEIVED = "common.received";
 	public static final String COMMON_DORMANT = "common.dormant";
+	public static final String COMMON_DRAFT = "common.draft";
 	public static final String COMMON_ACTIVE = "common.active";
 	public static final String COMMON_LIVE = "common.live";
 	public static final String COMMON_TO_GROUP = "common.to.group";
@@ -141,10 +143,14 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_PROPERTIES = "common.properties";
 	public static final String COMMON_TYPE = "common.type";
 	public static final String COMMON_DATABASE_CONFIG = "common.database.config";
+	public static final String COMMON_DATABASE_CONNECTION_PROBLEM = "common.db.connection.problem";
 	public static final String COMMON_CONNECTION_FAILED = "common.connection.failed";
 	public static final String COMMON_CONNECTION_OK = "common.connection.ok";
 	public static final String COMMON_DATABASE_CONNECTION_FAILED = "common.db.connection.failed";
 	public static final String COMMON_ATTENTION = "common.attention";
+	
+	public static final String EVENT_DESCRIPTION = "event.description";
+	public static final String EVENT_DESCRIPTION_MULTI_RECIPIENTS = "event.description.multi.recipients";	
 	
 	public static final String MESSAGE_GROUP_NO_MEMBERS = "message.no.members";
 	public static final String MESSAGE_KEYWORD_EXISTS = "message.keyword.already.exists";
@@ -253,6 +259,7 @@ public final class FrontlineSMSConstants {
 	public static final String MESSAGE_MESSAGES_DELETED = "message.messages.deleted";
 	public static final String MESSAGE_REMOVING_MESSAGES = "message.removing.messages";
 	public static final String MESSAGE_GROUPS_AND_CONTACTS_DELETED = "message.group.and.contacts.deleted";
+	public static final String MESSAGE_GROUPS_DELETED = "message.groups.deleted";
 	public static final String MESSAGE_PHONE_BLANK = "message.phone.number.blank";
 	public static final String MESSAGE_NO_GROUP_SELECTED = "message.no.group.selected.to.send";
 	public static final String MESSAGE_BLANK_PHONE_NUMBER = "message.no.phone.number.to.send";

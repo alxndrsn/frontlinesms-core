@@ -6,7 +6,6 @@
 	<!-- import an in-memory database and related hibernate paraphenalia -->
 	<import resource="classpath:frontlinesms-spring-hibernate-junit.xml" />
 	
-	<bean id="messageDao" class="net.frontlinesms.data.repository.hibernate.HibernateMessageDao">
-		<property name="sessionFactory" ref="sessionFactory" />
-	</bean>
+	<bean id="messageDao" class="net.frontlinesms.data.repository.hibernate.HibernateMessageDao" parent="baseHibernateDao"/>
+	<bean id="keywordDao" class="net.frontlinesms.data.repository.hibernate.HibernateKeywordDao" parent="baseHibernateDao"/>
 </beans>

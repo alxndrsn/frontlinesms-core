@@ -20,7 +20,6 @@ import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.UiProperties;
-import net.frontlinesms.ui.handler.contacts.ContactSelecter;
 import net.frontlinesms.ui.handler.message.MessagePanelHandler;
 import net.frontlinesms.ui.i18n.FileLanguageBundle;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -28,6 +27,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
 /**
  * Event handler for the Home tab and associated dialogs
  * @author Alex
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 public class HomeTabHandler extends BaseTabHandler {
 //> STATIC CONSTANTS
@@ -42,11 +42,23 @@ public class HomeTabHandler extends BaseTabHandler {
 	private static final String COMPONENT_LB_HOME_TAB_LOGO = "lbHomeTabLogo";
 	/** Thinlet Component Name: Settings dialog: checkbox indicating if the logo is visible */
 	private static final String COMPONENT_CB_HOME_TAB_LOGO_VISIBLE = "cbHomeTabLogoVisible";
+	/** Thinlet Component Name: Settings dialog: checkbox used to choose the default logo */
+	private static final String COMPONENT_CB_HOME_TAB_USE_DEFAULT_LOGO = "cbHomeTabLogoDefault";
+	/** Thinlet Component Name: Settings dialog: checkbox used to choose a custom logo */
+	private static final String COMPONENT_CB_HOME_TAB_USE_CUSTOM_LOGO = "cbHomeTabLogoCustom";
+	/** Thinlet Component Name: Settings dialog: checkbox used to choose a custom logo */
+	private static final String COMPONENT_CB_HOME_TAB_LOGO_KEEP_ORIGINAL_SIZE = "cbHomeTabLogoKeepOriginalSize";
+	/** Thinlet Component Name: Settings dialog: panel grouping the path of the image file for the logo */
+	private static final String COMPONENT_PN_CUSTOM_IMAGE = "pnCustomImage";
 	/** Thinlet Component Name: Settings dialog: textfield inidicating the path of the image file for the logo */
 	private static final String COMPONENT_TF_IMAGE_SOURCE = "tfImageSource";
 
 	/** Default FrontlineSMS home logo */
 	private static final String FRONTLINE_LOGO = "/icons/frontlineSMS_logo.png";
+	/** Max FrontlineSMS home logo width */
+	private static final double FRONTLINE_LOGO_MAX_WIDTH = 484.0;
+	/** Max FrontlineSMS home logo height */
+	private static final double FRONTLINE_LOGO_MAX_HEIGHT = 300.0;
 
 
 //> INSTANCE PROPERTIES
@@ -66,15 +78,26 @@ public class HomeTabHandler extends BaseTabHandler {
 		log.trace("ENTER");
 		Object homeTabSettings = ui.loadComponentFromFile(UI_FILE_HOME_TAB_SETTINGS, this);
 		UiProperties uiProperties = UiProperties.getInstance();
-		boolean visible = uiProperties.isHometabLogoVisible();
+		boolean visible 			= uiProperties.isHometabLogoVisible();
+		boolean isCustomLogo 		= uiProperties.isHometabCustomLogo();
+		boolean isOriginalSizeKept 	= uiProperties.isHometabLogoOriginalSizeKept();
+		
 		String imageLocation = uiProperties.getHomtabLogoPath();
 		log.debug("Visible? " + visible);
+		log.debug("Logo: " + (isCustomLogo ? "custom" : "default"));
+		if (isCustomLogo)
+			log.debug("Keep original size: " + isOriginalSizeKept);
 		log.debug("Image location [" + imageLocation + "]");
-		ui.setSelected(ui.find(homeTabSettings, COMPONENT_CB_HOME_TAB_LOGO_VISIBLE), visible);
+		
+		ui.setSelected(ui.find(homeTabSettings, (!visible ? COMPONENT_CB_HOME_TAB_LOGO_VISIBLE : (isCustomLogo ? COMPONENT_CB_HOME_TAB_USE_CUSTOM_LOGO : COMPONENT_CB_HOME_TAB_USE_DEFAULT_LOGO))), true);
+		ui.setSelected(ui.find(homeTabSettings, COMPONENT_CB_HOME_TAB_LOGO_KEEP_ORIGINAL_SIZE), isOriginalSizeKept);
+		
+		setHomeTabCustomLogo(ui.find(homeTabSettings, COMPONENT_PN_CUSTOM_IMAGE), isCustomLogo && visible);
+		
 		if (imageLocation != null && imageLocation.length() > 0) {
 			ui.setText(ui.find(homeTabSettings, COMPONENT_TF_IMAGE_SOURCE), imageLocation);
 		}
-		homeTabLogoVisibilityChanged(ui.find(homeTabSettings, "pnImgSource"), visible);
+		
 		ui.add(homeTabSettings);
 		log.trace("EXIT");
 	}
@@ -85,12 +108,18 @@ public class HomeTabHandler extends BaseTabHandler {
 	 */
 	public void saveHomeTabSettings(Object panel) {
 		log.trace("ENTER");
-		boolean visible = ui.isSelected(ui.find(panel, COMPONENT_CB_HOME_TAB_LOGO_VISIBLE));
+		boolean visible 			= ui.isSelected(ui.find(panel, COMPONENT_CB_HOME_TAB_LOGO_VISIBLE));
+		boolean isCustomLogo 		= ui.isSelected(ui.find(panel, COMPONENT_CB_HOME_TAB_USE_CUSTOM_LOGO));
+		boolean isOriginalSizeKept 	= ui.isSelected(ui.find(panel, COMPONENT_CB_HOME_TAB_LOGO_KEEP_ORIGINAL_SIZE));
+		
 		String imgSource = ui.getText(ui.find(panel, COMPONENT_TF_IMAGE_SOURCE));
 		log.debug("Visible? " + visible);
+		log.debug("Logo: " + (isCustomLogo ? "default" : "custom"));
 		log.debug("Image location [" + imgSource + "]");
 		UiProperties uiProperties = UiProperties.getInstance();
 		uiProperties.setHometabLogoVisible(visible);
+		uiProperties.setHometabCustomLogo(isCustomLogo);
+		uiProperties.setHometabLogoOriginalSizeKept(isOriginalSizeKept);
 		uiProperties.setHometabLogoPath(imgSource);
 		uiProperties.saveToDisk();
 
@@ -102,16 +131,17 @@ public class HomeTabHandler extends BaseTabHandler {
 	}
 	
 	/**
-	 * Changes the visibility of the home tab logo.
+	 * Enable or disable the bottom panel whether the logo is custom or not.
 	 * @param panel
-	 * @param visible <code>true</code> if the logo should be visible; <code>false</code> otherwise.
+	 * @param isCustom <code>true</code> if the logo is a custom logo; <code>false</code> otherwise.
 	 */
-	public void homeTabLogoVisibilityChanged(Object panel, boolean visible) {
-		ui.setEnabled(panel, visible);
+	public void setHomeTabCustomLogo(Object panel, boolean isCustom) {
+		ui.setEnabled(panel, isCustom);
 		for (Object obj : ui.getItems(panel)) {
-			ui.setEnabled(obj, visible);
+			ui.setEnabled(obj, isCustom);
 		}
 	}
+	
 
 	/**
 	 * Sets the phone number of the selected contact.
@@ -134,11 +164,6 @@ public class HomeTabHandler extends BaseTabHandler {
 		ui.updateCost();
 	}
 
-	/** Method which triggers showing of the contact selecter. */
-	public void selectMessageRecipient() {
-		ContactSelecter contactSelecter = new ContactSelecter(ui);
-		contactSelecter.show(InternationalisationUtils.getI18NString(FrontlineSMSConstants.SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "setRecipientTextfield(contactSelecter_contactList, contactSelecter)", null, this);
-	}
 	
 //> UI PASSTHRU METHODS TO UiGC
 	/**
@@ -164,7 +189,12 @@ public class HomeTabHandler extends BaseTabHandler {
 		Object tabComponent = ui.loadComponentFromFile(UI_FILE_HOME_TAB, this);
 		
 		Object pnSend = ui.find(tabComponent, UiGeneratorControllerConstants.COMPONENT_PN_SEND);
-		Object pnMessage = MessagePanelHandler.create(this.ui).getPanel();
+		
+		final boolean shouldDisplayRecipientField = true;
+		final boolean shouldCheckMaxMessageLength = false;
+		final int numberOfRecipients = 1;
+		
+		Object pnMessage = MessagePanelHandler.create(this.ui, shouldDisplayRecipientField, shouldCheckMaxMessageLength, numberOfRecipients).getPanel();
 		ui.add(pnSend, pnMessage);
 		
 		refreshLogoVisibility(tabComponent);
@@ -199,11 +229,44 @@ public class HomeTabHandler extends BaseTabHandler {
 		} else {
 			String imageLocation = UiProperties.getInstance().getHomtabLogoPath();
 			boolean useDefault = true;
-			if (imageLocation != null && imageLocation.length() > 0) {
+			if (UiProperties.getInstance().isHometabCustomLogo() && imageLocation != null && imageLocation.length() > 0) {
 				// Absolute or relative path provided
 				try {
 					BufferedImage homeTabLogoImage = ImageIO.read(new File(imageLocation));
-					ui.setIcon(lbLogo, homeTabLogoImage);
+					
+					// If the "Keep original size" box is unchecked, we resize the image
+					if (!UiProperties.getInstance().isHometabLogoOriginalSizeKept())
+					{
+						int width = homeTabLogoImage.getWidth();
+						int height = homeTabLogoImage.getHeight();
+						
+						if (height > FRONTLINE_LOGO_MAX_HEIGHT) {
+							if (width > FRONTLINE_LOGO_MAX_WIDTH) {
+								if (width / FRONTLINE_LOGO_MAX_WIDTH > height / FRONTLINE_LOGO_MAX_HEIGHT) {
+									height *= (FRONTLINE_LOGO_MAX_WIDTH / width);
+									width = (int)(FRONTLINE_LOGO_MAX_WIDTH);
+								}
+								else {
+									width *= (FRONTLINE_LOGO_MAX_HEIGHT / height);
+									height = (int)FRONTLINE_LOGO_MAX_HEIGHT;
+								}
+							}
+							else {
+								width *= (FRONTLINE_LOGO_MAX_HEIGHT / height);
+								height = (int)FRONTLINE_LOGO_MAX_HEIGHT;
+							}
+						}
+						else if (width > FRONTLINE_LOGO_MAX_WIDTH) {
+							height *= (FRONTLINE_LOGO_MAX_WIDTH / width);
+							width = (int)(FRONTLINE_LOGO_MAX_WIDTH);
+						}
+						
+						ui.setIcon(lbLogo, homeTabLogoImage.getScaledInstance(width, height, BufferedImage.SCALE_SMOOTH));
+					}
+					else
+						ui.setIcon(lbLogo, homeTabLogoImage);
+
+					
 					useDefault = false;
 				} catch (IOException e) {
 					// We are unable to find the specified image, using the default
@@ -216,6 +279,7 @@ public class HomeTabHandler extends BaseTabHandler {
 			}
 		}
 	}
+	
 
 //> UI HELPER METHODS
 	private Object getRow(Event newEvent) {

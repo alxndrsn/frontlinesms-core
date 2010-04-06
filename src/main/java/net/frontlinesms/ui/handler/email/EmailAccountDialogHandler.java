@@ -15,6 +15,7 @@ import net.frontlinesms.data.repository.EmailAccountDao;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.handler.keyword.EmailActionDialog;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
@@ -67,9 +68,14 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 	
 	private void initDialog() {
 		this.dialogComponent = ui.loadComponentFromFile(UI_FILE_EMAIL_ACCOUNTS_SETTINGS_FORM, this);
+		this.refreshAccountsList();
+	}
+
+	private void refreshAccountsList() {
 		Object table = find(COMPONENT_ACCOUNTS_LIST);
+		this.ui.removeAll(table);
 		for (EmailAccount acc : emailAccountDao.getAllEmailAccounts()) {
-			ui.add(table, ui.getRow(acc));
+			this.ui.add(table, ui.getRow(acc));
 		}
 	}
 
@@ -138,7 +144,8 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 			return;
 		}
 		LOG.debug("Account [" + acc.getAccountName() + "] created!");
-		ui.add(table, ui.getRow(acc));
+		//ui.add(table, ui.getRow(acc));
+		this.refreshAccountsList();
 		cleanEmailAccountFields(accountDialog);
 		LOG.trace("EXIT");
 	}
@@ -200,6 +207,7 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 				acc.setAccountServer(server);
 				acc.setUseSSL(useSSL);
 				acc.setAccountServerPort(serverPort);
+				emailAccountDao.updateEmailAccount(acc);
 				
 				Object tableToAdd = ui.find(ui.find("emailConfigDialog"), COMPONENT_ACCOUNTS_LIST);
 				int index = ui.getSelectedIndex(tableToAdd);
@@ -271,8 +279,9 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 			LOG.debug("Removing Account [" + acc.getAccountName() + "]");
 			emailManager.serverRemoved(acc);
 			emailAccountDao.deleteEmailAccount(acc);
-			ui.remove(o);
 		}
+		
+		this.refreshAccountsList();
 		LOG.trace("EXIT");
 	}
 

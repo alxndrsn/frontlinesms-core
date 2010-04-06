@@ -3,9 +3,12 @@
  */
 package net.frontlinesms.ui.handler.core;
 
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_DATABASE_CONNECTION_PROBLEM;
+
 import thinlet.FrameLauncher;
 import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.Icon;
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
  * UI Controller used when there is a problem 
@@ -18,12 +21,14 @@ public class DatabaseConnectionFailedDialog extends FrontlineUI implements Datab
 	/** Thinlet UI File: the dialog for the user to attempt reconnection or modify database settings */
 	private static final String UI_FILE_CONNECTION_PROBLEM_DIALOG = "/ui/core/database/dgConnectionProblem.xml";
 	
+	/** The label displaying the error message */
+	private static final String COMPONENT_DATABASE_PROBLEM_TEXT_ERROR_MESSAGE = "textErrorMessage";
+
 //> INSTANCE PROPERTIES
 	/** Lock for {@link #ensureConnected(DatabaseConnectionTester)} while the UI is handling connection. */
 	private final Object LOCK = new Object();
 	/** For {@link #acq} to check if it should keep blocking. */
 	private boolean keepBlocking;
-	private Object dialogComponent;
 	
 //> CONSTRUCTORS
 	/** private constructor to enforce use of factories */
@@ -49,7 +54,7 @@ public class DatabaseConnectionFailedDialog extends FrontlineUI implements Datab
 
 	/** Show the UI. */
 	private void showFrameLauncher() {
-		frameLauncher = new FrameLauncher("Database Connection Problem", this, 510, 380, getIcon(Icon.FRONTLINE_ICON));
+		frameLauncher = new FrameLauncher(InternationalisationUtils.getI18NString(COMMON_DATABASE_CONNECTION_PROBLEM), this, 400, 315, getIcon(Icon.FRONTLINE_ICON));
 		frameLauncher.setResizable(true);
 	}
 	
@@ -66,11 +71,11 @@ public class DatabaseConnectionFailedDialog extends FrontlineUI implements Datab
 //> PUBLIC UI METHODS
 	/** Show the database settings panel. */
 	public void showSettingsPage() {
-		DatabaseSettingsPanel settingsPanel = DatabaseSettingsPanel.createNew(this);
+		DatabaseSettingsPanel settingsPanel = DatabaseSettingsPanel.createNew(this, null);
 		settingsPanel.setCancelEnabled(false);
-		settingsPanel.setSettingsChangedCallbackListener(this);
-		this.removeAll(dialogComponent);
-		this.add(dialogComponent, settingsPanel.getPanelComponent());
+
+		boolean needToRestartApplication = false;
+		settingsPanel.showAsDialog(needToRestartApplication);
 	}
 	
 	/** Reconnect button has been pressed */
@@ -84,7 +89,7 @@ public class DatabaseConnectionFailedDialog extends FrontlineUI implements Datab
 		// Display the UI for re-attempting connection
 		DatabaseConnectionFailedDialog ui = new DatabaseConnectionFailedDialog();
 		Object problemDialog = ui.loadComponentFromFile(UI_FILE_CONNECTION_PROBLEM_DIALOG);
-		ui.dialogComponent = problemDialog;
+		ui.setText(ui.find(problemDialog, COMPONENT_DATABASE_PROBLEM_TEXT_ERROR_MESSAGE), ex.getMessage());
 		
 		// TODO show details of the exception
 		// TODO show exeption type

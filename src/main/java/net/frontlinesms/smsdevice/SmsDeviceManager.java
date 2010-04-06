@@ -88,8 +88,8 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 	private boolean running;	
 	/** If set TRUE, then thread will automatically try to connect to newly-detected devices. */ 
 	private boolean autoConnectToNewPhones;
-	/** Signals to thread that it should search the serial ports for connected devices. */
 	private boolean refreshPhoneList;
+
 
 	/**
 	 * Set containing all serial numbers of discovered phones.  Necessary because bluetooth/USB
@@ -122,10 +122,10 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 		while (running) {
 			doRun();
 			
-			// Individual phones should sleep, so there's no need to do this here!(?)  Here's
-			// a token pause in case things lock up / to stop this thread eating the CPU for
-			// breakfast.
-			Utils.sleep_ignoreInterrupts(10);
+			// Sleep for a second to ensure lists are not constantly being reshuffled.  Processing dispatch
+			// and received messages is not really time-critical, otherwise it might be worth sleeping for
+			// less time.
+			Utils.sleep_ignoreInterrupts(1000);
 		}
 		LOG.trace("EXIT");
 	}
@@ -482,6 +482,7 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 	}
 
 //> SMS DISPATCH METHODS
+	
 	/** Dispatch all messages in {@link #gsm7bitOutbox} to suitable {@link SmsDevice}s */
 	private void dispatchGsm7bitTextSms() {
 		List<Message> messages = removeAll(this.gsm7bitOutbox);
@@ -518,8 +519,29 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 				List<SmsModem> sendingModems = getSmsModemsForSending(messageType);
 				if(sendingModems.size() > 0) {
 					dispatchSms(sendingModems, messages);
+				} else {
+					// The messages cannot be sent
+					// We put them back in their outbox 
+					getOutboxFromType(messageType).addAll(messages);
 				}
 			}		
+		}
+	}
+	
+	/**
+	 * 
+	 * @param messageType The {@link MessageType}
+	 * @return The outbox corresponding to the {@link MessageType}
+	 */
+	private ConcurrentLinkedQueue<Message> getOutboxFromType(MessageType messageType) {
+		switch (messageType) {
+		case BINARY:
+			return binOutbox;
+		case UCS2_TEXT:
+			return ucs2Outbox;
+		case GSM7BIT_TEXT:
+			return gsm7bitOutbox;
+		default: throw new IllegalStateException("Unrecognized message type: " + messageType);
 		}
 	}
 

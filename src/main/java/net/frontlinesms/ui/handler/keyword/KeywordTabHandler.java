@@ -201,23 +201,21 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	public void enableKeywordFields(Object component) {
 		log.trace("ENTER");
 		int selected = ui.getSelectedIndex(keywordListComponent);
-		String field = Thinlet.getClass(component) == Thinlet.PANEL ? Thinlet.ENABLED : Thinlet.VISIBLE;
 		if (selected <= 0) {
 			log.debug("Nothing selected, so we only allow keyword creation.");
 			for (Object o : ui.getItems(component)) {
 				String name = ui.getString(o, Thinlet.NAME);
-				if (name == null)
+				if (name == null) {
 					continue;
-				if (!name.equals(COMPONENT_MENU_ITEM_CREATE)) {
-					ui.setBoolean(o, field, false);
 				} else {
-					ui.setBoolean(o, field, true);
+					boolean isEnabled = name.equals(COMPONENT_MENU_ITEM_CREATE);
+					ui.setEnabled(o, isEnabled);
 				}
 			}
 		} else {
 			//Keyword selected
 			for (Object o : ui.getItems(component)) {
-				ui.setBoolean(o, field, true);
+				ui.setEnabled(o, true);
 			}
 		}
 		log.trace("EXIT");
@@ -382,24 +380,20 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	public void enableKeywordActionFields(Object table, Object component) {
 		log.trace("ENTER");
 		int selected = ui.getSelectedIndex(table);
-		String field = Thinlet.getClass(component) == Thinlet.PANEL ? Thinlet.ENABLED : Thinlet.VISIBLE;
 		if (selected < 0) {
 			log.debug("Nothing selected, so we only allow keyword action creation.");
 			for (Object o : ui.getItems(component)) {
 				String name = ui.getString(o, Thinlet.NAME);
 				if (name == null)
 					continue;
-				if (!name.equals(COMPONENT_MENU_ITEM_CREATE)
-						&& !name.equals(COMPONENT_CB_ACTION_TYPE)) {
-					ui.setBoolean(o, field, false);
-				} else {
-					ui.setBoolean(o, field, true);
-				}
+				boolean isEnabled = name.equals(COMPONENT_MENU_ITEM_CREATE)
+						|| name.equals(COMPONENT_CB_ACTION_TYPE);
+				ui.setEnabled(o, isEnabled);
 			}
 		} else {
 			//Keyword action selected
 			for (Object o : ui.getItems(component)) {
-				ui.setBoolean(o, field, true);
+				ui.setEnabled(o, true);
 			}
 		}
 		log.trace("EXIT");
@@ -568,6 +562,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	 */
 	private void updateKeywordList() {
 		this.keywordListPagingHandler.refresh();
+		enableKeywordFields(ui.find(COMPONENT_KEY_PANEL));
 	}
 
 	/**
@@ -662,6 +657,9 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 			}
 			ui.add(table, ui.getRow(action), index);
 		}
+		// We make the buttons visible or not depending on the selected item
+		Object list = find(COMPONENT_ACTION_LIST);
+		enableKeywordActionFields(list, find(COMPONENT_KEY_ACT_PANEL));
 	}
 
 	private void setJoinGroupDisplay(Group group) {
