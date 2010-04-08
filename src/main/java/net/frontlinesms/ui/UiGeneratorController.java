@@ -463,7 +463,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				if (isAttachment(selected, Group.class) && isAttachment(o, Group.class)) {
 					Group sel = getGroup(selected);
 					Group oo = getGroup(o);
-					if (oo.getName().equals(sel.getName())) {
+					if (oo.equals(sel)) {
 						setSelected(o, true);
 						return;
 					}
@@ -471,7 +471,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				if (isAttachment(selected, Contact.class) && isAttachment(o, Contact.class)) {
 					Contact sel = getContact(selected);
 					Contact oo = getContact(o);
-					if (oo.getName().equals(sel.getName())) {
+					if (oo.equals(sel)) {
 						setSelected(o, true);
 						return;
 					}

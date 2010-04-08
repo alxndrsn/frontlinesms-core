@@ -62,12 +62,12 @@ abstract class BaseGroupActionDialog extends BaseActionDialog {
 			return;
 		}
 		for (Group g : userGroups) {
-			Object item = ui.createListItem(g.getName(), g);
+			Object item = ui.createListItem(g.getPath(), g);
 			ui.setIcon(item, Icon.GROUP);
 			// If we are editing a keyword which exists, pre-select the group which it is tied to 
 			if (this.isEditing()) {
 				KeywordAction action = super.getTargetObject(KeywordAction.class);
-				if (g.getName().equals(action.getGroup().getName())) {
+				if (g.equals(action.getGroup())) {
 					ui.setSelected(item, true);
 				}
 			}
