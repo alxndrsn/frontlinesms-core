@@ -41,6 +41,8 @@ public class StatisticsManager {
 	private static final String I18N_KEY_STATS_VERSION_NUMBER = "stats.data.version.number";
 	
 	private static final String STATISTICS_SMS_SEPARATOR = ",";
+	private static final String STATISTICS_SMS_KEYWORD = "STATS";
+	
 	private static final String PROPERTY_OS_NAME = "os.name";
 	private static final String PROPERTY_OS_VERSION = "os.version";
 	
@@ -207,7 +209,7 @@ public class StatisticsManager {
 	 * @return The generated String
 	 */
 	public String getDataAsSmsString() {
-		String statsOutput = "";
+		String statsOutput = STATISTICS_SMS_KEYWORD + " ";
 		for (Iterator<?> itr = statisticsList.entrySet().iterator() ; itr.hasNext() ; ) {
 			Map.Entry<String, String> entry = (Map.Entry<String, String>)itr.next();
 			statsOutput += entry.getValue();
