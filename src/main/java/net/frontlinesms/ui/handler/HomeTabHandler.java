@@ -36,8 +36,10 @@ public class HomeTabHandler extends BaseTabHandler {
 	
 	/** UI XML File Path: the Home Tab itself */
 	protected static final String UI_FILE_HOME_TAB = "/ui/core/home/homeTab.xml";
-	/** UI XML File Path: settings dialog for the home tab */
-	private static final String UI_FILE_HOME_TAB_SETTINGS = "/ui/core/home/dgHomeTabSettings.xml";
+	/** UI XML File Path: settings dialog for the home tab logo */
+	private static final String UI_FILE_HOME_TAB_SETTINGS = "/ui/core/dialog/dgHomeTabSettings.xml";
+	/** UI XML File Path: statistics dialog */
+	private static final String UI_FILE_STATS_DIALOG = "/ui/core/home/dgStatistics.xml";
 	/** Thinlet Component Name: Home Tab: logo */
 	private static final String COMPONENT_LB_HOME_TAB_LOGO = "lbHomeTabLogo";
 	/** Thinlet Component Name: Settings dialog: checkbox indicating if the logo is visible */
@@ -97,6 +99,18 @@ public class HomeTabHandler extends BaseTabHandler {
 		if (imageLocation != null && imageLocation.length() > 0) {
 			ui.setText(ui.find(homeTabSettings, COMPONENT_TF_IMAGE_SOURCE), imageLocation);
 		}
+		
+		ui.add(homeTabSettings);
+		log.trace("EXIT");
+	}
+	
+	/** Show the settings dialog for the home tab. */
+	public void showStatsDialog() {
+		log.trace("ENTER");
+		Object homeTabSettings = ui.loadComponentFromFile(UI_FILE_STATS_DIALOG, this);
+		UiProperties uiProperties = UiProperties.getInstance();
+		
+		
 		
 		ui.add(homeTabSettings);
 		log.trace("EXIT");

@@ -34,6 +34,9 @@ public final class FrontlineSMSConstants {
 	
 	public static final String FRONTLINE_SUPPORT_EMAIL = "frontlinesupport@kiwanja.net";
 	public static final String FRONTLINE_SUPPORT_EMAIL_SERVER = "mail.kiwanja.net";
+	public static final String FRONTLINE_STATS_EMAIL = "stats@frontlinesms.com";
+	public static final String FRONTLINE_STATS_PHONE_NUMBER = "000";
+	public static final int STATISTICS_DAYS_BEFORE_RELAUNCH = 0;
 	
 	public static final String ZIPPED_LOGS_FILENAME = "logs.zip";
 	
@@ -282,10 +285,14 @@ public final class FrontlineSMSConstants {
 	
 	public static final String DEFAULT_TIME = "00:00";
 
+	public static final int SECONDS_IN_A_DAY = 86400;
+
 //> DATE FORMATS
 	/** [i18n key to Date format] years, months and days.
 	 * This should specify a 4 digit year as it will be used for parsing entered dates as well as displaying used ones. */
 	public static final String DATEFORMAT_YMD = "date.keyword.action.format";
 	/** [i18n key to Date format] This date format is for displaying the date and time of an event, message etc.  It is not used for parsing input. */
 	public static final String DATEFORMAT_YMD_HMS = "date.message.format";
+
+
 }

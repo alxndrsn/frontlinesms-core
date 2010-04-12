@@ -26,7 +26,8 @@ import net.frontlinesms.data.domain.*;
 
 /**
  * Factory for the creation of KeywordActions.
- * @author Alex
+ * @author Alex Anderson <alex@frontlinesms.com>
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 public interface KeywordActionDao {
 	/**
@@ -59,6 +60,12 @@ public interface KeywordActionDao {
 	 * @return all {@link KeywordAction}s attached to the supplied {@link Keyword}
 	 */
 	public List<KeywordAction> getActions(Keyword keyword);
+	
+	/**
+	 * Gets a count of all {@link KeywordAction}s.
+	 * @return Total number of {@link KeywordAction}s.
+	 */
+	public int getTotalCount();
 	
 	/**
 	 * Gets a {@link KeywordAction} of a specified type for a particular {@link Keyword}.

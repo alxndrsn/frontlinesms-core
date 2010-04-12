@@ -117,7 +117,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	private IncomingMessageProcessor incomingMessageProcessor;
 	private PluginManager pluginManager;
 
-//> EVENT LISTENERS
+	//> EVENT LISTENERS
 	/** Listener for email events */
 	private EmailListener emailListener;
 	/** Listener for UI-related events */
@@ -454,6 +454,10 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	public SmsModemSettingsDao getSmsModemSettingsDao() {
 		return smsModemSettingsDao;
 	}
+	/** @return {@link #statisticsManager} */
+	public StatisticsManager getStatisticsManager() {
+		return (StatisticsManager) applicationContext.getBean("statisticsManager");
+	}
 	/** @return {@link #emailAccountDao} */
 	public EmailAccountDao getEmailAccountFactory() {
 		return emailAccountDao;
@@ -526,5 +530,11 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	/** @return {@link #smsDeviceManager}'s {@link SmsInternetService}s */
 	public Collection<SmsInternetService> getSmsInternetServices() {
 		return this.smsDeviceManager.getSmsInternetServices();
+	}
+
+	public boolean shouldLaunchStatsCollection() {
+		long dateLastStatisticsSubmit = AppProperties.getInstance().getLastStatisticsSubmissionDate();
+		int numberOfDaysSinceLastSubmit = (int)((System.currentTimeMillis() / 1000) - dateLastStatisticsSubmit) / FrontlineSMSConstants.SECONDS_IN_A_DAY;
+		return (numberOfDaysSinceLastSubmit >= FrontlineSMSConstants.STATISTICS_DAYS_BEFORE_RELAUNCH);
 	}
 }
