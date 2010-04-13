@@ -32,6 +32,11 @@
 		</license>
 	</licenses>
 	
+	<scm>
+		<connection>git://frontlinesms.git.sourceforge.net/gitroot/frontlinesms/frontlinesms.git</connection>
+		<developerConnection>ssh://alexandergeorge@frontlinesms.git.sourceforge.net/gitroot/frontlinesms/frontlinesms</developerConnection>
+	</scm>
+	
 	<repositories>
 		<repository>
 			<id>cleone.net.repo</id>
