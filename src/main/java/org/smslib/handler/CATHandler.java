@@ -215,11 +215,15 @@ public class CATHandler extends AbstractATHandler {
 			if (response.indexOf("OK\r") >= 0) {
 				smscReferenceNumber = getMessageReferenceNumberFromResponse(response);
 				break;
-			} else if (response.indexOf("ERROR") >= 0) {
-				String err = response.replaceAll("\\s+", "");
-				++errorRetries;
-				AtCmsError.log(log, err, pdu);
-				if (errorRetries >= srv.getRetriesCmsErrors()) {
+			} else {
+				if (response.toUpperCase().indexOf("ERROR") >= 0) {
+					String err = response.replaceAll("\\s+", "");
+					AtCmsError.log(log, err, pdu);
+				} else {
+					log.info("Could not understand response to AT+CMGS; treating as error: " + response);
+				}
+				
+				if (++errorRetries >= srv.getRetriesCmsErrors()) {
 					if (log != null) log.error("Quit retrying, message lost...");
 					smscReferenceNumber = SMSC_REF_NUMBER_SEND_FAILED;
 					break;
@@ -227,7 +231,7 @@ public class CATHandler extends AbstractATHandler {
 					if (log != null) log.warn("Retrying...");
 					sleepWithoutInterruption(srv.getDelayCmsErrors());
 				}
-			} else smscReferenceNumber = SMSC_REF_NUMBER_SEND_FAILED; // FIXME this seems like it will loop forever if an invalid response is given - test this and then fix it
+			}
 		}
 		return smscReferenceNumber;
 	}
