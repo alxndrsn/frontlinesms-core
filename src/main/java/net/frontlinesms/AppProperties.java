@@ -21,6 +21,8 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	private static final String KEY_VERSION_LAST_RUN = "version";
 	/** Property key (String): Path to the database config file to use */
 	private static final String KEY_DATABASE_CONFIG_PATH = "database.config";
+	/** Property key (String): Whether or not the device connection dialog must be shown when a connection problem occurs*/
+	private static final String KEY_SHOULD_ALWAYS_SHOW_DEVICE_CONNECTION_DIALOG = "always.show.device.connection.problem";
 	
 //> DEFAULT VALUES
 	/** Default value for {@link #KEY_DATABASE_CONFIG_PATH} */
@@ -67,10 +69,17 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	public String getDatabaseConfigPath() {
 		return super.getProperty(KEY_DATABASE_CONFIG_PATH, DEFAULT_DATABASE_CONFIG_PATH);
 	}
-
 	/** @param databaseConfigPath new value for the path to the database config file */
 	public void setDatabaseConfigPath(String databaseConfigPath) {
 		super.setProperty(KEY_DATABASE_CONFIG_PATH, databaseConfigPath);
+	}
+	/** @return <code>true</code> if the device connection dialog must be shown when a connection problem occurs, <code>false</code> otherwise */
+	public boolean shouldAlwaysShowDeviceConnectionDialog() {
+		return super.getPropertyAsBoolean(KEY_SHOULD_ALWAYS_SHOW_DEVICE_CONNECTION_DIALOG, true);
+	}
+	/** @param shouldAlwaysShow whether the device connection dialog must be shown when a connection problem occurs */
+	public void setAlwaysShowDeviceConnectionDialog(boolean shouldAlwaysShow) {
+		super.setPropertyAsBoolean(KEY_SHOULD_ALWAYS_SHOW_DEVICE_CONNECTION_DIALOG, shouldAlwaysShow);
 	}
 
 //> INSTANCE HELPER METHODS

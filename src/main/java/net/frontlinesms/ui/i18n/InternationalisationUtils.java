@@ -41,6 +41,7 @@ import java.util.Collection;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 
@@ -80,7 +81,7 @@ public class InternationalisationUtils {
 	 * <br> This method tries to get the string for the current bundle and if it does not exist, it looks into
 	 * the default bundle (English GB). 
 	 * @param key
-	 * @return the inernationalised text, or the english text if no internationalised text could be found
+	 * @return the internationalised text, or the english text if no internationalised text could be found
 	 */
 	public static String getI18NString(String key) {
 		if(FrontlineUI.currentResourceBundle != null) {
@@ -89,6 +90,21 @@ public class InternationalisationUtils {
 			} catch(MissingResourceException ex) {}
 		}
 		return Thinlet.DEFAULT_ENGLISH_BUNDLE.get(key);
+	}
+	
+	/**
+	 * Return the list of internationalised message for this prefix. 
+	 * <br> This method tries to get the strings for the current bundle
+	 * @param prefix
+	 * @return the list internationalised text, or an empty list if no internationalised text could be found
+	 */
+	public static List<String> getI18NStrings(String prefix) {
+		if(FrontlineUI.currentResourceBundle != null) {
+			try {
+				return FrontlineUI.currentResourceBundle.getValues(prefix);
+			} catch(MissingResourceException ex) {}
+		}
+		return new ArrayList<String>();
 	}
 
 	/**

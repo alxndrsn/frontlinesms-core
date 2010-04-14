@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dialog closable="true" close="removeDialog(this)" bottom="4" gap="8" icon="/icons/phone_disconnect.png" left="4" modal="true" name="deviceConnectionDialog" right="4" text="i18n.device.connection.titlebar" top="4" columns="1">
+	<panel columns="1" bottom="4" gap="15" left="4" right="4" top="4">
+        <label icon="/icons/help.png" font="12 bold" text="i18n.device.connection.title"/>
+    </panel>
+    <panel name="pnVariableTextCause" columns="1" bottom="4" gap="15" left="4" right="4" top="4">
+    	<!-- Variable text is going to be populated here, depending on the connection status -->
+    </panel>
+    <panel bottom="4" columns="1" gap="15" left="4" right="4" top="4">
+    	<label icon="/icons/phone_send.png" font="11 bold" text="i18n.device.connection.try.this"/>
+    </panel>
+    <panel name="pnVariableTextTry" columns="1" bottom="4" gap="15" left="4" right="4" top="4">
+    	<!-- Variable text is going to be populated here, depending on the connection status -->
+    </panel>
+    <panel halign="left" bottom="4" columns="1" gap="15" left="4" right="4" top="4">
+    	<button type="link" text="i18n.phones.help.moreinfo" action="showHelpPage('phonemanager.htm')"/>
+			<button type="link" text="i18n.phones.help.trouble" action="showHelpPage('troubleshooting.htm')"/>
+    	<checkbox colspan="2" name="cbAlwaysShow" action="manageAlwaysShow(cbAlwaysShow.selected)" selected="true" text="i18n.device.connection.always.show"/>
+    </panel>
+    <panel columns="2" gap="7" halign="center">
+	    <button action="retryDeviceConnection" text="i18n.common.db.retry" icon="/icons/refresh.png"/>
+	    <button action="removeDialog(deviceConnectionDialog)" icon="/icons/cross.png" name="btCancel" text="i18n.action.cancel"/>
+	</panel>
+</dialog>

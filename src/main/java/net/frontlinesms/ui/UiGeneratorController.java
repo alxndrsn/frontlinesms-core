@@ -46,6 +46,10 @@ import net.frontlinesms.data.domain.*;
 import net.frontlinesms.data.domain.Message.Type;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.debug.RandomDataGenerator;
+import net.frontlinesms.events.EventBus;
+import net.frontlinesms.events.EventObserver;
+import net.frontlinesms.events.FrontlineEvent;
+import net.frontlinesms.events.impl.SmsDeviceNotification;
 import net.frontlinesms.listener.EmailListener;
 import net.frontlinesms.listener.UIListener;
 import net.frontlinesms.plugins.PluginController;
@@ -54,6 +58,7 @@ import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.*;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
+import net.frontlinesms.ui.handler.DeviceConnectionDialogHandler;
 import net.frontlinesms.ui.handler.HomeTabHandler;
 import net.frontlinesms.ui.handler.ImportExportDialogHandler;
 import net.frontlinesms.ui.handler.PhoneTabHandler;
@@ -98,7 +103,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.*;
  * @author Carlos Eduardo Genz kadu(at)masabi(dot)com
  */
 @SuppressWarnings("serial")
-public class UiGeneratorController extends FrontlineUI implements EmailListener, UIListener, SingleGroupSelecterPanelOwner {
+public class UiGeneratorController extends FrontlineUI implements EmailListener, UIListener, SingleGroupSelecterPanelOwner, EventObserver {
 
 //> CONSTANTS
 	/** Default height of the Thinlet frame launcher */
@@ -170,6 +175,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 */
 	public UiGeneratorController(FrontlineSMS frontlineController, boolean detectPhones) throws Throwable {
 		this.frontlineController = frontlineController;
+		// We prepare listening events for device connection
+		this.frontlineController.getEventBus().registerObserver(this);
 		
 		// Load the requested language file.
 		AppProperties appProperties = AppProperties.getInstance();
@@ -327,7 +334,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			setStatus(InternationalisationUtils.getI18NString(MESSAGE_PHONE_MANAGER_INITIALISED));
 			
 			if (detectPhones) {
-				phoneTabController.phoneManager_detectModems();
+				this.launchModemDetection();
 			}
 		} catch(Throwable t) {
 			LOG.error("Problem starting User Interface module.", t);
@@ -336,6 +343,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 	}
 	
+	public void launchModemDetection() {
+		this.phoneTabController.phoneManager_detectModems();
+	}
+
 	/**
 	 * 
 	 * @param pluginClassName the fully qualified name of the plugin class
@@ -1761,5 +1772,21 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		Message testMessage = Message.createOutgoingMessage(System.currentTimeMillis(), null, "+123456789", "Test outgoing SMS");
 		this.messageFactory.saveMessage(testMessage);
 		this.frontlineController.outgoingMessageEvent(FrontlineSMS.EMULATOR, testMessage);
+	}
+
+
+	
+	/** Handle notifications from the {@link EventBus} */
+	public void notify(FrontlineEvent event) {
+		if(event instanceof SmsDeviceNotification) {
+			if (AppProperties.getInstance().shouldAlwaysShowDeviceConnectionDialog() && SmsDeviceManager.isFailedStatus(((SmsDeviceNotification)event).getStatus())) {
+				this.showDeviceConnectionDialog(((SmsDeviceNotification)event).getStatus());
+			}
+		}
+	}
+
+	private void showDeviceConnectionDialog(SmsDeviceStatus deviceConnectionStatus) {
+		DeviceConnectionDialogHandler deviceConnectionDialogHandler = new DeviceConnectionDialogHandler(this, deviceConnectionStatus);
+		add(deviceConnectionDialogHandler.getDialog());
 	}
 }
