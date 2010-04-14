@@ -219,7 +219,7 @@ public class CATHandler extends AbstractATHandler {
 				String err = response.replaceAll("\\s+", "");
 				++errorRetries;
 				AtCmsError.log(log, err, pdu);
-				if (errorRetries == srv.getRetriesCmsErrors()) {
+				if (errorRetries >= srv.getRetriesCmsErrors()) {
 					if (log != null) log.error("Quit retrying, message lost...");
 					smscReferenceNumber = SMSC_REF_NUMBER_SEND_FAILED;
 					break;

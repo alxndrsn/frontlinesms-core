@@ -83,6 +83,7 @@ public class CService {
 
 	private int delayNoResponse = 5000;
 
+	/** number of times to retry an AT command before giving up when the response is a CMS error */
 	private int retriesCmsErrors = 5;
 
 	private int delayCmsErrors = 5000;
@@ -406,6 +407,8 @@ public class CService {
 		this.retriesCmsErrors = retries;
 	}
 
+	/** This method only appears to be used in {@link AbstractATHandler#sendMessage(int, String, String, String)}
+	 * @return number of times to retry an AT command before giving up when the response is a CMS error */
 	public int getRetriesCmsErrors() {
 		return retriesCmsErrors;
 	}
