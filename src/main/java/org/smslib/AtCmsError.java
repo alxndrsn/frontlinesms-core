@@ -33,7 +33,7 @@ public class AtCmsError {
 			if(pdu != null) {
 				errorString += " for PDU " + pdu;
 			}
-			log.error(errorString);
+			log.error(errorString, new RuntimeException());
 		}
 	}
 	
