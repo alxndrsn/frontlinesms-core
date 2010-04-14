@@ -29,6 +29,10 @@ import org.smslib.CService.MessageClass;
 import org.smslib.handler.*;
 
 abstract public class AbstractATHandler {
+	/** The value returned by {@link #sendMessage(int, String, String, String)} instead of a valid
+	 * SMSC reference number when sending a message failed. */
+	protected static final int SMSC_REF_NUMBER_SEND_FAILED = -1;
+	
 	protected CSerialDriver serialDriver;
 
 	protected Logger log;
@@ -129,6 +133,18 @@ abstract public class AbstractATHandler {
 
 	abstract protected boolean keepGsmLinkOpen() throws IOException;
 
+	/**
+	 * This method is called to send an SMS.  It can be used with {@link CService.Protocol#PDU} or
+	 * {@link CService.Protocol#TEXT}, but nothing else.
+	 * @param size the "size" of the message when using {@link CService.Protocol#PDU}
+	 * @param pdu the PDU of the message when using {@link CService.Protocol#PDU}
+	 * @param phone the target phone number for the message when using {@link CService.Protocol#TEXT}
+	 * @param text the textual content of the message when using {@link CService.Protocol#TEXT}
+	 * @return the SMSC reference number for the message, or {@link #SMSC_REF_NUMBER_SEND_FAILED} if there was a problem sending the message.
+	 * @throws IOException
+	 * @throws NoResponseException
+	 * @throws UnrecognizedHandlerProtocolException
+	 */
 	abstract protected int sendMessage(int size, String pdu, String phone, String text) throws IOException, NoResponseException, UnrecognizedHandlerProtocolException;
 
 	abstract protected String listMessages(MessageClass messageClass) throws IOException, UnrecognizedHandlerProtocolException, SMSLibDeviceException;

@@ -186,6 +186,66 @@ public class CATHandler extends AbstractATHandler {
 		String response = serialSendReceive("AT+CMMS=1");
 		return response.matches("\\s+OK\\s+");
 	}
+	
+	private int sendMessage_PDU(int size, String pdu) throws IOException, NoResponseException {
+		int smscReferenceNumber;
+		int errorRetries = 0;
+		while (true) {
+			int responseRetries = 0;
+			serialDriver.send(CUtils.replace("AT+CMGS=\"{1}\"\r", "\"{1}\"", "" + size));
+			sleepWithoutInterruption(DELAY_CMGS);
+			while (!serialDriver.dataAvailable()) {
+				responseRetries++;
+				if (responseRetries == srv.getRetriesNoResponse()) throw new NoResponseException();
+				if (log != null) log.warn("ATHandler().SendMessage(): Still waiting for response (I) (" + responseRetries + ")...");
+				sleepWithoutInterruption(srv.getDelayNoResponse());
+			}
+			responseRetries = 0;
+			serialDriver.clearBuffer();
+			serialDriver.send(pdu);
+			serialDriver.send((char) 26);
+			String response = serialDriver.getResponse();
+			while(response.length() == 0) {
+				responseRetries++;
+				if (responseRetries == srv.getRetriesNoResponse()) throw new NoResponseException();
+				if (log != null) log.warn("ATHandler().SendMessage(): Still waiting for response (II) (" + responseRetries + ")...");
+				sleepWithoutInterruption(srv.getDelayNoResponse());
+				response = serialDriver.getResponse();
+			}
+			if (response.indexOf("OK\r") >= 0) {
+				smscReferenceNumber = getMessageReferenceNumberFromResponse(response);
+				break;
+			} else if (response.indexOf("ERROR") >= 0) {
+				String err = response.replaceAll("\\s+", "");
+				++errorRetries;
+				AtCmsError.log(log, err, pdu);
+				if (errorRetries == srv.getRetriesCmsErrors()) {
+					if (log != null) log.error("Quit retrying, message lost...");
+					smscReferenceNumber = SMSC_REF_NUMBER_SEND_FAILED;
+					break;
+				} else {
+					if (log != null) log.warn("Retrying...");
+					sleepWithoutInterruption(srv.getDelayCmsErrors());
+				}
+			} else smscReferenceNumber = SMSC_REF_NUMBER_SEND_FAILED; // FIXME this seems like it will loop forever if an invalid response is given - test this and then fix it
+		}
+		return smscReferenceNumber;
+	}
+	
+	private int sendMessage_TEXT(String phone, String text) throws IOException {
+		String cmd1 = CUtils.replace("AT+CMGS=\"{1}\"\r", "{1}", phone);
+		serialDriver.send(cmd1);
+		serialDriver.emptyBuffer();
+		serialDriver.send(text);
+		sleepWithoutInterruption(DELAY_CMGS);
+		serialDriver.send((byte) 26);
+		String response = serialDriver.getResponse();
+		if (response.indexOf("OK\r") >= 0) {
+			return getMessageReferenceNumberFromResponse(response);
+		} else {
+			return SMSC_REF_NUMBER_SEND_FAILED;
+		}
+	}
 
 	/** Sends an SMS message and retrieves the SMSC reference number assigned to it. */
 	protected int sendMessage(int size, String pdu, String phone, String text) throws IOException, NoResponseException, UnrecognizedHandlerProtocolException {
@@ -193,57 +253,10 @@ public class CATHandler extends AbstractATHandler {
 		int messageProtocol = srv.getProtocol();
 		switch(messageProtocol) {
 			case CService.Protocol.PDU:
-				int errorRetries = 0;
-				while (true) {
-					int responseRetries = 0;
-					serialDriver.send(CUtils.replace("AT+CMGS=\"{1}\"\r", "\"{1}\"", "" + size));
-					sleepWithoutInterruption(DELAY_CMGS);
-					while (!serialDriver.dataAvailable()) {
-						responseRetries++;
-						if (responseRetries == srv.getRetriesNoResponse()) throw new NoResponseException();
-						if (log != null) log.warn("ATHandler().SendMessage(): Still waiting for response (I) (" + responseRetries + ")...");
-						sleepWithoutInterruption(srv.getDelayNoResponse());
-					}
-					responseRetries = 0;
-					serialDriver.clearBuffer();
-					serialDriver.send(pdu);
-					serialDriver.send((char) 26);
-					String response = serialDriver.getResponse();
-					while(response.length() == 0) {
-						responseRetries++;
-						if (responseRetries == srv.getRetriesNoResponse()) throw new NoResponseException();
-						if (log != null) log.warn("ATHandler().SendMessage(): Still waiting for response (II) (" + responseRetries + ")...");
-						sleepWithoutInterruption(srv.getDelayNoResponse());
-						response = serialDriver.getResponse();
-					}
-					if (response.indexOf("OK\r") >= 0) {
-						smscReferenceNumber = getMessageReferenceNumberFromResponse(response);
-						break;
-					} else if (response.indexOf("ERROR") >= 0) {
-						String err = response.replaceAll("\\s+", "");
-						++errorRetries;
-						AtCmsError.log(log, err, pdu);
-						if (errorRetries == srv.getRetriesCmsErrors()) {
-							if (log != null) log.error("Quit retrying, message lost...");
-							smscReferenceNumber = -1;
-							break;
-						} else {
-							if (log != null) log.warn("Retrying...");
-							sleepWithoutInterruption(srv.getDelayCmsErrors());
-						}
-					} else smscReferenceNumber = -1;
-				}
+				smscReferenceNumber = sendMessage_PDU(size, pdu);
 				break;
 			case CService.Protocol.TEXT:
-				String cmd1 = CUtils.replace("AT+CMGS=\"{1}\"\r", "{1}", phone);
-				serialDriver.send(cmd1);
-				serialDriver.emptyBuffer();
-				serialDriver.send(text);
-				sleepWithoutInterruption(DELAY_CMGS);
-				serialDriver.send((byte) 26);
-				String response = serialDriver.getResponse();
-				if (response.indexOf("OK\r") >= 0) smscReferenceNumber = getMessageReferenceNumberFromResponse(response);
-				else smscReferenceNumber = -1;
+				smscReferenceNumber = sendMessage_TEXT(phone, text);
 				break;
 			default:
 				throw new UnrecognizedHandlerProtocolException(messageProtocol);
