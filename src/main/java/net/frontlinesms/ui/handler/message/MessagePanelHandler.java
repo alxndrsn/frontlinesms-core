@@ -194,19 +194,17 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	 * 
 	 */
 	public void messageChanged(String recipient, String message) {
-		int recipientLength = recipient.length(),
-			messageLength = message.length();
-		/*
-		if (messageLength == 0) {
-			clearMessageComponent();
-			return;
-		}
-		*/
+		int recipientLength = recipient.length();
+		int messageLength = message.length();
+		
 		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
 		boolean areAllCharactersValidGSM = GsmAlphabet.areAllCharactersValidGSM(message);
 		int totalLengthAllowed;
-		if(areAllCharactersValidGSM) totalLengthAllowed = Message.SMS_LENGTH_LIMIT + Message.SMS_MULTIPART_LENGTH_LIMIT * (Message.SMS_LIMIT - 1);
-		else totalLengthAllowed = Message.SMS_LENGTH_LIMIT + Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * (Message.SMS_LIMIT - 1);
+		if(areAllCharactersValidGSM) {
+			totalLengthAllowed = Message.SMS_LENGTH_LIMIT + Message.SMS_MULTIPART_LENGTH_LIMIT * (Message.SMS_LIMIT - 1);
+		} else {
+			totalLengthAllowed = Message.SMS_LENGTH_LIMIT_UCS2 + Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * (Message.SMS_LIMIT - 1);
+		}
 		
 		boolean shouldEnableSendButton = (messageLength > 0 && (!shouldCheckMaxMessageLength || messageLength <= totalLengthAllowed)
 											&& (!shouldDisplayRecipientField || recipientLength > 0));
