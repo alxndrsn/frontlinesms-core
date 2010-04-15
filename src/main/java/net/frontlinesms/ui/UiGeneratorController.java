@@ -1729,6 +1729,16 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		databaseSettings.showAsDialog(needToRestartApplication);
 	}
 	
+
+	/**
+	 * Show the device connection dialog if it's not already open
+	 * @param deviceConnectionStatus The status on which the text in the dialog must be populated from 
+	 */
+	private void showDeviceConnectionDialog(SmsDeviceStatus deviceConnectionStatus) {
+		DeviceConnectionDialogHandler deviceConnectionDialogHandler = new DeviceConnectionDialogHandler(this, deviceConnectionStatus);
+		add(deviceConnectionDialogHandler.getDialog());
+	}
+	
 	/** Reloads the ui. */
 	public final void reloadUi() {
 		this.frameLauncher.dispose();
@@ -1783,10 +1793,5 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				this.showDeviceConnectionDialog(((SmsDeviceNotification)event).getStatus());
 			}
 		}
-	}
-
-	private void showDeviceConnectionDialog(SmsDeviceStatus deviceConnectionStatus) {
-		DeviceConnectionDialogHandler deviceConnectionDialogHandler = new DeviceConnectionDialogHandler(this, deviceConnectionStatus);
-		add(deviceConnectionDialogHandler.getDialog());
 	}
 }

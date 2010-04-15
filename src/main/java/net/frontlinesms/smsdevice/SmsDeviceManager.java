@@ -92,6 +92,8 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 
 	/** Listener to be passed SMS Listener events from this */
 	private SmsListener smsListener;
+	/** Listener for application events */
+	private EventBus eventBus;
 	/** Flag indicating that the thread should continue running. */
 	private boolean running;	
 	/** If set TRUE, then thread will automatically try to connect to newly-detected devices. */ 
@@ -122,6 +124,10 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 
 	public void setSmsListener(SmsListener smsListener) {
 		this.smsListener = smsListener;
+	}
+
+	public void setEventBus(EventBus eventBus) {
+		this.eventBus = eventBus;
 	}
 
 	public void run() {
@@ -185,7 +191,9 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 		Enumeration<CommPortIdentifier> portIdentifiers = CommUtils.getPortIdentifiers();
 		
 		if (!portIdentifiers.hasMoreElements()) {
-			((FrontlineSMS)this.smsListener).getEventBus().triggerEvent(new SmsDeviceNotification(SmsModemStatus.NO_PHONE_DETECTED));
+			if(this.eventBus != null) {
+				this.eventBus.triggerEvent(new SmsDeviceNotification(SmsModemStatus.NO_PHONE_DETECTED));
+			}
 		} else {
 			LOG.debug("Getting ports...");
 			while (portIdentifiers.hasMoreElements()) {
@@ -326,8 +334,8 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 					activeDevice.setDuplicate(isDuplicate);
 					if(!isDuplicate) activeDevice.connect();
 				}
-			} else if (smsListener != null && isFailedStatus(deviceStatus) && !this.isAnotherDeviceProcessing(device)) {
-				((FrontlineSMS)this.smsListener).getEventBus().triggerEvent(new SmsDeviceNotification(deviceStatus));
+			} else if (this.eventBus != null && isFailedStatus(deviceStatus) && !this.isAnotherDeviceProcessing(device)) {
+				this.eventBus.triggerEvent(new SmsDeviceNotification(deviceStatus));
 			}
 		}
 		if (smsListener != null) {
