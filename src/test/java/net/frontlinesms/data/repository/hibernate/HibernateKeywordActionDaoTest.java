@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Required;
 public class HibernateKeywordActionDaoTest extends HibernateTestCase {
 //> PROPERTIES
 	/** {@link KeywordActionDao} instance to test against. */
-	private KeywordActionDao keywordActionDao;
+	private KeywordActionDao keywordActionDao; // TODO should this explicitly be a Hibernate*Dao?
 	/** {@link KeywordDao} instance to test against. */
 	private KeywordDao keywordDao;
 	
@@ -46,34 +46,31 @@ public class HibernateKeywordActionDaoTest extends HibernateTestCase {
 	}
 	
 	public void testKeywordActionsCount () {
-		KeywordAction action = KeywordAction.createReplyAction(this.testKeyword, "some reply text", 14343274L, 21340345L);
-		KeywordAction action2 = KeywordAction.createReplyAction(this.testKeyword, "some reply text 2", 14343274L, 21340345L);
-		KeywordAction action3 = KeywordAction.createReplyAction(this.testKeyword2, "some reply text for keyword 2", 14343274L, 21340345L);
-		KeywordAction action4 = KeywordAction.createEmailAction(this.testKeyword2, "Reply Text", null, "", "", 14343274L, 21340345L);
+		final long startDate = 14343274L;
+		final long endDate = 21340345L;
+		KeywordAction action = KeywordAction.createReplyAction(this.testKeyword, "some reply text", startDate, endDate);
+		KeywordAction action2 = KeywordAction.createReplyAction(this.testKeyword, "some reply text 2", startDate, endDate);
+		KeywordAction action3 = KeywordAction.createReplyAction(this.testKeyword2, "some reply text for keyword 2", startDate, endDate);
+		KeywordAction action4;
 		
 		this.keywordActionDao.saveKeywordAction(action);
 		this.keywordActionDao.saveKeywordAction(action2);
 		this.keywordActionDao.saveKeywordAction(action3);
 		
-		int expectedCount = 3;
-		int actualCount = this.keywordActionDao.getTotalCount();
-		assertEquals(expectedCount, actualCount);
+		assertEquals(3, this.keywordActionDao.getCount());
 		
 		this.keywordActionDao.deleteKeywordAction(action2);
-		expectedCount = 2;
-		actualCount = this.keywordActionDao.getTotalCount();
-		assertEquals(expectedCount, actualCount);
+		assertEquals(2, this.keywordActionDao.getCount());
 		
 		this.keywordActionDao.deleteKeywordAction(action3);
-		expectedCount = 1;
-		actualCount = this.keywordActionDao.getTotalCount();
-		assertEquals(expectedCount, actualCount);
+		assertEquals(1, this.keywordActionDao.getCount());
 		
 		this.keywordActionDao.deleteKeywordAction(action);
+		assertEquals(0, this.keywordActionDao.getCount());
+
+		action4 = KeywordAction.createEmailAction(this.testKeyword2, "Reply Text", null, "", "", startDate, endDate);
 		this.keywordActionDao.saveKeywordAction(action4);
-		expectedCount = 1;
-		actualCount = this.keywordActionDao.getTotalCount();
-		assertEquals(expectedCount, actualCount);
+		assertEquals(1, this.keywordActionDao.getCount());
 	}
 	
 //> INIT METHODS

@@ -190,7 +190,7 @@ public class StatisticsManager {
 	 * Collects the total number of keyword actions
 	 */
 	private void collectNumberOfKeywordActions() {
-		final int numberOfKeywordActions = keywordActionDao.getTotalCount();
+		final int numberOfKeywordActions = keywordActionDao.getCount();
 		this.statisticsList.put(InternationalisationUtils.getI18NString(I18N_KEY_STATS_KEYWORD_ACTIONS), String.valueOf(numberOfKeywordActions));
 	}
 

@@ -61,9 +61,8 @@ public class HibernateKeywordActionDao extends BaseHibernateDao<KeywordAction> i
 		return super.getList(criteria);
 	}
 	
-	/** @see net.frontlinesms.data.repository.KeywordActionDao#getTotalCount()*/
-	public int getTotalCount() {
-		DetachedCriteria criteria = super.getCriterion();
-		return super.getCount(criteria);
+	/** @see net.frontlinesms.data.repository.KeywordActionDao#getCount()*/
+	public int getCount() {
+		return super.countAll();
 	}
 }

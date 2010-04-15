@@ -65,7 +65,7 @@ public interface KeywordActionDao {
 	 * Gets a count of all {@link KeywordAction}s.
 	 * @return Total number of {@link KeywordAction}s.
 	 */
-	public int getTotalCount();
+	public int getCount();
 	
 	/**
 	 * Gets a {@link KeywordAction} of a specified type for a particular {@link Keyword}.
