@@ -157,7 +157,7 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	
 	/** @return thinlet list item for a group */
 	private Object createGroupListItem(Group group) {
-		String name = group.getName(); // TODO make this the qualified name
+		String name = group.getPath(); // TODO make this the qualified name
 		Object item = this.ui.createListItem(name, group);
 		this.ui.setIcon(item, Icon.GROUP);
 		return item;

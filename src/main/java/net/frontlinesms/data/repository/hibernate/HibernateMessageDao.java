@@ -67,11 +67,21 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 
 	/** @see MessageDao#getMessageCount(int, Keyword, Long, Long) */
 	public int getMessageCount(Message.Type messageType, Keyword keyword, Long start, Long end) {
-		DetachedCriteria criteria = super.getCriterion();
-		addDateCriteria(criteria, start, end);
-		addTypeCriteria(criteria, messageType);
-		addKeywordMatchCriteria(criteria, keyword);
-		return getCount(criteria);
+		PartialQuery<Message> q = createQueryStringForKeyword(true, messageType, keyword);
+		
+		if (start != null) {
+			q.appendWhereOrAnd();
+			if (end != null) {
+				q.append("(message." + Message.Field.DATE.getFieldName() + ">=? AND message." + Message.Field.DATE.getFieldName() + "<=?)", start, end);
+			} else {
+				q.append("(message." + Message.Field.DATE.getFieldName() + ">=?)", start);	
+			}			
+		} else if (end != null) {
+			q.appendWhereOrAnd();
+			q.append("(message." + Message.Field.DATE.getFieldName() + "<=?)", end);
+		}
+		
+		return super.getCount(q.getQueryString(), q.getInsertValues());
 	}
 
 	/** @see MessageDao#getMessageCountForMsisdn(int, String, Long, Long) */
@@ -139,7 +149,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 
 	/** @see MessageDao#getMessagesForKeyword(int, Keyword, Field, Order, Long, Long, int, int) */
 	public List<Message> getMessagesForKeyword(Message.Type messageType, Keyword keyword, Field sortBy, Order order, Long start, Long end, int startIndex, int limit) {
-		PartialQuery<Message> q = createQueryStringForKeyword(messageType, keyword);
+		PartialQuery<Message> q = createQueryStringForKeyword(false, messageType, keyword);
 		
 		if (start != null) {
 			q.appendWhereOrAnd();
@@ -161,7 +171,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	/** @see MessageDao#getMessagesForKeyword(int, Keyword) */
 	@SuppressWarnings("unchecked")
 	public List<Message> getMessagesForKeyword(Message.Type messageType, Keyword keyword) {
-		PartialQuery q = createQueryStringForKeyword(messageType, keyword);
+		PartialQuery q = createQueryStringForKeyword(false, messageType, keyword);
 		return super.getList(q.getQueryString(), q.getInsertValues());
 	}
 	
@@ -347,10 +357,14 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	/**
 	 * 
 	 */
-	private PartialQuery<Message> createQueryStringForKeyword(Message.Type messageType, Keyword keyword) {
+	private PartialQuery<Message> createQueryStringForKeyword(boolean isCount, Message.Type messageType, Keyword keyword) {
 		PartialQuery<Message> q = new PartialQuery<Message>();
 		// Build a list of values to insert into the query string
-		q.append("SELECT message FROM Message message");
+		String selectString = "message";
+		if (isCount)
+			selectString = "count(*)";
+		
+		q.append("SELECT " + selectString + " FROM Message message");
 		
 		if(messageType != Message.Type.TYPE_ALL) {
 			q.append("WHERE");

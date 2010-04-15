@@ -134,6 +134,9 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 	}
 	
 	private void testGetMessagesForKeywordWithParameters(String keyword, int totalMessageCount, Long startDate, Long endDate, int startIndex, int limit) {
+		int actualMessageCount = this.dao.getMessageCount(Message.Type.TYPE_ALL, new Keyword(keyword, ""), startDate, endDate);
+		assertTrue("Wrong message count. Expected <" + totalMessageCount + ">, but was <" + actualMessageCount + ">", totalMessageCount == actualMessageCount);
+		
 		// Adjust the expected message count to take into account the paging
 		int expectedMessageCount = Math.min(totalMessageCount-startIndex, limit);
 		

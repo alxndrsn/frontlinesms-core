@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.apache.log4j.Logger;
+import org.hibernate.property.Getter;
 
 import thinlet.Thinlet;
 
@@ -62,14 +63,18 @@ public class GroupSelecterPanel extends BasePanelHandler {
 	 * Refresh the list of groups
 	 * This method will reload the view of groups.
 	 */
-	public void refresh() {
+	public void refresh(boolean showRoot) {
 		Object groupTree = getGroupTreeComponent();
 		
 		FrontlineSMS frontlineController = ((UiGeneratorController) super.ui).getFrontlineController();
 		this.groupDao = new UnmodifiableGroupDao(frontlineController.getGroupDao());
 		
 		ui.removeAll(groupTree);
-		ui.add(groupTree, createNode(getRootGroup(), true));
+		Object node = createNode(getRootGroup(), true, showRoot);
+		// If we want to show the root group, we add it to the tree component
+		// Otherwise, the main nodes are added to the tree component in the createNode() function 
+		if (showRoot)
+			ui.add(groupTree, node);
 	}
 	
 //> ACCESSORS
@@ -117,7 +122,7 @@ public class GroupSelecterPanel extends BasePanelHandler {
 			// There is no parent for the group, so we need to get the node for the root group
 			parentGroupNode = ui.getItem(groupTree, 0);
 		}
-		ui.add(parentGroupNode, createNode(group, true));
+		ui.add(parentGroupNode, createNode(group, true, true));
 	}
 	
 //> UI EVENT METHODS
@@ -165,7 +170,7 @@ public class GroupSelecterPanel extends BasePanelHandler {
 	 *   TODO removing this argument, and treating it as always <code>false</code> speeds up the contact tab a lot
 	 * @return
 	 */
-	private Object createNode(Group group, boolean showContactsNumber) {
+	private Object createNode(Group group, boolean showContactsNumber, boolean showRootGroup) {
 		LOG.trace("ENTER");
 		
 		LOG.debug("Group [" + group.getName() + "]");
@@ -175,18 +180,24 @@ public class GroupSelecterPanel extends BasePanelHandler {
 //			toSet += " (" + this.groupMembershipDao.getMemberCount(group) + ")";
 //		}
 		
-		Object node = ui.createNode(toSet, group);
-
-		if(ui.getBoolean(node, Thinlet.EXPANDED)
-				/*&& groupDao.hasDescendants(group)*/) {
-			ui.setIcon(node, Icon.FOLDER_OPEN);
+		Object node;
+		
+		if (group.equals(getRootGroup()) && !showRootGroup) {
+			node = groupTreeComponent;
 		} else {
-			ui.setIcon(node, Icon.FOLDER_CLOSED);
+			node = ui.createNode(toSet, group);
+			
+			if(ui.getBoolean(node, Thinlet.EXPANDED)
+					/*&& groupDao.hasDescendants(group)*/) {
+				ui.setIcon(node, Icon.FOLDER_OPEN);
+			} else {
+				ui.setIcon(node, Icon.FOLDER_CLOSED);
+			}
 		}
 		
 		// Add subgroup components to this node
 		for (Group subGroup : groupDao.getChildGroups(group)) {
-			Object groupNode = createNode(subGroup, showContactsNumber);
+			Object groupNode = createNode(subGroup, showContactsNumber, showRootGroup);
 			ui.add(node, groupNode);
 		}
 		LOG.trace("EXIT");

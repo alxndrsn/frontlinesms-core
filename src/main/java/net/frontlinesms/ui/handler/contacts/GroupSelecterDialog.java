@@ -4,7 +4,6 @@ import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
-import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSelecterPanelOwner {
@@ -36,7 +35,7 @@ public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSe
 		
 		this.selecter = new GroupSelecterPanel(ui, this);
 		selecter.init(rootGroup);
-		selecter.refresh();
+		selecter.refresh(false);
 		
 		Object selecterPanel = selecter.getPanelComponent();
 		ui.setColspan(selecterPanel, 2);
