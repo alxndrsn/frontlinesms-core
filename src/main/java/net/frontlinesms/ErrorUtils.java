@@ -34,26 +34,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
-import java.util.Date;
-import java.util.Properties;
 
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
-import javax.mail.BodyPart;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -72,6 +56,8 @@ import org.apache.log4j.LogManager;
 
 import serial.SerialClassFactory;
 
+import net.frontlinesms.email.EmailException;
+import net.frontlinesms.email.smtp.SmtpEmailSender;
 import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.CommProperties;
@@ -107,7 +93,7 @@ public class ErrorUtils {
 			sendLogs(userName, userEmail, false);
 			JOptionPane.showMessageDialog(null, "Log files were successfully sent to frontline support team.");
 			return true;
-		} catch (MessagingException e) {
+		} catch (EmailException e) {
 			// Show user the option to save the logs.zip to a place they know!
 			String dir = showFileChooserForSavingZippedLogs();
 			if (dir != null) {
@@ -124,7 +110,7 @@ public class ErrorUtils {
 			try {
 				sendToFrontlineSupport(userName, userEmail, null);
 				return true;
-			} catch (MessagingException e1) {
+			} catch (EmailException e1) {
 				// If it fails, there is nothing we can do.
 				return false;
 			}
@@ -361,7 +347,7 @@ public class ErrorUtils {
 	 * @throws IOException
 	 * @throws MessagingException
 	 */
-	public static void sendLogs(String name, String emailAddress, boolean resetConfiguration) throws IOException, MessagingException {
+	public static void sendLogs(String name, String emailAddress, boolean resetConfiguration) throws IOException, EmailException {
 		LogManager.shutdown();
 		try {
 			ResourceUtils.zip(ResourceUtils.getConfigDirectoryPath() + "logs",
@@ -382,60 +368,20 @@ public class ErrorUtils {
 	 * @param attachment
 	 * @throws MessagingException
 	 */
-	public static void sendToFrontlineSupport(String fromName, String fromEmailAddress, String attachment) throws MessagingException {
-		Properties props = new Properties();
-	    props.put("mail.smtp.host", FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL_SERVER);
-	    Session session = Session.getInstance(props, null);
-	
-	    MimeMessage msg = new MimeMessage(session);
-	    
-	    // Set the email address on the message
-	    try {
-		    InternetAddress emailAddress = InternetAddress.getLocalAddress(session);
-		    if (emailAddress == null) emailAddress = new InternetAddress();
-	    	if(fromName != null && fromName.length()>0) emailAddress.setPersonal(fromName);
-	    	if(fromEmailAddress != null && fromEmailAddress.length()>0) emailAddress.setAddress(fromEmailAddress);
-	    	msg.setFrom(emailAddress);
-	    } catch(UnsupportedEncodingException ex) {
-	    	msg.setFrom();
-	    }
-	    
-	    msg.setRecipients(Message.RecipientType.TO, FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL);
-	    msg.setSubject("FrontlineSMS log files");
-	    msg.setSentDate(new Date());
-	
-	    //use a MimeMultipart as we need to handle the file attachments
-	    Multipart multipart = new MimeMultipart();
+	public static void sendToFrontlineSupport(String fromName, String fromEmailAddress, String attachment) throws EmailException {
+		SmtpEmailSender emailSender = new SmtpEmailSender(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL_SERVER);
 	
 	    StringBuilder sb = new StringBuilder();
 	    appendSystemProperties(sb);
 	    appendCommProperties(sb);
 	    appendPluginProperties(sb);
+	    String textContent = sb.toString();
 	    
-	    // Create a message part to represent the body text
-	    BodyPart messageBodyPart = new MimeBodyPart();
-	    messageBodyPart.setText(sb.toString());
-	
-	    //add the message body to the mime message
-	    multipart.addBodyPart(messageBodyPart);
-	
-	    if (attachment != null) {
-	    	MimeBodyPart attachmentBodyPart = new MimeBodyPart();
-	
-	    	//use a JAF FileDataSource as it does MIME type detection
-	    	DataSource source = new FileDataSource(attachment);
-	    	attachmentBodyPart.setDataHandler(new DataHandler(source));
-	
-	    	//assume that the filename you want to send is the same as the
-	    	//actual file name - could alter this to remove the file path
-	    	attachmentBodyPart.setFileName(FrontlineSMSConstants.ZIPPED_LOGS_FILENAME);
-	
-	    	multipart.addBodyPart(attachmentBodyPart);
-	    }
-	
-	    // Put all message parts in the message
-	    msg.setContent(multipart); 
-	    Transport.send(msg);
+		emailSender.sendEmail(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL,
+				emailSender.getLocalEmailAddress(fromEmailAddress, fromEmailAddress),
+				"FrontlineSMS log files",
+				textContent,
+				new File(attachment));
 	}
 	
 	/**

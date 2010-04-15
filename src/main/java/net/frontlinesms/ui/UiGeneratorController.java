@@ -32,8 +32,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import javax.mail.MessagingException;
-
 import net.frontlinesms.AppProperties;
 import net.frontlinesms.BuildProperties;
 import net.frontlinesms.EmailSender;
@@ -47,6 +45,7 @@ import net.frontlinesms.data.domain.*;
 import net.frontlinesms.data.domain.Message.Type;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.debug.RandomDataGenerator;
+import net.frontlinesms.email.EmailException;
 import net.frontlinesms.listener.EmailListener;
 import net.frontlinesms.listener.UIListener;
 import net.frontlinesms.plugins.PluginController;
@@ -1601,7 +1600,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 					LOG.debug(success);
 					alert(success);
 					setStatus(success);
-				} catch (MessagingException e) {
+				} catch (EmailException e) {
 					String msg = InternationalisationUtils.getI18NString(MESSAGE_FAILED_TO_SEND_REPORT);
 					LOG.debug(msg, e);
 					setStatus(msg);
@@ -1627,7 +1626,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 					LOG.debug("", e);
 					try {
 						ErrorUtils.sendToFrontlineSupport(userName, userEmail, null);
-					} catch (MessagingException e1) {
+					} catch (EmailException e1) {
 						LOG.debug("", e1);
 					}
 				} finally {
