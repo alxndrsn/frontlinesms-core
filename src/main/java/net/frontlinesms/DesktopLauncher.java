@@ -19,13 +19,19 @@
  */
 package net.frontlinesms;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Time;
 import java.util.Calendar;
 import java.util.TimeZone;
 
 import javax.swing.UIManager;
 
+import net.frontlinesms.encoding.Base64Utils;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.ui.FirstTimeWizard;
 import net.frontlinesms.ui.UiGeneratorController;
@@ -35,6 +41,8 @@ import net.frontlinesms.ui.i18n.LanguageBundle;
 
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
+
+import com.sun.mail.iap.ByteArray;
 
 import thinlet.Thinlet;
 
@@ -78,7 +86,13 @@ public class DesktopLauncher {
 			// resources.zip rather than in the resources/languages directory
 			LanguageBundle englishBundle = InternationalisationUtils.getDefaultLanguageBundle();
 			Thinlet.DEFAULT_ENGLISH_BUNDLE = englishBundle.getProperties();
-
+			
+			// If the user has currently no User ID defined
+			// We generate one
+			if (appProperties.getUserId() == null) {
+				appProperties.setUserId(generateUserId());
+			}
+			
 			boolean showWizard = appProperties.isShowWizard();
 			appProperties.setLastRunVersion(VERSION);
 			appProperties.saveToDisk();
@@ -98,6 +112,21 @@ public class DesktopLauncher {
 			// so that they can give us some feedback :)
 			ErrorUtils.showErrorDialog("Fatal error starting FrontlineSMS!", "A problem ocurred during FrontlineSMS startup.", t, true);
 		} 
+	}
+
+	/**
+	 * Generate the User ID this user is going to keep for all its statistics
+	 * @return The generated ID as a String
+	 */
+	private static String generateUserId() {
+		Long currentTime = new Long(System.currentTimeMillis());
+		byte[] bytes;
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			new DataOutputStream(baos).writeLong(currentTime);
+			bytes = baos.toByteArray();
+		} catch (IOException e) { /* not gonna happen */ throw new IllegalStateException(e); }
+		return Base64Utils.encode(bytes).replace('=', ' ').trim();
 	}
 
 	private static FrontlineSMS initFrontline() throws Throwable {

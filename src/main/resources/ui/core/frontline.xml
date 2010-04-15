@@ -49,6 +49,7 @@
 			<separator />
 			<menuitem icon="/icons/report_error.png" text="i18n.menuitem.error.report" action="showUserDetailsDialog"/>
 			<menuitem icon="/icons/survey.png" text="i18n.menuitem.config.path" action="showConfigurationLocationDialog"/>
+			<menuitem icon="/icons/hits.png" text="i18n.stats.send" name="menu_statsDialog" action="showStatsDialog"/>
 			<separator />
 			<menuitem icon="/icons/about.png" text="i18n.menuitem.help.about" action="showAboutScreen"/>
 		</menu>

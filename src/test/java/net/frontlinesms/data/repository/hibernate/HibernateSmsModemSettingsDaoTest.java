@@ -56,6 +56,9 @@ public class HibernateSmsModemSettingsDaoTest extends HibernateTestCase {
 		dao.updateSmsModemSettings(settingsOne);
 		settingsOne = dao.getSmsModemSettings(SERIAL_ONE);
 		assertFalse(settingsOne.useForSending());
+		
+		final int expectedSettingsCount = 2;
+		assertEquals(expectedSettingsCount, dao.getCount());
 	}
 	
 //> ACCESSORS

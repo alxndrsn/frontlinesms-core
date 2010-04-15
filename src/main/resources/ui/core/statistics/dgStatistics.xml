@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dialog closable="true" close="removeDialog()" icon="/icons/hits.png" bottom="4" columns="2" gap="8" left="4" modal="true" name="statsDialog" right="4" text="i18n.stats.dialog.statistics" top="4">
+    <panel bottom="10" columns="1" gap="10" left="10" right="10" top="10" halign="center">
+	    <panel columns="1" gap="6" weightx="1">
+	        <label font="13 bold" text="i18n.stats.dialog.text.1" icon="/icons/httprequest.png"/>
+	        <label name="i18n.stats.dialog.text.2"/>
+	        <label text="i18n.stats.dialog.text.3"/>
+	        <label text="i18n.stats.dialog.text.4"/>
+	    </panel>
+	    <panel columns="1" gap="6" weightx="2">
+	    	<label font="bold" text="i18n.common.content" icon="/icons/database_table.png"/>
+	    	<table name="statsContent" weightx="1" weighty="1" height="260" width="140">
+	        	<header>
+	            	<column icon="/icons/help.png" text="i18n.stats.dialog.data" width="250"/>
+	            	<column icon="/icons/file.png" text="i18n.stats.dialog.value" width="50"/>
+				</header>
+			</table>
+	    </panel>
+	    <panel columns="1" gap="5">
+	    	<label text="i18n.stats.dialog.send.data"/>
+	    	<label font="11" text="i18n.stats.dialog.send.type"/>
+		</panel>
+		<panel gap="5" halign="center">
+		    <button icon="/icons/tick.png" action="sendStatistics" name="contactSelecter_okButton" text="i18n.action.yes"/>
+		    <button action="removeDialog()" icon="/icons/cross.png" text="i18n.action.no"/>
+		</panel>
+	</panel>
+</dialog>

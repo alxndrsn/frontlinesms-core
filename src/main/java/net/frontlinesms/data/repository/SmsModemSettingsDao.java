@@ -45,4 +45,11 @@ public interface SmsModemSettingsDao {
 	 * @param settings settings which have changed
 	 */
 	public void updateSmsModemSettings(SmsModemSettings settings);
+	
+	/**
+	 * Count the number of {@link SmsModemSettings} in the database
+	 */
+	public int getCount();
+	
+	
 }

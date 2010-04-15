@@ -6,8 +6,8 @@ package net.frontlinesms;
 import net.frontlinesms.resources.UserHomeFilePropertySet;
 
 /**
- * @author Alex
- *
+ * @author Alex Anderson <alex@frontlinesms.com>
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 public final class AppProperties extends UserHomeFilePropertySet {
 //> STATIC CONSTANTS
@@ -21,6 +21,12 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	private static final String KEY_VERSION_LAST_RUN = "version";
 	/** Property key (String): Path to the database config file to use */
 	private static final String KEY_DATABASE_CONFIG_PATH = "database.config";
+	/** Property key (String): User ID */
+	private static final String KEY_USER_ID = "user.id";
+	/** Property key (String): Date of last statistics submission */
+	private static final String KEY_LAST_STATS_SUBMISSION = "user.last.stats.submission";
+	/** Property key (String): Date of last prompt */
+	private static final String KEY_LAST_STATS_PROMPT = "user.last.stats.prompt";
 	
 //> DEFAULT VALUES
 	/** Default value for {@link #KEY_DATABASE_CONFIG_PATH} */
@@ -53,7 +59,7 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	}
 	/** @param showWizard <code>true</code> if the wizard should be shown, <code>false</code> otherwise */
 	public void setShowWizard(boolean showWizard) {
-		super.setProperty(KEY_SHOW_WIZARD, Boolean.toString(false));
+		super.setPropertyAsBoolean(KEY_SHOW_WIZARD, showWizard);
 	}
 	/** @return the last version of the app that was run */
 	public String getLastRunVersion() {
@@ -72,7 +78,36 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	public void setDatabaseConfigPath(String databaseConfigPath) {
 		super.setProperty(KEY_DATABASE_CONFIG_PATH, databaseConfigPath);
 	}
-
+	
+	/** @return the user Id */
+	public String getUserId() {
+		return super.getProperty(KEY_USER_ID);
+	}
+	/** @param userId The userId to set to the property */
+	public void setUserId(String userId) {
+		super.setProperty(KEY_USER_ID, userId);
+	}
+	
+	/** @return the date of last stats submission */
+	public long getLastStatisticsSubmissionDate() {
+		return (super.getProperty(KEY_LAST_STATS_SUBMISSION) == null ? 0 : Long.valueOf(super.getProperty(KEY_LAST_STATS_SUBMISSION)));
+	}
+	
+	/** @param lastSubmissionDate The date of last stats submission */
+	public void setLastStatisticsSubmissionDate(long lastSubmissionDate) {
+		super.setProperty(KEY_LAST_STATS_SUBMISSION, String.valueOf(lastSubmissionDate));
+	}
+	
+	/** @return the last date the dialog was prompted */
+	public long getLastStatisticsPromptDate() {
+		return (super.getProperty(KEY_LAST_STATS_PROMPT) == null ? 0 : Long.valueOf(super.getProperty(KEY_LAST_STATS_PROMPT)));
+	}
+	
+	/** @param lastPromptDate The last date the dialog was prompted */
+	public void setLastStatisticsPromptDate(long lastPromptDate) {
+		super.setProperty(KEY_LAST_STATS_PROMPT, String.valueOf(lastPromptDate));
+	}
+	
 //> INSTANCE HELPER METHODS
 
 //> STATIC FACTORIES

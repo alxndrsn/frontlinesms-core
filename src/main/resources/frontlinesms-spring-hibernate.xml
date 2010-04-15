@@ -16,7 +16,6 @@
 		<description>This property configurer allows the use of System Properties in the Spring XML config.</description>
 		<property name="ignoreUnresolvablePlaceholders" value="true"/>
 	</bean>
-
 	<bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager" parent="sessionFactoryAware"/>
 
 	<bean id="contactDao" class="net.frontlinesms.data.repository.hibernate.HibernateContactDao" parent="baseHibernateDao"/>
@@ -36,6 +35,14 @@
 		<property name="eventBus" ref="eventBus"/>
 	</bean>
 	
+	
+	<bean id="statisticsManager" class="net.frontlinesms.data.StatisticsManager" scope="prototype">
+		<property name="contactDao" ref="contactDao"/>
+		<property name="keywordDao" ref="keywordDao"/>
+		<property name="keywordActionDao" ref="keywordActionDao"/>
+		<property name="messageDao" ref="messageDao"/>
+		<property name="smsModemSettingsDao" ref="smsModemSettingsDao"/>
+	</bean>
 	<bean id="sessionFactoryAware" abstract="true">
 		<property name="sessionFactory" ref="sessionFactory"/>
 	</bean>

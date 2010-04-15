@@ -35,5 +35,10 @@ public class HibernateSmsModemSettingsDao extends BaseHibernateDao<SmsModemSetti
 	public void updateSmsModemSettings(SmsModemSettings settings) {
 		super.updateWithoutDuplicateHandling(settings);
 	}
+	
+	/** @see SmsModemSettingsDao#getCount() */
+	public int getCount() {
+		return super.countAll();
+	}
 
 }

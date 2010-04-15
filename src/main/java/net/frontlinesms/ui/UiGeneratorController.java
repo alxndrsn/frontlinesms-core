@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.mail.MessagingException;
 
@@ -57,6 +58,7 @@ import net.frontlinesms.smsdevice.internet.SmsInternetService;
 import net.frontlinesms.ui.handler.HomeTabHandler;
 import net.frontlinesms.ui.handler.ImportExportDialogHandler;
 import net.frontlinesms.ui.handler.PhoneTabHandler;
+import net.frontlinesms.ui.handler.StatisticsDialogHandler;
 import net.frontlinesms.ui.handler.contacts.ContactsTabHandler;
 import net.frontlinesms.ui.handler.contacts.GroupSelecterPanel;
 import net.frontlinesms.ui.handler.contacts.SingleGroupSelecterPanelOwner;
@@ -329,6 +331,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			if (detectPhones) {
 				phoneTabController.phoneManager_detectModems();
 			}
+			
+			if (frontlineController.shouldLaunchStatsCollection())
+				this.showStatsDialog();
+			
 		} catch(Throwable t) {
 			LOG.error("Problem starting User Interface module.", t);
 			super.destroy();
@@ -417,6 +423,14 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/** Pass through to method in the {@link HomeTabHandler}. */
 	public void showHomeTabSettings() {
 		this.homeTabController.showHomeTabSettings();
+	}
+	
+	/**
+	 * Shows the statistics dialog.
+	 */
+	public void showStatsDialog() {
+		StatisticsDialogHandler statisticsDialogHandler = new StatisticsDialogHandler(this);
+		add(statisticsDialogHandler.getDialog());
 	}
 
 	/**
@@ -1278,6 +1292,20 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		setChoice(cell, ALIGNMENT, CENTER);
 		add(row, cell);
 		add(row, createTableCell(action.getCounter()));
+		return row;
+	}
+	
+	/**
+	 * Creates a Thinlet UI table row containing details of a simple key/value element.
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public Object getRow(Entry<String, String> entry) {
+		Object row = createTableRow(entry.getKey());
+		add(row, createTableCell(entry.getKey()));
+		add(row, createTableCell(entry.getValue()));
+		
 		return row;
 	}
 

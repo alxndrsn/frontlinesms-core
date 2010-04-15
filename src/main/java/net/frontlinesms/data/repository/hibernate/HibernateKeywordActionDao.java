@@ -15,7 +15,8 @@ import net.frontlinesms.data.repository.KeywordActionDao;
 
 /**
  * Hibernate implementation of {@link KeywordActionDao}.
- * @author Alex
+ * @author Alex Anderson <alex@frontlinesms.com>
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 public class HibernateKeywordActionDao extends BaseHibernateDao<KeywordAction> implements KeywordActionDao {
 	/** Create instance of this class */
@@ -58,5 +59,11 @@ public class HibernateKeywordActionDao extends BaseHibernateDao<KeywordAction> i
 		DetachedCriteria criteria = super.getCriterion();
 		criteria.add(Restrictions.eq(KeywordAction.Field.KEYWORD.getFieldName(), keyword));
 		return super.getList(criteria);
+	}
+	
+	/** @see net.frontlinesms.data.repository.KeywordActionDao#getTotalCount()*/
+	public int getTotalCount() {
+		DetachedCriteria criteria = super.getCriterion();
+		return super.getCount(criteria);
 	}
 }
