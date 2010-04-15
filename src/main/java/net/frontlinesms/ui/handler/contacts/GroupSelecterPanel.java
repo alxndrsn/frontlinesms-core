@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.apache.log4j.Logger;
-import org.hibernate.property.Getter;
 
 import thinlet.Thinlet;
 
@@ -70,7 +69,7 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		this.groupDao = new UnmodifiableGroupDao(frontlineController.getGroupDao());
 		
 		ui.removeAll(groupTree);
-		Object node = createNode(getRootGroup(), true, showRoot);
+		Object node = createNode(getRootGroup(), showRoot);
 		// If we want to show the root group, we add it to the tree component
 		// Otherwise, the main nodes are added to the tree component in the createNode() function 
 		if (showRoot)
@@ -122,7 +121,7 @@ public class GroupSelecterPanel extends BasePanelHandler {
 			// There is no parent for the group, so we need to get the node for the root group
 			parentGroupNode = ui.getItem(groupTree, 0);
 		}
-		ui.add(parentGroupNode, createNode(group, true, true));
+		ui.add(parentGroupNode, createNode(group, true));
 	}
 	
 //> UI EVENT METHODS
@@ -164,21 +163,15 @@ public class GroupSelecterPanel extends BasePanelHandler {
 	
 	/**
 	 * Creates a node for the supplied group, creating nodes for its sub-groups and contacts as well.
-	 * 
 	 * @param group The group to be put into a node.
-	 * @param showContactsNumber set <code>true</code> to show the number of contacts per group in the node's text or <code>false</code> otherwise
-	 *   TODO removing this argument, and treating it as always <code>false</code> speeds up the contact tab a lot
-	 * @return
+	 * @return a Thinlet tree node for displaying a group
 	 */
-	private Object createNode(Group group, boolean showContactsNumber, boolean showRootGroup) {
+	private Object createNode(Group group, boolean showRootGroup) {
 		LOG.trace("ENTER");
 		
 		LOG.debug("Group [" + group.getName() + "]");
 		
 		String toSet = group.getName();
-//		if (showContactsNumber) {
-//			toSet += " (" + this.groupMembershipDao.getMemberCount(group) + ")";
-//		}
 		
 		Object node;
 		
@@ -197,7 +190,7 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		
 		// Add subgroup components to this node
 		for (Group subGroup : groupDao.getChildGroups(group)) {
-			Object groupNode = createNode(subGroup, showContactsNumber, showRootGroup);
+			Object groupNode = createNode(subGroup, showRootGroup);
 			ui.add(node, groupNode);
 		}
 		LOG.trace("EXIT");
