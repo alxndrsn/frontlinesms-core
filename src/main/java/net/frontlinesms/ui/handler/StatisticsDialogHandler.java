@@ -67,7 +67,7 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 		for (Entry<String, String> entry : this.statisticsManager.getStatisticsList().entrySet())
 			ui.add(taStatsContent, ui.getRow(entry));
 		
-		this.saveLastPrompt();
+		this.saveLastPromptDate();
 
 		LOG.trace("EXIT");
 	}
@@ -75,12 +75,22 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 	/**
 	 * The dialog being shown, properties must be updated
 	 */
-	private void saveLastPrompt() {
+	private void saveLastPromptDate() {
 		AppProperties appProperties = AppProperties.getInstance();
-		appProperties.setLastStatisticsSubmissionDate(System.currentTimeMillis() / 1000);
+		appProperties.setLastStatisticsPromptDate(System.currentTimeMillis() / 1000);
 		appProperties.saveToDisk();
 	}
 
+	/**
+	 * The statistics being sent, properties must be updated
+	 */
+	private void saveLastSubmissionDate() {
+		// We save the current state of the number of messages
+		AppProperties appProperties = AppProperties.getInstance();
+		appProperties.setLastStatisticsSubmissionDate((System.currentTimeMillis() / 1000));
+		appProperties.saveToDisk();
+	}
+	
 	/**
 	 * @return the instance of the statistics dialog 
 	 */
@@ -103,11 +113,7 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 		if (!sendStatisticsViaEmail())
 			sendStatisticsViaSms();
 		
-		// We save the current state of the number of messages
-		AppProperties appProperties = AppProperties.getInstance();
-		appProperties.setReceivedMessageLastSubmission(this.statisticsManager.getReceivedMessages());
-		appProperties.setSentMessageLastSubmission(this.statisticsManager.getSentMessages());
-		appProperties.saveToDisk();
+		this.saveLastSubmissionDate();
 		
 		this.ui.alert(InternationalisationUtils.getI18NString(I18N_STATS_DIALOG_THANKS));
 		this.removeDialog();

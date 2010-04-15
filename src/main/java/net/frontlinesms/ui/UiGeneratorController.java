@@ -426,7 +426,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	/**
-	 * Shows the email accounts settings dialog.
+	 * Shows the statistics dialog.
 	 */
 	public void showStatsDialog() {
 		StatisticsDialogHandler statisticsDialogHandler = new StatisticsDialogHandler(this);

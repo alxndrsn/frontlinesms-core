@@ -163,7 +163,7 @@ public class StatisticsManager {
 	 */
 	private void collectNumberOfReceivedMessages() {
 		final int numberOfReceivedMessages = messageDao.getMessageCount(Message.Type.TYPE_RECEIVED, null, null);
-		final int numberOfReceivedMessagesSinceLastSubmission = numberOfReceivedMessages - AppProperties.getInstance().getReceivedMessageLastSubmission();
+		final int numberOfReceivedMessagesSinceLastSubmission = messageDao.getMessageCount(Message.Type.TYPE_RECEIVED, (AppProperties.getInstance().getLastStatisticsSubmissionDate() * 1000), null);
 		this.statisticsList.put(InternationalisationUtils.getI18NString(I18N_KEY_STATS_RECEIVED_MESSAGES), String.valueOf(numberOfReceivedMessages));
 		this.statisticsList.put(InternationalisationUtils.getI18NString(I18N_KEY_STATS_RECEIVED_MESSAGES_SINCE_LAST_SUBMISSION), String.valueOf(numberOfReceivedMessagesSinceLastSubmission));
 	}
@@ -173,7 +173,7 @@ public class StatisticsManager {
 	 */
 	private void collectNumberOfSentMessages() {
 		final int numberOfSentMessages = messageDao.getMessageCount(Message.Type.TYPE_OUTBOUND, null, null);
-		final int numberOfSentMessagesSinceLastSubmission = numberOfSentMessages - AppProperties.getInstance().getSentMessageLastSubmission();
+		final int numberOfSentMessagesSinceLastSubmission = messageDao.getMessageCount(Message.Type.TYPE_OUTBOUND, (AppProperties.getInstance().getLastStatisticsSubmissionDate() * 1000), null);
 		this.statisticsList.put(InternationalisationUtils.getI18NString(I18N_KEY_STATS_SENT_MESSAGES), String.valueOf(numberOfSentMessages));
 		this.statisticsList.put(InternationalisationUtils.getI18NString(I18N_KEY_STATS_SENT_MESSAGES_SINCE_LAST_SUBMISSION), String.valueOf(numberOfSentMessagesSinceLastSubmission));
 	}

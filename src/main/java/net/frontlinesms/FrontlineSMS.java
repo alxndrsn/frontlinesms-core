@@ -533,7 +533,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	}
 
 	public boolean shouldLaunchStatsCollection() {
-		long dateLastStatisticsSubmit = AppProperties.getInstance().getLastStatisticsSubmissionDate();
+		long dateLastStatisticsSubmit = AppProperties.getInstance().getLastStatisticsPromptDate();
 		int numberOfDaysSinceLastSubmit = (int)((System.currentTimeMillis() / 1000) - dateLastStatisticsSubmit) / FrontlineSMSConstants.SECONDS_IN_A_DAY;
 		return (numberOfDaysSinceLastSubmit >= FrontlineSMSConstants.STATISTICS_DAYS_BEFORE_RELAUNCH);
 	}

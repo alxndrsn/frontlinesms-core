@@ -6,8 +6,8 @@ package net.frontlinesms;
 import net.frontlinesms.resources.UserHomeFilePropertySet;
 
 /**
- * @author Alex
- *
+ * @author Alex Anderson <alex@frontlinesms.com>
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 public final class AppProperties extends UserHomeFilePropertySet {
 //> STATIC CONSTANTS
@@ -25,10 +25,8 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	private static final String KEY_USER_ID = "user.id";
 	/** Property key (String): Date of last statistics submission */
 	private static final String KEY_LAST_STATS_SUBMISSION = "user.last.stats.submission";
-	/** Property key (String): Number of received messages during the last submission */
-	private static final String KEY_RECEIVED_MESSAGES_LAST_SUBMISSION = "user.received.messages.last.submission";
-	/** Property key (String): Number of sent messages during the last submission */
-	private static final String KEY_SENT_MESSAGES_LAST_SUBMISSION = "user.sent.messages.last.submission";
+	/** Property key (String): Date of last prompt */
+	private static final String KEY_LAST_STATS_PROMPT = "user.last.stats.prompt";
 	
 //> DEFAULT VALUES
 	/** Default value for {@link #KEY_DATABASE_CONFIG_PATH} */
@@ -99,25 +97,15 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	public void setLastStatisticsSubmissionDate(long lastSubmissionDate) {
 		super.setProperty(KEY_LAST_STATS_SUBMISSION, String.valueOf(lastSubmissionDate));
 	}
-
-	/** @return the number of received messages during the last stats submission */
-	public int getReceivedMessageLastSubmission() {
-		return (super.getProperty(KEY_RECEIVED_MESSAGES_LAST_SUBMISSION) == null ? 0 : Integer.parseInt(super.getProperty(KEY_RECEIVED_MESSAGES_LAST_SUBMISSION)));
+	
+	/** @return the last date the dialog was prompted */
+	public long getLastStatisticsPromptDate() {
+		return (super.getProperty(KEY_LAST_STATS_PROMPT) == null ? 0 : Long.valueOf(super.getProperty(KEY_LAST_STATS_PROMPT)));
 	}
 	
-	/** @param lastReceivedMessages The number of received messages during the last stats submission */
-	public void setReceivedMessageLastSubmission(int lastReceivedMessages) {
-		super.setProperty(KEY_RECEIVED_MESSAGES_LAST_SUBMISSION, String.valueOf(lastReceivedMessages));
-	}
-	
-	/** @return the number of sent messages during the last stats submission */
-	public int getSentMessageLastSubmission() {
-		return (super.getProperty(KEY_SENT_MESSAGES_LAST_SUBMISSION) == null ? 0 : Integer.parseInt(super.getProperty(KEY_SENT_MESSAGES_LAST_SUBMISSION)));
-	}
-	
-	/** @param lastSentMessages The number of received messages during the last stats submission */
-	public void setSentMessageLastSubmission(int lastSentMessages) {
-		super.setProperty(KEY_SENT_MESSAGES_LAST_SUBMISSION, String.valueOf(lastSentMessages));
+	/** @param lastPromptDate The last date the dialog was prompted */
+	public void setLastStatisticsPromptDate(long lastPromptDate) {
+		super.setProperty(KEY_LAST_STATS_PROMPT, String.valueOf(lastPromptDate));
 	}
 	
 //> INSTANCE HELPER METHODS
