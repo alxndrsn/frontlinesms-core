@@ -180,8 +180,7 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		} else {
 			node = ui.createNode(toSet, group);
 			
-			if(ui.getBoolean(node, Thinlet.EXPANDED)
-					/*&& groupDao.hasDescendants(group)*/) {
+			if(ui.getBoolean(node, Thinlet.EXPANDED)) {
 				ui.setIcon(node, Icon.FOLDER_OPEN);
 			} else {
 				ui.setIcon(node, Icon.FOLDER_CLOSED);
