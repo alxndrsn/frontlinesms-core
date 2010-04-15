@@ -56,6 +56,10 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 		
 		Object taStatsContent = ui.find(dialogComponent, COMPONENT_TA_STATS_CONTENT);
 		this.statisticsManager.collectData();
+		
+		// Log the stats data.
+		LOG.info(statisticsManager.getDataAsEmailString());
+		
 		for (Entry<String, String> entry : this.statisticsManager.getStatisticsList().entrySet()) {
 			ui.add(taStatsContent, ui.getRow(entry));
 		}
@@ -69,7 +73,7 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 	 */
 	private void saveLastPromptDate() {
 		AppProperties appProperties = AppProperties.getInstance();
-		appProperties.setLastStatisticsPromptDate(System.currentTimeMillis() / 1000);
+		appProperties.setLastStatisticsPromptDate(System.currentTimeMillis());
 		appProperties.saveToDisk();
 	}
 
@@ -79,7 +83,7 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 	private void saveLastSubmissionDate() {
 		// We save the current state of the number of messages
 		AppProperties appProperties = AppProperties.getInstance();
-		appProperties.setLastStatisticsSubmissionDate((System.currentTimeMillis() / 1000));
+		appProperties.setLastStatisticsSubmissionDate(System.currentTimeMillis());
 		appProperties.saveToDisk();
 	}
 	

@@ -88,24 +88,26 @@ public final class AppProperties extends UserHomeFilePropertySet {
 		super.setProperty(KEY_USER_ID, userId);
 	}
 	
-	/** @return the date of last stats submission */
-	public long getLastStatisticsSubmissionDate() {
-		return (super.getProperty(KEY_LAST_STATS_SUBMISSION) == null ? 0 : Long.valueOf(super.getProperty(KEY_LAST_STATS_SUBMISSION)));
+	/** @return the date of last stats submission, or <code>null</code> if none has been set */
+	public Long getLastStatisticsSubmissionDate() {
+		String lastSubmitDate = super.getProperty(KEY_LAST_STATS_SUBMISSION);
+		return lastSubmitDate == null ? null : Long.parseLong(lastSubmitDate);
 	}
 	
 	/** @param lastSubmissionDate The date of last stats submission */
 	public void setLastStatisticsSubmissionDate(long lastSubmissionDate) {
-		super.setProperty(KEY_LAST_STATS_SUBMISSION, String.valueOf(lastSubmissionDate));
+		super.setProperty(KEY_LAST_STATS_SUBMISSION, Long.toString(lastSubmissionDate));
 	}
 	
-	/** @return the last date the dialog was prompted */
+	/** @return the last date the dialog was prompted, or zero if it has never been filled */
 	public long getLastStatisticsPromptDate() {
-		return (super.getProperty(KEY_LAST_STATS_PROMPT) == null ? 0 : Long.valueOf(super.getProperty(KEY_LAST_STATS_PROMPT)));
+		String lastPrompt = super.getProperty(KEY_LAST_STATS_PROMPT);
+		return lastPrompt == null ? 0 : Long.valueOf(lastPrompt);
 	}
 	
 	/** @param lastPromptDate The last date the dialog was prompted */
 	public void setLastStatisticsPromptDate(long lastPromptDate) {
-		super.setProperty(KEY_LAST_STATS_PROMPT, String.valueOf(lastPromptDate));
+		super.setProperty(KEY_LAST_STATS_PROMPT, Long.toString(lastPromptDate));
 	}
 	
 //> INSTANCE HELPER METHODS

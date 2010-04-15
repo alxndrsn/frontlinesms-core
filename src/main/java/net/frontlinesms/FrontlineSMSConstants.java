@@ -31,12 +31,17 @@ import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 public final class FrontlineSMSConstants {
 	/** String for displaying the version of the application.  This has 1 substitution variable. */
 	public static final String I18N_APP_VERSION = "application.version";
-	
+	/** Email address to send error reports to */
 	public static final String FRONTLINE_SUPPORT_EMAIL = "frontlinesupport@kiwanja.net";
+	/** SMTP server to submit {@link #FRONTLINE_STATS_EMAIL} to. */
 	public static final String FRONTLINE_SUPPORT_EMAIL_SERVER = "mail.kiwanja.net";
+	/** Email address to send usage statistics to */
 	public static final String FRONTLINE_STATS_EMAIL = "stats@frontlinesms.com";
-	public static final String FRONTLINE_STATS_PHONE_NUMBER = "000";
-	public static final int STATISTICS_DAYS_BEFORE_RELAUNCH = 0;
+	/** Phone number to submit usage statistics to over SMS.  N.B. This should be an INTERNATIONAL number (i.e. +XXYYYY) */
+	public static final String FRONTLINE_STATS_PHONE_NUMBER = "000"; // FIXME make this a real number
+	
+	/** Number of days to wait before prompting to submit statistics after the previous time */
+	public static final int STATISTICS_DAYS_BEFORE_RELAUNCH = 0; // FIXME stat sending should be less frequent than every single day
 	
 	public static final String ZIPPED_LOGS_FILENAME = "logs.zip";
 	
@@ -286,7 +291,7 @@ public final class FrontlineSMSConstants {
 	
 	public static final String DEFAULT_TIME = "00:00";
 
-	public static final int SECONDS_IN_A_DAY = 86400;
+	public static final int MILLIS_PER_DAY = 24*60*60*1000;
 
 //> DATE FORMATS
 	/** [i18n key to Date format] years, months and days.

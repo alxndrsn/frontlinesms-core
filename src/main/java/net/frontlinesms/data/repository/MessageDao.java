@@ -177,8 +177,8 @@ public interface MessageDao {
 	/**
 	 * Gets the number of messages of a specific type from between the specified dates
 	 * @param type
-	 * @param start
-	 * @param end
+	 * @param start the start date as a java timestamp, or <code>null</code> for no start date restriction
+	 * @param end the end date as a java timestamp, or <code>null</code> for no start date restriction
 	 * @return count of messages
 	 */
 	public int getMessageCount(Message.Type type, Long start, Long end);

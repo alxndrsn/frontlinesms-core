@@ -41,7 +41,10 @@ public class StatisticsManager {
 	private static final String I18N_KEY_STATS_USER_ID = "stats.data.user.id";
 	private static final String I18N_KEY_STATS_VERSION_NUMBER = "stats.data.version.number";
 	
-	private static final String STATISTICS_SMS_SEPARATOR = ",";
+	/** Separator used between different stat values in a statistics SMS message */
+	private static final char STATISTICS_SMS_SEPARATOR = ',';
+	/** SMS keyword that statistics SMS will start with.  This allows the FrontlineSMS's statistics
+	 * generator to filter statistics SMS by keyword :-) */
 	private static final String STATISTICS_SMS_KEYWORD = "STATS";
 	
 	private static final String PROPERTY_OS_NAME = "os.name";
@@ -146,9 +149,14 @@ public class StatisticsManager {
 	 * Collects the date of the last actual submission
 	 */
 	private void collectLastSubmissionDate() {
-		final long dateLastStatisticsSubmit = AppProperties.getInstance().getLastStatisticsSubmissionDate() * 1000;
-		String formatedDate = InternationalisationUtils.getDateFormat().format(dateLastStatisticsSubmit);
-		this.statisticsList.put(I18N_KEY_STATS_LAST_SUBMISSION_DATE, formatedDate);
+		final long dateLastSubmit = AppProperties.getInstance().getLastStatisticsSubmissionDate() * 1000;
+		String formattedDate;
+		if(dateLastSubmit == 0) {
+			formattedDate = "";
+		} else {
+			formattedDate = InternationalisationUtils.getDateFormat().format(dateLastSubmit);
+		}
+		this.statisticsList.put(I18N_KEY_STATS_LAST_SUBMISSION_DATE, formattedDate);
 	}
 
 	/**
@@ -163,10 +171,12 @@ public class StatisticsManager {
 	 * Collects the total number of received messages
 	 */
 	private void collectNumberOfReceivedMessages() {
-		final int numberOfReceivedMessages = messageDao.getMessageCount(Message.Type.TYPE_RECEIVED, null, null);
-		final int numberOfReceivedMessagesSinceLastSubmission = messageDao.getMessageCount(Message.Type.TYPE_RECEIVED, (AppProperties.getInstance().getLastStatisticsSubmissionDate() * 1000), null);
-		this.statisticsList.put(I18N_KEY_STATS_RECEIVED_MESSAGES, String.valueOf(numberOfReceivedMessages));
-		this.statisticsList.put(I18N_KEY_STATS_RECEIVED_MESSAGES_SINCE_LAST_SUBMISSION, String.valueOf(numberOfReceivedMessagesSinceLastSubmission));
+		final int totalReceived = messageDao.getMessageCount(Message.Type.TYPE_RECEIVED, null, null);
+		this.statisticsList.put(I18N_KEY_STATS_RECEIVED_MESSAGES, String.valueOf(totalReceived));
+
+		final Long lastSubmitDate = AppProperties.getInstance().getLastStatisticsSubmissionDate();
+		final int receivedSinceLastSubmit = messageDao.getMessageCount(Message.Type.TYPE_RECEIVED, (lastSubmitDate * 1000), null);
+		this.statisticsList.put(I18N_KEY_STATS_RECEIVED_MESSAGES_SINCE_LAST_SUBMISSION, String.valueOf(receivedSinceLastSubmit));
 	}
 
 	/**
@@ -174,8 +184,10 @@ public class StatisticsManager {
 	 */
 	private void collectNumberOfSentMessages() {
 		final int numberOfSentMessages = messageDao.getMessageCount(Message.Type.TYPE_OUTBOUND, null, null);
-		final int numberOfSentMessagesSinceLastSubmission = messageDao.getMessageCount(Message.Type.TYPE_OUTBOUND, (AppProperties.getInstance().getLastStatisticsSubmissionDate() * 1000), null);
 		this.statisticsList.put(I18N_KEY_STATS_SENT_MESSAGES, String.valueOf(numberOfSentMessages));
+
+		Long lastSubmitDate = AppProperties.getInstance().getLastStatisticsSubmissionDate();
+		final int numberOfSentMessagesSinceLastSubmission = messageDao.getMessageCount(Message.Type.TYPE_OUTBOUND, (lastSubmitDate * 1000), null);
 		this.statisticsList.put(I18N_KEY_STATS_SENT_MESSAGES_SINCE_LAST_SUBMISSION, String.valueOf(numberOfSentMessagesSinceLastSubmission));
 	}
 
@@ -205,8 +217,8 @@ public class StatisticsManager {
 	}
 	
 	/**
-	 * Generate the text which will be sent via SMS
-	 * It represents each data separated by {@link #STATISTICS_SMS_SEPARATOR}
+	 * Generate the text which will be sent via SMS.
+	 * This is the {@link #STATISTICS_SMS_KEYWORD} followed by each data separated by {@link #STATISTICS_SMS_SEPARATOR}
 	 * @return The generated String
 	 */
 	public String getDataAsSmsString() {
@@ -217,7 +229,7 @@ public class StatisticsManager {
 		}
 		
 		return STATISTICS_SMS_KEYWORD + " " + 
-				statsOutput.substring(STATISTICS_SMS_SEPARATOR.length());
+				statsOutput.substring(1/*avoid first separator char*/);
 	}
 	
 	/**
