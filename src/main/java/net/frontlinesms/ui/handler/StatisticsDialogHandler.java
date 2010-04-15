@@ -3,22 +3,14 @@
  */
 package net.frontlinesms.ui.handler;
 
-import java.util.Date;
-import java.util.Properties;
 import java.util.Map.Entry;
 
-import javax.mail.Message;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-
 import net.frontlinesms.AppProperties;
-import net.frontlinesms.EmailSender;
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.StatisticsManager;
-import net.frontlinesms.data.domain.EmailAccount;
+import net.frontlinesms.email.EmailException;
+import net.frontlinesms.email.smtp.SmtpEmailSender;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -45,7 +37,7 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 	private Logger LOG = Utils.getLogger(this.getClass());
 	
 	private UiGeneratorController ui;
-	/** Manager of {@link EmailAccount}s and {@link EmailSender}s */
+	/** Manager of statistics */
 	private StatisticsManager statisticsManager;
 	
 	private Object dialogComponent;
@@ -130,35 +122,26 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 	
 	/**
 	 * Try to send an e-mail containing the statistics in plain text
+	 * @return true if the statistics were successfully sent
 	 */
 	private boolean sendStatisticsViaEmail() {
-		Properties props = new Properties();
-	    props.put("mail.smtp.host", FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL_SERVER);
-	    Session session = Session.getInstance(props, null);
-	
-	    MimeMessage msg = new MimeMessage(session);
-	    
-	    // Set the email address on the message
-	    try {
-		    InternetAddress emailAddress = InternetAddress.getLocalAddress(session);
-		    if (emailAddress == null) emailAddress = new InternetAddress();
-	    	msg.setFrom(emailAddress);
-	    
-		    msg.setRecipients(Message.RecipientType.TO, FrontlineSMSConstants.FRONTLINE_STATS_EMAIL);
-		    msg.setSubject("FrontlineSMS Statistics");
-		    msg.setSentDate(new Date());
-		    StringBuilder sb = new StringBuilder();
-		    appendStatistics(sb);
-		    msg.setText(sb.toString()); 
-		    
-		    Transport.send(msg);
-		    
-		    return true;
-	    } catch(Exception ex) {
-	    	return false;
-	    }
+		try {
+			new SmtpEmailSender(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL_SERVER).sendEmail(
+					FrontlineSMSConstants.FRONTLINE_STATS_EMAIL,
+					"FrontlineSMS Statistics",
+					getStatisticsForEmail());
+			return true;
+		} catch(EmailException ex) { 
+			LOG.info("Sending statistics by email failed.", ex);
+			return false;
+		}
 	}
 	
+	private String getStatisticsForEmail() {
+		StringBuilder sb = new StringBuilder();
+	    appendStatistics(sb);
+	    return sb.toString();
+	}
 
 	/**
 	 * Appends the statistics to the e-mail's body.
