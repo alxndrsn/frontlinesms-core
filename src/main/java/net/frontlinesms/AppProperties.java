@@ -94,9 +94,9 @@ public final class AppProperties extends UserHomeFilePropertySet {
 		return lastSubmitDate == null ? null : Long.parseLong(lastSubmitDate);
 	}
 	
-	/** @param lastSubmissionDate The date of last stats submission */
-	public void setLastStatisticsSubmissionDate(long lastSubmissionDate) {
-		super.setProperty(KEY_LAST_STATS_SUBMISSION, Long.toString(lastSubmissionDate));
+	/** Sets last stat submission date to NOW */
+	public void setLastStatisticsSubmissionDate() {
+		super.setProperty(KEY_LAST_STATS_SUBMISSION, Long.toString(System.currentTimeMillis()));
 	}
 	
 	/** @return the last date the dialog was prompted, or zero if it has never been filled */
@@ -105,9 +105,9 @@ public final class AppProperties extends UserHomeFilePropertySet {
 		return lastPrompt == null ? 0 : Long.valueOf(lastPrompt);
 	}
 	
-	/** @param lastPromptDate The last date the dialog was prompted */
-	public void setLastStatisticsPromptDate(long lastPromptDate) {
-		super.setProperty(KEY_LAST_STATS_PROMPT, Long.toString(lastPromptDate));
+	/** Sets last stat submission prompt date to NOW */
+	public void setLastStatisticsPromptDate() {
+		super.setProperty(KEY_LAST_STATS_PROMPT, Long.toString(System.currentTimeMillis()));
 	}
 	
 //> INSTANCE HELPER METHODS

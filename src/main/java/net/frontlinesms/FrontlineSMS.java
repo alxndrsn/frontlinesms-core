@@ -454,7 +454,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	public SmsModemSettingsDao getSmsModemSettingsDao() {
 		return smsModemSettingsDao;
 	}
-	/** @return {@link #statisticsManager} */
+	/** @return a new instance of {@link StatisticsManager} */
 	public StatisticsManager getStatisticsManager() {
 		return (StatisticsManager) applicationContext.getBean("statisticsManager");
 	}

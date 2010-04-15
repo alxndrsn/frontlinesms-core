@@ -73,7 +73,7 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 	 */
 	private void saveLastPromptDate() {
 		AppProperties appProperties = AppProperties.getInstance();
-		appProperties.setLastStatisticsPromptDate(System.currentTimeMillis());
+		appProperties.setLastStatisticsPromptDate();
 		appProperties.saveToDisk();
 	}
 
@@ -83,7 +83,7 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 	private void saveLastSubmissionDate() {
 		// We save the current state of the number of messages
 		AppProperties appProperties = AppProperties.getInstance();
-		appProperties.setLastStatisticsSubmissionDate(System.currentTimeMillis());
+		appProperties.setLastStatisticsSubmissionDate();
 		appProperties.saveToDisk();
 	}
 	
