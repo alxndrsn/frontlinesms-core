@@ -102,6 +102,7 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_AUTO_LEAVE_GROUP = "common.auto.leave.group";
 	public static final String COMMON_AUTO_JOIN_GROUP = "common.auto.join.group";
 	public static final String COMMON_KEYWORD = "common.keyword";
+	public static final String COMMON_KEYWORDS = "common.keywords";
 	public static final String COMMON_MESSAGE = "common.message";
 	public static final String COMMON_URL = "common.url";
 	public static final String COMMON_RECIPIENT = "common.recipient";

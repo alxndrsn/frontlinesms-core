@@ -56,9 +56,9 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 		
 		Object taStatsContent = ui.find(dialogComponent, COMPONENT_TA_STATS_CONTENT);
 		this.statisticsManager.collectData();
-		for (Entry<String, String> entry : this.statisticsManager.getStatisticsList().entrySet())
+		for (Entry<String, String> entry : this.statisticsManager.getStatisticsList().entrySet()) {
 			ui.add(taStatsContent, ui.getRow(entry));
-		
+		}
 		this.saveLastPromptDate();
 
 		LOG.trace("EXIT");
@@ -136,21 +136,17 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 			return false;
 		}
 	}
-	
-	private String getStatisticsForEmail() {
-		StringBuilder sb = new StringBuilder();
-	    appendStatistics(sb);
-	    return sb.toString();
-	}
 
 	/**
-	 * Appends the statistics to the e-mail's body.
+	 * Gets the statistics in a format suitable for emailing.
 	 * @param bob {@link StringBuilder} used for compiling the body of the e-mail.
 	 */
-	private void appendStatistics(StringBuilder bob) {
+	private String getStatisticsForEmail() {
+		StringBuilder bob = new StringBuilder();
 		beginSection(bob, "Statistics");
 	    bob.append(this.statisticsManager.getDataAsEmailString());
 		endSection(bob, "Statistics");
+	    return bob.toString();
 	}
 	
 	/**

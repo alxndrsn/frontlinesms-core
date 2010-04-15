@@ -1302,7 +1302,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 */
 	public Object getRow(Entry<String, String> entry) {
 		Object row = createTableRow(entry.getKey());
-		add(row, createTableCell(entry.getKey()));
+		String label = InternationalisationUtils.getI18NString(entry.getKey());
+		add(row, createTableCell(label));
 		add(row, createTableCell(entry.getValue()));
 		
 		return row;
