@@ -3,6 +3,8 @@
  */
 package net.frontlinesms.data.repository.hibernate;
 
+import java.util.List;
+
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 
@@ -39,6 +41,11 @@ public class HibernateSmsModemSettingsDao extends BaseHibernateDao<SmsModemSetti
 	/** @see SmsModemSettingsDao#getCount() */
 	public int getCount() {
 		return super.countAll();
+	}
+	
+	/** @see SmsModemSettingsDao#getAll() */
+	public List<SmsModemSettings> getAll() {
+		return super.getAll();
 	}
 
 }

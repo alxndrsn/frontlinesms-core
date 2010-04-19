@@ -37,7 +37,7 @@ public class HomeTabHandler extends BaseTabHandler {
 	/** UI XML File Path: the Home Tab itself */
 	protected static final String UI_FILE_HOME_TAB = "/ui/core/home/homeTab.xml";
 	/** UI XML File Path: settings dialog for the home tab logo */
-	private static final String UI_FILE_HOME_TAB_SETTINGS = "/ui/core/dialog/dgHomeTabSettings.xml";
+	private static final String UI_FILE_HOME_TAB_SETTINGS = "/ui/core/home/dgHomeTabSettings.xml";
 	/** UI XML File Path: statistics dialog */
 	private static final String UI_FILE_STATS_DIALOG = "/ui/core/home/dgStatistics.xml";
 	/** Thinlet Component Name: Home Tab: logo */

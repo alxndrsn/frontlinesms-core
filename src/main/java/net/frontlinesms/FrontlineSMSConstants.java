@@ -41,7 +41,7 @@ public final class FrontlineSMSConstants {
 	public static final String FRONTLINE_STATS_PHONE_NUMBER = "000"; // FIXME make this a real number
 	
 	/** Number of days to wait before prompting to submit statistics after the previous time */
-	public static final int STATISTICS_DAYS_BEFORE_RELAUNCH = 0; // FIXME stat sending should be less frequent than every single day
+	public static final int STATISTICS_DAYS_BEFORE_RELAUNCH = 1; // FIXME stat sending should be less frequent than every single day
 	
 	public static final String ZIPPED_LOGS_FILENAME = "logs.zip";
 	
@@ -145,6 +145,7 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_SUBJECT = "common.subject";
 	public static final String COMMON_CONTENT = "common.content";
 	public static final String COMMON_CONTACTS_IN_GROUP = "common.contacts.in.group";
+	public static final String COMMON_KEYWORD_ACTIONS = "common.keyword.actions";
 	public static final String COMMON_KEYWORD_ACTIONS_OF = "common.keyword.actions.of";
 	public static final String COMMON_EDITING_SMS_SERVICE = "common.edting.sms.service";
 	public static final String COMMON_BLANK = "common.blank";
@@ -243,6 +244,8 @@ public final class FrontlineSMSConstants {
 
 	/** String in messages which is substituted for a value */
 	public static final String ARG_VALUE = "%";
+	
+	public static final Object INTELLISMS_HANDLER_NAME = "IntelliSms";
 
 	public static final String PROPERTY_FIELD = "field";
 

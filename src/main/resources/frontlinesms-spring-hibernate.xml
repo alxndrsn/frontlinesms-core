@@ -32,17 +32,9 @@
 	
 	<bean id="baseHibernateDao" abstract="true">
 		<property name="sessionFactory" ref="sessionFactory"/>
-		<property name="eventBus" ref="eventBus"/>
 	</bean>
 	
-	
-	<bean id="statisticsManager" class="net.frontlinesms.data.StatisticsManager" scope="prototype">
-		<property name="contactDao" ref="contactDao"/>
-		<property name="keywordDao" ref="keywordDao"/>
-		<property name="keywordActionDao" ref="keywordActionDao"/>
-		<property name="messageDao" ref="messageDao"/>
-		<property name="smsModemSettingsDao" ref="smsModemSettingsDao"/>
-	</bean>
+	<bean id="statisticsManager" class="net.frontlinesms.data.StatisticsManager" scope="prototype"/>
 	<bean id="sessionFactoryAware" abstract="true">
 		<property name="sessionFactory" ref="sessionFactory"/>
 	</bean>

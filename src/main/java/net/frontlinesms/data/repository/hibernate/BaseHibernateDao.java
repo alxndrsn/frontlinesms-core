@@ -23,6 +23,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.transform.DistinctRootEntityResultTransformer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
@@ -39,6 +40,7 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	/** The unqualified name of {@link #clazz} */
 	private final String className;
 	/**EventNotifier that sends out FrontlineEvents**/
+	@Autowired
 	private EventBus eventBus;
 	
 	/**

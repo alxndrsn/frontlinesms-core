@@ -9,7 +9,7 @@
 	    </panel>
 	    <panel columns="1" gap="6" weightx="2">
 	    	<label font="bold" text="i18n.common.content" icon="/icons/database_table.png"/>
-	    	<table name="statsContent" weightx="1" weighty="1" height="260" width="140">
+	    	<table name="statsContent" weightx="1" weighty="1" height="280" width="140">
 	        	<header>
 	            	<column icon="/icons/help.png" text="i18n.stats.dialog.data" width="250"/>
 	            	<column icon="/icons/file.png" text="i18n.stats.dialog.value" width="50"/>

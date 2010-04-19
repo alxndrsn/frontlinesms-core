@@ -1,5 +1,7 @@
 package net.frontlinesms.data.repository;
 
+import java.util.List;
+
 import net.frontlinesms.data.domain.SmsModemSettings;
 
 /*
@@ -51,5 +53,8 @@ public interface SmsModemSettingsDao {
 	 */
 	public int getCount();
 	
-	
+	/**
+	 * Get all the {@link SmsModemSettings} in the database
+	 */
+	public List<SmsModemSettings> getAll();
 }
