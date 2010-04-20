@@ -66,9 +66,6 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 		}
 		this.saveLastPromptDate();
 
-		System.out.println("Statistics SMS size: " + this.statisticsManager.getDataAsSmsString().length());
-		System.out.println("Statistics SMS: " + this.statisticsManager.getDataAsSmsString());
-
 		LOG.trace("EXIT");
 	}
 	
