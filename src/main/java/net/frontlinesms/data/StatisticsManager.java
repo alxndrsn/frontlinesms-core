@@ -47,10 +47,13 @@ public class StatisticsManager {
 	private static final String I18N_KEY_STATS_USER_ID = "stats.data.user.id";
 	private static final String I18N_KEY_STATS_VERSION_NUMBER = "stats.data.version.number";
 	private static final String I18N_KEY_INTERNET_SERVICE_ACCOUNTS = "stats.data.smsdevice.internet.accounts";
-	public static final String STATS_LIST_KEY_SEPARATOR = ":";
-	
+	/** Separates the i18n key from the ID keys in the {@link #statisticsList} for composite keys */
+	private static final String STATS_LIST_KEY_SEPARATOR = ":";
+
 	/** Separator used between different stat values in a statistics SMS message */
 	private static final char STATISTICS_SMS_SEPARATOR = ',';
+	/** Separator used between stat key and value for optional keys */
+	private static final char STATISTICS_SMS_OPTIONAL_KEY_VALUE_SEPARATOR = ':';
 	/** SMS keyword that statistics SMS will start with.  This allows the FrontlineSMS's statistics
 	 * generator to filter statistics SMS by keyword :-) */
 	private static final char STATISTICS_SMS_KEYWORD = '\u03A3';
@@ -274,6 +277,16 @@ public class StatisticsManager {
 		
 		for(Entry<String, String> entry : statisticsList.entrySet()) {
 			statsOutput.append(STATISTICS_SMS_SEPARATOR);
+			
+			// For composite values, we need the id from the key to be included in the
+			// SMS so we can make sense of the stat
+			String key = entry.getKey();
+			if(isCompositeKey(key)) {
+				int shortKeyBeginIndex = key.indexOf(STATS_LIST_KEY_SEPARATOR) + 1;
+				String shortKey = key.substring(shortKeyBeginIndex, Math.min(key.length(), shortKeyBeginIndex + 2));
+				statsOutput.append(shortKey);
+				statsOutput.append(STATISTICS_SMS_OPTIONAL_KEY_VALUE_SEPARATOR);
+			}
 			statsOutput.append(entry.getValue());
 		}
 		
@@ -306,5 +319,19 @@ public class StatisticsManager {
 	public int getSentMessages() {
 		return Integer.parseInt(this.statisticsList.get(I18N_KEY_STATS_SENT_MESSAGES));
 	}
+
+//> STATIC HELPER METHODS
+	/** Checks if a key from {@link #statisticsList} is composite */
+	public static boolean isCompositeKey(String key) {
+		return key.indexOf(STATS_LIST_KEY_SEPARATOR) != -1;
+	}
 	
+	/** Splits stats map key into constituent parts. */
+	public static String[] splitStatsMapKey(String key) {
+		if(!isCompositeKey(key)) {
+			return new String[]{key};
+		} else {
+			return key.split(STATS_LIST_KEY_SEPARATOR);
+		}
+	}
 }

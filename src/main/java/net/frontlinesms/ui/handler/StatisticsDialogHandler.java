@@ -66,6 +66,9 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 		}
 		this.saveLastPromptDate();
 
+		System.out.println("Statistics SMS size: " + this.statisticsManager.getDataAsSmsString().length());
+		System.out.println("Statistics SMS: " + this.statisticsManager.getDataAsSmsString());
+
 		LOG.trace("EXIT");
 	}
 	
@@ -80,8 +83,8 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 		Object row = ui.createTableRow(key);
 		
 		String label;
-		if(key.indexOf(StatisticsManager.STATS_LIST_KEY_SEPARATOR) != -1) {
-			String[] parts = key.split(StatisticsManager.STATS_LIST_KEY_SEPARATOR);
+		if(StatisticsManager.isCompositeKey(key)) {
+			String[] parts = StatisticsManager.splitStatsMapKey(key);
 			if(parts.length > 1) {
 				String[] subsequentParts = Arrays.copyOfRange(parts, 1, parts.length);
 				label = InternationalisationUtils.getI18NString(parts[0], subsequentParts);
