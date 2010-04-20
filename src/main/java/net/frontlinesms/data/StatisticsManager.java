@@ -1,7 +1,7 @@
 package net.frontlinesms.data;
 
-
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,7 +22,8 @@ import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.data.repository.SmsInternetServiceSettingsDao;
 import net.frontlinesms.data.repository.SmsModemSettingsDao;
-import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
+import net.frontlinesms.smsdevice.Provider;
+import net.frontlinesms.smsdevice.internet.SmsInternetService;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 import org.apache.log4j.Logger;
@@ -33,8 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Alex Anderson <alex@frontlinesms.com>
  */
 public class StatisticsManager {
-	private static final String I18N_KEY_STATS_ACCOUNTS_CLICKATELL = "stats.data.clickatell.accounts";
-	private static final String I18N_KEY_STATS_ACCOUNTS_INTELLISMS = "stats.data.intellisms.accounts";
 	private static final String I18N_KEY_STATS_CONTACTS = FrontlineSMSConstants.COMMON_CONTACTS;
 	private static final String I18N_KEY_STATS_KEYWORDS = FrontlineSMSConstants.COMMON_KEYWORDS;
 	private static final String I18N_KEY_STATS_KEYWORD_ACTIONS = FrontlineSMSConstants.COMMON_KEYWORD_ACTIONS;
@@ -47,6 +46,8 @@ public class StatisticsManager {
 	private static final String I18N_KEY_STATS_SENT_MESSAGES_SINCE_LAST_SUBMISSION = "stats.data.sent.messages.since.last.submission";
 	private static final String I18N_KEY_STATS_USER_ID = "stats.data.user.id";
 	private static final String I18N_KEY_STATS_VERSION_NUMBER = "stats.data.version.number";
+	private static final String I18N_KEY_INTERNET_SERVICE_ACCOUNTS = "stats.data.smsdevice.internet.accounts";
+	public static final String STATS_LIST_KEY_SEPARATOR = ":";
 	
 	/** Separator used between different stat values in a statistics SMS message */
 	private static final char STATISTICS_SMS_SEPARATOR = ',';
@@ -111,9 +112,7 @@ public class StatisticsManager {
 		this.smsModemSettingsDao = smsModemSettingsDao;
 	}
 	
-	/**
-	 * GETTER
-	 */
+	/** @return {@link #statisticsList} */
 	public Map<String, String> getStatisticsList() {
 		return statisticsList;
 	}
@@ -236,33 +235,33 @@ public class StatisticsManager {
 		this.statisticsList.put(I18N_KEY_STATS_PHONES_CONNECTED, String.valueOf(numberOfRecognizedPhones));
 	}
 	
-	/**
-	 * Collects the number of ClickATell and IntelliSMS accounts
-	 */
+	/** Collects the number of {@link SmsInternetService} accounts. */
 	private void collecSmsInternetServices() {
 		Collection<SmsInternetServiceSettings> smsInternetServicesSettings = this.smsInternetServiceSettingsDao.getSmsInternetServiceAccounts();
-		int nbIntelliSms = 0;
-		int nbClickATell = 0;
-
-		for (SmsInternetServiceSettings serviceSettings : smsInternetServicesSettings) {
+		
+		Map<String, Integer> counts = new HashMap<String, Integer>();
+		for(SmsInternetServiceSettings settings : smsInternetServicesSettings) {
+			String className = settings.getServiceClassName();
+			if(!counts.containsKey(className)) {
+				counts.put(className, 1);
+			} else {
+				counts.put(className, counts.get(className) + 1);
+			}
+			
+		}
+		
+		for(Entry<String, Integer> e : counts.entrySet()) {
+			String value = Integer.toString(e.getValue());
+			
 			try {
-				String serviceHandler = SmsInternetServiceSettingsHandler.getProviderName(Class.forName(serviceSettings.getServiceClassName()));
-				if (serviceHandler.equals(FrontlineSMSConstants.INTELLISMS_HANDLER_NAME)) {
-					++nbIntelliSms;
-				} else {
-					++nbClickATell;
-				}
-			} catch (Throwable t) {
-				log.warn("Unable to initialize SmsInternetService of class: " + serviceSettings.getServiceClassName(), t);
+				Class<SmsInternetService> serviceClass = (Class<SmsInternetService>) Class.forName(e.getKey());
+				Provider anna = (Provider) serviceClass.getAnnotation(Provider.class);
+				this.statisticsList.put(I18N_KEY_INTERNET_SERVICE_ACCOUNTS + STATS_LIST_KEY_SEPARATOR + anna.name(), value);
+			} catch (Exception ex) {
+				log.warn("Ignoring unrecognized internet service for stats: " + e.getKey(), ex);
 			}
 		}
 		
-		if (nbClickATell > 0) {
-			this.statisticsList.put(I18N_KEY_STATS_ACCOUNTS_CLICKATELL, String.valueOf(nbClickATell));
-		}
-		if (nbIntelliSms > 0) {
-			this.statisticsList.put(I18N_KEY_STATS_ACCOUNTS_INTELLISMS, String.valueOf(nbIntelliSms));
-		}
 	}
 
 	/**

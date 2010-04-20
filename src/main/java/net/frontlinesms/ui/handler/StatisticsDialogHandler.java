@@ -3,6 +3,7 @@
  */
 package net.frontlinesms.ui.handler;
 
+import java.util.Arrays;
 import java.util.Map.Entry;
 
 import net.frontlinesms.AppProperties;
@@ -61,11 +62,35 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 		LOG.info(statisticsManager.getDataAsEmailString());
 		
 		for (Entry<String, String> entry : this.statisticsManager.getStatisticsList().entrySet()) {
-			ui.add(taStatsContent, ui.getRow(entry));
+			ui.add(taStatsContent, getRow(entry));
 		}
 		this.saveLastPromptDate();
 
 		LOG.trace("EXIT");
+	}
+	
+	/**
+	 * Creates a Thinlet UI table row containing details of a statistics key/value element.
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public Object getRow(Entry<String, String> entry) {
+		String key = entry.getKey();
+		Object row = ui.createTableRow(key);
+		
+		String label;
+		if(key.indexOf(StatisticsManager.STATS_LIST_KEY_SEPARATOR) != -1) {
+			String[] parts = key.split(StatisticsManager.STATS_LIST_KEY_SEPARATOR);
+			if(parts.length > 1) {
+				String[] subsequentParts = Arrays.copyOfRange(parts, 1, parts.length);
+				label = InternationalisationUtils.getI18NString(parts[0], subsequentParts);
+			} else label = InternationalisationUtils.getI18NString(key);
+		} else label = InternationalisationUtils.getI18NString(key);
+		ui.add(row, ui.createTableCell(label));
+		ui.add(row, ui.createTableCell(entry.getValue()));
+		
+		return row;
 	}
 	
 	/**

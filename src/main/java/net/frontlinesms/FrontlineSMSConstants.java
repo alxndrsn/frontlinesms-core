@@ -244,8 +244,6 @@ public final class FrontlineSMSConstants {
 
 	/** String in messages which is substituted for a value */
 	public static final String ARG_VALUE = "%";
-	
-	public static final Object INTELLISMS_HANDLER_NAME = "IntelliSms";
 
 	public static final String PROPERTY_FIELD = "field";
 

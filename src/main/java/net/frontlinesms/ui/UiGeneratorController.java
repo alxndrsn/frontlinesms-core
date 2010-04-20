@@ -331,8 +331,9 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				phoneTabController.phoneManager_detectModems();
 			}
 			
-			if (frontlineController.shouldLaunchStatsCollection())
+			if (frontlineController.shouldLaunchStatsCollection()) {
 				this.showStatsDialog();
+			}
 			
 		} catch(Throwable t) {
 			LOG.error("Problem starting User Interface module.", t);
@@ -1291,21 +1292,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		setChoice(cell, ALIGNMENT, CENTER);
 		add(row, cell);
 		add(row, createTableCell(action.getCounter()));
-		return row;
-	}
-	
-	/**
-	 * Creates a Thinlet UI table row containing details of a simple key/value element.
-	 * @param key
-	 * @param value
-	 * @return
-	 */
-	public Object getRow(Entry<String, String> entry) {
-		Object row = createTableRow(entry.getKey());
-		String label = InternationalisationUtils.getI18NString(entry.getKey());
-		add(row, createTableCell(label));
-		add(row, createTableCell(entry.getValue()));
-		
 		return row;
 	}
 
