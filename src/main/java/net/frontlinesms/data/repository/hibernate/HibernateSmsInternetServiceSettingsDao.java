@@ -5,18 +5,12 @@ package net.frontlinesms.data.repository.hibernate;
 
 import java.util.Collection;
 
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Restrictions;
-
 import net.frontlinesms.data.DuplicateKeyException;
-import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.SmsInternetServiceSettings;
 import net.frontlinesms.data.repository.SmsInternetServiceSettingsDao;
-import net.frontlinesms.data.repository.SmsModemSettingsDao;
 
 /**
- * @author Alex
- *
+ * @author Alex Anderson <alex@frontlinesms.com>
  */
 public class HibernateSmsInternetServiceSettingsDao extends BaseHibernateDao<SmsInternetServiceSettings> implements SmsInternetServiceSettingsDao {
 	/** Create instance of this class */
@@ -42,16 +36,5 @@ public class HibernateSmsInternetServiceSettingsDao extends BaseHibernateDao<Sms
 	/** @see SmsInternetServiceSettingsDao#updateSmsInternetServiceSettings(SmsInternetServiceSettings) */
 	public void updateSmsInternetServiceSettings(SmsInternetServiceSettings settings) {
 		super.updateWithoutDuplicateHandling(settings);
-	}
-	
-	/** @see SmsInternetServiceSettings#getCount() */
-	public String getCount() {
-		return super.getAll().get(0).getServiceClassName();
-		/*
-		DetachedCriteria criteria = super.getCriterion();
-		criteria.add(Restrictions.eq(Group.Field.PATH.getFieldName(), path));
-		
-		return super.getCount(criteria);
-		*/
 	}
 }

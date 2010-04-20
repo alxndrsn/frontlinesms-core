@@ -34,9 +34,4 @@ public interface SmsInternetServiceSettingsDao {
 	 * @param settings settings to delete
 	 */
 	public void deleteSmsInternetServiceSettings(SmsInternetServiceSettings settings);
-	
-	/**
-	 * Count the number of {@link SmsInternetServiceSettings} in the database
-	 */
-	public String getCount();
 }
