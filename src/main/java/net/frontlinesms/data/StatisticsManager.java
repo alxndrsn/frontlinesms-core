@@ -171,9 +171,9 @@ public class StatisticsManager {
 	 * Collects the date of the last actual submission
 	 */
 	private void collectLastSubmissionDate() {
-		final long dateLastSubmit = AppProperties.getInstance().getLastStatisticsSubmissionDate();
+		final Long dateLastSubmit = AppProperties.getInstance().getLastStatisticsSubmissionDate();
 		String formattedDate;
-		if(dateLastSubmit == 0) {
+		if(dateLastSubmit == null || dateLastSubmit == 0) {
 			formattedDate = "";
 		} else {
 			formattedDate = InternationalisationUtils.getDateFormat().format(dateLastSubmit);
