@@ -24,11 +24,11 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	/** Property key (String): User ID */
 	private static final String KEY_USER_ID = "user.id";
 	/** Property key (String): Date of last statistics submission */
-	private static final String KEY_LAST_STATS_SUBMISSION = "user.last.stats.submission";
+	private static final String KEY_LAST_STATS_SUBMISSION = "stats.submit.lastdate";
 	/** Property key (String): Date of last prompt */
-	private static final String KEY_LAST_STATS_PROMPT = "user.last.stats.prompt";
-	/** Property key (String): Whether or not the device connection dialog must be shown when a connection problem occurs*/
-	private static final String KEY_SHOULD_ALWAYS_SHOW_DEVICE_CONNECTION_DIALOG = "always.show.device.connection.problem";
+	private static final String KEY_LAST_STATS_PROMPT = "stats.prompt.lastdate";
+	/** Property key (String): Whether or not the device connection dialog is shown when a connection problem occurs*/
+	private static final String KEY_SHOW_DEVICE_CONNECTION_DIALOG = "smsdevice.connection.problem.dialog.show";
 	
 //> DEFAULT VALUES
 	/** Default value for {@link #KEY_DATABASE_CONFIG_PATH} */
@@ -113,11 +113,11 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	
 	/** @return <code>true</code> if the device connection dialog must be shown when a connection problem occurs, <code>false</code> otherwise */
 	public boolean shouldAlwaysShowDeviceConnectionDialog() {
-		return super.getPropertyAsBoolean(KEY_SHOULD_ALWAYS_SHOW_DEVICE_CONNECTION_DIALOG, true);
+		return super.getPropertyAsBoolean(KEY_SHOW_DEVICE_CONNECTION_DIALOG, true);
 	}
-	/** @param shouldAlwaysShow whether the device connection dialog must be shown when a connection problem occurs */
-	public void setAlwaysShowDeviceConnectionDialog(boolean shouldAlwaysShow) {
-		super.setPropertyAsBoolean(KEY_SHOULD_ALWAYS_SHOW_DEVICE_CONNECTION_DIALOG, shouldAlwaysShow);
+	/** @param showDialog whether the device connection dialog is shown when a connection problem occurs */
+	public void setShowDeviceConnectionDialog(boolean showDialog) {
+		super.setPropertyAsBoolean(KEY_SHOW_DEVICE_CONNECTION_DIALOG, showDialog);
 	}
 	
 //> INSTANCE HELPER METHODS

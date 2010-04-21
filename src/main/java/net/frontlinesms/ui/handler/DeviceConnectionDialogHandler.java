@@ -94,7 +94,7 @@ public class DeviceConnectionDialogHandler implements ThinletUiEventHandler {
 	 */
 	public void manageAlwaysShow(boolean shouldAlwaysShow) {
 		AppProperties appProperties = AppProperties.getInstance();
-		appProperties.setAlwaysShowDeviceConnectionDialog(shouldAlwaysShow);
+		appProperties.setShowDeviceConnectionDialog(shouldAlwaysShow);
 		appProperties.saveToDisk();
 	}
 	
