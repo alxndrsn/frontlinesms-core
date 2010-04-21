@@ -1,4 +1,4 @@
-package net.frontlinesms.events.impl;
+package net.frontlinesms.data.events;
 
 import net.frontlinesms.events.FrontlineEvent;
 

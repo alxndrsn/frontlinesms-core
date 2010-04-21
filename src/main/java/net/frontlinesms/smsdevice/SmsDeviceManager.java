@@ -30,11 +30,10 @@ import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.domain.Message;
+import net.frontlinesms.data.events.DatabaseNotification;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEvent;
-import net.frontlinesms.events.impl.DatabaseNotification;
-import net.frontlinesms.events.impl.SmsDeviceNotification;
 import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
 

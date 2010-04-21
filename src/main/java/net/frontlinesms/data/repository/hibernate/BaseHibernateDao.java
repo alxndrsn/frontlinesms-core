@@ -8,11 +8,11 @@ import java.util.List;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.EntityField;
 import net.frontlinesms.data.Order;
+import net.frontlinesms.data.events.DidDeleteNotification;
+import net.frontlinesms.data.events.DidSaveNotification;
+import net.frontlinesms.data.events.DidUpdateNotification;
+import net.frontlinesms.data.events.WillDeleteWarning;
 import net.frontlinesms.events.EventBus;
-import net.frontlinesms.events.impl.DidDeleteNotification;
-import net.frontlinesms.events.impl.DidSaveNotification;
-import net.frontlinesms.events.impl.DidUpdateNotification;
-import net.frontlinesms.events.impl.WillDeleteWarning;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

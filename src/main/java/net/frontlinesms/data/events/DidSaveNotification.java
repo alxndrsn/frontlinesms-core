@@ -1,4 +1,4 @@
-package net.frontlinesms.events.impl;
+package net.frontlinesms.data.events;
 
 /**
  * A notification that is fired immediately after an object is saved. Generics are used

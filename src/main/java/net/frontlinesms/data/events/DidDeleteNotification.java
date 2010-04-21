@@ -1,4 +1,4 @@
-package net.frontlinesms.events.impl;
+package net.frontlinesms.data.events;
 
 /**
  * This event is sent to the event bus when an entity

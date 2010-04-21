@@ -16,7 +16,6 @@ import org.smslib.CIncomingMessage;
 import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.events.EventBus;
-import net.frontlinesms.events.impl.SmsDeviceNotification;
 import net.frontlinesms.junit.BaseTestCase;
 import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;

@@ -1,7 +1,6 @@
-package net.frontlinesms.events.impl;
+package net.frontlinesms.smsdevice;
 
 import net.frontlinesms.events.FrontlineEvent;
-import net.frontlinesms.smsdevice.SmsDeviceStatus;
 /**
  * A superclass for notifications involving device connections
  * @author Morgan Belkadi <morgan@frontlinesms.com>

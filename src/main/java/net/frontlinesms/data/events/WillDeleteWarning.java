@@ -1,4 +1,4 @@
-package net.frontlinesms.events.impl;
+package net.frontlinesms.data.events;
 
 /**
  * A notification that is fired immediately before an object is deleted from the database. 

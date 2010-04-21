@@ -48,7 +48,6 @@ import net.frontlinesms.email.EmailException;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEvent;
-import net.frontlinesms.events.impl.SmsDeviceNotification;
 import net.frontlinesms.listener.EmailListener;
 import net.frontlinesms.listener.UIListener;
 import net.frontlinesms.plugins.PluginController;
