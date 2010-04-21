@@ -9,7 +9,6 @@ import java.util.Enumeration;
 
 import net.frontlinesms.CommUtils;
 import net.frontlinesms.Utils;
-import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.SmsModemSettings;
 import net.frontlinesms.data.repository.SmsModemSettingsDao;
 import net.frontlinesms.smsdevice.SmsDevice;
@@ -27,7 +26,6 @@ import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
-import org.apache.log4j.Logger;
 import org.smslib.AbstractATHandler;
 import org.smslib.handler.CATHandler;
 

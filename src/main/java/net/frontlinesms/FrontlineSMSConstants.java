@@ -301,5 +301,7 @@ public final class FrontlineSMSConstants {
 	/** [i18n key to Date format] This date format is for displaying the date and time of an event, message etc.  It is not used for parsing input. */
 	public static final String DATEFORMAT_YMD_HMS = "date.message.format";
 
-
+	public static final String I18N_DEVICE_CONNECTION_SUFFIX_FAILED = "failed";
+	public static final String I18N_DEVICE_CONNECTION_SUFFIX_NO_PHONE_DETECTED = "nothing";
+	public static final String I18N_DEVICE_CONNECTION_SUFFIX_OWNED_BY_SOMEONE_ELSE = "owned";
 }

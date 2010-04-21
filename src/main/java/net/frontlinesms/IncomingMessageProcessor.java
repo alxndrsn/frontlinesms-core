@@ -251,93 +251,93 @@ public class IncomingMessageProcessor extends Thread {
 		String incomingSenderMsisdn = incoming.getSenderMsisdn();
 		String incomingMessageText = incoming.getTextContent();
 		switch (action.getType()) {
-		case TYPE_FORWARD:
-			// Generate a message, and then forward it to the group attached to this action.
-			LOG.debug("It is a forward action!");
-			String forwardedMessageText = KeywordAction.KeywordUtils.getForwardText(action, contactDao.getFromMsisdn(incomingSenderMsisdn), incomingSenderMsisdn, incomingMessageText);
-			LOG.debug("Message to forward [" + forwardedMessageText + "]");
-			for (Contact contact : this.groupMembershipDao.getActiveMembers(action.getGroup())) {
-				LOG.debug("Sending to [" + contact.getName() + "]");
-				frontline.sendTextMessage(contact.getPhoneNumber(), KeywordAction.KeywordUtils.personaliseMessage(contact, forwardedMessageText));
-			}
-			break;
-		case TYPE_JOIN: {
-			LOG.debug("It is a group join action!");
-			
-			// If the contact does not exist, we need to persist him so that we can add him to a group.
-			// Otherwise, get the contact from the database.
-			Contact contact = contactDao.getFromMsisdn(incomingSenderMsisdn);
-			try {
-				if (contact == null) {
-					contact = new Contact("", incomingSenderMsisdn, null, null, null, true);
-					contactDao.saveContact(contact);
+			case TYPE_FORWARD:
+				// Generate a message, and then forward it to the group attached to this action.
+				LOG.debug("It is a forward action!");
+				String forwardedMessageText = KeywordAction.KeywordUtils.getForwardText(action, contactDao.getFromMsisdn(incomingSenderMsisdn), incomingSenderMsisdn, incomingMessageText);
+				LOG.debug("Message to forward [" + forwardedMessageText + "]");
+				for (Contact contact : this.groupMembershipDao.getActiveMembers(action.getGroup())) {
+					LOG.debug("Sending to [" + contact.getName() + "]");
+					frontline.sendTextMessage(contact.getPhoneNumber(), KeywordAction.KeywordUtils.personaliseMessage(contact, forwardedMessageText));
 				}
-				Group group = action.getGroup();
-				LOG.debug("Adding contact [" + contact.getName() + "], Number [" + contact.getPhoneNumber() + "] to Group [" + group.getName() + "]");
-				boolean contactAdded = this.groupMembershipDao.addMember(group, contact);
-				if(contactAdded) {
-					groupDao.updateGroup(group);
-					if(uiListener != null) {
-						uiListener.contactAddedToGroup(contact, group);
+				break;
+			case TYPE_JOIN: {
+				LOG.debug("It is a group join action!");
+				
+				// If the contact does not exist, we need to persist him so that we can add him to a group.
+				// Otherwise, get the contact from the database.
+				Contact contact = contactDao.getFromMsisdn(incomingSenderMsisdn);
+				try {
+					if (contact == null) {
+						contact = new Contact("", incomingSenderMsisdn, null, null, null, true);
+						contactDao.saveContact(contact);
+					}
+					Group group = action.getGroup();
+					LOG.debug("Adding contact [" + contact.getName() + "], Number [" + contact.getPhoneNumber() + "] to Group [" + group.getName() + "]");
+					boolean contactAdded = this.groupMembershipDao.addMember(group, contact);
+					if(contactAdded) {
+						groupDao.updateGroup(group);
+						if(uiListener != null) {
+							uiListener.contactAddedToGroup(contact, group);
+						}
+					}
+				} catch(DuplicateKeyException ex) {
+					// Due to previous check, this should never be thrown...
+					// Not much we can do if it is!
+					// FIXME throwing this exception could spit out otherwise-shredded data
+					// into the logs!
+					throw new RuntimeException(ex);
+				}
+			}	break;
+			case TYPE_LEAVE: {
+				LOG.debug("It is a group leave action!");
+				Contact contact = contactDao.getFromMsisdn(incomingSenderMsisdn);
+				if (contact != null) {
+					Group group = action.getGroup();
+					LOG.debug("Removing contact [" + contact.getName() + "] from Group [" + group.getName() + "]");
+					if(this.groupMembershipDao.removeMember(group, contact)) {
+						this.groupDao.updateGroup(group);
+					}
+					if (uiListener != null) {
+						uiListener.contactRemovedFromGroup(contact, group);
 					}
 				}
-			} catch(DuplicateKeyException ex) {
-				// Due to previous check, this should never be thrown...
-				// Not much we can do if it is!
-				// FIXME throwing this exception could spit out otherwise-shredded data
-				// into the logs!
-				throw new RuntimeException(ex);
-			}
-		}	break;
-		case TYPE_LEAVE: {
-			LOG.debug("It is a group leave action!");
-			Contact contact = contactDao.getFromMsisdn(incomingSenderMsisdn);
-			if (contact != null) {
-				Group group = action.getGroup();
-				LOG.debug("Removing contact [" + contact.getName() + "] from Group [" + group.getName() + "]");
-				if(this.groupMembershipDao.removeMember(group, contact)) {
-					this.groupDao.updateGroup(group);
+			}	break;
+			case TYPE_REPLY:
+				// Generate a message, and then send it back to the sender of the received message.
+				LOG.debug("It is an auto-reply action!");
+				String reply = KeywordAction.KeywordUtils.getReplyText(action, contactDao.getFromMsisdn(incomingSenderMsisdn), incomingSenderMsisdn, incomingMessageText, null);
+				LOG.debug("Sending [" + reply + "] to [" + incomingSenderMsisdn + "]");
+				Message msgReply = frontline.sendTextMessage(incomingSenderMsisdn, reply);
+				// TODO should the message be tied to the action somehow?
+				break;
+			case TYPE_EXTERNAL_CMD:
+				// Executes a external command
+				LOG.debug("It is an external command action!");
+				try {
+					executeExternalCommand(action, incomingSenderMsisdn, incomingMessageText);
+				} catch (IOException e) {
+					LOG.debug("Problem executing external command.", e);
+				} catch (InterruptedException e) {
+					LOG.debug("Problem executing external command.", e);
+				} catch (JDOMException e) {
+					LOG.debug("Problem executing external command.", e);
 				}
-				if (uiListener != null) {
-					uiListener.contactRemovedFromGroup(contact, group);
-				}
-			}
-		}	break;
-		case TYPE_REPLY:
-			// Generate a message, and then send it back to the sender of the received message.
-			LOG.debug("It is an auto-reply action!");
-			String reply = KeywordAction.KeywordUtils.getReplyText(action, contactDao.getFromMsisdn(incomingSenderMsisdn), incomingSenderMsisdn, incomingMessageText, null);
-			LOG.debug("Sending [" + reply + "] to [" + incomingSenderMsisdn + "]");
-			Message msgReply = frontline.sendTextMessage(incomingSenderMsisdn, reply);
-			// TODO should the message be tied to the action somehow?
-			break;
-		case TYPE_EXTERNAL_CMD:
-			// Executes a external command
-			LOG.debug("It is an external command action!");
-			try {
-				executeExternalCommand(action, incomingSenderMsisdn, incomingMessageText);
-			} catch (IOException e) {
-				LOG.debug("Problem executing external command.", e);
-			} catch (InterruptedException e) {
-				LOG.debug("Problem executing external command.", e);
-			} catch (JDOMException e) {
-				LOG.debug("Problem executing external command.", e);
-			}
-			break;
-		case TYPE_EMAIL:
-			LOG.debug("It is an e-mail action!");
-			Email email = new Email(
-					action.getEmailAccount(),
-					action.getEmailRecipients(),
-					KeywordAction.KeywordUtils.getEmailSubject(action, contactDao.getFromMsisdn(incomingSenderMsisdn), incomingSenderMsisdn, incomingMessageText, null),
-					KeywordAction.KeywordUtils.getReplyText(action, contactDao.getFromMsisdn(incomingSenderMsisdn), incomingSenderMsisdn, incomingMessageText, null)
-			);
-			emailDao.saveEmail(email);
-			LOG.debug("Sending [" + email.getEmailContent() + "] from [" + email.getEmailFrom().getAccountName() + "] to [" + email.getEmailRecipients() + "]");
-			emailServerHandler.sendEmail(email);
-			break;
+				break;
+			case TYPE_EMAIL:
+				LOG.debug("It is an e-mail action!");
+				Email email = new Email(
+						action.getEmailAccount(),
+						action.getEmailRecipients(),
+						KeywordAction.KeywordUtils.getEmailSubject(action, contactDao.getFromMsisdn(incomingSenderMsisdn), incomingSenderMsisdn, incomingMessageText, null),
+						KeywordAction.KeywordUtils.getReplyText(action, contactDao.getFromMsisdn(incomingSenderMsisdn), incomingSenderMsisdn, incomingMessageText, null)
+				);
+				emailDao.saveEmail(email);
+				LOG.debug("Sending [" + email.getEmailContent() + "] from [" + email.getEmailFrom().getAccountName() + "] to [" + email.getEmailRecipients() + "]");
+				emailServerHandler.sendEmail(email);
+				break;
 		}
-		
+				
 		action.incrementCounter();
 		this.keywordActionDao.updateKeywordAction(action);
 		

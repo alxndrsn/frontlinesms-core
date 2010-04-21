@@ -25,8 +25,16 @@ import java.util.concurrent.*;
 import serial.*;
 
 import net.frontlinesms.CommUtils;
+import net.frontlinesms.FrontlineSMS;
+import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.Utils;
+import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.domain.Message;
+import net.frontlinesms.events.EventBus;
+import net.frontlinesms.events.EventObserver;
+import net.frontlinesms.events.FrontlineEvent;
+import net.frontlinesms.events.impl.DatabaseNotification;
+import net.frontlinesms.events.impl.SmsDeviceNotification;
 import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
 
@@ -70,7 +78,7 @@ import org.smslib.util.GsmAlphabet;
  * @author Ben Whitaker ben(at)masabi(dot)com
  * @author Alex Anderson alex(at)masabi(dot)com
  */
-public class SmsDeviceManager extends Thread implements SmsListener {
+public class SmsDeviceManager extends Thread implements SmsListener  {
 	/** List of GSM 7bit text messages queued to be sent. */
 	private final ConcurrentLinkedQueue<Message> gsm7bitOutbox = new ConcurrentLinkedQueue<Message>();
 	/** List of UCS2 text messages queued to be sent. */
@@ -84,6 +92,8 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 
 	/** Listener to be passed SMS Listener events from this */
 	private SmsListener smsListener;
+	/** Listener for application events */
+	private EventBus eventBus;
 	/** Flag indicating that the thread should continue running. */
 	private boolean running;	
 	/** If set TRUE, then thread will automatically try to connect to newly-detected devices. */ 
@@ -114,6 +124,10 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 
 	public void setSmsListener(SmsListener smsListener) {
 		this.smsListener = smsListener;
+	}
+
+	public void setEventBus(EventBus eventBus) {
+		this.eventBus = eventBus;
 	}
 
 	public void run() {
@@ -175,9 +189,16 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 	public void listComPortsAndOwners(boolean connectToAllDiscoveredPhones) {
 		LOG.trace("ENTER");
 		Enumeration<CommPortIdentifier> portIdentifiers = CommUtils.getPortIdentifiers();
-		LOG.debug("Getting ports...");
-		while (portIdentifiers.hasMoreElements()) {
-			requestConnect(portIdentifiers.nextElement(), connectToAllDiscoveredPhones);
+		
+		if (!portIdentifiers.hasMoreElements()) {
+			if(this.eventBus != null) {
+				this.eventBus.triggerEvent(new SmsDeviceNotification(SmsModemStatus.NO_PHONE_DETECTED));
+			}
+		} else {
+			LOG.debug("Getting ports...");
+			while (portIdentifiers.hasMoreElements()) {
+				requestConnect(portIdentifiers.nextElement(), connectToAllDiscoveredPhones);
+			}
 		}
 		LOG.trace("EXIT");
 	}
@@ -296,6 +317,7 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 		// Special handling for modems
 		if (device instanceof SmsModem) {
 			LOG.debug("Event [" + deviceStatus + "]");
+			
 			SmsModem activeDevice = (SmsModem) device;
 			if(deviceStatus.equals(SmsModemStatus.DISCONNECTED)) {
 				// A device has just disconnected.  If we aren't using the device for sending or receiving,
@@ -303,8 +325,7 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 				// would probably want to attempt to reconnect.  Also, if we were previously connected to 
 				// this device then we should now remove its serial number from the list of connected serials.
 				if(!activeDevice.isDuplicate()) connectedSerials.remove(activeDevice.getSerial());
-			}
-			if(deviceStatus.equals(SmsModemStatus.CONNECTING)) {
+			} else if(deviceStatus.equals(SmsModemStatus.CONNECTING)) {
 				// The max speed for this connection has been found.  If this connection
 				// is a duplicate, we should set the duplicate flag to true.  Otherwise,
 				// we may wish to reconnect.
@@ -313,15 +334,42 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 					activeDevice.setDuplicate(isDuplicate);
 					if(!isDuplicate) activeDevice.connect();
 				}
+			} else if (this.eventBus != null && isFailedStatus(deviceStatus) && !this.isAnotherDeviceProcessing(device)) {
+				this.eventBus.triggerEvent(new SmsDeviceNotification(deviceStatus));
 			}
 		}
-		
 		if (smsListener != null) {
 			smsListener.smsDeviceEvent(device, deviceStatus);
 		}
 		LOG.trace("EXIT");
 	}
 
+	/**
+	 * Check if the given {@link SmsDeviceStatus} belongs to the failed statuses which should show the device connection problem dialog 
+	 * @param deviceStatus
+	 * @return <code>true</code> if the {@link SmsDevice} is a failed status, <code>false</code> otherwise
+	 */
+	public static boolean isFailedStatus(SmsDeviceStatus deviceStatus) {
+		return (deviceStatus.equals(SmsModemStatus.OWNED_BY_SOMEONE_ELSE)
+				|| deviceStatus.equals(SmsModemStatus.NO_PHONE_DETECTED)
+				|| deviceStatus.equals(SmsModemStatus.GSM_REG_FAILED)
+				|| deviceStatus.equals(SmsModemStatus.FAILED_TO_CONNECT));
+	}
+
+	/**
+	 * Check if another device than the one given in parameter is currently in an active state
+	 * @param device
+	 * @return <code>true</code> if there is another {@link SmsDevice} processing, <code>false</code> otherwise
+	 */
+	private boolean isAnotherDeviceProcessing(SmsDevice device) {
+		for (SmsDevice smsDevice : getAllPhones()) {
+			if (smsDevice.equals(device)) continue;
+			if (!isFailedStatus(smsDevice.getStatus())) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Get's all {@link SmsDevice}s that this manager is currently connected to
@@ -432,17 +480,24 @@ public class SmsDeviceManager extends Thread implements SmsListener {
 					SmsModem phoneHandler = modem;
 					phoneHandlers.put(portName, phoneHandler);
 					if(connectToDiscoveredPhones) phoneHandler.start();
+					//return SmsModemStatus.CONNECTING;
 				} else {
 					// If we don't have a handle on this port, but it's owned by someone else,
 					// then we add it to the phoneHandlers list anyway so that we can see its
 					// status.
 					LOG.debug("Port currently owned by another process.");
 					phoneHandlers.putIfAbsent(portName, modem);
+					
+					// if we already have a modem for this port, return its status,
+					// otherwise return the status of the new modem instance
+					//return stored != null ? stored.getStatus() : modem.getStatus();
 				}
 			} catch(NoSuchPortException ex) {
 				LOG.warn("Port is no longer available.", ex);
 			}
 		}
+		
+		//return SmsModemStatus.NO_PHONE_DETECTED;
 	}
 
 	public Collection<SmsInternetService> getSmsInternetServices() {

@@ -27,6 +27,8 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	private static final String KEY_LAST_STATS_SUBMISSION = "user.last.stats.submission";
 	/** Property key (String): Date of last prompt */
 	private static final String KEY_LAST_STATS_PROMPT = "user.last.stats.prompt";
+	/** Property key (String): Whether or not the device connection dialog must be shown when a connection problem occurs*/
+	private static final String KEY_SHOULD_ALWAYS_SHOW_DEVICE_CONNECTION_DIALOG = "always.show.device.connection.problem";
 	
 //> DEFAULT VALUES
 	/** Default value for {@link #KEY_DATABASE_CONFIG_PATH} */
@@ -73,7 +75,6 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	public String getDatabaseConfigPath() {
 		return super.getProperty(KEY_DATABASE_CONFIG_PATH, DEFAULT_DATABASE_CONFIG_PATH);
 	}
-
 	/** @param databaseConfigPath new value for the path to the database config file */
 	public void setDatabaseConfigPath(String databaseConfigPath) {
 		super.setProperty(KEY_DATABASE_CONFIG_PATH, databaseConfigPath);
@@ -108,6 +109,15 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	/** Sets last stat submission prompt date to NOW */
 	public void setLastStatisticsPromptDate() {
 		super.setProperty(KEY_LAST_STATS_PROMPT, Long.toString(System.currentTimeMillis()));
+	}
+	
+	/** @return <code>true</code> if the device connection dialog must be shown when a connection problem occurs, <code>false</code> otherwise */
+	public boolean shouldAlwaysShowDeviceConnectionDialog() {
+		return super.getPropertyAsBoolean(KEY_SHOULD_ALWAYS_SHOW_DEVICE_CONNECTION_DIALOG, true);
+	}
+	/** @param shouldAlwaysShow whether the device connection dialog must be shown when a connection problem occurs */
+	public void setAlwaysShowDeviceConnectionDialog(boolean shouldAlwaysShow) {
+		super.setPropertyAsBoolean(KEY_SHOULD_ALWAYS_SHOW_DEVICE_CONNECTION_DIALOG, shouldAlwaysShow);
 	}
 	
 //> INSTANCE HELPER METHODS

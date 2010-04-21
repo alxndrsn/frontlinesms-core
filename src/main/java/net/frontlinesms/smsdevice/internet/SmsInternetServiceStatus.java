@@ -9,7 +9,8 @@ import net.frontlinesms.smsdevice.SmsModem;
 
 /**
  * Statuses for {@link SmsModem}
- * @author Alex
+ * @author Alex Anderson <alex@frontlinesms.com>
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 public enum SmsInternetServiceStatus implements SmsDeviceStatus {
 	CONNECTED(FrontlineSMSConstants.SMS_DEVICE_STATUS_CONNECTED),
@@ -36,4 +37,15 @@ public enum SmsInternetServiceStatus implements SmsDeviceStatus {
 	public String getI18nKey() {
 		return this.i18nKey;
 	}
+
+	public String getI18nSuffix() {
+		switch (this) {
+		case FAILED_TO_CONNECT:
+			return FrontlineSMSConstants.I18N_DEVICE_CONNECTION_SUFFIX_FAILED;
+		default:
+			return "";
+		}
+	}
+	
+	
 }

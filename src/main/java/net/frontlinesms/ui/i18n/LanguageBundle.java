@@ -23,9 +23,12 @@
 package net.frontlinesms.ui.i18n;
 
 import java.awt.Font;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
@@ -131,6 +134,23 @@ public abstract class LanguageBundle {
 	}
 	
 	/**
+	 * This method iterates through the properties and try to find properties looking like prefix.0, prefix.1 etc.
+	 * @param prefix of the properties to fetch
+	 * @return list of properties
+	 */
+	public List<String> getValues(String prefix) {
+		if (!prefix.endsWith(".")) {
+			prefix += ".";
+		}
+		List<String> propertiesList = new ArrayList<String>();
+		for (int i = 0 ; properties.containsKey(prefix + i) ; ++i) {
+			propertiesList.add(this.getValue(prefix + i));
+		}
+		
+		return propertiesList;
+	}
+	
+	/**
 	 * Gets the value of a property.  If that property is not set, return the default value.
 	 * @param key
 	 * @param defaultValue
@@ -144,6 +164,8 @@ public abstract class LanguageBundle {
 			return value;
 		}
 	}
+	
+	
 
 	/** @return the mapping of keys to internationalised text contained in this bundle. */
 	public Map<String, String> getProperties() {

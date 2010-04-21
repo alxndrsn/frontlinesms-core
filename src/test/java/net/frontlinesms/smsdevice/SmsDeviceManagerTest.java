@@ -8,10 +8,17 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.mockito.internal.verification.NoMoreInteractions;
+import org.mockito.internal.verification.Times;
+import org.mockito.internal.verification.api.VerificationMode;
 import org.smslib.CIncomingMessage;
 
+import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.data.domain.Message;
+import net.frontlinesms.events.EventBus;
+import net.frontlinesms.events.impl.SmsDeviceNotification;
 import net.frontlinesms.junit.BaseTestCase;
+import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
 
 import static org.mockito.Mockito.*;
@@ -226,6 +233,40 @@ public class SmsDeviceManagerTest extends BaseTestCase {
 		assertEquals(Message.STATUS_OUTBOX, m.getStatus());
 	}
 	
+	public void testSmsDeviceEvent () {
+		SmsDeviceManager manager = new SmsDeviceManager();
+		
+		EventBus mockEventBus = mock(EventBus.class);
+		manager.setEventBus(mockEventBus);
+		
+		// Testing if the event is triggered with one failed-status device and a DORMANT device <SHOULD NOT>
+		SmsModem modem1 = mock(SmsModem.class);
+		addModem(manager, modem1, "will_fail");
+		SmsModem modem2 = mock(SmsModem.class);
+		addModem(manager, modem2, "will_be_owned");
+		
+		when(modem1.getStatus()).thenReturn(SmsModemStatus.FAILED_TO_CONNECT);
+		when(modem2.getStatus()).thenReturn(SmsModemStatus.DORMANT);
+		manager.smsDeviceEvent(modem1, SmsModemStatus.FAILED_TO_CONNECT);
+		verify(mockEventBus, new NoMoreInteractions()).triggerEvent(any(SmsDeviceNotification.class));
+		
+		// Testing if the event is triggered with one failed-status device and a CONNECTING device <SHOULD NOT>
+		when(modem2.getStatus()).thenReturn(SmsModemStatus.CONNECTING);
+		manager.smsDeviceEvent(modem1, SmsModemStatus.FAILED_TO_CONNECT);
+		verify(mockEventBus, new NoMoreInteractions()).triggerEvent(any(SmsDeviceNotification.class));
+		
+		// Testing if the event is triggered with the connecting device failing <SHOULD>
+		when(modem2.getStatus()).thenReturn(SmsModemStatus.OWNED_BY_SOMEONE_ELSE);
+		manager.smsDeviceEvent(modem2, SmsModemStatus.OWNED_BY_SOMEONE_ELSE);
+		verify(mockEventBus, new Times(1)).triggerEvent(any(SmsDeviceNotification.class));
+		
+		// Testing if the event is triggered with one failed-status device and a CONNECTED device <SHOULD NOT>
+		SmsModem modem3 = createMockModem(true, true, true, true);
+		addModem(manager, modem3, "connected");
+		manager.smsDeviceEvent(modem1, SmsModemStatus.FAILED_TO_CONNECT);
+		verify(mockEventBus, new NoMoreInteractions()).triggerEvent(any(SmsDeviceNotification.class));
+	}
+	
 	
 //> PRIVATE HELPER METHODS
 	/** @return a mock {@link SmsInternetService} with certain important methods stubbed */
@@ -245,6 +286,7 @@ public class SmsDeviceManagerTest extends BaseTestCase {
 		when(mock.isUseForReceiving()).thenReturn(useForReceiving);
 		when(mock.isBinarySendingSupported()).thenReturn(supportsBinary);
 		when(mock.isUcs2SendingSupported()).thenReturn(supportsUcs2);
+		when(mock.getStatus()).thenReturn(SmsModemStatus.CONNECTED);
 		return mock;
 	}
 	
@@ -260,7 +302,7 @@ public class SmsDeviceManagerTest extends BaseTestCase {
 			throw new RuntimeException(ex);
 		}
 	}
-
+	
 	/** @return some generated SMS messages */
 	private Collection<Message> generateMessages(int count, MessageType type) {
 		HashSet<Message> messages = new HashSet<Message>();

@@ -58,9 +58,9 @@ public class SmsModem extends Thread implements SmsDevice {
 		38400,
 		57600,
 		115200,
-		230400,
-		460800,
-		921600
+//		230400,
+//		460800,
+//		921600
 	};
 
 	/** Logging object */
@@ -171,7 +171,7 @@ public class SmsModem extends Thread implements SmsDevice {
 	
 //> ACCESSOR METHODS
 	/** @return {@link #status} */
-	public SmsDeviceStatus getStatus() {
+	public SmsModemStatus getStatus() {
 		return this.status;
 	}
 	
@@ -413,10 +413,10 @@ public class SmsModem extends Thread implements SmsDevice {
 			return true;
 		} catch (GsmNetworkRegistrationException e) {
 			this.setStatus(SmsModemStatus.GSM_REG_FAILED, null);
-		} catch (SMSLibDeviceException ex) {
-			this.setStatus(SmsModemStatus.FAILED_TO_CONNECT, ex.getClass().getCanonicalName() + " : " + ex.getMessage());
+		} catch (PortInUseException ex) {
+			this.setStatus(SmsModemStatus.OWNED_BY_SOMEONE_ELSE, ex.getClass().getSimpleName() + " : " + ex.getMessage());
 		} catch (Exception ex) {
-			this.setStatus(SmsModemStatus.DISCONNECTED, ex.getClass().getCanonicalName() + " : " + ex.getMessage());
+			this.setStatus(SmsModemStatus.FAILED_TO_CONNECT, ex.getClass().getSimpleName() + " : " + ex.getMessage());
 		}
 		LOG.debug("Connection failed!");
 		LOG.trace("EXIT");
@@ -636,19 +636,19 @@ public class SmsModem extends Thread implements SmsDevice {
 				phonePresent = true;
 				LOG.debug("Phone found, max speed is [" + baudRate + "]");
 				cService = new CService(portName, maxBaudRate, "", "", "");
-				try {
+//				try {
 					cService.serialDriver.open();
 					// wait for port to open and AT handler to awake
 					Utils.sleep_ignoreInterrupts(500);
-				} catch(TooManyListenersException ex) {
-					LOG.debug("Too Many Listeners", ex);
-				} catch(UnsupportedCommOperationException ex) {
-					LOG.debug("Unsupported Operation", ex);
-				} catch(NoSuchPortException ex) {
-					LOG.debug("Port does not exist", ex);
-				} catch(PortInUseException ex) {
-					LOG.debug("Port already in use", ex);
-				} 
+//				} catch(TooManyListenersException ex) {
+//					LOG.debug("Too Many Listeners", ex);
+//				} catch(UnsupportedCommOperationException ex) {
+//					LOG.debug("Unsupported Operation", ex);
+//				} catch(NoSuchPortException ex) {
+//					LOG.debug("Port does not exist", ex);
+//				} catch(PortInUseException ex) {
+//					LOG.debug("Port already in use", ex);
+//				} 
 				setManufacturer(cService.getManufacturer());
 				setModel(cService.getModel());
 				
@@ -672,16 +672,13 @@ public class SmsModem extends Thread implements SmsDevice {
 				if(!duplicate) {
 					tryToConnect = true;
 				}
-			} catch (IOException ex) {
-				LOG.error("Communication error", ex);
-				baudRate = 0;
-				phonePresent = false;
-				tryToConnect = false;
 			} catch (Exception ex) {
-				LOG.error("Unexpected error while detecting phone", ex);
+				// It's surprising, but we failed to connect to the phone even though we detected it successfully!
+				LOG.error("Error while connecting to detected phone", ex);
 				baudRate = 0;
 				phonePresent = false;
 				tryToConnect = false;
+				this.setStatus(SmsModemStatus.FAILED_TO_CONNECT, ex.getClass().getSimpleName() + ": " + ex.getMessage());
 			} finally {
 				disconnect(false);				
 			}

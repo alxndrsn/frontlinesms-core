@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import net.frontlinesms.Utils;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
  * @author aga

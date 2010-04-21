@@ -53,7 +53,7 @@ public enum SmsModemStatus implements SmsDeviceStatus {
 	OWNED_BY_SOMEONE_ELSE(FrontlineSMSConstants.SMS_MODEM_STATUS_ALREADY_OWNED),;
 	
 //> PROPERTIES
-	/** Key for getting relelvant message from language bundle */
+	/** Key for getting relevant message from language bundle */
 	private final String i18nKey;
 	
 //> CONSTRUCTORS
@@ -66,5 +66,19 @@ public enum SmsModemStatus implements SmsDeviceStatus {
 	/** @see SmsDeviceStatus#getI18nKey() */
 	public String getI18nKey() {
 		return this.i18nKey;
+	}
+
+	public String getI18nSuffix() {
+		switch (this) {
+		case FAILED_TO_CONNECT:
+		case GSM_REG_FAILED:
+			return FrontlineSMSConstants.I18N_DEVICE_CONNECTION_SUFFIX_FAILED;
+		case NO_PHONE_DETECTED:
+			return FrontlineSMSConstants.I18N_DEVICE_CONNECTION_SUFFIX_NO_PHONE_DETECTED;
+		case OWNED_BY_SOMEONE_ELSE:
+			return FrontlineSMSConstants.I18N_DEVICE_CONNECTION_SUFFIX_OWNED_BY_SOMEONE_ELSE;
+		default:
+			return "";
+		}
 	}
 }
