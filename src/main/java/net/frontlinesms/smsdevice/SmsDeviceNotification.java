@@ -2,10 +2,12 @@ package net.frontlinesms.smsdevice;
 
 import net.frontlinesms.events.FrontlineEvent;
 /**
- * A superclass for notifications involving device connections
+ * A superclass for notifications involving device connections.
+ * In the fullness of time, this notification type should be used to replace {@link SmsDeviceEventListener}.
+ * TODO to replace {@link SmsDeviceEventListener}, this class will need to contain a reference to the {@link SmsDevice} which has triggered each notification.
+ * 
  * @author Morgan Belkadi <morgan@frontlinesms.com>
- *
- * @param <E>
+ * @author Alex Anderson <alex@frontlinesms.com>
  */
 public class SmsDeviceNotification extends FrontlineEvent{
 	private SmsDeviceStatus status;
