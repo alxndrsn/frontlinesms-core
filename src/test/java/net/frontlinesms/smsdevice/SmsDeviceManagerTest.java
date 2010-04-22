@@ -286,7 +286,7 @@ public class SmsDeviceManagerTest extends BaseTestCase {
 		when(mock.isUseForReceiving()).thenReturn(useForReceiving);
 		when(mock.isBinarySendingSupported()).thenReturn(supportsBinary);
 		when(mock.isUcs2SendingSupported()).thenReturn(supportsUcs2);
-		when(mock.getStatus()).thenReturn(SmsModemStatus.CONNECTED);
+		when(mock.getStatus()).thenReturn(SmsModemStatus.DORMANT);
 		return mock;
 	}
 	
