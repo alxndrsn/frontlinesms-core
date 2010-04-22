@@ -41,6 +41,8 @@
 			<separator />
 			<menuitem icon="/icons/sms_receive.png" text="i18n.menuitem.generate.incoming.sms" action="dbgGenerateIncomingSms"/>
 			<menuitem icon="/icons/sms_send.png" text="i18n.menuitem.generate.outgoing.sms" action="dbgGenerateOutgoingSms"/>
+			
+			<menuitem icon="/icons/report_error.png" text="Generate Error" action="dbgGenerateError"/>
 		</menu>
 		<menu text="i18n.menubar.help">
 			<menuitem icon="/icons/help.png" text="i18n.menuitem.help.manual" action="showHelpPage('help-menu.htm')"/>

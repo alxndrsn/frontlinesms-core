@@ -104,9 +104,13 @@ public class ErrorUtils {
 				}
 				JOptionPane.showMessageDialog(null, "Logs were saved successfully. Please e-mail them to " + FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL + ".");
 				return true;
-			} else return false; // Slightly unclear how this would happen
+			} else {
+				JOptionPane.showMessageDialog(null, "Unable to send logs at this time.");
+				return false; // Slightly unclear how this would happen
+			}
 		} catch (IOException e) {
 			// Problem writing logs.zip
+			JOptionPane.showMessageDialog(null, "Unable to send logs at this time.");
 			try {
 				sendToFrontlineSupport(userName, userEmail, null);
 				return true;

@@ -1762,6 +1762,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		this.frontlineController.incomingMessageEvent(FrontlineSMS.EMULATOR, new CIncomingMessage("+123456789", "Test incoming SMS"));
 	}
 	
+	public void dbgGenerateError() {
+		throw new RuntimeException("Exception generated from debug menu.");
+	}
+	
 	public void dbgGenerateOutgoingSms() {
 		Message testMessage = Message.createOutgoingMessage(System.currentTimeMillis(), null, "+123456789", "Test outgoing SMS");
 		this.messageFactory.saveMessage(testMessage);
