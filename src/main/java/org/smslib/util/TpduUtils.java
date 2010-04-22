@@ -891,7 +891,7 @@ public final class TpduUtils {
 			int timeZoneDifference = getTimezoneDifference(timezoneOctet);
 			
 			// Convert the timezone difference to milliseconds and add it to the timestamp
-			timestamp -= (timeZoneDifference * 60 * 1000); // XXX FIXME surely this should be * 60
+			timestamp -= (timeZoneDifference * 60 * 1000);
 		}
 		
 		return timestamp;
