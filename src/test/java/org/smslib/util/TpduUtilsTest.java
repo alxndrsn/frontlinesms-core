@@ -6,7 +6,10 @@ package org.smslib.util;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.Random;
+import java.util.TimeZone;
 
 import org.smslib.CIncomingMessage;
 import org.smslib.MessageDecodeException;
@@ -468,5 +471,65 @@ public class TpduUtilsTest extends BaseTestCase {
 		PduInputStream in = new PduInputStream(encodedMsisdn);
 		String decodedMsisdn = TpduUtils.decodeMsisdnFromAddressField(in, isSmscNumber);
 		assertEquals("Semi-octet codec (" + (isSmscNumber ? "SMSC" : "non-SMSC") + ") failed.  Encoded = [" + HexUtils.encode(encodedMsisdn) + "]", address, decodedMsisdn);
+	}
+	
+	public void testDecodeServiceCentreTimestamp() throws Exception {
+		testDecodeServiceCentreTimestamp("01303041729440", "03 Mar 2010 14:27:49 +0100");
+		testDecodeServiceCentreTimestamp("01209132723380", "19 Feb 2010 23:27:33 +0200");
+		testDecodeServiceCentreTimestamp("00202150750321", "12 Feb 2000 05:57:30 +0300");
+		testDecodeServiceCentreTimestamp("01205031906122", "05 Feb 2010 13:09:16 +0530");
+		testDecodeServiceCentreTimestamp("01202201428123", "22 Feb 2010 10:24:18 +0800");
+		testDecodeServiceCentreTimestamp("0010100151952B", "01 Jan 2000 10:15:59 -0800");
+	}
+	private void testDecodeServiceCentreTimestamp(String timestamp, String expected) throws Exception {
+		long ts = TpduUtils.decodeServiceCentreTimeStamp(new PduInputStream(timestamp));
+		long expectedTs = new SimpleDateFormat("dd MMM yyyy HH:mm:ss ZZZZZ").parse(expected).getTime();
+		assertEquals(expectedTs, ts);
+	}
+
+	public void testGetTimezoneDifference() {
+		testGetTimezoneDifference(0x00, 0);
+
+		testGetTimezoneDifference(0x10, 15);
+		testGetTimezoneDifference(0x40, 60);
+		testGetTimezoneDifference(0x01, 150);
+		testGetTimezoneDifference(0x21, 180);
+		testGetTimezoneDifference(0x23, 480);
+
+		testGetTimezoneDifference(0x18, -15);
+		testGetTimezoneDifference(0x48, -60);
+		testGetTimezoneDifference(0x09, -150);
+	}
+	
+	private void testGetTimezoneDifference(int timezoneOctet, int expectedDifference) {
+		assertEquals(expectedDifference, TpduUtils.getTimezoneDifference(timezoneOctet));
+	}
+	
+	public static void main(String[] args) throws MessageDecodeException {
+		for(KnownTimezonePdu ktp : KnownTimezonePdu.values()) {
+			new CIncomingMessage(ktp.getPdu(), 0, "AA");
+		}
+	}
+}
+
+enum KnownTimezonePdu {
+	ONE("12.5", "06915669917777640A9156691639180000012022014281232B0500032A0303E6A0301CCE4E8FC36E3AC85D6F8BCB7217888A0EBBD77317688A0EBBE969771A"),
+	TWO("1", "0891534875001040F30414D0537AD91C7683A465B71E00000130304172944036C7F79B0C6ABFE5EEB4FB0CA2BF41F977DD052ADACBF23C1D9D769F41EFF50FF444B3407474987E029DE5E5307DF30A01"),
+	;
+	
+	private KnownTimezonePdu(String diff, String pdu) {
+		this.pdu = pdu;
+		this.timezoneDifference = new BigDecimal(diff);
+	}
+	
+	private final String pdu;
+	private final BigDecimal timezoneDifference;
+	
+	public byte[] getData() {
+		return HexUtils.decode(pdu);
+	}
+	
+	public String getPdu() {
+		return pdu;
 	}
 }

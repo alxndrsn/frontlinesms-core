@@ -858,6 +858,7 @@ public final class TpduUtils {
 	/**
 	 * Decodes the 7-byte TP-Service-Centre-Time-Stamp parameter, which identifies the time when the SC received a message.
 	 * [TP-SCTS: TP-Service-Centre-Time-Stamp] Parameter identifying time when the SC received the message.
+	 * NB This method does not support years before 2000.  If you have messages that old, they will look like they came from the future.  Sorry about that.
 	 * @param in
 	 * @return java timestamp of the SMS timestamp converted to UTC
 	 * @throws IOException 
@@ -887,21 +888,28 @@ public final class TpduUtils {
 		 */
 		int timezoneOctet = in.read();
 		if(timezoneOctet != 0) {
-			// The timezone this message was sent in was not UTC, so we must adjust the time accordingly
-			int timezoneDifferenceSeptet = timezoneOctet & TP_SCTS_TIMEZONE_VALUE_MASK;
-			
-			// Work out the number of minutes different that this timezone is
-			int timeZoneDifference = 15 * decodeSemiOctetNumber(timezoneDifferenceSeptet);
-			
-			// If it's negative, adjust accordingly
-			final boolean isNegative = (timezoneOctet & TP_SCTS_TIMEZONE_NEGATIVE_FLAG) != 0;
-			if(isNegative) timeZoneDifference *= -1;
+			int timeZoneDifference = getTimezoneDifference(timezoneOctet);
 			
 			// Convert the timezone difference to milliseconds and add it to the timestamp
-			timestamp += (timeZoneDifference * 1000);
+			timestamp -= (timeZoneDifference * 60 * 1000); // XXX FIXME surely this should be * 60
 		}
 		
 		return timestamp;
+	}
+	
+	/** @return the number of minutes the timezone is different from GMT */
+	static int getTimezoneDifference(int timezoneOctet) {
+		// The timezone this message was sent in was not UTC, so we must adjust the time accordingly
+		int timezoneDifferenceSeptet = timezoneOctet & TP_SCTS_TIMEZONE_VALUE_MASK;
+		
+		// Work out the number of minutes different that this timezone is
+		int timeZoneDifference = 15 * decodeSemiOctetNumber(timezoneDifferenceSeptet);
+		
+		// If it's negative, adjust accordingly
+		final boolean isNegative = (timezoneOctet & TP_SCTS_TIMEZONE_NEGATIVE_FLAG) != 0;
+		if(isNegative) timeZoneDifference *= -1;
+		
+		return timeZoneDifference;
 	}
 	
 	/**
