@@ -50,10 +50,10 @@ public class CsvExporter {
 	/** File extension for comma-separated value files */
 	public static final String CSV_EXTENSION = ".csv";
 	/** Logging object */
-	private static Logger LOG = Utils.getLogger(CsvExporter.class);
+	protected static Logger LOG = Utils.getLogger(CsvExporter.class);
 			
 	/** The delimiter to use between group names when they are exported. */
-	private static final String GROUPS_DELIMITER = "\\"; 
+	protected static final String GROUPS_DELIMITER = "\\"; 
 	
 //> UTILITY METHODS
 	/**
@@ -76,10 +76,10 @@ public class CsvExporter {
 	 * @param messages List of messages to be exported.
 	 * @param messageFormat The desired message format, if null, the default will be used.
 	 * @param dateFormat The desired date format, if null, the default will be used.
-	 * @param contactFactory 
+	 * @param contactDao 
 	 * @throws IOException
 	 */
-	public static void export(File exportFile, List<? extends Message> messages, CsvRowFormat messageFormat, String dateFormat, ContactDao contactFactory) throws IOException {
+	public static void export(File exportFile, List<? extends Message> messages, CsvRowFormat messageFormat, String dateFormat, ContactDao contactDao) throws IOException {
 		LOG.trace("ENTER");
 		if (messageFormat == null) messageFormat = getDefaultMessageExportFormat();
 		if (dateFormat == null) dateFormat = InternationalisationUtils.getI18NString(DEFAULT_EXPORT_DATE_FORMAT);
@@ -101,9 +101,9 @@ public class CsvExporter {
 					CsvUtils.MARKER_RECIPIENT_NUMBER,	/*->*/ InternationalisationUtils.getI18NString(COMMON_RECIPIENT_NUMBER),
 					CsvUtils.MARKER_MESSAGE_CONTENT,		/*->*/ InternationalisationUtils.getI18NString(COMMON_MESSAGE_CONTENT));
 			for (Message message : messages) {
-				Contact sender = contactFactory.getFromMsisdn(message.getSenderMsisdn());
+				Contact sender = contactDao.getFromMsisdn(message.getSenderMsisdn());
 				String senderName = sender == null ? "" : sender.getName();
-				Contact recipient = contactFactory.getFromMsisdn(message.getRecipientMsisdn());
+				Contact recipient = contactDao.getFromMsisdn(message.getRecipientMsisdn());
 				String recipientName = recipient == null ? "" : recipient.getName();
 				CsvUtils.writeLine(out, messageFormat, 
 					CsvUtils.MARKER_MESSAGE_DATE,		/*->*/ dateFormatter.format(new Date(message.getDate())),
