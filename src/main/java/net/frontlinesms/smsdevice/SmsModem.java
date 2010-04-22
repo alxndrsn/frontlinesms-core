@@ -28,7 +28,6 @@ import serial.*;
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.listener.SmsListener;
-import net.frontlinesms.resources.ResourceUtils;
 
 import org.apache.log4j.Logger;
 import org.smslib.*;
@@ -51,16 +50,17 @@ public class SmsModem extends Thread implements SmsDevice {
 	 * As far as I know there is no basis for the time chosen for this timeout. */
 	private static final int TIMEOUT = 80 * 1000; // = 80 seconds;
 
-	/** The different baud rates that a PhoneHandler may connect at. */
+	/**
+	 * The different baud rates that a PhoneHandler may connect at.
+	 * We do not go above a baud rate of 115200bps here, as higher baud rates are not beneficial due to speed limits
+	 * of the GSM network, and are also not recommended by the SMS Lib project for being unstable.
+	 */
 	private static final int[] COMM_SPEEDS = new int[] {
 		9600,
 		19200,
 		38400,
 		57600,
-		115200,
-//		230400,
-//		460800,
-//		921600
+		115200
 	};
 
 	/** Logging object */
@@ -251,9 +251,7 @@ public class SmsModem extends Thread implements SmsDevice {
 		return smsLibConnected;
 	}
 
-	/* (non-Javadoc)
-	 * @see net.frontlinesms.SmsDevice#isUseForSending()
-	 */
+	/** @see SmsDevice#isUseForSending() */
 	public boolean isUseForSending() {
 		return useForSending;
 	}
@@ -261,9 +259,7 @@ public class SmsModem extends Thread implements SmsDevice {
 		useForSending = useForSend;
 	}
 
-	/* (non-Javadoc)
-	 * @see net.frontlinesms.SmsDevice#isUseForReceiving()
-	 */
+	/** @see SmsDevice#isUseForReceiving() */
 	public boolean isUseForReceiving() {
 		return useForReceiving;
 	}
@@ -636,19 +632,11 @@ public class SmsModem extends Thread implements SmsDevice {
 				phonePresent = true;
 				LOG.debug("Phone found, max speed is [" + baudRate + "]");
 				cService = new CService(portName, maxBaudRate, "", "", "");
-//				try {
-					cService.serialDriver.open();
-					// wait for port to open and AT handler to awake
-					Utils.sleep_ignoreInterrupts(500);
-//				} catch(TooManyListenersException ex) {
-//					LOG.debug("Too Many Listeners", ex);
-//				} catch(UnsupportedCommOperationException ex) {
-//					LOG.debug("Unsupported Operation", ex);
-//				} catch(NoSuchPortException ex) {
-//					LOG.debug("Port does not exist", ex);
-//				} catch(PortInUseException ex) {
-//					LOG.debug("Port already in use", ex);
-//				} 
+				
+				cService.serialDriver.open();
+				// wait for port to open and AT handler to awake
+				Utils.sleep_ignoreInterrupts(500);
+					
 				setManufacturer(cService.getManufacturer());
 				setModel(cService.getModel());
 				
@@ -756,9 +744,7 @@ public class SmsModem extends Thread implements SmsDevice {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see net.frontlinesms.SmsDevice#sendSMS(net.frontlinesms.data.Message)
-	 */
+	/** @see SmsDevice#sendSMS(net.frontlinesms.data.Message) */
 	public void sendSMS(Message outgoingMessage) {
 		LOG.trace("ENTER");
 		outgoingMessage.setStatus(Message.STATUS_PENDING);

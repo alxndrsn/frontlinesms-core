@@ -539,24 +539,17 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 					SmsModem phoneHandler = modem;
 					phoneHandlers.put(portName, phoneHandler);
 					if(connectToDiscoveredPhones) phoneHandler.start();
-					//return SmsModemStatus.CONNECTING;
 				} else {
 					// If we don't have a handle on this port, but it's owned by someone else,
 					// then we add it to the phoneHandlers list anyway so that we can see its
 					// status.
 					LOG.debug("Port currently owned by another process.");
 					phoneHandlers.putIfAbsent(portName, modem);
-					
-					// if we already have a modem for this port, return its status,
-					// otherwise return the status of the new modem instance
-					//return stored != null ? stored.getStatus() : modem.getStatus();
 				}
 			} catch(NoSuchPortException ex) {
 				LOG.warn("Port is no longer available.", ex);
 			}
 		}
-		
-		//return SmsModemStatus.NO_PHONE_DETECTED;
 	}
 
 	public Collection<SmsInternetService> getSmsInternetServices() {
