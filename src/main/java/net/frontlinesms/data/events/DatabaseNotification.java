@@ -1,6 +1,6 @@
 package net.frontlinesms.data.events;
 
-import net.frontlinesms.events.FrontlineEvent;
+import net.frontlinesms.events.FrontlineEventNotification;
 
 /**
  * A superclass for notifications involving database entities
@@ -8,7 +8,7 @@ import net.frontlinesms.events.FrontlineEvent;
  * @author Dieterich Lawson <dieterich@medic.frontlinesms.com>
  * @author Alex Anderson <alex@frontlinesms.com>
  */
-public abstract class DatabaseNotification<E> implements FrontlineEvent {
+public abstract class DatabaseNotification<E> implements FrontlineEventNotification {
 
 	/**
 	 * The object that this notification is about, which has presumably just been updated

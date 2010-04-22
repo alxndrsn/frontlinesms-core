@@ -1772,7 +1772,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	// FIXME remove this
 	
 	/** Handle notifications from the {@link EventBus} */
-	public void notify(FrontlineEvent notification) {
+	public void notify(FrontlineEventNotification notification) {
 		if(notification instanceof NoSmsDevicesConnectedNotification) {
 			// Unable to connect to SMS devices.  If enabled, show the help dialog to prompt connection 
 			if (!displayedNoPhonesDialog || AppProperties.getInstance().isDeviceConnectionDialogEnabled()) {

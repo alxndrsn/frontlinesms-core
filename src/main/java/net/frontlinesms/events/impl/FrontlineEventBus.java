@@ -4,7 +4,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.events.EventObserver;
-import net.frontlinesms.events.FrontlineEvent;
+import net.frontlinesms.events.FrontlineEventNotification;
 
 /**
  * Implementation of the event bus.
@@ -41,7 +41,7 @@ public class FrontlineEventBus implements EventBus{
 	/* (non-Javadoc)
 	 * @see net.frontlinesms.events.EventBus#triggerEvent(net.frontlinesms.events.FrontlineEvent)
 	 */
-	public void triggerEvent(FrontlineEvent event){
+	public void notifyObservers(FrontlineEventNotification event){
 		for(EventObserver observer: observers){
 			observer.notify(event);
 		}

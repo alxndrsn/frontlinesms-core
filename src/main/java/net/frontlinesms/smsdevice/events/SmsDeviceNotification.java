@@ -1,6 +1,6 @@
 package net.frontlinesms.smsdevice.events;
 
-import net.frontlinesms.events.FrontlineEvent;
+import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.smsdevice.SmsDevice;
 import net.frontlinesms.smsdevice.SmsDeviceEventListener;
 import net.frontlinesms.smsdevice.SmsDeviceStatus;
@@ -12,7 +12,7 @@ import net.frontlinesms.smsdevice.SmsDeviceStatus;
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  * @author Alex Anderson <alex@frontlinesms.com>
  */
-public class SmsDeviceNotification implements FrontlineEvent {
+public class SmsDeviceNotification implements FrontlineEventNotification {
 	private SmsDeviceStatus status;
 	
 	public SmsDeviceNotification (SmsDeviceStatus status) {

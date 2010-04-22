@@ -17,7 +17,7 @@ import net.frontlinesms.data.events.DatabaseNotification;
 import net.frontlinesms.data.repository.EmailAccountDao;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.events.EventObserver;
-import net.frontlinesms.events.FrontlineEvent;
+import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.contacts.ContactSelecter;
@@ -114,7 +114,7 @@ public class EmailActionDialog extends BaseActionDialog implements EventObserver
 	}
 	
 	/** Handle notifications from the {@link EventBus} */
-	public void notify(FrontlineEvent event) {
+	public void notify(FrontlineEventNotification event) {
 		if(event instanceof DatabaseNotification<?>) {
 			if(((DatabaseNotification<?>)event).getDatabaseEntity() instanceof EmailAccount) {
 				this.refreshEmailAccountList();

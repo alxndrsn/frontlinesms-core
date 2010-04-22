@@ -186,7 +186,7 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 		
 		if (!portIdentifiers.hasMoreElements()) {
 			if(this.eventBus != null) {
-				this.eventBus.triggerEvent(new NoSmsDevicesConnectedNotification(false, false));
+				this.eventBus.notifyObservers(new NoSmsDevicesConnectedNotification(false, false));
 			}
 		} else {
 			LOG.debug("Getting ports...");
@@ -334,7 +334,7 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 				if(this.eventBus != null) {
 					NoSmsDevicesConnectedNotification notification = createNoSmsDevicesConnectedNotification();
 					if(notification != null) {
-						this.eventBus.triggerEvent(notification);
+						this.eventBus.notifyObservers(notification);
 					}
 				}
 			}

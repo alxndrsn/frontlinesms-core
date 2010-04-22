@@ -6,6 +6,6 @@ package net.frontlinesms.events;
  * @author Dieterich Lawson <dieterich@medic.frontlinesms.com>
  */
 public interface EventObserver {
-	/** Passes a {@link FrontlineEvent} to an {@link EventObserver}. */
-	public void notify(FrontlineEvent notification);
+	/** Passes a {@link FrontlineEventNotification} to an {@link EventObserver}. */
+	public void notify(FrontlineEventNotification notification);
 }

@@ -24,7 +24,6 @@ public interface EventBus {
 	/**
 	 * Sends out an event notification to all listeners 
 	 * @param event the event to send out
-	 * FIXME rename this method notifyObservers()
 	 */
-	public void triggerEvent(FrontlineEvent event);
+	public void notifyObservers(FrontlineEventNotification notification);
 }

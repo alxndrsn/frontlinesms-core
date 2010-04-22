@@ -5,8 +5,7 @@ package net.frontlinesms.events;
  * Should be implemented to create situation-specific events.
  * @author Dieterich Lawson <dieterich@medic.frontlinesms.com>
  * @author Alex Anderson <alex@frontlinesms.com>
- * TODO rename this FrontlineEventNotification
  */
-public interface FrontlineEvent {
+public interface FrontlineEventNotification {
 
 }

@@ -63,7 +63,7 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 		log.trace("Saving entity: " + entity);
 		this.getHibernateTemplate().save(entity);
 		log.trace("Entity saved.");
-		eventBus.triggerEvent(new DidSaveNotification<E>(entity));
+		eventBus.notifyObservers(new DidSaveNotification<E>(entity));
 	}
 	
 	/**
@@ -120,7 +120,7 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 		log.trace("Updating entity: " + entity);
 		this.getHibernateTemplate().update(entity);
 		log.trace("Entity updated.");
-		eventBus.triggerEvent(new DidUpdateNotification<E>(entity));
+		eventBus.notifyObservers(new DidUpdateNotification<E>(entity));
 	}
 	
 	/**
@@ -128,11 +128,11 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	 * @param entity entity to delete
 	 */
 	protected void delete(E entity) {
-		eventBus.triggerEvent(new WillDeleteWarning<E>(entity));
+		eventBus.notifyObservers(new WillDeleteWarning<E>(entity));
 		log.trace("Deleting entity: " + entity);
 		this.getHibernateTemplate().delete(entity);
 		log.trace("Entity deleted.");
-		eventBus.triggerEvent(new DidDeleteNotification<E>(entity));
+		eventBus.notifyObservers(new DidDeleteNotification<E>(entity));
 	}
 	
 	/**
