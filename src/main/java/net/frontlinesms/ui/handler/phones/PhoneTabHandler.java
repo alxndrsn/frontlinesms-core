@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui.handler;
+package net.frontlinesms.ui.handler.phones;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -23,6 +23,7 @@ import net.frontlinesms.ui.Event;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 

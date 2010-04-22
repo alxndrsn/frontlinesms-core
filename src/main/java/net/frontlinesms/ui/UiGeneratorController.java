@@ -52,6 +52,8 @@ import net.frontlinesms.ui.handler.core.DatabaseSettingsPanel;
 import net.frontlinesms.ui.handler.email.*;
 import net.frontlinesms.ui.handler.keyword.KeywordTabHandler;
 import net.frontlinesms.ui.handler.message.*;
+import net.frontlinesms.ui.handler.phones.NoPhonesDetectedDialogHandler;
+import net.frontlinesms.ui.handler.phones.PhoneTabHandler;
 import net.frontlinesms.ui.i18n.*;
 
 import org.apache.log4j.Logger;
@@ -1771,7 +1773,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		if(notification instanceof NoSmsDevicesConnectedNotification) {
 			// Unable to connect to SMS devices.  If enabled, show the help dialog to prompt connection 
 			if (AppProperties.getInstance().isDeviceConnectionDialogEnabled()) {
-				DeviceConnectionDialogHandler deviceConnectionDialogHandler = new DeviceConnectionDialogHandler(this);
+				NoPhonesDetectedDialogHandler deviceConnectionDialogHandler = new NoPhonesDetectedDialogHandler(this);
 				deviceConnectionDialogHandler.initDialog((NoSmsDevicesConnectedNotification) notification);
 				add(deviceConnectionDialogHandler.getDialog());
 			}

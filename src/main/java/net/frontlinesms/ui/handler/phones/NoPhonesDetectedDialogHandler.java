@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui.handler;
+package net.frontlinesms.ui.handler.phones;
 
 import java.awt.Image;
 
@@ -23,7 +23,7 @@ import org.apache.log4j.Logger;
  * @author Alex Anderson <alex@frontlinesms.com>
  */
 @TextResourceKeyOwner(prefix="I18N_")
-public class DeviceConnectionDialogHandler implements ThinletUiEventHandler { // TODO rename this e.g. NoPhonesDetectedDialogHandler
+public class NoPhonesDetectedDialogHandler implements ThinletUiEventHandler {
 //> STATIC CONSTANTS
 	private static final String COMPONENT_NO_DEVICES_PARENT_PANEL = "pnNoDevices";
 	private static final String COMPONENT_NO_DEVICES_CAUSE_PANEL = "pnNoDevices_cause";
@@ -64,7 +64,7 @@ public class DeviceConnectionDialogHandler implements ThinletUiEventHandler { //
 	 * @param uiController 
 	 * @param notification the notification which triggered this dialog; used to determine what to display in the dialog
 	 */
-	public DeviceConnectionDialogHandler(UiGeneratorController uiController) {
+	public NoPhonesDetectedDialogHandler(UiGeneratorController uiController) {
 		this.uiController = uiController;
 	}
 	
