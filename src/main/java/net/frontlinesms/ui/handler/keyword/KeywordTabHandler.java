@@ -160,8 +160,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		Object panel = ui.loadComponentFromFile(UI_FILE_KEYWORDS_ADVANCED_VIEW, this);
 		Object table = ui.find(panel, COMPONENT_ACTION_LIST);
 		Keyword keyword = ui.getKeyword(ui.getSelectedItem(keywordListComponent));
-		String key = keyword.getKeyword().length() == 0 ? "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">" : keyword.getKeyword();
-		ui.setText(panel, InternationalisationUtils.getI18NString(COMMON_KEYWORD_ACTIONS_OF, key));
+		ui.setText(panel, InternationalisationUtils.getI18NString(COMMON_KEYWORD_ACTIONS_OF, getDisplayableKeyword(keyword)));
 		for (KeywordAction action : this.keywordActionDao.getActions(keyword)) {
 			ui.add(table, ui.getRow(action));
 		}
@@ -495,8 +494,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 				//Fill every field
 				Object tfKeyword = ui.find(panel, COMPONENT_TF_KEYWORD);
 				ui.setEnabled(tfKeyword, false);
-				String key = keyword.getKeyword().length() == 0 ? "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">" : keyword.getKeyword();
-				ui.setText(tfKeyword, key);
+				ui.setText(tfKeyword, getDisplayableKeyword(keyword));
 				for (KeywordAction action : actions) {
 					KeywordAction.Type type = action.getType();
 					if (type == KeywordAction.Type.TYPE_REPLY) {
@@ -515,8 +513,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 			} else {
 				Object panel = ui.loadComponentFromFile(UI_FILE_KEYWORDS_ADVANCED_VIEW, this);
 				Object table = ui.find(panel, COMPONENT_ACTION_LIST);
-				String key = keyword.getKeyword().length() == 0 ? "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">" : keyword.getKeyword();
-				ui.setText(panel, InternationalisationUtils.getI18NString(COMMON_KEYWORD_ACTIONS_OF, key));
+				ui.setText(panel, InternationalisationUtils.getI18NString(COMMON_KEYWORD_ACTIONS_OF, getDisplayableKeyword(keyword)));
 				//Fill every field
 				for (KeywordAction action : actions) {
 					ui.add(table, ui.getRow(action));
@@ -618,7 +615,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	 * @param keyword The object to be edited.
 	 */
 	private void showKeywordDialogForEdition(Keyword keyword) {
-		String key = keyword.getKeyword().length() == 0 ? "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">" : keyword.getKeyword();
+		String key = getDisplayableKeyword(keyword);
 		String title = InternationalisationUtils.getI18NString(COMMON_EDITING_KEYWORD, key);
 		Object keywordForm = ui.loadComponentFromFile(UI_FILE_NEW_KEYWORD_FORM, this);
 		ui.setAttachedObject(keywordForm, keyword);
@@ -752,5 +749,17 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		} else {
 			setLeaveGroupDisplay(group);
 		}
+	}
+	
+	/**
+	 * Gets a displayable string for a keyword, replacing the blank keyword with an internationalised
+	 * string describing the blank keyword.
+	 * @param keyword
+	 * @return
+	 */
+	public static String getDisplayableKeyword(Keyword keyword) {
+		String displayable = keyword.getKeyword();
+		if(displayable.length() == 0) return "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">";
+		else return displayable;		
 	}
 }

@@ -16,11 +16,12 @@ public class LeaveGroupActionDialog extends BaseGroupActionDialog {
 	LeaveGroupActionDialog(UiGeneratorController ui, KeywordTabHandler owner) {
 		super(ui, owner);
 	}
-	
+
+	/** @see BaseGroupActionDialog#getDialogTitle() */
 	@Override
 	protected String getDialogTitle() {
 		return InternationalisationUtils.getI18NString(COMMON_KEYWORD)
-				+ " \"" + super.getTargetKeyword().getKeyword() + "\" "
+				+ " \"" + KeywordTabHandler.getDisplayableKeyword(super.getTargetKeyword()) + "\" "
 				+ InternationalisationUtils.getI18NString(COMMON_AUTO_LEAVE_GROUP) + ":";
 	}
 

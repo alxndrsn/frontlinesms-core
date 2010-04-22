@@ -18,10 +18,11 @@ public class JoinGroupActionDialog extends BaseGroupActionDialog {
 		super(ui, owner);
 	}
 	
+	/** @see BaseGroupActionDialog#getDialogTitle() */
 	@Override
 	protected String getDialogTitle() {
 		return InternationalisationUtils.getI18NString(COMMON_KEYWORD)
-				+ " \"" + super.getTargetKeyword().getKeyword() + "\" "
+				+ " \"" + KeywordTabHandler.getDisplayableKeyword(super.getTargetKeyword()) + "\" "
 				+ InternationalisationUtils.getI18NString(COMMON_AUTO_JOIN_GROUP) + ":";
 	}
 
