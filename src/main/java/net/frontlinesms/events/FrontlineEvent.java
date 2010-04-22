@@ -1,10 +1,12 @@
 package net.frontlinesms.events;
 
 /**
- * The base class for the Event notification structure.
- * Should be extended to create useful events
- * @author Dieterich
+ * The interface for the Event notification structure.
+ * Should be implemented to create situation-specific events.
+ * @author Dieterich Lawson <dieterich@medic.frontlinesms.com>
+ * @author Alex Anderson <alex@frontlinesms.com>
+ * TODO rename this FrontlineEventNotification
  */
-public abstract class FrontlineEvent {
+public interface FrontlineEvent {
 
 }

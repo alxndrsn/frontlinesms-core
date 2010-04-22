@@ -67,18 +67,4 @@ public enum SmsModemStatus implements SmsDeviceStatus {
 	public String getI18nKey() {
 		return this.i18nKey;
 	}
-
-	public String getI18nSuffix() {
-		switch (this) {
-		case FAILED_TO_CONNECT:
-		case GSM_REG_FAILED:
-			return FrontlineSMSConstants.I18N_DEVICE_CONNECTION_SUFFIX_FAILED;
-		case NO_PHONE_DETECTED:
-			return FrontlineSMSConstants.I18N_DEVICE_CONNECTION_SUFFIX_NO_PHONE_DETECTED;
-		case OWNED_BY_SOMEONE_ELSE:
-			return FrontlineSMSConstants.I18N_DEVICE_CONNECTION_SUFFIX_OWNED_BY_SOMEONE_ELSE;
-		default:
-			return "";
-		}
-	}
 }

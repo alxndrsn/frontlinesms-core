@@ -4,11 +4,11 @@ import net.frontlinesms.events.FrontlineEvent;
 
 /**
  * A superclass for notifications involving database entities
- * @author Dieterich
- *
- * @param <E>
+ * @param <E> database entity to which the event refers
+ * @author Dieterich Lawson <dieterich@medic.frontlinesms.com>
+ * @author Alex Anderson <alex@frontlinesms.com>
  */
-public abstract class DatabaseNotification<E> extends FrontlineEvent{
+public abstract class DatabaseNotification<E> implements FrontlineEvent {
 
 	/**
 	 * The object that this notification is about, which has presumably just been updated

@@ -5,8 +5,7 @@ package net.frontlinesms.events;
  * listeners when noteworthy events happen in FrontlineSMS core, like deletions
  * or saves of objects. The event bus can also be used for inter-plugin communication.
  * All implementing classes should be thread safe
- * @author Dieterich
- *
+ * @author Dieterich Lawson <dieterich@medic.frontlinesms.com>
  */
 public interface EventBus {
 
@@ -25,6 +24,7 @@ public interface EventBus {
 	/**
 	 * Sends out an event notification to all listeners 
 	 * @param event the event to send out
+	 * FIXME rename this method notifyObservers()
 	 */
 	public void triggerEvent(FrontlineEvent event);
 }

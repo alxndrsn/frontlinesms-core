@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
-import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
@@ -139,15 +138,11 @@ public abstract class LanguageBundle {
 	 * @return list of properties
 	 */
 	public List<String> getValues(String prefix) {
-		if (!prefix.endsWith(".")) {
-			prefix += ".";
+		List<String> values = getValues(properties, prefix);
+		if(values.size() == 0) {
+			throw new MissingResourceException("Requested resource not found in language bundle '" + getIdentifier() + "'", LanguageBundle.class.getName(), prefix);
 		}
-		List<String> propertiesList = new ArrayList<String>();
-		for (int i = 0 ; properties.containsKey(prefix + i) ; ++i) {
-			propertiesList.add(this.getValue(prefix + i));
-		}
-		
-		return propertiesList;
+		return values;
 	}
 	
 	/**
@@ -208,6 +203,24 @@ public abstract class LanguageBundle {
 		// None of the requested fonts could be found, so return null
 		LOG.trace("No font found.  Returning null.");
 		return null;
+	}
+	
+//> STATIC HELPER METHODS
+	/**
+	 * This method iterates through the properties and try to find properties looking like prefix.0, prefix.1 etc.
+	 * @param prefix of the properties to fetch
+	 * @return list of properties
+	 */
+	public static List<String> getValues(Map<String, String> properties, String prefix) {
+		if (!prefix.endsWith(".")) {
+			prefix += ".";
+		}
+		List<String> propertiesList = new ArrayList<String>();
+		for (int i = 0; properties.containsKey(prefix + i) ; ++i) {
+			propertiesList.add(properties.get(prefix + i));
+		}
+		
+		return propertiesList;
 	}
 
 //> GENERATED CODE

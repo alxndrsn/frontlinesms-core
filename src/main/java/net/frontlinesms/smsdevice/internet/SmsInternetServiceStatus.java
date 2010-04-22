@@ -37,15 +37,4 @@ public enum SmsInternetServiceStatus implements SmsDeviceStatus {
 	public String getI18nKey() {
 		return this.i18nKey;
 	}
-
-	public String getI18nSuffix() {
-		switch (this) {
-		case FAILED_TO_CONNECT:
-			return FrontlineSMSConstants.I18N_DEVICE_CONNECTION_SUFFIX_FAILED;
-		default:
-			return "";
-		}
-	}
-	
-	
 }

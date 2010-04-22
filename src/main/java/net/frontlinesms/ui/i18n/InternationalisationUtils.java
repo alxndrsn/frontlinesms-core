@@ -94,17 +94,18 @@ public class InternationalisationUtils {
 	
 	/**
 	 * Return the list of internationalised message for this prefix. 
-	 * <br> This method tries to get the strings for the current bundle
-	 * @param prefix
+	 * <br> This method tries to get the strings from the current bundle, and if it does not exist, it looks into
+	 * the default bundle
+	 * @param key
 	 * @return the list internationalised text, or an empty list if no internationalised text could be found
 	 */
-	public static List<String> getI18NStrings(String prefix) {
+	public static List<String> getI18nStrings(String key) {
 		if(FrontlineUI.currentResourceBundle != null) {
 			try {
-				return FrontlineUI.currentResourceBundle.getValues(prefix);
+				return FrontlineUI.currentResourceBundle.getValues(key);
 			} catch(MissingResourceException ex) {}
 		}
-		return new ArrayList<String>();
+		return LanguageBundle.getValues(Thinlet.DEFAULT_ENGLISH_BUNDLE, key);
 	}
 
 	/**

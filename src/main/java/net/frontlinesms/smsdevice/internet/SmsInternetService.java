@@ -61,4 +61,7 @@ public interface SmsInternetService extends SmsDevice {
 	 * @return gets the structure for the properties of this service type
 	 */
 	public Map<String, Object> getPropertiesStructure();
+	
+	/** @see SmsDevice#getStatus() */
+	public SmsInternetServiceStatus getStatus();
 }

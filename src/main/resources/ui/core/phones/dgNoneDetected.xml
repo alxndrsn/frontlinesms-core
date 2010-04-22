@@ -3,15 +3,26 @@
 	<panel columns="1" bottom="4" gap="15" left="4" right="4" top="4">
         <label icon="/icons/help.png" font="12 bold" text="i18n.device.connection.title"/>
     </panel>
-    <panel name="pnVariableTextCause" columns="1" bottom="4" gap="15" left="4" right="4" top="4">
-    	<!-- Variable text is going to be populated here, depending on the connection status -->
+    
+    <panel name="pnNoDevices" columns="1" bottom="4" gap="4" left="4" right="4" top="4">
+    	<panel name="pnNoDevices_cause" columns="1" gap="4" left="4" right="4" top="4"/>
+    	<panel name="pnNoDevices_try" columns="1" bottom="4" gap="4" left="4" right="4">
+    		<label text="i18n.device.connection.try.this"/>
+    	</panel>
     </panel>
-    <panel bottom="4" columns="1" gap="15" left="4" right="4" top="4">
-    	<label icon="/icons/phone_send.png" font="11 bold" text="i18n.device.connection.try.this"/>
+    <panel name="pnFailed" columns="1" bottom="4" gap="4" left="4" right="4" top="4">
+    	<panel name="pnFailed_cause" columns="1" gap="4" left="4" right="4" top="4" />
+    	<panel name="pnFailed_try" columns="1" bottom="4" gap="4" left="4" right="4">
+    		<label text="i18n.device.connection.try.this"/>
+    	</panel>
     </panel>
-    <panel name="pnVariableTextTry" columns="1" bottom="4" gap="15" left="4" right="4" top="4">
-    	<!-- Variable text is going to be populated here, depending on the connection status -->
+    <panel name="pnOwned" columns="1" bottom="4" gap="4" left="4" right="4" top="4">
+    	<panel name="pnOwned_cause" columns="1" gap="4" left="4" right="4" top="4"/>
+    	<panel name="pnOwned_try" columns="1" bottom="4" gap="4" left="4" right="4">
+    		<label text="i18n.device.connection.try.this"/>
+    	</panel>
     </panel>
+    
     <panel halign="left" bottom="4" columns="1" gap="15" left="4" right="4" top="4">
     	<button type="link" text="i18n.phones.help.moreinfo" action="showHelpPage('phonemanager.htm')"/>
 			<button type="link" text="i18n.phones.help.trouble" action="showHelpPage('troubleshooting.htm')"/>

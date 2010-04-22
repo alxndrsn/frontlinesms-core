@@ -18,6 +18,7 @@ import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.junit.BaseTestCase;
 import net.frontlinesms.listener.SmsListener;
+import net.frontlinesms.smsdevice.events.SmsDeviceNotification;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
 
 import static org.mockito.Mockito.*;

@@ -25,16 +25,11 @@ import java.util.concurrent.*;
 import serial.*;
 
 import net.frontlinesms.CommUtils;
-import net.frontlinesms.FrontlineSMS;
-import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.Utils;
-import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.domain.Message;
-import net.frontlinesms.data.events.DatabaseNotification;
 import net.frontlinesms.events.EventBus;
-import net.frontlinesms.events.EventObserver;
-import net.frontlinesms.events.FrontlineEvent;
 import net.frontlinesms.listener.SmsListener;
+import net.frontlinesms.smsdevice.events.NoSmsDevicesConnectedNotification;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
 
 import org.apache.log4j.Logger;
@@ -191,7 +186,7 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 		
 		if (!portIdentifiers.hasMoreElements()) {
 			if(this.eventBus != null) {
-				this.eventBus.triggerEvent(new SmsDeviceNotification(SmsModemStatus.NO_PHONE_DETECTED));
+				this.eventBus.triggerEvent(new NoSmsDevicesConnectedNotification(false, false));
 			}
 		} else {
 			LOG.debug("Getting ports...");
@@ -333,8 +328,15 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 					activeDevice.setDuplicate(isDuplicate);
 					if(!isDuplicate) activeDevice.connect();
 				}
-			} else if (this.eventBus != null && isFailedStatus(deviceStatus) && !this.isAnotherDeviceProcessing(device)) {
-				this.eventBus.triggerEvent(new SmsDeviceNotification(deviceStatus));
+			}
+			
+			if (isFailedStatus(deviceStatus)) {
+				if(this.eventBus != null) {
+					NoSmsDevicesConnectedNotification notification = createNoSmsDevicesConnectedNotification();
+					if(notification != null) {
+						this.eventBus.triggerEvent(notification);
+					}
+				}
 			}
 		}
 		if (smsListener != null) {
@@ -342,32 +344,90 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 		}
 		LOG.trace("EXIT");
 	}
+	
+	/**
+	 * Creates a {@link NoSmsDevicesConnectedNotification} based on the current status of attached.  If any devices
+	 * are connected or still processing, a notification is not created.
+	 * {@link SmsDevice}s.
+	 * @return a {@link NoSmsDevicesConnectedNotification} describing the current lack of connected devices, or <code>null</code> if there are devices connected or in the process of connecting.
+	 */
+	private NoSmsDevicesConnectedNotification createNoSmsDevicesConnectedNotification() {
+		// Check if all other devices have finished detecting.  If that's the case, and no
+		// devices have been detected, we throw a NoSmsDevicesDetectedNotification.
+		boolean incompatibleDevicesDetected = false;
+		boolean ownedPortsDetected = false;
+		boolean deviceDetectedOrDetectionInProgress = false;
+		
+		checkAll:for (SmsDevice device : getAllPhones()) {
+			if(device instanceof SmsModem) {
+				SmsModemStatus status = ((SmsModem)device).getStatus();
+				switch(status) {
+				case FAILED_TO_CONNECT:
+				case GSM_REG_FAILED:
+				case DISCONNECTED:
+					incompatibleDevicesDetected = true;
+					break;
+					
+				case OWNED_BY_SOMEONE_ELSE:
+					ownedPortsDetected = true;
+					break;
+					
+				case CONNECTED:
+				case CONNECTING:
+				case DETECTED:
+				case DISCONNECTING:
+				case DORMANT:
+				case MAX_SPEED_FOUND:
+				case SEARCHING:
+				case TRY_TO_CONNECT:
+					deviceDetectedOrDetectionInProgress = true;
+					break checkAll;
+
+				case DISCONNECT_FORCED:
+				case NO_PHONE_DETECTED:
+				case DUPLICATE:
+					// ignore this
+					break;
+				}
+			} else if(device instanceof SmsInternetService) {
+				switch(((SmsInternetService)device).getStatus()) {
+				case CONNECTED:
+				case CONNECTING:
+				case DORMANT:
+				case LOW_CREDIT:
+				case TRYING_TO_RECONNECT:
+					deviceDetectedOrDetectionInProgress = true;
+					break checkAll;
+
+				case RECEIVING_FAILED:
+					// ignore this as it's not really relevant here
+					break;
+					
+				case DISCONNECTED:
+				case FAILED_TO_CONNECT:
+					// ignore this - we only prompt to help connect phones, not internet services
+					break;
+				}
+			}
+		}
+		
+		if(deviceDetectedOrDetectionInProgress) {
+			return null;
+		} else {
+			return new NoSmsDevicesConnectedNotification(incompatibleDevicesDetected, ownedPortsDetected);
+		}
+	}
 
 	/**
 	 * Check if the given {@link SmsDeviceStatus} belongs to the failed statuses which should show the device connection problem dialog 
 	 * @param deviceStatus
 	 * @return <code>true</code> if the {@link SmsDevice} is a failed status, <code>false</code> otherwise
 	 */
-	public static boolean isFailedStatus(SmsDeviceStatus deviceStatus) {
-		return (deviceStatus.equals(SmsModemStatus.OWNED_BY_SOMEONE_ELSE)
+	private static boolean isFailedStatus(SmsDeviceStatus deviceStatus) {
+		return deviceStatus.equals(SmsModemStatus.OWNED_BY_SOMEONE_ELSE)
 				|| deviceStatus.equals(SmsModemStatus.NO_PHONE_DETECTED)
 				|| deviceStatus.equals(SmsModemStatus.GSM_REG_FAILED)
-				|| deviceStatus.equals(SmsModemStatus.FAILED_TO_CONNECT));
-	}
-
-	/**
-	 * Check if another device than the one given in parameter is currently in an active state
-	 * @param device
-	 * @return <code>true</code> if there is another {@link SmsDevice} processing, <code>false</code> otherwise
-	 */
-	private boolean isAnotherDeviceProcessing(SmsDevice device) {
-		for (SmsDevice smsDevice : getAllPhones()) {
-			if (smsDevice.equals(device)) continue;
-			if (!isFailedStatus(smsDevice.getStatus())) {
-				return true;
-			}
-		}
-		return false;
+				|| deviceStatus.equals(SmsModemStatus.FAILED_TO_CONNECT);
 	}
 
 	/**

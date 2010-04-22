@@ -31,48 +31,28 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.frontlinesms.AppProperties;
-import net.frontlinesms.BuildProperties;
-import net.frontlinesms.EmailSender;
-import net.frontlinesms.ErrorUtils;
-import net.frontlinesms.FrontlineSMS;
-import net.frontlinesms.FrontlineSMSConstants;
-import net.frontlinesms.PluginManager;
-import net.frontlinesms.Utils;
+import net.frontlinesms.*;
 import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.data.domain.Message.Type;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.debug.RandomDataGenerator;
 import net.frontlinesms.email.EmailException;
-import net.frontlinesms.events.EventBus;
-import net.frontlinesms.events.EventObserver;
-import net.frontlinesms.events.FrontlineEvent;
+import net.frontlinesms.events.*;
 import net.frontlinesms.listener.EmailListener;
 import net.frontlinesms.listener.UIListener;
-import net.frontlinesms.plugins.PluginController;
-import net.frontlinesms.plugins.PluginControllerProperties;
-import net.frontlinesms.plugins.PluginProperties;
+import net.frontlinesms.plugins.*;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.*;
+import net.frontlinesms.smsdevice.events.*;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
-import net.frontlinesms.ui.handler.DeviceConnectionDialogHandler;
-import net.frontlinesms.ui.handler.HomeTabHandler;
-import net.frontlinesms.ui.handler.ImportExportDialogHandler;
-import net.frontlinesms.ui.handler.PhoneTabHandler;
-import net.frontlinesms.ui.handler.StatisticsDialogHandler;
-import net.frontlinesms.ui.handler.contacts.ContactsTabHandler;
-import net.frontlinesms.ui.handler.contacts.GroupSelecterPanel;
-import net.frontlinesms.ui.handler.contacts.SingleGroupSelecterPanelOwner;
+import net.frontlinesms.ui.handler.*;
+import net.frontlinesms.ui.handler.contacts.*;
 import net.frontlinesms.ui.handler.core.DatabaseSettingsPanel;
-import net.frontlinesms.ui.handler.email.EmailAccountDialogHandler;
-import net.frontlinesms.ui.handler.email.EmailTabHandler;
+import net.frontlinesms.ui.handler.email.*;
 import net.frontlinesms.ui.handler.keyword.KeywordTabHandler;
-import net.frontlinesms.ui.handler.message.MessageHistoryTabHandler;
-import net.frontlinesms.ui.handler.message.MessagePanelHandler;
-import net.frontlinesms.ui.i18n.FileLanguageBundle;
-import net.frontlinesms.ui.i18n.InternationalisationUtils;
-import net.frontlinesms.ui.i18n.LanguageBundle;
+import net.frontlinesms.ui.handler.message.*;
+import net.frontlinesms.ui.i18n.*;
 
 import org.apache.log4j.Logger;
 import org.smslib.CIncomingMessage;
@@ -1741,16 +1721,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		databaseSettings.showAsDialog(needToRestartApplication);
 	}
 	
-
-	/**
-	 * Show the device connection dialog if it's not already open
-	 * @param deviceConnectionStatus The status on which the text in the dialog must be populated from 
-	 */
-	private void showDeviceConnectionDialog(SmsDeviceStatus deviceConnectionStatus) {
-		DeviceConnectionDialogHandler deviceConnectionDialogHandler = new DeviceConnectionDialogHandler(this, deviceConnectionStatus);
-		add(deviceConnectionDialogHandler.getDialog());
-	}
-	
 	/** Reloads the ui. */
 	public final void reloadUi() {
 		this.frameLauncher.dispose();
@@ -1796,13 +1766,21 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		this.frontlineController.outgoingMessageEvent(FrontlineSMS.EMULATOR, testMessage);
 	}
 
-
+	/** Temp var for debugging */
+	@Deprecated
+	boolean displayedNoPhonesDialog;
+	// FIXME remove this
 	
 	/** Handle notifications from the {@link EventBus} */
-	public void notify(FrontlineEvent event) {
-		if(event instanceof SmsDeviceNotification) {
-			if (AppProperties.getInstance().shouldAlwaysShowDeviceConnectionDialog() && SmsDeviceManager.isFailedStatus(((SmsDeviceNotification)event).getStatus())) {
-				this.showDeviceConnectionDialog(((SmsDeviceNotification)event).getStatus());
+	public void notify(FrontlineEvent notification) {
+		if(notification instanceof NoSmsDevicesConnectedNotification) {
+			// Unable to connect to SMS devices.  If enabled, show the help dialog to prompt connection 
+			if (!displayedNoPhonesDialog || AppProperties.getInstance().isDeviceConnectionDialogEnabled()) {
+				DeviceConnectionDialogHandler deviceConnectionDialogHandler = new DeviceConnectionDialogHandler(this);
+				deviceConnectionDialogHandler.initDialog((NoSmsDevicesConnectedNotification) notification);
+				add(deviceConnectionDialogHandler.getDialog());
+				
+				displayedNoPhonesDialog = true;
 			}
 		}
 	}

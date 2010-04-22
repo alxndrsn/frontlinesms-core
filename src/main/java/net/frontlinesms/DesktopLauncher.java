@@ -19,15 +19,11 @@
  */
 package net.frontlinesms;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Time;
-import java.util.Calendar;
-import java.util.TimeZone;
 
 import javax.swing.UIManager;
 
@@ -41,8 +37,6 @@ import net.frontlinesms.ui.i18n.LanguageBundle;
 
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
-
-import com.sun.mail.iap.ByteArray;
 
 import thinlet.Thinlet;
 
