@@ -652,7 +652,13 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 				toBeReSent.setRetriesRemaining(Message.MAX_RETRIES);
 				ui.getPhoneManager().sendSMS(toBeReSent);
 			} else if (status == Message.STATUS_DELIVERED || status == Message.STATUS_SENT) {
-				ui.getFrontlineController().sendTextMessage(toBeReSent.getRecipientMsisdn(), toBeReSent.getTextContent());
+				if(toBeReSent.isBinaryMessage()) {
+					Message newMessage = Message.createBinaryOutgoingMessage(System.currentTimeMillis(), "",
+							toBeReSent.getRecipientMsisdn(), toBeReSent.getRecipientSmsPort(), toBeReSent.getBinaryContent());
+					ui.getFrontlineController().sendMessage(newMessage);
+				} else {
+					ui.getFrontlineController().sendTextMessage(toBeReSent.getRecipientMsisdn(), toBeReSent.getTextContent());
+				}
 			}
 		}
 	}
