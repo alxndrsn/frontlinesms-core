@@ -9,6 +9,7 @@ import net.frontlinesms.AppProperties;
 import net.frontlinesms.Utils;
 import net.frontlinesms.smsdevice.events.NoSmsDevicesConnectedNotification;
 import net.frontlinesms.ui.DatabaseSettings;
+import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -135,7 +136,7 @@ public class DeviceConnectionDialogHandler implements ThinletUiEventHandler { //
 		return uiController.find(this.dialogComponent, componentName);
 	}
 
-//> UI PASS-THRU METHODS
+//> UI EVENT METHODS
 	
 	/**
 	 * This method is called when the checkbox is ticked or unticked
@@ -160,13 +161,13 @@ public class DeviceConnectionDialogHandler implements ThinletUiEventHandler { //
 		this.removeDialog(dialogComponent);
 	}
 	
+//> UI PASS-THRU METHODS
 	/**
 	 * Opens a page of the help manual
-	 * @param page The name of the help manual page, including file extension.
+	 * @see FrontlineUI#showHelpPage(String)
 	 */
 	public void showHelpPage(String page) {
-		String url = "help/" + page;
-		Utils.openExternalBrowser(url);
+		uiController.showHelpPage(page);
 	}
 	
 
