@@ -96,12 +96,12 @@ public class CsvUtils {
 	/** A csv-escaped {@link #QUOTE} character */
 	private static final String DOUBLE_QUOTE_STRING = QUOTE_STRING + QUOTE_STRING;
 	/** The comma character, used for separating items in a line of CSV */
-	private static final char COMMA = ',';
+	private static final char SEPARATOR = ',';
 	/** Line terminator used at the end of each line of a CSV file */
 	private static final String LINE_TERMINATOR = "\r\n";
 	/** Array containing all special characters that cause a CSV value to require escaping */
 	@SuppressWarnings("unused")
-	private static final char[] RESTRICTED_CHARS = {CR, LF, QUOTE, COMMA};
+	private static final char[] RESTRICTED_CHARS = {CR, LF, QUOTE, SEPARATOR};
 
 	/**
 	 * Writes a line of CSV, substituting markers for replacements where this is requested.
@@ -116,7 +116,24 @@ public class CsvUtils {
 		for(Iterator<String> format = rowFormat.format(markersAndReplacements).iterator(); format.hasNext(); ) {
 			out.write(format.next());
 			if(format.hasNext()) {
-				out.write(",");
+				out.write(SEPARATOR);
+			}
+		}
+		
+		out.write(LINE_TERMINATOR);
+	}
+	
+	/**
+	 * Write a simple line of CSV
+	 * @param out The {@link Writer} to write the line of CSV to.
+	 * @param values The array of strings representing the values to write
+	 * @throws IOException
+	 */
+	public static void writeLine(Writer out, String[] values) throws IOException {
+		for(int i = 0 ; i < values.length ; ++i) {
+			out.write(values[i]);
+			if ((i + 1) < values.length) {
+				out.write(SEPARATOR);
 			}
 		}
 		
@@ -170,7 +187,7 @@ public class CsvUtils {
 						lastValue.append(QUOTE);
 						// We're still inside our quoted region, so: on to the next character!
 						read = reader.read();
-					} else if(read == COMMA || read == CR || read == END) {
+					} else if(read == SEPARATOR || read == CR || read == END) {
 						// We've just finished reading a quoted value!  We can drop out
 						// of the "insideQuotes" handling, and handle this like we would
 						// normally.
@@ -197,7 +214,7 @@ public class CsvUtils {
 					if(lastValue.length() > 0)
 						throw new CsvParseException("Unexpected characters before quote in value: '" + lastValue.toString() + "'");
 					insideQuotes = true;
-				} else if(read == COMMA) {
+				} else if(read == SEPARATOR) {
 					// We've finished this value, so we should continue to the next one
 					readStrings.add(lastValue.toString());
 					lastValue.delete(0, Integer.MAX_VALUE);

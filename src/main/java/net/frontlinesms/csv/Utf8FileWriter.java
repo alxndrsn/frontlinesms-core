@@ -16,7 +16,7 @@ import java.io.Writer;
  * Writer for writing UTF-8 text to a file.
  * @author Alex
  */
-class Utf8FileWriter extends Writer {	
+public class Utf8FileWriter extends Writer {	
 	/** Stream to the file. */
 	private FileOutputStream fileOutputStream;
 	/** Writer to {@link #fileOutputStream} */
