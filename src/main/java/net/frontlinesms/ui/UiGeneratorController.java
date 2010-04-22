@@ -1765,22 +1765,15 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		this.messageFactory.saveMessage(testMessage);
 		this.frontlineController.outgoingMessageEvent(FrontlineSMS.EMULATOR, testMessage);
 	}
-
-	/** Temp var for debugging */
-	@Deprecated
-	boolean displayedNoPhonesDialog;
-	// FIXME remove this
 	
 	/** Handle notifications from the {@link EventBus} */
 	public void notify(FrontlineEventNotification notification) {
 		if(notification instanceof NoSmsDevicesConnectedNotification) {
 			// Unable to connect to SMS devices.  If enabled, show the help dialog to prompt connection 
-			if (!displayedNoPhonesDialog || AppProperties.getInstance().isDeviceConnectionDialogEnabled()) {
+			if (AppProperties.getInstance().isDeviceConnectionDialogEnabled()) {
 				DeviceConnectionDialogHandler deviceConnectionDialogHandler = new DeviceConnectionDialogHandler(this);
 				deviceConnectionDialogHandler.initDialog((NoSmsDevicesConnectedNotification) notification);
 				add(deviceConnectionDialogHandler.getDialog());
-				
-				displayedNoPhonesDialog = true;
 			}
 		}
 	}
