@@ -775,13 +775,31 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			}
 			if (toAdd) {
 				LOG.debug("Time to try to add this message to list...");
-				if (ui.getItems(messageListComponent).length < this.messagePagingHandler.getMaxItemsPerPage()) {
-					LOG.debug("There's space! Adding...");
-					ui.add(messageListComponent, ui.getRow(message));
-					ui.setEnabled(messageListComponent, true);
-					if (message.getType() == Type.TYPE_OUTBOUND) {
-						numberToSend += message.getNumberOfSMS();
-						updateMessageHistoryCost();
+				
+				// if this message is already in the list, perhaps with a different status, we should just
+				// update the current row rather than adding a new one
+				Object[] messageItems = ui.getItems(messageListComponent);
+				boolean replaced = false;
+				for (int rowIndex = 0; rowIndex < messageItems.length; rowIndex++) {
+					Object currentRowComponent = messageItems[rowIndex];
+					if(message.equals(ui.getAttachedObject(currentRowComponent))) {
+						// replace or update the row in the message table
+						ui.add(messageListComponent, ui.getRow(message), rowIndex);
+						ui.remove(currentRowComponent);
+						replaced = true;
+						break;
+					}
+				}
+				
+				if(!replaced) {
+					if (ui.getItems(messageListComponent).length < this.messagePagingHandler.getMaxItemsPerPage()) {
+						LOG.debug("There's space! Adding...");
+						ui.add(messageListComponent, ui.getRow(message));
+						ui.setEnabled(messageListComponent, true);
+						if (message.getType() == Type.TYPE_OUTBOUND) {
+							numberToSend += message.getNumberOfSMS();
+							updateMessageHistoryCost();
+						}
 					}
 				}
 			}

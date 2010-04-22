@@ -412,7 +412,6 @@ public class Message {
 				+ ((senderMsisdn == null) ? 0 : senderMsisdn.hashCode());
 		result = prime * result + smsPartsCount;
 		result = prime * result + smscReference;
-		result = prime * result + status;
 		result = prime * result + type.hashCode();
 		return result;
 	}
@@ -455,8 +454,6 @@ public class Message {
 		if (smsPartsCount != other.smsPartsCount)
 			return false;
 		if (smscReference != other.smscReference)
-			return false;
-		if (status != other.status)
 			return false;
 		if (type != other.type)
 			return false;
