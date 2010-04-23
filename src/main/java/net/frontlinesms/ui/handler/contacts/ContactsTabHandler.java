@@ -6,15 +6,10 @@ package net.frontlinesms.ui.handler.contacts;
 // TODO remove static imports
 import static net.frontlinesms.FrontlineSMSConstants.ACTION_ADD_TO_GROUP;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_CONTACTS_IN_GROUP;
-import static net.frontlinesms.FrontlineSMSConstants.COMMON_DATE;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_E_MAIL_ADDRESS;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_GROUP;
-import static net.frontlinesms.FrontlineSMSConstants.COMMON_MESSAGE;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_NAME;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_PHONE_NUMBER;
-import static net.frontlinesms.FrontlineSMSConstants.COMMON_RECIPIENT;
-import static net.frontlinesms.FrontlineSMSConstants.COMMON_SENDER;
-import static net.frontlinesms.FrontlineSMSConstants.COMMON_STATUS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_CONTACTS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUPS_AND_CONTACTS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUP_ALREADY_EXISTS;
@@ -37,7 +32,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import net.frontlinesms.Utils;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
@@ -53,8 +47,6 @@ import net.frontlinesms.ui.handler.ComponentPagingHandler;
 import net.frontlinesms.ui.handler.PagedComponentItemProvider;
 import net.frontlinesms.ui.handler.PagedListDetails;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
-
-import org.apache.log4j.Logger;
 
 import thinlet.Thinlet;
 import thinlet.ThinletText;
@@ -76,8 +68,6 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	private static final String COMPONENT_SEND_SMS_BUTTON_GROUP_SIDE = "sendSMSButtonGroupSide";
 	
 //> INSTANCE PROPERTIES
-	/** Logging object */
-	private final Logger LOG = Utils.getLogger(this.getClass()); // FIXME rename to log
 	
 //> DATA ACCESS OBJECTS
 	/** Data access object for {@link Group}s */
@@ -135,7 +125,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 * This method updated the contact list according to the new selection.
 	 */
 	public void groupSelectionChanged(Group selectedGroup) {
-		if(LOG.isTraceEnabled()) System.out.println("Group selected: " + selectedGroup);
+		if(log.isTraceEnabled()) log.trace("Group selected: " + selectedGroup);
 		this.selectedGroup = selectedGroup;
 		
 		String contactsPanelTitle;
@@ -379,7 +369,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 * @param item The item holding the destination group.
 	 */
 	public void addToGroup(Object item) {
-		LOG.trace("ENTER");
+		log.trace("ENTER");
 		Object[] selected = null;
 		selected = this.ui.getSelectedItems(contactListComponent);
 		// Add to the selected groups...
@@ -388,14 +378,14 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		for (Object component : selected) {
 			if (this.ui.isAttachment(component, Contact.class)) {
 				Contact contact = this.ui.getContact(component);
-				LOG.debug("Adding Contact [" + contact.getName() + "] to [" + destination + "]");
+				log.debug("Adding Contact [" + contact.getName() + "] to [" + destination + "]");
 				if(this.groupMembershipDao.addMember(destination, contact)) {
 					groupDao.updateGroup(destination);
 				}
 			}
 		}
 		updateGroupList();
-		LOG.trace("EXIT");
+		log.trace("EXIT");
 	}
 	
 	/**
@@ -405,7 +395,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 * @param dialog
 	 */
 	public void removeSelectedFromGroupList(final Object button, Object dialog) {
-		LOG.trace("ENTER");
+		log.trace("ENTER");
 		if (dialog != null) {
 			this.ui.removeDialog(dialog);
 		}
@@ -416,22 +406,15 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			if (button != null) {
 				removeContactsAlso = ui.getName(button).equals(COMPONENT_BUTTON_YES);
 			}
-			LOG.debug("Selected Group [" + selectedGroup.getName() + "]");
-			LOG.debug("Remove Contacts from database [" + removeContactsAlso + "]");
+			log.debug("Selected Group [" + selectedGroup.getName() + "]");
+			log.debug("Remove Contacts from database [" + removeContactsAlso + "]");
 			if (!ui.isDefaultGroup(selectedGroup)) {
-				//Inside a default group
-				LOG.debug("Removing group [" + selectedGroup.getName() + "] from database");
+				log.debug("Removing group [" + selectedGroup.getName() + "] from database");
 				groupDao.deleteGroup(selectedGroup, removeContactsAlso);
 				this.groupSelecter.selectGroup(groupSelecter.getRootGroup());
 			} else {
+				// Inside a default group
 				throw new IllegalStateException();
-//				if (removeContactsAlso) {
-//					LOG.debug("Group not destroyable, removing contacts...");
-//					for (Contact c : selectedGroup.getDirectMembers()) {
-//						LOG.debug("Removing contact [" + c.getName() + "] from database");
-//						contactDao.deleteContact(c);
-//					}
-//				}
 			}
 		}
 		
@@ -439,7 +422,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		ui.setEnabled(sms, selectedGroup != null);
 		ui.alert(InternationalisationUtils.getI18NString(MESSAGE_GROUPS_AND_CONTACTS_DELETED));
 		refresh();
-		LOG.trace("EXIT");
+		log.trace("EXIT");
 	}
 
 	/**
@@ -456,21 +439,21 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 
 	/** Removes the selected contacts of the supplied contact list component. */
 	public void deleteSelectedContacts() {
-		LOG.trace("ENTER");
+		log.trace("ENTER");
 		Group selectedGroup = this.groupSelecter.getSelectedGroup();
 		this.ui.removeConfirmationDialog();
 		this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_REMOVING_CONTACTS));
 		final Object[] selected = this.ui.getSelectedItems(contactListComponent);
 		for (Object o : selected) {
 			Contact contact = ui.getContact(o);
-			LOG.debug("Deleting contact [" + contact.getName() + "]");
+			log.debug("Deleting contact [" + contact.getName() + "]");
 			contactDao.deleteContact(contact);
 		}
 		ui.alert(InternationalisationUtils.getI18NString(MESSAGE_CONTACTS_DELETED));
 		refresh();
 		this.groupSelecter.selectGroup(selectedGroup);
 		
-		LOG.trace("EXIT");
+		log.trace("EXIT");
 	}
 
 	/**
@@ -494,18 +477,18 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 * @param selectedParentGroup
 	 */
 	private void doGroupCreation(String newGroupName, Object dialog, Group selectedParentGroup) {
-		LOG.trace("ENTER");
-		if(LOG.isDebugEnabled()) {
+		log.trace("ENTER");
+		if(log.isDebugEnabled()) {
 			String parentGroupName = selectedParentGroup == null ? "null" : selectedParentGroup.getName();
-			LOG.debug("Parent group [" + parentGroupName + "]");
+			log.debug("Parent group [" + parentGroupName + "]");
 		}
 		if(selectedParentGroup == null) {
 			selectedParentGroup = ui.getRootGroup();
 		}
 
-		LOG.debug("Group Name [" + newGroupName + "]");
+		log.debug("Group Name [" + newGroupName + "]");
 		try {
-			if(LOG.isDebugEnabled()) LOG.debug("Creating group with name: " + newGroupName + " and parent: " + selectedParentGroup);
+			if(log.isDebugEnabled()) log.debug("Creating group with name: " + newGroupName + " and parent: " + selectedParentGroup);
 			
 			Group g = new Group(selectedParentGroup, newGroupName);
 			this.groupDao.saveGroup(g);
@@ -516,12 +499,12 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			this.selectedGroup = g;
 			this.updateGroupList();
 			
-			LOG.debug("Group created successfully!");
+			log.debug("Group created successfully!");
 		} catch (DuplicateKeyException e) {
-			LOG.debug("A group with this name already exists.", e);
+			log.debug("A group with this name already exists.", e);
 			this.ui.alert(InternationalisationUtils.getI18NString(MESSAGE_GROUP_ALREADY_EXISTS));
 		}
-		LOG.trace("EXIT");
+		log.trace("EXIT");
 	}
 	
 	/** Repopulates the contact list according to the current filter. */
