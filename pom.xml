@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.frontlinesms.core</groupId>
 	<artifactId>frontlinesms</artifactId>
-	<name>FrontlineSMS</name>
+	<name>frontlinesms</name>
 	<version>1.6.08-RC6-SNAPSHOT</version>
 	<description>FrontlineSMS core application</description>
 	<licenses>
