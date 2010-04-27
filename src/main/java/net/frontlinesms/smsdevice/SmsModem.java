@@ -780,7 +780,6 @@ public class SmsModem extends Thread implements SmsDevice {
 		try {
 			cService.sendMessage(cMessage);
 			if (cMessage.getRefNo() != -1) {
-				message.setDispatchDate(cMessage.getDispatchDate());
 				message.setSmscReference(cMessage.getRefNo());
 				message.setStatus(Message.STATUS_SENT);
 				if(LOG.isDebugEnabled()) LOG.debug("Message [" + message.getTextContent() + "] was sent to [" + message.getRecipientMsisdn() + "]");
@@ -960,7 +959,6 @@ public class SmsModem extends Thread implements SmsDevice {
 				try {
 					cService.sendMessage(cMessage);
 					if (cMessage.getRefNo() != -1) {
-						message.setDispatchDate(cMessage.getDispatchDate());
 						message.setSmscReference(cMessage.getRefNo());
 						message.setStatus(Message.STATUS_SENT);
 						if(LOG.isDebugEnabled()) LOG.debug("Message [" + message.getTextContent() + "] was sent to [" + message.getRecipientMsisdn() + "]");

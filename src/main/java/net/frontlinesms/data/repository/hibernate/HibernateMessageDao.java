@@ -175,6 +175,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 		return super.getList(q.getQueryString(), q.getInsertValues());
 	}
 	
+	@SuppressWarnings("unchecked")
 	List<String> getSimilarKeywords(Keyword keyword) {
 		if(keyword.getKeyword().length() == 0) {
 			// Get all keywords apart from the blank one
@@ -183,9 +184,6 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 		} else {
 			String likeKeyword = keyword.getKeyword() + " %";
 			List<String> similarKeywords = this.getHibernateTemplate().find("SELECT k.keyword FROM Keyword  AS k WHERE k.keyword LIKE ?", likeKeyword);
-			for(String k : similarKeywords) {
-				System.out.println("Similar keyword: " + k);
-			}
 			return similarKeywords;
 		}
 	}

@@ -125,8 +125,7 @@ public class Message {
 	private int recipientSmsPort;
 	private int smsPartsCount;
 	private long date;
-	private int smscReference;
-	private long dispatchDate;
+	private Integer smscReference;
 	private String senderMsisdn;
 	/** Text content of this message. */
 	@Column(name=COLUMN_TEXT_CONTENT, length=SMS_MAX_CHARACTERS)
@@ -249,14 +248,12 @@ public class Message {
 	}
 
 	/**
-	 * gets the SMSC reference number of this Message.  this appears after a message is sent, so that 
+	 * @return the SMSC reference number of this Message.  this appears after a message is sent, so that 
 	 * delivery reciepts can be matched up to previous messages.
-	 * 
 	 */
-	public int getSmscReference() {
+	public Integer getSmscReference() {
 		return this.smscReference;
 	}
-	
 	/**
 	 * sets the SMSC reference number of this Message.  this appears after a message is sent, so that 
 	 * delivery reciepts can be matched up to previous messages.
@@ -266,36 +263,12 @@ public class Message {
 	public void setSmscReference(int smscReference) {
 		this.smscReference = smscReference;
 	}
-
-	/**
-	 * sets the Dispatch time that an outgoing message was accepted by the SMSC on the GSM network
-	 * not to be set for incoming messages
-	 * @param reference
-	 */
-	public void setDispatchDate(long dispatchDate) {
-		this.dispatchDate = dispatchDate;
-	}
 	
-	/**
-	 * gets the Dispatch time that an outgoing message was accepted by the SMSC on the GSM network
-	 * 
-	 */
-	public long getDispatchDate() {
-		return this.dispatchDate;
-	}
-	
-	/**
-	 * gets the retries left for this message
-	 * 
-	 */
+	/** @return the retries left for this message */
 	public int getRetriesRemaining() {
 		return this.retriesRemaining;
 	}
-	
-	/**
-	 * sets the retries left for this message
-	 * 
-	 */
+	/** sets the retries left for this message */
 	public void setRetriesRemaining(int retries) {
 		this.retriesRemaining = retries;
 	}
@@ -394,29 +367,44 @@ public class Message {
 	}
 	
 //> GENERATED METHODS
-	/** @see java.lang.Object#hashCode() */
+	/**
+	 * {@link #status} and {@link #smscReference} are not included in {@link #equals(Object)} or {@link #hashCode()}
+	 * as they are liable to change throughout a message's lifetime.  Likewise, {@link #senderMsisdn} is ignored for
+	 * {@link Type#TYPE_OUTBOUND} and {@link #recipientMsisdn} is ignored for {@link Type#TYPE_RECEIVED} and {@link Type#TYPE_DELIVERY_REPORT}.
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (int) (date ^ (date >>> 32));
-		result = prime * result + (int) (dispatchDate ^ (dispatchDate >>> 32));
 		result = prime * result + Arrays.hashCode(binaryMessageContent);
 		result = prime * result
 				+ ((textMessageContent == null) ? 0 : textMessageContent.hashCode());
-		result = prime * result
-				+ ((recipientMsisdn == null) ? 0 : recipientMsisdn.hashCode());
+		
+		if(!(type == Type.TYPE_RECEIVED || type == Type.TYPE_DELIVERY_REPORT)) {
+			result = prime * result
+					+ ((recipientMsisdn == null) ? 0 : recipientMsisdn.hashCode());
+		}
+		
 		result = prime * result + recipientSmsPort;
 		result = prime * result + retriesRemaining;
-		result = prime * result
-				+ ((senderMsisdn == null) ? 0 : senderMsisdn.hashCode());
+		
+		if(type != Type.TYPE_OUTBOUND) {
+			result = prime * result
+					+ ((senderMsisdn == null) ? 0 : senderMsisdn.hashCode());
+		}
+		
 		result = prime * result + smsPartsCount;
-		result = prime * result + smscReference;
 		result = prime * result + type.hashCode();
 		return result;
 	}
 
-	/** @see java.lang.Object#equals(java.lang.Object) */
+	/** 
+	 * {@link #status} and {@link #smscReference} are not included in {@link #equals(Object)} or {@link #hashCode()}
+	 * as they are liable to change throughout a message's lifetime.
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -428,8 +416,6 @@ public class Message {
 		Message other = (Message) obj;
 		if (date != other.date)
 			return false;
-		if (dispatchDate != other.dispatchDate)
-			return false;
 		if (!Arrays.equals(binaryMessageContent, other.binaryMessageContent))
 			return false;
 		if (textMessageContent == null) {
@@ -437,23 +423,29 @@ public class Message {
 				return false;
 		} else if (!textMessageContent.equals(other.textMessageContent))
 			return false;
-		if (recipientMsisdn == null) {
-			if (other.recipientMsisdn != null)
+		
+		if(!(type == Type.TYPE_RECEIVED || type == Type.TYPE_DELIVERY_REPORT)) {
+			if (recipientMsisdn == null) {
+				if (other.recipientMsisdn != null)
+					return false;
+			} else if (!recipientMsisdn.equals(other.recipientMsisdn))
 				return false;
-		} else if (!recipientMsisdn.equals(other.recipientMsisdn))
-			return false;
+		}
+		
 		if (recipientSmsPort != other.recipientSmsPort)
 			return false;
 		if (retriesRemaining != other.retriesRemaining)
 			return false;
-		if (senderMsisdn == null) {
-			if (other.senderMsisdn != null)
+		
+		if(type != Type.TYPE_OUTBOUND) {
+			if (senderMsisdn == null) {
+				if (other.senderMsisdn != null)
+					return false;
+			} else if (!senderMsisdn.equals(other.senderMsisdn))
 				return false;
-		} else if (!senderMsisdn.equals(other.senderMsisdn))
-			return false;
+		}
+		
 		if (smsPartsCount != other.smsPartsCount)
-			return false;
-		if (smscReference != other.smscReference)
 			return false;
 		if (type != other.type)
 			return false;

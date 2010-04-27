@@ -100,7 +100,6 @@ public class ClickatellInternetService extends AbstractSmsInternetService {
 		try {
 			service.sendMessage(oMessage);
 			if (oMessage.getMessageStatus() == MessageStatuses.SENT) {
-				message.setDispatchDate(oMessage.getDispatchDate().getTime());
 				message.setStatus(Message.STATUS_SENT);
 				LOG.debug("Message [" + message + "] was sent!");
 			} else {

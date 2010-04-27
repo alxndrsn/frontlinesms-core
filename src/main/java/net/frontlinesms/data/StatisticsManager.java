@@ -239,6 +239,7 @@ public class StatisticsManager {
 	}
 	
 	/** Collects the number of {@link SmsInternetService} accounts. */
+	@SuppressWarnings("unchecked")
 	private void collecSmsInternetServices() {
 		Collection<SmsInternetServiceSettings> smsInternetServicesSettings = this.smsInternetServiceSettingsDao.getSmsInternetServiceAccounts();
 		

@@ -171,7 +171,6 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 			}
 			LOG.debug("Code is [" + code + "]");
 			if (code == ResultCodes.OK) {
-				message.setDispatchDate(System.currentTimeMillis());
 				message.setStatus(Message.STATUS_SENT);
 				LOG.debug("Message [" + message + "] was sent!");
 			} else {

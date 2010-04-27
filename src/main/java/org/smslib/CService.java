@@ -732,7 +732,8 @@ public class CService {
 				atHandler.switchToCmdMode();
 				log.debug("Checking storage locations: " + atHandler.storageLocations);
 				for (int ml = 0; ml < (atHandler.storageLocations.length() / 2); ml++) {
-					if (atHandler.setMemoryLocation(atHandler.storageLocations.substring((ml * 2), (ml * 2) + 2))) {
+					String memoryLocation = atHandler.storageLocations.substring((ml * 2), (ml * 2) + 2);
+					if (atHandler.setMemoryLocation(memoryLocation)) {
 						String response = atHandler.listMessages(messageClass);
 						response = response.replaceAll("\\s+OK\\s+", "\nOK\n");
 						BufferedReader reader = null;
