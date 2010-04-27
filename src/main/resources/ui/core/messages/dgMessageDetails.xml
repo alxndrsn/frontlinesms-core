@@ -9,7 +9,7 @@
     <label icon="/icons/user_receiver.png" text="i18n.common.recipient"/>
     <textfield editable="false" name="tfRecipient" weightx="1"/>
     <label icon="/icons/message.png" text="i18n.common.message" valign="top"/>
-    <textarea editable="false" columns="40" name="tfContent" wrap="true" rows="8" weightx="1" weighty="1"/>
+    <textarea editable="false" columns="40" name="tfContent" rows="8" weightx="1" weighty="1"/>
     <panel colspan="2" halign="center" weightx="1">
         <button action="removeDialog(messageDialog)" icon="/icons/tick.png" text="i18n.action.ok"/>
     </panel>
