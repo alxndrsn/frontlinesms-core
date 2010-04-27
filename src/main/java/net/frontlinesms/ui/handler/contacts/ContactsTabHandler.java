@@ -63,6 +63,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	private static final String UI_FILE_NEW_GROUP_FORM = "/ui/dialog/newGroupForm.xml"; // TODO move this to the correct path
 	
 	private static final String COMPONENT_GROUP_SELECTER_CONTAINER = "pnGroupsContainer";
+	private static final String COMPONENT_BUTTON_OK	 = "btOk";
 	private static final String COMPONENT_CONTACTS_PANEL = "pnContacts";
 	private static final String COMPONENT_DELETE_BUTTON = "deleteButton";
 	private static final String COMPONENT_SEND_SMS_BUTTON_GROUP_SIDE = "sendSMSButtonGroupSide";
@@ -90,6 +91,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	
 	/** The selected group in the left panel  */
 	private Group selectedGroup;
+	private Object newGroupForm;
 
 //> CONSTRUCTORS
 	/**
@@ -147,6 +149,14 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		this.ui.setEnabled(btSendSmsToGroup, selectedGroup != null);
 		
 		updateContactList();
+	}
+	
+	public void groupNameChanged (String groupName) {
+		boolean shouldEnableOKButton = (groupName != null && !groupName.equals(""));
+		if (this.newGroupForm != null) {
+			Object okButton = this.ui.find(this.newGroupForm, COMPONENT_BUTTON_OK);
+			this.ui.setEnabled(okButton, shouldEnableOKButton);
+		}
 	}
 	
 //> CONTACT EDITING METHODS
@@ -333,7 +343,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 * @param groupList
 	 */
 	public void showNewGroupDialog() {
-		Object newGroupForm = this.ui.loadComponentFromFile(UI_FILE_NEW_GROUP_FORM, this);
+		newGroupForm = this.ui.loadComponentFromFile(UI_FILE_NEW_GROUP_FORM, this);
 		ui.setAttachedObject(newGroupForm, this.groupSelecter.getSelectedGroup());
 		this.ui.add(newGroupForm);
 	}
@@ -466,7 +476,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		// The selected parent group should be attached to this dialog.  Get it,
 		// create the new group, update the group list and then remove the dialog.
 		Group selectedParentGroup = this.ui.getGroup(dialog);
-		doGroupCreation(newGroupName, dialog, selectedParentGroup);		
+		doGroupCreation(newGroupName, dialog, selectedParentGroup);
 	}
 	
 //> PRIVATE UI HELPER METHODS
