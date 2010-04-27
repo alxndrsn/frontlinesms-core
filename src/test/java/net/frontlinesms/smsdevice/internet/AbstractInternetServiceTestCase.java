@@ -22,6 +22,7 @@ package net.frontlinesms.smsdevice.internet;
 import net.frontlinesms.AbstractTestCase;
 import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
+import net.frontlinesms.data.domain.Message.Status;
 import net.frontlinesms.smsdevice.internet.AbstractSmsInternetService;
 
 /**
@@ -50,7 +51,7 @@ public abstract class AbstractInternetServiceTestCase extends AbstractTestCase {
 		Message message = getMessageDetails();
 		assertNotNull(message);
 		internetService.sendSmsDirect(message);
-		assertEquals(message.getStatus(), Message.STATUS_SENT);
+		assertEquals(message.getStatus(), Status.SENT);
 	}
 
 	/**

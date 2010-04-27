@@ -23,6 +23,7 @@ import java.util.*;
 
 import net.frontlinesms.*;
 import net.frontlinesms.data.domain.*;
+import net.frontlinesms.data.domain.Message.Status;
 import net.frontlinesms.email.pop.*;
 import net.frontlinesms.smsdevice.Provider;
 import net.frontlinesms.smsdevice.properties.*;
@@ -171,17 +172,17 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 			}
 			LOG.debug("Code is [" + code + "]");
 			if (code == ResultCodes.OK) {
-				message.setStatus(Message.STATUS_SENT);
+				message.setStatus(Status.SENT);
 				LOG.debug("Message [" + message + "] was sent!");
 			} else {
 				if (code == ResultCodes.InsufficientCredit) {
 					setStatus(SmsInternetServiceStatus.LOW_CREDIT, Integer.toString(getRemainingCredit()));
 				}
-				message.setStatus(Message.STATUS_FAILED);
+				message.setStatus(Status.FAILED);
 				LOG.debug("Message [" + message + "] was not sent.  Cause: [" + code + "]");
 			}
 		} catch (IntelliSMSException e) {
-			message.setStatus(Message.STATUS_FAILED);
+			message.setStatus(Status.FAILED);
 			LOG.debug("Failed to send message [" + message + "]: " + e.getResultCode(), e);
 			LOG.info("Failed to send message: " + e.getResultCode());
 			

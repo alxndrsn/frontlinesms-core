@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.domain.*;
+import net.frontlinesms.data.domain.Message.Status;
 import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.smsdevice.properties.*;
 
@@ -115,7 +116,7 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 	 */
 	public void sendSMS(Message outgoingMessage) {
 		LOG.trace("ENTER");
-		outgoingMessage.setStatus(Message.STATUS_PENDING);
+		outgoingMessage.setStatus(Status.PENDING);
 		outgoingMessage.setSenderMsisdn(getMsisdn());
 		
 		outbox.add(outgoingMessage);

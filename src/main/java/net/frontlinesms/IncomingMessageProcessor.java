@@ -30,6 +30,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.data.domain.KeywordAction.ExternalCommandResponseActionType;
 import net.frontlinesms.data.domain.KeywordAction.ExternalCommandResponseType;
+import net.frontlinesms.data.domain.Message.Status;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.data.*;
 import net.frontlinesms.listener.IncomingMessageListener;
@@ -195,10 +196,10 @@ public class IncomingMessageProcessor extends Thread {
 			LOG.debug("It's a delivery report for message [" + message + "]");
 			switch(statusReport.getDeliveryStatus()) {
 			case CStatusReportMessage.DeliveryStatus.Delivered:
-				message.setStatus(Message.STATUS_DELIVERED);
+				message.setStatus(Status.DELIVERED);
 				break;
 			case CStatusReportMessage.DeliveryStatus.Aborted:
-				message.setStatus(Message.STATUS_FAILED);
+				message.setStatus(Status.FAILED);
 				break;
 			}
 			if (uiListener != null) {

@@ -27,6 +27,7 @@ import serial.*;
 import net.frontlinesms.CommUtils;
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.domain.Message;
+import net.frontlinesms.data.domain.Message.Status;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.smsdevice.events.NoSmsDevicesConnectedNotification;
@@ -219,7 +220,7 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 	 */
 	public void sendSMS(Message outgoingMessage) {
 		LOG.trace("ENTER");
-		outgoingMessage.setStatus(Message.STATUS_OUTBOX);
+		outgoingMessage.setStatus(Status.OUTBOX);
 		switch(MessageType.get(outgoingMessage)) {
 		case BINARY:
 			binOutbox.add(outgoingMessage);
@@ -283,7 +284,7 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 
 	public void outgoingMessageEvent(SmsDevice sender, Message msg) {
 		if (smsListener != null) smsListener.outgoingMessageEvent(sender, msg);
-		if (msg.getStatus() == Message.STATUS_FAILED) {
+		if (msg.getStatus() == Status.FAILED) {
 			if (msg.getRetriesRemaining() > 0) {
 				msg.setRetriesRemaining(msg.getRetriesRemaining() - 1);
 				msg.setSenderMsisdn("");

@@ -34,6 +34,7 @@ import java.util.Set;
 import net.frontlinesms.*;
 import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
+import net.frontlinesms.data.domain.Message.Status;
 import net.frontlinesms.data.domain.Message.Type;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.debug.RandomDataGenerator;
@@ -684,7 +685,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				Message message = (Message) attachedItem;
 				// We should only attempt to reply to messages we have received - otherwise
 				// we could end up texting ourselves a lot!
-				if(message.getType() == Type.TYPE_RECEIVED) {
+				if(message.getType() == Type.RECEIVED) {
 					String senderMsisdn = message.getSenderMsisdn();
 					Contact contact = contactDao.getFromMsisdn(senderMsisdn);
 					if(contact != null) {
@@ -910,7 +911,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		saveWindowSize();
 		boolean somethingToDo = false;
 		
-		Collection<Message> pending = messageFactory.getMessages(Type.TYPE_OUTBOUND, new Integer[] {Message.STATUS_PENDING});
+		Collection<Message> pending = messageFactory.getMessages(Type.OUTBOUND, Status.PENDING);
 		if(LOG.isDebugEnabled()) LOG.debug("Pending Messages size [" + pending.size() + "]");
 		if (pending.size() > 0) {
 			showPendingMessages(pending);
@@ -922,7 +923,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	public void close() {
 		LOG.trace("ENTER");
-		Collection<Message> pending = messageFactory.getMessages(Type.TYPE_OUTBOUND, new Integer[] {Message.STATUS_PENDING});
+		Collection<Message> pending = messageFactory.getMessages(Type.OUTBOUND, Status.PENDING);
 		LOG.debug("Pending Messages size [" + pending.size() + "]");
 		if (pending.size() > 0) {
 			showPendingMessages(pending);
@@ -942,8 +943,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Method called when the user make the final decision to close the app.
 	 */
 	public void exit() {
-		for (Message m : messageFactory.getMessages(Type.TYPE_OUTBOUND, new Integer[] {Message.STATUS_PENDING})) {
-			m.setStatus(Message.STATUS_OUTBOX);
+		for (Message m : messageFactory.getMessages(Type.OUTBOUND, Status.PENDING)) {
+			m.setStatus(Status.OUTBOX);
 		}
 		saveWindowSize();
 		frameLauncher.dispose();
@@ -1102,25 +1103,25 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 */
 	public static final String getMessageStatusAsString(Message message) {
 		switch(message.getStatus()) {
-			case Message.STATUS_DRAFT:
+			case DRAFT:
 				return InternationalisationUtils.getI18NString(COMMON_DRAFT);
-			case Message.STATUS_RECEIVED:
+			case RECEIVED:
 				return InternationalisationUtils.getI18NString(COMMON_RECEIVED);
-			case Message.STATUS_OUTBOX:
+			case OUTBOX:
 				return InternationalisationUtils.getI18NString(COMMON_OUTBOX);
-			case Message.STATUS_PENDING:
+			case PENDING:
 				return InternationalisationUtils.getI18NString(COMMON_PENDING);
-			case Message.STATUS_SENT:
+			case SENT:
 				return InternationalisationUtils.getI18NString(COMMON_SENT);
-			case Message.STATUS_DELIVERED:
+			case DELIVERED:
 				return InternationalisationUtils.getI18NString(COMMON_DELIVERED);
-			case Message.STATUS_KEEP_TRYING:
+			case KEEP_TRYING:
 				return InternationalisationUtils.getI18NString(COMMON_RETRYING);
-			case Message.STATUS_ABORTED:
+			case ABORTED:
 				return "(aborted)";
-			case Message.STATUS_FAILED:
+			case FAILED:
 				return InternationalisationUtils.getI18NString(COMMON_FAILED);
-			case Message.STATUS_UNKNOWN:
+			case UNKNOWN:
 			default:
 				return "(unknown)";
 		}
@@ -1295,7 +1296,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		Object row = createTableRow(message);
 
 		String icon;
-		if (message.getType() == Type.TYPE_RECEIVED) {
+		if (message.getType() == Type.RECEIVED) {
 			icon = Icon.SMS_RECEIVE;
 		} else {
 			icon = Icon.SMS_SEND;
@@ -1493,9 +1494,9 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		Contact recipient = contactDao.getFromMsisdn(message.getRecipientMsisdn());
 		String strRecipient = (recipient == null ? message.getRecipientMsisdn() : recipient.getName());
 		
-		if (message.getStatus() == Message.STATUS_SENT) {
+		if (message.getStatus() == Status.SENT) {
 			newEvent(new Event(Event.TYPE_OUTGOING_MESSAGE, InternationalisationUtils.getI18NString(EVENT_DESCRIPTION, strRecipient, message.getTextContent())));
-		} else if (message.getStatus() == Message.STATUS_FAILED) {
+		} else if (message.getStatus() == Status.FAILED) {
 			newEvent(new Event(Event.TYPE_OUTGOING_MESSAGE_FAILED, InternationalisationUtils.getI18NString(EVENT_DESCRIPTION, strRecipient, message.getTextContent())));
 		}
 		LOG.trace("ENTER");

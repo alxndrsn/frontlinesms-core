@@ -193,11 +193,11 @@ public class StatisticsManager {
 	 * Collects the total number of received messages
 	 */
 	private void collectNumberOfReceivedMessages() {
-		final int totalReceived = messageDao.getMessageCount(Message.Type.TYPE_RECEIVED, null, null);
+		final int totalReceived = messageDao.getMessageCount(Message.Type.RECEIVED, null, null);
 		this.statisticsList.put(I18N_KEY_STATS_RECEIVED_MESSAGES, String.valueOf(totalReceived));
 
 		final Long lastSubmitDate = AppProperties.getInstance().getLastStatisticsSubmissionDate();
-		final int receivedSinceLastSubmit = messageDao.getMessageCount(Message.Type.TYPE_RECEIVED, lastSubmitDate, null);
+		final int receivedSinceLastSubmit = messageDao.getMessageCount(Message.Type.RECEIVED, lastSubmitDate, null);
 		this.statisticsList.put(I18N_KEY_STATS_RECEIVED_MESSAGES_SINCE_LAST_SUBMISSION, String.valueOf(receivedSinceLastSubmit));
 	}
 
@@ -205,11 +205,11 @@ public class StatisticsManager {
 	 * Collects the total number of sent messages
 	 */
 	private void collectNumberOfSentMessages() {
-		final int numberOfSentMessages = messageDao.getMessageCount(Message.Type.TYPE_OUTBOUND, null, null);
+		final int numberOfSentMessages = messageDao.getMessageCount(Message.Type.OUTBOUND, null, null);
 		this.statisticsList.put(I18N_KEY_STATS_SENT_MESSAGES, String.valueOf(numberOfSentMessages));
 
 		Long lastSubmitDate = AppProperties.getInstance().getLastStatisticsSubmissionDate();
-		final int numberOfSentMessagesSinceLastSubmission = messageDao.getMessageCount(Message.Type.TYPE_OUTBOUND, lastSubmitDate , null);
+		final int numberOfSentMessagesSinceLastSubmission = messageDao.getMessageCount(Message.Type.OUTBOUND, lastSubmitDate , null);
 		this.statisticsList.put(I18N_KEY_STATS_SENT_MESSAGES_SINCE_LAST_SUBMISSION, String.valueOf(numberOfSentMessagesSinceLastSubmission));
 	}
 

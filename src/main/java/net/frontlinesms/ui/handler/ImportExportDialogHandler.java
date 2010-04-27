@@ -483,24 +483,24 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 
 	/**
 	 * Get the type of {@link Message} that has been selected to export.
-	 * @return {@link Type#TYPE_ALL}, {@link Type#TYPE_ALL}, {@link Type#TYPE_ALL} or <code>null</code> if the user would not like any messages.
+	 * @return {@link Type#ALL}, {@link Type#ALL}, {@link Type#ALL} or <code>null</code> if the user would not like any messages.
 	 */
 	private final Message.Type getMessageType() {
 		boolean sent = isChecked(COMPONENT_CB_SENT);
 		boolean received = isChecked(COMPONENT_CB_RECEIVED);
 		
 		if (sent && received) {
-			return Type.TYPE_ALL;
+			return Type.ALL;
 		} else if (sent) {
-			return Type.TYPE_OUTBOUND;
+			return Type.OUTBOUND;
 		} else if (received) {
-			return Type.TYPE_RECEIVED;
+			return Type.RECEIVED;
 		} else return null;
 	}
 	
 	/**
 	 * Creates an export row format for keywords.
-	 * @param type Type of {@link Message} to export, e.g. {@link Type#TYPE_RECEIVED}
+	 * @param type Type of {@link Message} to export, e.g. {@link Type#RECEIVED}
 	 * @return The row format for exporting {@link Keyword}s to CSV
 	 */
 	private CsvRowFormat getRowFormatForKeyword(Message.Type type) {
@@ -508,7 +508,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		addMarker(rowFormat, CsvUtils.MARKER_KEYWORD_KEY, COMPONENT_CB_KEYWORD);
 		addMarker(rowFormat, CsvUtils.MARKER_KEYWORD_DESCRIPTION, COMPONENT_CB_DESCRIPTION);
 
-		if (type == Type.TYPE_ALL) {
+		if (type == Type.ALL) {
 			rowFormat.addMarker(CsvUtils.MARKER_MESSAGE_TYPE);
 		}
 		addMarker(rowFormat, CsvUtils.MARKER_MESSAGE_DATE, COMPONENT_CB_DATE);

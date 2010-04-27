@@ -151,7 +151,7 @@ public class CsvExporter {
 					CsvUtils.MARKER_CONTACT_NOTES, InternationalisationUtils.getI18NString(COMMON_CONTACT_NOTES));
 			for (Message message : messages) {
 				Contact c;
-				if (message.getType() == Type.TYPE_RECEIVED) {
+				if (message.getType() == Type.RECEIVED) {
 					c = contactFactory.getFromMsisdn(message.getSenderMsisdn());
 				} else {
 					c = contactFactory.getFromMsisdn(message.getRecipientMsisdn());
@@ -170,7 +170,7 @@ public class CsvExporter {
 				}
 	
 				CsvUtils.writeLine(out, messageFormat,
-					CsvUtils.MARKER_MESSAGE_TYPE, message.getType() == Type.TYPE_RECEIVED ? InternationalisationUtils.getI18NString(COMMON_RECEIVED) : InternationalisationUtils.getI18NString(COMMON_SENT),
+					CsvUtils.MARKER_MESSAGE_TYPE, message.getType() == Type.RECEIVED ? InternationalisationUtils.getI18NString(COMMON_RECEIVED) : InternationalisationUtils.getI18NString(COMMON_SENT),
 					CsvUtils.MARKER_MESSAGE_STATUS, UiGeneratorController.getMessageStatusAsString(message),
 					CsvUtils.MARKER_MESSAGE_DATE, dateFormatter.format(new Date(message.getDate())),
 					CsvUtils.MARKER_MESSAGE_CONTENT, message.getTextContent().replace('\n', ' ').replace('\r', ' '),
@@ -271,7 +271,7 @@ public class CsvExporter {
 				} else {
 					for (Message message : messageFactory.getMessagesForKeyword(messageType, keyword)) {
 						Contact c;
-						if (message.getType() == Type.TYPE_RECEIVED) {
+						if (message.getType() == Type.RECEIVED) {
 							c = contactFactory.getFromMsisdn(message.getSenderMsisdn());
 						} else {
 							c = contactFactory.getFromMsisdn(message.getRecipientMsisdn());
@@ -292,7 +292,7 @@ public class CsvExporter {
 						CsvUtils.writeLine(out, rowFormat, 
 									CsvUtils.MARKER_KEYWORD_KEY,			/*->*/ keyword.getKeyword(),
 									CsvUtils.MARKER_KEYWORD_DESCRIPTION,	/*->*/ keyword.getDescription(),
-									CsvUtils.MARKER_MESSAGE_TYPE,		/*->*/ message.getType() == Type.TYPE_RECEIVED ? InternationalisationUtils.getI18NString(COMMON_RECEIVED) : InternationalisationUtils.getI18NString(COMMON_SENT),
+									CsvUtils.MARKER_MESSAGE_TYPE,		/*->*/ message.getType() == Type.RECEIVED ? InternationalisationUtils.getI18NString(COMMON_RECEIVED) : InternationalisationUtils.getI18NString(COMMON_SENT),
 									CsvUtils.MARKER_MESSAGE_DATE, 		/*->*/ dateFormatter.format(new Date(message.getDate())),
 									CsvUtils.MARKER_MESSAGE_CONTENT, 	/*->*/ message.getTextContent().replace('\n', ' ').replace('\r', ' '),
 									CsvUtils.MARKER_SENDER_NUMBER,		/*->*/ message.getSenderMsisdn(),

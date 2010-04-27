@@ -63,8 +63,8 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 		assertEquals(1, dao.getSMSCountForMsisdn(ARTHUR, 0l, Long.MAX_VALUE));
 		assertEquals(1, dao.getSMSCountForMsisdn(BERNADETTE, 0l, Long.MAX_VALUE));
 		assertEquals(0, dao.getSMSCountForMsisdn("whatever i am invented", 0l, Long.MAX_VALUE));
-		assertEquals(0, dao.getMessageCount(Type.TYPE_OUTBOUND, 0l, Long.MAX_VALUE));
-		assertEquals(1, dao.getMessageCount(Type.TYPE_RECEIVED, 0l, Long.MAX_VALUE));
+		assertEquals(0, dao.getMessageCount(Type.OUTBOUND, 0l, Long.MAX_VALUE));
+		assertEquals(1, dao.getMessageCount(Type.RECEIVED, 0l, Long.MAX_VALUE));
 		
 		dao.deleteMessage(m);
 
@@ -134,7 +134,7 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 	}
 	
 	private void testGetMessagesForKeywordWithParameters(String keyword, int totalMessageCount, Long startDate, Long endDate, int startIndex, int limit) {
-		int actualMessageCount = this.dao.getMessageCount(Message.Type.TYPE_ALL, new Keyword(keyword, ""), startDate, endDate);
+		int actualMessageCount = this.dao.getMessageCount(Message.Type.ALL, new Keyword(keyword, ""), startDate, endDate);
 		assertTrue("Wrong message count. Expected <" + totalMessageCount + ">, but was <" + actualMessageCount + ">", totalMessageCount == actualMessageCount);
 		
 		// Adjust the expected message count to take into account the paging
@@ -142,7 +142,7 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 		
 		// Test ascending
 		{
-			List<Message> dateAscMessages = this.dao.getMessagesForKeyword(Message.Type.TYPE_ALL, new Keyword(keyword, ""),
+			List<Message> dateAscMessages = this.dao.getMessagesForKeyword(Message.Type.ALL, new Keyword(keyword, ""),
 					Message.Field.DATE, Order.ASCENDING, startDate, endDate, startIndex, limit);
 			assertEquals("Messages for keyword '" + keyword + "' " +
 					"start=" + startIndex + ";limit=" + limit,
@@ -165,7 +165,7 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 			
 		// Test descending
 		{
-			List<Message> dateDescMessages = this.dao.getMessagesForKeyword(Message.Type.TYPE_ALL, new Keyword(keyword, ""),
+			List<Message> dateDescMessages = this.dao.getMessagesForKeyword(Message.Type.ALL, new Keyword(keyword, ""),
 					Message.Field.DATE, Order.DESCENDING, startDate, endDate, startIndex, limit);
 			assertEquals("Messages for keyword '" + keyword + "' " +
 					"start=" + startIndex + ";limit=" + limit,
@@ -255,9 +255,9 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 	 */
 	private void testGetMessagesForKeyword(String keywordString, int expectedMessageCount) {
 		Keyword keyword = new Keyword(keywordString, "Test keyword.");
-		List<Message> allMessagesForBlankKeyword = dao.getMessagesForKeyword(Message.Type.TYPE_ALL, keyword);
-		List<Message> incomingMessagesForBlankKeyword = dao.getMessagesForKeyword(Message.Type.TYPE_RECEIVED, keyword);
-		List<Message> outgoingMessagesForBlankKeyword = dao.getMessagesForKeyword(Message.Type.TYPE_OUTBOUND, keyword);
+		List<Message> allMessagesForBlankKeyword = dao.getMessagesForKeyword(Message.Type.ALL, keyword);
+		List<Message> incomingMessagesForBlankKeyword = dao.getMessagesForKeyword(Message.Type.RECEIVED, keyword);
+		List<Message> outgoingMessagesForBlankKeyword = dao.getMessagesForKeyword(Message.Type.OUTBOUND, keyword);
 		
 		int allMessageCount = allMessagesForBlankKeyword.size();
 		int incomingMessageCount = incomingMessagesForBlankKeyword.size();

@@ -24,6 +24,7 @@ import java.util.*;
 
 import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
+import net.frontlinesms.data.domain.Message.Status;
 import net.frontlinesms.data.domain.Message.Type;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.events.EventBus;
@@ -221,7 +222,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 
 		LOG.debug("Re-Loading messages to outbox.");
 		//We need to reload all messages, which status is OUTBOX, to the outbox.
-		for (Message m : messageDao.getMessages(Type.TYPE_OUTBOUND, new Integer[] { Message.STATUS_OUTBOX, Message.STATUS_PENDING})) {
+		for (Message m : messageDao.getMessages(Type.OUTBOUND, Status.OUTBOX, Status.PENDING)) {
 			smsDeviceManager.sendSMS(m);
 		}
 
@@ -414,7 +415,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		Message m;
 		if (targetNumber.equals(FrontlineSMSConstants.EMULATOR_MSISDN)) {
 			m = Message.createOutgoingMessage(System.currentTimeMillis(), FrontlineSMSConstants.EMULATOR_MSISDN, FrontlineSMSConstants.EMULATOR_MSISDN, textContent.trim());
-			m.setStatus(Message.STATUS_SENT);
+			m.setStatus(Status.SENT);
 			messageDao.saveMessage(m);
 			outgoingMessageEvent(EMULATOR, m);
 			incomingMessageEvent(EMULATOR, new CIncomingMessage(System.currentTimeMillis(), FrontlineSMSConstants.EMULATOR_MSISDN, textContent.trim(), 1, "NYI"));

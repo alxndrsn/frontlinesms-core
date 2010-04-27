@@ -27,6 +27,7 @@ import serial.*;
 
 import net.frontlinesms.Utils;
 import net.frontlinesms.data.domain.*;
+import net.frontlinesms.data.domain.Message.Status;
 import net.frontlinesms.listener.SmsListener;
 
 import org.apache.log4j.Logger;
@@ -747,7 +748,7 @@ public class SmsModem extends Thread implements SmsDevice {
 	/** @see SmsDevice#sendSMS(net.frontlinesms.data.Message) */
 	public void sendSMS(Message outgoingMessage) {
 		LOG.trace("ENTER");
-		outgoingMessage.setStatus(Message.STATUS_PENDING);
+		outgoingMessage.setStatus(Status.PENDING);
 
 		if (msisdn != null && !msisdn.equals("")) {
 			outgoingMessage.setSenderMsisdn(msisdn);
@@ -781,16 +782,16 @@ public class SmsModem extends Thread implements SmsDevice {
 			cService.sendMessage(cMessage);
 			if (cMessage.getRefNo() != -1) {
 				message.setSmscReference(cMessage.getRefNo());
-				message.setStatus(Message.STATUS_SENT);
+				message.setStatus(Status.SENT);
 				if(LOG.isDebugEnabled()) LOG.debug("Message [" + message.getTextContent() + "] was sent to [" + message.getRecipientMsisdn() + "]");
 			} else {
 				//message not sent
 				//failed to send
-				message.setStatus(Message.STATUS_FAILED);
+				message.setStatus(Status.FAILED);
 				if(LOG.isDebugEnabled()) LOG.debug("Message [" + message + "] failed to send to [" + message.getRecipientMsisdn() + "]");
 			}
 		} catch(Exception ex) {
-			message.setStatus(Message.STATUS_FAILED);
+			message.setStatus(Status.FAILED);
 			if(LOG.isInfoEnabled()) LOG.info("Message [" + message + "] failed to send to [" + message.getRecipientMsisdn() + "]", ex);
 			throw new IOException();
 		} finally {
@@ -922,7 +923,7 @@ public class SmsModem extends Thread implements SmsDevice {
 		}
 		
 		for (Message m : outbox) {
-			m.setStatus(Message.STATUS_FAILED);
+			m.setStatus(Status.FAILED);
 			if (smsListener != null) smsListener.outgoingMessageEvent(this, m);
 		}
 		LOG.trace("EXIT");
@@ -960,16 +961,16 @@ public class SmsModem extends Thread implements SmsDevice {
 					cService.sendMessage(cMessage);
 					if (cMessage.getRefNo() != -1) {
 						message.setSmscReference(cMessage.getRefNo());
-						message.setStatus(Message.STATUS_SENT);
+						message.setStatus(Status.SENT);
 						if(LOG.isDebugEnabled()) LOG.debug("Message [" + message.getTextContent() + "] was sent to [" + message.getRecipientMsisdn() + "]");
 					} else {
 						//message not sent
 						//failed to send
-						message.setStatus(Message.STATUS_FAILED);
+						message.setStatus(Status.FAILED);
 						if(LOG.isDebugEnabled()) LOG.debug("Message [" + message + "] failed to send to [" + message.getRecipientMsisdn() + "]");
 					}
 				} catch(Exception ex) {
-					message.setStatus(Message.STATUS_FAILED);
+					message.setStatus(Status.FAILED);
 					if(LOG.isInfoEnabled()) LOG.info("Message [" + message + "] failed to send to [" + message.getRecipientMsisdn() + "]", ex);
 				} finally {
 					if (smsListener != null) {
@@ -979,7 +980,7 @@ public class SmsModem extends Thread implements SmsDevice {
 			}
 		} finally {
 			for (Message m : smsMessages) {
-				if (m.getStatus() == Message.STATUS_PENDING) {
+				if (m.getStatus() == Status.PENDING) {
 					outbox.add(m);
 				}
 			}

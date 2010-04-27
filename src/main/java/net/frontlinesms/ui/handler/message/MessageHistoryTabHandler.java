@@ -39,6 +39,7 @@ import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.data.domain.Message.Field;
+import net.frontlinesms.data.domain.Message.Status;
 import net.frontlinesms.data.domain.Message.Type;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
@@ -391,10 +392,10 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		boolean showReceivedMessages = ui.isSelected(showReceivedMessagesComponent);
 		Message.Type messageType;
 		if (showSentMessages && showReceivedMessages) { 
-			messageType = Type.TYPE_ALL;
+			messageType = Type.ALL;
 		} else if (showSentMessages) {
-			messageType = Type.TYPE_OUTBOUND;
-		} else messageType = Type.TYPE_RECEIVED;
+			messageType = Type.OUTBOUND;
+		} else messageType = Type.RECEIVED;
 		return messageType;
 	}
 	
@@ -591,10 +592,10 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		for(Object o : selected) {
 			Message toBeRemoved = ui.getMessage(o);
 			LOG.debug("Message [" + toBeRemoved + "]");
-			int status = toBeRemoved.getStatus();
-			if (status != Message.STATUS_PENDING) {
+			Message.Status status = toBeRemoved.getStatus();
+			if (status != Status.PENDING) {
 				LOG.debug("Removing Message [" + toBeRemoved + "] from database.");
-				if (status == Message.STATUS_OUTBOX) {
+				if (status == Status.OUTBOX) {
 					// FIXME should not be getting the phone manager like this - should be a local propery i rather think
 					ui.getPhoneManager().removeFromOutbox(toBeRemoved);
 				}
@@ -646,12 +647,12 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		Object[] selected = ui.getSelectedItems(object);
 		for (Object o : selected) {
 			Message toBeReSent = ui.getMessage(o);
-			int status = toBeReSent.getStatus();
-			if (status == Message.STATUS_FAILED) {
+			Message.Status status = toBeReSent.getStatus();
+			if (status == Status.FAILED) {
 				toBeReSent.setSenderMsisdn("");
 				toBeReSent.setRetriesRemaining(Message.MAX_RETRIES);
 				ui.getPhoneManager().sendSMS(toBeReSent);
-			} else if (status == Message.STATUS_DELIVERED || status == Message.STATUS_SENT) {
+			} else if (status == Status.DELIVERED || status == Status.SENT) {
 				if(toBeReSent.isBinaryMessage()) {
 					Message newMessage = Message.createBinaryOutgoingMessage(System.currentTimeMillis(), "",
 							toBeReSent.getRecipientMsisdn(), toBeReSent.getRecipientSmsPort(), toBeReSent.getBinaryContent());
@@ -685,10 +686,10 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			boolean sentMessagesSelected = false;
 			for(Object selectedComponent : selectedItems) {
 				Message attachedMessage = ui.getAttachedObject(selectedComponent, Message.class);
-				if(attachedMessage.getType() == Type.TYPE_RECEIVED) {
+				if(attachedMessage.getType() == Type.RECEIVED) {
 					receivedMessagesSelected = true;
 				}
-				if(attachedMessage.getType() == Type.TYPE_OUTBOUND) {
+				if(attachedMessage.getType() == Type.OUTBOUND) {
 					sentMessagesSelected = true;
 				}
 			}
@@ -736,7 +737,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		Object sel = ui.getSelectedItem(contactListComponent); // TODO doesn't seem to do anything for keyword list
 		boolean sent = ui.isSelected(showSentMessagesComponent);
 		boolean received = ui.isSelected(showReceivedMessagesComponent);
-		if (sel != null && ((sent && message.getType() == Type.TYPE_OUTBOUND) || (received && message.getType() == Type.TYPE_RECEIVED))) {
+		if (sel != null && ((sent && message.getType() == Type.OUTBOUND) || (received && message.getType() == Type.RECEIVED))) {
 			boolean toAdd = false;
 			if (ui.getSelectedIndex(contactListComponent) == 0) {
 				toAdd = true;
@@ -796,7 +797,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 						LOG.debug("There's space! Adding...");
 						ui.add(messageListComponent, ui.getRow(message));
 						ui.setEnabled(messageListComponent, true);
-						if (message.getType() == Type.TYPE_OUTBOUND) {
+						if (message.getType() == Type.OUTBOUND) {
 							numberToSend += message.getNumberOfSMS();
 							updateMessageHistoryCost();
 						}

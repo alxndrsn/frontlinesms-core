@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 
 import net.frontlinesms.*;
 import net.frontlinesms.data.domain.Message;
+import net.frontlinesms.data.domain.Message.Status;
 import net.frontlinesms.smsdevice.Provider;
 import net.frontlinesms.smsdevice.properties.*;
 
@@ -100,7 +101,7 @@ public class ClickatellInternetService extends AbstractSmsInternetService {
 		try {
 			service.sendMessage(oMessage);
 			if (oMessage.getMessageStatus() == MessageStatuses.SENT) {
-				message.setStatus(Message.STATUS_SENT);
+				message.setStatus(Status.SENT);
 				LOG.debug("Message [" + message + "] was sent!");
 			} else {
 				//message not sent
@@ -109,11 +110,11 @@ public class ClickatellInternetService extends AbstractSmsInternetService {
 					setStatus(SmsInternetServiceStatus.LOW_CREDIT, Float.toString(gateway.queryBalance()));
 					creditLow();
 				}
-				message.setStatus(Message.STATUS_FAILED);
+				message.setStatus(Status.FAILED);
 				LOG.debug("Message [" + message + "] was not sent.  Cause: [" + oMessage.getFailureCause() + "]");
 			}
 		} catch(Exception ex) {
-			message.setStatus(Message.STATUS_FAILED);
+			message.setStatus(Status.FAILED);
 			LOG.debug("Failed to send message [" + message + "]", ex);
 			LOG.info("Failed to send message");
 		} finally {

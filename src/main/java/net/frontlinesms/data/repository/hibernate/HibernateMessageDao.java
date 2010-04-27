@@ -49,10 +49,10 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 		return super.getList(criteria, startIndex, limit);
 	}
 
-	/** @see MessageDao#getMessageCount(int, Integer[]) */
-	public int getMessageCount(Message.Type messageType, Integer[] messageStati) {
+	/** @see MessageDao#getMessageCount(int, Message.Status[]) */
+	public int getMessageCount(Message.Type messageType, Message.Status... messageStatuses) {
 		DetachedCriteria criteria = DetachedCriteria.forClass(Email.class);
-		addStatusCriteria(criteria, messageStati);
+		addStatusCriteria(criteria, messageStatuses);
 		addTypeCriteria(criteria, messageType);
 		return getCount(criteria);
 	}
@@ -116,11 +116,11 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 		return getList(criteria);
 	}
 
-	/** @see MessageDao#getMessages(int, Integer[]) */
-	public Collection<Message> getMessages(Message.Type messageType, Integer[] status) {
+	/** @see MessageDao#getMessages(int, Message.Status[]) */
+	public Collection<Message> getMessages(Message.Type messageType, Message.Status... statuses) {
 		DetachedCriteria criteria = super.getCriterion();
 		addTypeCriteria(criteria, messageType);
-		addStatusCriteria(criteria, status);
+		addStatusCriteria(criteria, statuses);
 		return getList(criteria);
 	}
 	
@@ -206,11 +206,11 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 		return super.getList(criteria);
 	}
 
-	/** @see MessageDao#getMessagesForStati(int, Integer[], Field, Order, int, int) */
-	public List<Message> getMessagesForStati(Message.Type messageType, Integer[] messageStati, Field sortBy, Order order, int startIndex, int limit) {
+	/** @see MessageDao#getMessagesForStati(int, Message.Status[], Field, Order, int, int) */
+	public List<Message> getMessagesForStati(Message.Type messageType, Message.Status[] messageStatuses, Field sortBy, Order order, int startIndex, int limit) {
 		DetachedCriteria criteria = super.getSortCriterion(sortBy, order);
 		addTypeCriteria(criteria, messageType);
-		addStatusCriteria(criteria, messageStati);
+		addStatusCriteria(criteria, messageStatuses);
 		return super.getList(criteria, startIndex, limit);
 	}
 
@@ -338,7 +338,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	 * @param messageType 
 	 */
 	private void addTypeCriteria(DetachedCriteria criteria, Message.Type messageType) {
-		if(messageType != Type.TYPE_ALL) {
+		if(messageType != Type.ALL) {
 			criteria.add(Restrictions.eq(Field.TYPE.getFieldName(), messageType));
 		}
 	}
@@ -348,7 +348,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	 * @param criteria 
 	 * @param statuses 
 	 */
-	private void addStatusCriteria(DetachedCriteria criteria, Integer[] statuses) {
+	private void addStatusCriteria(DetachedCriteria criteria, Message.Status... statuses) {
 		criteria.add(Restrictions.in(Field.STATUS.getFieldName(), statuses));
 	}
 	
@@ -364,7 +364,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 		
 		q.append("SELECT " + selectString + " FROM Message message");
 		
-		if(messageType != Message.Type.TYPE_ALL) {
+		if(messageType != Message.Type.ALL) {
 			q.append("WHERE");
 			q.append("message.type=?", messageType);
 		}

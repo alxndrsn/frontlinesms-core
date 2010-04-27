@@ -43,41 +43,44 @@ public class Message {
 //> CONSTANTS
 	public enum Type {
 		/** This is a pseudo-message type, used as a blanket for all types. */
-		TYPE_ALL,
+		ALL,
 		/** Message type: unknown */
-		TYPE_UNKNOWN,
+		UNKNOWN,
 		/** Message type: received */
-		TYPE_RECEIVED,
+		RECEIVED,
 		/** Message type: outbound */
-		TYPE_OUTBOUND,
+		OUTBOUND,
 		/** Message type: delivery report */
-		TYPE_DELIVERY_REPORT;
+		DELIVERY_REPORT;
+	}
+	
+	public enum Status {
+		/** Message status: DRAFT - nothing has been done with this message yet */
+		DRAFT,
+		/** messages of TYPE_RECEIVED should always be STATUS_RECEIVED */
+		RECEIVED,
+		/** outgoing message that is created, and will be sent to a phone as soon as one is available */
+		OUTBOX,
+		/** outgoing message given to a phone, which the phone is trying to send */
+		PENDING,
+		/** outgoing message successfully delivered to the GSM network*/
+		SENT,
+		/** outgoing message that has had delivery confirmed by the GSM network */
+		DELIVERED,
+		/** Outgoing message that had status KEEP TRYING returned by the GSM network */
+		KEEP_TRYING,
+		/** Outgoing message that had status ABORTED returned by the GSM network */
+		ABORTED,
+		/** Outgoing message that had status UNKNOWN returned by the GSM network */
+		UNKNOWN,
+		/** Outgoing message that had status FAILED returned by the GSM network */
+		FAILED;
+		
 	}
 	
 	/** Number of times a failed message send is retried before status is set to STATUS_FAILED */
 	public static final int MAX_RETRIES = 2;
 	
-	/** Message status: DRAFT - nothing has been done with this message yet */
-	public static final int STATUS_DRAFT = 0;
-	/** messages of TYPE_RECEIVED should always be STATUS_RECEIVED */
-	public static final int STATUS_RECEIVED = 1;
-	/** outgoing message that is created, and will be sent to a phone as soon as one is available */
-	public static final int STATUS_OUTBOX = 2;
-	/** outgoing message given to a phone, which the phone is trying to send */
-	public static final int STATUS_PENDING = 3;
-	/** outgoing message successfully delivered to the GSM network*/
-	public static final int STATUS_SENT = 4;
-	/** outgoing message that has had delivery confirmed by the GSM network */
-	public static final int STATUS_DELIVERED = 5;
-	/** Outgoing message that had status KEEP TRYING returned by the GSM network */
-	public static final int STATUS_KEEP_TRYING = 6;
-	/** Outgoing message that had status ABORTED returned by the GSM network */
-	public static final int STATUS_ABORTED = 7;
-	/** Outgoing message that had status UNKNOWN returned by the GSM network */
-	public static final int STATUS_UNKNOWN = 8;
-	/** Outgoing message that had status FAILED returned by the GSM network */
-	public static final int STATUS_FAILED = 9;
-
 	/** The maximum number of parts in an SMS message.  TODO rename this SMS_PART_LIMIT */
 	public static final int SMS_LIMIT = 255;
 	/** Maximum number of characters that can be fit into a single 7-bit GSM SMS message. TODO this value should probably be fetched from {@link TpduUtils}. */
@@ -120,7 +123,7 @@ public class Message {
 	private long id;
 	private Type type;
 	private int retriesRemaining;
-	private int status;
+	private Status status;
 	private String recipientMsisdn;
 	private int recipientSmsPort;
 	private int smsPartsCount;
@@ -150,7 +153,7 @@ public class Message {
 	 * Gets the status of this Message.  Should be one of the Message.STATUS_ constants.
 	 * @return
 	 */
-	public int getStatus() {
+	public Status getStatus() {
 		return this.status;
 	}
 	
@@ -159,7 +162,7 @@ public class Message {
 	 * only allows you to change the status of an outgoing message
 	 * @param messageStatus
 	 */
-	public void setStatus(int messageStatus) {
+	public void setStatus(Status messageStatus) {
 		this.status = messageStatus;
 	}
 
@@ -293,8 +296,8 @@ public class Message {
 	 */
 	public static Message createBinaryIncomingMessage(long dateReceived, String senderMsisdn, String recipientMsisdn, int recipientPort, byte[] content) {
 		Message m = new Message();
-		m.type = Type.TYPE_RECEIVED;
-		m.status = Message.STATUS_RECEIVED;
+		m.type = Type.RECEIVED;
+		m.status = Status.RECEIVED;
 		m.date = dateReceived;
 		m.senderMsisdn = senderMsisdn;
 		m.recipientMsisdn = recipientMsisdn;
@@ -317,8 +320,8 @@ public class Message {
 	 */
 	public static Message createBinaryOutgoingMessage(long dateSent, String senderMsisdn, String recipientMsisdn, int recipientPort, byte[] content) {
 		Message m = new Message();
-		m.type = Type.TYPE_OUTBOUND;
-		m.status = Message.STATUS_DRAFT;
+		m.type = Type.OUTBOUND;
+		m.status = Status.DRAFT;
 		m.date = dateSent;
 		m.senderMsisdn = senderMsisdn;
 		m.recipientMsisdn = recipientMsisdn;
@@ -338,8 +341,8 @@ public class Message {
 	 */
 	public static Message createOutgoingMessage(long dateSent, String senderMsisdn, String recipientMsisdn, String messageContent) {
 		Message m = new Message();
-		m.type = Type.TYPE_OUTBOUND;
-		m.status = Message.STATUS_DRAFT;
+		m.type = Type.OUTBOUND;
+		m.status = Status.DRAFT;
 		m.date = dateSent;
 		m.senderMsisdn = senderMsisdn;
 		m.recipientMsisdn = recipientMsisdn;
@@ -357,8 +360,8 @@ public class Message {
 	 */
 	public static Message createIncomingMessage(long dateReceived, String senderMsisdn, String recipientMsisdn, String messageContent) {
 		Message m = new Message();
-		m.type = Type.TYPE_RECEIVED;
-		m.status = Message.STATUS_RECEIVED;
+		m.type = Type.RECEIVED;
+		m.status = Status.RECEIVED;
 		m.date = dateReceived;
 		m.senderMsisdn = senderMsisdn;
 		m.recipientMsisdn = recipientMsisdn;
@@ -370,7 +373,7 @@ public class Message {
 	/**
 	 * {@link #status} and {@link #smscReference} are not included in {@link #equals(Object)} or {@link #hashCode()}
 	 * as they are liable to change throughout a message's lifetime.  Likewise, {@link #senderMsisdn} is ignored for
-	 * {@link Type#TYPE_OUTBOUND} and {@link #recipientMsisdn} is ignored for {@link Type#TYPE_RECEIVED} and {@link Type#TYPE_DELIVERY_REPORT}.
+	 * {@link Type#OUTBOUND} and {@link #recipientMsisdn} is ignored for {@link Type#RECEIVED} and {@link Type#DELIVERY_REPORT}.
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -382,7 +385,7 @@ public class Message {
 		result = prime * result
 				+ ((textMessageContent == null) ? 0 : textMessageContent.hashCode());
 		
-		if(!(type == Type.TYPE_RECEIVED || type == Type.TYPE_DELIVERY_REPORT)) {
+		if(!(type == Type.RECEIVED || type == Type.DELIVERY_REPORT)) {
 			result = prime * result
 					+ ((recipientMsisdn == null) ? 0 : recipientMsisdn.hashCode());
 		}
@@ -390,7 +393,7 @@ public class Message {
 		result = prime * result + recipientSmsPort;
 		result = prime * result + retriesRemaining;
 		
-		if(type != Type.TYPE_OUTBOUND) {
+		if(type != Type.OUTBOUND) {
 			result = prime * result
 					+ ((senderMsisdn == null) ? 0 : senderMsisdn.hashCode());
 		}
@@ -424,7 +427,7 @@ public class Message {
 		} else if (!textMessageContent.equals(other.textMessageContent))
 			return false;
 		
-		if(!(type == Type.TYPE_RECEIVED || type == Type.TYPE_DELIVERY_REPORT)) {
+		if(!(type == Type.RECEIVED || type == Type.DELIVERY_REPORT)) {
 			if (recipientMsisdn == null) {
 				if (other.recipientMsisdn != null)
 					return false;
@@ -437,7 +440,7 @@ public class Message {
 		if (retriesRemaining != other.retriesRemaining)
 			return false;
 		
-		if(type != Type.TYPE_OUTBOUND) {
+		if(type != Type.OUTBOUND) {
 			if (senderMsisdn == null) {
 				if (other.senderMsisdn != null)
 					return false;

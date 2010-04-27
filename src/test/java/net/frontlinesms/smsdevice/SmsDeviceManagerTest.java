@@ -15,6 +15,7 @@ import org.smslib.CIncomingMessage;
 
 import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.data.domain.Message;
+import net.frontlinesms.data.domain.Message.Status;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.junit.BaseTestCase;
 import net.frontlinesms.listener.SmsListener;
@@ -230,7 +231,7 @@ public class SmsDeviceManagerTest extends BaseTestCase {
 		manager.sendSMS(m);
 		manager.doRun();
 		
-		assertEquals(Message.STATUS_OUTBOX, m.getStatus());
+		assertEquals(Status.OUTBOX, m.getStatus());
 	}
 	
 	public void testSmsDeviceEvent () {

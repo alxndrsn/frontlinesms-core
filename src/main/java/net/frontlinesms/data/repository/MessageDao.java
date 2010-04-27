@@ -129,8 +129,7 @@ public interface MessageDao {
 	 */
 	public List<Message> getMessagesForKeyword(Message.Type messageType, Keyword keyword);
 	
-	// TODO could greatly speed this by defining status ranges e.g. STATUS_DRAFT=1, _OUTBOX=2, _PENDING=3 -> status <=3 => message not yet sent
-	public List<Message> getMessagesForStati(Message.Type messageType, Integer[] messageStati, Field sortBy, Order order, int startIndex, int limit);
+	public List<Message> getMessagesForStati(Message.Type messageType, Message.Status[] messageStatuses, Field sortBy, Order order, int startIndex, int limit);
 	
 	/**
 	 * Get the total number of messages with the supplied statuses.
@@ -138,7 +137,7 @@ public interface MessageDao {
 	 * @param messageStati
 	 * @return
 	 */
-	public int getMessageCount(Message.Type messageType, Integer[] messageStati);
+	public int getMessageCount(Message.Type messageType, Message.Status... messageStatuses);
 
 	/**
 	 * Gets all messages of a particular type (SENT, RECEIVED, ALL) which begin with the specified keyword.  If
@@ -189,7 +188,7 @@ public interface MessageDao {
 	 * @param status
 	 * @return 
 	 */
-	public Collection<Message> getMessages(Message.Type type, Integer[] status);
+	public Collection<Message> getMessages(Message.Type type, Message.Status... status);
 	
 	/**
 	 * Gets the number of messagesthere are of the given type for the given keyword.
