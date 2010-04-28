@@ -287,7 +287,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			List<Group> allGroups = this.groupDao.getAllGroups();
 			for (Group g : allGroups) {
 				Object menuItem = Thinlet.create(Thinlet.MENUITEM);
-				this.ui.setText(menuItem, InternationalisationUtils.getI18NString(COMMON_GROUP) + "'" + g.getName() + "'");
+				this.ui.setText(menuItem, InternationalisationUtils.getI18NString(COMMON_GROUP) + " '" + g.getName() + "'");
 				this.ui.setIcon(menuItem, Icon.GROUP);
 				this.ui.setAttachedObject(menuItem, g);
 				this.ui.setAction(menuItem, "addToGroup(this)", menu, this);
