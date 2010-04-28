@@ -19,6 +19,9 @@
  */
 package net.frontlinesms;
 
+import static net.frontlinesms.FrontlineSMSConstants.COMMON_UNDEFINED;
+import static net.frontlinesms.FrontlineSMSConstants.DEFAULT_END_DATE;
+
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.BufferedReader;
@@ -33,7 +36,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
@@ -41,6 +46,7 @@ import java.util.Date;
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.encoding.Base64Utils;
 import net.frontlinesms.resources.ResourceUtils;
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -83,6 +89,35 @@ public class Utils {
 	 */
 	public static Logger getLogger(Class<? extends Object> clazz) {
 		return Logger.getLogger(clazz);
+	}
+	
+	/**
+	 * Gets the date passed in arguments as a long format 
+	 * @param dateFieldString The string basically input in a text field
+	 * @param isStartDate A boolean saying whether we're looking for a start or end date
+	 * @return
+	 * @throws ParseException
+	 */
+	public static long getLongDateFromStringDate (String dateFieldString, boolean isStartDate) throws ParseException {
+		if (dateFieldString.length() == 0
+				|| (!isStartDate && dateFieldString.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED)))) {
+			return (isStartDate ? System.currentTimeMillis() : DEFAULT_END_DATE); // FIXME Should we take the TimeZone into account?
+		} else {
+			Date ds = InternationalisationUtils.parseDate(dateFieldString);
+			Calendar c = Calendar.getInstance();
+			c.setTime(ds);
+			
+			// If we are looking for a conversion of a start date, then no worries, because the first milliseconds of
+			// the given day is returned
+			if (!isStartDate) {
+				// Otherwise, we're looking for the last milliseconds of the given day
+				// So, we seek the first millisecond of the day after
+				c.add(Calendar.DATE, 1);
+				// And then substitute one millisecond
+				c.setTimeInMillis(c.getTimeInMillis() - 1);
+			}
+			return c.getTime().getTime();
+		}
 	}
 
 	/**

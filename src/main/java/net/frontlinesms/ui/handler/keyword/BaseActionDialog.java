@@ -186,30 +186,19 @@ public abstract class BaseActionDialog implements ThinletUiEventHandler {
 	
 	protected long getEnteredStartDate() throws DialogValidationException {
 		String startDate = ui.getText(find(COMPONENT_TF_START_DATE));
-		if (startDate.length() == 0) {
-			log.debug("No start date set, so we set to [" + InternationalisationUtils.getDefaultStartDate() + "]");
-			return System.currentTimeMillis();
-		} else {
-			try {
-				Date ds = InternationalisationUtils.parseDate(startDate); 
-				return ds.getTime();
-			} catch (ParseException ex) {
-				throw new DialogValidationException("Wrong format for date", ex, InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
-			}
+		try {
+			return Utils.getLongDateFromStringDate(startDate, true);
+		} catch (ParseException ex) {
+			throw new DialogValidationException("Wrong format for date", ex, InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
 		}
 	}
+	
+	
 	protected long getEnteredEndDate() throws DialogValidationException {
 		String endDate = ui.getText(find(COMPONENT_TF_END_DATE));
 		
-		if(endDate.length() == 0 || endDate.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
-			log.debug("End date not set, so we set to the default.");
-			return DEFAULT_END_DATE;
-		} else {
-			
-		}
 		try {
-			Date de = InternationalisationUtils.parseDate(endDate);
-			return de.getTime();
+			return Utils.getLongDateFromStringDate(endDate, false);
 		} catch (ParseException ex) {
 			throw new DialogValidationException("Wrong format for date", ex, InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
 		}
