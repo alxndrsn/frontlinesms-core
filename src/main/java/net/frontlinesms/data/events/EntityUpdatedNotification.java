@@ -7,9 +7,9 @@ package net.frontlinesms.data.events;
  *
  * @param <E> the class of the object that was updated
  */
-public class DidUpdateNotification<E> extends DatabaseNotification<E> {
+public class EntityUpdatedNotification<E> extends DatabaseEntityNotification<E> {
 
-	public DidUpdateNotification(E object) {
+	public EntityUpdatedNotification(E object) {
 		super(object);
 	}
 

@@ -13,7 +13,7 @@ import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
-import net.frontlinesms.data.events.DatabaseNotification;
+import net.frontlinesms.data.events.DatabaseEntityNotification;
 import net.frontlinesms.data.repository.EmailAccountDao;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.events.EventObserver;
@@ -115,8 +115,8 @@ public class EmailActionDialog extends BaseActionDialog implements EventObserver
 	
 	/** Handle notifications from the {@link EventBus} */
 	public void notify(FrontlineEventNotification event) {
-		if(event instanceof DatabaseNotification<?>) {
-			if(((DatabaseNotification<?>)event).getDatabaseEntity() instanceof EmailAccount) {
+		if(event instanceof DatabaseEntityNotification<?>) {
+			if(((DatabaseEntityNotification<?>)event).getDatabaseEntity() instanceof EmailAccount) {
 				this.refreshEmailAccountList();
 			}
 		}

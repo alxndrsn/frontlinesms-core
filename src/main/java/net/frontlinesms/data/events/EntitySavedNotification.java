@@ -7,9 +7,9 @@ package net.frontlinesms.data.events;
  *
  * @param <E> the Class of the object that was saved
  */
-public class DidSaveNotification<E> extends DatabaseNotification<E> {
+public class EntitySavedNotification<E> extends DatabaseEntityNotification<E> {
 	
-	public DidSaveNotification(E object) {
+	public EntitySavedNotification(E object) {
 		super(object);
 	}
 

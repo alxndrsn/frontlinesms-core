@@ -7,9 +7,9 @@ package net.frontlinesms.data.events;
  *
  * @param <E> the class of the recently deleted entity
  */
-public class DidDeleteNotification<E> extends DatabaseNotification<E> {
+public class EntityDeletedNotification<E> extends DatabaseEntityNotification<E> {
 
-	public DidDeleteNotification(E object) {
+	public EntityDeletedNotification(E object) {
 		super(object);
 	}
 

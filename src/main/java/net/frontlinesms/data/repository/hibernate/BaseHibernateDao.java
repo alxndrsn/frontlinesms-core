@@ -8,10 +8,10 @@ import java.util.List;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.EntityField;
 import net.frontlinesms.data.Order;
-import net.frontlinesms.data.events.DidDeleteNotification;
-import net.frontlinesms.data.events.DidSaveNotification;
-import net.frontlinesms.data.events.DidUpdateNotification;
-import net.frontlinesms.data.events.WillDeleteWarning;
+import net.frontlinesms.data.events.EntityDeletedNotification;
+import net.frontlinesms.data.events.EntitySavedNotification;
+import net.frontlinesms.data.events.EntityUpdatedNotification;
+import net.frontlinesms.data.events.EntityDeleteWarning;
 import net.frontlinesms.events.EventBus;
 
 import org.apache.commons.logging.Log;
@@ -63,7 +63,7 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 		log.trace("Saving entity: " + entity);
 		this.getHibernateTemplate().save(entity);
 		log.trace("Entity saved.");
-		eventBus.notifyObservers(new DidSaveNotification<E>(entity));
+		eventBus.notifyObservers(new EntitySavedNotification<E>(entity));
 	}
 	
 	/**
@@ -120,7 +120,7 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 		log.trace("Updating entity: " + entity);
 		this.getHibernateTemplate().update(entity);
 		log.trace("Entity updated.");
-		eventBus.notifyObservers(new DidUpdateNotification<E>(entity));
+		eventBus.notifyObservers(new EntityUpdatedNotification<E>(entity));
 	}
 	
 	/**
@@ -128,11 +128,11 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	 * @param entity entity to delete
 	 */
 	protected void delete(E entity) {
-		eventBus.notifyObservers(new WillDeleteWarning<E>(entity));
+		eventBus.notifyObservers(new EntityDeleteWarning<E>(entity));
 		log.trace("Deleting entity: " + entity);
 		this.getHibernateTemplate().delete(entity);
 		log.trace("Entity deleted.");
-		eventBus.notifyObservers(new DidDeleteNotification<E>(entity));
+		eventBus.notifyObservers(new EntityDeletedNotification<E>(entity));
 	}
 	
 	/**

@@ -7,9 +7,9 @@ package net.frontlinesms.data.events;
  *
  * @param <E> the class of the object that will be deleted
  */
-public class WillDeleteWarning<E> extends DatabaseNotification<E> {
+public class EntityDeleteWarning<E> extends DatabaseEntityNotification<E> {
 
-	public WillDeleteWarning(E object){
+	public EntityDeleteWarning(E object){
 		super(object);
 	}
 	
