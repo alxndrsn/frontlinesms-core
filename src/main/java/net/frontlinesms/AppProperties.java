@@ -100,10 +100,10 @@ public final class AppProperties extends UserHomeFilePropertySet {
 		super.setProperty(KEY_LAST_STATS_SUBMISSION, Long.toString(System.currentTimeMillis()));
 	}
 	
-	/** @return the last date the dialog was prompted, or zero if it has never been filled */
-	public long getLastStatisticsPromptDate() {
+	/** @return the last date the dialog was prompted, or <code>null</code> if it has never been filled */
+	public Long getLastStatisticsPromptDate() {
 		String lastPrompt = super.getProperty(KEY_LAST_STATS_PROMPT);
-		return lastPrompt == null ? 0 : Long.valueOf(lastPrompt);
+		return lastPrompt == null ? null : Long.valueOf(lastPrompt);
 	}
 	
 	/** Sets last stat submission prompt date to NOW */

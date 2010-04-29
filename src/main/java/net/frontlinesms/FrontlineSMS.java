@@ -535,8 +535,16 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	}
 
 	public boolean shouldLaunchStatsCollection() {
-		long dateLastPrompt = AppProperties.getInstance().getLastStatisticsPromptDate();
-		long dateNextPrompt = dateLastPrompt + (FrontlineSMSConstants.MILLIS_PER_DAY * FrontlineSMSConstants.STATISTICS_DAYS_BEFORE_RELAUNCH);
-		return System.currentTimeMillis() >= dateNextPrompt;
+		Long dateLastPrompt = AppProperties.getInstance().getLastStatisticsPromptDate();
+		if (dateLastPrompt == null) {
+			// This is the first time we are checking if the dialog must be prompted, this should then be the first launch.
+			// We set the last prompt date to the current date to delay the pompt until STATISTICS_DAYS_BEFORE_RELAUNCH of use.
+			AppProperties.getInstance().setLastStatisticsPromptDate();
+			AppProperties.getInstance().saveToDisk();
+			return false;
+		} else {
+			long dateNextPrompt = dateLastPrompt + (FrontlineSMSConstants.MILLIS_PER_DAY * FrontlineSMSConstants.STATISTICS_DAYS_BEFORE_RELAUNCH);
+			return System.currentTimeMillis() >= dateNextPrompt;
+		}
 	}
 }
