@@ -177,9 +177,9 @@ public class HibernateGroupMembershipDao extends BaseHibernateDao<GroupMembershi
 	public boolean removeMember(Group group, Contact contact) {
 		try {
 			DetachedCriteria crit = getMembershipCriteria(group, contact);
-			this.getHibernateTemplate().delete(DataAccessUtils.uniqueResult(this.getList(crit))); // FIXME this should fire a DidDeleteNotification
+			this.getHibernateTemplate().delete(DataAccessUtils.uniqueResult(this.getList(crit)));
 			return true;
-		} catch(DataAccessException ex) {
+		} catch(Exception ex) {
 			return false;
 		}
 	}

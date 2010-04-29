@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
@@ -24,10 +26,13 @@ import net.frontlinesms.junit.HibernateTestCase;
  */
 public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 	/** The dao for managing group memberships. */
-	private GroupMembershipDao dao;
+	@Autowired
+	private GroupMembershipDao groupMembershipDao;
 	/** The dao for managing {@link Contact}s */
+	@Autowired
 	private ContactDao contactDao;
 	/** The dao for managing {@link Group}s */
+	@Autowired
 	private GroupDao groupDao;
 	
 //> TEST METHODS
@@ -40,92 +45,13 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 		
 		testRelationship(group);
 		
-		this.dao.addMember(group, contact);
+		this.groupMembershipDao.addMember(group, contact);
 		testRelationship(group, contact);
 		
-		this.dao.removeMember(group, contact);
+		this.groupMembershipDao.removeMember(group, contact);
 		testRelationship(group);
 	}
-	/*
-	public void testFiltering() throws DuplicateKeyException {
-		// Create the groups
-		Group parent = createGroup("parent");
-		Group child1 = createGroup(parent, "child1");
-		Group child2 = createGroup(parent, "child2");
-
-		// Create the contacts
-		Contact alice = createContact("Alice", "+123456789", child1);
-		Contact arnold = createContact("Arnold", "0123456789", child1);
-		Contact brigitte = createContact("Brigitte", "+111555999", child2);
-		Contact brian = createContact("Brian", "0111555999", child2);
-		Contact caroline = createContact("Caroline", "+987654321", parent);
-		Contact charles = createContact("Charles", "0987654321", parent);
-		Contact xuxa = createContact("Xuxa", "+111555000");
-		Contact xavier = createContact("Xavier", "0111555000");
-
-		// Test null filter
-		testFiltering(getRootGroup(), null,
-				alice, arnold, brigitte, brian, caroline, charles, xuxa, xavier);
-		testFiltering(parent, null,
-				alice, arnold, brigitte, brian, caroline, charles);
-		testFiltering(child1, null,
-				alice, arnold);
-		testFiltering(child2, null,
-				brigitte, brian);
-
-		// Test empty filter
-		testFiltering(getRootGroup(), "",
-				alice, arnold, brigitte, brian, caroline, charles, xuxa, xavier);
-		testFiltering(parent, "",
-				alice, arnold, brigitte, brian, caroline, charles);
-		testFiltering(child1, "",
-				alice, arnold);
-		testFiltering(child2, "",
-				brigitte, brian);
-		
-		// Test filtering by phone number
-		testFiltering(getRootGroup(), "0",
-				arnold, brian, charles, xuxa, xavier);
-		testFiltering(parent, "0",
-				arnold, brian, charles);
-		testFiltering(child1, "0",
-				arnold);
-		testFiltering(child2, "0",
-				brian);
-		
-		testFiltering(getRootGroup(), "123",
-				alice, arnold);
-		testFiltering(parent, "123",
-				alice, arnold);
-		testFiltering(child1, "123",
-				alice, arnold);
-		testFiltering(child2, "123");
-		
-		// Test filtering by name
-		testFiltering(getRootGroup(), "a",
-				alice, arnold, brian, caroline, charles, xuxa, xavier);
-		testFiltering(parent, "a",
-				alice, arnold, brian, caroline, charles);
-		testFiltering(child1, "a",
-				alice, arnold);
-		testFiltering(child2, "a",
-				brian);
-
-		testFiltering(getRootGroup(), "li",
-				alice, caroline);
-		testFiltering(parent, "li",
-				alice, caroline);
-		testFiltering(child1, "li",
-				alice);
-		testFiltering(child2, "li");
-
-		testFiltering(getRootGroup(), "xuxa", 
-				xuxa);
-		testFiltering(parent, "xuxa");
-		testFiltering(child1, "xuxa");
-		testFiltering(child2, "xuxa");
-	}
-	*/
+	
 	public void testFiltering() throws DuplicateKeyException {
 		// Create the groups
 		Group parent = createGroup("parent");
@@ -142,8 +68,8 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 		Contact xuxa = createContact("Xuxa", "+111555000");
 		Contact xavier = createContact("Xavier", "0111555000");
 		
-		dao.addMember(child2, alice);
-		dao.addMember(child1, brian);
+		groupMembershipDao.addMember(child2, alice);
+		groupMembershipDao.addMember(child1, brian);
 
 		// Test null filter
 		testFiltering(getRootGroup(), null,
@@ -210,9 +136,9 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 	
 	
 	private void testFiltering(Group group, String filterString, Contact... expectedContacts) {
-		assertEquals(expectedContacts.length, this.dao.getFilteredMemberCount(group, filterString));
+		assertEquals(expectedContacts.length, this.groupMembershipDao.getFilteredMemberCount(group, filterString));
 		
-		List<Contact> actualResults = this.dao.getFilteredMembers(group, filterString, 0, expectedContacts.length);
+		List<Contact> actualResults = this.groupMembershipDao.getFilteredMembers(group, filterString, 0, expectedContacts.length);
 		
 		for(Contact c : actualResults) {
 			System.out.println(c.getName());
@@ -254,8 +180,8 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 		// DESC: charles, arnold, brian, xavier, caroline, alice, brigitte, xuxa
 		
 		
-		dao.addMember(child2, alice);
-		dao.addMember(child1, brian);
+		groupMembershipDao.addMember(child2, alice);
+		groupMembershipDao.addMember(child1, brian);
 		
 
 		// Test null filter
@@ -328,9 +254,9 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 	
 	/** @param expectedContacts an array containing the contacts we expect in the result, in the order that they should be returned in */
 	private void testFilteringAndSorting(Group group, String filterString, Field sortBy, Order order, Contact... expectedContacts) {
-		assertEquals(expectedContacts.length, this.dao.getFilteredMemberCount(group, filterString));
+		assertEquals(expectedContacts.length, this.groupMembershipDao.getFilteredMemberCount(group, filterString));
 		
-		List<Contact> actualResults = this.dao.getFilteredMembersSorted(group, filterString, sortBy, order, 0, expectedContacts.length);
+		List<Contact> actualResults = this.groupMembershipDao.getFilteredMembersSorted(group, filterString, sortBy, order, 0, expectedContacts.length);
 		
 		for(Contact c : actualResults) {
 			System.err.println(c.getName());
@@ -373,6 +299,25 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 		testRelationship(parent, alice, arnold, brigitte, brian, caroline, charles);
 		testRelationship(getRootGroup(), alice, arnold, brigitte, brian, caroline, charles, xuxa, xavier);
 	}
+
+	public void testLeaveGroups () throws DuplicateKeyException {
+		Group parent = createGroup("parent");
+		Group child1 = createGroup(parent, "child1");
+		Group child2 = createGroup(parent, "child2");
+
+		// Create the contacts
+		Contact alice = createContact("Alice", "+123456789", "alice@wonderland.com", child1);
+		Contact brian = createContact("Brian", "0111555999", child2);
+		Contact brigitte = createContact("Brigitte", "+111555999", child2);
+		Contact charles = createContact("Charles", "0987654321", "prince@wales.com", parent);
+		Contact xavier = createContact("Xavier", "0111555000");
+		
+		assertTrue(this.groupMembershipDao.removeMember(child1, alice));
+		assertFalse(this.groupMembershipDao.removeMember(child1, brian));
+		assertFalse(this.groupMembershipDao.removeMember(child1, xavier));
+		assertTrue(this.groupMembershipDao.removeMember(child2, brigitte));
+		assertFalse(this.groupMembershipDao.removeMember(getRootGroup(), charles));
+	}
 	
 //> INSTANCE HELPER METHODS
 	/** Creates a contact with specified name. 
@@ -391,7 +336,7 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 		this.contactDao.saveContact(contact);
 		
 		for(Group group : groups) {
-			this.dao.addMember(group, contact);
+			this.groupMembershipDao.addMember(group, contact);
 		}
 		
 		return contact;
@@ -405,7 +350,7 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 		this.contactDao.saveContact(contact);
 		
 		for(Group group : groups) {
-			this.dao.addMember(group, contact);
+			this.groupMembershipDao.addMember(group, contact);
 		}
 		
 		return contact;
@@ -422,7 +367,7 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 		this.groupDao.saveGroup(group);
 		
 		for(Contact contact : contacts) {
-			this.dao.addMember(group, contact);
+			this.groupMembershipDao.addMember(group, contact);
 		}
 		
 		return group;
@@ -434,13 +379,13 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 	 * @param members
 	 */
 	private void testRelationship(Group group, Contact... members) {
-		assertEquals("Incorrect members count for group: " + group.getPath(), members.length, this.dao.getMemberCount(group));
-		assertEqualsIgnoreOrder("groupMembershipDao.getMembers(Group) fooooor group " + group.getPath(), members, this.dao.getMembers(group));
-		assertEqualsIgnoreOrder("groupMembershipDao.getMembers(Group, int, int) for group " + group.getPath(), members, this.dao.getMembers(group, 0, members.length));
+		assertEquals("Incorrect members count for group: " + group.getPath(), members.length, this.groupMembershipDao.getMemberCount(group));
+		assertEqualsIgnoreOrder("groupMembershipDao.getMembers(Group) fooooor group " + group.getPath(), members, this.groupMembershipDao.getMembers(group));
+		assertEqualsIgnoreOrder("groupMembershipDao.getMembers(Group, int, int) for group " + group.getPath(), members, this.groupMembershipDao.getMembers(group, 0, members.length));
 		
 		for(Contact contact : members) {
 //			assertTrue(dao.getGroups(contact).contains(group));
-			assertTrue(dao.isMember(group, contact));
+			assertTrue(groupMembershipDao.isMember(group, contact));
 		}
 		
 		// Check that active membership fetching is behaving itself
@@ -448,7 +393,7 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 		for(Contact member : members) {
 			if(member.isActive()) expectedActiveMembers.add(member);
 		}
-		assertEqualsIgnoreOrder("active members", expectedActiveMembers.toArray(new Contact[0]), dao.getActiveMembers(group));
+		assertEqualsIgnoreOrder("active members", expectedActiveMembers.toArray(new Contact[0]), groupMembershipDao.getActiveMembers(group));
 	}
 	
 	private Group getRootGroup() {
@@ -458,7 +403,7 @@ public class HibernateGroupMembershipDaoTest extends HibernateTestCase {
 //> ACCESSORS
 	/**  */
 	public void setGroupMembershipDao(GroupMembershipDao dao) {
-		this.dao = dao;
+		this.groupMembershipDao = dao;
 	}
 	
 	public void setGroupDao(GroupDao groupDao) {
