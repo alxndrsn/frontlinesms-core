@@ -5,6 +5,7 @@ package net.frontlinesms;
 
 import static org.mockito.Mockito.*;
 
+import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -12,8 +13,11 @@ import org.smslib.CIncomingMessage;
 
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
+import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
 import net.frontlinesms.data.domain.Message;
+import net.frontlinesms.data.repository.ContactDao;
+import net.frontlinesms.data.repository.KeywordActionDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.junit.BaseTestCase;
@@ -22,27 +26,36 @@ import net.frontlinesms.smsdevice.SmsDevice;
 
 /**
  * Tests for the {@link IncomingMessageProcessor} class.
- * @author aga
+ * @author Alex Anderson <alex@frontlinesms.com>
  */
 public class IncomingMessageProcessorTest extends BaseTestCase {
 	/** A phone number used for initialising {@link CIncomingMessage}s */
 	private static final String TEST_ORIGINATOR = "+123456789";
 	private FrontlineSMS frontline;
+	private ContactDao contactDao;
 	private MessageDao messageDao;
 	private KeywordDao keywordDao;
+	private KeywordActionDao keywordActionDao;
+	
 	private IncomingMessageProcessor imp;
 	private BlockingIncomingMessageEventListener bimel;
 	
+//> TEST META METHODS
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	
 		// Set up the Frontline controller
-		messageDao = mock(MessageDao.class);
-		keywordDao = mock(KeywordDao.class);
 		frontline = mock(FrontlineSMS.class);
+
+		contactDao = mock(ContactDao.class);
+		when(frontline.getContactDao()).thenReturn(contactDao);
+		messageDao = mock(MessageDao.class);
 		when(frontline.getMessageDao()).thenReturn(messageDao);
+		keywordDao = mock(KeywordDao.class);
 		when(frontline.getKeywordDao()).thenReturn(keywordDao);
+		keywordActionDao = mock(KeywordActionDao.class);
+		when(frontline.getKeywordActionDao()).thenReturn(keywordActionDao);
 		
 		imp = new IncomingMessageProcessor(frontline);
 		bimel = new BlockingIncomingMessageEventListener();
@@ -59,6 +72,47 @@ public class IncomingMessageProcessorTest extends BaseTestCase {
 		frontline = null;
 	}
 
+//> TESTS
+	public void testActionProcessing() {
+		Message mockMessage = mock(Message.class);
+		Keyword mockKeyword = mock(Keyword.class);
+		
+		when(keywordDao.getFromMessageText(anyString())).thenReturn(mockKeyword);
+
+		UIListener uiListener = mock(UIListener.class);
+		imp.setUiListener(uiListener);
+
+		KeywordAction goodAction1 = mockKeywordAction(true);
+		KeywordAction goodAction2 = mockKeywordAction(true);
+		KeywordAction deadAction = mockKeywordAction(false);
+		
+		KeywordAction badAction = mockKeywordAction(true);
+		when(badAction.getType()).thenReturn(KeywordAction.Type.TYPE_REPLY);
+		
+		when(keywordActionDao.getActions(mockKeyword)).thenReturn(Arrays.asList(goodAction1, deadAction, badAction, goodAction2));
+		
+		imp.handleTextMessage(mockMessage);
+
+		verify(goodAction1).incrementCounter();
+		verify(uiListener).keywordActionExecuted(goodAction1);
+		
+		verify(goodAction2).incrementCounter();
+		verify(uiListener).keywordActionExecuted(goodAction2);
+		
+		verify(deadAction, never()).incrementCounter();
+		verify(uiListener, never()).keywordActionExecuted(deadAction);
+		
+		verify(badAction, never()).incrementCounter();
+		verify(uiListener, never()).keywordActionExecuted(badAction);
+	}
+	
+	private KeywordAction mockKeywordAction(boolean isAlive) {
+		KeywordAction action = mock(KeywordAction.class);
+		when(action.isAlive(anyLong())).thenReturn(isAlive);
+		when(action.getType()).thenReturn(KeywordAction.Type.NO_ACTION);
+		return action;
+	}
+	
 	/**
 	 * Verify that new message objects are created and saved for messages which have no
 	 * keywords linked to them.

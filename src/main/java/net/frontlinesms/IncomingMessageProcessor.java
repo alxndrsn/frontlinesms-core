@@ -212,7 +212,8 @@ public class IncomingMessageProcessor extends Thread {
 	 * Processes keyword actions for a text message.
 	 * @param incoming
 	 */
-	private void handleTextMessage(final Message incoming) {
+	/* not private to allow unit testing */
+	void handleTextMessage(final Message incoming) {
 		Keyword keyword = keywordDao.getFromMessageText(incoming.getTextContent());
 		if (keyword != null) {
 			LOG.debug("The message contains keyword [" + keyword.getKeyword() + "]");
@@ -225,17 +226,16 @@ public class IncomingMessageProcessor extends Thread {
 				//If we could not find this contact, we execute the action.
 				//If we found a contact, he/she needs to be allowed to execute the action.
 				if (contact == null || contact.isActive()) {
-					// TODO why are we creating new threads here?  Looks like a bad idea; why is it necessary?
 					final long triggerTime = System.currentTimeMillis();
-					new Thread() {
-						public void run() {
-							for (KeywordAction action : actions) {
-								if (action.isAlive(triggerTime)) {
-									handleIncomingMessageAction_post(action, incoming);
-								}
+					for (KeywordAction action : actions) {
+						if (action.isAlive(triggerTime)) {
+							try {
+								handleIncomingMessageAction_post(action, incoming);
+							} catch(Exception ex) {
+								LOG.warn("Exception thrown while executing action.", ex);
 							}
 						}
-					}.start();
+					}
 				}
 			}
 		}
@@ -252,6 +252,9 @@ public class IncomingMessageProcessor extends Thread {
 		String incomingSenderMsisdn = incoming.getSenderMsisdn();
 		String incomingMessageText = incoming.getTextContent();
 		switch (action.getType()) {
+			case NO_ACTION:
+				// This action is used for testing, and causes nothing to happen
+				break;
 			case TYPE_FORWARD:
 				// Generate a message, and then forward it to the group attached to this action.
 				LOG.debug("It is a forward action!");
@@ -309,7 +312,7 @@ public class IncomingMessageProcessor extends Thread {
 				LOG.debug("It is an auto-reply action!");
 				String reply = KeywordAction.KeywordUtils.getReplyText(action, contactDao.getFromMsisdn(incomingSenderMsisdn), incomingSenderMsisdn, incomingMessageText, null);
 				LOG.debug("Sending [" + reply + "] to [" + incomingSenderMsisdn + "]");
-				Message msgReply = frontline.sendTextMessage(incomingSenderMsisdn, reply);
+				frontline.sendTextMessage(incomingSenderMsisdn, reply);
 				// TODO should the message be tied to the action somehow?
 				break;
 			case TYPE_EXTERNAL_CMD:

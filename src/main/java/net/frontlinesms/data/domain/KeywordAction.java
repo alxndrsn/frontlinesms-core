@@ -51,6 +51,8 @@ public class KeywordAction {
 	
 //> CONSTANTS
 	public enum Type {
+		/** No action.  This type should only occur in test code. */
+		NO_ACTION,
 		/** Action: forward the received message to a group */
 		TYPE_FORWARD,
 		/** Action: add the sender's msisdn to a group */
