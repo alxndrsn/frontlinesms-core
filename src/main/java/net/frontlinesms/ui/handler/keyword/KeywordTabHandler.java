@@ -298,7 +298,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		} else {
 			// Editing an existent keyword.  This keyword may already have actions applied to it, so
 			// we need to check for actions and update them as appropriate.
-			KeywordAction replyAction = this.keywordActionDao.getAction(keyword, KeywordAction.Type.TYPE_REPLY);
+			KeywordAction replyAction = this.keywordActionDao.getAction(keyword, KeywordAction.Type.REPLY);
 			if (replyAction != null) {
 				if (replyText == null) {
 					// The reply action has been removed
@@ -311,7 +311,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 				}
 			}
 			
-			KeywordAction joinAction = this.keywordActionDao.getAction(keyword, KeywordAction.Type.TYPE_JOIN);
+			KeywordAction joinAction = this.keywordActionDao.getAction(keyword, KeywordAction.Type.JOIN);
 			if (joinAction != null) {
 				if (joinGroup == null) {
 					// Previous join action has been removed, so delete it.
@@ -325,7 +325,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 				}
 			}
 			
-			KeywordAction leaveAction = this.keywordActionDao.getAction(keyword, KeywordAction.Type.TYPE_LEAVE);
+			KeywordAction leaveAction = this.keywordActionDao.getAction(keyword, KeywordAction.Type.LEAVE);
 			if (leaveAction != null) {
 				if (leaveGroup == null) {
 					keywordActionDao.deleteKeywordAction(leaveAction);
@@ -467,9 +467,9 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 				KeywordAction.Type previousType = null;
 				for (KeywordAction action : actions) {
 					KeywordAction.Type type = action.getType();
-					if (type != KeywordAction.Type.TYPE_REPLY
-							&& type != KeywordAction.Type.TYPE_JOIN
-							&& type != KeywordAction.Type.TYPE_LEAVE) {
+					if (type != KeywordAction.Type.REPLY
+							&& type != KeywordAction.Type.JOIN
+							&& type != KeywordAction.Type.LEAVE) {
 						simple = false;
 						break;
 					}
@@ -497,14 +497,14 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 				ui.setText(tfKeyword, getDisplayableKeyword(keyword));
 				for (KeywordAction action : actions) {
 					KeywordAction.Type type = action.getType();
-					if (type == KeywordAction.Type.TYPE_REPLY) {
+					if (type == KeywordAction.Type.REPLY) {
 						Object cbReply = ui.find(panel, COMPONENT_CB_AUTO_REPLY);
 						Object tfReply = ui.find(panel, COMPONENT_TF_AUTO_REPLY);
 						ui.setSelected(cbReply, true);
 						ui.setText(tfReply, action.getUnformattedReplyText());
-					} else if (type == KeywordAction.Type.TYPE_JOIN) {
+					} else if (type == KeywordAction.Type.JOIN) {
 						setJoinGroupDisplay(action.getGroup());
-					} else if (type == KeywordAction.Type.TYPE_LEAVE) {
+					} else if (type == KeywordAction.Type.LEAVE) {
 						setLeaveGroupDisplay(action.getGroup());
 					}
 				}
@@ -585,22 +585,22 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	private void showActionEditDialog(KeywordAction action) {
 		BaseActionDialog dialog;
 		switch (action.getType()) {
-			case TYPE_FORWARD:
+			case FORWARD:
 				dialog = new ForwardActionDialog(ui, this);
 				break;
-			case TYPE_JOIN: 
+			case JOIN: 
 				dialog = new JoinGroupActionDialog(ui, this);
 				break;
-			case TYPE_LEAVE: 
+			case LEAVE: 
 				dialog = new JoinGroupActionDialog(ui, this);
 				break;
-			case TYPE_REPLY:
+			case REPLY:
 				dialog = new ReplyActionDialog(ui, this);
 				break;
-			case TYPE_EXTERNAL_CMD:
+			case EXTERNAL_CMD:
 				dialog = new ExternalCommandActionDialog(ui, this);
 				break;
-			case TYPE_EMAIL:
+			case EMAIL:
 				dialog = new EmailActionDialog(ui, this);
 				break;
 			default: throw new IllegalStateException();

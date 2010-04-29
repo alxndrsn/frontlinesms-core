@@ -13,7 +13,7 @@ import net.frontlinesms.ui.handler.message.MessagePanelHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
- * UI Event handler for the dialog for editing {@link KeywordAction}s of {@link KeywordAction#TYPE_REPLY}.
+ * UI Event handler for the dialog for editing {@link KeywordAction}s of {@link KeywordAction#REPLY}.
  * @author Alex Anderson 
  * <li> alex(at)masabi(dot)com
  * @author Carlos Eduardo Genz

@@ -87,7 +87,7 @@ public class IncomingMessageProcessorTest extends BaseTestCase {
 		KeywordAction deadAction = mockKeywordAction(false);
 		
 		KeywordAction badAction = mockKeywordAction(true);
-		when(badAction.getType()).thenReturn(KeywordAction.Type.TYPE_REPLY);
+		when(badAction.getType()).thenReturn(KeywordAction.Type.REPLY);
 		
 		when(keywordActionDao.getActions(mockKeyword)).thenReturn(Arrays.asList(goodAction1, deadAction, badAction, goodAction2));
 		

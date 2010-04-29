@@ -255,7 +255,7 @@ public class IncomingMessageProcessor extends Thread {
 			case NO_ACTION:
 				// This action is used for testing, and causes nothing to happen
 				break;
-			case TYPE_FORWARD:
+			case FORWARD:
 				// Generate a message, and then forward it to the group attached to this action.
 				LOG.debug("It is a forward action!");
 				String forwardedMessageText = KeywordAction.KeywordUtils.getForwardText(action, contactDao.getFromMsisdn(incomingSenderMsisdn), incomingSenderMsisdn, incomingMessageText);
@@ -265,7 +265,7 @@ public class IncomingMessageProcessor extends Thread {
 					frontline.sendTextMessage(contact.getPhoneNumber(), KeywordAction.KeywordUtils.personaliseMessage(contact, forwardedMessageText));
 				}
 				break;
-			case TYPE_JOIN: {
+			case JOIN: {
 				LOG.debug("It is a group join action!");
 				
 				// If the contact does not exist, we need to persist him so that we can add him to a group.
@@ -293,7 +293,7 @@ public class IncomingMessageProcessor extends Thread {
 					throw new RuntimeException(ex);
 				}
 			}	break;
-			case TYPE_LEAVE: {
+			case LEAVE: {
 				LOG.debug("It is a group leave action!");
 				Contact contact = contactDao.getFromMsisdn(incomingSenderMsisdn);
 				if (contact != null) {
@@ -307,7 +307,7 @@ public class IncomingMessageProcessor extends Thread {
 					}
 				}
 			}	break;
-			case TYPE_REPLY:
+			case REPLY:
 				// Generate a message, and then send it back to the sender of the received message.
 				LOG.debug("It is an auto-reply action!");
 				String reply = KeywordAction.KeywordUtils.getReplyText(action, contactDao.getFromMsisdn(incomingSenderMsisdn), incomingSenderMsisdn, incomingMessageText, null);
@@ -315,7 +315,7 @@ public class IncomingMessageProcessor extends Thread {
 				frontline.sendTextMessage(incomingSenderMsisdn, reply);
 				// TODO should the message be tied to the action somehow?
 				break;
-			case TYPE_EXTERNAL_CMD:
+			case EXTERNAL_CMD:
 				// Executes a external command
 				LOG.debug("It is an external command action!");
 				try {
@@ -328,7 +328,7 @@ public class IncomingMessageProcessor extends Thread {
 					LOG.debug("Problem executing external command.", e);
 				}
 				break;
-			case TYPE_EMAIL:
+			case EMAIL:
 				LOG.debug("It is an e-mail action!");
 				Email email = new Email(
 						action.getEmailAccount(),
@@ -445,7 +445,7 @@ public class IncomingMessageProcessor extends Thread {
 	 */
 	private void handleExternalCommandResponse(KeywordAction action, String incomingSenderMsisdn,
 			String response) {
-		assert(action.getType() == KeywordAction.Type.TYPE_EXTERNAL_CMD) : "This method should only be called on external command actions.";
+		assert(action.getType() == KeywordAction.Type.EXTERNAL_CMD) : "This method should only be called on external command actions.";
 		// PLAIN TEXT RESPONSE so we need to verify if the user wants
 		// to auto reply forward the response
 		LOG.trace("ENTER");

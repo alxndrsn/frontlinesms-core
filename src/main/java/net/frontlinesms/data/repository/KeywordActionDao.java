@@ -32,7 +32,7 @@ import net.frontlinesms.data.domain.*;
 public interface KeywordActionDao {
 	/**
 	 * Gets all keyword actions of TYPE_REPLY.
-	 * @return all {@link KeywordAction} of type {@link KeywordAction#TYPE_REPLY}
+	 * @return all {@link KeywordAction} of type {@link KeywordAction#REPLY}
 	 */
 	public Collection<KeywordAction> getReplyActions();
 

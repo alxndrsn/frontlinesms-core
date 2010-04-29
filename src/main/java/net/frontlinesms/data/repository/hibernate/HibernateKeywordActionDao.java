@@ -32,7 +32,7 @@ public class HibernateKeywordActionDao extends BaseHibernateDao<KeywordAction> i
 	/** @see KeywordActionDao#getReplyActions() */
 	public Collection<KeywordAction> getReplyActions() {
 		DetachedCriteria criteria = super.getCriterion();
-		criteria.add(Restrictions.eq(KeywordAction.Field.TYPE.getFieldName(), KeywordAction.Type.TYPE_REPLY));
+		criteria.add(Restrictions.eq(KeywordAction.Field.TYPE.getFieldName(), KeywordAction.Type.REPLY));
 		return super.getList(criteria);
 	}
 

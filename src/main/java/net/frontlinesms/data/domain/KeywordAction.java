@@ -54,17 +54,17 @@ public class KeywordAction {
 		/** No action.  This type should only occur in test code. */
 		NO_ACTION,
 		/** Action: forward the received message to a group */
-		TYPE_FORWARD,
+		FORWARD,
 		/** Action: add the sender's msisdn to a group */
-		TYPE_JOIN,
+		JOIN,
 		/** Action: remove the sender's msisdn from a group */
-		TYPE_LEAVE,
+		LEAVE,
 		/** Reply: send a specified reply to the sender's msisdn */
-		TYPE_REPLY,
+		REPLY,
 		/** Action: executes an external command */
-		TYPE_EXTERNAL_CMD,
+		EXTERNAL_CMD,
 		/** Action: send an e-mail */
-		TYPE_EMAIL;
+		EMAIL;
 	}
 	
 	public enum ExternalCommandType {
@@ -145,13 +145,13 @@ public class KeywordAction {
 	
 	/** @return the external command type */
 	public ExternalCommandType getExternalCommandType() {
-		assert(this.type==Type.TYPE_EXTERNAL_CMD) : "This method cannot be called on an action of type " + type;
+		assert(this.type==Type.EXTERNAL_CMD) : "This method cannot be called on an action of type " + type;
 		return this.externalCommandType;
 	}
 	
 	/** @return the external command response type */
 	public ExternalCommandResponseType getExternalCommandResponseType() {
-		assert(this.type==Type.TYPE_EXTERNAL_CMD) : "Cannot get command response from type: " + type;
+		assert(this.type==Type.EXTERNAL_CMD) : "Cannot get command response from type: " + type;
 		return externalCommandResponseType;
 	}
 	
@@ -160,7 +160,7 @@ public class KeywordAction {
 	 * @param type new value for {@link #externalCommandResponseType}
 	 */
 	public void setExternalCommandResponseType(ExternalCommandResponseType type) {
-		assert(this.type==Type.TYPE_EXTERNAL_CMD) : "Cannot set command response from type: " + type;
+		assert(this.type==Type.EXTERNAL_CMD) : "Cannot set command response from type: " + type;
 		this.externalCommandResponseType = type;
 	}
 	
@@ -169,7 +169,7 @@ public class KeywordAction {
 	 * @return
 	 */
 	public ExternalCommandResponseActionType getCommandResponseActionType() {
-		assert(this.type==Type.TYPE_EXTERNAL_CMD) : "Cannot get command response action from type: " + type;
+		assert(this.type==Type.EXTERNAL_CMD) : "Cannot get command response action from type: " + type;
 		return externalCommandResponseActionType;
 	}
 	
@@ -178,7 +178,7 @@ public class KeywordAction {
 	 * @param type
 	 */
 	public void setCommandResponseActionType(ExternalCommandResponseActionType type) {
-		assert(this.type==Type.TYPE_EXTERNAL_CMD) : "Cannot get command response action from type: " + type;
+		assert(this.type==Type.EXTERNAL_CMD) : "Cannot get command response action from type: " + type;
 		this.externalCommandResponseActionType = type;
 	}
 	
@@ -208,7 +208,7 @@ public class KeywordAction {
 	 * @return {@link #emailRecipients}
 	 */
 	public String getEmailRecipients() {
-		assert(this.type==Type.TYPE_EMAIL) : "Cannot get email recipients from action of type: " + type;
+		assert(this.type==Type.EMAIL) : "Cannot get email recipients from action of type: " + type;
 		return this.emailRecipients;
 	}
 	
@@ -217,7 +217,7 @@ public class KeywordAction {
 	 * @return {@link #emailSubject} 
 	 */
 	public String getEmailSubject() {
-		assert(this.type==Type.TYPE_EMAIL) : "Cannot get email subject from action of type: " + type;
+		assert(this.type==Type.EMAIL) : "Cannot get email subject from action of type: " + type;
 		return this.emailSubject;
 	}
 	
@@ -247,10 +247,10 @@ public class KeywordAction {
 	 * @return <code>true</code> if a group may be attached to an action of this type; <code>false</code> otherwise.
 	 */
 	private boolean hasGroup() {
-		return this.type==Type.TYPE_JOIN
-				|| this.type==Type.TYPE_LEAVE
-				|| this.type==Type.TYPE_FORWARD
-				|| this.type==Type.TYPE_EXTERNAL_CMD;
+		return this.type==Type.JOIN
+				|| this.type==Type.LEAVE
+				|| this.type==Type.FORWARD
+				|| this.type==Type.EXTERNAL_CMD;
 	}
 	
 	/**
@@ -258,25 +258,25 @@ public class KeywordAction {
 	 * @param recipients new value for {@link #emailRecipients}
 	 */
 	public void setEmailRecipients(String recipients) {
-		assert(this.type==Type.TYPE_EMAIL) : "Cannot set email recipients from action of type: " + type;
+		assert(this.type==Type.EMAIL) : "Cannot set email recipients from action of type: " + type;
 		this.emailRecipients = recipients;
 	}
 	
-	/** @param subject new value for {@link #emailSubject} of {@link #TYPE_EMAIL} */
+	/** @param subject new value for {@link #emailSubject} of {@link #EMAIL} */
 	public void setEmailSubject(String subject) {
-		assert(this.type==Type.TYPE_EMAIL) : "Cannot set email subject from action of type: " + type;
+		assert(this.type==Type.EMAIL) : "Cannot set email subject from action of type: " + type;
 		this.emailSubject = subject;
 	}
 	
-	/** @param emailAccount new value for {@link #emailAccount} of {@link #TYPE_EMAIL} */
+	/** @param emailAccount new value for {@link #emailAccount} of {@link #EMAIL} */
 	public void setEmailAccount(EmailAccount emailAccount) {
-		assert(this.type==Type.TYPE_EMAIL) : "Cannot get group from action of type: " + type;
+		assert(this.type==Type.EMAIL) : "Cannot get group from action of type: " + type;
 		this.emailAccount = emailAccount;
 	}
 	
-	/** @param text new value for {@link #commandString} of a {@link #TYPE_FORWARD} */
+	/** @param text new value for {@link #commandString} of a {@link #FORWARD} */
 	public void setForwardText(String text) {
-		assert(this.type==Type.TYPE_FORWARD) : "Cannot get forward text from action of type: " + type;
+		assert(this.type==Type.FORWARD) : "Cannot get forward text from action of type: " + type;
 		this.commandString = text;
 	}
 	
@@ -308,13 +308,13 @@ public class KeywordAction {
 
 	/** @return the email account related to this keyword action */
 	public EmailAccount getEmailAccount() {
-		assert(this.type==Type.TYPE_EMAIL) : "Cannot get group from action of type: " + type;
+		assert(this.type==Type.EMAIL) : "Cannot get group from action of type: " + type;
 		return this.emailAccount;
 	}
 	
 	/** @return {@link #unformattedReplyText} the reply text for this action (if it is of TYPE_REPLY or TYPE_EMAIL) */
 	public String getUnformattedReplyText() {
-		assert(this.type==Type.TYPE_REPLY || this.type==Type.TYPE_EMAIL) : "Cannot get reply text from action of type: " + type;
+		assert(this.type==Type.REPLY || this.type==Type.EMAIL) : "Cannot get reply text from action of type: " + type;
 		return this.commandString;
 	}
 	
@@ -323,25 +323,25 @@ public class KeywordAction {
 	 * @param replyText new value for {@link #replyText}
 	 */
 	public void setReplyText(String replyText) {
-		assert(this.type==Type.TYPE_REPLY || this.type==Type.TYPE_EMAIL) : "Cannot set reply text from action of type: " + type;
+		assert(this.type==Type.REPLY || this.type==Type.EMAIL) : "Cannot set reply text from action of type: " + type;
 		this.commandString = replyText;
 	}
 	
 	/** @return the forward text for this action (if it is of TYPE_FORWARD). */
 	public String getUnformattedForwardText() {
-		assert(this.type==Type.TYPE_FORWARD) : "Cannot get forward text from action of type: " + type;
+		assert(this.type==Type.FORWARD) : "Cannot get forward text from action of type: " + type;
 		return this.commandString;
 	}
 	
 	/** @return the command text for this action (if it is of TYPE_EXTERNAL_CMD). */
 	public String getUnformattedCommandText() {
-		assert(this.type==Type.TYPE_EXTERNAL_CMD) : "Cannot get command text from type: " + type;
+		assert(this.type==Type.EXTERNAL_CMD) : "Cannot get command text from type: " + type;
 		return this.commandString;
 	}
 	
 	/** @return the command line for this action (if it is of TYPE_EXTERNAL_CMD). */
 	public String getUnformattedCommand() {
-		assert(this.type==Type.TYPE_EXTERNAL_CMD) : "Cannot get command from type: " + type;
+		assert(this.type==Type.EXTERNAL_CMD) : "Cannot get command from type: " + type;
 		return this.externalCommand;
 	}
 	
@@ -529,7 +529,7 @@ public class KeywordAction {
 	 * @return a new instance of KeywordAction
 	 */
 	public static KeywordAction createReplyAction(Keyword keyword, String replyText, long start, long end) {
-		KeywordAction action = new KeywordAction(Type.TYPE_REPLY, keyword);
+		KeywordAction action = new KeywordAction(Type.REPLY, keyword);
 		action.setReplyText(replyText);
 		action.setStartDate(start);
 		action.setEndDate(end);
@@ -548,7 +548,7 @@ public class KeywordAction {
 	 * @return a new instance of KeywordAction
 	 */
 	public static KeywordAction createEmailAction(Keyword keyword, String replyText, EmailAccount account, String to, String subject,long start, long end) {
-		KeywordAction action = new KeywordAction(Type.TYPE_EMAIL, keyword);
+		KeywordAction action = new KeywordAction(Type.EMAIL, keyword);
 		action.setReplyText(replyText);
 		action.setEmailAccount(account);
 		action.setEmailRecipients(to);
@@ -582,7 +582,7 @@ public class KeywordAction {
 	 */
 	public static KeywordAction createExternalCommandAction(Keyword keyword, String commandLine, ExternalCommandType commandType, ExternalCommandResponseType responseType,
 			ExternalCommandResponseActionType responseActionType, String commandMsg, Group toFwd, long start, long end) {
-		KeywordAction action = new KeywordAction(Type.TYPE_EXTERNAL_CMD, keyword);
+		KeywordAction action = new KeywordAction(Type.EXTERNAL_CMD, keyword);
 		action.setCommandLine(commandLine);
 		action.setExternalCommandType(commandType);
 		action.setExternalCommandResponseType(responseType);
@@ -601,7 +601,7 @@ public class KeywordAction {
 	 * @return a new instance of KeywordAction
 	 */
 	public static KeywordAction createGroupJoinAction(Keyword keyword, Group group, long start, long end) {
-		KeywordAction action = new KeywordAction(Type.TYPE_JOIN, keyword);
+		KeywordAction action = new KeywordAction(Type.JOIN, keyword);
 		action.setGroup(group);
 		action.setStartDate(start);
 		action.setEndDate(end);
@@ -615,7 +615,7 @@ public class KeywordAction {
 	 * @return a new instance of KeywordAction
 	 */
 	public static KeywordAction createGroupLeaveAction(Keyword keyword, Group group, long start, long end) {
-		KeywordAction action = new KeywordAction(Type.TYPE_LEAVE, keyword);
+		KeywordAction action = new KeywordAction(Type.LEAVE, keyword);
 		action.setGroup(group);
 		action.setStartDate(start);
 		action.setEndDate(end);
@@ -630,7 +630,7 @@ public class KeywordAction {
 	 * @return a new instance of KeywordAction
 	 */
 	public static KeywordAction createForwardAction(Keyword keyword, Group group, String forwardText, long start, long end) {
-		KeywordAction action = new KeywordAction(Type.TYPE_FORWARD, keyword);
+		KeywordAction action = new KeywordAction(Type.FORWARD, keyword);
 		action.setGroup(group);
 		action.setForwardText(forwardText);
 		action.setStartDate(start);
