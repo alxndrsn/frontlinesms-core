@@ -68,4 +68,10 @@ public interface KeywordDao {
 	 * @throws DuplicateKeyException
 	 */
 	public void saveKeyword(Keyword keyword) throws DuplicateKeyException;
+	
+	/**
+	 * Updates a keyword in the data source
+	 * @param keyword the keyword which should be updated
+	 */
+	public void updateKeyword(Keyword keyword) throws DuplicateKeyException;
 }

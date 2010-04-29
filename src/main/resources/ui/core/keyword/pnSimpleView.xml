@@ -22,9 +22,9 @@
             <button action="keywordTab_doClear(pnKeywordActionsSimple)" icon="/icons/clear.png" name="btClear" text="i18n.action.clear"/>
         </panel>
     </panel>
-    <panel name="pnTip" columns="2" gap="5" halign="center">
+    <panel name="pnTip" columns="2" gap="5" halign="left">
         <label icon="/icons/tip.png" rowspan="2"/>
         <label text="i18n.sentence.keyword.tab.tip"/>
-        <button action="keywordShowAdvancedView" alignment="left" name="btGoToAdvanced" text="i18n.action.go.to.advanced" type="link"/>
+        <button action="keywordShowAdvancedView" icon="/icons/task_next_execution.png" name="btGoToAdvanced" text="i18n.action.go.to.advanced" type="link" halign="left"/>
     </panel>
 </panel>
