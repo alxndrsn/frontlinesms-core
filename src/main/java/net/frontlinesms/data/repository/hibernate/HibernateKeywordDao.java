@@ -75,4 +75,10 @@ public class HibernateKeywordDao extends BaseHibernateDao<Keyword> implements Ke
 	public void saveKeyword(Keyword keyword) throws DuplicateKeyException {
 		super.save(keyword);
 	}
+	
+	/** @throws DuplicateKeyException 
+	 * @see KeywordDao#updateKeyword(Keyword) */
+	public void updateKeyword(Keyword keyword) throws DuplicateKeyException {
+		super.update(keyword);
+	}
 }

@@ -3,8 +3,6 @@
  */
 package net.frontlinesms.ui.handler.keyword;
 
-import static net.frontlinesms.FrontlineSMSConstants.ACTION_ADD_KEYWORD;
-import static net.frontlinesms.FrontlineSMSConstants.ACTION_CREATE;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_BLANK;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_EDITING_KEYWORD;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_KEYWORD_ACTIONS_OF;
@@ -12,7 +10,6 @@ import static net.frontlinesms.FrontlineSMSConstants.DEFAULT_END_DATE;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_KEYWORD_EXISTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_KEYWORD_SAVED;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_ACTION_LIST;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_SAVE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_AUTO_REPLY;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORDS_DIVIDER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORD_LIST;
@@ -21,7 +18,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_K
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_DESCRIPTION;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_KEYWORD;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_TITLE;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_TIP;
 
 import java.text.ParseException;
 import java.util.Collection;
@@ -62,10 +58,11 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	private static final String COMPONENT_LEAVE_GROUP_SELECT_LABEL = "lbLeaveGroup";
 
 	public static final String COMPONENT_KEY_ACT_PANEL = "keyActPanel";
-	public static final String COMPONENT_BT_CLEAR = "btClear";
 	public static final String COMPONENT_TF_AUTO_REPLY = "tfAutoReply";
 	public static final String COMPONENT_TF_KEYWORD = "tfKeyword";
 	public static final String COMPONENT_CB_ACTION_TYPE = "cbActionType";
+	
+	private static final String I18N_CREATE_KEYWORD = "action.new.keyword";
 
 	private KeywordDao keywordDao;
 	private KeywordActionDao keywordActionDao;
@@ -433,98 +430,94 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	 * 
 	 * @param dialog The dialog, which is holding the current reference to the keyword being edited.
 	 * @param desc The new description for the keyword.
+	 * @throws DuplicateKeyException 
 	 */
-	public void finishKeywordEdition(Object dialog, String desc) {
+	public void finishKeywordEdition(Object dialog, String desc) throws DuplicateKeyException {
 		log.trace("ENTER");
 		Keyword key = ui.getKeyword(dialog);
 		log.debug("New description [" + desc + "] for keyword [" + key.getKeyword() + "]");
 		key.setDescription(desc);
+		this.keywordDao.updateKeyword(key);
 		ui.removeDialog(dialog);
 		log.trace("EXIT");
 	}
 
 	public void showSelectedKeyword() {
-		int index = ui.getSelectedIndex(keywordListComponent);
 		Object selected = ui.getSelectedItem(keywordListComponent);
+		
 		Object divider = find(COMPONENT_KEYWORDS_DIVIDER);
 		if (ui.getItems(divider).length >= 2) {
 			ui.remove(ui.getItems(divider)[ui.getItems(divider).length - 1]);
 		}
-		if (index == 0) {
-			//Add keyword selected
+		
+		// If selected is null, then we are here because a keyword has been unselected
+		if (selected == null) {
+			enableKeywordFields(ui.find(COMPONENT_KEY_PANEL));
+			return;
+		}
+		
+		//An existent keyword is selected, let's check if it is simple or advanced.
+		Keyword keyword = ui.getAttachedObject(selected, Keyword.class);
+		Collection<KeywordAction> actions = this.keywordActionDao.getActions(keyword);
+		boolean simple = actions.size() <= 3;
+		if (simple) {
+			KeywordAction.Type previousType = null;
+			for (KeywordAction action : actions) {
+				KeywordAction.Type type = action.getType();
+				if (type != KeywordAction.Type.TYPE_REPLY
+						&& type != KeywordAction.Type.TYPE_JOIN
+						&& type != KeywordAction.Type.TYPE_LEAVE) {
+					simple = false;
+					break;
+				}
+				
+				if (action.getEndDate() != DEFAULT_END_DATE) {
+					simple = false;
+					break;
+				}
+				
+				if (type == previousType) {
+					simple = false;
+					break;
+				}
+				
+				previousType = type;
+			}
+		}
+		if (simple) {
 			Object panel = ui.loadComponentFromFile(UI_FILE_KEYWORDS_SIMPLE_VIEW, this);
-
-			Object btSave = ui.find(panel, COMPONENT_BT_SAVE);
-			ui.setText(btSave, InternationalisationUtils.getI18NString(ACTION_CREATE));
-			ui.setVisible(ui.find(panel,COMPONENT_PN_TIP), false);
 			ui.add(divider, panel);
-		} else if (index > 0) {
-			//An existent keyword is selected, let's check if it is simple or advanced.
-			Keyword keyword = ui.getAttachedObject(selected, Keyword.class);
-			Collection<KeywordAction> actions = this.keywordActionDao.getActions(keyword);
-			boolean simple = actions.size() <= 3;
-			if (simple) {
-				KeywordAction.Type previousType = null;
-				for (KeywordAction action : actions) {
-					KeywordAction.Type type = action.getType();
-					if (type != KeywordAction.Type.TYPE_REPLY
-							&& type != KeywordAction.Type.TYPE_JOIN
-							&& type != KeywordAction.Type.TYPE_LEAVE) {
-						simple = false;
-						break;
-					}
-					
-					if (action.getEndDate() != DEFAULT_END_DATE) {
-						simple = false;
-						break;
-					}
-					
-					if (type == previousType) {
-						simple = false;
-						break;
-					}
-					
-					previousType = type;
+			
+			//Fill every field
+			Object tfKeyword = ui.find(panel, COMPONENT_TF_KEYWORD);
+			ui.setEnabled(tfKeyword, false);
+			ui.setText(tfKeyword, getDisplayableKeyword(keyword));
+			for (KeywordAction action : actions) {
+				KeywordAction.Type type = action.getType();
+				if (type == KeywordAction.Type.TYPE_REPLY) {
+					Object cbReply = ui.find(panel, COMPONENT_CB_AUTO_REPLY);
+					Object tfReply = ui.find(panel, COMPONENT_TF_AUTO_REPLY);
+					ui.setSelected(cbReply, true);
+					ui.setText(tfReply, action.getUnformattedReplyText());
+				} else if (type == KeywordAction.Type.TYPE_JOIN) {
+					setJoinGroupDisplay(action.getGroup());
+				} else if (type == KeywordAction.Type.TYPE_LEAVE) {
+					setLeaveGroupDisplay(action.getGroup());
 				}
 			}
-			if (simple) {
-				Object panel = ui.loadComponentFromFile(UI_FILE_KEYWORDS_SIMPLE_VIEW, this);
-				ui.add(divider, panel);
-				
-				//Fill every field
-				Object tfKeyword = ui.find(panel, COMPONENT_TF_KEYWORD);
-				ui.setEnabled(tfKeyword, false);
-				ui.setText(tfKeyword, getDisplayableKeyword(keyword));
-				for (KeywordAction action : actions) {
-					KeywordAction.Type type = action.getType();
-					if (type == KeywordAction.Type.TYPE_REPLY) {
-						Object cbReply = ui.find(panel, COMPONENT_CB_AUTO_REPLY);
-						Object tfReply = ui.find(panel, COMPONENT_TF_AUTO_REPLY);
-						ui.setSelected(cbReply, true);
-						ui.setText(tfReply, action.getUnformattedReplyText());
-					} else if (type == KeywordAction.Type.TYPE_JOIN) {
-						setJoinGroupDisplay(action.getGroup());
-					} else if (type == KeywordAction.Type.TYPE_LEAVE) {
-						setLeaveGroupDisplay(action.getGroup());
-					}
-				}
-				
-				ui.setVisible(ui.find(panel, COMPONENT_BT_CLEAR), false);
-			} else {
-				Object panel = ui.loadComponentFromFile(UI_FILE_KEYWORDS_ADVANCED_VIEW, this);
-				Object table = ui.find(panel, COMPONENT_ACTION_LIST);
-				ui.setText(panel, InternationalisationUtils.getI18NString(COMMON_KEYWORD_ACTIONS_OF, getDisplayableKeyword(keyword)));
-				//Fill every field
-				for (KeywordAction action : actions) {
-					ui.add(table, ui.getRow(action));
-				}
-				ui.add(divider, panel);
-				enableKeywordActionFields(table, ui.find(panel, COMPONENT_KEY_ACT_PANEL));
+		} else {
+			Object panel = ui.loadComponentFromFile(UI_FILE_KEYWORDS_ADVANCED_VIEW, this);
+			Object table = ui.find(panel, COMPONENT_ACTION_LIST);
+			ui.setText(panel, InternationalisationUtils.getI18NString(COMMON_KEYWORD_ACTIONS_OF, getDisplayableKeyword(keyword)));
+			//Fill every field
+			for (KeywordAction action : actions) {
+				ui.add(table, ui.getRow(action));
 			}
+			ui.add(divider, panel);
+			enableKeywordActionFields(table, ui.find(panel, COMPONENT_KEY_ACT_PANEL));
 		}
 		enableKeywordFields(ui.find(COMPONENT_KEY_PANEL));
 	}
-
 	/** Show group selecter for choosing the group to join. */
 	public void selectJoinGroup() {
 		selectingJoinGroup = true;
@@ -567,14 +560,12 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	 * @param parentKeyword
 	 */
 	private void showNewKeywordForm(Keyword parentKeyword) {
-		String title = "Create new keyword.";
+		String title = InternationalisationUtils.getI18NString(I18N_CREATE_KEYWORD);
 		Object keywordForm = ui.loadComponentFromFile(UI_FILE_NEW_KEYWORD_FORM, this);
 		ui.setAttachedObject(keywordForm, parentKeyword);
 		ui.setText(ui.find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_TITLE), title);
-		// Pre-populate the keyword textfield with currently-selected keyword string so that
-		// a sub-keyword can easily be created.  Append a space to save the user from having
-		// to do it!
-		if (parentKeyword != null) ui.setText(ui.find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_KEYWORD), parentKeyword.getKeyword() + ' ');
+		// We don't re-populate the keyword textfield with currently-selected keyword string anymore
+		// cause it doesn't really make sense
 		ui.add(keywordForm);
 	}
 	
@@ -620,9 +611,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		Object keywordForm = ui.loadComponentFromFile(UI_FILE_NEW_KEYWORD_FORM, this);
 		ui.setAttachedObject(keywordForm, keyword);
 		ui.setText(ui.find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_TITLE), title);
-		// Pre-populate the keyword textfield with currently-selected keyword string so that
-		// a sub-keyword can easily be created.  Append a space to save the user from having
-		// to do it!
+		// Pre-populate the textfields with currently-selected keyword attributes strings
 		Object textField = ui.find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_KEYWORD);
 		Object textFieldDescription = ui.find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_DESCRIPTION);
 		ui.setText(textField, key);
@@ -723,12 +712,10 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		Keyword selectedKeyword = ui.getAttachedObject(selectedItem, Keyword.class);
 		
 		List<Keyword> keywords = keywordDao.getAllKeywords(startIndex, limit);
-		Object[] listItems = new Object[keywords.size() + 1];
-		Object newKeyword = ui.createListItem(InternationalisationUtils.getI18NString(ACTION_ADD_KEYWORD), null);
-		listItems[0] = newKeyword;
+		Object[] listItems = new Object[keywords.size()];
 		
-		for(int i=1; i<listItems.length; ++i) {
-			Keyword keyword = keywords.get(i-1);
+		for(int i=0; i<listItems.length; ++i) {
+			Keyword keyword = keywords.get(i);
 			listItems[i] = ui.createListItem(keyword);
 			if(selectedKeyword != null && selectedKeyword.equals(keyword)) {
 				selectedItem = listItems[i];

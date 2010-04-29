@@ -37,7 +37,7 @@
 		</popupmenu>
 	</table>
 	<panel name="keyActPanel" gap="5" weightx="1">
-		<combobox editable="false" name="cbActionType" selected="0">
+		<combobox action="keywordTab_newAction(this)" editable="false" name="cbActionType" selected="0">
 			<choice icon="/icons/big_sms_autoReply.png" text="i18n.action.create.auto.reply"/>
 			<choice icon="/icons/big_sms_autoForward.png" text="i18n.common.auto.forward"/>
 			<choice icon="/icons/big_group_join.png" text="i18n.action.create.join.group"/>

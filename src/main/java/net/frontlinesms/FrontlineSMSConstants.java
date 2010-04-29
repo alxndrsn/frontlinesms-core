@@ -68,8 +68,6 @@ public final class FrontlineSMSConstants {
 	public static final int RESULTS_PER_PAGE_DEFAULT = 100;
 
 	public static final String ACTION_FORWARD = "action.create.forward.msg";
-	public static final String ACTION_ADD_KEYWORD = "action.add.keyword";
-	public static final String ACTION_CREATE = "action.create";
 	public static final String ACTION_ADD_TO_GROUP = "action.add.to.group";
 	public static final String ACTION_SAVE = "action.save";
 	public static final String ACTION_CANCEL = "action.cancel";
