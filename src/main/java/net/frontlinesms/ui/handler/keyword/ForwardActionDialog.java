@@ -181,6 +181,6 @@ public class ForwardActionDialog extends BaseActionDialog {
 	}
 	
 	public void forwardTextChanged () {
-		forwardTextChanged(this.ui.getText(this.ui.find(COMPONENT_BT_SAVE)));
+		forwardTextChanged(this.ui.getText(this.ui.find(COMPONENT_FORWARD_FORM_TEXTAREA)));
 	}
 }
