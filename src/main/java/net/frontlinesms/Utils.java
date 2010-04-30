@@ -42,6 +42,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.TimeZone;
 
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.encoding.Base64Utils;
@@ -119,7 +120,7 @@ public class Utils {
 			return c.getTime().getTime();
 		}
 	}
-
+	
 	/**
 	 * Converts a device manufacturer and model into a human-readable string, with extraneous information removed.
 	 * @param manufacturer
