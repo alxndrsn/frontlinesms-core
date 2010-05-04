@@ -1161,7 +1161,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				ret.append(KeywordAction.KeywordUtils.getReplyText(action, DEMO_SENDER, DEMO_SENDER.getPhoneNumber(), DEMO_MESSAGE_TEXT_INCOMING, DEMO_MESSAGE_KEYWORD));
 				break;
 			case EXTERNAL_CMD:
-				if (action.getExternalCommandType() == KeywordAction.ExternalCommandType.EXTERNAL_HTTP_REQUEST) {
+				if (action.getExternalCommandType() == KeywordAction.ExternalCommandType.HTTP_REQUEST) {
 					ret.append(InternationalisationUtils.getI18NString(COMMON_HTTP_REQUEST));
 				} else {
 					ret.append(InternationalisationUtils.getI18NString(COMMON_EXTERNAL_COMMAND));
@@ -1256,7 +1256,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			icon = Icon.ACTION_REPLY;
 			break;
 		case EXTERNAL_CMD:
-			if (action.getExternalCommandType() == KeywordAction.ExternalCommandType.EXTERNAL_COMMAND_LINE) 
+			if (action.getExternalCommandType() == KeywordAction.ExternalCommandType.COMMAND_LINE) 
 				icon = Icon.ACTION_EXTERNAL_COMMAND;
 			else 
 				icon = Icon.ACTION_HTTP_REQUEST;
