@@ -42,11 +42,11 @@ public class HomeTabHandler extends BaseTabHandler {
 	private static final String UI_FILE_STATS_DIALOG = "/ui/core/home/dgStatistics.xml";
 	/** Thinlet Component Name: Home Tab: logo */
 	private static final String COMPONENT_LB_HOME_TAB_LOGO = "lbHomeTabLogo";
-	/** Thinlet Component Name: Settings dialog: checkbox indicating if the logo is visible */
-	private static final String COMPONENT_CB_HOME_TAB_LOGO_VISIBLE = "cbHomeTabLogoVisible";
-	/** Thinlet Component Name: Settings dialog: checkbox used to choose the default logo */
+	/** Thinlet Component Name: Settings dialog: radio indicating if the logo is visible */
+	private static final String COMPONENT_CB_HOME_TAB_LOGO_INVISIBLE = "cbHomeTabLogoInvisible";
+	/** Thinlet Component Name: Settings dialog: radio used to choose the default logo */
 	private static final String COMPONENT_CB_HOME_TAB_USE_DEFAULT_LOGO = "cbHomeTabLogoDefault";
-	/** Thinlet Component Name: Settings dialog: checkbox used to choose a custom logo */
+	/** Thinlet Component Name: Settings dialog: radio used to choose a custom logo */
 	private static final String COMPONENT_CB_HOME_TAB_USE_CUSTOM_LOGO = "cbHomeTabLogoCustom";
 	/** Thinlet Component Name: Settings dialog: checkbox used to choose a custom logo */
 	private static final String COMPONENT_CB_HOME_TAB_LOGO_KEEP_ORIGINAL_SIZE = "cbHomeTabLogoKeepOriginalSize";
@@ -84,14 +84,23 @@ public class HomeTabHandler extends BaseTabHandler {
 		boolean isCustomLogo 		= uiProperties.isHometabCustomLogo();
 		boolean isOriginalSizeKept 	= uiProperties.isHometabLogoOriginalSizeKept();
 		
-		String imageLocation = uiProperties.getHomtabLogoPath();
+		String imageLocation = uiProperties.getHometabLogoPath();
 		log.debug("Visible? " + visible);
 		log.debug("Logo: " + (isCustomLogo ? "custom" : "default"));
 		if (isCustomLogo)
 			log.debug("Keep original size: " + isOriginalSizeKept);
 		log.debug("Image location [" + imageLocation + "]");
 		
-		ui.setSelected(ui.find(homeTabSettings, (!visible ? COMPONENT_CB_HOME_TAB_LOGO_VISIBLE : (isCustomLogo ? COMPONENT_CB_HOME_TAB_USE_CUSTOM_LOGO : COMPONENT_CB_HOME_TAB_USE_DEFAULT_LOGO))), true);
+		String radioButtonName;
+		if(!visible) {
+			radioButtonName = COMPONENT_CB_HOME_TAB_LOGO_INVISIBLE;
+		} else if(isCustomLogo) {
+			radioButtonName = COMPONENT_CB_HOME_TAB_USE_CUSTOM_LOGO;
+		} else {
+			radioButtonName = COMPONENT_CB_HOME_TAB_USE_DEFAULT_LOGO;
+		}
+		
+		ui.setSelected(ui.find(homeTabSettings, radioButtonName), true);
 		ui.setSelected(ui.find(homeTabSettings, COMPONENT_CB_HOME_TAB_LOGO_KEEP_ORIGINAL_SIZE), isOriginalSizeKept);
 		
 		setHomeTabCustomLogo(ui.find(homeTabSettings, COMPONENT_PN_CUSTOM_IMAGE), isCustomLogo && visible);
@@ -108,10 +117,6 @@ public class HomeTabHandler extends BaseTabHandler {
 	public void showStatsDialog() {
 		log.trace("ENTER");
 		Object homeTabSettings = ui.loadComponentFromFile(UI_FILE_STATS_DIALOG, this);
-		UiProperties uiProperties = UiProperties.getInstance();
-		
-		
-		
 		ui.add(homeTabSettings);
 		log.trace("EXIT");
 	}
@@ -122,16 +127,16 @@ public class HomeTabHandler extends BaseTabHandler {
 	 */
 	public void saveHomeTabSettings(Object panel) {
 		log.trace("ENTER");
-		boolean visible 			= ui.isSelected(ui.find(panel, COMPONENT_CB_HOME_TAB_LOGO_VISIBLE));
+		boolean invisible 			= ui.isSelected(ui.find(panel, COMPONENT_CB_HOME_TAB_LOGO_INVISIBLE));
 		boolean isCustomLogo 		= ui.isSelected(ui.find(panel, COMPONENT_CB_HOME_TAB_USE_CUSTOM_LOGO));
 		boolean isOriginalSizeKept 	= ui.isSelected(ui.find(panel, COMPONENT_CB_HOME_TAB_LOGO_KEEP_ORIGINAL_SIZE));
 		
 		String imgSource = ui.getText(ui.find(panel, COMPONENT_TF_IMAGE_SOURCE));
-		log.debug("Visible? " + visible);
+		log.debug("Hidden? " + invisible);
 		log.debug("Logo: " + (isCustomLogo ? "default" : "custom"));
 		log.debug("Image location [" + imgSource + "]");
 		UiProperties uiProperties = UiProperties.getInstance();
-		uiProperties.setHometabLogoVisible(visible);
+		uiProperties.setHometabLogoVisible(!invisible);
 		uiProperties.setHometabCustomLogo(isCustomLogo);
 		uiProperties.setHometabLogoOriginalSizeKept(isOriginalSizeKept);
 		uiProperties.setHometabLogoPath(imgSource);
@@ -241,7 +246,7 @@ public class HomeTabHandler extends BaseTabHandler {
 			Image noIcon = null;
 			ui.setIcon(lbLogo, noIcon);
 		} else {
-			String imageLocation = UiProperties.getInstance().getHomtabLogoPath();
+			String imageLocation = UiProperties.getInstance().getHometabLogoPath();
 			boolean useDefault = true;
 			if (UiProperties.getInstance().isHometabCustomLogo() && imageLocation != null && imageLocation.length() > 0) {
 				// Absolute or relative path provided
@@ -293,7 +298,6 @@ public class HomeTabHandler extends BaseTabHandler {
 			}
 		}
 	}
-	
 
 //> UI HELPER METHODS
 	private Object getRow(Event newEvent) {

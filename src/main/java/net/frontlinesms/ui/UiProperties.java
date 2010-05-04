@@ -56,15 +56,14 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	 * @param visible <code>true</code> if the tab should be visible, <code>false</code> otherwise.
 	 */
 	public void setTabVisible(String tabName, boolean visible) {
-		super.setProperty(tabName + ".visible", Boolean.toString(visible));
+		super.setPropertyAsBoolean(tabName + ".visible", visible);
 	}
 	/** 
 	 * @param tabName The name of the tab.
 	 * @return <code>true</code> if the tab should be visible, <code>false</code> otherwise.
 	 */
 	public boolean isTabVisible(String tabName) {
-		Boolean visible = super.getPropertyAsBoolean(tabName + ".visible");
-		return visible == null || visible.booleanValue();
+		return super.getPropertyAsBoolean(tabName + ".visible", true);
 	}
 	
 	/** @return value for {@link #KEY_WINDOW_STATE} */
@@ -110,20 +109,19 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	
 	/** @return <code>true</code> if the logo should be shown on the home tab; <code>false</code> otherwise */
 	public boolean isHometabLogoVisible() {
-		Boolean visible = super.getPropertyAsBoolean(KEY_HOMETABLOGO_VISIBLE);
-		return visible != null && !visible.booleanValue();
+		return super.getPropertyAsBoolean(KEY_HOMETABLOGO_VISIBLE, true);
 	}
 	/**
 	 * Set visibility of the logo on the home tab.
 	 * @param visible value for property {@link #KEY_HOMETABLOGO_VISIBLE}
 	 */
 	public void setHometabLogoVisible(boolean visible) {
-		super.setProperty(KEY_HOMETABLOGO_VISIBLE, String.valueOf(visible));
+		super.setPropertyAsBoolean(KEY_HOMETABLOGO_VISIBLE, visible);
 	}
 	
 	/** @return <code>true</code> if the logo shown on the home tab is the default logo; <code>false</code> otherwise */
 	public boolean isHometabCustomLogo() {
-		return super.getPropertyAsBoolean(KEY_HOMETABLOGO_CUSTOM, true);
+		return super.getPropertyAsBoolean(KEY_HOMETABLOGO_CUSTOM, false);
 	}
 	
 	
@@ -132,7 +130,7 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	 * @param isCustomLogo value for property {@link #KEY_HOMETABLOGO_CUSTOM}
 	 */
 	public void setHometabCustomLogo(boolean isCustomLogo) {
-		super.setProperty(KEY_HOMETABLOGO_CUSTOM, String.valueOf(isCustomLogo));
+		super.setPropertyAsBoolean(KEY_HOMETABLOGO_CUSTOM, isCustomLogo);
 	}
 	
 
@@ -151,7 +149,7 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	
 	
 	/** @return the path to the file containing the logo to display on the home tab */
-	public String getHomtabLogoPath() {
+	public String getHometabLogoPath() {
 		return super.getProperty(KEY_HOMETABLOGO_SOURCE);
 	}
 	/**
