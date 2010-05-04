@@ -71,15 +71,15 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 			KeywordAction action = super.getTargetObject(KeywordAction.class);
 			
 			//COMMAND TYPE
-			ui.setSelected(find(COMPONENT_RB_TYPE_HTTP), action.getExternalCommandType() == KeywordAction.ExternalCommandType.EXTERNAL_HTTP_REQUEST);
-			ui.setSelected(find(COMPONENT_RB_TYPE_COMMAND_LINE), action.getExternalCommandType() == KeywordAction.ExternalCommandType.EXTERNAL_COMMAND_LINE);
+			ui.setSelected(find(COMPONENT_RB_TYPE_HTTP), action.getExternalCommandType() == KeywordAction.ExternalCommandType.HTTP_REQUEST);
+			ui.setSelected(find(COMPONENT_RB_TYPE_COMMAND_LINE), action.getExternalCommandType() == KeywordAction.ExternalCommandType.COMMAND_LINE);
 			
 			//COMMAND
 			ui.setText(find(COMPONENT_TF_COMMAND), action.getUnformattedCommand());
 			
 			Object pnResponse = find(COMPONENT_PN_RESPONSE);
 			//RESPONSE TYPE
-			if (action.getExternalCommandResponseType() == ExternalCommandResponseType.EXTERNAL_RESPONSE_PLAIN_TEXT) {
+			if (action.getExternalCommandResponseType() == ExternalCommandResponseType.PLAIN_TEXT) {
 				log.debug("Setting up dialog for PLAIN TEXT response.");
 				ui.setSelected(find(COMPONENT_RB_PLAIN_TEXT), true);
 				ui.setSelected(find(COMPONENT_RB_FRONTLINE_COMMANDS), false);
@@ -91,9 +91,9 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 				ui.setText(find(COMPONENT_TF_MESSAGE), action.getUnformattedCommandText());
 				ExternalCommandResponseActionType responseActionType = action.getCommandResponseActionType();
 				ui.setSelected(find(COMPONENT_CB_AUTO_REPLY),
-							responseActionType == KeywordAction.ExternalCommandResponseActionType.TYPE_REPLY || responseActionType == KeywordAction.ExternalCommandResponseActionType.EXTERNAL_REPLY_AND_FORWARD);
+							responseActionType == KeywordAction.ExternalCommandResponseActionType.REPLY || responseActionType == KeywordAction.ExternalCommandResponseActionType.REPLY_AND_FORWARD);
 			
-				if (responseActionType == KeywordAction.ExternalCommandResponseActionType.TYPE_FORWARD || responseActionType == KeywordAction.ExternalCommandResponseActionType.EXTERNAL_REPLY_AND_FORWARD) {
+				if (responseActionType == KeywordAction.ExternalCommandResponseActionType.FORWARD || responseActionType == KeywordAction.ExternalCommandResponseActionType.REPLY_AND_FORWARD) {
 					ui.setSelected(find(COMPONENT_CB_FORWARD), true);
 					ui.activate(list);
 					//Select group
@@ -107,7 +107,7 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 						}
 					}
 				}
-			} else if (action.getExternalCommandResponseType() == ExternalCommandResponseType.EXTERNAL_RESPONSE_LIST_COMMANDS) {
+			} else if (action.getExternalCommandResponseType() == ExternalCommandResponseType.LIST_COMMANDS) {
 				log.debug("Setting up dialog for LIST COMMANDS response.");
 				ui.setSelected(find(COMPONENT_RB_PLAIN_TEXT), false);
 				ui.setSelected(find(COMPONENT_RB_FRONTLINE_COMMANDS), true);
@@ -158,13 +158,13 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 			return;
 		}
 		
-		ExternalCommandType commandType = ui.isSelected(find(COMPONENT_RB_TYPE_HTTP)) ? KeywordAction.ExternalCommandType.EXTERNAL_HTTP_REQUEST : KeywordAction.ExternalCommandType.EXTERNAL_COMMAND_LINE;
+		ExternalCommandType commandType = ui.isSelected(find(COMPONENT_RB_TYPE_HTTP)) ? KeywordAction.ExternalCommandType.HTTP_REQUEST : KeywordAction.ExternalCommandType.COMMAND_LINE;
 		String commandLine = ui.getText(find(COMPONENT_TF_COMMAND));
-		ExternalCommandResponseType responseType = ExternalCommandResponseType.EXTERNAL_RESPONSE_DONT_WAIT;
+		ExternalCommandResponseType responseType = ExternalCommandResponseType.DONT_WAIT;
 		if (ui.isSelected(find(COMPONENT_RB_PLAIN_TEXT))) {
-			responseType = ExternalCommandResponseType.EXTERNAL_RESPONSE_PLAIN_TEXT;
+			responseType = ExternalCommandResponseType.PLAIN_TEXT;
 		} else if (ui.isSelected(find(COMPONENT_RB_FRONTLINE_COMMANDS))) {
-			responseType = ExternalCommandResponseType.EXTERNAL_RESPONSE_LIST_COMMANDS;
+			responseType = ExternalCommandResponseType.LIST_COMMANDS;
 		}
 		
 		log.debug("Command type [" + commandType + "]");
@@ -173,27 +173,27 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 		
 		Group group = null;
 		String message = null;
-		KeywordAction.ExternalCommandResponseActionType responseActionType = KeywordAction.ExternalCommandResponseActionType.EXTERNAL_DO_NOTHING; 
-		if (responseType == ExternalCommandResponseType.EXTERNAL_RESPONSE_PLAIN_TEXT) {
+		KeywordAction.ExternalCommandResponseActionType responseActionType = KeywordAction.ExternalCommandResponseActionType.DO_NOTHING; 
+		if (responseType == ExternalCommandResponseType.PLAIN_TEXT) {
 			boolean reply = ui.isSelected(find(COMPONENT_CB_AUTO_REPLY));
 			boolean fwd = ui.isSelected(find(COMPONENT_CB_FORWARD));
 			
 			if (reply && fwd) {
-				responseActionType = KeywordAction.ExternalCommandResponseActionType.EXTERNAL_REPLY_AND_FORWARD;
+				responseActionType = KeywordAction.ExternalCommandResponseActionType.REPLY_AND_FORWARD;
 			} else if (reply) {
-				responseActionType = KeywordAction.ExternalCommandResponseActionType.TYPE_REPLY;
+				responseActionType = KeywordAction.ExternalCommandResponseActionType.REPLY;
 			} else if (fwd) {
-				responseActionType = KeywordAction.ExternalCommandResponseActionType.TYPE_FORWARD;
+				responseActionType = KeywordAction.ExternalCommandResponseActionType.FORWARD;
 			}
 			log.debug("Response Action type [" + responseActionType + "]");
-			if (responseActionType == KeywordAction.ExternalCommandResponseActionType.TYPE_REPLY 
-					|| responseActionType == KeywordAction.ExternalCommandResponseActionType.TYPE_FORWARD
-					|| responseActionType == KeywordAction.ExternalCommandResponseActionType.EXTERNAL_REPLY_AND_FORWARD) {
+			if (responseActionType == KeywordAction.ExternalCommandResponseActionType.REPLY 
+					|| responseActionType == KeywordAction.ExternalCommandResponseActionType.FORWARD
+					|| responseActionType == KeywordAction.ExternalCommandResponseActionType.REPLY_AND_FORWARD) {
 				message = ui.getText(find(COMPONENT_TF_MESSAGE));
 				log.debug("Message [" + message + "]");
 			}
-			if (responseActionType == KeywordAction.ExternalCommandResponseActionType.TYPE_FORWARD 
-					|| responseActionType == KeywordAction.ExternalCommandResponseActionType.EXTERNAL_REPLY_AND_FORWARD) {
+			if (responseActionType == KeywordAction.ExternalCommandResponseActionType.FORWARD 
+					|| responseActionType == KeywordAction.ExternalCommandResponseActionType.REPLY_AND_FORWARD) {
 				group = ui.getGroup(ui.getSelectedItem(find(COMPONENT_EXTERNAL_COMMAND_GROUP_LIST)));
 				if (group == null) {
 					log.debug("No group selected to forward");

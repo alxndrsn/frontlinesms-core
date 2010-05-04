@@ -363,7 +363,8 @@ public class IncomingMessageProcessor extends Thread {
 	 * @throws InterruptedException 
 	 * @throws JDOMException 
 	 */
-	private void executeExternalCommand(KeywordAction action, String incomingSenderMsisdn, String incomingMessageText) throws IOException, InterruptedException, JDOMException {
+	/* not private to allow unit testing */
+	void executeExternalCommand(KeywordAction action, String incomingSenderMsisdn, String incomingMessageText) throws IOException, InterruptedException, JDOMException {
 		LOG.trace("ENTER");
 		String cmd = KeywordAction.KeywordUtils.getExternalCommand(
 				action,
@@ -373,12 +374,12 @@ public class IncomingMessageProcessor extends Thread {
 		);
 		LOG.debug("Command to be executed [" + cmd + "]");
 
-		if (action.getExternalCommandResponseType() != ExternalCommandResponseType.EXTERNAL_RESPONSE_LIST_COMMANDS) {
+		if (action.getExternalCommandResponseType() != ExternalCommandResponseType.LIST_COMMANDS) {
 			//Executes the command and handle the response as plain text, or no response at all.
 			String response;
 			LOG.debug("Response will be plain text or nothing at all.");
-			boolean waitForResponse = action.getExternalCommandResponseType() == ExternalCommandResponseType.EXTERNAL_RESPONSE_PLAIN_TEXT;
-			if (action.getExternalCommandType() == KeywordAction.ExternalCommandType.EXTERNAL_HTTP_REQUEST) {
+			boolean waitForResponse = action.getExternalCommandResponseType() == ExternalCommandResponseType.PLAIN_TEXT;
+			if (action.getExternalCommandType() == KeywordAction.ExternalCommandType.HTTP_REQUEST) {
 				LOG.debug("Executing HTTP request...");
 				response = Utils.makeHttpRequest(cmd, waitForResponse);
 			} else {
@@ -393,7 +394,7 @@ public class IncomingMessageProcessor extends Thread {
 			//LIST OF COMMANDS TO EXECUTE
 			LOG.debug("Response will be an XML with Frontline Commands.");
 			InputStream toRead = null;
-			if (action.getExternalCommandType() == KeywordAction.ExternalCommandType.EXTERNAL_HTTP_REQUEST) {
+			if (action.getExternalCommandType() == KeywordAction.ExternalCommandType.HTTP_REQUEST) {
 				LOG.debug("Executing HTTP request...");
 				toRead = Utils.makeHttpRequest(cmd);
 			} else {
@@ -451,27 +452,27 @@ public class IncomingMessageProcessor extends Thread {
 		// to auto reply forward the response
 		LOG.trace("ENTER");
 		ExternalCommandResponseActionType responseActionType = action.getCommandResponseActionType();
-		if (responseActionType == KeywordAction.ExternalCommandResponseActionType.EXTERNAL_DO_NOTHING) {
+		if (responseActionType == KeywordAction.ExternalCommandResponseActionType.DO_NOTHING) {
 			LOG.debug("Nothing to do with the response!");
 			LOG.trace("EXIT");
 			return;
 		}
 		String message = KeywordAction.KeywordUtils.getExternalCommandReplyMessage(action, response);
 		LOG.debug("Message to forward [" + message + "]");
-		if (responseActionType == KeywordAction.ExternalCommandResponseActionType.TYPE_REPLY 
-				|| responseActionType == KeywordAction.ExternalCommandResponseActionType.EXTERNAL_REPLY_AND_FORWARD) {
+		if (responseActionType == KeywordAction.ExternalCommandResponseActionType.REPLY 
+				|| responseActionType == KeywordAction.ExternalCommandResponseActionType.REPLY_AND_FORWARD) {
 			//Auto reply
 			LOG.debug("Sending to [" + incomingSenderMsisdn + "] as an auto-reply.");
 			frontline.sendTextMessage(incomingSenderMsisdn, message);
 		}
-		if (responseActionType == KeywordAction.ExternalCommandResponseActionType.TYPE_FORWARD 
-				|| responseActionType == KeywordAction.ExternalCommandResponseActionType.EXTERNAL_REPLY_AND_FORWARD) {
+		if (responseActionType == KeywordAction.ExternalCommandResponseActionType.FORWARD 
+				|| responseActionType == KeywordAction.ExternalCommandResponseActionType.REPLY_AND_FORWARD) {
 			//Forwarding to a group
 			Group fwd = action.getGroup();
 			LOG.debug("Forwarding to group [" + fwd.getName() + "]");
 			for(Contact contact : this.groupMembershipDao.getActiveMembers(fwd)) {
 				if (contact.isActive()) {
-					if (responseActionType != KeywordAction.ExternalCommandResponseActionType.EXTERNAL_REPLY_AND_FORWARD 
+					if (responseActionType != KeywordAction.ExternalCommandResponseActionType.REPLY_AND_FORWARD 
 							|| !contact.getPhoneNumber().equalsIgnoreCase(incomingSenderMsisdn)) {
 						//If we have already replied to the sender and he/she is on the group to forward
 						//so we don't send the message again.

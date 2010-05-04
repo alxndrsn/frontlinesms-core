@@ -139,9 +139,9 @@ public class KeywordActionTest extends BaseTestCase {
 	public void testExternalCommandActionFactory() {
 		final Keyword keyword = mock(Keyword.class);
 		final String commandLine = "\"Test command.exe\" -arg1 /switch1 --longarg1 SOMETHING extrA";
-		final ExternalCommandType commandType = ExternalCommandType.EXTERNAL_COMMAND_LINE;
-		final ExternalCommandResponseType responseType = ExternalCommandResponseType.EXTERNAL_RESPONSE_PLAIN_TEXT; // FIXME use a real type
-		final ExternalCommandResponseActionType responseActionType = ExternalCommandResponseActionType.EXTERNAL_REPLY_AND_FORWARD; // FIXME use a real type
+		final ExternalCommandType commandType = ExternalCommandType.COMMAND_LINE;
+		final ExternalCommandResponseType responseType = ExternalCommandResponseType.PLAIN_TEXT; // FIXME use a real type
+		final ExternalCommandResponseActionType responseActionType = ExternalCommandResponseActionType.REPLY_AND_FORWARD; // FIXME use a real type
 		final String commandMsg = "";
 		final Group toFwd = mock(Group.class);
 		final long start = TEST_START_DATE;

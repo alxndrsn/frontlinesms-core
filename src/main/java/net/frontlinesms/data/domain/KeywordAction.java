@@ -68,23 +68,26 @@ public class KeywordAction {
 	}
 	
 	public enum ExternalCommandType {
-		EXTERNAL_HTTP_REQUEST,
-		EXTERNAL_COMMAND_LINE;
+		HTTP_REQUEST,
+		COMMAND_LINE;
 	}
 	
-	/** The action type of the external command.  TODO these should probably be represented with a pair of booleans. */
+	/**
+	 * The action type of the external command.  TODO these should probably be represented with a pair of booleans.
+	 * These are only used when {@link #externalCommandResponseType} is
+	 * {@link ExternalCommandResponseType#PLAIN_TEXT}
+	 */
 	public enum ExternalCommandResponseActionType {
-		TYPE_REPLY,
-		TYPE_FORWARD,
-		EXTERNAL_REPLY_AND_FORWARD,
-		EXTERNAL_DO_NOTHING;
+		REPLY,
+		FORWARD,
+		REPLY_AND_FORWARD,
+		DO_NOTHING;
 	}
 	
 	public enum ExternalCommandResponseType {
-		EXTERNAL_RESPONSE_PLAIN_TEXT,
-		EXTERNAL_RESPONSE_LIST_COMMANDS,
-		EXTERNAL_RESPONSE_DONT_WAIT;
-		
+		PLAIN_TEXT,
+		LIST_COMMANDS,
+		DONT_WAIT;
 	}
 	
 //> CONSTRUCTORS
