@@ -31,8 +31,8 @@
 			<separator />
 			<menuitem icon="/icons/frontline_icon.png" text="i18n.hometab.logo.settings" name="menu_showHometabSettings" action="showHomeTabSettings()"/>
 		</menu>
-		<!-- Menu below is for dev. -- >
-		<menu text="i18n.menubar.debug">
+		<!-- Menu below is for dev. -->
+		<menu text="i18n.menubar.debug" name="mnDebug">
 			<menuitem icon="/icons/database_execute.png" text="i18n.menuitem.debug.data.generate" action="generateTestData"/>
 			
 		<separator />
@@ -44,7 +44,7 @@
 			
 			<menuitem icon="/icons/report_error.png" text="Generate Error" action="dbgGenerateError"/>
 		</menu>
-		 -->
+		
 		<menu text="i18n.menubar.help">
 			<menuitem icon="/icons/help.png" text="i18n.menuitem.help.manual" action="showHelpPage('help-menu.htm')"/>
 			<menuitem icon="/icons/frontline_icon.png" text="i18n.menuitem.website" action="openBrowser('http://www.frontlinesms.com')"/>

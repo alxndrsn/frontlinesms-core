@@ -191,7 +191,17 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		LOG.debug("Detect Phones [" + detectPhones + "]");
 		
 		try {
-			add(loadComponentFromFile(UI_FILE_HOME));
+			Object desktopUiComponent = loadComponentFromFile(UI_FILE_HOME);
+			add(desktopUiComponent);
+			
+			// Remove the debug menu if this build is a proper release
+			if(!BuildProperties.getInstance().getVersion().contains("SNAPSHOT")) {
+				Object debugMenuComponent = find(desktopUiComponent, "mnDebug");
+				if(debugMenuComponent != null) {
+					remove(debugMenuComponent);
+				}
+			}
+			
 			statusBarComponent = find(COMPONENT_STATUS_BAR);
 			setStatus(InternationalisationUtils.getI18NString(MESSAGE_STARTING));
 			
