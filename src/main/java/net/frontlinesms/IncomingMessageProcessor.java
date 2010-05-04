@@ -215,6 +215,7 @@ public class IncomingMessageProcessor extends Thread {
 	/* not private to allow unit testing */
 	void handleTextMessage(final Message incoming) {
 		Keyword keyword = keywordDao.getFromMessageText(incoming.getTextContent());
+		
 		if (keyword != null) {
 			LOG.debug("The message contains keyword [" + keyword.getKeyword() + "]");
 			final Collection<KeywordAction> actions = this.keywordActionDao.getActions(keyword);
@@ -226,7 +227,7 @@ public class IncomingMessageProcessor extends Thread {
 				//If we could not find this contact, we execute the action.
 				//If we found a contact, he/she needs to be allowed to execute the action.
 				if (contact == null || contact.isActive()) {
-					final long triggerTime = System.currentTimeMillis();
+					final long triggerTime = incoming.getDate();
 					for (KeywordAction action : actions) {
 						if (action.isAlive(triggerTime)) {
 							try {

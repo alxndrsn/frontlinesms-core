@@ -7,6 +7,7 @@ import static net.frontlinesms.FrontlineSMSConstants.COMMON_AUTO_FORWARD_FOR_KEY
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_TO_GROUP;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_GROUP_SELECTED_TO_FWD;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_START_DATE_AFTER_END;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_SAVE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_FORWARD_FORM_GROUP_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_FORWARD_FORM_TEXTAREA;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_FORWARD_FORM_TITLE;
@@ -74,10 +75,18 @@ public class ForwardActionDialog extends BaseActionDialog {
 			ui.add(list, item);
 		}
 
-		// Set the FORWARD TEXT, if any has been supplied 
-		if(action!=null) {
-			ui.setText(find(COMPONENT_FORWARD_FORM_TEXTAREA), action.getUnformattedForwardText());
+		boolean enableSaveButton = false;
+		
+		// Set the FORWARD TEXT, if any has been supplied
+		if (action != null) {
+			String unformatedForwardText = action.getUnformattedForwardText();
+			if (unformatedForwardText != null && !unformatedForwardText.equals("")) {
+				ui.setText(find(COMPONENT_FORWARD_FORM_TEXTAREA), action.getUnformattedForwardText());
+				enableSaveButton = true;
+			}
 		}
+		
+		this.ui.setEnabled(this.find(COMPONENT_BT_SAVE), enableSaveButton);
 	}
 
 	/** @see net.frontlinesms.ui.handler.keyword.BaseActionDialog#getLayoutFilePath() */
@@ -97,6 +106,7 @@ public class ForwardActionDialog extends BaseActionDialog {
 	 */
 	public void addSenderToForwardMessage(String currentText, Object textArea) {
 		ui.setText(textArea, currentText + ' ' + CsvUtils.MARKER_SENDER_NAME);
+		this.forwardTextChanged();
 	}
 
 	/**
@@ -104,6 +114,7 @@ public class ForwardActionDialog extends BaseActionDialog {
 	 */
 	public void addMsgContentToForwardMessage(String currentText, Object textArea) {
 		ui.setText(textArea, currentText + ' ' + CsvUtils.MARKER_MESSAGE_CONTENT);
+		this.forwardTextChanged();
 	}
 	
 	/**
@@ -127,28 +138,49 @@ public class ForwardActionDialog extends BaseActionDialog {
 				log.trace("EXIT");
 				return;
 			}
-			KeywordAction action;
-			boolean isNew = false;
-			if (isEditing()) {
-				action = super.getTargetObject(KeywordAction.class);
-				log.debug("Editing action [" + action + "]. Setting new values!");
-				action.setGroup(group);
-				action.setForwardText(forwardText);
-				action.setStartDate(start);
-				action.setEndDate(end);
-				super.update(action);
-			} else {
-				isNew = true;
-				Keyword keyword = super.getTargetObject(Keyword.class);
-				log.debug("Creating action for keyword [" + keyword.getKeyword() + "]");
-				action = KeywordAction.createForwardAction(keyword, group, forwardText, start, end);
-				super.save(action);
-			}
-			updateKeywordActionList(action, isNew);
-			super.removeDialog();
+			doCreateKeywordActionForward(group, forwardText, start, end);
 		} else {
 			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_GROUP_SELECTED_TO_FWD));
 		}
 		log.trace("EXIT");
+	}
+
+	/**
+	 * Actually creates the keyword action forward when everything is in order
+	 * @param group
+	 * @param forwardText
+	 * @param start
+	 * @param end
+	 */
+	private void doCreateKeywordActionForward(Group group, String forwardText, long start, long end) {
+		KeywordAction action;
+		boolean isNew = false;
+		if (isEditing()) {
+			action = super.getTargetObject(KeywordAction.class);
+			log.debug("Editing action [" + action + "]. Setting new values!");
+			action.setGroup(group);
+			action.setForwardText(forwardText);
+			action.setStartDate(start);
+			action.setEndDate(end);
+			super.update(action);
+		} else {
+			isNew = true;
+			Keyword keyword = super.getTargetObject(Keyword.class);
+			log.debug("Creating action for keyword [" + keyword.getKeyword() + "]");
+			action = KeywordAction.createForwardAction(keyword, group, forwardText, start, end);
+			super.save(action);
+		}
+		updateKeywordActionList(action, isNew);
+		super.removeDialog();
+	}
+	
+	public void forwardTextChanged (String forwardString) {
+		boolean enableSaveButton = (forwardString != null && !forwardString.equals(""));
+		
+		this.ui.setEnabled(this.find(COMPONENT_BT_SAVE), enableSaveButton);
+	}
+	
+	public void forwardTextChanged () {
+		forwardTextChanged(this.ui.getText(this.ui.find(COMPONENT_FORWARD_FORM_TEXTAREA)));
 	}
 }

@@ -100,7 +100,6 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_DORMANT = "common.dormant";
 	public static final String COMMON_DRAFT = "common.draft";
 	public static final String COMMON_ACTIVE = "common.active";
-	public static final String COMMON_LIVE = "common.live";
 	public static final String COMMON_TO_GROUP = "common.to.group";
 	public static final String COMMON_AUTO_FORWARD_FOR_KEYWORD = "common.auto.forward.for.keyword";
 	public static final String COMMON_AUTO_LEAVE_GROUP = "common.auto.leave.group";
