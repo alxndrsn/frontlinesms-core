@@ -11,6 +11,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.transaction.annotation.Transactional;
 
 import net.frontlinesms.data.DuplicateKeyException;
+import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.repository.GroupDao;
@@ -74,7 +75,8 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 	
 	/** @see GroupDao#getAllGroups() */
 	public List<Group> getAllGroups() {
-		return super.getAll();
+		DetachedCriteria criteria = super.getSortCriterion(Group.Field.PATH, Order.ASCENDING);
+		return super.getList(criteria);
 	}
 	
 	public boolean hasDescendants(Group parent) {
@@ -88,7 +90,8 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 
 	/** @see GroupDao#getAllGroups(int, int) */
 	public List<Group> getAllGroups(int startIndex, int limit) {
-		return super.getAll(startIndex, limit);
+		DetachedCriteria criteria = super.getSortCriterion(Group.Field.PATH, Order.ASCENDING);
+		return super.getList(criteria, startIndex, limit);
 	}
 
 	/** @see GroupDao#getGroupByPath(String) */
@@ -115,7 +118,7 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 
 	/** @return criteria for getting the children of a group */
 	private DetachedCriteria getChildCriteria(Group parent) {
-		DetachedCriteria criteria = super.getCriterion();
+		DetachedCriteria criteria = super.getSortCriterion(Group.Field.PATH, Order.ASCENDING);
 //		criteria.add(Restrictions.like(Group.Field.PATH.getFieldName(), parent.getPath() + Group.PATH_SEPARATOR + "[^" + Group.PATH_SEPARATOR + "]"));
 		criteria.add(Restrictions.eq("parentPath", parent.getPath()));
 		return criteria;

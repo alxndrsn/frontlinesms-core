@@ -7,7 +7,6 @@ package net.frontlinesms.ui.handler.contacts;
 import static net.frontlinesms.FrontlineSMSConstants.ACTION_ADD_TO_GROUP;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_CONTACTS_IN_GROUP;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_E_MAIL_ADDRESS;
-import static net.frontlinesms.FrontlineSMSConstants.COMMON_GROUP;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_NAME;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_PHONE_NUMBER;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_CONTACTS_DELETED;

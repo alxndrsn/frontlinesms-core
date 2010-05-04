@@ -27,8 +27,6 @@ public class UtilsTest extends BaseTestCase {
 		assertTrue(System.currentTimeMillis() >= date);
 		assertTrue(Utils.getLongDateFromStringDate("20/04/2009", true) < Utils.getLongDateFromStringDate("19/04/2010", true));
 		assertTrue(Utils.getLongDateFromStringDate("20/04/09", true) < Utils.getLongDateFromStringDate("19/04/10", true));
-		assertTrue(System.currentTimeMillis() >= Utils.getLongDateFromStringDate("29/04/2010", true));
-		assertTrue(System.currentTimeMillis() <= Utils.getLongDateFromStringDate("30/04/2010", true));
 	}
 	
 	public void testGetFilenameWithoutExtension() {
