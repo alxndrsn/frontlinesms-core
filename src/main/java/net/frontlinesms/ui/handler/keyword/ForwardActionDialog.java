@@ -176,7 +176,6 @@ public class ForwardActionDialog extends BaseActionDialog {
 	
 	public void forwardTextChanged (String forwardString) {
 		boolean enableSaveButton = (forwardString != null && !forwardString.equals(""));
-		
 		this.ui.setEnabled(this.find(COMPONENT_BT_SAVE), enableSaveButton);
 	}
 	
