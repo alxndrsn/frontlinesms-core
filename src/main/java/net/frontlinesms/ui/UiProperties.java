@@ -136,7 +136,7 @@ public final class UiProperties extends UserHomeFilePropertySet {
 
 	/** @return <code>true</code> if the custom logo should keep its original size; <code>false</code> otherwise */
 	public boolean isHometabLogoOriginalSizeKept() {
-		return super.getPropertyAsBoolean(KEY_HOMETABLOGO_KEEP_ORIGINAL_SIZE, true);
+		return super.getPropertyAsBoolean(KEY_HOMETABLOGO_KEEP_ORIGINAL_SIZE, false);
 	}
 	
 	/**
