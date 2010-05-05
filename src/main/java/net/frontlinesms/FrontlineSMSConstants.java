@@ -148,7 +148,6 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_EDITING_SMS_SERVICE = "common.edting.sms.service";
 	public static final String COMMON_BLANK = "common.blank";
 	public static final String COMMON_CURRENCY = "common.currency";
-	public static final String COMMON_PROPERTIES = "common.properties";
 	public static final String COMMON_TYPE = "common.type";
 	public static final String COMMON_DATABASE_CONFIG = "common.database.config";
 	public static final String COMMON_DATABASE_CONNECTION_PROBLEM = "common.db.connection.problem";

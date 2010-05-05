@@ -192,7 +192,11 @@ public class HibernateGroupDaoTest extends HibernateTestCase {
 		this.sameGroupOrder(expectedResult, this.groupDao.getChildGroups(getRootGroup()).toArray(new Group[0]));
 	}
 	
-	
+	/**
+	 * Check if both arrays passed in parameter are identical, order included
+	 * @param expectedResult
+	 * @param actualResult
+	 */
 	private void sameGroupOrder(Group[] expectedResult, Group[] actualResult) {
 		assertEquals(expectedResult.length, actualResult.length);
 		
