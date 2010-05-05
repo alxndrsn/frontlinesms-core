@@ -4,6 +4,7 @@
 package net.frontlinesms.data.repository.hibernate;
 
 import java.util.Collection;
+import java.util.List;
 
 import net.frontlinesms.junit.HibernateTestCase;
 
@@ -173,6 +174,33 @@ public class HibernateGroupDaoTest extends HibernateTestCase {
 		groupDao.deleteGroup(myGroup, false);
 	}
 	
+	public void testGroupOrder() throws DuplicateKeyException {
+		Group 	barcelona  = createGroup(getRootGroup(), "FC Barcelona"),
+				lyon = createGroup(getRootGroup(), "Olympique Lyonnais"),
+				munchen = createGroup(getRootGroup(), "Bayern Munchen"),
+				milan = createGroup(getRootGroup(), "Inter Milan");
+		
+		this.groupDao.saveGroup(barcelona);
+		this.groupDao.saveGroup(lyon);
+		this.groupDao.saveGroup(munchen);
+		this.groupDao.saveGroup(milan);
+		
+		Group[] expectedResult = new Group[] { munchen, barcelona, milan, lyon };
+		// We test the order of the "All Groups" request
+		this.sameGroupOrder(expectedResult, this.groupDao.getAllGroups().toArray(new Group[0]));
+		// We test the order of the child groups of Root
+		this.sameGroupOrder(expectedResult, this.groupDao.getChildGroups(getRootGroup()).toArray(new Group[0]));
+	}
+	
+	
+	private void sameGroupOrder(Group[] expectedResult, Group[] actualResult) {
+		assertEquals(expectedResult.length, actualResult.length);
+		
+		for (int i = 0 ; i < expectedResult.length ; ++i) {
+			assertEquals(expectedResult[i], actualResult[i]);
+		}
+	}
+
 	private Contact createContact(String name, Group... groups) throws DuplicateKeyException {
 		// Make a phone number up that should be unique
 		String phoneNumber = Integer.toString(name.hashCode());
