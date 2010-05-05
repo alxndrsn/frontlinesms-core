@@ -13,7 +13,9 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_ACTIO
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_AUTO_REPLY;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORDS_DIVIDER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_KEYWORD_LIST;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_REMAINING_CHARS;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_MENU_ITEM_CREATE;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_MENU_ITEM_EDIT;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_BUTTON_DONE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_DESCRIPTION;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_KEYWORD;
@@ -26,6 +28,7 @@ import java.util.List;
 import thinlet.Thinlet;
 
 import net.frontlinesms.FrontlineSMS;
+import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
@@ -57,12 +60,14 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	private static final String COMPONENT_JOIN_GROUP_SELECT_LABEL = "lbJoinGroup";
 	private static final String COMPONENT_LEAVE_GROUP_SELECT_LABEL = "lbLeaveGroup";
 
+	public static final String COMPONENT_CB_ACTION_TYPE = "cbActionType";
 	public static final String COMPONENT_KEY_ACT_PANEL = "keyActPanel";
+	public static final String COMPONENT_LB_KEYWORD_DESCRIPTION = "lbKeywordDescription";
+	public static final String COMPONENT_TA_KEYWORD_DESCRIPTION = "newKeywordForm_description";
 	public static final String COMPONENT_TF_AUTO_REPLY = "tfAutoReply";
 	public static final String COMPONENT_TF_KEYWORD = "tfKeyword";
-	public static final String COMPONENT_CB_ACTION_TYPE = "cbActionType";
 	
-	private static final String I18N_CREATE_KEYWORD = "action.new.keyword";
+	private static final String I18N_CREATE_KEYWORD = "action.new.keyword";;
 
 	private KeywordDao keywordDao;
 	private KeywordActionDao keywordActionDao;
@@ -72,6 +77,8 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	
 	/** Flag used to indicate if we are selecting the join group or the leave group. */
 	private boolean selectingJoinGroup;
+	/** Add/Edit keyword form */
+	private Object keywordForm;
 	
 	public KeywordTabHandler(UiGeneratorController ui) {
 		super(ui);
@@ -157,6 +164,15 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		Object panel = ui.loadComponentFromFile(UI_FILE_KEYWORDS_ADVANCED_VIEW, this);
 		Object table = ui.find(panel, COMPONENT_ACTION_LIST);
 		Keyword keyword = ui.getKeyword(ui.getSelectedItem(keywordListComponent));
+		Object lbKeywordDescription = ui.find(panel, COMPONENT_LB_KEYWORD_DESCRIPTION);
+		
+		String keywordDescription = getDisplayableDescription(keyword);
+		if (keywordDescription != null && keywordDescription.length() > 0) {
+			ui.setText(lbKeywordDescription, keywordDescription);
+		} else {
+			ui.remove(lbKeywordDescription);
+		}
+		
 		ui.setText(panel, InternationalisationUtils.getI18NString(COMMON_KEYWORD_ACTIONS_OF, getDisplayableKeyword(keyword)));
 		for (KeywordAction action : this.keywordActionDao.getActions(keyword)) {
 			ui.add(table, ui.getRow(action));
@@ -204,7 +220,9 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 				if (name == null) {
 					continue;
 				} else {
-					boolean isEnabled = name.equals(COMPONENT_MENU_ITEM_CREATE);
+					// "New" button is always enabled
+					// "Edit" button is only enabled if a keyword is selected, even the blank keyword
+					boolean isEnabled = (name.equals(COMPONENT_MENU_ITEM_CREATE) || (name.equals(COMPONENT_MENU_ITEM_EDIT) && selected == 0));
 					ui.setEnabled(o, isEnabled);
 				}
 			}
@@ -439,6 +457,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		key.setDescription(desc);
 		this.keywordDao.updateKeyword(key);
 		ui.removeDialog(dialog);
+		this.showSelectedKeyword();
 		log.trace("EXIT");
 	}
 
@@ -484,14 +503,25 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 				previousType = type;
 			}
 		}
+		
+		String keywordDescription = getDisplayableDescription(keyword);
 		if (simple) {
 			Object panel = ui.loadComponentFromFile(UI_FILE_KEYWORDS_SIMPLE_VIEW, this);
 			ui.add(divider, panel);
 			
 			//Fill every field
 			Object tfKeyword = ui.find(panel, COMPONENT_TF_KEYWORD);
+			Object lbKeywordDescription = ui.find(panel, COMPONENT_LB_KEYWORD_DESCRIPTION);
 			ui.setEnabled(tfKeyword, false);
 			ui.setText(tfKeyword, getDisplayableKeyword(keyword));
+			
+			// We display the keyword description in the panel
+			if (keywordDescription != null && keywordDescription.length() > 0) {
+				ui.setText(lbKeywordDescription,keywordDescription);
+			} else {
+				ui.remove(lbKeywordDescription);
+			}
+			
 			for (KeywordAction action : actions) {
 				KeywordAction.Type type = action.getType();
 				if (type == KeywordAction.Type.REPLY) {
@@ -508,6 +538,14 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		} else {
 			Object panel = ui.loadComponentFromFile(UI_FILE_KEYWORDS_ADVANCED_VIEW, this);
 			Object table = ui.find(panel, COMPONENT_ACTION_LIST);
+			Object lbKeywordDescription = ui.find(panel, COMPONENT_LB_KEYWORD_DESCRIPTION);
+			
+			// We display the keyword description in the panel
+			if (keywordDescription != null && keywordDescription.length() > 0) {
+				ui.setText(lbKeywordDescription,keywordDescription);
+			} else {
+				ui.remove(lbKeywordDescription);
+			}
 			ui.setText(panel, InternationalisationUtils.getI18NString(COMMON_KEYWORD_ACTIONS_OF, getDisplayableKeyword(keyword)));
 			//Fill every field
 			for (KeywordAction action : actions) {
@@ -608,7 +646,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	private void showKeywordDialogForEdition(Keyword keyword) {
 		String key = getDisplayableKeyword(keyword);
 		String title = InternationalisationUtils.getI18NString(COMMON_EDITING_KEYWORD, key);
-		Object keywordForm = ui.loadComponentFromFile(UI_FILE_NEW_KEYWORD_FORM, this);
+		keywordForm = ui.loadComponentFromFile(UI_FILE_NEW_KEYWORD_FORM, this);
 		ui.setAttachedObject(keywordForm, keyword);
 		ui.setText(ui.find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_TITLE), title);
 		// Pre-populate the textfields with currently-selected keyword attributes strings
@@ -616,12 +654,26 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		Object textFieldDescription = ui.find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_DESCRIPTION);
 		ui.setText(textField, key);
 		ui.setEnabled(textField, false);
-		if (keyword.getDescription() != null) { 
+		if (keyword.getDescription() != null) {
+			// Shouldn't be possible to edit the blank keyword
 			ui.setText(textFieldDescription, keyword.getDescription());
+			this.keywordDescriptionChanged(keyword.getDescription());
 		}
 		String method = "finishKeywordEdition(newKeywordForm, newKeywordForm_description.text)";
 		ui.setAction(ui.find(keywordForm, COMPONENT_NEW_KEYWORD_BUTTON_DONE), method, keywordForm, this);
 		ui.add(keywordForm);
+	}
+	
+	public void keywordDescriptionChanged (String descriptionString) {
+		if (descriptionString != null && descriptionString.length() > 0) {
+			if (descriptionString.length() > FrontlineSMSConstants.KEYWORD_MAX_DESCRIPTION_LENGTH) {
+				ui.setText(ui.find(keywordForm, COMPONENT_TA_KEYWORD_DESCRIPTION), descriptionString.substring(0, FrontlineSMSConstants.KEYWORD_MAX_DESCRIPTION_LENGTH));
+			}
+		}
+		descriptionString = ui.getText(ui.find(keywordForm, COMPONENT_TA_KEYWORD_DESCRIPTION));
+		ui.setText(ui.find(keywordForm, COMPONENT_LB_REMAINING_CHARS), String.valueOf(FrontlineSMSConstants.KEYWORD_MAX_DESCRIPTION_LENGTH - descriptionString.length()));
+		ui.setVisible(ui.find(keywordForm, COMPONENT_LB_REMAINING_CHARS), true);
+		ui.setVisible(ui.find(keywordForm, "lbTextRemainingChars"), true);			
 	}
 	
 	void updateKeywordActionList_(KeywordAction action, boolean isNew) {
@@ -746,7 +798,19 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	 */
 	public static String getDisplayableKeyword(Keyword keyword) {
 		String displayable = keyword.getKeyword();
-		if(displayable.length() == 0) return "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">";
+		if (displayable.length() == 0) return "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">";
 		else return displayable;		
+	}
+	
+	/**
+	 * Gets a displayable string for a keyword description, replacing the blank keyword with an internationalised
+	 * string describing the blank keyword.
+	 * @param keyword
+	 * @return
+	 */
+	public static String getDisplayableDescription(Keyword keyword) {
+		boolean hasDescription = (keyword.getDescription() != null && keyword.getDescription().length() > 0); 
+		if (keyword.getKeyword().length() == 0 && !hasDescription) return InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_BLANK_KEYWORD_DESCRIPTION);
+		else return keyword.getDescription();		
 	}
 }

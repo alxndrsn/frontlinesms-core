@@ -121,6 +121,7 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_MENU_ITEM_VIEW_CONTACT = "viewContact";
 	public static final String COMPONENT_MENU_ITEM_MSG_HISTORY = "msg_history";
 	public static final String COMPONENT_MENU_ITEM_CREATE = "miCreate";
+	public static final String COMPONENT_MENU_ITEM_EDIT = "miEdit";
 	public static final String COMPONENT_STATUS_BAR = "statusBar";
 	public static final String COMPONENT_CONTACT_MANAGER_CONTACT_LIST = "contactManager_contactList";
 	public static final String COMPONENT_COMPOSE_MESSAGE_RECIPIENT_LIST = "composeMessage_to";
