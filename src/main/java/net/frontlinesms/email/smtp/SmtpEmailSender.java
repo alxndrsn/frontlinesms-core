@@ -26,7 +26,6 @@ import javax.mail.internet.MimeMultipart;
 
 import org.apache.log4j.Logger;
 
-import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.Utils;
 import net.frontlinesms.email.EmailException;
 
@@ -122,7 +121,7 @@ public class SmtpEmailSender {
 			
 			    	// Assume that the filename you want to send is the same as the
 			    	// Actual file name - could alter this to remove the file path
-			    	attachmentBodyPart.setFileName(FrontlineSMSConstants.ZIPPED_LOGS_FILENAME);
+			    	attachmentBodyPart.setFileName(attachment.getName());
 			
 			    	multipart.addBodyPart(attachmentBodyPart);
 		    	}

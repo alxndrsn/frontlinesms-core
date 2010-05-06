@@ -23,7 +23,7 @@ import org.apache.log4j.Logger;
 public class PopUtils {
 //> STATIC CONSTANTS
 	/** Logging object */
-	private static Logger LOG = Utils.getLogger(IntelliSmsInternetService.class);
+	private static Logger LOG = Utils.getLogger(PopUtils.class);
 	/** MIME Type for plain text */
 	private static final String MIMETYPE_TEXT_PLAIN = "text/plain";
 
