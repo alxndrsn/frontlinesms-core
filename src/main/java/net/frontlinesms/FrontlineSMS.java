@@ -85,7 +85,6 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	private static Logger LOG = Utils.getLogger(FrontlineSMS.class);
 	/** SMS device emulator */
 	public static final SmsDevice EMULATOR = new DummySmsDevice(FrontlineSMSConstants.EMULATOR_MSISDN);
-	/** I18n message used for the description of the blank keyword */
 	
 //> INSTANCE VARIABLES
 
