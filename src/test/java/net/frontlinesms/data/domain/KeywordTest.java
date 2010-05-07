@@ -3,7 +3,19 @@
  */
 package net.frontlinesms.data.domain;
 
+import static org.mockito.Mockito.*;
+import thinlet.Thinlet;
+
+import net.frontlinesms.FrontlineSMS;
+import net.frontlinesms.FrontlineSMSConstants;
+import net.frontlinesms.data.repository.KeywordActionDao;
+import net.frontlinesms.data.repository.KeywordDao;
+import net.frontlinesms.data.repository.hibernate.HibernateKeywordActionDao;
+import net.frontlinesms.data.repository.hibernate.HibernateKeywordDao;
 import net.frontlinesms.junit.BaseTestCase;
+import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.handler.keyword.KeywordTabHandler;
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
  * Unit tests for the {@link Keyword} class.
@@ -137,6 +149,21 @@ public class KeywordTest extends BaseTestCase {
 		assertTrue(one.matches(" One"));
 		assertFalse(one.matches("oneno"));
 		assertFalse(one.matches("ONEno"));
+	}
+	
+	public void testKeywordFunctions () throws Throwable {
+		Thinlet.DEFAULT_ENGLISH_BUNDLE = InternationalisationUtils.getDefaultLanguageBundle().getProperties();
+		final String DESCRIPTION = "Description";
+		
+		Keyword keywordOne = new Keyword("A", "");
+		Keyword keywordTwo = new Keyword("B", DESCRIPTION);
+		Keyword blankKeywordWithoutDescription = new Keyword("", "");
+		Keyword blankKeywordWithDescription = new Keyword("", DESCRIPTION);
+		
+		assertEquals("", KeywordTabHandler.getDisplayableDescription(keywordOne));
+		assertEquals(DESCRIPTION, KeywordTabHandler.getDisplayableDescription(keywordTwo));
+		assertEquals(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_BLANK_KEYWORD_DESCRIPTION), KeywordTabHandler.getDisplayableDescription(blankKeywordWithoutDescription));
+		assertEquals(DESCRIPTION, KeywordTabHandler.getDisplayableDescription(blankKeywordWithDescription));
 	}
 	
 //> INSTANCE HELPER METHODS

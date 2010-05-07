@@ -3,7 +3,13 @@
     <label name="newKeywordForm_title"/>
     <textfield perform="do_createKeyword(newKeywordForm, this.text, newKeywordForm_description.text)" columns="30" name="newKeywordForm_keyword" weightx="1"/>
     <label text="i18n.common.description"/>
-    <textarea name="newKeywordForm_description" weighty="1" weightx="1"/>
+    <panel columns="1">
+	    <textarea name="newKeywordForm_description" weighty="1" weightx="1" action="keywordDescriptionChanged(this.text)"/>
+		<panel gap="5" halign="right">
+	    	<label text="i18n.sentence.remaining.characters" name="lbTextRemainingChars"/>
+	        <label font="bold" name="lbRemainingChars"/>
+	    </panel>
+    </panel>
     <panel gap="5" halign="center">
 	    <button name="btDone" action="do_createKeyword(newKeywordForm, newKeywordForm_keyword.text, newKeywordForm_description.text)" icon="/icons/tick.png" text="i18n.action.save"/>
 	    <button action="removeDialog(newKeywordForm)" icon="/icons/cross.png" text="i18n.action.cancel"/>

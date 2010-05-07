@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <panel bottom="5" columns="1" gap="5" icon="/icons/keywordAction.png" left="5" name="pnKeywordActionsAdvanced" right="5" top="5" weightx="1" weighty="1">
+	<label font="12 bold italic" name="lbKeywordDescription"/>
 	<table delete="showConfirmationDialog('removeSelectedFromKeywordActionsList')" perform="keywordManager_edit(actionList)" action="enableKeywordActionFields(this, keyActPanel)" name="actionList" weightx="1" weighty="1">
 		<header>
 			<column width="23"/>

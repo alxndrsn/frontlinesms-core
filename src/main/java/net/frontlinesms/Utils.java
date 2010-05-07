@@ -42,7 +42,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.TimeZone;
 
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.encoding.Base64Utils;

@@ -21,6 +21,7 @@ package net.frontlinesms.data.domain;
 
 import javax.persistence.*;
 
+import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.data.EntityField;
 
 /**
@@ -67,6 +68,7 @@ public class Keyword {
 	private String keyword;
 
 	/** description of this keyword */
+	@Column(length=FrontlineSMSConstants.KEYWORD_MAX_DESCRIPTION_LENGTH)
 	private String description;
 
 //> CONSTRUCTORS

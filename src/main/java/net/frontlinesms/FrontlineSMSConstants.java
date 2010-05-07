@@ -148,7 +148,6 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_EDITING_SMS_SERVICE = "common.edting.sms.service";
 	public static final String COMMON_BLANK = "common.blank";
 	public static final String COMMON_CURRENCY = "common.currency";
-	public static final String COMMON_PROPERTIES = "common.properties";
 	public static final String COMMON_TYPE = "common.type";
 	public static final String COMMON_DATABASE_CONFIG = "common.database.config";
 	public static final String COMMON_DATABASE_CONNECTION_PROBLEM = "common.db.connection.problem";
@@ -160,6 +159,7 @@ public final class FrontlineSMSConstants {
 	public static final String EVENT_DESCRIPTION = "event.description";
 	public static final String EVENT_DESCRIPTION_MULTI_RECIPIENTS = "event.description.multi.recipients";	
 	
+	public static final String MESSAGE_BLANK_KEYWORD_DESCRIPTION = "message.blank.keyword";
 	public static final String MESSAGE_GROUP_NO_MEMBERS = "message.no.members";
 	public static final String MESSAGE_KEYWORD_EXISTS = "message.keyword.already.exists";
 	public static final String MESSAGE_KEYWORD_SAVED = "message.keyword.saved";
@@ -291,6 +291,9 @@ public final class FrontlineSMSConstants {
 	public static final String DEFAULT_TIME = "00:00";
 
 	public static final long MILLIS_PER_DAY = 24*60*60*1000;
+	
+	/** maximum length of the description field for a keyword */
+	public static final int KEYWORD_MAX_DESCRIPTION_LENGTH = 255;
 
 //> DATE FORMATS
 	/** [i18n key to Date format] years, months and days.

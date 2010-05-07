@@ -35,6 +35,7 @@ import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.*;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 import org.apache.log4j.Logger;
 import org.smslib.CIncomingMessage;
@@ -84,6 +85,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	private static Logger LOG = Utils.getLogger(FrontlineSMS.class);
 	/** SMS device emulator */
 	public static final SmsDevice EMULATOR = new DummySmsDevice(FrontlineSMSConstants.EMULATOR_MSISDN);
+	/** I18n message used for the description of the blank keyword */
 	
 //> INSTANCE VARIABLES
 
@@ -189,7 +191,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	public void startServices() {
 		try {
 			LOG.debug("Creating blank keyword...");
-			Keyword blankKeyword = new Keyword("", "Blank keyword, used to be triggerd by every received message.[i18n]");
+			Keyword blankKeyword = new Keyword("", "");
 			keywordDao.saveKeyword(blankKeyword);
 			LOG.debug("Blank keyword created.");
 		} catch (DuplicateKeyException e) {
