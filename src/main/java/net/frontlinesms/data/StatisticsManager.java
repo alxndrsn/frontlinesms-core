@@ -217,7 +217,7 @@ public class StatisticsManager {
 	 * Collects the total number of keywords
 	 */
 	private void collectNumberOfKeyword() {
-		final int numberOfKeyword = keywordDao.getTotalKeywordCount();
+		final int numberOfKeyword = keywordDao.getTotalKeywordCount() - 1; // We don't want the blank keyword
 		this.statisticsList.put(I18N_KEY_STATS_KEYWORDS, String.valueOf(numberOfKeyword));
 	}
 

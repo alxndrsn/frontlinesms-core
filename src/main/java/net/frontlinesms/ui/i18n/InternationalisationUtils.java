@@ -283,12 +283,12 @@ public class InternationalisationUtils {
 					// not strictly legal, so we'll log a warning and carry on.
 					LOG.warn("Bad line in language file '" + identifier + "': '" + line + "'");
 				} else {
-					String key = line.substring(0, splitChar);					
+					String key = line.substring(0, splitChar).trim();					
 					if(i18nStrings.containsKey(key)) {
 						// This key has already been read from the language file.  Ignore the new value.
 						LOG.warn("Duplicate key in language file '': ''");
 					} else {
-						String value = line.substring(splitChar + 1);
+						String value = line.substring(splitChar + 1).trim();
 						i18nStrings.put(key, value);
 					}
 				}
