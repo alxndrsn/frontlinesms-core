@@ -19,7 +19,6 @@
  */
 package net.frontlinesms.data.repository;
 
-import java.util.Collection;
 import java.util.List;
 
 import net.frontlinesms.data.DuplicateKeyException;
@@ -46,7 +45,7 @@ public interface GroupDao {
 	 * @param parent
 	 * @return a list of groups with the specified parent
 	 */
-	public Collection<Group> getChildGroups(Group parent);
+	public List<Group> getChildGroups(Group parent);
 	
 	/** @return Total number of groups */
 	public int getGroupCount();

@@ -4,7 +4,6 @@
 package net.frontlinesms.data.repository.unmodifiable;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.Map.Entry;
@@ -50,7 +49,7 @@ public class UnmodifiableGroupDao implements GroupDao {
 		return groups.get(path);
 	}
 	
-	public Collection<Group> getChildGroups(Group parent) {
+	public List<Group> getChildGroups(Group parent) {
 		ArrayList<Group> kids = new ArrayList<Group>();
 		String pathMatch = parent.getPath() + "/";
 		for(Entry<String, Group> e : groups.entrySet()) {

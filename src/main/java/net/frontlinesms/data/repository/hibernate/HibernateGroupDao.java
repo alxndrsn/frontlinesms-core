@@ -3,7 +3,6 @@
  */
 package net.frontlinesms.data.repository.hibernate;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.criterion.DetachedCriteria;
@@ -84,7 +83,7 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 	}
 	
 	/** @see GroupDao#getChildGroups(Group) */
-	public Collection<Group> getChildGroups(Group parent) {
+	public List<Group> getChildGroups(Group parent) {
 		return super.getList(getChildCriteria(parent));
 	}
 

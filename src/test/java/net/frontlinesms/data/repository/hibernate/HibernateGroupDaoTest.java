@@ -175,10 +175,10 @@ public class HibernateGroupDaoTest extends HibernateTestCase {
 	}
 	
 	public void testGroupOrder() throws DuplicateKeyException {
-		Group 	barcelona  = createGroup(getRootGroup(), "FC Barcelona"),
-				lyon = createGroup(getRootGroup(), "Olympique Lyonnais"),
-				munchen = createGroup(getRootGroup(), "Bayern Munchen"),
-				milan = createGroup(getRootGroup(), "Inter Milan");
+		Group barcelona = createGroup(getRootGroup(), "FC Barcelona");
+		Group lyon = createGroup(getRootGroup(), "Olympique Lyonnais");
+		Group munchen = createGroup(getRootGroup(), "Bayern Munchen");
+		Group milan = createGroup(getRootGroup(), "Inter Milan");
 		
 		this.groupDao.saveGroup(barcelona);
 		this.groupDao.saveGroup(lyon);
@@ -187,9 +187,9 @@ public class HibernateGroupDaoTest extends HibernateTestCase {
 		
 		Group[] expectedResult = new Group[] { munchen, barcelona, milan, lyon };
 		// We test the order of the "All Groups" request
-		this.sameGroupOrder(expectedResult, this.groupDao.getAllGroups().toArray(new Group[0]));
+		this.assertEquals(expectedResult, this.groupDao.getAllGroups());
 		// We test the order of the child groups of Root
-		this.sameGroupOrder(expectedResult, this.groupDao.getChildGroups(getRootGroup()).toArray(new Group[0]));
+		this.assertEquals(expectedResult, this.groupDao.getChildGroups(getRootGroup()));
 	}
 	
 	/**
@@ -197,11 +197,11 @@ public class HibernateGroupDaoTest extends HibernateTestCase {
 	 * @param expectedResult
 	 * @param actualResult
 	 */
-	private void sameGroupOrder(Group[] expectedResult, Group[] actualResult) {
-		assertEquals(expectedResult.length, actualResult.length);
+	private void assertEquals(Group[] expectedResult, List<Group> actualResult) {
+		assertEquals(expectedResult.length, actualResult.size());
 		
 		for (int i = 0 ; i < expectedResult.length ; ++i) {
-			assertEquals(expectedResult[i], actualResult[i]);
+			assertEquals(expectedResult[i], actualResult.get(i));
 		}
 	}
 
