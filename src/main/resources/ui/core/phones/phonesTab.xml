@@ -38,7 +38,7 @@
 				<menuitem name="miCancelDetection" text="i18n.action.stop.detection" icon="/icons/stopDetection.png" action="stopDetection(phoneManager_modemListError)"/>
 			</popupmenu>
 		</table>
-		<button tooltip="i18n.tooltip.click.for.help" valign="bottom" action="showHelpPage('help-menu.htm')" icon="/icons/big_help.png" type="link"/>
+		<button tooltip="i18n.tooltip.click.for.help" valign="bottom" action="showHelpPage('phones.htm')" icon="/icons/big_help.png" type="link"/>
 		<panel columns="1" gap="8">
 			<button type="link" text="i18n.phones.help.moreinfo" action="showHelpPage('phones.htm')"/>
 			<button type="link" text="i18n.phones.help.trouble" action="showHelpPage('troubleshooting.htm')"/>
