@@ -66,6 +66,32 @@ public class SmtpEmailSender {
 	 * @param textContent The text content of the email
 	 * @throws MessagingException if there was a problem sending the email
 	 */
+	public void sendEmail(String recipients, String fromAddress, String subject, String textContent) throws EmailException {
+	    MimeMessage msg = new MimeMessage(session);
+
+	    try {
+	    	msg.setFrom(new InternetAddress(fromAddress));
+		    msg.setRecipients(Message.RecipientType.TO, recipients);
+		    msg.setSubject(subject);
+		    msg.setSentDate(new Date());
+		    msg.setText(textContent); 
+		    
+		    Transport.send(msg);
+	    } catch(MessagingException ex) {
+	    	log.info("Exception thrown while sending email to " + recipients, ex);
+	    	throw new EmailException(ex);
+	    }
+	}
+	
+	/**
+	 * Create and send an email.
+	 * @param smtpServer The SMTP server to deliver the email to
+	 * @param recipients The recipient email address(es) to use in the {@link RecipientType#TO} field.  These should be specified as per {@link InternetAddress#parse(String)}.
+	 * @param fromAddress The address the email should show in the "from" field
+	 * @param subject The subject of the email
+	 * @param textContent The text content of the email
+	 * @throws MessagingException if there was a problem sending the email
+	 */
 	public void sendEmail(String recipients, Address fromAddress, String subject, String textContent) throws EmailException {
 	    MimeMessage msg = new MimeMessage(session);
 
