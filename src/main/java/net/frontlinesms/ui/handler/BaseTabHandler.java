@@ -62,7 +62,7 @@ public abstract class BaseTabHandler implements ThinletUiEventHandler {
 	 * @param dialog the dialog to remove
 	 * @see UiGeneratorController#removeDialog(Object)
 	 */
-	public final void removeDialog(Object dialog) {
+	public void removeDialog(Object dialog) {
 		this.ui.removeDialog(dialog);
 	}
 	/**

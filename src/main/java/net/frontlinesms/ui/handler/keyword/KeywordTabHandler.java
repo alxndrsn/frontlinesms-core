@@ -241,11 +241,17 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 
 	/**
 	 * Shows the new keyword dialog.
-	 * 
-	 * @param keywordList
+	 * @param parentKeyword
 	 */
-	public void show_createKeywordForm(Object keywordList) {
-		showNewKeywordForm(ui.getKeyword(ui.getSelectedItem(keywordList)));
+	public void showNewKeywordForm() {
+		String title = InternationalisationUtils.getI18NString(I18N_CREATE_KEYWORD);
+		this.keywordForm = ui.loadComponentFromFile(UI_FILE_NEW_KEYWORD_FORM, this);
+		ui.setText(ui.find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_TITLE), title);
+		
+		// Update the display for the number of characters left in the description field
+		this.keywordDescriptionChanged("");
+		
+		ui.add(keywordForm);
 	}
 
 	/**
@@ -255,7 +261,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	 * @param newKeyword The desired keyword.
 	 * @param description The description for this new keyword.
 	 */
-	public void do_createKeyword(Object formPanel, String newKeyword, String description) {
+	public void do_createKeyword(String newKeyword, String description) {
 		log.trace("ENTER");
 		log.debug("Creating keyword [" + newKeyword + "] with description [" + description + "]");
 		try {
@@ -272,7 +278,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 			return;
 		}
 		updateKeywordList();
-		ui.remove(formPanel);
+		removeDialog(this.keywordForm);
 		log.trace("EXIT");
 	}
 	
@@ -456,7 +462,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		log.debug("New description [" + desc + "] for keyword [" + key.getKeyword() + "]");
 		key.setDescription(desc);
 		this.keywordDao.updateKeyword(key);
-		ui.removeDialog(dialog);
+		this.removeDialog(dialog);
 		this.showSelectedKeyword();
 		log.trace("EXIT");
 	}
@@ -582,6 +588,25 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		
 		groupSelect.show();
 	}
+	
+	public void removeDialog(Object dialog) {
+		super.removeDialog(dialog);
+		if(dialog == this.keywordForm) {
+			keywordForm = null;
+		}
+	}
+	
+	public void keywordDescriptionChanged (String descriptionString) {
+		if (descriptionString != null && descriptionString.length() > 0) {
+			if (descriptionString.length() > FrontlineSMSConstants.KEYWORD_MAX_DESCRIPTION_LENGTH) {
+				ui.setText(ui.find(keywordForm, COMPONENT_TA_KEYWORD_DESCRIPTION), descriptionString.substring(0, FrontlineSMSConstants.KEYWORD_MAX_DESCRIPTION_LENGTH));
+			}
+		}
+		descriptionString = ui.getText(ui.find(keywordForm, COMPONENT_TA_KEYWORD_DESCRIPTION));
+		ui.setText(ui.find(keywordForm, COMPONENT_LB_REMAINING_CHARS), String.valueOf(FrontlineSMSConstants.KEYWORD_MAX_DESCRIPTION_LENGTH - descriptionString.length()));
+		ui.setVisible(ui.find(keywordForm, COMPONENT_LB_REMAINING_CHARS), true);
+		ui.setVisible(ui.find(keywordForm, "lbTextRemainingChars"), true);			
+	}
 
 //> UI HELPER METHODS
 	/** 
@@ -591,20 +616,6 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	private void updateKeywordList() {
 		this.keywordListPagingHandler.refresh();
 		enableKeywordFields(ui.find(COMPONENT_KEY_PANEL));
-	}
-
-	/**
-	 * Shows the new keyword dialog.
-	 * @param parentKeyword
-	 */
-	private void showNewKeywordForm(Keyword parentKeyword) {
-		String title = InternationalisationUtils.getI18NString(I18N_CREATE_KEYWORD);
-		Object keywordForm = ui.loadComponentFromFile(UI_FILE_NEW_KEYWORD_FORM, this);
-		ui.setAttachedObject(keywordForm, parentKeyword);
-		ui.setText(ui.find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_TITLE), title);
-		// We don't re-populate the keyword textfield with currently-selected keyword string anymore
-		// cause it doesn't really make sense
-		ui.add(keywordForm);
 	}
 	
 	/**
@@ -654,26 +665,15 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		Object textFieldDescription = ui.find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_DESCRIPTION);
 		ui.setText(textField, key);
 		ui.setEnabled(textField, false);
-		if (keyword.getDescription() != null) {
-			// Shouldn't be possible to edit the blank keyword
-			ui.setText(textFieldDescription, keyword.getDescription());
-			this.keywordDescriptionChanged(keyword.getDescription());
-		}
+		
+		String displayedDescription = keyword.getDescription();
+		if(displayedDescription == null) displayedDescription = "";
+		ui.setText(textFieldDescription, displayedDescription);
+		this.keywordDescriptionChanged(displayedDescription);
+		
 		String method = "finishKeywordEdition(newKeywordForm, newKeywordForm_description.text)";
 		ui.setAction(ui.find(keywordForm, COMPONENT_NEW_KEYWORD_BUTTON_DONE), method, keywordForm, this);
 		ui.add(keywordForm);
-	}
-	
-	public void keywordDescriptionChanged (String descriptionString) {
-		if (descriptionString != null && descriptionString.length() > 0) {
-			if (descriptionString.length() > FrontlineSMSConstants.KEYWORD_MAX_DESCRIPTION_LENGTH) {
-				ui.setText(ui.find(keywordForm, COMPONENT_TA_KEYWORD_DESCRIPTION), descriptionString.substring(0, FrontlineSMSConstants.KEYWORD_MAX_DESCRIPTION_LENGTH));
-			}
-		}
-		descriptionString = ui.getText(ui.find(keywordForm, COMPONENT_TA_KEYWORD_DESCRIPTION));
-		ui.setText(ui.find(keywordForm, COMPONENT_LB_REMAINING_CHARS), String.valueOf(FrontlineSMSConstants.KEYWORD_MAX_DESCRIPTION_LENGTH - descriptionString.length()));
-		ui.setVisible(ui.find(keywordForm, COMPONENT_LB_REMAINING_CHARS), true);
-		ui.setVisible(ui.find(keywordForm, "lbTextRemainingChars"), true);			
 	}
 	
 	void updateKeywordActionList_(KeywordAction action, boolean isNew) {
