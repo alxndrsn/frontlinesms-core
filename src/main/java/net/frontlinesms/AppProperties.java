@@ -25,10 +25,6 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	private static final String KEY_USER_ID = "user.id";
 	/** Property key (String): User Email address */
 	private static final String KEY_USER_EMAIL = "user.email";
-	/** Property key (String): User country */
-	private static final String KEY_USER_COUNTRY = "user.country";
-	/** Property key (String): User sector */
-	private static final String KEY_USER_SECTOR = "user.sector";
 	/** Property key (String): Date of last statistics submission */
 	private static final String KEY_LAST_STATS_SUBMISSION = "stats.submit.lastdate";
 	/** Property key (String): Date of last prompt */
@@ -99,18 +95,6 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	}
 	public void setUserEmail(String userEmail) {
 		super.setProperty(KEY_USER_EMAIL, userEmail);
-	}
-	public String getWorkSector() {
-		return super.getProperty(KEY_USER_SECTOR, "");
-	}
-	public void setWorkSector(String sectorName) {
-		super.setProperty(KEY_USER_SECTOR, sectorName);
-	}
-	public String getWorkCountry() {
-		return super.getProperty(KEY_USER_COUNTRY, "");
-	}
-	public void setWorkCountry(String countryCode) {
-		super.setProperty(KEY_USER_COUNTRY, countryCode);
 	}
 	
 	/** @return the date of last stats submission, or <code>null</code> if none has been set */

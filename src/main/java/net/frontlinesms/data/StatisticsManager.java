@@ -48,9 +48,6 @@ public class StatisticsManager {
 	private static final String I18N_KEY_STATS_VERSION_NUMBER = "stats.data.version.number";
 	private static final String I18N_KEY_INTERNET_SERVICE_ACCOUNTS = "stats.data.smsdevice.internet.accounts";
 
-	private static final String STAT_KEY_SECTOR = "sector";
-	private static final String STAT_KEY_COUNTRY = "country";
-	
 	/** Separates the i18n key from the ID keys in the {@link #statisticsList} for composite keys */
 	private static final String STATS_LIST_KEY_SEPARATOR = ":";
 
@@ -287,12 +284,6 @@ public class StatisticsManager {
 	}
 	public String getUserEmailAddress() {
 		return userEmailAddress;
-	}
-	public void setWorkSector(int sectorIndex) {
-		this.statisticsList.put(STAT_KEY_SECTOR, Integer.toString(sectorIndex));
-	}
-	public void setCountry(String countryCode) {
-		this.statisticsList.put(STAT_KEY_COUNTRY, countryCode);
 	}
 	
 //> REPORT GENERATION METHODS

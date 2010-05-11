@@ -4,6 +4,8 @@
 package net.frontlinesms.ui.handler;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map.Entry;
 
 import net.frontlinesms.AppProperties;
@@ -25,17 +27,16 @@ import org.apache.log4j.Logger;
 @TextResourceKeyOwner
 public class StatisticsDialogHandler implements ThinletUiEventHandler {
 
-
 //> UI LAYOUT FILES
 	public static final String UI_FILE_STATISTICS_FORM = "/ui/core/statistics/dgStatistics.xml";
 	private static final String COMPONENT_EMAIL_TEXTFIELD = "tfEmail";
 	
 //> UI COMPONENT NAMES
 	private static final String COMPONENT_TA_STATS_CONTENT = "statsContent";
-	private static final String COMPONENT_SECTOR_LIST = "cbSector";
-	private static final String COMPONENT_COUNTRY_LIST = "cbCountry";
+	private static final String COMPONENT_EMAIL_ADDRESS_PANEL = "pnEmailAddress";
 
 	private static final String I18N_STATS_DIALOG_THANKS = "stats.dialog.thanks";
+	private static final String I18N_STATS_DIALOG_EMAIL_REQUEST = "stats.dialog.email.request";
 
 //> INSTANCE PROPERTIES
 	/** Logger */
@@ -59,12 +60,11 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 		LOG.trace("INIT STATISTICS DIALOG");
 		this.dialogComponent = ui.loadComponentFromFile(UI_FILE_STATISTICS_FORM, this);
 		
-		// Initialise the country list
-		initCountryList(AppProperties.getInstance().getWorkCountry());
 		// set value for email if it's currently saved
 		ui.setText(find(COMPONENT_EMAIL_TEXTFIELD), AppProperties.getInstance().getUserEmail());
-		// set value for sector if it's currently saved
-		setSelectedSector(AppProperties.getInstance().getWorkSector());
+		
+		// Set text for the email info
+		initEmailAddressEntryPanel();
 		
 		this.statisticsManager.collectData();
 		
@@ -80,38 +80,14 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 		LOG.trace("EXIT");
 	}
 	
-	/**
-	 * Set the selected sector in the sector list.
-	 * @param sector
-	 */
-	private void setSelectedSector(String sector) {
-		Object sectorList = find(COMPONENT_SECTOR_LIST);
-		int currentIndex = 0;
-		for(Object sectorComponent : ui.getItems(sectorList)) {
-			String text = ui.getText(sectorComponent);
-			if(text.equals(sector)) {
-				ui.setSelectedIndex(sectorList, currentIndex);
-				break;
-			}
-			++currentIndex;
-		}
-	}
-	
-	/**
-	 * Initialise the country list.
-	 * @param countryCode The code of the country to select initially.
-	 */
-	private void initCountryList(String countryCode) {
-		Object countryList = find(COMPONENT_COUNTRY_LIST);
-		int currentIndex = ui.getItems(countryList).length;
-		for(StatCountry c : StatCountry.values()) {
-			Object countryChoice = ui.createComboboxChoice(c.getEnglishName(), c);
-			ui.setIcon(countryChoice, "/icons/flags/" + c.getCode() + ".png");
-			ui.add(countryList, countryChoice);
-			if(c.getCode().equals(countryCode)) {
-				ui.setSelectedIndex(countryList, currentIndex);
-			}
-			++currentIndex;
+	private void initEmailAddressEntryPanel() {
+		Object emailAddressPanel = find(COMPONENT_EMAIL_ADDRESS_PANEL);
+		List<String> textList = InternationalisationUtils.getI18nStrings(I18N_STATS_DIALOG_EMAIL_REQUEST);
+		Collections.reverse(textList);
+		for(String text : textList) {
+			Object label = ui.createLabel(text);
+			ui.setColspan(label, 2);
+			ui.add(emailAddressPanel, label, 0);
 		}
 	}
 	
@@ -179,18 +155,12 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 	public void sendStatistics() {
 		// Gather the email, country and sector values
 		String userEmail = getUserEmail();
-		int sectorIndex = getSectorIndex();
-		String countryCode = getCountryCode();
 		
 		this.statisticsManager.setUserEmailAddress(userEmail);
-		this.statisticsManager.setWorkSector(sectorIndex);
-		this.statisticsManager.setCountry(countryCode);
 		
 		// TODO save values for email, sector and country
 		AppProperties appProperties = AppProperties.getInstance();
 		appProperties.setUserEmail(userEmail);
-		appProperties.setWorkSector(getSectorName());
-		appProperties.setWorkCountry(countryCode);
 		appProperties.saveToDisk();
 		
 		if (!sendStatisticsViaEmail()) {
@@ -199,23 +169,12 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 		
 		this.saveLastSubmissionDate();
 		
-		this.ui.alert(InternationalisationUtils.getI18NString(I18N_STATS_DIALOG_THANKS));
+		this.ui.alert(InternationalisationUtils.getI18NString(I18N_STATS_DIALOG_THANKS, FrontlineSMSConstants.STATISTICS_DAYS_BEFORE_RELAUNCH));
 		this.removeDialog();
 	}
 	
 	private String getUserEmail() {
 		return ui.getText(find(COMPONENT_EMAIL_TEXTFIELD));
-	}
-	private int getSectorIndex() {
-		return ui.getSelectedIndex(find(COMPONENT_SECTOR_LIST));
-	}
-	private String getSectorName() {
-		return ui.getText(ui.getSelectedItem(find(COMPONENT_SECTOR_LIST)));
-	}
-	private String getCountryCode() {
-		Object countryItem = ui.getSelectedItem(ui.find(COMPONENT_COUNTRY_LIST));
-		StatCountry country = ui.getAttachedObject(countryItem, StatCountry.class);
-		return country == null ? "" : country.getCode();
 	}
 	
 	/**

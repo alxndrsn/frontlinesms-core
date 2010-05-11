@@ -42,7 +42,7 @@ public final class FrontlineSMSConstants {
 	public static final String FRONTLINE_STATS_PHONE_NUMBER = "+447716355738";
 	
 	/** Number of days to wait before prompting to submit statistics after the previous time */
-	public static final long STATISTICS_DAYS_BEFORE_RELAUNCH = 0;
+	public static final int STATISTICS_DAYS_BEFORE_RELAUNCH = 28;
 	
 	public static final String ZIPPED_LOGS_FILENAME = "logs.zip";
 	
