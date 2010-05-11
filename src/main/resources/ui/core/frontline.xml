@@ -2,12 +2,12 @@
 <panel columns="1" gap="3" left="3" bottom="3" right="3" weightx="1" weighty="1">
 	<menubar weightx="1" name="menubar">
 		<menu text="i18n.menubar.file">
-			<menu icon="/icons/export.png" text="i18n.menu.export" name="menu_export">
+			<menu icon="/icons/export.png" text="i18n.menuitem.export" name="menu_export">
 				<menuitem icon="/icons/users.png" text="i18n.common.contacts" action="showExportWizard('contacts')"/>
 				<menuitem icon="/icons/sms.png" text="i18n.common.messages" action="showExportWizard('messages')"/>
 				<menuitem icon="/icons/keyword.png" text="i18n.common.keywords" action="showExportWizard('keywords')"/>
 			</menu>
-			<menu icon="/icons/import.png" text="i18n.menu.import" name="menu_import">
+			<menu icon="/icons/import.png" text="i18n.menuitem.import" name="menu_import">
 				<menuitem icon="/icons/users.png" text="i18n.common.contacts" action="showImportWizard('contacts')"/>
 			</menu>
 			<separator />
