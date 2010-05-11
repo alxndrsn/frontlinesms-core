@@ -6,10 +6,11 @@
 	        <label name="i18n.stats.dialog.text.2"/>
 	        <label text="i18n.stats.dialog.text.3"/>
 	        <label text="i18n.stats.dialog.text.4"/>
+	    	<label font="11" text="i18n.stats.dialog.send.type"/>
 	    </panel>
 	    <panel columns="1" gap="6" weightx="2">
-	    	<label font="bold" text="i18n.common.content" icon="/icons/database_table.png"/>
-	    	<table name="statsContent" weightx="1" weighty="1" height="280" width="140">
+	    	<label font="bold" text="Anonymous data [i18n] XXX" icon="/icons/database_table.png"/>
+	    	<table name="statsContent" weightx="1" weighty="1" height="140" width="140">
 	        	<header>
 	            	<column icon="/icons/help.png" text="i18n.stats.dialog.data" width="250"/>
 	            	<column icon="/icons/file.png" text="i18n.stats.dialog.value" width="50"/>
@@ -18,12 +19,9 @@
 	    </panel>
 	    
 	    <panel columns="2" gap="5">
-	    	<label text="XXX i18n it would really help us if you provide some more details about your project..." colspan="2"/>
+	    	<label font="bold" text="Additional information [i18n] XXX" icon="/icons/database_table.png" colspan="2"/>
 	    	
-	    	<label text="XXX i18n Email address" icon="/icons/email.png"/>
-	    	<textfield name="tfEmail"/>
-	    	
-	    	<label text="XXX i18n Category of work" icon="/icons/note.png"/>
+	    	<label text="Primary category [i18n] XXX" icon="/icons/note.png" weightx="1"/>
 	    	<combobox editable="false" name="cbSector">
 				<choice text=""/>
 				<choice text="Agriculture"/> 
@@ -41,15 +39,19 @@
 				<choice text="Other"/> 
 	    	</combobox>
 	    	
-	    	<label text="XXX i18n Your country" icon="/icons/sms_http.png"/>
+	    	<label text="Primary country [i18n] XXX" icon="/icons/sms_http.png"/>
 	    	<combobox editable="false" name="cbCountry">
 				<choice text=""/>
 			</combobox>
+	    	<label/>
+	    	<label text="Enter your email address here to opt in to our newsletter and receive updates [i18n] XXX" colspan="2"/>
+	    	<label text="on new versions and features. [i18n] XXX" colspan="2"/>
+	    	<label text="Email address [i18n] XXX" icon="/icons/email.png"/>
+	    	<textfield name="tfEmail"/>
 	    </panel>
 	    
 	    <panel columns="1" gap="5">
-	    	<label text="i18n.stats.dialog.send.data"/>
-	    	<label font="11" text="i18n.stats.dialog.send.type"/>
+	    	<label text="Can we collect this information? [i18n] XXX"/>
 		</panel>
 		<panel gap="5" halign="center">
 		    <button icon="/icons/tick.png" action="sendStatistics" name="contactSelecter_okButton" text="i18n.action.yes"/>

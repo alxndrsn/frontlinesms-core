@@ -306,7 +306,6 @@ public class StatisticsManager {
 		StringBuilder statsOutput = new StringBuilder();
 
 		statsOutput.append(this.getUserEmailAddress());
-		statsOutput.append(STATS_LIST_KEY_SEPARATOR);
 		
 		for(Entry<String, String> entry : statisticsList.entrySet()) {
 			statsOutput.append(STATISTICS_SMS_SEPARATOR);
@@ -324,7 +323,7 @@ public class StatisticsManager {
 		}
 		
 		return STATISTICS_SMS_KEYWORD + " " + 
-				statsOutput.substring(1/*avoid first separator char*/);
+				statsOutput.toString();
 	}
 	
 	/**
