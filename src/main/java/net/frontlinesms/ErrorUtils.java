@@ -376,6 +376,7 @@ public class ErrorUtils {
 		SmtpEmailSender emailSender = new SmtpEmailSender(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL_SERVER);
 	
 	    StringBuilder sb = new StringBuilder();
+	    appendFrontlineProperties(sb);
 	    appendSystemProperties(sb);
 	    appendCommProperties(sb);
 	    appendPluginProperties(sb);
@@ -429,6 +430,17 @@ public class ErrorUtils {
 		
 		endSection(bob, "Plugin Properties");
 	}
+	
+	private static void appendFrontlineProperties(StringBuilder bob) {
+		beginSection(bob, "FrontlineSMS Properties");
+		
+		// Including flsms version, so we don't need to open logs to find that out.
+		appendProperty(bob, "FrontlineSMS Version", BuildProperties.getInstance().getVersion());
+		appendProperty(bob, "User ID", AppProperties.getInstance().getUserId());
+		appendProperty(bob, "User Email", AppProperties.getInstance().getUserEmail());
+
+		endSection(bob, "FrontlineSMS Properties");
+	}
 
 	/**
 	 * Appends pertinent system properties to a {@link StringBuilder}.
@@ -457,9 +469,6 @@ public class ErrorUtils {
 		appendSystemProperty(bob, "Java home", "java.home");
 		appendSystemProperty(bob, "Java Version", "java.version");
 		appendSystemProperty(bob, "Java VM Version", "java.vm.version");
-		
-		// Including flsms version, so we don't need to open logs to find that out.
-		appendProperty(bob, "FrontlineSMS Version", BuildProperties.getInstance().getVersion());
 		
 		endSection(bob, "System Properties");
 	}
