@@ -40,9 +40,9 @@ public class StatisticsManager {
 	private static final String I18N_KEY_STATS_LAST_SUBMISSION_DATE = "stats.data.last.submission.date";
 	private static final String I18N_KEY_STATS_OS = "stats.data.os";
 	private static final String I18N_KEY_STATS_PHONES_CONNECTED = "stats.data.phones.connected";
-	private static final String I18N_KEY_STATS_RECEIVED_MESSAGES = FrontlineSMSConstants.COMMON_RECEIVED;
+	private static final String I18N_KEY_STATS_RECEIVED_MESSAGES = FrontlineSMSConstants.COMMON_RECEIVED_MESSAGES;
 	private static final String I18N_KEY_STATS_RECEIVED_MESSAGES_SINCE_LAST_SUBMISSION = "stats.data.received.messages.since.last.submission";
-	private static final String I18N_KEY_STATS_SENT_MESSAGES = FrontlineSMSConstants.COMMON_SENT;
+	private static final String I18N_KEY_STATS_SENT_MESSAGES = FrontlineSMSConstants.COMMON_SENT_MESSAGES;
 	private static final String I18N_KEY_STATS_SENT_MESSAGES_SINCE_LAST_SUBMISSION = "stats.data.sent.messages.since.last.submission";
 	private static final String I18N_KEY_STATS_USER_ID = "stats.data.user.id";
 	private static final String I18N_KEY_STATS_VERSION_NUMBER = "stats.data.version.number";

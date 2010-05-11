@@ -2,12 +2,12 @@
 <panel columns="1" gap="3" left="3" bottom="3" right="3" weightx="1" weighty="1">
 	<menubar weightx="1" name="menubar">
 		<menu text="i18n.menubar.file">
-			<menu icon="/icons/export.png" text="i18n.menu.export" name="menu_export">
+			<menu icon="/icons/export.png" text="i18n.menuitem.export" name="menu_export">
 				<menuitem icon="/icons/users.png" text="i18n.common.contacts" action="showExportWizard('contacts')"/>
 				<menuitem icon="/icons/sms.png" text="i18n.common.messages" action="showExportWizard('messages')"/>
 				<menuitem icon="/icons/keyword.png" text="i18n.common.keywords" action="showExportWizard('keywords')"/>
 			</menu>
-			<menu icon="/icons/import.png" text="i18n.menu.import" name="menu_import">
+			<menu icon="/icons/import.png" text="i18n.menuitem.import" name="menu_import">
 				<menuitem icon="/icons/users.png" text="i18n.common.contacts" action="showImportWizard('contacts')"/>
 			</menu>
 			<separator />
@@ -16,22 +16,19 @@
 		<menu text="i18n.menubar.settings">
 			<menuitem icon="/icons/database_edit.png" text="i18n.menuitem.edit.db.settings" name="menu_editDatabase" action="showDatabaseConfigDialog"/>
 			<menuitem icon="/icons/emailAccount_edit.png" text="i18n.menuitem.email.settings" name="menu_emailSettings" action="showEmailAccountsSettings"/>
+			<menuitem icon="/icons/frontline_icon.png" text="i18n.hometab.logo.settings" name="menu_showHometabSettings" action="showHomeTabSettings()"/>
 			<menuitem icon="/icons/sms_http_edit.png" text="i18n.smsdevice.internet.settings" action="showSmsInternetServiceSettings"/>
 			<separator />
 			<menu icon="/icons/language.png" text="i18n.menu.language" name="menu_language">
 				<!-- This should be populated at runtime with different language options -->
 			</menu>
 		</menu>
-		<menu text="i18n.menubar.view">
-			<menu icon="/icons/tab.png" name="menu_tabs" text="i18n.common.tabs">
+		<menu text="i18n.menubar.view" name="menu_tabs">
 				<checkboxmenuitem action="tabsChanged(this)" name="miHome" icon="/icons/frontline_icon.png" text="i18n.tab.home"/>
 				<checkboxmenuitem action="tabsChanged(this)" name="miKeyword" icon="/icons/keyword.png" text="i18n.tab.keyword.manager"/>
 				<checkboxmenuitem action="tabsChanged(this)" name="miEmail" icon="/icons/email.png" text="i18n.tab.email"/>
-			</menu>
-			<separator />
-			<menuitem icon="/icons/frontline_icon.png" text="i18n.hometab.logo.settings" name="menu_showHometabSettings" action="showHomeTabSettings()"/>
 		</menu>
-		<!-- Menu below is for dev. -->
+		<!-- Menu below is for dev and will only appear in SNAPSHOT versions -->
 		<menu text="i18n.menubar.debug" name="mnDebug">
 			<menuitem icon="/icons/database_execute.png" text="i18n.menuitem.debug.data.generate" action="generateTestData"/>
 			

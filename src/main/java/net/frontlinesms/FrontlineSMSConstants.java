@@ -155,6 +155,8 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_CONNECTION_OK = "common.connection.ok";
 	public static final String COMMON_DATABASE_CONNECTION_FAILED = "common.db.connection.failed";
 	public static final String COMMON_ATTENTION = "common.attention";
+	public static final String COMMON_RECEIVED_MESSAGES = "common.received.messages";
+	public static final String COMMON_SENT_MESSAGES = "common.sent.messages";
 	
 	public static final String EVENT_DESCRIPTION = "event.description";
 	public static final String EVENT_DESCRIPTION_MULTI_RECIPIENTS = "event.description.multi.recipients";	
@@ -300,5 +302,5 @@ public final class FrontlineSMSConstants {
 	 * This should specify a 4 digit year as it will be used for parsing entered dates as well as displaying used ones. */
 	public static final String DATEFORMAT_YMD = "date.keyword.action.format";
 	/** [i18n key to Date format] This date format is for displaying the date and time of an event, message etc.  It is not used for parsing input. */
-	public static final String DATEFORMAT_YMD_HMS = "date.message.format";
+	public static final String DATEFORMAT_YMD_HMS = "date.message.format";;
 }
