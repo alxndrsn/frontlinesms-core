@@ -366,7 +366,7 @@ public class Utils {
 	public static void openHelpPageInBrowser(String page) {
 		String url;
 		
-		if (!isMacOS()) {
+		if (isMacOS()) {
 			url = "http://www.frontlinesms.com/help/" + BuildProperties.getInstance().getVersion() + "/" + page;	
 		} else {
 			url = "help/" + page;
@@ -386,7 +386,7 @@ public class Utils {
 	}
 	
 	/**
-	 * Checks if the Users OS is a Mac OS
+	 * Checks if the User's OS is a Mac OS
 	 * @return <code>true</code> if the OS is Mac OS, <code>false</code> otherwise.
 	 */
 	public static boolean isMacOS () {
@@ -395,7 +395,7 @@ public class Utils {
 	}
 	
 	/**
-	 * Checks if the Users OS is a Windows OS
+	 * Checks if the User's OS is a Windows OS
 	 * @return <code>true</code> if the OS is Windows, <code>false</code> otherwise.
 	 */
 	public static boolean isWindowsOS () {
