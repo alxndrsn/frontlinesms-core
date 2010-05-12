@@ -21,6 +21,7 @@ package net.frontlinesms.ui;
 
 import java.awt.Image;
 
+import net.frontlinesms.BuildProperties;
 import net.frontlinesms.ErrorUtils;
 import net.frontlinesms.Utils;
 import net.frontlinesms.ui.i18n.LanguageBundle;
@@ -149,7 +150,7 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	 * @param page The name of the help manual page, including file extension.
 	 */
 	public void showHelpPage(String page) {
-		String url = "help/" + page;
+		String url = "help/" + BuildProperties.getInstance().getVersion() + "/" + page;
 		Utils.openExternalBrowser(url);
 	}
 	
