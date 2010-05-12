@@ -367,7 +367,7 @@ public class Utils {
 		String url;
 		
 		if (isMacOS()) {
-			url = "http://www.frontlinesms.com/help/" + BuildProperties.getInstance().getVersion() + "/" + page;	
+			url = getOnlineHelpUrl(page);	
 		} else {
 			url = "help/" + page;
 		}
@@ -385,6 +385,10 @@ public class Utils {
 		openExternalBrowser(url);
 	}
 	
+	private final static String getOnlineHelpUrl(String page) {
+		return "http://help.frontlinesms.com/manuals/" + BuildProperties.getInstance().getVersion() + "/" + page;
+	}
+
 	/**
 	 * Checks if the User's OS is a Mac OS
 	 * @return <code>true</code> if the OS is Mac OS, <code>false</code> otherwise.
