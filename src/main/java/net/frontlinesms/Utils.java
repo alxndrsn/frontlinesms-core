@@ -322,11 +322,10 @@ public class Utils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void openExternalBrowser(String url) {
-		String os = System.getProperty("os.name").toLowerCase();
 		Runtime rt = Runtime.getRuntime();
 	
 		try {
-			if (os.startsWith("win")) {
+			if (isWindowsOS()) {
 				LOG.info("Attempting to open URL with Windows-specific code");
 				String[] cmd = new String[4];
 				cmd[0] = "cmd.exe";
@@ -334,7 +333,7 @@ public class Utils {
 				cmd[2] = "start";
 				cmd[3] = url;
 				rt.exec(cmd);
-			} else if (os.startsWith("mac")) {
+			} else if (isMacOS()) {
 				LOG.info("Attempting to open URL with Mac-specific code");
 
 				// TODO here, we are trying to launch the browser twice.  This looks to only open
@@ -365,10 +364,9 @@ public class Utils {
 	 * @param page The help page
 	 */
 	public static void openHelpPageInBrowser(String page) {
-		String os = System.getProperty("os.name").toLowerCase();
 		String url;
 		
-		if (os.startsWith("mac")) {
+		if (isMacOS()) {
 			url = "http://www.frontlinesms.com/help/" + BuildProperties.getInstance().getVersion() + "/" + page;	
 		} else {
 			url = "help/" + page;
@@ -385,6 +383,24 @@ public class Utils {
 		LOG.debug("URL rewritten as '" + url + "'");
 		*/
 		openExternalBrowser(url);
+	}
+	
+	/**
+	 * Checks if the User's OS is a Mac OS
+	 * @return <code>true</code> if the OS is Mac OS, <code>false</code> otherwise.
+	 */
+	public static boolean isMacOS () {
+		String os = System.getProperty("os.name").toLowerCase();
+		return os.startsWith("mac");		
+	}
+	
+	/**
+	 * Checks if the User's OS is a Windows OS
+	 * @return <code>true</code> if the OS is Windows, <code>false</code> otherwise.
+	 */
+	public static boolean isWindowsOS () {
+		String os = System.getProperty("os.name").toLowerCase();
+		return os.startsWith("win");		
 	}
 
 	/**
