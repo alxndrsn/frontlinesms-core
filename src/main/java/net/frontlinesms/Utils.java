@@ -337,18 +337,6 @@ public class Utils {
 			} else if (os.startsWith("mac")) {
 				LOG.info("Attempting to open URL with Mac-specific code");
 
-				if(!url.startsWith("http://")) {
-					// It seems like we don't have permission to open a file inside a .app package
-					// on OSX.  While we are packaging the mac version as a .app, we access help on
-					// the FrontlineSMS website.
-					LOG.debug("Rewriting local url '" + url + "'...");
-					String workingDirectory = System.getProperty("user.dir");
-					LOG.debug("Working directory: '" + workingDirectory + "'");
-					// url = workingDirectory + "/FrontlineSMS.app/Contents/Resources/" + url;
-					url = "http://www.frontlinesms.com/" + url;
-					LOG.debug("URL rewritten as '" + url + "'");
-				}
-
 				// TODO here, we are trying to launch the browser twice.  This looks to only open
 				// one browser instance, so I'd guess one of them was failing.  If it's the same
 				// one every time, we can get rid of the other method.
@@ -370,6 +358,33 @@ public class Utils {
 		} catch (Throwable t) {
 			LOG.warn("Could not open browser (" + url + ")", t);
 		}
+	}
+	
+	/**
+	 * Builds the URL of the web page depending on the OS
+	 * @param page The help page
+	 */
+	public static void openHelpPageInBrowser(String page) {
+		String os = System.getProperty("os.name").toLowerCase();
+		String url;
+		
+		if (os.startsWith("mac")) {
+			url = "http://www.frontlinesms.com/help/" + BuildProperties.getInstance().getVersion() + "/" + page;	
+		} else {
+			url = "help/" + page;
+		}
+		
+		 /* TODO: Try to resolve permission problem for mac and then open local help files
+		// It seems like we don't have permission to open a file inside a .app package
+		// on OSX.  While we are packaging the mac version as a .app, we access help on
+		// the FrontlineSMS website.
+		LOG.debug("Rewriting local url '" + url + "'...");
+		String workingDirectory = System.getProperty("user.dir");
+		LOG.debug("Working directory: '" + workingDirectory + "'");
+		// url = workingDirectory + "/FrontlineSMS.app/Contents/Resources/" + url;
+		LOG.debug("URL rewritten as '" + url + "'");
+		*/
+		openExternalBrowser(url);
 	}
 
 	/**
