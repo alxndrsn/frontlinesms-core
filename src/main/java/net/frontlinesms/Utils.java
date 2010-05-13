@@ -366,8 +366,9 @@ public class Utils {
 	public static void openHelpPageInBrowser(String page) {
 		String url;
 		
-		if (isMacOS()) {
-			url = getOnlineHelpUrl(page);	
+		if (!isMacOS()) {
+			url = getOnlineHelpUrl(page);
+			System.err.println("Pwals: " + url);
 		} else {
 			url = "help/" + page;
 		}
@@ -386,7 +387,7 @@ public class Utils {
 	}
 	
 	private final static String getOnlineHelpUrl(String page) {
-		return "http://help.frontlinesms.com/manuals/" + BuildProperties.getInstance().getVersion() + "/" + page;
+		return "http://help.frontlinesms.com/manuals/?page=" + BuildProperties.getInstance().getVersion() + "_" + page;
 	}
 
 	/**
