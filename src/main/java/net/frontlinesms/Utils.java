@@ -364,30 +364,22 @@ public class Utils {
 	 * @param page The help page
 	 */
 	public static void openHelpPageInBrowser(String page) {
+		// TODO Try to resolve permission problem for mac and then open local help files
+		// It seems like we don't have permission to open a file inside a .app package
+		// on OSX.  While we are packaging the mac version as a .app, we access help on
+		// the FrontlineSMS website.
 		String url;
-		
-		if (!isMacOS()) {
+		if (isMacOS()) {
 			url = getOnlineHelpUrl(page);
-			System.err.println("Pwals: " + url);
 		} else {
 			url = "help/" + page;
 		}
 		
-		 /* TODO: Try to resolve permission problem for mac and then open local help files
-		// It seems like we don't have permission to open a file inside a .app package
-		// on OSX.  While we are packaging the mac version as a .app, we access help on
-		// the FrontlineSMS website.
-		LOG.debug("Rewriting local url '" + url + "'...");
-		String workingDirectory = System.getProperty("user.dir");
-		LOG.debug("Working directory: '" + workingDirectory + "'");
-		// url = workingDirectory + "/FrontlineSMS.app/Contents/Resources/" + url;
-		LOG.debug("URL rewritten as '" + url + "'");
-		*/
 		openExternalBrowser(url);
 	}
 	
 	private final static String getOnlineHelpUrl(String page) {
-		return "http://help.frontlinesms.com/manuals/?page=" + BuildProperties.getInstance().getVersion() + "_" + page;
+		return "http://help.frontlinesms.com/manuals/" + BuildProperties.getInstance().getVersion() + "/" + page;
 	}
 
 	/**
