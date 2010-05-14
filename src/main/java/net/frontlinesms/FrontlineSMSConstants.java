@@ -75,10 +75,6 @@ public final class FrontlineSMSConstants {
 //> CONTACTS i18n Keys
 	/** [i18n key] "All contacts" */
 	public static final String CONTACTS_ALL = "contacts.all";
-	/** [i18n key] "Unnamed contacts" */
-	public static final String CONTACTS_UNNAMED = "contacts.unnamed";
-	/** [i18n key] "Ungrouped contacts" */
-	public static final String CONTACTS_UNGROUPED = "contacts.ungrouped";
 	
 // COMMON i18n Keys TODO these need commenting
 	public static final String COMMON_ALL = "common.all";
