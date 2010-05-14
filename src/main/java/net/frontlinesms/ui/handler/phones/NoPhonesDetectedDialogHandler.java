@@ -150,7 +150,7 @@ public class NoPhonesDetectedDialogHandler implements ThinletUiEventHandler {
 	/** @param dialog the dialog to remove
 	 * @see UiGeneratorController#remove(Object) */
 	public void removeDialog(Object dialog) {
-		this.uiController.remove(dialog);
+		this.uiController.closeDeviceConnectionDialog(dialog);
 	}
 	
 	/**

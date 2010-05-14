@@ -148,6 +148,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	/** Thinlet UI Component: status bar at the bottom of the window */
 	private final Object statusBarComponent;
+	/** Thinlet UI Cialog: device connection dialog handler */
+	private NoPhonesDetectedDialogHandler deviceConnectionDialogHandler;
+	/** A Lock object used to synchronise methods accessing the {@link #deviceConnectionDialogHandler} */
+	private Object deviceConnectionDialogHandlerLock = new Object();
 	
 	/**
 	 * Creates a new instance of the UI Controller.
@@ -1788,10 +1792,21 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		if(notification instanceof NoSmsDevicesConnectedNotification) {
 			// Unable to connect to SMS devices.  If enabled, show the help dialog to prompt connection 
 			if (AppProperties.getInstance().isDeviceConnectionDialogEnabled()) {
-				NoPhonesDetectedDialogHandler deviceConnectionDialogHandler = new NoPhonesDetectedDialogHandler(this);
-				deviceConnectionDialogHandler.initDialog((NoSmsDevicesConnectedNotification) notification);
-				add(deviceConnectionDialogHandler.getDialog());
+				synchronized (deviceConnectionDialogHandlerLock) {
+					if (deviceConnectionDialogHandler == null) {
+						deviceConnectionDialogHandler = new NoPhonesDetectedDialogHandler(this);
+						deviceConnectionDialogHandler.initDialog((NoSmsDevicesConnectedNotification) notification);
+						add(deviceConnectionDialogHandler.getDialog());
+					}
+				}
 			}
+		}
+	}
+
+	public void closeDeviceConnectionDialog(Object dialog) {
+		synchronized (deviceConnectionDialogHandlerLock) {
+			this.remove(dialog);
+			this.deviceConnectionDialogHandler = null;
 		}
 	}
 }
