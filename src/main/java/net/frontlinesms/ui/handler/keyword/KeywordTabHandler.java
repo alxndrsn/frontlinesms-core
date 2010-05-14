@@ -375,7 +375,6 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		
 		// Refresh the UI
 		updateKeywordList();
-		ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_KEYWORD_SAVED));
 		ui.infoMessage(InternationalisationUtils.getI18NString(MESSAGE_KEYWORD_SAVED));
 		log.trace("EXIT");
 	}
