@@ -21,7 +21,6 @@ package net.frontlinesms.ui;
 
 import java.awt.Image;
 
-import net.frontlinesms.BuildProperties;
 import net.frontlinesms.ErrorUtils;
 import net.frontlinesms.Utils;
 import net.frontlinesms.ui.i18n.LanguageBundle;
@@ -39,10 +38,14 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 //> UI DEFINITION FILES
 	/** Thinlet UI layout File: alert popup box */
 	protected static final String UI_FILE_ALERT = "/ui/core/util/dgAlert.xml";
+	/** Thinlet UI layout File: info popup box */
+	protected static final String UI_FILE_INFO = "/ui/core/util/dgInfo.xml";
 
 //> UI COMPONENTS
 	/** Component of {@link #UI_FILE_ALERT} which contains the message to display */
 	private static final String COMPONENT_ALERT_MESSAGE = "alertMessage";
+	/** Component of {@link #UI_FILE_INFO} which contains the message to display */
+	private static final String COMPONENT_INFO_MESSAGE = "infoMessage";
 	
 //> INSTANCE PROPERTIES
 	/** Logging object */
@@ -125,6 +128,16 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 		Object alertDialog = loadComponentFromFile(UI_FILE_ALERT);
 		setText(find(alertDialog, COMPONENT_ALERT_MESSAGE), alertMessage);
 		add(alertDialog);
+	}
+	
+	/**
+	 * Popup an info message to the user with the supplied message.
+	 * @param infoMessage
+	 */
+	public void infoMessage(String infoMessage) {
+		Object infoDialog = loadComponentFromFile(UI_FILE_INFO);
+		setText(find(infoDialog, COMPONENT_INFO_MESSAGE), infoMessage);
+		add(infoDialog);
 	}
 	
 	/**

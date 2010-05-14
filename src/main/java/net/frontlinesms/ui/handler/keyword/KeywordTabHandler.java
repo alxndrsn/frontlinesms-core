@@ -376,6 +376,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		// Refresh the UI
 		updateKeywordList();
 		ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_KEYWORD_SAVED));
+		ui.infoMessage(InternationalisationUtils.getI18NString(MESSAGE_KEYWORD_SAVED));
 		log.trace("EXIT");
 	}
 
@@ -423,7 +424,6 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		ui.setText(ui.find(panel, COMPONENT_TF_KEYWORD), "");
 		ui.setSelected(ui.find(panel, COMPONENT_CB_AUTO_REPLY), false);
 		ui.setText(ui.find(panel, COMPONENT_TF_AUTO_REPLY), "");
-		
 		// TODO do we need to clear the group displays here?
 	}
 	
