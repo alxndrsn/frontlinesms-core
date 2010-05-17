@@ -128,6 +128,7 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 	public void run() {
 		LOG.trace("ENTER");
 		running = true;
+		Utils.sleep_ignoreInterrupts(5000);
 		while (running) {
 			doRun();
 			
