@@ -57,7 +57,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private static final String MESSAGE_EXPORT_TASK_SUCCESSFUL = "message.export.successful";
 
 	/** I18n Text Key: TODO document */
-	private static final String MESSAGE_IMPORTING_SELECTED_CONTACTS = "message.importing.selected.contacts";
+	private static final String MESSAGE_IMPORTING_SELECTED_CONTACTS = "message.importing.contacts.groups";
 	/** I18n Text Key: TODO document */
 	private static final String MESSAGE_IMPORTING_SELECTED_KEYWORDS = "message.importing.selected.keywords";
 	/** I18n Text Key: TODO document */

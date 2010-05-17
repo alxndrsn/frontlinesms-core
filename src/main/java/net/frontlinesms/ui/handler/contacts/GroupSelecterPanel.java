@@ -5,6 +5,7 @@ package net.frontlinesms.ui.handler.contacts;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -36,6 +37,8 @@ public class GroupSelecterPanel extends BasePanelHandler {
 	private boolean allowMultipleSelections;
 
 	private Group rootGroup;
+	/** A list of groups which should be disabled/hidden */
+	private List<Group> hiddenGroups;
 
 //> CONSTRUCTORS
 	public GroupSelecterPanel(UiGeneratorController ui, GroupSelecterPanelOwner owner) {
@@ -74,6 +77,14 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		// Otherwise, the main nodes are added to the tree component in the createNode() function 
 		if (showRoot)
 			ui.add(groupTree, node);
+	}
+	
+	/**
+	 * Sets a list of groups which should be disabled/hidden
+	 * @param hiddenGroups
+	 */
+	public void hideGroups (List<Group> hiddenGroups) {
+		this.hiddenGroups = hiddenGroups;
 	}
 	
 //> ACCESSORS
@@ -190,7 +201,12 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		// Add subgroup components to this node
 		for (Group subGroup : groupDao.getChildGroups(group)) {
 			Object groupNode = createNode(subGroup, showRootGroup);
-			ui.add(node, groupNode);
+			if (groupNode != null) {
+				ui.add(node, groupNode);
+				if (hiddenGroups != null && hiddenGroups.contains(subGroup)) {
+					ui.setEnabled(groupNode, false);
+				}
+			}
 		}
 		LOG.trace("EXIT");
 		return node;
