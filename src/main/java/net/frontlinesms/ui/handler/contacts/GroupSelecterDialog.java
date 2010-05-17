@@ -69,7 +69,8 @@ public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSe
 
 	public void groupSelectionChanged(Group selectedGroup) {
 		// Once a group other than the root is selected, we want to allow the DONE button to be clicked
-		boolean enableDoneButton = (!selectedGroup.isRoot() && hiddenGroups != null && !hiddenGroups.contains(selectedGroup));
+		// (if the selected group is not in the hidden groups list)
+		boolean enableDoneButton = (selectedGroup != null && !selectedGroup.isRoot() && (hiddenGroups == null || !hiddenGroups.contains(selectedGroup)));
 		setDoneButtonEnabled(enableDoneButton);
 	}
 

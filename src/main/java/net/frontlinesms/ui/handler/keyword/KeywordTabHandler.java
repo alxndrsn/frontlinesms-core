@@ -67,7 +67,9 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	public static final String COMPONENT_TF_AUTO_REPLY = "tfAutoReply";
 	public static final String COMPONENT_TF_KEYWORD = "tfKeyword";
 	
-	private static final String I18N_CREATE_KEYWORD = "action.new.keyword";;
+	private static final String I18N_CREATE_KEYWORD = "action.new.keyword";
+	private static final String I18N_KEYWORD_ACTION_NO_GROUP = "common.keyword.actions.no.group";
+	private static final String I18N_COMMON_NONE = "common.none";
 
 	private KeywordDao keywordDao;
 	private KeywordActionDao keywordActionDao;
@@ -527,6 +529,10 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 				ui.remove(lbKeywordDescription);
 			}
 			
+			// We have to set the text in case there is no join/leave keyword actions
+			setJoinGroupDisplay(null);
+			setLeaveGroupDisplay(null);
+			
 			for (KeywordAction action : actions) {
 				KeywordAction.Type type = action.getType();
 				if (type == KeywordAction.Type.REPLY) {
@@ -614,6 +620,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	 */
 	private void updateKeywordList() {
 		this.keywordListPagingHandler.refresh();
+		this.showSelectedKeyword();
 		enableKeywordFields(ui.find(COMPONENT_KEY_PANEL));
 	}
 	
@@ -709,8 +716,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		if(group != null) {
 			ui.setText(joinGroupButton, group.getPath());
 		} else {
-			// TODO set the text to the original
-			ui.setText(joinGroupButton, "(None)"); // FIXME i18n
+			ui.setText(joinGroupButton, InternationalisationUtils.getI18NString(I18N_KEYWORD_ACTION_NO_GROUP, InternationalisationUtils.getI18NString(I18N_COMMON_NONE)));
 		}
 	}
 	private void setLeaveGroupDisplay(Group group) {
@@ -723,8 +729,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		if(group != null) {
 			ui.setText(leaveGroupButton, group.getPath());
 		} else {
-			// TODO set the text to the original
-			ui.setText(leaveGroupButton, "Select"); // FIXME i18n
+			ui.setText(leaveGroupButton, InternationalisationUtils.getI18NString(I18N_KEYWORD_ACTION_NO_GROUP, InternationalisationUtils.getI18NString(I18N_COMMON_NONE)));
 		}
 	}
 

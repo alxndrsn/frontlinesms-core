@@ -9,12 +9,12 @@
         <textarea name="tfAutoReply" weightx="1" action="autoReplyChanged(this.text, cbAutoReply)" colspan="2"/>
         
         <label icon="/icons/group_join.png" text="i18n.sentence.add.sender.to.group"/>
-        <label name="lbJoinGroup" text="(none)" />
+        <label name="lbJoinGroup"/>
        	<button name="btJoinGroupSelect" text="Select" type="link" action="selectJoinGroup" halign="left"/>
         <button name="btJoinGroupRemove" text="Remove" type="link" action="removeJoinGroup" halign="left" visible="false"/>
         
         <label icon="/icons/group_leave.png" text="i18n.sentence.remove.sender.from.group"/>
-        <label name="lbLeaveGroup" text="(none)" />
+        <label name="lbLeaveGroup"/>
         <button name="btLeaveGroupSelect" text="Select" type="link" action="selectLeaveGroup" halign="left"/>
         <button name="btLeaveGroupRemove" text="Remove" type="link" action="removeLeaveGroup" halign="left" visible="false"/>
         
