@@ -134,8 +134,6 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_EDITING_KEYWORD = "common.editing.keyword";
 	public static final String COMMON_UNDEFINED = "common.undefined";
 	public static final String COMMON_HTTP_REQUEST = "common.http.request";
-	public static final String COMMON_EDITING_KEYWORD_WHITELIST = "common.editing.keyword.whitelist";
-	public static final String COMMON_EDITING_KEYWORD_BLACKLIST = "common.editing.keyword.blacklist";
 	public static final String COMMON_SUBJECT = "common.subject";
 	public static final String COMMON_CONTENT = "common.content";
 	public static final String COMMON_CONTACTS_IN_GROUP = "common.contacts.in.group";
@@ -144,13 +142,7 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_EDITING_SMS_SERVICE = "common.edting.sms.service";
 	public static final String COMMON_BLANK = "common.blank";
 	public static final String COMMON_CURRENCY = "common.currency";
-	public static final String COMMON_TYPE = "common.type";
-	public static final String COMMON_DATABASE_CONFIG = "common.database.config";
 	public static final String COMMON_DATABASE_CONNECTION_PROBLEM = "common.db.connection.problem";
-	public static final String COMMON_CONNECTION_FAILED = "common.connection.failed";
-	public static final String COMMON_CONNECTION_OK = "common.connection.ok";
-	public static final String COMMON_DATABASE_CONNECTION_FAILED = "common.db.connection.failed";
-	public static final String COMMON_ATTENTION = "common.attention";
 	public static final String COMMON_RECEIVED_MESSAGES = "common.received.messages";
 	public static final String COMMON_SENT_MESSAGES = "common.sent.messages";
 	
@@ -265,7 +257,6 @@ public final class FrontlineSMSConstants {
 	public static final String MESSAGE_MESSAGES_DELETED = "message.messages.deleted";
 	public static final String MESSAGE_REMOVING_MESSAGES = "message.removing.messages";
 	public static final String MESSAGE_GROUPS_AND_CONTACTS_DELETED = "message.group.and.contacts.deleted";
-	public static final String MESSAGE_GROUPS_DELETED = "message.groups.deleted";
 	public static final String MESSAGE_PHONE_BLANK = "message.phone.number.blank";
 	public static final String MESSAGE_NO_GROUP_SELECTED = "message.no.group.selected.to.send";
 	public static final String MESSAGE_BLANK_PHONE_NUMBER = "message.no.phone.number.to.send";

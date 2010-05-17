@@ -30,14 +30,16 @@
 		</menu>
 		<!-- Menu below is for dev and will only appear in SNAPSHOT versions -->
 		<menu text="i18n.menubar.debug" name="mnDebug">
-			<menuitem icon="/icons/database_execute.png" text="i18n.menuitem.debug.data.generate" action="generateTestData"/>
+			<!-- Item labels in this menu should be hardcoded as English - this menu does not appear 
+				in production builds of FrontlineSMS, so translations are unnecessary -->
+			<menuitem icon="/icons/database_execute.png" text="Generate debug data" action="generateTestData"/>
 			
 		<separator />
-			<menuitem icon="/icons/group.png" text="i18n.menuitem.show.group.selecter" action="showGroupSelecter"/>
+			<menuitem icon="/icons/group.png" text="Show group selecter" action="showGroupSelecter"/>
 			
 			<separator />
-			<menuitem icon="/icons/sms_receive.png" text="i18n.menuitem.generate.incoming.sms" action="dbgGenerateIncomingSms"/>
-			<menuitem icon="/icons/sms_send.png" text="i18n.menuitem.generate.outgoing.sms" action="dbgGenerateOutgoingSms"/>
+			<menuitem icon="/icons/sms_receive.png" text="Generate incoming SMS" action="dbgGenerateIncomingSms"/>
+			<menuitem icon="/icons/sms_send.png" text="Generate outgoing SMS" action="dbgGenerateOutgoingSms"/>
 			
 			<menuitem icon="/icons/report_error.png" text="Generate Error" action="dbgGenerateError"/>
 		</menu>
