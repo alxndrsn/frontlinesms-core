@@ -7,6 +7,8 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LABEL
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RADIO_BUTTON_ACTIVE;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -30,6 +32,7 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	/** UI XML File Path: Edit and Create dialog for {@link Contact} objects */
 	private static final String UI_FILE_CREATE_CONTACT_FORM = "/ui/core/contacts/dgEditContact.xml";
 
+	public static final String COMPONENT_BT_REMOVE_FROM_GROUP = "btRemoveFromGroup";
 	public static final String COMPONENT_NEW_CONTACT_GROUP_LIST = "newContact_groupList";
 	public static final String COMPONENT_CONTACT_NAME = "contact_name";
 	public static final String COMPONENT_CONTACT_MOBILE_MSISDN = "contact_mobileMsisdn";
@@ -59,6 +62,9 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	private Set<Group> addedGroups = new HashSet<Group>();
 	/** Groups to remove the contact from - this list contains only groups that he was already a member of */
 	private Set<Group> removedGroups = new HashSet<Group>();
+	/** A list of groups which should be disabled/hidden */
+	private List<Group> hiddenGroups;
+	
 	
 //> CONSTRUCTORS
 	ContactEditor(UiGeneratorController ui, ContactEditorOwner owner) {
@@ -66,6 +72,7 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 		this.contactDao = ui.getFrontlineController().getContactDao();
 		this.groupMembershipDao = ui.getFrontlineController().getGroupMembershipDao();
 		this.owner = owner;
+		this.hiddenGroups = new LinkedList<Group>();
 	}
 	
 //> INIT METHODS
@@ -81,6 +88,7 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	/** Show dialog to edit an existing contact. */
 	public void show(Contact contact) {
 		this.target = contact;
+		this.hiddenGroups = this.groupMembershipDao.getGroups(target);
 		initDialog();
 		populateContactDetails(contact);
 		for(Group g : groupMembershipDao.getGroups(contact)) {
@@ -130,6 +138,7 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	
 	/** Adds the group to the UI, and if appropriate to {@link #addedGroups} */
 	private void addNewGroup(Group group) {
+		hiddenGroups.add(group);
 		if(!removedGroups.remove(group)) {
 			addedGroups.add(group);
 		}
@@ -239,17 +248,25 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	}
 	
 	/** Remove selected groups */
-	public void removeSelectedGroups() {
-		Object[] selecteds = ui.getSelectedItems(this.groupListComponent);
-		for(Object selected : selecteds) {
-			this.removeGroup(ui.getAttachedObject(selected, Group.class));
-		}
+	public void removeSelectedGroup() {
+		Group selectedGroup = ui.getAttachedObject(ui.getSelectedItem(this.groupListComponent), Group.class);
+		this.removeGroup(selectedGroup);
+		this.hiddenGroups.remove(selectedGroup);
+		this.ui.setEnabled(this.ui.find(COMPONENT_BT_REMOVE_FROM_GROUP), false);
+	}
+	
+	/**
+	 * Called when a group is selected or deselected in the list
+	 */
+	public void groupSelectionChanged () {
+		Object selected = ui.getSelectedItem(this.groupListComponent);
+		this.ui.setEnabled(this.ui.find(COMPONENT_BT_REMOVE_FROM_GROUP), (selected != null));
 	}
 	
 	/** Show selecter for new groups. */
 	public void addNewGroup() {
 		GroupSelecterDialog dialog = new GroupSelecterDialog(ui, this);
-		dialog.hideGroups(groupMembershipDao.getGroups(target));
+		dialog.hideGroups(hiddenGroups);
 		dialog.init(ui.getRootGroup());
 		dialog.show();
 	}
