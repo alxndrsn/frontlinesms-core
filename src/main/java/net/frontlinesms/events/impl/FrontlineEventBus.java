@@ -10,7 +10,8 @@ import net.frontlinesms.events.FrontlineEventNotification;
  * Implementation of the event bus.
  * This class uses CopyOnWriteArrayList, so it
  * is thread safe.
- * @author Dieterich Lawson
+ * @author Dieterich Lawson <dieterich@medic.frontlinesms.com>
+ * @author Alex Anderson <alex@frontlinesms.com>
  */
 public class FrontlineEventBus implements EventBus{
 	
@@ -21,26 +22,18 @@ public class FrontlineEventBus implements EventBus{
 		observers = new CopyOnWriteArrayList<EventObserver>();
 	}
 	 
-	/* (non-Javadoc)
-	 * @see net.frontlinesms.events.EventBus#registerObserver(net.frontlinesms.events.EventObserver)
-	 */
+	/** @see net.frontlinesms.events.EventBus#registerObserver(net.frontlinesms.events.EventObserver) */
 	public void registerObserver(EventObserver observer){
-		if(!observers.contains(observer))
-			observers.add(observer);
+		observers.addIfAbsent(observer);
 	}
 	
 
-	/* (non-Javadoc)
-	 * @see net.frontlinesms.events.EventBus#unregisterObserver(net.frontlinesms.events.EventObserver)
-	 */
+	/** @see net.frontlinesms.events.EventBus#unregisterObserver(net.frontlinesms.events.EventObserver) */
 	public void unregisterObserver(EventObserver observer){
-		if(!observers.contains(observer))
-			observers.remove(observer);
+		observers.remove(observer);
 	}
 
-	/* (non-Javadoc)
-	 * @see net.frontlinesms.events.EventBus#triggerEvent(net.frontlinesms.events.FrontlineEvent)
-	 */
+	/** @see net.frontlinesms.events.EventBus#triggerEvent(net.frontlinesms.events.FrontlineEvent) */
 	public void notifyObservers(FrontlineEventNotification event){
 		for(EventObserver observer: observers){
 			observer.notify(event);
