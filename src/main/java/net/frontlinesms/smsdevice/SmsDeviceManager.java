@@ -128,14 +128,13 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 	public void run() {
 		LOG.trace("ENTER");
 		running = true;
-		Utils.sleep_ignoreInterrupts(5000);
 		while (running) {
-			doRun();
-			
 			// Sleep for a second to ensure lists are not constantly being reshuffled.  Processing dispatch
 			// and received messages is not really time-critical, otherwise it might be worth sleeping for
 			// less time.
 			Utils.sleep_ignoreInterrupts(1000);
+			
+			doRun();
 		}
 		LOG.trace("EXIT");
 	}
