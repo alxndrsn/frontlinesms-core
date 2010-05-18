@@ -368,13 +368,10 @@ public class Utils {
 		// It seems like we don't have permission to open a file inside a .app package
 		// on OSX.  While we are packaging the mac version as a .app, we access help on
 		// the FrontlineSMS website.
-		String url;
-		if (isMacOS()) {
+		String url = "help/" + page;
+		if (!new File(url).exists()) {
 			url = getOnlineHelpUrl(page);
-		} else {
-			url = "help/" + page;
 		}
-		
 		openExternalBrowser(url);
 	}
 	
