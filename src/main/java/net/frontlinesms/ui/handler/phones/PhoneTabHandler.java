@@ -357,7 +357,8 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 		// Handle modems first
 		if (device instanceof SmsModem) {
 			SmsModem activeDevice = (SmsModem) device;
-			ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_PHONE) + ": " + activeDevice.getPort() + ' ' + getSmsDeviceStatusAsString(device));
+			// FIXME re-implement status update on the AWT Event Queue - doing it here causes splitpanes to collapse
+			// ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_PHONE) + ": " + activeDevice.getPort() + ' ' + getSmsDeviceStatusAsString(device));
 			if (deviceStatus.equals(SmsModemStatus.CONNECTED)) {
 				log.debug("Phone is connected. Try to read details from database!");
 				String serial = activeDevice.getSerial();
