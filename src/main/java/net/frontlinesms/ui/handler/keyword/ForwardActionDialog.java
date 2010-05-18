@@ -67,7 +67,7 @@ public class ForwardActionDialog extends BaseActionDialog {
 		Object list = find(COMPONENT_FORWARD_FORM_GROUP_LIST);
 		List<Group> userGroups = this.groupDao.getAllGroups();
 		for (Group g : userGroups) {
-			Object item = ui.createListItem(g.getName(), g);
+			Object item = ui.createListItem(g.getPath(), g);
 			ui.setIcon(item, Icon.GROUP);
 			if (action!= null && g.equals(action.getGroup())) {
 				ui.setSelected(item, true);
