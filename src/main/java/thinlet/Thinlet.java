@@ -1592,21 +1592,6 @@ public class Thinlet extends Container implements Runnable, Serializable, Thinle
 	}
 
 	/**
-	 * Invokes the paint method
-	 */
-	public void update(Graphics g) {
-		super.update(g);
-		repaint();
-	}
-
-	/*public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
-		if (infoflags == ImageObserver.ALLBITS) {
-			validate(content);
-		}
-		return super.imageUpdate(img, infoflags, x, y, width, height);
-	}*/
-
-	/**
 	 * Paints the components inside the graphics clip area
 	 */
 	public void paint(Graphics g) {
