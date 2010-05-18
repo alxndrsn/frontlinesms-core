@@ -439,11 +439,14 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 * @param selectedGroup A set of thinlet components with group members attached to them.
 	 */
 	public void removeFromGroup(Object selectedGroup) {
-		Group g = this.ui.getGroup(selectedGroup);
-		Contact c = this.ui.getContact(this.ui.getSelectedItem(contactListComponent));
-		if(this.groupMembershipDao.removeMember(g, c)) {
-			this.refresh();
+		Object[] selectedContacts = this.ui.getSelectedItems(this.ui.find(COMPONENT_CONTACT_MANAGER_CONTACT_LIST));
+		Group group = this.ui.getGroup(selectedGroup);
+		
+		for (Object selected : selectedContacts) {
+			Contact c = this.ui.getContact(selected);
+			this.groupMembershipDao.removeMember(group, c);
 		}
+		this.refresh();		
 	}
 
 	/** Removes the selected contacts of the supplied contact list component. */

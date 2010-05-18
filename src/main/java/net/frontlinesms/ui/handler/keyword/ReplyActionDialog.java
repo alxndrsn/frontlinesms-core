@@ -2,6 +2,7 @@ package net.frontlinesms.ui.handler.keyword;
 
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_START_DATE_AFTER_END;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_SENDER_NAME;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_SENDER_NUMBER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_BOTTOM;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.UI_FILE_SENDER_NAME_PANEL;
@@ -61,7 +62,7 @@ public class ReplyActionDialog extends BaseActionDialog {
 		ui.add(pnBottom, senderPanel, 0);
 		ui.add(this.getDialogComponent(), pnMessage, ui.getItems(this.getDialogComponent()).length - 3);
 		ui.setAction(ui.find(senderPanel, COMPONENT_BT_SENDER_NAME), "addConstantToCommand(tfMessage.text, tfMessage, 0)", this.getDialogComponent(), this);
-		ui.setAction(ui.find(senderPanel, "btSenderNumber"), "addConstantToCommand(tfMessage.text, tfMessage, 1)", this.getDialogComponent(), this);
+		ui.setAction(ui.find(senderPanel, COMPONENT_BT_SENDER_NUMBER), "addConstantToCommand(tfMessage.text, tfMessage, 1)", this.getDialogComponent(), this);
 		// FIX 0000542
 		
 		//Adds the date panel to it
