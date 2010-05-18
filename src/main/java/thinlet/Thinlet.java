@@ -1595,11 +1595,8 @@ public class Thinlet extends Container implements Runnable, Serializable, Thinle
 	 * Invokes the paint method
 	 */
 	public void update(Graphics g) {
-		if (METHOD_TRACE)
-			System.out.println("Thinlet.update() : ENTRY");
-		paint(g);
-		if (METHOD_TRACE)
-			System.out.println("Thinlet.update() : EXIT");
+		super.update(g);
+		repaint();
 	}
 
 	/*public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
