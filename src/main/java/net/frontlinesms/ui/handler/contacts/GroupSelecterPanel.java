@@ -4,8 +4,8 @@
 package net.frontlinesms.ui.handler.contacts;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -38,7 +38,7 @@ public class GroupSelecterPanel extends BasePanelHandler {
 
 	private Group rootGroup;
 	/** A list of groups which should be disabled/hidden */
-	private List<Group> hiddenGroups;
+	private final HashSet<Group> hiddenGroups = new HashSet<Group>();
 
 //> CONSTRUCTORS
 	public GroupSelecterPanel(UiGeneratorController ui, GroupSelecterPanelOwner owner) {
@@ -50,6 +50,12 @@ public class GroupSelecterPanel extends BasePanelHandler {
 
 	/** Initialise the selecter. */
 	public void init(Group rootGroup) {
+		Collection<Group> noHiddenGroups = Collections.emptySet();
+		init(rootGroup, noHiddenGroups );
+	}
+
+	/** Initialise the selecter. */
+	public void init(Group rootGroup, Collection<Group> hiddenGroups) {
 		super.loadPanel(XML_LAYOUT_GROUP_PANEL);
 		
 		// TODO update selection of group tree appropriate to allowMultipleSelections
@@ -59,6 +65,8 @@ public class GroupSelecterPanel extends BasePanelHandler {
 		
 		// add nodes for group tree
 		this.setRootGroup(rootGroup);
+		
+		this.setHiddenGroups(hiddenGroups);
 	}
 
 	/**
@@ -83,8 +91,13 @@ public class GroupSelecterPanel extends BasePanelHandler {
 	 * Sets a list of groups which should be disabled/hidden
 	 * @param hiddenGroups
 	 */
-	public void hideGroups (List<Group> hiddenGroups) {
-		this.hiddenGroups = hiddenGroups;
+	public void setHiddenGroups(Collection<Group> hiddenGroups) {
+		this.hiddenGroups.clear();
+		this.hiddenGroups.addAll(hiddenGroups);
+	}
+	
+	public boolean isHidden(Group group) {
+		return this.hiddenGroups.contains(group);
 	}
 	
 //> ACCESSORS
