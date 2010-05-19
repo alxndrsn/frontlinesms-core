@@ -1,6 +1,8 @@
 package net.frontlinesms.ui.handler.contacts;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.data.domain.Group;
@@ -16,30 +18,35 @@ public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSe
 	
 	private GroupSelecterPanel selecter;
 	private Object dialogComponent;
-	/** A list of groups which should be disabled/hidden */
-	private List<Group> hiddenGroups;
 	
 	public GroupSelecterDialog(UiGeneratorController ui, SingleGroupSelecterDialogOwner owner) {
 		this.ui = ui;
 		this.owner = owner;
 	}
 	
-	/**
-	 * Init with default title
-	 * @param rootGroups
-	 */
+	/** Init with default title and no hidden groups */
 	public void init(Group rootGroup) {
 		init(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_GROUP), rootGroup);
 	}
 	
+	/** Init with default title */
+	public void init(Group rootGroup, Collection<Group> hiddenGroups) {
+		init(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_GROUP), rootGroup, hiddenGroups);
+	}
+	
+	/** Init with specific title and no hidden groups */
 	public void init(String title, Group rootGroup) {
+		Set<Group> noHiddenGroups = Collections.emptySet();
+		this.init(title, rootGroup, noHiddenGroups);
+	}
+	
+	public void init(String title, Group rootGroup, Collection<Group> hiddenGroups) {
 		// TODO init
 		dialogComponent = ui.loadComponentFromFile(XML_LAYOUT_GROUP_SELECTER_DIALOG, this);
 		this.setTitle(title);
 		
 		this.selecter = new GroupSelecterPanel(ui, this);
-		selecter.hideGroups(hiddenGroups);
-		selecter.init(rootGroup);
+		selecter.init(rootGroup, hiddenGroups);
 		selecter.refresh(false);
 		
 		Object selecterPanel = selecter.getPanelComponent();
@@ -55,14 +62,6 @@ public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSe
 		ui.setText(this.dialogComponent, title);
 	}
 	
-	/**
-	 * Sets a list of groups which should be disabled/hidden
-	 * @param hiddenGroups
-	 */
-	public void hideGroups (List<Group> hiddenGroups) {
-		this.hiddenGroups = hiddenGroups;
-	}
-	
 	public void show() {
 		ui.add(this.dialogComponent);
 	}
@@ -70,7 +69,9 @@ public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSe
 	public void groupSelectionChanged(Group selectedGroup) {
 		// Once a group other than the root is selected, we want to allow the DONE button to be clicked
 		// (if the selected group is not in the hidden groups list)
-		boolean enableDoneButton = (selectedGroup != null && !selectedGroup.isRoot() && (hiddenGroups == null || !hiddenGroups.contains(selectedGroup)));
+		boolean enableDoneButton = selectedGroup != null 
+				&& !selectedGroup.isRoot()
+				&& !this.selecter.isHidden(selectedGroup);
 		setDoneButtonEnabled(enableDoneButton);
 	}
 

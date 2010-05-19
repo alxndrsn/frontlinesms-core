@@ -266,8 +266,7 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	/** Show selecter for new groups. */
 	public void addNewGroup() {
 		GroupSelecterDialog dialog = new GroupSelecterDialog(ui, this);
-		dialog.hideGroups(hiddenGroups);
-		dialog.init(ui.getRootGroup());
+		dialog.init(ui.getRootGroup(), hiddenGroups);
 		dialog.show();
 	}
 
