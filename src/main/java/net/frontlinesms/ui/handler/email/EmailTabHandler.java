@@ -223,21 +223,19 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 	 * @param list 
 	 * @param popup 
 	 * @param toolbar
-	 * 
-	 * TODO check where this is used, and make sure there is no dead code
 	 */
 	public void enableOptions(Object list, Object popup, Object toolbar) {
 		Object[] selectedItems = ui.getSelectedItems(list);
 		boolean hasSelection = selectedItems.length > 0;
 
-		if(popup!= null && !hasSelection && "emailServerListPopup".equals(ui.getName(popup))) {
+		if(popup!= null && !hasSelection) {
 			ui.setVisible(popup, false);
 			return;
 		}
 		
 		if (hasSelection && popup != null) {
 			// If nothing is selected, hide the popup menu
-			ui.setVisible(popup, hasSelection);
+			ui.setVisible(popup, true);
 		}
 		
 		if (toolbar != null && !toolbar.equals(popup)) {
