@@ -159,7 +159,6 @@ public class CsvUtils {
 	 * of unescaped values.
 	 * 
 	 * Reads following RFC 4180, http://tools.ietf.org/html/rfc4180
-	 * 
 	 * @param reader
 	 * @return Array containing list of values on this line, or <code>null</code> if the end of the file was reached before reading any characters
 	 * @throws IOException
@@ -187,11 +186,12 @@ public class CsvUtils {
 						lastValue.append(QUOTE);
 						// We're still inside our quoted region, so: on to the next character!
 						read = reader.read();
-					} else if(read == SEPARATOR || read == CR || read == END) {
-						// We've just finished reading a quoted value!  We can drop out
-						// of the "insideQuotes" handling, and handle this like we would
-						// normally.
+					} else if(read == SEPARATOR || read == CR || read == LF || read == END) {
+						// We've finished this value, so we should continue to the next one
 						insideQuotes = false;
+						readStrings.add(lastValue.toString());
+						lastValue.delete(0, Integer.MAX_VALUE);
+						read = reader.read();
 					} else {
 						// Can anything else appear here?  Should be the end of this value!
 						throw new CsvParseException("We've reached the end of the quoted section, but apparently not the end of the value.  Only sensible option here is the end of the line...");
@@ -224,6 +224,7 @@ public class CsvUtils {
 					if(lastValue.length() > 0) {
 						// we've finished the line, with a new value!
 						readStrings.add(lastValue.toString());
+					} if(readStrings.size() > 0) {
 						return readStrings.toArray(new String[readStrings.size()]);
 					}
 				} else {
@@ -237,7 +238,13 @@ public class CsvUtils {
 		if(lastValue.length() > 0) {
 			readStrings.add(lastValue.toString());
 		}
-		return readStrings.toArray(new String[readStrings.size()]);
+		
+		if(readStrings.size() == 0) {
+			// We have reached the end of the file, so return null here
+			return null;
+		} else {
+			return readStrings.toArray(new String[readStrings.size()]);
+		}
 	}
 	
 	/**
