@@ -255,7 +255,10 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 			if(type == EntityType.CONTACTS) {
 				CsvRowFormat rowFormat = getRowFormatForContact();
 				CsvImporter.importContacts(new File(dataPath), this.contactDao, rowFormat);
-			} else throw new IllegalStateException("Import is not supported for: " + getType());
+				uiController.refreshContactsTab();
+			} else {
+				throw new IllegalStateException("Import is not supported for: " + getType());
+			}
 			uiController.setStatus(InternationalisationUtils.getI18NString(MESSAGE_IMPORT_TASK_SUCCESSFUL));
 			uiController.removeDialog(wizardDialog);
 		} catch(Exception ex) {

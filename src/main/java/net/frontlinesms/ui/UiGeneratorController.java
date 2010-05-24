@@ -1811,4 +1811,14 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			this.deviceConnectionDialogHandler = null;
 		}
 	}
+
+	/**
+	 * Refreshes the contact tab iff it is currently visible.  If it is not visible,
+	 * it will not be refreshed until it is show again.
+	 */
+	public void refreshContactsTab() {
+		if (this.currentTab.equals(TAB_CONTACT_MANAGER)) {
+			this.contactsTabController.refresh();
+		}
+	}
 }
