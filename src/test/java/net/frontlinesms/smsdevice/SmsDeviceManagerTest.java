@@ -14,8 +14,8 @@ import org.mockito.internal.verification.api.VerificationMode;
 import org.smslib.CIncomingMessage;
 
 import net.frontlinesms.FrontlineSMS;
-import net.frontlinesms.data.domain.Message;
-import net.frontlinesms.data.domain.Message.Status;
+import net.frontlinesms.data.domain.FrontlineMessage;
+import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.junit.BaseTestCase;
 import net.frontlinesms.listener.SmsListener;
@@ -53,11 +53,11 @@ public class SmsDeviceManagerTest extends BaseTestCase {
 		manager.doRun();
 		
 		// Check that all messages were sent with the TWO functioning internet services, and nothing else
-		verify(modem, never()).sendSMS(any(Message.class));
-		verify(sisNoSend, never()).sendSMS(any(Message.class));
-		verify(sisNoSendNoBinary, never()).sendSMS(any(Message.class));
-		verify(sisBinary, times(10)).sendSMS(any(Message.class));
-		verify(sisNoBinary, times(10)).sendSMS(any(Message.class));
+		verify(modem, never()).sendSMS(any(FrontlineMessage.class));
+		verify(sisNoSend, never()).sendSMS(any(FrontlineMessage.class));
+		verify(sisNoSendNoBinary, never()).sendSMS(any(FrontlineMessage.class));
+		verify(sisBinary, times(10)).sendSMS(any(FrontlineMessage.class));
+		verify(sisNoBinary, times(10)).sendSMS(any(FrontlineMessage.class));
 	}
 	
 	/**
@@ -84,11 +84,11 @@ public class SmsDeviceManagerTest extends BaseTestCase {
 		manager.doRun();
 		
 		// Check that all messages were sent with the ONE internet services which is functioning and sends binary, and nothing else
-		verify(modem, never()).sendSMS(any(Message.class));
-		verify(sisNoSend, never()).sendSMS(any(Message.class));
-		verify(sisNoSendNoBinary, never()).sendSMS(any(Message.class));
-		verify(sisNoBinary, never()).sendSMS(any(Message.class));
-		verify(sisBinary, times(20)).sendSMS(any(Message.class));
+		verify(modem, never()).sendSMS(any(FrontlineMessage.class));
+		verify(sisNoSend, never()).sendSMS(any(FrontlineMessage.class));
+		verify(sisNoSendNoBinary, never()).sendSMS(any(FrontlineMessage.class));
+		verify(sisNoBinary, never()).sendSMS(any(FrontlineMessage.class));
+		verify(sisBinary, times(20)).sendSMS(any(FrontlineMessage.class));
 	}
 	
 	/** Test that text messages are sent only with suitable modems. */
@@ -108,21 +108,21 @@ public class SmsDeviceManagerTest extends BaseTestCase {
 		
 		// Sending no messages
 		manager.doRun();
-		verify(disconnectedModem, never()).sendSMS(any(Message.class));
-		verify(gsmOnlyModem, never()).sendSMS(any(Message.class));
-		verify(ucs2Modem, never()).sendSMS(any(Message.class));
-		verify(binaryModem, never()).sendSMS(any(Message.class));
-		verify(everythingModem, never()).sendSMS(any(Message.class));
+		verify(disconnectedModem, never()).sendSMS(any(FrontlineMessage.class));
+		verify(gsmOnlyModem, never()).sendSMS(any(FrontlineMessage.class));
+		verify(ucs2Modem, never()).sendSMS(any(FrontlineMessage.class));
+		verify(binaryModem, never()).sendSMS(any(FrontlineMessage.class));
+		verify(everythingModem, never()).sendSMS(any(FrontlineMessage.class));
 
 		// Send some simple text messages, and make sure that they were send with the expected modems
-		Collection<Message> gsm7bitMessages = generateMessages(8, MessageType.GSM7BIT_TEXT);
+		Collection<FrontlineMessage> gsm7bitMessages = generateMessages(8, MessageType.GSM7BIT_TEXT);
 		sendSms(manager, gsm7bitMessages);
 		manager.doRun();
-		verify(disconnectedModem, never()).sendSMS(any(Message.class));
-		verify(gsmOnlyModem, times(2)).sendSMS(any(Message.class));
-		verify(ucs2Modem, times(2)).sendSMS(any(Message.class));
-		verify(binaryModem, times(2)).sendSMS(any(Message.class));
-		verify(everythingModem, times(2)).sendSMS(any(Message.class));
+		verify(disconnectedModem, never()).sendSMS(any(FrontlineMessage.class));
+		verify(gsmOnlyModem, times(2)).sendSMS(any(FrontlineMessage.class));
+		verify(ucs2Modem, times(2)).sendSMS(any(FrontlineMessage.class));
+		verify(binaryModem, times(2)).sendSMS(any(FrontlineMessage.class));
+		verify(everythingModem, times(2)).sendSMS(any(FrontlineMessage.class));
 	}
 	
 	/** Test that binary messages are sent only with suitable modems. */
@@ -141,14 +141,14 @@ public class SmsDeviceManagerTest extends BaseTestCase {
 		addModem(manager, everythingModem, "everything");
 		
 		// Send some binary messages
-		Collection<Message> binaryMessages = generateMessages(8, MessageType.BINARY);
+		Collection<FrontlineMessage> binaryMessages = generateMessages(8, MessageType.BINARY);
 		sendSms(manager, binaryMessages);
 		manager.doRun();
-		verify(disconnectedModem, never()).sendSMS(any(Message.class));
-		verify(gsmOnlyModem, never()).sendSMS(any(Message.class));
-		verify(ucs2Modem, never()).sendSMS(any(Message.class));
-		verify(binaryModem, times(4)).sendSMS(any(Message.class));
-		verify(everythingModem, times(4)).sendSMS(any(Message.class));
+		verify(disconnectedModem, never()).sendSMS(any(FrontlineMessage.class));
+		verify(gsmOnlyModem, never()).sendSMS(any(FrontlineMessage.class));
+		verify(ucs2Modem, never()).sendSMS(any(FrontlineMessage.class));
+		verify(binaryModem, times(4)).sendSMS(any(FrontlineMessage.class));
+		verify(everythingModem, times(4)).sendSMS(any(FrontlineMessage.class));
 	}
 	
 	/** Test that binary messages are sent only with suitable modems. */
@@ -167,14 +167,14 @@ public class SmsDeviceManagerTest extends BaseTestCase {
 		addModem(manager, everythingModem, "everything");
 		
 		// Send some UCS2 messages
-		Collection<Message> ucs2Messages = generateMessages(8, MessageType.UCS2_TEXT);
+		Collection<FrontlineMessage> ucs2Messages = generateMessages(8, MessageType.UCS2_TEXT);
 		sendSms(manager, ucs2Messages);
 		manager.doRun();
-		verify(disconnectedModem, never()).sendSMS(any(Message.class));
-		verify(gsmOnlyModem, never()).sendSMS(any(Message.class));
-		verify(ucs2Modem, times(4)).sendSMS(any(Message.class));
-		verify(binaryModem, never()).sendSMS(any(Message.class));
-		verify(everythingModem, times(4)).sendSMS(any(Message.class));
+		verify(disconnectedModem, never()).sendSMS(any(FrontlineMessage.class));
+		verify(gsmOnlyModem, never()).sendSMS(any(FrontlineMessage.class));
+		verify(ucs2Modem, times(4)).sendSMS(any(FrontlineMessage.class));
+		verify(binaryModem, never()).sendSMS(any(FrontlineMessage.class));
+		verify(everythingModem, times(4)).sendSMS(any(FrontlineMessage.class));
 	}
 	
 	/** Test that messages are polled from all modems who have message receiving enabled. */
@@ -227,7 +227,7 @@ public class SmsDeviceManagerTest extends BaseTestCase {
 	/** Tests that when there are no SMS devices, the messages are left in outbox. */
 	public void testNoSmsDevices() {
 		SmsDeviceManager manager = new SmsDeviceManager();
-		Message m = Message.createOutgoingMessage(System.currentTimeMillis(), "+123456", "+987654", "Hi");
+		FrontlineMessage m = FrontlineMessage.createOutgoingMessage(System.currentTimeMillis(), "+123456", "+987654", "Hi");
 		manager.sendSMS(m);
 		manager.doRun();
 		
@@ -305,10 +305,10 @@ public class SmsDeviceManagerTest extends BaseTestCase {
 	}
 	
 	/** @return some generated SMS messages */
-	private Collection<Message> generateMessages(int count, MessageType type) {
-		HashSet<Message> messages = new HashSet<Message>();
+	private Collection<FrontlineMessage> generateMessages(int count, MessageType type) {
+		HashSet<FrontlineMessage> messages = new HashSet<FrontlineMessage>();
 		while(--count >= 0) {
-			Message m;
+			FrontlineMessage m;
 			long now = System.currentTimeMillis();
 			String recipientMsisdn = "Recipient " + count;
 			String senderMsisdn = "Sender " + count;
@@ -317,14 +317,14 @@ public class SmsDeviceManagerTest extends BaseTestCase {
 				for (int i = 0; i < data.length; i++) {
 					data[i] = (byte) i;
 				}
-				m = Message.createBinaryOutgoingMessage(now, senderMsisdn, recipientMsisdn, 0, data);
+				m = FrontlineMessage.createBinaryOutgoingMessage(now, senderMsisdn, recipientMsisdn, 0, data);
 			} else {
 				String content = "Content " + count;
 				if(type == MessageType.UCS2_TEXT) {
 					// Add some random arabic letters to the text content
 					content += "\u0634\u0626\u0647\u0629";
 				} 
-				m = Message.createOutgoingMessage(now, senderMsisdn, recipientMsisdn, content);
+				m = FrontlineMessage.createOutgoingMessage(now, senderMsisdn, recipientMsisdn, content);
 			}
 			messages.add(m);
 		}
@@ -332,7 +332,7 @@ public class SmsDeviceManagerTest extends BaseTestCase {
 	}
 
 	/** Send multiple SMS to the manager */
-	private void sendSms(SmsDeviceManager manager, Collection<Message> messages) {
-		for(Message m : messages) manager.sendSMS(m);
+	private void sendSms(SmsDeviceManager manager, Collection<FrontlineMessage> messages) {
+		for(FrontlineMessage m : messages) manager.sendSMS(m);
 	}
 }

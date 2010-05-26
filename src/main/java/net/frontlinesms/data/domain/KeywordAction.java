@@ -128,7 +128,7 @@ public class KeywordAction {
 	private Group group;
 	@ManyToOne(optional=true)
 	private EmailAccount emailAccount;
-	@Column(length=Message.SMS_MAX_CHARACTERS)
+	@Column(length=FrontlineMessage.SMS_MAX_CHARACTERS)
 	private String commandString;
 	private int commandInteger;
 	private int counter;

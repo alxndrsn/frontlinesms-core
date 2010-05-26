@@ -34,7 +34,8 @@ import net.frontlinesms.data.EntityField;
  *
  */
 @Entity
-public class Message {
+@Table(name="message")
+public class FrontlineMessage {
 
 //> DATABASE COLUMN NAMES
 	/** Database column name for field {@link #textMessageContent} */
@@ -98,7 +99,7 @@ public class Message {
 
 //> ENTITY FIELDS
 	/** Details of the fields that this class has. */
-	public enum Field implements EntityField<Message> {
+	public enum Field implements EntityField<FrontlineMessage> {
 		TYPE("type"),
 		DATE("date"),
 		STATUS("status"),
@@ -138,7 +139,7 @@ public class Message {
 	
 //> CONSTRUCTOR
 	/** Default constructor empty for hibernate */
-	Message() {}
+	FrontlineMessage() {}
 	
 //> ACCESSOR METHODS
 	/**
@@ -294,8 +295,8 @@ public class Message {
 	 * @param content 
 	 * @return Message object representing the sent message.
 	 */
-	public static Message createBinaryIncomingMessage(long dateReceived, String senderMsisdn, String recipientMsisdn, int recipientPort, byte[] content) {
-		Message m = new Message();
+	public static FrontlineMessage createBinaryIncomingMessage(long dateReceived, String senderMsisdn, String recipientMsisdn, int recipientPort, byte[] content) {
+		FrontlineMessage m = new FrontlineMessage();
 		m.type = Type.RECEIVED;
 		m.status = Status.RECEIVED;
 		m.date = dateReceived;
@@ -318,8 +319,8 @@ public class Message {
 	 * 
 	 * FIXME rename this to createOutgoingFormMessage as that is what it is.
 	 */
-	public static Message createBinaryOutgoingMessage(long dateSent, String senderMsisdn, String recipientMsisdn, int recipientPort, byte[] content) {
-		Message m = new Message();
+	public static FrontlineMessage createBinaryOutgoingMessage(long dateSent, String senderMsisdn, String recipientMsisdn, int recipientPort, byte[] content) {
+		FrontlineMessage m = new FrontlineMessage();
 		m.type = Type.OUTBOUND;
 		m.status = Status.DRAFT;
 		m.date = dateSent;
@@ -339,8 +340,8 @@ public class Message {
 	 * @param messageContent The text content of this message.
 	 * @return a Message object representing the received message.
 	 */
-	public static Message createOutgoingMessage(long dateSent, String senderMsisdn, String recipientMsisdn, String messageContent) {
-		Message m = new Message();
+	public static FrontlineMessage createOutgoingMessage(long dateSent, String senderMsisdn, String recipientMsisdn, String messageContent) {
+		FrontlineMessage m = new FrontlineMessage();
 		m.type = Type.OUTBOUND;
 		m.status = Status.DRAFT;
 		m.date = dateSent;
@@ -358,8 +359,8 @@ public class Message {
 	 * @param messageContent The text content of this message.
 	 * @returna Message object representing the sent message.
 	 */
-	public static Message createIncomingMessage(long dateReceived, String senderMsisdn, String recipientMsisdn, String messageContent) {
-		Message m = new Message();
+	public static FrontlineMessage createIncomingMessage(long dateReceived, String senderMsisdn, String recipientMsisdn, String messageContent) {
+		FrontlineMessage m = new FrontlineMessage();
 		m.type = Type.RECEIVED;
 		m.status = Status.RECEIVED;
 		m.date = dateReceived;
@@ -416,7 +417,7 @@ public class Message {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Message other = (Message) obj;
+		FrontlineMessage other = (FrontlineMessage) obj;
 		if (date != other.date)
 			return false;
 		if (!Arrays.equals(binaryMessageContent, other.binaryMessageContent))

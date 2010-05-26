@@ -27,7 +27,7 @@ import serial.*;
 
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.*;
-import net.frontlinesms.data.domain.Message.Status;
+import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.listener.SmsListener;
 
 import org.apache.log4j.Logger;
@@ -75,7 +75,7 @@ public class SmsModem extends Thread implements SmsDevice {
 	private long timeOfLastResponseFromPhone;
 
 	private final LinkedList<CIncomingMessage> inbox = new LinkedList<CIncomingMessage>();
-	private final ConcurrentLinkedQueue<Message> outbox = new ConcurrentLinkedQueue<Message>();
+	private final ConcurrentLinkedQueue<FrontlineMessage> outbox = new ConcurrentLinkedQueue<FrontlineMessage>();
 	/** The SmsListener to which this phone handler should report SMS Message events. */
 	private SmsListener smsListener;
 
@@ -477,15 +477,15 @@ public class SmsModem extends Thread implements SmsDevice {
 						long startTime = System.currentTimeMillis();
 						if(SEND_BULK) {
 							//create SMS list
-							LinkedList<Message> messageList = new LinkedList<Message>();
-							Message m;
+							LinkedList<FrontlineMessage> messageList = new LinkedList<FrontlineMessage>();
+							FrontlineMessage m;
 							while(messageList.size() < SMS_BULK_LIMIT && (m = outbox.poll()) != null) messageList.add(m);
 							if(messageList.size() > 0) {
 								LOG.debug("Sending bulk of [" + messageList.size() + "] message(s)");
 								sendSmsListDirect(messageList);
 							}
 						} else {
-							Message m = outbox.poll();
+							FrontlineMessage m = outbox.poll();
 							if(m != null) {
 								LOG.debug("Sending message [" + m.toString() + "]");
 								sendSmsDirect(m);
@@ -745,8 +745,8 @@ public class SmsModem extends Thread implements SmsDevice {
 	}
 
 
-	/** @see SmsDevice#sendSMS(net.frontlinesms.data.Message) */
-	public void sendSMS(Message outgoingMessage) {
+	/** @see SmsDevice#sendSMS(net.frontlinesms.data.FrontlineMessage) */
+	public void sendSMS(FrontlineMessage outgoingMessage) {
 		LOG.trace("ENTER");
 		outgoingMessage.setStatus(Status.PENDING);
 
@@ -769,7 +769,7 @@ public class SmsModem extends Thread implements SmsDevice {
 	 * Send an SMS message using this phone handler.
 	 * @param message The message to be sent.
 	 */
-	private void sendSmsDirect(Message message) throws IOException {
+	private void sendSmsDirect(FrontlineMessage message) throws IOException {
 		LOG.trace("ENTER");
 		LOG.debug("Sending [" + message.getTextContent() + "] to [" + message.getRecipientMsisdn() + "]");
 		COutgoingMessage cMessage = new COutgoingMessage(message.getRecipientMsisdn(), message.getTextContent());
@@ -922,7 +922,7 @@ public class SmsModem extends Thread implements SmsDevice {
 			this.setStatus(SmsModemStatus.DISCONNECTED, null);
 		}
 		
-		for (Message m : outbox) {
+		for (FrontlineMessage m : outbox) {
 			m.setStatus(Status.FAILED);
 			if (smsListener != null) smsListener.outgoingMessageEvent(this, m);
 		}
@@ -936,12 +936,12 @@ public class SmsModem extends Thread implements SmsDevice {
 	 * @return true if there was no problem sending messages, false otherwise.
 	 * @throws IOException 
 	 */
-	private void sendSmsListDirect(List<Message> smsMessages) throws IOException {
+	private void sendSmsListDirect(List<FrontlineMessage> smsMessages) throws IOException {
 		LOG.trace("ENTER");
 
 		try {
 			cService.keepGsmLinkOpen();
-			for (Message message : smsMessages) {
+			for (FrontlineMessage message : smsMessages) {
 				LOG.debug("Sending [" + message.getTextContent() + "] to [" + message.getRecipientMsisdn() + "]");
 				COutgoingMessage cMessage;
 
@@ -979,7 +979,7 @@ public class SmsModem extends Thread implements SmsDevice {
 				}
 			}
 		} finally {
-			for (Message m : smsMessages) {
+			for (FrontlineMessage m : smsMessages) {
 				if (m.getStatus() == Status.PENDING) {
 					outbox.add(m);
 				}

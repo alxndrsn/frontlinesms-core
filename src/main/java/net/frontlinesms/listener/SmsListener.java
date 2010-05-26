@@ -42,7 +42,7 @@ public interface SmsListener {
 	 * @param sender The device that this message was sent on.
 	 * @param outgoingMessage The sent message.
 	 */
-	public void outgoingMessageEvent(SmsDevice sender, Message outgoingMessage);
+	public void outgoingMessageEvent(SmsDevice sender, FrontlineMessage outgoingMessage);
 	
 	/**
 	 * called when one of the SMS devices (phones or http senders) has a change in status,

@@ -14,8 +14,8 @@ import net.frontlinesms.junit.HibernateTestCase;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Keyword;
-import net.frontlinesms.data.domain.Message;
-import net.frontlinesms.data.domain.Message.Type;
+import net.frontlinesms.data.domain.FrontlineMessage;
+import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
 
@@ -55,7 +55,7 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 		checkSanity();
 		
 		long startTime = System.currentTimeMillis();
-		Message m = Message.createIncomingMessage(startTime + 1000, ARTHUR, BERNADETTE, "Hello mate.");
+		FrontlineMessage m = FrontlineMessage.createIncomingMessage(startTime + 1000, ARTHUR, BERNADETTE, "Hello mate.");
 		dao.saveMessage(m);
 	
 		checkSanity();
@@ -134,7 +134,7 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 	}
 	
 	private void testGetMessagesForKeywordWithParameters(String keyword, int totalMessageCount, Long startDate, Long endDate, int startIndex, int limit) {
-		int actualMessageCount = this.dao.getMessageCount(Message.Type.ALL, new Keyword(keyword, ""), startDate, endDate);
+		int actualMessageCount = this.dao.getMessageCount(FrontlineMessage.Type.ALL, new Keyword(keyword, ""), startDate, endDate);
 		assertTrue("Wrong message count. Expected <" + totalMessageCount + ">, but was <" + actualMessageCount + ">", totalMessageCount == actualMessageCount);
 		
 		// Adjust the expected message count to take into account the paging
@@ -142,8 +142,8 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 		
 		// Test ascending
 		{
-			List<Message> dateAscMessages = this.dao.getMessagesForKeyword(Message.Type.ALL, new Keyword(keyword, ""),
-					Message.Field.DATE, Order.ASCENDING, startDate, endDate, startIndex, limit);
+			List<FrontlineMessage> dateAscMessages = this.dao.getMessagesForKeyword(FrontlineMessage.Type.ALL, new Keyword(keyword, ""),
+					FrontlineMessage.Field.DATE, Order.ASCENDING, startDate, endDate, startIndex, limit);
 			assertEquals("Messages for keyword '" + keyword + "' " +
 					"start=" + startIndex + ";limit=" + limit,
 					expectedMessageCount, dateAscMessages.size());
@@ -153,7 +153,7 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 				lastDate = startDate;
 			}
 			
-			for(Message m : dateAscMessages) {
+			for(FrontlineMessage m : dateAscMessages) {
 				if (lastDate == null) {
 					lastDate = m.getDate();
 				}
@@ -165,8 +165,8 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 			
 		// Test descending
 		{
-			List<Message> dateDescMessages = this.dao.getMessagesForKeyword(Message.Type.ALL, new Keyword(keyword, ""),
-					Message.Field.DATE, Order.DESCENDING, startDate, endDate, startIndex, limit);
+			List<FrontlineMessage> dateDescMessages = this.dao.getMessagesForKeyword(FrontlineMessage.Type.ALL, new Keyword(keyword, ""),
+					FrontlineMessage.Field.DATE, Order.DESCENDING, startDate, endDate, startIndex, limit);
 			assertEquals("Messages for keyword '" + keyword + "' " +
 					"start=" + startIndex + ";limit=" + limit,
 					expectedMessageCount, dateDescMessages.size());
@@ -175,7 +175,7 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 				lastDate = endDate;
 			}
 			
-			for(Message m : dateDescMessages) {
+			for(FrontlineMessage m : dateDescMessages) {
 				if (lastDate == null) {
 					lastDate = m.getDate();
 				}
@@ -212,10 +212,10 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 		final String senderMsisdn = "test sender";
 		final String recipientMsisdn = "test recipient";
 		
-		Message incomingMessage = Message.createIncomingMessage(date, senderMsisdn, recipientMsisdn, messageContent);
+		FrontlineMessage incomingMessage = FrontlineMessage.createIncomingMessage(date, senderMsisdn, recipientMsisdn, messageContent);
 		this.dao.saveMessage(incomingMessage);
 		
-		Message outgoingMessage = Message.createOutgoingMessage(date, senderMsisdn, recipientMsisdn, messageContent);
+		FrontlineMessage outgoingMessage = FrontlineMessage.createOutgoingMessage(date, senderMsisdn, recipientMsisdn, messageContent);
 		this.dao.saveMessage(outgoingMessage);
 	}
 	
@@ -255,9 +255,9 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 	 */
 	private void testGetMessagesForKeyword(String keywordString, int expectedMessageCount) {
 		Keyword keyword = new Keyword(keywordString, "Test keyword.");
-		List<Message> allMessagesForBlankKeyword = dao.getMessagesForKeyword(Message.Type.ALL, keyword);
-		List<Message> incomingMessagesForBlankKeyword = dao.getMessagesForKeyword(Message.Type.RECEIVED, keyword);
-		List<Message> outgoingMessagesForBlankKeyword = dao.getMessagesForKeyword(Message.Type.OUTBOUND, keyword);
+		List<FrontlineMessage> allMessagesForBlankKeyword = dao.getMessagesForKeyword(FrontlineMessage.Type.ALL, keyword);
+		List<FrontlineMessage> incomingMessagesForBlankKeyword = dao.getMessagesForKeyword(FrontlineMessage.Type.RECEIVED, keyword);
+		List<FrontlineMessage> outgoingMessagesForBlankKeyword = dao.getMessagesForKeyword(FrontlineMessage.Type.OUTBOUND, keyword);
 		
 		int allMessageCount = allMessagesForBlankKeyword.size();
 		int incomingMessageCount = incomingMessagesForBlankKeyword.size();
@@ -287,12 +287,12 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 	}
 
 	private void createOutgoingMessage(String messageContent) {
-		Message m = Message.createOutgoingMessage(0, "testSender", "testRecipient", messageContent);
+		FrontlineMessage m = FrontlineMessage.createOutgoingMessage(0, "testSender", "testRecipient", messageContent);
 		this.dao.saveMessage(m);
 	}
 
 	private void createIncomingMessage(String messageContent) {
-		Message m = Message.createIncomingMessage(0, "testSender", "testRecipient", messageContent);
+		FrontlineMessage m = FrontlineMessage.createIncomingMessage(0, "testSender", "testRecipient", messageContent);
 		this.dao.saveMessage(m);
 	}
 

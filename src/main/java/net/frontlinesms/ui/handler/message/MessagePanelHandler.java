@@ -20,7 +20,7 @@ import java.awt.Color;
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.Contact;
-import net.frontlinesms.data.domain.Message;
+import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
@@ -120,7 +120,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		// We clear the components
 		uiController.setText(uiController.find(this.messagePanel, COMPONENT_TF_RECIPIENT), "");
 		uiController.setText(uiController.find(this.messagePanel, COMPONENT_TF_MESSAGE), "");
-		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_REMAINING_CHARS), String.valueOf(Message.SMS_LENGTH_LIMIT));
+		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_REMAINING_CHARS), String.valueOf(FrontlineMessage.SMS_LENGTH_LIMIT));
 		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_MSG_NUMBER), "0");
 		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_FIRST), Icon.SMS_DISABLED);
 		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS_DISABLED);
@@ -145,8 +145,8 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
 		
 		int totalLengthAllowed;
-		if(GsmAlphabet.areAllCharactersValidGSM(message))totalLengthAllowed = Message.SMS_MULTIPART_LENGTH_LIMIT * Message.SMS_LIMIT;
-		else totalLengthAllowed = Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * Message.SMS_LIMIT;
+		if(GsmAlphabet.areAllCharactersValidGSM(message))totalLengthAllowed = FrontlineMessage.SMS_MULTIPART_LENGTH_LIMIT * FrontlineMessage.SMS_LIMIT;
+		else totalLengthAllowed = FrontlineMessage.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * FrontlineMessage.SMS_LIMIT;
 		
 		boolean shouldEnableSendButton = ((!shouldCheckMaxMessageLength || messageLength <= totalLengthAllowed)
 											&& recipientLength > 0
@@ -201,9 +201,9 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		boolean areAllCharactersValidGSM = GsmAlphabet.areAllCharactersValidGSM(message);
 		int totalLengthAllowed;
 		if(areAllCharactersValidGSM) {
-			totalLengthAllowed = Message.SMS_LENGTH_LIMIT + Message.SMS_MULTIPART_LENGTH_LIMIT * (Message.SMS_LIMIT - 1);
+			totalLengthAllowed = FrontlineMessage.SMS_LENGTH_LIMIT + FrontlineMessage.SMS_MULTIPART_LENGTH_LIMIT * (FrontlineMessage.SMS_LIMIT - 1);
 		} else {
-			totalLengthAllowed = Message.SMS_LENGTH_LIMIT_UCS2 + Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * (Message.SMS_LIMIT - 1);
+			totalLengthAllowed = FrontlineMessage.SMS_LENGTH_LIMIT_UCS2 + FrontlineMessage.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * (FrontlineMessage.SMS_LIMIT - 1);
 		}
 		
 		boolean shouldEnableSendButton = (messageLength > 0 && (!shouldCheckMaxMessageLength || messageLength <= totalLengthAllowed)
@@ -215,13 +215,13 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		int singleMessageCharacterLimit;
 		int multipartMessageCharacterLimit;
 		if(areAllCharactersValidGSM) {
-			singleMessageCharacterLimit = Message.SMS_LENGTH_LIMIT;
-			multipartMessageCharacterLimit = Message.SMS_MULTIPART_LENGTH_LIMIT;
+			singleMessageCharacterLimit = FrontlineMessage.SMS_LENGTH_LIMIT;
+			multipartMessageCharacterLimit = FrontlineMessage.SMS_MULTIPART_LENGTH_LIMIT;
 		} else {
 			// It appears there are some unicode-only characters here.  We should therefore
 			// treat this message as if it will be sent as unicode.
-			singleMessageCharacterLimit = Message.SMS_LENGTH_LIMIT_UCS2;
-			multipartMessageCharacterLimit = Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2;
+			singleMessageCharacterLimit = FrontlineMessage.SMS_LENGTH_LIMIT_UCS2;
+			multipartMessageCharacterLimit = FrontlineMessage.SMS_MULTIPART_LENGTH_LIMIT_UCS2;
 		}
 		
 		Object 	tfMessage = uiController.find(this.messagePanel, COMPONENT_TF_MESSAGE),

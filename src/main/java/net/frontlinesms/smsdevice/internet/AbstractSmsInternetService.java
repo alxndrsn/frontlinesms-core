@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.*;
-import net.frontlinesms.data.domain.Message.Status;
+import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.smsdevice.properties.*;
 
@@ -53,7 +53,7 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 	/** The active thread running this service */
 	private SmsInternetServiceThread thread;
 	/** Queue of SMS messages waiting to be sent with this service */
-	protected ConcurrentLinkedQueue<Message> outbox = new ConcurrentLinkedQueue<Message>();
+	protected ConcurrentLinkedQueue<FrontlineMessage> outbox = new ConcurrentLinkedQueue<FrontlineMessage>();
 	/** The SmsListener to which this phone handler should report SMS Message events. */
 	protected SmsListener smsListener;
 	/** Settings for this service */
@@ -67,7 +67,7 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 //> ACCESSOR METHODS
 	
 	/** @return This internet service outbox. */
-	public ConcurrentLinkedQueue<Message> getOutbox() {
+	public ConcurrentLinkedQueue<FrontlineMessage> getOutbox() {
 		return outbox;
 	}
 	
@@ -114,7 +114,7 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 	/** 
 	 * Adds the supplied message to the outbox. 
 	 */
-	public void sendSMS(Message outgoingMessage) {
+	public void sendSMS(FrontlineMessage outgoingMessage) {
 		LOG.trace("ENTER");
 		outgoingMessage.setStatus(Status.PENDING);
 		outgoingMessage.setSenderMsisdn(getMsisdn());
@@ -211,7 +211,7 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 			while (running) {
 				boolean sleep = true;
 				if (isConnected() && isUseForSending()) {
-					Message m = outbox.poll();
+					FrontlineMessage m = outbox.poll();
 					if (m != null) {
 						LOG.debug("Sending message [" + m.toString() + "]");
 						long startTime = System.currentTimeMillis();
@@ -257,7 +257,7 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 	 * Send an SMS message using this phone handler.
 	 * @param message The message to be sent.
 	 */
-	protected abstract void sendSmsDirect(Message message);
+	protected abstract void sendSmsDirect(FrontlineMessage message);
 	
 	/**
 	 * Attempt to receive SMS messages from this service.

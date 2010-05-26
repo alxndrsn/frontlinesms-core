@@ -30,7 +30,7 @@ import java.util.Iterator;
 
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Keyword;
-import net.frontlinesms.data.domain.Message;
+import net.frontlinesms.data.domain.FrontlineMessage;
 
 /**
  * Utilities for reading and writing Comma Seperated Value (CSV) files.
@@ -42,17 +42,17 @@ import net.frontlinesms.data.domain.Message;
 public class CsvUtils {
 	
 //> SUBSTITUTION MARKERS
-	/** [Substitution marker] {@link Message#getSenderMsisdn()} */
+	/** [Substitution marker] {@link FrontlineMessage#getSenderMsisdn()} */
 	public static final String MARKER_SENDER_NUMBER = "${sender_number}";
-	/** [Substitution marker] {@link Message#getSenderMsisdn()} converted into a {@link Contact#getName()} if possible */
+	/** [Substitution marker] {@link FrontlineMessage#getSenderMsisdn()} converted into a {@link Contact#getName()} if possible */
 	public static final String MARKER_SENDER_NAME = "${sender_name}";
-	/** [Substitution marker] {@link Message#getRecipientMsisdn()} */
+	/** [Substitution marker] {@link FrontlineMessage#getRecipientMsisdn()} */
 	public static final String MARKER_RECIPIENT_NUMBER = "${recipient_number}";
-	/** [Substitution marker] {@link Message#getRecipientMsisdn()} converted into a {@link Contact#getName()} if possible */
+	/** [Substitution marker] {@link FrontlineMessage#getRecipientMsisdn()} converted into a {@link Contact#getName()} if possible */
 	public static final String MARKER_RECIPIENT_NAME = "${recipient_name}";
-	/** [Substitution marker] {@link Message#getTextContent()} */
+	/** [Substitution marker] {@link FrontlineMessage#getTextContent()} */
 	public static final String MARKER_MESSAGE_CONTENT = "${message_content}";
-	/** [Substitution marker] {@link Message#getDate()} */
+	/** [Substitution marker] {@link FrontlineMessage#getDate()} */
 	public static final String MARKER_MESSAGE_DATE = "${message_date}";
 	/** [Substitution marker] {@link Contact#getName()} */
 	public static final String MARKER_CONTACT_NAME = "${contact_name}";
@@ -68,9 +68,9 @@ public class CsvUtils {
 	public static final String MARKER_CONTACT_NOTES = "${contact_notes}";
 	/** [Substitution marker] {@link Contact#getGroups()} covnerted to a {@link String} TODO define how it's converted to a string */
 	public static final String MARKER_CONTACT_GROUPS = "${contact_groups}";
-	/** [Substitution marker] {@link Message#getType()} */
+	/** [Substitution marker] {@link FrontlineMessage#getType()} */
 	public static final String MARKER_MESSAGE_TYPE = "${message_type}";
-	/** [Substitution marker] {@link Message#getStatus()} */
+	/** [Substitution marker] {@link FrontlineMessage#getStatus()} */
 	public static final String MARKER_MESSAGE_STATUS = "${message_status}";
 	/** [Substitution marker] {@link Keyword#getKeyword()} */
 	public static final String MARKER_KEYWORD_KEY = "${keyword}";

@@ -17,8 +17,8 @@ import net.frontlinesms.csv.CsvRowFormat;
 import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Keyword;
-import net.frontlinesms.data.domain.Message;
-import net.frontlinesms.data.domain.Message.Type;
+import net.frontlinesms.data.domain.FrontlineMessage;
+import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordDao;
@@ -152,7 +152,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private final ContactDao contactDao;
 	/** Data access object for determining group memberships */
 	private final GroupMembershipDao groupMembershipDao;
-	/** Data access object for {@link Message}s */
+	/** Data access object for {@link FrontlineMessage}s */
 	private final MessageDao messageDao;
 	/** Data access object for {@link Keyword}s */
 	private final KeywordDao keywordDao;
@@ -168,7 +168,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private boolean export;
 	/** The type of object we are dealing with, one of {@link #TYPE_CONTACT}, {@link #TYPE_KEYWORD}, {@link #TYPE_MESSAGE}. */
 	private EntityType type;
-	/** The objects we are exporting - a selection of thinlet components with attached {@link Contact}s, {@link Keyword}s or {@link Message}s */
+	/** The objects we are exporting - a selection of thinlet components with attached {@link Contact}s, {@link Keyword}s or {@link FrontlineMessage}s */
 	private Object attachedObject;
 
 //> CONSTRUCTORS
@@ -333,12 +333,12 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 
 //> INSTANCE HELPER METHODS
 	/**
-	 * Export the supplied {@link Message}s using settings set in {@link #wizardDialog}.
+	 * Export the supplied {@link FrontlineMessage}s using settings set in {@link #wizardDialog}.
 	 * @param messages The messages to export
 	 * @param filename The file to export the contacts to
 	 * @throws IOException 
 	 */
-	private void exportMessages(List<Message> messages, String filename) throws IOException {
+	private void exportMessages(List<FrontlineMessage> messages, String filename) throws IOException {
 		CsvRowFormat rowFormat = getRowFormatForMessage();
 		if (!rowFormat.hasMarkers()) {
 			uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_FIELD_SELECTED));
@@ -381,7 +381,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		//KEYWORDS
 		log.debug("Exporting all keywords..");
 		
-		Message.Type messageType = getMessageType();
+		FrontlineMessage.Type messageType = getMessageType();
 		CsvRowFormat rowFormat = getRowFormatForKeyword(messageType);
 		if (!rowFormat.hasMarkers()) {
 			uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_FIELD_SELECTED));
@@ -475,7 +475,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		} else if (type == EntityType.MESSAGES) {
 			//MESSAGES
 			log.debug("Exporting selected messages...");
-			exportMessages(getSelected(Message.class, selected), filename);
+			exportMessages(getSelected(FrontlineMessage.class, selected), filename);
 		} else {
 			//KEYWORDS
 			log.debug("Exporting selected keywords...");
@@ -485,10 +485,10 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	}
 
 	/**
-	 * Get the type of {@link Message} that has been selected to export.
+	 * Get the type of {@link FrontlineMessage} that has been selected to export.
 	 * @return {@link Type#ALL}, {@link Type#ALL}, {@link Type#ALL} or <code>null</code> if the user would not like any messages.
 	 */
-	private final Message.Type getMessageType() {
+	private final FrontlineMessage.Type getMessageType() {
 		boolean sent = isChecked(COMPONENT_CB_SENT);
 		boolean received = isChecked(COMPONENT_CB_RECEIVED);
 		
@@ -503,10 +503,10 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	
 	/**
 	 * Creates an export row format for keywords.
-	 * @param type Type of {@link Message} to export, e.g. {@link Type#RECEIVED}
+	 * @param type Type of {@link FrontlineMessage} to export, e.g. {@link Type#RECEIVED}
 	 * @return The row format for exporting {@link Keyword}s to CSV
 	 */
-	private CsvRowFormat getRowFormatForKeyword(Message.Type type) {
+	private CsvRowFormat getRowFormatForKeyword(FrontlineMessage.Type type) {
 		CsvRowFormat rowFormat = new CsvRowFormat();
 		addMarker(rowFormat, CsvUtils.MARKER_KEYWORD_KEY, COMPONENT_CB_KEYWORD);
 		addMarker(rowFormat, CsvUtils.MARKER_KEYWORD_DESCRIPTION, COMPONENT_CB_DESCRIPTION);

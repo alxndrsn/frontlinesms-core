@@ -110,7 +110,7 @@ public class RandomDataGenerator {
 		MessageDao messageDao = frontlineController.getMessageDao();
 		while(--count >= 0) {
 			String messageContent = generateMessageContent();
-			Message message = Message.createIncomingMessage((953550030 + (Math.abs(randy.nextLong()) % 315532800)) * 1000, getRandomContactPhoneNumber(), LOCAL_PHONE_NUMBER, messageContent);
+			FrontlineMessage message = FrontlineMessage.createIncomingMessage((953550030 + (Math.abs(randy.nextLong()) % 315532800)) * 1000, getRandomContactPhoneNumber(), LOCAL_PHONE_NUMBER, messageContent);
 			messageDao.saveMessage(message);
 		}
 	}
@@ -119,7 +119,7 @@ public class RandomDataGenerator {
 		MessageDao messageDao = frontlineController.getMessageDao();
 		while(--count >= 0) {
 			String messageContent = generateMessageContent();
-			Message message = Message.createOutgoingMessage((953550030 + (Math.abs(randy.nextLong()) % 315532800)) * 1000, LOCAL_PHONE_NUMBER, getRandomContactPhoneNumber(), messageContent);
+			FrontlineMessage message = FrontlineMessage.createOutgoingMessage((953550030 + (Math.abs(randy.nextLong()) % 315532800)) * 1000, LOCAL_PHONE_NUMBER, getRandomContactPhoneNumber(), messageContent);
 			messageDao.saveMessage(message);
 		}
 	}

@@ -37,10 +37,10 @@ import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
-import net.frontlinesms.data.domain.Message;
-import net.frontlinesms.data.domain.Message.Field;
-import net.frontlinesms.data.domain.Message.Status;
-import net.frontlinesms.data.domain.Message.Type;
+import net.frontlinesms.data.domain.FrontlineMessage;
+import net.frontlinesms.data.domain.FrontlineMessage.Field;
+import net.frontlinesms.data.domain.FrontlineMessage.Status;
+import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordDao;
@@ -94,7 +94,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	private final GroupMembershipDao groupMembershipDao;
 	/** DAO for {@link Keyword}s */
 	private final KeywordDao keywordDao;
-	/** DAO for {@link Message}s */
+	/** DAO for {@link FrontlineMessage}s */
 	private final MessageDao messageDao;
 	
 //> UI COMPONENTS
@@ -282,10 +282,10 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		int messageCount = getMessageCount();
 		numberToSend = messageCount;
 		
-		List<Message> messages = getListMessages(startIndex, limit);
+		List<FrontlineMessage> messages = getListMessages(startIndex, limit);
 		Object[] messageRows = new Object[messages.size()];
 		for (int i = 0; i < messages.size(); i++) {
-			Message m = messages.get(i);
+			FrontlineMessage m = messages.get(i);
 			messageRows[i] = ui.getRow(m);
 		}
 		
@@ -301,7 +301,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		if (selectedItem == null) {
 			return 0;
 		} else {
-			final Message.Type messageType = getSelectedMessageType();
+			final FrontlineMessage.Type messageType = getSelectedMessageType();
 			int selectedIndex = ui.getSelectedIndex(filterList);
 			if (selectedIndex == 0) {
 				return messageDao.getMessageCount(messageType, messageHistoryStart, messageHistoryEnd);
@@ -328,7 +328,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	 * @param limit The maximum number of messages to return
 	 * @return a page of messages, sorted and filtered
 	 */
-	private List<Message> getListMessages(int startIndex, int limit) {
+	private List<FrontlineMessage> getListMessages(int startIndex, int limit) {
 		Class<?> filterClass = getMessageHistoryFilterType();
 		Object filterList = getMessageHistoryFilterList();
 		Object selectedItem = ui.getSelectedItem(filterList);
@@ -336,13 +336,13 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		if (selectedItem == null) {
 			return Collections.emptyList();
 		} else {
-			Message.Type messageType = getSelectedMessageType();
+			FrontlineMessage.Type messageType = getSelectedMessageType();
 			Order order = getMessageSortOrder();
 			Field field = getMessageSortField();
 			
 			int selectedIndex = ui.getSelectedIndex(filterList);
 			if (selectedIndex == 0) {
-				List<Message> allMessages = messageDao.getAllMessages(messageType, field, order, messageHistoryStart, messageHistoryEnd, startIndex, limit);
+				List<FrontlineMessage> allMessages = messageDao.getAllMessages(messageType, field, order, messageHistoryStart, messageHistoryEnd, startIndex, limit);
 				return allMessages;
 			} else {
 				if(filterClass == Contact.class) {
@@ -366,9 +366,9 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	private Field getMessageSortField() {
 		Object header = Thinlet.get(messageListComponent, ThinletText.HEADER);
 		Object tableColumn = ui.getSelectedItem(header);
-		Message.Field field = Message.Field.DATE;
+		FrontlineMessage.Field field = FrontlineMessage.Field.DATE;
 		if (tableColumn != null) {
-			field = (Message.Field) ui.getProperty(tableColumn, PROPERTY_FIELD);
+			field = (FrontlineMessage.Field) ui.getProperty(tableColumn, PROPERTY_FIELD);
 		}
 		
 		return field;
@@ -387,10 +387,10 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	}
 	
 	/** @return he type(s) of messages to display in the message list */
-	private Message.Type getSelectedMessageType() {
+	private FrontlineMessage.Type getSelectedMessageType() {
 		boolean showSentMessages = ui.isSelected(showSentMessagesComponent);
 		boolean showReceivedMessages = ui.isSelected(showReceivedMessagesComponent);
-		Message.Type messageType;
+		FrontlineMessage.Type messageType;
 		if (showSentMessages && showReceivedMessages) { 
 			messageType = Type.ALL;
 		} else if (showSentMessages) {
@@ -556,12 +556,12 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	 * Event triggered when an outgoing message is created or updated.
 	 * @param message The message involved in the event
 	 */
-	public synchronized void outgoingMessageEvent(Message message) {
+	public synchronized void outgoingMessageEvent(FrontlineMessage message) {
 		LOG.debug("Refreshing message list");
 		
 		// If the message is already in the list, we just need to update its row
 		for (int i = 0; i < ui.getItems(messageListComponent).length; i++) {
-			Message e = ui.getMessage(ui.getItem(messageListComponent, i));
+			FrontlineMessage e = ui.getMessage(ui.getItem(messageListComponent, i));
 			if (e.equals(message)) {
 				ui.remove(ui.getItem(messageListComponent, i));
 				ui.add(messageListComponent, ui.getRow(message), i);
@@ -577,7 +577,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	 * Event triggered when an incoming message arrives.
 	 * @param message The message involved in the event
 	 */
-	public synchronized void incomingMessageEvent(Message message) {
+	public synchronized void incomingMessageEvent(FrontlineMessage message) {
 		addMessageToList(message);
 	}
 	
@@ -590,9 +590,9 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		final Object[] selected = ui.getSelectedItems(messageListComponent);
 		int numberRemoved = 0;
 		for(Object o : selected) {
-			Message toBeRemoved = ui.getMessage(o);
+			FrontlineMessage toBeRemoved = ui.getMessage(o);
 			LOG.debug("Message [" + toBeRemoved + "]");
-			Message.Status status = toBeRemoved.getStatus();
+			FrontlineMessage.Status status = toBeRemoved.getStatus();
 			if (status != Status.PENDING) {
 				LOG.debug("Removing Message [" + toBeRemoved + "] from database.");
 				if (status == Status.OUTBOX) {
@@ -618,7 +618,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	public void showMessageDetails() {
 		Object selected = ui.getSelectedItem(this.messageListComponent);
 		if (selected != null) {
-			Message message = ui.getMessage(selected);
+			FrontlineMessage message = ui.getMessage(selected);
 			Object details = ui.loadComponentFromFile(UI_FILE_MSG_DETAILS_FORM, this);
 			String senderDisplayName = ui.getSenderDisplayValue(message);
 			String recipientDisplayName = ui.getRecipientDisplayValue(message);
@@ -646,15 +646,15 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	public void resendSelectedFromMessageList(Object object) {
 		Object[] selected = ui.getSelectedItems(object);
 		for (Object o : selected) {
-			Message toBeReSent = ui.getMessage(o);
-			Message.Status status = toBeReSent.getStatus();
+			FrontlineMessage toBeReSent = ui.getMessage(o);
+			FrontlineMessage.Status status = toBeReSent.getStatus();
 			if (status == Status.FAILED) {
 				toBeReSent.setSenderMsisdn("");
-				toBeReSent.setRetriesRemaining(Message.MAX_RETRIES);
+				toBeReSent.setRetriesRemaining(FrontlineMessage.MAX_RETRIES);
 				ui.getPhoneManager().sendSMS(toBeReSent);
 			} else if (status == Status.DELIVERED || status == Status.SENT) {
 				if(toBeReSent.isBinaryMessage()) {
-					Message newMessage = Message.createBinaryOutgoingMessage(System.currentTimeMillis(), "",
+					FrontlineMessage newMessage = FrontlineMessage.createBinaryOutgoingMessage(System.currentTimeMillis(), "",
 							toBeReSent.getRecipientMsisdn(), toBeReSent.getRecipientSmsPort(), toBeReSent.getBinaryContent());
 					ui.getFrontlineController().sendMessage(newMessage);
 				} else {
@@ -685,7 +685,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			boolean receivedMessagesSelected = false;
 			boolean sentMessagesSelected = false;
 			for(Object selectedComponent : selectedItems) {
-				Message attachedMessage = ui.getAttachedObject(selectedComponent, Message.class);
+				FrontlineMessage attachedMessage = ui.getAttachedObject(selectedComponent, FrontlineMessage.class);
 				if(attachedMessage.getType() == Type.RECEIVED) {
 					receivedMessagesSelected = true;
 				}
@@ -717,11 +717,11 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			// Here, the FIELD property is set on each column of the message table.  These field objects are
 			// then used for easy sorting of the message table.
 			if(text != null) {
-				if (text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_STATUS))) ui.putProperty(o, PROPERTY_FIELD, Message.Field.STATUS);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_DATE))) ui.putProperty(o, PROPERTY_FIELD, Message.Field.DATE);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_SENDER))) ui.putProperty(o, PROPERTY_FIELD, Message.Field.SENDER_MSISDN);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_RECIPIENT))) ui.putProperty(o, PROPERTY_FIELD, Message.Field.RECIPIENT_MSISDN);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_MESSAGE))) ui.putProperty(o, PROPERTY_FIELD, Message.Field.MESSAGE_CONTENT);
+				if (text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_STATUS))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.STATUS);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_DATE))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.DATE);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_SENDER))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.SENDER_MSISDN);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_RECIPIENT))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.RECIPIENT_MSISDN);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_MESSAGE))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.MESSAGE_CONTENT);
 			}
 		}
 	}
@@ -731,7 +731,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	 * We just add the message to the top of the list, as things will get rather complicated otherwise
 	 * @param message the message to add
 	 */
-	private void addMessageToList(Message message) {
+	private void addMessageToList(FrontlineMessage message) {
 		LOG.trace("ENTER");
 		LOG.debug("Message [" + message + "]");
 		Object sel = ui.getSelectedItem(contactListComponent); // TODO doesn't seem to do anything for keyword list

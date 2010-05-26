@@ -24,7 +24,7 @@ import java.util.List;
 
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.*;
-import net.frontlinesms.data.domain.Message.Field;
+import net.frontlinesms.data.domain.FrontlineMessage.Field;
 
 /**
  * Factory for creating instances of net.frontlinesms.data.Message
@@ -44,7 +44,7 @@ public interface MessageDao {
 	 * @param index the result index of the messages to recover
 	 * @return
 	 */
-	public List<Message> getMessagesForMsisdn(Message.Type type, String number, Field sortBy, Order order, Long start, Long end, int startIndex, int limit);
+	public List<FrontlineMessage> getMessagesForMsisdn(FrontlineMessage.Type type, String number, Field sortBy, Order order, Long start, Long end, int startIndex, int limit);
 
 	/**
 	 * Gets all messages for the specified number. 
@@ -57,7 +57,7 @@ public interface MessageDao {
 	 * @param index the result index of the messages to recover
 	 * @return
 	 */
-	public List<Message> getMessagesForMsisdn(Message.Type type, String number, Field sortBy, Order order, Long start, Long end);
+	public List<FrontlineMessage> getMessagesForMsisdn(FrontlineMessage.Type type, String number, Field sortBy, Order order, Long start, Long end);
 	
 	/**
 	 * Gets message count for the specified number. 
@@ -66,7 +66,7 @@ public interface MessageDao {
 	 * @param end TODO
 	 * @return
 	 */
-	public int getMessageCountForMsisdn(Message.Type type, String number, Long start, Long end);
+	public int getMessageCountForMsisdn(FrontlineMessage.Type type, String number, Long start, Long end);
 	
 	/**
 	 * Gets count of SMS sent for the specified number. 
@@ -110,7 +110,7 @@ public interface MessageDao {
 	 * be TYPE_RECEIVED always.  If other functionality is required, the method should be renamed
 	 * or new methods created.
 	 */
-	public List<Message> getMessagesForKeyword(Message.Type messageType, Keyword keyword, Field sortBy, Order order, Long start, Long end, int startIndex, int limit);
+	public List<FrontlineMessage> getMessagesForKeyword(FrontlineMessage.Type messageType, Keyword keyword, Field sortBy, Order order, Long start, Long end, int startIndex, int limit);
 	
 	/**
 	 * Gets all messages of a particular type (SENT, RECEIVED, ALL).
@@ -119,7 +119,7 @@ public interface MessageDao {
 	 * @param order direction to order results in
 	 * @return
 	 */
-	public List<Message> getMessages(Message.Type messageType, Field sortBy, Order order);
+	public List<FrontlineMessage> getMessages(FrontlineMessage.Type messageType, Field sortBy, Order order);
 	
 	/**
 	 * Gets all messages of a particular type (SENT, RECEIVED, ALL) which begin with the specified keyword.
@@ -127,9 +127,9 @@ public interface MessageDao {
 	 * @param keyword word messages should start with
 	 * @return
 	 */
-	public List<Message> getMessagesForKeyword(Message.Type messageType, Keyword keyword);
+	public List<FrontlineMessage> getMessagesForKeyword(FrontlineMessage.Type messageType, Keyword keyword);
 	
-	public List<Message> getMessagesForStati(Message.Type messageType, Message.Status[] messageStatuses, Field sortBy, Order order, int startIndex, int limit);
+	public List<FrontlineMessage> getMessagesForStati(FrontlineMessage.Type messageType, FrontlineMessage.Status[] messageStatuses, Field sortBy, Order order, int startIndex, int limit);
 	
 	/**
 	 * Get the total number of messages with the supplied statuses.
@@ -137,7 +137,7 @@ public interface MessageDao {
 	 * @param messageStati
 	 * @return
 	 */
-	public int getMessageCount(Message.Type messageType, Message.Status... messageStatuses);
+	public int getMessageCount(FrontlineMessage.Type messageType, FrontlineMessage.Status... messageStatuses);
 
 	/**
 	 * Gets all messages of a particular type (SENT, RECEIVED, ALL) which begin with the specified keyword.  If
@@ -151,13 +151,13 @@ public interface MessageDao {
 	 * @param limit the maximum number of messages to recover
 	 * @return
 	 */
-	public List<Message> getMessages(Message.Type messageType, Keyword keyword, Field sortBy, Order order);
+	public List<FrontlineMessage> getMessages(FrontlineMessage.Type messageType, Keyword keyword, Field sortBy, Order order);
 	
 	/**
 	 * Gets all messages.
 	 * @return all messages in the system 
 	 */
-	public List<Message> getAllMessages();
+	public List<FrontlineMessage> getAllMessages();
 	
 	/**
 	 * Gets a page of messages.
@@ -171,7 +171,7 @@ public interface MessageDao {
 	 * @return list of all messages conforming to the specified constraints and sorted in a particular way.
 	 *
 	 */
-	public List<Message> getAllMessages(Message.Type type, Field field, Order order, Long start, Long end, int startIndex, int limit);
+	public List<FrontlineMessage> getAllMessages(FrontlineMessage.Type type, Field field, Order order, Long start, Long end, int startIndex, int limit);
 	
 	/**
 	 * Gets the number of messages of a specific type from between the specified dates
@@ -180,7 +180,7 @@ public interface MessageDao {
 	 * @param end the end date as a java timestamp, or <code>null</code> for no start date restriction
 	 * @return count of messages
 	 */
-	public int getMessageCount(Message.Type type, Long start, Long end);
+	public int getMessageCount(FrontlineMessage.Type type, Long start, Long end);
 	
 	/**
 	 * Gets all messages with the supplied status and type.
@@ -188,7 +188,7 @@ public interface MessageDao {
 	 * @param status
 	 * @return 
 	 */
-	public Collection<Message> getMessages(Message.Type type, Message.Status... status);
+	public Collection<FrontlineMessage> getMessages(FrontlineMessage.Type type, FrontlineMessage.Status... status);
 	
 	/**
 	 * Gets the number of messagesthere are of the given type for the given keyword.
@@ -198,7 +198,7 @@ public interface MessageDao {
 	 * @param end
 	 * @return
 	 */
-	public int getMessageCount(Message.Type messageType, Keyword keyword, Long start, Long end);
+	public int getMessageCount(FrontlineMessage.Type messageType, Keyword keyword, Long start, Long end);
 	
 	/**
 	 * Gets the outgoing message with the matching SMSC Reference Number sent to
@@ -207,29 +207,29 @@ public interface MessageDao {
 	 * @param smscReference
 	 * @return
 	 */
-	public Message getMessageForStatusUpdate(String targetMsisdnSuffix, int smscReference);
+	public FrontlineMessage getMessageForStatusUpdate(String targetMsisdnSuffix, int smscReference);
 	
 	/** @return the number of messages sent to the specified phone numbers within the specified dates */
-	public int getMessageCount(Message.Type messageType, List<String> phoneNumbers, Long messageHistoryStart, Long messageHistoryEnd);
+	public int getMessageCount(FrontlineMessage.Type messageType, List<String> phoneNumbers, Long messageHistoryStart, Long messageHistoryEnd);
 
 	/** @return the messages sent to the specified phone numbers within the specified dates */
-	public List<Message> getMessages(Message.Type messageType, List<String> phoneNumbers, Long messageHistoryStart, Long messageHistoryEnd);
+	public List<FrontlineMessage> getMessages(FrontlineMessage.Type messageType, List<String> phoneNumbers, Long messageHistoryStart, Long messageHistoryEnd);
 
 	/**
 	 * Delete the supplied message to the data source.
 	 * @param message the message to be deleted
 	 */
-	public void deleteMessage(Message message);
+	public void deleteMessage(FrontlineMessage message);
 
 	/**
 	 * Save the supplied message to the data source.
 	 * @param message the message to be saved
 	 */
-	public void saveMessage(Message message);
+	public void saveMessage(FrontlineMessage message);
 
 	/**
 	 * Update the supplied message in the data source.
 	 * @param message the message to be updated
 	 */
-	public void updateMessage(Message message);
+	public void updateMessage(FrontlineMessage message);
 }

@@ -30,7 +30,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.data.domain.KeywordAction.ExternalCommandResponseActionType;
 import net.frontlinesms.data.domain.KeywordAction.ExternalCommandResponseType;
-import net.frontlinesms.data.domain.Message.Status;
+import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.data.*;
 import net.frontlinesms.listener.IncomingMessageListener;
@@ -155,17 +155,17 @@ public class IncomingMessageProcessor extends Thread {
 			handleStatusReport(incomingMessage);
 		} else {
 			// This is an incoming message, so process accordingly
-			Message incoming;
+			FrontlineMessage incoming;
 			if (incomingMessage.getMessageEncoding() == SmsMessageEncoding.GSM_7BIT || incomingMessage.getMessageEncoding() == SmsMessageEncoding.UCS2) {
 				if(LOG.isDebugEnabled()) LOG.debug("Incoming text message [" + incomingMessage.getText() + "]");
-				incoming = Message.createIncomingMessage(incomingMessage.getDate(), incomingSenderMsisdn, receiver.getMsisdn(), incomingMessage.getText());
+				incoming = FrontlineMessage.createIncomingMessage(incomingMessage.getDate(), incomingSenderMsisdn, receiver.getMsisdn(), incomingMessage.getText());
 				messageDao.saveMessage(incoming);
 				handleTextMessage(incoming);
 			} else {
 				if(LOG.isDebugEnabled()) LOG.debug("Incoming binary message: " + incomingMessage.getBinary().length + "b");
 				
 				// Save the binary message
-				incoming = Message.createBinaryIncomingMessage(incomingMessage.getDate(), incomingSenderMsisdn, receiver.getMsisdn(), -1, incomingMessage.getBinary());
+				incoming = FrontlineMessage.createBinaryIncomingMessage(incomingMessage.getDate(), incomingSenderMsisdn, receiver.getMsisdn(), -1, incomingMessage.getBinary());
 				messageDao.saveMessage(incoming);
 			}
 
@@ -191,7 +191,7 @@ public class IncomingMessageProcessor extends Thread {
 		// Here, we strip the first four characters off the originator's number.  This is because we
 		// cannot be sure if the numbers supplied by the PhoneHandler are localised, or international
 		// with or without leading +.
-		Message message = messageDao.getMessageForStatusUpdate(statusReport.getOriginator(), incomingMessage.getRefNo());
+		FrontlineMessage message = messageDao.getMessageForStatusUpdate(statusReport.getOriginator(), incomingMessage.getRefNo());
 		if (message != null) {
 			LOG.debug("It's a delivery report for message [" + message + "]");
 			switch(statusReport.getDeliveryStatus()) {
@@ -213,7 +213,7 @@ public class IncomingMessageProcessor extends Thread {
 	 * @param incoming
 	 */
 	/* not private to allow unit testing */
-	void handleTextMessage(final Message incoming) {
+	void handleTextMessage(final FrontlineMessage incoming) {
 		Keyword keyword = keywordDao.getFromMessageText(incoming.getTextContent());
 		
 		if (keyword != null) {
@@ -248,7 +248,7 @@ public class IncomingMessageProcessor extends Thread {
 	 * @param action The action to executed.
 	 * @param incoming The incoming message that triggered this action.
 	 */
-	private void handleIncomingMessageAction_post(KeywordAction action, Message incoming) {
+	private void handleIncomingMessageAction_post(KeywordAction action, FrontlineMessage incoming) {
 		LOG.trace("ENTER");
 		String incomingSenderMsisdn = incoming.getSenderMsisdn();
 		String incomingMessageText = incoming.getTextContent();

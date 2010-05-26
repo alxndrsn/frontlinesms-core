@@ -13,7 +13,7 @@ import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
-import net.frontlinesms.data.domain.Message;
+import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.SmsInternetServiceSettings;
 import net.frontlinesms.data.domain.SmsModemSettings;
 import net.frontlinesms.data.repository.ContactDao;
@@ -71,7 +71,7 @@ public class StatisticsManager {
 	/** Data Access Object for {@link Contact}s */
 	@Autowired
 	private ContactDao contactDao;
-	/** Data Access Object for {@link Message}s */
+	/** Data Access Object for {@link FrontlineMessage}s */
 	@Autowired
 	private MessageDao messageDao;
 	/** Data Access Object for {@link KeywordAction}s */
@@ -203,11 +203,11 @@ public class StatisticsManager {
 	 * Collects the total number of received messages
 	 */
 	private void collectNumberOfReceivedMessages() {
-		final int totalReceived = messageDao.getMessageCount(Message.Type.RECEIVED, null, null);
+		final int totalReceived = messageDao.getMessageCount(FrontlineMessage.Type.RECEIVED, null, null);
 		this.statisticsList.put(I18N_KEY_STATS_RECEIVED_MESSAGES, String.valueOf(totalReceived));
 
 		final Long lastSubmitDate = AppProperties.getInstance().getLastStatisticsSubmissionDate();
-		final int receivedSinceLastSubmit = messageDao.getMessageCount(Message.Type.RECEIVED, lastSubmitDate, null);
+		final int receivedSinceLastSubmit = messageDao.getMessageCount(FrontlineMessage.Type.RECEIVED, lastSubmitDate, null);
 		this.statisticsList.put(I18N_KEY_STATS_RECEIVED_MESSAGES_SINCE_LAST_SUBMISSION, String.valueOf(receivedSinceLastSubmit));
 	}
 
@@ -215,11 +215,11 @@ public class StatisticsManager {
 	 * Collects the total number of sent messages
 	 */
 	private void collectNumberOfSentMessages() {
-		final int numberOfSentMessages = messageDao.getMessageCount(Message.Type.OUTBOUND, null, null);
+		final int numberOfSentMessages = messageDao.getMessageCount(FrontlineMessage.Type.OUTBOUND, null, null);
 		this.statisticsList.put(I18N_KEY_STATS_SENT_MESSAGES, String.valueOf(numberOfSentMessages));
 
 		Long lastSubmitDate = AppProperties.getInstance().getLastStatisticsSubmissionDate();
-		final int numberOfSentMessagesSinceLastSubmission = messageDao.getMessageCount(Message.Type.OUTBOUND, lastSubmitDate , null);
+		final int numberOfSentMessagesSinceLastSubmission = messageDao.getMessageCount(FrontlineMessage.Type.OUTBOUND, lastSubmitDate , null);
 		this.statisticsList.put(I18N_KEY_STATS_SENT_MESSAGES_SINCE_LAST_SUBMISSION, String.valueOf(numberOfSentMessagesSinceLastSubmission));
 	}
 

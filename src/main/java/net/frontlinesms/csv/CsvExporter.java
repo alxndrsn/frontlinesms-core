@@ -29,7 +29,7 @@ import java.util.List;
 
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.*;
-import net.frontlinesms.data.domain.Message.Type;
+import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -64,7 +64,7 @@ public class CsvExporter {
 	 * @param contactFactory 
 	 * @throws IOException
 	 */
-	public static void export(String exportFileName, List<? extends Message> messages, ContactDao contactFactory) throws IOException {
+	public static void export(String exportFileName, List<? extends FrontlineMessage> messages, ContactDao contactFactory) throws IOException {
 		export(new File(exportFileName), messages, null, null, contactFactory);
 	}
 	
@@ -79,7 +79,7 @@ public class CsvExporter {
 	 * @param contactDao 
 	 * @throws IOException
 	 */
-	public static void export(File exportFile, List<? extends Message> messages, CsvRowFormat messageFormat, String dateFormat, ContactDao contactDao) throws IOException {
+	public static void export(File exportFile, List<? extends FrontlineMessage> messages, CsvRowFormat messageFormat, String dateFormat, ContactDao contactDao) throws IOException {
 		LOG.trace("ENTER");
 		if (messageFormat == null) messageFormat = getDefaultMessageExportFormat();
 		if (dateFormat == null) dateFormat = InternationalisationUtils.getI18NString(DEFAULT_EXPORT_DATE_FORMAT);
@@ -100,7 +100,7 @@ public class CsvExporter {
 					CsvUtils.MARKER_RECIPIENT_NAME,		/*->*/ InternationalisationUtils.getI18NString(COMMON_RECIPIENT_NAME),
 					CsvUtils.MARKER_RECIPIENT_NUMBER,	/*->*/ InternationalisationUtils.getI18NString(COMMON_RECIPIENT_NUMBER),
 					CsvUtils.MARKER_MESSAGE_CONTENT,		/*->*/ InternationalisationUtils.getI18NString(COMMON_MESSAGE_CONTENT));
-			for (Message message : messages) {
+			for (FrontlineMessage message : messages) {
 				Contact sender = contactDao.getFromMsisdn(message.getSenderMsisdn());
 				String senderName = sender == null ? "" : sender.getName();
 				Contact recipient = contactDao.getFromMsisdn(message.getRecipientMsisdn());
@@ -128,7 +128,7 @@ public class CsvExporter {
 	 * @param contactFactory 
 	 * @throws IOException
 	 */
-	public static void exportMessages(File exportFile, Collection<Message> messages, CsvRowFormat messageFormat, ContactDao contactFactory) throws IOException {
+	public static void exportMessages(File exportFile, Collection<FrontlineMessage> messages, CsvRowFormat messageFormat, ContactDao contactFactory) throws IOException {
 		LOG.trace("ENTER : messages: " + messages.size());
 		LOG.debug("Message format [" + messageFormat + "]");
 		LOG.debug("Filename [" + exportFile.getAbsolutePath() + "]");
@@ -149,7 +149,7 @@ public class CsvExporter {
 					CsvUtils.MARKER_CONTACT_OTHER_PHONE, InternationalisationUtils.getI18NString(COMMON_CONTACT_OTHER_PHONE_NUMBER),
 					CsvUtils.MARKER_CONTACT_EMAIL, InternationalisationUtils.getI18NString(COMMON_CONTACT_E_MAIL_ADDRESS),
 					CsvUtils.MARKER_CONTACT_NOTES, InternationalisationUtils.getI18NString(COMMON_CONTACT_NOTES));
-			for (Message message : messages) {
+			for (FrontlineMessage message : messages) {
 				Contact c;
 				if (message.getType() == Type.RECEIVED) {
 					c = contactFactory.getFromMsisdn(message.getSenderMsisdn());
@@ -239,7 +239,7 @@ public class CsvExporter {
 	 * @param messageType 
 	 * @throws IOException
 	 */
-	public static void exportKeywords(File exportFile, List<? extends Keyword> keywords, CsvRowFormat rowFormat, ContactDao contactFactory, MessageDao messageFactory, Message.Type messageType) throws IOException {
+	public static void exportKeywords(File exportFile, List<? extends Keyword> keywords, CsvRowFormat rowFormat, ContactDao contactFactory, MessageDao messageFactory, FrontlineMessage.Type messageType) throws IOException {
 		LOG.trace("ENTER");
 		LOG.debug("Keyword format [" + rowFormat + "]");
 		LOG.debug("Filename [" + exportFile.getAbsolutePath() + "]");
@@ -269,7 +269,7 @@ public class CsvExporter {
 							CsvUtils.MARKER_KEYWORD_KEY, 		/*->*/ keyword.getKeyword(),
 							CsvUtils.MARKER_KEYWORD_DESCRIPTION, /*->*/ keyword.getDescription());
 				} else {
-					for (Message message : messageFactory.getMessagesForKeyword(messageType, keyword)) {
+					for (FrontlineMessage message : messageFactory.getMessagesForKeyword(messageType, keyword)) {
 						Contact c;
 						if (message.getType() == Type.RECEIVED) {
 							c = contactFactory.getFromMsisdn(message.getSenderMsisdn());

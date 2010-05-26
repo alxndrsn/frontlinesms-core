@@ -30,5 +30,5 @@ public interface UIListener extends IncomingMessageListener {
 	
 	public void contactAddedToGroup(Contact contact, Group group);
 	
-	public void outgoingMessageEvent(Message message);
+	public void outgoingMessageEvent(FrontlineMessage message);
 }
