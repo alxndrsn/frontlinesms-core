@@ -147,7 +147,9 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_SENT_MESSAGES = "common.sent.messages";
 	
 	public static final String EVENT_DESCRIPTION = "event.description";
-	public static final String EVENT_DESCRIPTION_MULTI_RECIPIENTS = "event.description.multi.recipients";	
+	public static final String EVENT_DESCRIPTION_MULTI_RECIPIENTS = "event.description.multi.recipients";
+	
+	public static final int ISO_639_1_CODE_LENGTH = 2;
 	
 	public static final String MESSAGE_BLANK_KEYWORD_DESCRIPTION = "message.blank.keyword";
 	public static final String MESSAGE_GROUP_NO_MEMBERS = "message.no.members";
