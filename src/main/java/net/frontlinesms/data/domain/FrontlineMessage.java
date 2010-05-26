@@ -31,9 +31,9 @@ import net.frontlinesms.data.EntityField;
 /**
  * Object representing an SMS message in our data structure.
  * @author Alex
- *
  */
 @Entity
+// This class is mapped to the database table called "message", as this class used to be called "Message"
 @Table(name="message")
 public class FrontlineMessage {
 
