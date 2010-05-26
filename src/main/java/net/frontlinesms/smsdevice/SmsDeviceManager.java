@@ -25,7 +25,7 @@ import java.util.concurrent.*;
 import serial.*;
 
 import net.frontlinesms.CommUtils;
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.data.domain.Message.Status;
 import net.frontlinesms.events.EventBus;
@@ -103,7 +103,7 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 	private final HashSet<String> connectedSerials = new HashSet<String>();
 	private String[] portIgnoreList;
 
-	private static Logger LOG = Utils.getLogger(SmsDeviceManager.class);
+	private static Logger LOG = FrontlineUtils.getLogger(SmsDeviceManager.class);
 
 	/**
 	 * Create a polling-variant SMS Handler.
@@ -132,7 +132,7 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 			// Sleep for a second to ensure lists are not constantly being reshuffled.  Processing dispatch
 			// and received messages is not really time-critical, otherwise it might be worth sleeping for
 			// less time.
-			Utils.sleep_ignoreInterrupts(1000);
+			FrontlineUtils.sleep_ignoreInterrupts(1000);
 			
 			doRun();
 		}

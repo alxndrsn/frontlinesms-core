@@ -18,7 +18,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_RE
 import java.awt.Color;
 
 import net.frontlinesms.FrontlineSMSConstants;
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Message;
 import net.frontlinesms.ui.Icon;
@@ -48,7 +48,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 
 //> INSTANCE PROPERTIES
 	/** Logging obhect */
-	private final Logger log = Utils.getLogger(this.getClass());
+	private final Logger log = FrontlineUtils.getLogger(this.getClass());
 	/** The {@link UiGeneratorController} that shows the tab. */
 	private final UiGeneratorController uiController;
 	/** The parent component */

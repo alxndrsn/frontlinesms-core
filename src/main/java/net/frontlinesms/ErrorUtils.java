@@ -251,7 +251,7 @@ public class ErrorUtils {
 		errorFrame.setTitle(title);
 		final Container contentPane = errorFrame.getContentPane();
 		contentPane.setLayout(new SimpleLayout());
-		errorFrame.setIconImage(Utils.getImage("/icons/fatal_error.png", DesktopLauncher.class));
+		errorFrame.setIconImage(FrontlineUtils.getImage("/icons/fatal_error.png", DesktopLauncher.class));
 		JLabel errorMessage = new JLabel(message);
 		Font messageFont = new Font(errorMessage.getFont().getFontName(), Font.BOLD, 15);
 		errorMessage.setFont(messageFont);
@@ -359,7 +359,7 @@ public class ErrorUtils {
 			sendToFrontlineSupport(name, emailAddress, ResourceUtils.getConfigDirectoryPath() + FrontlineSMSConstants.ZIPPED_LOGS_FILENAME);
 		} finally {
 			if (resetConfiguration) {
-				Utils.loadLogConfiguration();
+				FrontlineUtils.loadLogConfiguration();
 			}
 		}
 	}
@@ -568,7 +568,7 @@ public class ErrorUtils {
 	 * @return the {@link ImageIcon} found at the specified location, or <code>null</code> if none could be found.
 	 */
 	private static ImageIcon getImageIcon(String path) {
-		Image image = Utils.getImage(path, ErrorUtils.class);
+		Image image = FrontlineUtils.getImage(path, ErrorUtils.class);
 		if(image == null) {
 			return null;
 		} else {

@@ -55,11 +55,11 @@ import org.apache.log4j.PropertyConfigurator;
  * Class containing general helper methods that have nowhere better to live.
  * @author Alex Anderson alex@frontlinesms.com
  */
-public class Utils {
+public class FrontlineUtils {
 	
 //> CONSTANTS
 	/** Logging object */
-	private static Logger LOG = Utils.getLogger(Utils.class);
+	private static Logger LOG = FrontlineUtils.getLogger(FrontlineUtils.class);
 	/** Date formatter used in logs. */
 	private static final SimpleDateFormat LOG_DATE_FORMATTER = new SimpleDateFormat();
 
@@ -75,7 +75,7 @@ public class Utils {
 		if (f.exists()) {
 			PropertyConfigurator.configure(f.getAbsolutePath());
 		} else {
-			PropertyConfigurator.configure(Utils.class.getResource("/log4j.properties"));
+			PropertyConfigurator.configure(FrontlineUtils.class.getResource("/log4j.properties"));
 		}
 
 	}

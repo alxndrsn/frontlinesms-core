@@ -26,7 +26,7 @@ import javax.mail.internet.MimeMultipart;
 
 import org.apache.log4j.Logger;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.email.EmailException;
 
 /**
@@ -35,7 +35,7 @@ import net.frontlinesms.email.EmailException;
  */
 public class SmtpEmailSender {
 	/** Logging object */
-	private final Logger log = Utils.getLogger(this.getClass());
+	private final Logger log = FrontlineUtils.getLogger(this.getClass());
 	/** SMTP email session */
 	private final Session session;
 	

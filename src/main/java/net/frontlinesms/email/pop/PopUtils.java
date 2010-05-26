@@ -11,7 +11,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.smsdevice.internet.IntelliSmsInternetService;
 
 import org.apache.log4j.Logger;
@@ -23,7 +23,7 @@ import org.apache.log4j.Logger;
 public class PopUtils {
 //> STATIC CONSTANTS
 	/** Logging object */
-	private static Logger LOG = Utils.getLogger(PopUtils.class);
+	private static Logger LOG = FrontlineUtils.getLogger(PopUtils.class);
 	/** MIME Type for plain text */
 	private static final String MIMETYPE_TEXT_PLAIN = "text/plain";
 

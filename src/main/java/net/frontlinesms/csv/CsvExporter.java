@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.data.domain.Message.Type;
 import net.frontlinesms.data.repository.*;
@@ -50,7 +50,7 @@ public class CsvExporter {
 	/** File extension for comma-separated value files */
 	public static final String CSV_EXTENSION = ".csv";
 	/** Logging object */
-	protected static Logger LOG = Utils.getLogger(CsvExporter.class);
+	protected static Logger LOG = FrontlineUtils.getLogger(CsvExporter.class);
 			
 	/** The delimiter to use between group names when they are exported. */
 	protected static final String GROUPS_DELIMITER = "\\"; 
@@ -220,7 +220,7 @@ public class CsvExporter {
 					CsvUtils.MARKER_CONTACT_EMAIL, contact.getEmailAddress(),
 					CsvUtils.MARKER_CONTACT_STATUS, Boolean.toString(contact.isActive()),
 					CsvUtils.MARKER_CONTACT_NOTES, contact.getNotes(),
-					CsvUtils.MARKER_CONTACT_GROUPS, Utils.contactGroupsAsString(groupMembershipDao.getGroups(contact), GROUPS_DELIMITER));
+					CsvUtils.MARKER_CONTACT_GROUPS, FrontlineUtils.contactGroupsAsString(groupMembershipDao.getGroups(contact), GROUPS_DELIMITER));
 			}
 		} finally {
 			if(out!= null) out.close();

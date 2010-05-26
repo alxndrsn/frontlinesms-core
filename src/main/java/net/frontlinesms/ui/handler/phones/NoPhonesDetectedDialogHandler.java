@@ -6,7 +6,7 @@ package net.frontlinesms.ui.handler.phones;
 import java.awt.Image;
 
 import net.frontlinesms.AppProperties;
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.smsdevice.events.NoSmsDevicesConnectedNotification;
 import net.frontlinesms.ui.DatabaseSettings;
 import net.frontlinesms.ui.FrontlineUI;
@@ -52,7 +52,7 @@ public class NoPhonesDetectedDialogHandler implements ThinletUiEventHandler {
 	
 //> INSTANCE PROPERTIES
 	/** Logging object */
-	private final Logger log = Utils.getLogger(this.getClass());
+	private final Logger log = FrontlineUtils.getLogger(this.getClass());
 	/** The {@link UiGeneratorController} that shows the tab. */
 	private final UiGeneratorController uiController;
 	

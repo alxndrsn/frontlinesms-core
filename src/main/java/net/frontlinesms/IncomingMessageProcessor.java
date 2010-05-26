@@ -52,7 +52,7 @@ public class IncomingMessageProcessor extends Thread {
 	/** Time, in millis, thread should sleep for after message processing failed. */
 	private static final int THREAD_SLEEP_AFTER_PROCESSING_FAILED = 5000;
 
-	private static final Logger LOG = Utils.getLogger(IncomingMessageProcessor.class);
+	private static final Logger LOG = FrontlineUtils.getLogger(IncomingMessageProcessor.class);
 	
 	/** Set hi when the thread should terminate. */
 	private boolean keepAlive;
@@ -132,7 +132,7 @@ public class IncomingMessageProcessor extends Thread {
 						// connectivity issue.  Stop processing messages for a while, and re-queue this one.
 						LOG.warn("Error processing message.  It will be queued for re-processing.", t);
 						incomingMessageQueue.add(queueItem);
-						Utils.sleep_ignoreInterrupts(THREAD_SLEEP_AFTER_PROCESSING_FAILED);
+						FrontlineUtils.sleep_ignoreInterrupts(THREAD_SLEEP_AFTER_PROCESSING_FAILED);
 					}
 				} else {
 					LOG.error("Unknown queue item type: " + queueItem.getClass());
@@ -381,10 +381,10 @@ public class IncomingMessageProcessor extends Thread {
 			boolean waitForResponse = action.getExternalCommandResponseType() == ExternalCommandResponseType.PLAIN_TEXT;
 			if (action.getExternalCommandType() == KeywordAction.ExternalCommandType.HTTP_REQUEST) {
 				LOG.debug("Executing HTTP request...");
-				response = Utils.makeHttpRequest(cmd, waitForResponse);
+				response = FrontlineUtils.makeHttpRequest(cmd, waitForResponse);
 			} else {
 				LOG.debug("Executing external program...");
-				response = Utils.executeExternalProgram(cmd, waitForResponse);
+				response = FrontlineUtils.executeExternalProgram(cmd, waitForResponse);
 			}
 			if (waitForResponse) {
 				LOG.debug("Response [" + response + "]");
@@ -396,10 +396,10 @@ public class IncomingMessageProcessor extends Thread {
 			InputStream toRead = null;
 			if (action.getExternalCommandType() == KeywordAction.ExternalCommandType.HTTP_REQUEST) {
 				LOG.debug("Executing HTTP request...");
-				toRead = Utils.makeHttpRequest(cmd);
+				toRead = FrontlineUtils.makeHttpRequest(cmd);
 			} else {
 				LOG.debug("Executing external program...");
-				toRead = Utils.executeExternalProgram(cmd);
+				toRead = FrontlineUtils.executeExternalProgram(cmd);
 			}
 			LOG.debug("Reading XML from response...");
 			XMLReader reader = new XMLReader(toRead);

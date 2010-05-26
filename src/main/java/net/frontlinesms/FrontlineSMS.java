@@ -81,7 +81,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
  */
 public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	/** Logging object */
-	private static Logger LOG = Utils.getLogger(FrontlineSMS.class);
+	private static Logger LOG = FrontlineUtils.getLogger(FrontlineSMS.class);
 	/** SMS device emulator */
 	public static final SmsDevice EMULATOR = new DummySmsDevice(FrontlineSMSConstants.EMULATOR_MSISDN);
 	

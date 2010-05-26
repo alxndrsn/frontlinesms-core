@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 import net.frontlinesms.AppProperties;
 import net.frontlinesms.BuildProperties;
 import net.frontlinesms.FrontlineSMSConstants;
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
@@ -64,7 +64,7 @@ public class StatisticsManager {
 	
 //> DATA ACCESS OBJECTS
 	/** Logging object */
-	private final Logger log = Utils.getLogger(this.getClass());
+	private final Logger log = FrontlineUtils.getLogger(this.getClass());
 	/** Data Access Object for {@link Keyword}s */
 	@Autowired
 	private KeywordDao keywordDao;

@@ -24,7 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.data.domain.Message.Status;
 import net.frontlinesms.listener.SmsListener;
@@ -43,7 +43,7 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 	
 //> CONSTANTS
 	/** Logging object */
-	private static Logger LOG = Utils.getLogger(AbstractSmsInternetService.class);
+	private static Logger LOG = FrontlineUtils.getLogger(AbstractSmsInternetService.class);
 	/** Property name: use this service for sending SMS */
 	protected static final String PROPERTY_USE_FOR_SENDING = "common.use.for.sending";
 	/** Property name: use this service for receiving SMS */
@@ -235,8 +235,8 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 				// TODO verify delivery reports?
 				// If this thread is still running, we should have a little snooze
 				if (running) {
-					if (sleep) Utils.sleep_ignoreInterrupts(5000); /* 5 seconds */
-					else Utils.sleep_ignoreInterrupts(100); /* 0.1 seconds */
+					if (sleep) FrontlineUtils.sleep_ignoreInterrupts(5000); /* 5 seconds */
+					else FrontlineUtils.sleep_ignoreInterrupts(100); /* 0.1 seconds */
 				}
 			}
 			LOG.trace("EXIT");

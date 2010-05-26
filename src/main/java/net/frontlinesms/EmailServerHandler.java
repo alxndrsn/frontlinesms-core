@@ -47,7 +47,7 @@ public class EmailServerHandler extends Thread implements EmailListener {
 	/** Flag indicating that the thread should continue running. */
 	private boolean running;	
 
-	private static Logger LOG = Utils.getLogger(EmailServerHandler.class);
+	private static Logger LOG = FrontlineUtils.getLogger(EmailServerHandler.class);
 	
 	public EmailServerHandler() {
 		super("EmailServerHandler");
@@ -90,7 +90,7 @@ public class EmailServerHandler extends Thread implements EmailListener {
 					LOG.debug("Error retrieving account details", e);
 				}
 			}
-			Utils.sleep_ignoreInterrupts(5000);
+			FrontlineUtils.sleep_ignoreInterrupts(5000);
 		}
 		LOG.trace("EXIT");
 	}

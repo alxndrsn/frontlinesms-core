@@ -22,7 +22,7 @@ package net.frontlinesms.data.domain;
 import javax.persistence.*;
 
 import net.frontlinesms.FrontlineSMSConstants;
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.EntityField;
 
@@ -506,14 +506,14 @@ public class KeywordAction {
 			String messageWithoutKeyword = removeKeyword(incomingMessageText, keywordString);
 			
 			if(urlEncode) {
-				senderMsisdn = Utils.urlEncode(senderMsisdn);
-				keywordInMessage = Utils.urlEncode(keywordInMessage);
-				senderDisplayName = Utils.urlEncode(senderDisplayName);
-				messageWithoutKeyword = Utils.urlEncode(messageWithoutKeyword);
+				senderMsisdn = FrontlineUtils.urlEncode(senderMsisdn);
+				keywordInMessage = FrontlineUtils.urlEncode(keywordInMessage);
+				senderDisplayName = FrontlineUtils.urlEncode(senderDisplayName);
+				messageWithoutKeyword = FrontlineUtils.urlEncode(messageWithoutKeyword);
 			}
 			
 			// TODO perhaps all variables should be subbed?
-			return Utils.replace(unformattedText,
+			return FrontlineUtils.replace(unformattedText,
 					CsvUtils.MARKER_SENDER_NUMBER,		/*->*/ senderMsisdn,
 					CsvUtils.MARKER_KEYWORD_KEY,		/*->*/ keywordInMessage,
 					CsvUtils.MARKER_SENDER_NAME,		/*->*/ senderDisplayName,

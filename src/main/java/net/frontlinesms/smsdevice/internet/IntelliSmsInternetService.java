@@ -73,7 +73,7 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 	 */
 	private static final boolean PROXIES_SUPPORTED = false;
 	/** Logging object */
-	private static Logger LOG = Utils.getLogger(IntelliSmsInternetService.class);
+	private static Logger LOG = FrontlineUtils.getLogger(IntelliSmsInternetService.class);
 
 //> INSTANCE PROPERTIES
 	private IntelliSMS intelliSMS;

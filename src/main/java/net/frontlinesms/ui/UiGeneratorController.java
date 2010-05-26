@@ -95,7 +95,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 
 //> INSTANCE PROPERTIES
 	/** Logging object */
-	public Logger LOG = Utils.getLogger(UiGeneratorController.class);
+	public Logger LOG = FrontlineUtils.getLogger(UiGeneratorController.class);
 	
 	/** The {@link FrontlineSMS} instance that this UI is attached to. */
 	private FrontlineSMS frontlineController;

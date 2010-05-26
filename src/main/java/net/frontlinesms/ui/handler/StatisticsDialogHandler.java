@@ -10,7 +10,7 @@ import java.util.Map.Entry;
 
 import net.frontlinesms.AppProperties;
 import net.frontlinesms.FrontlineSMSConstants;
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.StatisticsManager;
 import net.frontlinesms.email.EmailException;
 import net.frontlinesms.email.smtp.SmtpEmailSender;
@@ -40,7 +40,7 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 
 //> INSTANCE PROPERTIES
 	/** Logger */
-	private Logger LOG = Utils.getLogger(this.getClass());
+	private Logger LOG = FrontlineUtils.getLogger(this.getClass());
 	
 	private UiGeneratorController ui;
 	/** Manager of statistics */

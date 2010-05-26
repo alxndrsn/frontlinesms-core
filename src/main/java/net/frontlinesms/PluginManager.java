@@ -24,7 +24,7 @@ public class PluginManager {
 
 //> INSTANCE PROPERTIES
 	/** Logging object */
-	private final Logger log = Utils.getLogger(this.getClass());
+	private final Logger log = FrontlineUtils.getLogger(this.getClass());
 	/** The application context */
 	private final ApplicationContext applicationContext;
 	/** FrontlineSMS instance */

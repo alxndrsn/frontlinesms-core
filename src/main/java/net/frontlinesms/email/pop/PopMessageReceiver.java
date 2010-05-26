@@ -12,7 +12,7 @@ import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.URLName;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.email.EmailFilter;
 
 import org.apache.log4j.Logger;
@@ -30,7 +30,7 @@ public class PopMessageReceiver {
 	/** Folder name for the inbox */
 	private static final String FOLDER_INBOX = "INBOX";
 	/** Logging object for this class */
-	private static Logger LOG = Utils.getLogger(PopMessageReceiver.class);
+	private static Logger LOG = FrontlineUtils.getLogger(PopMessageReceiver.class);
 	
 //> INSTANCE PROPERTIES
 	/** Object that filters emails to reduce email spam. */

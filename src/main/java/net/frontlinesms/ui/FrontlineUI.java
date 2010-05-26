@@ -22,7 +22,7 @@ package net.frontlinesms.ui;
 import java.awt.Image;
 
 import net.frontlinesms.ErrorUtils;
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.ui.i18n.LanguageBundle;
 
 import org.apache.log4j.Logger;
@@ -49,7 +49,7 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	
 //> INSTANCE PROPERTIES
 	/** Logging object */
-	protected final Logger log = Utils.getLogger(this.getClass());
+	protected final Logger log = FrontlineUtils.getLogger(this.getClass());
 	/** The language bundle currently in use */
 	public static LanguageBundle currentResourceBundle;
 	/** Frame launcher that this UI instance is displayed within.  We need to keep a handle on it so that we can dispose of it when we quit or change UI modes. */
@@ -152,10 +152,10 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	/**
 	 * Opens a link in the system browser
 	 * @param url the url to open
-	 * @see Utils#openExternalBrowser(String)
+	 * @see FrontlineUtils#openExternalBrowser(String)
 	 */
 	public void openBrowser(String url) {
-		Utils.openExternalBrowser(url);
+		FrontlineUtils.openExternalBrowser(url);
 	}
 
 	/**
@@ -163,7 +163,7 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	 * @param page The name of the help manual page, including file extension.
 	 */
 	public void showHelpPage(String page) {
-		Utils.openHelpPageInBrowser(page);
+		FrontlineUtils.openHelpPageInBrowser(page);
 	}
 	
 	/**

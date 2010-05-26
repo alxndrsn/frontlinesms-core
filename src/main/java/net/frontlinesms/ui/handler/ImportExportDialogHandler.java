@@ -10,7 +10,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.csv.CsvExporter;
 import net.frontlinesms.csv.CsvImporter;
 import net.frontlinesms.csv.CsvRowFormat;
@@ -147,7 +147,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 
 //> INSTANCE PROPERTIES
 	/** Logging object */
-	private final Logger log = Utils.getLogger(this.getClass());
+	private final Logger log = FrontlineUtils.getLogger(this.getClass());
 	/** Data access object for {@link Contact}s */
 	private final ContactDao contactDao;
 	/** Data access object for determining group memberships */
@@ -232,7 +232,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 
 //> PUBLIC UI METHODS
 	public void filenameModified(String text) {
-		boolean enableExport = Utils.getFilenameWithoutExtension(new File(text)).length() > 0;
+		boolean enableExport = FrontlineUtils.getFilenameWithoutExtension(new File(text)).length() > 0;
 		uiController.setEnabled(uiController.find(this.wizardDialog, COMPONENT_BT_DO_EXPORT), enableExport);
 	}
 	

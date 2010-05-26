@@ -24,7 +24,7 @@ import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.ui.i18n.*;
@@ -39,7 +39,7 @@ public class MasterTranslationFile extends LanguageBundle {
 	private static final String IDENTIFIER_PREFIX = "master:";
 
 	/** Logging object */
-	private static final Logger LOG = Utils.getLogger(MasterTranslationFile.class);
+	private static final Logger LOG = FrontlineUtils.getLogger(MasterTranslationFile.class);
 	
 //> INSTANCE VARIABLES
 	private final String filename;

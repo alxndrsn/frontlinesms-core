@@ -11,7 +11,7 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
@@ -32,7 +32,7 @@ public abstract class BaseActionDialog implements ThinletUiEventHandler {
 
 //> INSTANCE PROPERTIES
 	/** Log */
-	protected Logger log = Utils.getLogger(this.getClass());
+	protected Logger log = FrontlineUtils.getLogger(this.getClass());
 	/** UI */
 	protected final UiGeneratorController ui;
 	/** {@link KeywordTabHandler} which spawned this. */
@@ -187,7 +187,7 @@ public abstract class BaseActionDialog implements ThinletUiEventHandler {
 	protected long getEnteredStartDate() throws DialogValidationException {
 		String startDate = ui.getText(find(COMPONENT_TF_START_DATE));
 		try {
-			return Utils.getLongDateFromStringDate(startDate, true);
+			return FrontlineUtils.getLongDateFromStringDate(startDate, true);
 		} catch (ParseException ex) {
 			throw new DialogValidationException("Wrong format for date", ex, InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
 		}
@@ -198,7 +198,7 @@ public abstract class BaseActionDialog implements ThinletUiEventHandler {
 		String endDate = ui.getText(find(COMPONENT_TF_END_DATE));
 		
 		try {
-			return Utils.getLongDateFromStringDate(endDate, false);
+			return FrontlineUtils.getLongDateFromStringDate(endDate, false);
 		} catch (ParseException ex) {
 			throw new DialogValidationException("Wrong format for date", ex, InternationalisationUtils.getI18NString(MESSAGE_WRONG_FORMAT_DATE));
 		}

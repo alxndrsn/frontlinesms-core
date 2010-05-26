@@ -31,7 +31,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 
 import org.apache.log4j.Logger;
 
@@ -47,7 +47,7 @@ public abstract class UserHomeFilePropertySet extends FilePropertySet {
 	
 //> CONSTANTS
 	/** Logging object for this instance. */
-	public static final Logger LOG = Utils.getLogger(UserHomeFilePropertySet.class);
+	public static final Logger LOG = FrontlineUtils.getLogger(UserHomeFilePropertySet.class);
 	
 //> INSTANCE METHODS
 	/**

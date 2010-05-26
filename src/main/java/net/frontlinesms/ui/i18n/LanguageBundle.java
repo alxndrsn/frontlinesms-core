@@ -31,7 +31,7 @@ import java.util.MissingResourceException;
 
 import org.apache.log4j.Logger;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 
 /**
  * Bundle of translations for a language, and associated properties.
@@ -51,7 +51,7 @@ public abstract class LanguageBundle {
 	public static final String KEY_FONT_NAME = "font.name";
 	
 	/** Logging object for this class */
-	private static final Logger LOG = Utils.getLogger(LanguageBundle.class);
+	private static final Logger LOG = FrontlineUtils.getLogger(LanguageBundle.class);
 	
 //> INSTANCE PROPERTIES
 	/** Map of i18n string keys to internationalised strings. */

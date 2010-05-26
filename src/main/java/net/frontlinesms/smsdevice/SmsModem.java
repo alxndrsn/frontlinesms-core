@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import serial.*;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.data.domain.Message.Status;
 import net.frontlinesms.listener.SmsListener;
@@ -65,7 +65,7 @@ public class SmsModem extends Thread implements SmsDevice {
 	};
 
 	/** Logging object */
-	private static Logger LOG = Utils.getLogger(SmsModem.class);
+	private static Logger LOG = FrontlineUtils.getLogger(SmsModem.class);
 		
 //> PROPERTIES
 	
@@ -361,7 +361,7 @@ public class SmsModem extends Thread implements SmsDevice {
 			// devices get the SMSC number information from their SIM card.
 			cService.setSmscNumber("");
 
-			Utils.sleep_ignoreInterrupts(500);
+			FrontlineUtils.sleep_ignoreInterrupts(500);
 
 			resetWatchdog();
 			cService.connect();
@@ -528,14 +528,14 @@ public class SmsModem extends Thread implements SmsDevice {
 				if (noActivity) {
 					try {
 						if(smsLibConnected) cService.keepGsmLinkOpen();
-						Utils.sleep_ignoreInterrupts(5000); /* 5 seconds */
+						FrontlineUtils.sleep_ignoreInterrupts(5000); /* 5 seconds */
 					} catch (Throwable t) {
 						LOG.debug("", t);
 						tryToConnect = false;
 						disconnect(true);
 					}
 				} else {
-					Utils.sleep_ignoreInterrupts(100); /* 0.1 seconds */
+					FrontlineUtils.sleep_ignoreInterrupts(100); /* 0.1 seconds */
 				}
 			}
 		}
@@ -592,9 +592,9 @@ public class SmsModem extends Thread implements SmsDevice {
 			try {
 				cService.serialDriver.open();
 				// wait for port to open and AT handler to awake
-				Utils.sleep_ignoreInterrupts(500);
+				FrontlineUtils.sleep_ignoreInterrupts(500);
 				cService.serialDriver.send("AT\r");
-				Utils.sleep_ignoreInterrupts(500); // Wait here just in case the phone does not respond very quickly, e.g Nokia 6310i throws IOException without this line.
+				FrontlineUtils.sleep_ignoreInterrupts(500); // Wait here just in case the phone does not respond very quickly, e.g Nokia 6310i throws IOException without this line.
 				String response = cService.serialDriver.getResponse();
 
 				// If the phone returns an OK, then it looks like it works at this baud
@@ -636,7 +636,7 @@ public class SmsModem extends Thread implements SmsDevice {
 				
 				cService.serialDriver.open();
 				// wait for port to open and AT handler to awake
-				Utils.sleep_ignoreInterrupts(500);
+				FrontlineUtils.sleep_ignoreInterrupts(500);
 					
 				setManufacturer(cService.getManufacturer());
 				setModel(cService.getModel());

@@ -50,7 +50,7 @@ public class ClickatellInternetService extends AbstractSmsInternetService {
 	protected static final String PROPERTY_SSL = PROPERTY_PREFIX + "ssl";
 
 	/** Logging object */
-	private static Logger LOG = Utils.getLogger(ClickatellInternetService.class);
+	private static Logger LOG = FrontlineUtils.getLogger(ClickatellInternetService.class);
 	private ClickatellHTTPGateway gateway;
 	private boolean connected;
 	private Service service;

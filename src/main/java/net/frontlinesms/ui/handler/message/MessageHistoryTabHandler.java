@@ -32,7 +32,7 @@ import thinlet.Thinlet;
 import thinlet.ThinletText;
 
 import net.frontlinesms.FrontlineSMSConstants;
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
@@ -87,7 +87,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	
 //> INSTANCE PROPERTIES
 	/** Logger */
-	private final Logger LOG = Utils.getLogger(this.getClass());
+	private final Logger LOG = FrontlineUtils.getLogger(this.getClass());
 	
 	/** DAO for {@link Contact}s */
 	private final ContactDao contactDao;

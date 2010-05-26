@@ -5,7 +5,7 @@ package net.frontlinesms.ui.handler;
 
 import org.apache.log4j.Logger;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -16,7 +16,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  */
 public abstract class BaseTabHandler implements ThinletUiEventHandler {
 	/** Logging object */
-	protected final Logger log = Utils.getLogger(this.getClass());
+	protected final Logger log = FrontlineUtils.getLogger(this.getClass());
 	/** The {@link UiGeneratorController} that shows the tab. */
 	protected final UiGeneratorController ui;
 	/** The tab component this handler is based around */

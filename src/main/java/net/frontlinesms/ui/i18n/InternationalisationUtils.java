@@ -46,7 +46,7 @@ import java.util.Map;
 import java.util.MissingResourceException;
 
 import net.frontlinesms.FrontlineSMSConstants;
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.Email;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.ui.FrontlineUI;
@@ -69,7 +69,7 @@ public class InternationalisationUtils {
 	/** The path to the default language bundle on the classpath. */
 	private static final String DEFAULT_LANGUAGE_BUNDLE_PATH = "/resources/languages/frontlineSMS.properties";
 	/** Logging object for this class */
-	private static Logger LOG = Utils.getLogger(InternationalisationUtils.class);
+	private static Logger LOG = FrontlineUtils.getLogger(InternationalisationUtils.class);
 	
 //> GENERAL i18n HELP METHODS
 	/** The default characterset, UTF-8.  This must be available for every JVM. */
