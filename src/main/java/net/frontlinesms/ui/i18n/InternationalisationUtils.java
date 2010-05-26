@@ -66,8 +66,10 @@ public class InternationalisationUtils {
 //> STATIC PROPERTIES
 	/** Name of the directory containing the languages files.  This is located within the config directory. */
 	private static final String LANGUAGES_DIRECTORY_NAME = "languages";
+	/** The filename of the default language bundle. */
+	public static final String DEFAULT_LANGUAGE_BUNDLE_FILENAME = "frontlineSMS.properties";
 	/** The path to the default language bundle on the classpath. */
-	private static final String DEFAULT_LANGUAGE_BUNDLE_PATH = "/resources/languages/frontlineSMS.properties";
+	public static final String DEFAULT_LANGUAGE_BUNDLE_PATH = "/resources/languages/" + DEFAULT_LANGUAGE_BUNDLE_FILENAME;
 	/** Logging object for this class */
 	private static Logger LOG = Utils.getLogger(InternationalisationUtils.class);
 	

@@ -289,5 +289,5 @@ public final class FrontlineSMSConstants {
 	 * This should specify a 4 digit year as it will be used for parsing entered dates as well as displaying used ones. */
 	public static final String DATEFORMAT_YMD = "date.keyword.action.format";
 	/** [i18n key to Date format] This date format is for displaying the date and time of an event, message etc.  It is not used for parsing input. */
-	public static final String DATEFORMAT_YMD_HMS = "date.message.format";;
+	public static final String DATEFORMAT_YMD_HMS = "date.message.format";
 }

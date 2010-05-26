@@ -61,7 +61,15 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	 * @return the flag image for the language bundle, or <code>null</code> if none could be found.
 	 */
 	public Image getFlagIcon(LanguageBundle languageBundle) {
-		String country = languageBundle.getCountry();
+		return getFlagIcon(languageBundle.getCountry());
+	}
+	
+	/**
+	 * Gets the icon for a specific country
+	 * @param languageBundle
+	 * @return the flag image for the language bundle, or <code>null</code> if none could be found.
+	 */
+	public Image getFlagIcon(String country) {
 		String flagFile = country != null ? "/icons/flags/" + country + ".png" : null;
 		return country == null ? null : getIcon(flagFile);
 	}
