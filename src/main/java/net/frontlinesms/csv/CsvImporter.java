@@ -58,9 +58,10 @@ public class CsvImporter {
 		Utf8FileReader reader = null;
 		try {
 			reader = new Utf8FileReader(importFile);
-			
+			int total = 0;
 			String[] lineValues;
 			while((lineValues = CsvUtils.readLine(reader)) != null) {
+				if (total++ == 0) continue;
 				String name = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_NAME);
 				String number = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_PHONE);
 				String email = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_EMAIL);
