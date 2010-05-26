@@ -3,6 +3,7 @@
  */
 package net.frontlinesms.ui;
 
+import java.awt.Font;
 import java.awt.Image;
 
 import thinlet.Thinlet;
@@ -344,8 +345,21 @@ public class ExtendedThinlet extends Thinlet {
 	 * @return a table cell
 	 */
 	public final Object createTableCell(String text) {
+		return createTableCell(text, false);
+	}
+	
+	/**
+	 * Creates a UI table cell component containing the specified text. 
+	 * @param text
+	 * @return a table cell
+	 */
+	public final Object createTableCell(String text, boolean bold) {
 		Object cell = Thinlet.create(CELL);
 		setString(cell, TEXT, text);
+		if (bold) {
+			String fontName = (FrontlineUI.currentResourceBundle.getFont() != null ? FrontlineUI.currentResourceBundle.getFont().getFontName() : "");
+			setFont(cell, new Font(fontName, Font.BOLD, 12));
+		}
 		return cell;
 	}
         
