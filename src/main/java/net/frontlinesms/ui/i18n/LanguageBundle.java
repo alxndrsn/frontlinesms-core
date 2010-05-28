@@ -205,6 +205,20 @@ public abstract class LanguageBundle {
 		return null;
 	}
 	
+	/** Sets the ISO-???? country code relating to the language in this bundle */
+	public void setCountry(String country) {
+		this.properties.put(KEY_LANGUAGE_COUNTRY, country);
+	}
+	
+	/** Sets the name of this language bundle */
+	public void setLanguageName(String languageName) {
+		this.properties.put(KEY_LANGUAGE_NAME, languageName);
+	}
+
+	/** Sets the ISO-???? code relating to this language */
+	public void setLanguageCode(String languageCode) {
+		this.properties.put(KEY_LANGUAGE_CODE, languageCode);
+	}
 //> STATIC HELPER METHODS
 	/**
 	 * This method iterates through the properties and try to find properties looking like prefix.0, prefix.1 etc.

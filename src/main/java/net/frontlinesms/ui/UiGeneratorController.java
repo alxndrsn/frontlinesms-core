@@ -47,6 +47,7 @@ import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.*;
 import net.frontlinesms.smsdevice.events.*;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
+import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.*;
 import net.frontlinesms.ui.handler.contacts.*;
 import net.frontlinesms.ui.handler.core.DatabaseSettingsPanel;
@@ -1412,6 +1413,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			this.emailTabHandler.refresh();
 			setStatus(InternationalisationUtils.getI18NString(MESSAGE_EMAILS_LOADED));
 		}
+		this.frontlineController.getEventBus().notifyObservers(new TabChangedNotification(currentTab));
 		LOG.trace("EXIT");
 	}
 

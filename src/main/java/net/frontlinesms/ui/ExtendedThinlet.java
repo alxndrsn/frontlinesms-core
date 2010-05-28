@@ -345,7 +345,9 @@ public class ExtendedThinlet extends Thinlet {
 	 * @return a table cell
 	 */
 	public final Object createTableCell(String text) {
-		return createTableCell(text, false);
+		Object cell = Thinlet.create(CELL);
+		setString(cell, TEXT, text);
+		return cell;
 	}
 	
 	/**
@@ -388,6 +390,26 @@ public class ExtendedThinlet extends Thinlet {
 		Object item = Thinlet.create(ITEM);
 		setString(item, TEXT, text);
 		setAttachedObject(item, attachedObject);
+		return item;
+	}
+	
+	/**
+	 * Creates a Thinlet UI Component of type LIST ITEM, set's the component's
+	 * TEXT attribute to the supplied text and attaches the supplied OBJECT.
+	 * @param text
+	 * @param attachedObject
+	 * @return a list item with the supplied attachment 
+	 */
+	public final Object createListItem(String text, Object attachedObject, boolean bold) {
+		Object item = Thinlet.create(ITEM);
+		setString(item, TEXT, text);
+		setAttachedObject(item, attachedObject);
+		
+		if (bold) {
+			String fontName = (FrontlineUI.currentResourceBundle.getFont() != null ? FrontlineUI.currentResourceBundle.getFont().getFontName() : "");
+			setFont(item, new Font(fontName, Font.BOLD, 12));
+		}
+		
 		return item;
 	}
 	
