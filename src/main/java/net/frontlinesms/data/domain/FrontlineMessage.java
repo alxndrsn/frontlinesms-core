@@ -400,7 +400,7 @@ public class FrontlineMessage {
 		}
 		
 		result = prime * result + smsPartsCount;
-		result = prime * result + type.hashCode();
+		result = prime * result + (type==null ? 0 : type.hashCode());
 		return result;
 	}
 

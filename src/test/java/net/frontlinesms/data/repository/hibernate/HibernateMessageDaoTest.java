@@ -13,6 +13,7 @@ import net.frontlinesms.junit.HibernateTestCase;
 
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.Order;
+import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
@@ -158,7 +159,7 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 					lastDate = m.getDate();
 				}
 				assertTrue(m.getTextContent().startsWith(keyword));
-				assertTrue(lastDate + " is supposed to be lower greater than " + m.getDate(), lastDate <= m.getDate());
+				assertTrue(lastDate + " is supposed to be lower than " + m.getDate(), lastDate <= m.getDate());
 				lastDate = m.getDate();
 			}
 		}
@@ -184,6 +185,7 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 				lastDate = m.getDate();
 			}
 		}
+		System.out.println();
 	}
 	
 	private void createMessagesWithParameters(String... keywords) {
@@ -294,6 +296,14 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 	private void createIncomingMessage(String messageContent) {
 		FrontlineMessage m = FrontlineMessage.createIncomingMessage(0, "testSender", "testRecipient", messageContent);
 		this.dao.saveMessage(m);
+	}
+	
+	public void testMultimediaMessageRetrieval() {
+		FrontlineMultimediaMessage mms = new FrontlineMultimediaMessage();
+		this.dao.saveMessage(mms);
+		List<FrontlineMessage> messages = this.dao.getAllMessages();
+		assertEquals(1, messages.size());
+		assertEquals(FrontlineMultimediaMessage.class, messages.get(0).getClass());
 	}
 
 //> INSTANCE HELPER METHODS
