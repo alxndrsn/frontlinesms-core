@@ -27,7 +27,6 @@ import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.UiProperties;
 import net.frontlinesms.ui.handler.contacts.ContactSelecter;
-import net.frontlinesms.ui.handler.core.DatabaseSettingsPanel;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 import org.apache.log4j.Logger;
@@ -76,8 +75,8 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	private synchronized void init() {
 		assert(this.messagePanel == null) : "This has already been initialised.";
 		this.messagePanel = uiController.loadComponentFromFile(UI_FILE_MESSAGE_PANEL, this);
-		Object 	pnRecipient 		= uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_PN_MESSAGE_RECIPIENT),
-				lbTooManyMessages 	= uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_LB_TOO_MANY_MESSAGES);
+		Object pnRecipient = find(UiGeneratorControllerConstants.COMPONENT_PN_MESSAGE_RECIPIENT);
+		Object lbTooManyMessages = find(UiGeneratorControllerConstants.COMPONENT_LB_TOO_MANY_MESSAGES);
 		uiController.setVisible(pnRecipient, shouldDisplayRecipientField);
 		
 		if (lbTooManyMessages != null) {
@@ -87,7 +86,11 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		messageChanged("", "");
 	}
 
-//> ACCESSORS
+	private Object find(String component) {
+		return this.find(component);
+	}
+
+	//> ACCESSORS
 	/** @return {@link #messagePanel} */
 	public Object getPanel() {
 		return this.messagePanel;
@@ -100,7 +103,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 //> THINLET UI METHODS
 	/** Sets the method called by the send button at the bottom of the compose message panel */
 	public void setSendButtonMethod(ThinletUiEventHandler eventHandler, Object rootComponent, String methodCall) {
-		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
+		Object sendButton = find(COMPONENT_BT_SEND);
 		uiController.setAction(sendButton, methodCall, rootComponent, eventHandler);
 	}
 	
@@ -108,8 +111,8 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	 * Extract message details from the controls in the panel, and send an SMS.
 	 */
 	public void send() {
-		String recipient = uiController.getText(uiController.find(COMPONENT_TF_RECIPIENT));
-		String message = uiController.getText(uiController.find(COMPONENT_TF_MESSAGE));
+		String recipient = uiController.getText(find(COMPONENT_TF_RECIPIENT));
+		String message = uiController.getText(find(COMPONENT_TF_MESSAGE));
 		
 		if (recipient.equals("")) {
 			uiController.alert(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_BLANK_PHONE_NUMBER));
@@ -118,18 +121,18 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		this.uiController.getFrontlineController().sendTextMessage(recipient, message);
 		
 		// We clear the components
-		uiController.setText(uiController.find(this.messagePanel, COMPONENT_TF_RECIPIENT), "");
-		uiController.setText(uiController.find(this.messagePanel, COMPONENT_TF_MESSAGE), "");
-		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_REMAINING_CHARS), String.valueOf(Message.SMS_LENGTH_LIMIT));
-		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_MSG_NUMBER), "0");
-		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_FIRST), Icon.SMS_DISABLED);
-		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS_DISABLED);
-		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS_DISABLED);
-		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(0));
+		uiController.setText(find(COMPONENT_TF_RECIPIENT), "");
+		uiController.setText(find(COMPONENT_TF_MESSAGE), "");
+		uiController.setText(find(COMPONENT_LB_REMAINING_CHARS), String.valueOf(Message.SMS_LENGTH_LIMIT));
+		uiController.setText(find(COMPONENT_LB_MSG_NUMBER), "0");
+		uiController.setIcon(find(COMPONENT_LB_FIRST), Icon.SMS_DISABLED);
+		uiController.setIcon(find(COMPONENT_LB_SECOND), Icon.SMS_DISABLED);
+		uiController.setIcon(find(COMPONENT_LB_THIRD), Icon.SMS_DISABLED);
+		uiController.setText(find(COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(0));
 		if (shouldCheckMaxMessageLength) // Otherwise this component doesn't exist
-			uiController.setVisible(uiController.find(this.messagePanel, COMPONENT_LB_TOO_MANY_MESSAGES), false);
+			uiController.setVisible(find(COMPONENT_LB_TOO_MANY_MESSAGES), false);
 
-		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
+		Object sendButton = find(COMPONENT_BT_SEND);
 		if (sendButton != null) uiController.setEnabled(sendButton, false);
 	}
 	
@@ -142,7 +145,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		int recipientLength = recipient.length(),
 			messageLength = message.length();
 		
-		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
+		Object sendButton = find(COMPONENT_BT_SEND);
 		
 		int totalLengthAllowed;
 		if(GsmAlphabet.areAllCharactersValidGSM(message))totalLengthAllowed = Message.SMS_MULTIPART_LENGTH_LIMIT * Message.SMS_LIMIT;
@@ -171,8 +174,8 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	 * @param dialog
 	 */
 	public void setRecipientTextfield(Object contactSelecter_contactList, Object dialog) {
-		Object 	tfRecipient = uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_TF_RECIPIENT),
-				tfMessage	= uiController.find(this.messagePanel, UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE);
+		Object 	tfRecipient = find(UiGeneratorControllerConstants.COMPONENT_TF_RECIPIENT),
+				tfMessage	= find(UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE);
 		Object selectedItem = uiController.getSelectedItem(contactSelecter_contactList);
 		if (selectedItem == null) {
 			uiController.alert(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_NO_CONTACT_SELECTED));
@@ -197,7 +200,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		int recipientLength = recipient.length();
 		int messageLength = message.length();
 		
-		Object sendButton = uiController.find(this.messagePanel, COMPONENT_BT_SEND);
+		Object sendButton = find(COMPONENT_BT_SEND);
 		boolean areAllCharactersValidGSM = GsmAlphabet.areAllCharactersValidGSM(message);
 		int totalLengthAllowed;
 		if(areAllCharactersValidGSM) {
@@ -224,8 +227,8 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 			multipartMessageCharacterLimit = Message.SMS_MULTIPART_LENGTH_LIMIT_UCS2;
 		}
 		
-		Object 	tfMessage = uiController.find(this.messagePanel, COMPONENT_TF_MESSAGE),
-				lbTooManyMessages = uiController.find(this.messagePanel, COMPONENT_LB_TOO_MANY_MESSAGES);
+		Object 	tfMessage = find(COMPONENT_TF_MESSAGE),
+				lbTooManyMessages = find(COMPONENT_LB_TOO_MANY_MESSAGES);
 		
 		int numberOfMsgs, remaining;
 		double costEstimate;
@@ -260,17 +263,17 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		// The message will actually cost {numberOfRecipients} times the calculated cost
 		costEstimate *= numberOfRecipients;
 		
-		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_REMAINING_CHARS), String.valueOf(remaining));
-		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_MSG_NUMBER), String.valueOf(numberOfMsgs));
-		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_FIRST), Icon.SMS_DISABLED);
-		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS_DISABLED);
-		uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS_DISABLED);
-		if (numberOfMsgs >= 1) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_FIRST), Icon.SMS);
-		if (numberOfMsgs >= 2) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_SECOND), Icon.SMS);
-		if (numberOfMsgs == 3) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS);
-		if (numberOfMsgs > 3) uiController.setIcon(uiController.find(this.messagePanel, COMPONENT_LB_THIRD), Icon.SMS_ADD);
+		uiController.setText(find(COMPONENT_LB_REMAINING_CHARS), String.valueOf(remaining));
+		uiController.setText(find(COMPONENT_LB_MSG_NUMBER), String.valueOf(numberOfMsgs));
+		uiController.setIcon(find(COMPONENT_LB_FIRST), Icon.SMS_DISABLED);
+		uiController.setIcon(find(COMPONENT_LB_SECOND), Icon.SMS_DISABLED);
+		uiController.setIcon(find(COMPONENT_LB_THIRD), Icon.SMS_DISABLED);
+		if (numberOfMsgs >= 1) uiController.setIcon(find(COMPONENT_LB_FIRST), Icon.SMS);
+		if (numberOfMsgs >= 2) uiController.setIcon(find(COMPONENT_LB_SECOND), Icon.SMS);
+		if (numberOfMsgs == 3) uiController.setIcon(find(COMPONENT_LB_THIRD), Icon.SMS);
+		if (numberOfMsgs > 3) uiController.setIcon(find(COMPONENT_LB_THIRD), Icon.SMS_ADD);
 		
-		uiController.setText(uiController.find(this.messagePanel, COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(costEstimate));
+		uiController.setText(find(COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(costEstimate));
 	}
 	
 	/**
@@ -280,7 +283,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	 * @param dialog
 	 */
 	public void homeScreen_setRecipientTextfield(Object contactSelecter_contactList, Object dialog) {
-		Object tfRecipient = uiController.find(this.messagePanel, COMPONENT_TF_RECIPIENT);
+		Object tfRecipient = find(COMPONENT_TF_RECIPIENT);
 		Object selectedItem = uiController.getSelectedItem(contactSelecter_contactList);
 		if (selectedItem == null) {
 			uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_CONTACT_SELECTED));

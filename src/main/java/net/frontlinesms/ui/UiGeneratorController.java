@@ -1395,6 +1395,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		LOG.trace("ENTER");
 		Object newTab = getSelectedItem(tabbedPane);
 		currentTab = getString(newTab, NAME);
+		this.frontlineController.getEventBus().notifyObservers(new TabChangedNotification(currentTab));
+		
 		LOG.debug("Current tab [" + currentTab + "]");
 		if (currentTab == null) return;
 		if (currentTab.equals(TAB_CONTACT_MANAGER)) {
@@ -1413,7 +1415,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			this.emailTabHandler.refresh();
 			setStatus(InternationalisationUtils.getI18NString(MESSAGE_EMAILS_LOADED));
 		}
-		this.frontlineController.getEventBus().notifyObservers(new TabChangedNotification(currentTab));
 		LOG.trace("EXIT");
 	}
 
