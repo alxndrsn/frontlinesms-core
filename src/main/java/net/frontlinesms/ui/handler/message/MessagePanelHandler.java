@@ -87,7 +87,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	}
 
 	private Object find(String component) {
-		return this.find(component);
+		return this.uiController.find(this.messagePanel, component);
 	}
 
 	//> ACCESSORS
