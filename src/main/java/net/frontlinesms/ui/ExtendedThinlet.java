@@ -359,8 +359,8 @@ public class ExtendedThinlet extends Thinlet {
 		Object cell = Thinlet.create(CELL);
 		setString(cell, TEXT, text);
 		if (bold) {
-			String fontName = (FrontlineUI.currentResourceBundle.getFont() != null ? FrontlineUI.currentResourceBundle.getFont().getFontName() : "");
-			setFont(cell, new Font(fontName, Font.BOLD, 12));
+			Font boldFont = super.getFont().deriveFont(Font.BOLD);
+			setFont(cell, boldFont);
 		}
 		return cell;
 	}
@@ -406,8 +406,8 @@ public class ExtendedThinlet extends Thinlet {
 		setAttachedObject(item, attachedObject);
 		
 		if (bold) {
-			String fontName = (FrontlineUI.currentResourceBundle.getFont() != null ? FrontlineUI.currentResourceBundle.getFont().getFontName() : "");
-			setFont(item, new Font(fontName, Font.BOLD, 12));
+			Font boldFont = super.getFont().deriveFont(Font.BOLD);
+			setFont(item, boldFont);
 		}
 		
 		return item;
