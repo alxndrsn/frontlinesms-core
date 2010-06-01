@@ -48,6 +48,10 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 //> STATIC CONSTANTS
 	/** Default source port to use for an outgoing binary SMS message */
 	private static final int DEFAULT_SOURCE_PORT = 0;
+	
+	/** IntelliSMS defines its maximum SMS parts as 10.  Specifying more than this will lead to a ERR:PARAMETER_INVALID when
+	 * querying the HTTP interface. */
+	private static final int MAX_SMS_PARTS = 10;
 
 	/** Prefix attached to every property name. */
 	private static final String PROPERTY_PREFIX = "smsdevice.internet.intellisms.";
@@ -86,7 +90,7 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 		intelliSMS = new IntelliSMS();
 		intelliSMS.Username = getUsername();
 		intelliSMS.Password = getPassword();
-		intelliSMS.MaxConCatMsgs = FrontlineMessage.SMS_LIMIT;
+		intelliSMS.MaxConCatMsgs = MAX_SMS_PARTS;
 		if (isEncrypted()) {
 			intelliSMS.PrimaryGateway="https://www.intellisoftware.co.uk";
 			intelliSMS.BackupGateway="https://www.intellisoftware2.co.uk";
@@ -164,7 +168,7 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 			} else if(!GsmAlphabet.areAllCharactersValidGSM(message.getTextContent())) {
 				code = sendUcs2Sms(message);
 			} else {
-				if ( (message.getTextContent().length() / FrontlineMessage.SMS_LENGTH_LIMIT) > FrontlineMessage.SMS_LIMIT) {
+				if ( (message.getTextContent().length() / FrontlineMessage.SMS_LENGTH_LIMIT) > MAX_SMS_PARTS) {
 					LOG.error("Message too long. [" + message.getTextContent().length() + "] chars.");
 				}
 				SendStatusCollection results = intelliSMS.SendMessage(new String[] {message.getRecipientMsisdn()}, message.getTextContent(), getMsisdn());
