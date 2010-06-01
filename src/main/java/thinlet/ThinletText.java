@@ -105,6 +105,7 @@ public interface ThinletText {
 
 	public static final String ATTRIBUTE_ACTION = "action";
 	public static final String ATTRIBUTE_DELETE = "delete";
+	public static final String ATTRIBUTE_ENTER = "enter";
 	public static final String ATTRIBUTE_COLUMNS = "columns";
 	public static final String ATTRIBUTE_COLSPAN = "colspan";
 	public static final String ATTRIBUTE_ROWSPAN = "rowspan";

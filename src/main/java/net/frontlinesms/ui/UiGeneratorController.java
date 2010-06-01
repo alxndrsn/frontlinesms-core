@@ -1242,7 +1242,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		add(row, cell);
 		
 		String name = contact.getName();
-		add(row, createTableCell(name, true));
+		add(row, createTableCell(name));
 
 		add(row, createTableCell(contact.getPhoneNumber()));
 		add(row, createTableCell(contact.getEmailAddress()));

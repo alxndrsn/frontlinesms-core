@@ -3588,6 +3588,8 @@ public class Thinlet extends Container implements Runnable, Serializable, Thinle
 			return true;
 		} else if (keycode == KeyEvent.VK_DELETE) {
 			invoke(component, null, ATTRIBUTE_DELETE);
+		} else if (keycode == KeyEvent.VK_ENTER) {
+			invoke(component, null, ATTRIBUTE_ENTER);
 		} else if (controldown) {
 			if (((keycode == KeyEvent.VK_A) || (keycode == 0xBF)) && //KeyEvent.VK_SLASH
 					(getString(component, SELECTION, "single") != "single")) { // select all
@@ -6964,6 +6966,7 @@ public class Thinlet extends Container implements Runnable, Serializable, Thinle
 				{ METHOD, ATTRIBUTE_ACTION },
 				{ METHOD, PERFORM },
 				{ METHOD, ATTRIBUTE_DELETE },
+				{ METHOD, ATTRIBUTE_ENTER },
 				{ BOOLEAN, LINE, VALIDATE, Boolean.TRUE } },
 			ITEM, CHOICE, new Object[][] {
 				{ BOOLEAN, SELECTED, null, Boolean.FALSE } },
