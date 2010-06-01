@@ -178,7 +178,13 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 			newThread.start();
 		} catch(SmsInternetServiceInitialisationException ex) {
 			LOG.error("There was an error starting SMS Internet Service.", ex);
+			
+			// stopThisThing() updates the status to a meaningless "not connected" message, so 
+			// we need to keep the old, meaningul message from before
+			SmsInternetServiceStatus status = getStatus();
+			String statusDetail = getStatusDetail();
 			this.stopThisThing();
+			this.setStatus(status, statusDetail);
 		}
 	}
 	
