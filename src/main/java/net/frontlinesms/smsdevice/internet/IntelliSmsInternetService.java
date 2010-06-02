@@ -23,7 +23,7 @@ import java.util.*;
 
 import net.frontlinesms.*;
 import net.frontlinesms.data.domain.*;
-import net.frontlinesms.data.domain.Message.Status;
+import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.email.pop.*;
 import net.frontlinesms.smsdevice.Provider;
 import net.frontlinesms.smsdevice.properties.*;
@@ -48,6 +48,10 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 //> STATIC CONSTANTS
 	/** Default source port to use for an outgoing binary SMS message */
 	private static final int DEFAULT_SOURCE_PORT = 0;
+	
+	/** IntelliSMS defines its maximum SMS parts as 10.  Specifying more than this will lead to a ERR:PARAMETER_INVALID when
+	 * querying the HTTP interface. */
+	private static final int MAX_SMS_PARTS = 10;
 
 	/** Prefix attached to every property name. */
 	private static final String PROPERTY_PREFIX = "smsdevice.internet.intellisms.";
@@ -73,7 +77,7 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 	 */
 	private static final boolean PROXIES_SUPPORTED = false;
 	/** Logging object */
-	private static Logger LOG = Utils.getLogger(IntelliSmsInternetService.class);
+	private static Logger LOG = FrontlineUtils.getLogger(IntelliSmsInternetService.class);
 
 //> INSTANCE PROPERTIES
 	private IntelliSMS intelliSMS;
@@ -86,7 +90,7 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 		intelliSMS = new IntelliSMS();
 		intelliSMS.Username = getUsername();
 		intelliSMS.Password = getPassword();
-		intelliSMS.MaxConCatMsgs = Message.SMS_LIMIT;
+		intelliSMS.MaxConCatMsgs = MAX_SMS_PARTS;
 		if (isEncrypted()) {
 			intelliSMS.PrimaryGateway="https://www.intellisoftware.co.uk";
 			intelliSMS.BackupGateway="https://www.intellisoftware2.co.uk";
@@ -154,7 +158,7 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 	 * Send an SMS message using this phone handler.
 	 * @param message The message to be sent.
 	 */
-	protected synchronized void sendSmsDirect(Message message) {
+	protected synchronized void sendSmsDirect(FrontlineMessage message) {
 		LOG.trace("ENTER");
 		LOG.debug("Sending [" + message.getTextContent() + "] to [" + message.getRecipientMsisdn() + "]");
 		try {
@@ -164,7 +168,7 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 			} else if(!GsmAlphabet.areAllCharactersValidGSM(message.getTextContent())) {
 				code = sendUcs2Sms(message);
 			} else {
-				if ( (message.getTextContent().length() / Message.SMS_LENGTH_LIMIT) > Message.SMS_LIMIT) {
+				if ( (message.getTextContent().length() / FrontlineMessage.SMS_LENGTH_LIMIT) > MAX_SMS_PARTS) {
 					LOG.error("Message too long. [" + message.getTextContent().length() + "] chars.");
 				}
 				SendStatusCollection results = intelliSMS.SendMessage(new String[] {message.getRecipientMsisdn()}, message.getTextContent(), getMsisdn());
@@ -193,7 +197,12 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 				} catch (IntelliSMSException e1) {
 					remainingCredit = -1;
 				}
+				
+				this.stopThisThing();
 				setStatus(SmsInternetServiceStatus.LOW_CREDIT, Integer.toString(remainingCredit));
+			} else {
+				this.stopThisThing();
+				this.setStatus(SmsInternetServiceStatus.DISCONNECTED, e.getResultCode() + ": " + e.getMessage());
 			}
 		} finally {
 			if (smsListener != null) {
@@ -203,7 +212,7 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 		LOG.trace("EXIT");
 	}
 
-	private ResultCodes sendBinarySms(Message message) throws IntelliSMSException {
+	private ResultCodes sendBinarySms(FrontlineMessage message) throws IntelliSMSException {
 		LOG.trace("ENTER");
 		byte[][] messagePayloads = TpduUtils.getPayloads(message.getBinaryContent(), DEFAULT_SOURCE_PORT, message.getRecipientSmsPort());
 		int totalParts = messagePayloads.length;
@@ -222,7 +231,7 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 		return ret;
 	}
 
-	private ResultCodes sendUcs2Sms(Message message) throws IntelliSMSException {
+	private ResultCodes sendUcs2Sms(FrontlineMessage message) throws IntelliSMSException {
 		LOG.trace("ENTER");
 		String[] messageParts = TpduUtils.splitText_ucs2(message.getTextContent(), false);
 		int totalParts = messageParts.length;

@@ -13,7 +13,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.resources.properties.PropsFileLayout;
 
 /**
@@ -23,7 +23,7 @@ import net.frontlinesms.resources.properties.PropsFileLayout;
 public class FileLanguageBundle extends LanguageBundle {
 //> STATIC PROPERTIES
 	/** Logging object */
-	private static final Logger LOG = Utils.getLogger(FileLanguageBundle.class);
+	private static final Logger LOG = FrontlineUtils.getLogger(FileLanguageBundle.class);
 	
 //> INSTANCE PROPERTIES
 	/** The file that this bundle was loaded from. */

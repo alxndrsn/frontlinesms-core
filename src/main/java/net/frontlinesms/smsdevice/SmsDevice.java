@@ -19,7 +19,7 @@
  */
 package net.frontlinesms.smsdevice;
 
-import net.frontlinesms.data.domain.Message;
+import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.listener.SmsListener;
 
 public interface SmsDevice {
@@ -39,7 +39,7 @@ public interface SmsDevice {
 	public void setUseForReceiving(boolean use);
 
 	/** Adds the supplied message to the outbox. */
-	public void sendSMS(Message outgoingMessage);
+	public void sendSMS(FrontlineMessage outgoingMessage);
 	
 	/** Sets the {@link SmsListener} attached to this {@link SmsDevice}. */
 	public void setSmsListener(SmsListener smsListener);

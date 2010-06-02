@@ -11,7 +11,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
@@ -31,7 +31,7 @@ public abstract class BasePluginController implements PluginController {
 
 //> INSTANCE PROPERTIES
 	/** Logging object for this class */
-	protected final Logger log = Utils.getLogger(this.getClass());
+	protected final Logger log = FrontlineUtils.getLogger(this.getClass());
 	/** Lazy-initialized singleton Thinlet Tab component for this instance of this plugin. */
 	private Object thinletTab;
 	/**

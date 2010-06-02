@@ -54,7 +54,7 @@ import thinlet.Thinlet;
  */
 public class DesktopLauncher {
 	/** Logging object */
-	private static final Logger LOG = Utils.getLogger(DesktopLauncher.class);
+	private static final Logger LOG = FrontlineUtils.getLogger(DesktopLauncher.class);
 	
 	/**
 	 * Main class for launching the FrontlineSMS project.

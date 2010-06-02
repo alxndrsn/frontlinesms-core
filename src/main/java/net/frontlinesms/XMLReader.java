@@ -55,7 +55,7 @@ public class XMLReader {
 
 	private Document doc;
 	
-	private static Logger LOG = Utils.getLogger(XMLReader.class);
+	private static Logger LOG = FrontlineUtils.getLogger(XMLReader.class);
 	
 	public XMLReader(InputStream toRead) throws JDOMException, IOException {
 		SAXBuilder builder = new SAXBuilder();

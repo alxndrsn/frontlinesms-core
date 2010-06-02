@@ -3,7 +3,7 @@
  */
 package net.frontlinesms.plugins;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 
@@ -18,7 +18,7 @@ public abstract class BasePluginThinletTabController<ControllerClass extends Plu
 
 //> INSTANCE PROPERTIES
 	/** Logging object */
-	protected final Logger log = Utils.getLogger(this.getClass());
+	protected final Logger log = FrontlineUtils.getLogger(this.getClass());
 	/** The {@link PluginController} that owns this class. */
 	private final ControllerClass pluginController;
 	/** The {@link UiGeneratorController} that shows the tab. */

@@ -22,7 +22,7 @@ package net.frontlinesms.smsdevice.internet;
 import net.frontlinesms.AbstractTestCase;
 import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
-import net.frontlinesms.data.domain.Message.Status;
+import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.smsdevice.internet.AbstractSmsInternetService;
 
 /**
@@ -42,13 +42,13 @@ public abstract class AbstractInternetServiceTestCase extends AbstractTestCase {
 	
 	protected abstract AbstractSmsInternetService init() throws DuplicateKeyException;
 	protected abstract void executeReceiving(AbstractSmsInternetService internetService);
-	protected abstract Message getMessageDetails();
+	protected abstract FrontlineMessage getMessageDetails();
 	
 	/**
-	 * Test method for {@link net.frontlinesms.smsdevice.internet.AbstractSmsInternetService#sendSmsDirect(net.frontlinesms.data.Message)}.
+	 * Test method for {@link net.frontlinesms.smsdevice.internet.AbstractSmsInternetService#sendSmsDirect(net.frontlinesms.data.FrontlineMessage)}.
 	 */
 	public void testSendSmsDirect() {
-		Message message = getMessageDetails();
+		FrontlineMessage message = getMessageDetails();
 		assertNotNull(message);
 		internetService.sendSmsDirect(message);
 		assertEquals(message.getStatus(), Status.SENT);

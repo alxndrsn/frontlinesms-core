@@ -36,7 +36,7 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 	private static final String FILE_SMS_INTERNET_SERVICE_LIST = "conf/SmsInternetServices.txt";
 	
 	/** Logging object */
-	private static final Logger LOG = Utils.getLogger(SmsInternetServiceSettingsHandler.class);
+	private static final Logger LOG = FrontlineUtils.getLogger(SmsInternetServiceSettingsHandler.class);
 
 //> INSTANCE PROPERTIES
 	/** Thinlet instance that owns this handler */

@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 import net.frontlinesms.EmailSender;
 import net.frontlinesms.EmailServerHandler;
 import net.frontlinesms.FrontlineSMS;
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.repository.EmailAccountDao;
@@ -45,7 +45,7 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler {
 
 //> INSTANCE PROPERTIES
 	/** Logger */
-	private Logger LOG = Utils.getLogger(this.getClass());
+	private Logger LOG = FrontlineUtils.getLogger(this.getClass());
 	
 	private UiGeneratorController ui;
 	private EmailAccountDao emailAccountDao;

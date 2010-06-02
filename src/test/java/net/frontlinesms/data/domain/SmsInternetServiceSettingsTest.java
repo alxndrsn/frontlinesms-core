@@ -5,7 +5,7 @@ package net.frontlinesms.data.domain;
 
 import java.util.*;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.SmsInternetServiceSettings;
 import net.frontlinesms.data.repository.SmsInternetServiceSettingsDao;
 import net.frontlinesms.junit.BaseTestCase;
@@ -41,7 +41,7 @@ public class SmsInternetServiceSettingsTest extends BaseTestCase {
 
 		obj = new PasswordString("test");
 		expectedTypes.put(obj, PasswordString.class);
-		values.put(obj, Utils.encodeBase64("test"));
+		values.put(obj, FrontlineUtils.encodeBase64("test"));
 
 		OptionalSection o = new OptionalSection();
 		o.setValue(Boolean.TRUE);

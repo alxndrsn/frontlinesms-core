@@ -15,7 +15,7 @@ import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
-import net.frontlinesms.data.domain.Message;
+import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.KeywordActionDao;
 import net.frontlinesms.data.repository.KeywordDao;
@@ -74,7 +74,7 @@ public class IncomingMessageProcessorTest extends BaseTestCase {
 
 //> TESTS
 	public void testActionProcessing() {
-		Message mockMessage = mock(Message.class);
+		FrontlineMessage mockMessage = mock(FrontlineMessage.class);
 		Keyword mockKeyword = mock(Keyword.class);
 		
 		when(keywordDao.getFromMessageText(anyString())).thenReturn(mockKeyword);
@@ -125,18 +125,18 @@ public class IncomingMessageProcessorTest extends BaseTestCase {
 	
 	/**
 	 * Test the basic processing of a text message, including whether it is persisted, that keyword matching is
-	 * attempted, and that the created {@link Message} object contained the expected text.
+	 * attempted, and that the created {@link FrontlineMessage} object contained the expected text.
 	 * @param messageText
 	 * @return
 	 */
-	private Message testTextMessage(String messageText) {
+	private FrontlineMessage testTextMessage(String messageText) {
 		// Create and queue the message
 		CIncomingMessage message = new CIncomingMessage(TEST_ORIGINATOR, messageText);
 		
-		Message mess = testMessageReceive(message);
+		FrontlineMessage mess = testMessageReceive(message);
 		verify(keywordDao).getFromMessageText(messageText);
 		
-		assertEquals("Created " + Message.class + " message had unexpected text content.", messageText, mess.getTextContent());
+		assertEquals("Created " + FrontlineMessage.class + " message had unexpected text content.", messageText, mess.getTextContent());
 		assertNull(mess.getBinaryContent());
 		
 		return mess;
@@ -162,24 +162,24 @@ public class IncomingMessageProcessorTest extends BaseTestCase {
 	 * @param data
 	 * @return
 	 */
-	private Message testBinaryMessage(byte[] data) {
+	private FrontlineMessage testBinaryMessage(byte[] data) {
 		CIncomingMessage message = new CIncomingMessage(TEST_ORIGINATOR, data);
-		Message mess = testMessageReceive(message);
+		FrontlineMessage mess = testMessageReceive(message);
 		assertEquals("Message contains incorrect data.", data, message.getBinary());
 		return mess;
 	}
 	
 	/**
-	 * Receive a {@link CIncomingMessage}, and return the corresponding {@link Message} 
+	 * Receive a {@link CIncomingMessage}, and return the corresponding {@link FrontlineMessage} 
 	 * @param message
 	 * @return
 	 */
-	private Message testMessageReceive(CIncomingMessage message) {
+	private FrontlineMessage testMessageReceive(CIncomingMessage message) {
 		SmsDevice receiver = mock(SmsDevice.class);
 		imp.queue(receiver, message);
 		
 		// Wait for the message to be processed, and then check that the expected steps were taken
-		Message mess = bimel.getIncomingMessage();
+		FrontlineMessage mess = bimel.getIncomingMessage();
 		verify(messageDao).saveMessage(mess);
 		
 		return mess;
@@ -194,14 +194,14 @@ public class IncomingMessageProcessorTest extends BaseTestCase {
  * @author aga
  */
 class BlockingIncomingMessageEventListener implements UIListener {
-	private final BlockingQueue<Message> incomingMessages = new LinkedBlockingQueue<Message>();
+	private final BlockingQueue<FrontlineMessage> incomingMessages = new LinkedBlockingQueue<FrontlineMessage>();
 	
 	public void contactAddedToGroup(Contact contact, Group group) { /* ignore */ }
 	public void contactRemovedFromGroup(Contact contact, Group group) { /* ignore */ }
 	public void keywordActionExecuted(KeywordAction action) { /* ignore */ }
-	public void outgoingMessageEvent(Message message) { /* ignore */ }
+	public void outgoingMessageEvent(FrontlineMessage message) { /* ignore */ }
 
-	public void incomingMessageEvent(Message message) {
+	public void incomingMessageEvent(FrontlineMessage message) {
 		incomingMessages.add(message);
 	}
 
@@ -210,7 +210,7 @@ class BlockingIncomingMessageEventListener implements UIListener {
 	 * available.
 	 * @return The head of {@link #incomingMessages}.
 	 */
-	public Message getIncomingMessage() {
+	public FrontlineMessage getIncomingMessage() {
 		try {
 			return incomingMessages.take();
 		} catch (InterruptedException ex) {

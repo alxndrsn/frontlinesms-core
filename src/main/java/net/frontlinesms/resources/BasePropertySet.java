@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 
 import org.apache.log4j.Logger;
 
@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
 class BasePropertySet {
 //> STATIC CONSTANTS
 	/** Logging object for this instance. */
-	public static final Logger LOG = Utils.getLogger(BasePropertySet.class);
+	public static final Logger LOG = FrontlineUtils.getLogger(BasePropertySet.class);
 
 //> INSTANCE PROPERTIES
 	/** Map from property key to value */

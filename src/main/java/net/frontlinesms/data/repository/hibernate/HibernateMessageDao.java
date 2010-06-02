@@ -16,41 +16,41 @@ import net.frontlinesms.data.EntityField;
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Email;
 import net.frontlinesms.data.domain.Keyword;
-import net.frontlinesms.data.domain.Message;
-import net.frontlinesms.data.domain.Message.Field;
-import net.frontlinesms.data.domain.Message.Type;
+import net.frontlinesms.data.domain.FrontlineMessage;
+import net.frontlinesms.data.domain.FrontlineMessage.Field;
+import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.repository.MessageDao;
 
 /**
  * Hibernate implementation of {@link MessageDao}.
  * @author Alex
  */
-public class HibernateMessageDao extends BaseHibernateDao<Message> implements MessageDao {
+public class HibernateMessageDao extends BaseHibernateDao<FrontlineMessage> implements MessageDao {
 	/** Create instance of this class */
 	public HibernateMessageDao() {
-		super(Message.class);
+		super(FrontlineMessage.class);
 	}
 
-	/** @see MessageDao#deleteMessage(Message) */
-	public void deleteMessage(Message message) {
+	/** @see MessageDao#deleteMessage(FrontlineMessage) */
+	public void deleteMessage(FrontlineMessage message) {
 		super.delete(message);
 	}
 
 	/** @see MessageDao#getAllMessages() */
-	public List<Message> getAllMessages() {
+	public List<FrontlineMessage> getAllMessages() {
 		return super.getAll();
 	}
 
 	/** @see MessageDao#getAllMessages(int, Field, Order, Long, Long, int, int) */
-	public List<Message> getAllMessages(Message.Type messageType, Field sortBy, Order order, Long start, Long end, int startIndex, int limit) {
+	public List<FrontlineMessage> getAllMessages(FrontlineMessage.Type messageType, Field sortBy, Order order, Long start, Long end, int startIndex, int limit) {
 		DetachedCriteria criteria = super.getSortCriterion(sortBy, order);
 		addTypeCriteria(criteria, messageType);
 		addDateCriteria(criteria, start, end);
 		return super.getList(criteria, startIndex, limit);
 	}
 
-	/** @see MessageDao#getMessageCount(int, Message.Status[]) */
-	public int getMessageCount(Message.Type messageType, Message.Status... messageStatuses) {
+	/** @see MessageDao#getMessageCount(int, FrontlineMessage.Status[]) */
+	public int getMessageCount(FrontlineMessage.Type messageType, FrontlineMessage.Status... messageStatuses) {
 		DetachedCriteria criteria = DetachedCriteria.forClass(Email.class);
 		addStatusCriteria(criteria, messageStatuses);
 		addTypeCriteria(criteria, messageType);
@@ -58,7 +58,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessageCount(int, Long, Long) */
-	public int getMessageCount(Message.Type messageType, Long start, Long end) {
+	public int getMessageCount(FrontlineMessage.Type messageType, Long start, Long end) {
 		DetachedCriteria criteria = super.getCriterion();
 		addDateCriteria(criteria, start, end);
 		addTypeCriteria(criteria, messageType);
@@ -66,26 +66,26 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessageCount(int, Keyword, Long, Long) */
-	public int getMessageCount(Message.Type messageType, Keyword keyword, Long start, Long end) {
-		PartialQuery<Message> q = createQueryStringForKeyword(true, messageType, keyword);
+	public int getMessageCount(FrontlineMessage.Type messageType, Keyword keyword, Long start, Long end) {
+		PartialQuery<FrontlineMessage> q = createQueryStringForKeyword(true, messageType, keyword);
 		
 		if (start != null) {
 			q.appendWhereOrAnd();
 			if (end != null) {
-				q.append("(message." + Message.Field.DATE.getFieldName() + ">=? AND message." + Message.Field.DATE.getFieldName() + "<=?)", start, end);
+				q.append("(message." + FrontlineMessage.Field.DATE.getFieldName() + ">=? AND message." + FrontlineMessage.Field.DATE.getFieldName() + "<=?)", start, end);
 			} else {
-				q.append("(message." + Message.Field.DATE.getFieldName() + ">=?)", start);	
+				q.append("(message." + FrontlineMessage.Field.DATE.getFieldName() + ">=?)", start);	
 			}			
 		} else if (end != null) {
 			q.appendWhereOrAnd();
-			q.append("(message." + Message.Field.DATE.getFieldName() + "<=?)", end);
+			q.append("(message." + FrontlineMessage.Field.DATE.getFieldName() + "<=?)", end);
 		}
 		
 		return super.getCount(q.getQueryString(), q.getInsertValues());
 	}
 
 	/** @see MessageDao#getMessageCountForMsisdn(int, String, Long, Long) */
-	public int getMessageCountForMsisdn(Message.Type messageType, String phoneNumber, Long start, Long end) {
+	public int getMessageCountForMsisdn(FrontlineMessage.Type messageType, String phoneNumber, Long start, Long end) {
 		DetachedCriteria criteria = super.getCriterion();
 		addTypeCriteria(criteria, messageType);
 		addDateCriteria(criteria, start, end);
@@ -94,7 +94,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessageForStatusUpdate(String, int) */
-	public Message getMessageForStatusUpdate(String targetMsisdnSuffix, int smscReference) {
+	public FrontlineMessage getMessageForStatusUpdate(String targetMsisdnSuffix, int smscReference) {
 		DetachedCriteria criteria = super.getCriterion();
 		criteria.add(Restrictions.eq(Field.RECIPIENT_MSISDN.getFieldName(), targetMsisdnSuffix));
 		criteria.add(Restrictions.eq(Field.SMSC_REFERENCE.getFieldName(), smscReference));
@@ -102,42 +102,42 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessages(int, Field, Order) */
-	public List<Message> getMessages(Message.Type messageType, Field sortBy, Order order) {
+	public List<FrontlineMessage> getMessages(FrontlineMessage.Type messageType, Field sortBy, Order order) {
 		DetachedCriteria criteria = super.getSortCriterion(sortBy, order);
 		addTypeCriteria(criteria, messageType);
 		return getList(criteria);
 	}
 
 	/** @see MessageDao#getMessagesForKeyword(int, Keyword, Field, Order, Long, Long, int, int) */
-	public List<Message> getMessages(Message.Type messageType, Keyword keyword, Field sortBy, Order order) {
+	public List<FrontlineMessage> getMessages(FrontlineMessage.Type messageType, Keyword keyword, Field sortBy, Order order) {
 		DetachedCriteria criteria = getSortCriterion(sortBy, order);
 		addTypeCriteria(criteria, messageType);
 		addKeywordMatchCriteria(criteria, keyword);
 		return getList(criteria);
 	}
 
-	/** @see MessageDao#getMessages(int, Message.Status[]) */
-	public Collection<Message> getMessages(Message.Type messageType, Message.Status... statuses) {
+	/** @see MessageDao#getMessages(int, FrontlineMessage.Status[]) */
+	public Collection<FrontlineMessage> getMessages(FrontlineMessage.Type messageType, FrontlineMessage.Status... statuses) {
 		DetachedCriteria criteria = super.getCriterion();
 		addTypeCriteria(criteria, messageType);
 		addStatusCriteria(criteria, statuses);
 		return getList(criteria);
 	}
 	
-	public int getMessageCount(Message.Type messageType, List<String> phoneNumbers,
+	public int getMessageCount(FrontlineMessage.Type messageType, List<String> phoneNumbers,
 			Long messageHistoryStart, Long messageHistoryEnd) {
 		return super.getCount(getCriteria(messageType, phoneNumbers,
 				messageHistoryStart, messageHistoryEnd));
 	}
 	
-	public List<Message> getMessages(Message.Type messageType,
+	public List<FrontlineMessage> getMessages(FrontlineMessage.Type messageType,
 			List<String> phoneNumbers, Long messageHistoryStart,
 			Long messageHistoryEnd) {
 		return super.getList(getCriteria(messageType, phoneNumbers,
 				messageHistoryStart, messageHistoryEnd));
 	}
 
-	private DetachedCriteria getCriteria(Message.Type messageType,
+	private DetachedCriteria getCriteria(FrontlineMessage.Type messageType,
 			List<String> phoneNumbers, Long messageHistoryStart,
 			Long messageHistoryEnd) {
 		DetachedCriteria criteria = super.getCriterion();
@@ -148,19 +148,19 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessagesForKeyword(int, Keyword, Field, Order, Long, Long, int, int) */
-	public List<Message> getMessagesForKeyword(Message.Type messageType, Keyword keyword, Field sortBy, Order order, Long start, Long end, int startIndex, int limit) {
-		PartialQuery<Message> q = createQueryStringForKeyword(false, messageType, keyword);
+	public List<FrontlineMessage> getMessagesForKeyword(FrontlineMessage.Type messageType, Keyword keyword, Field sortBy, Order order, Long start, Long end, int startIndex, int limit) {
+		PartialQuery<FrontlineMessage> q = createQueryStringForKeyword(false, messageType, keyword);
 		
 		if (start != null) {
 			q.appendWhereOrAnd();
 			if (end != null) {
-				q.append("(message." + Message.Field.DATE.getFieldName() + ">=? AND message." + Message.Field.DATE.getFieldName() + "<=?)", start, end);
+				q.append("(message." + FrontlineMessage.Field.DATE.getFieldName() + ">=? AND message." + FrontlineMessage.Field.DATE.getFieldName() + "<=?)", start, end);
 			} else {
-				q.append("(message." + Message.Field.DATE.getFieldName() + ">=?)", start);	
+				q.append("(message." + FrontlineMessage.Field.DATE.getFieldName() + ">=?)", start);	
 			}			
 		} else if (end != null) {
 			q.appendWhereOrAnd();
-			q.append("(message." + Message.Field.DATE.getFieldName() + "<=?)", end);
+			q.append("(message." + FrontlineMessage.Field.DATE.getFieldName() + "<=?)", end);
 		}
 		
 		
@@ -170,7 +170,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 
 	/** @see MessageDao#getMessagesForKeyword(int, Keyword) */
 	@SuppressWarnings("unchecked")
-	public List<Message> getMessagesForKeyword(Message.Type messageType, Keyword keyword) {
+	public List<FrontlineMessage> getMessagesForKeyword(FrontlineMessage.Type messageType, Keyword keyword) {
 		PartialQuery q = createQueryStringForKeyword(false, messageType, keyword);
 		return super.getList(q.getQueryString(), q.getInsertValues());
 	}
@@ -189,7 +189,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessagesForMsisdn(int, String, Field, Order, Long, Long, int, int) */
-	public List<Message> getMessagesForMsisdn(Message.Type messageType, String phoneNumber, Field sortBy, Order order, Long start, Long end, int startIndex, int limit) {
+	public List<FrontlineMessage> getMessagesForMsisdn(FrontlineMessage.Type messageType, String phoneNumber, Field sortBy, Order order, Long start, Long end, int startIndex, int limit) {
 		DetachedCriteria criteria = super.getSortCriterion(sortBy, order);
 		addTypeCriteria(criteria, messageType);
 		addDateCriteria(criteria, start, end);
@@ -198,7 +198,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	}
 
 	/** @see MessageDao#getMessagesForMsisdn(int, String, Field, Order, Long, Long) */
-	public List<Message> getMessagesForMsisdn(Message.Type messageType, String phoneNumber, Field sortBy, Order order, Long start, Long end) {
+	public List<FrontlineMessage> getMessagesForMsisdn(FrontlineMessage.Type messageType, String phoneNumber, Field sortBy, Order order, Long start, Long end) {
 		DetachedCriteria criteria = super.getSortCriterion(sortBy, order);
 		addTypeCriteria(criteria, messageType);
 		addDateCriteria(criteria, start, end);
@@ -206,8 +206,8 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 		return super.getList(criteria);
 	}
 
-	/** @see MessageDao#getMessagesForStati(int, Message.Status[], Field, Order, int, int) */
-	public List<Message> getMessagesForStati(Message.Type messageType, Message.Status[] messageStatuses, Field sortBy, Order order, int startIndex, int limit) {
+	/** @see MessageDao#getMessagesForStati(int, FrontlineMessage.Status[], Field, Order, int, int) */
+	public List<FrontlineMessage> getMessagesForStati(FrontlineMessage.Type messageType, FrontlineMessage.Status[] messageStatuses, Field sortBy, Order order, int startIndex, int limit) {
 		DetachedCriteria criteria = super.getSortCriterion(sortBy, order);
 		addTypeCriteria(criteria, messageType);
 		addStatusCriteria(criteria, messageStatuses);
@@ -237,13 +237,13 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 		return super.getCount(criteria);
 	}
 
-	/** @see MessageDao#saveMessage(Message) */
-	public void saveMessage(Message message) {
+	/** @see MessageDao#saveMessage(FrontlineMessage) */
+	public void saveMessage(FrontlineMessage message) {
 		super.saveWithoutDuplicateHandling(message);
 	}
 
-	/** @see MessageDao#updateMessage(Message) */
-	public void updateMessage(Message message) {
+	/** @see MessageDao#updateMessage(FrontlineMessage) */
+	public void updateMessage(FrontlineMessage message) {
 		super.updateWithoutDuplicateHandling(message);
 	}
 	
@@ -337,7 +337,7 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	 * @param criteria
 	 * @param messageType 
 	 */
-	private void addTypeCriteria(DetachedCriteria criteria, Message.Type messageType) {
+	private void addTypeCriteria(DetachedCriteria criteria, FrontlineMessage.Type messageType) {
 		if(messageType != Type.ALL) {
 			criteria.add(Restrictions.eq(Field.TYPE.getFieldName(), messageType));
 		}
@@ -348,23 +348,23 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 	 * @param criteria 
 	 * @param statuses 
 	 */
-	private void addStatusCriteria(DetachedCriteria criteria, Message.Status... statuses) {
+	private void addStatusCriteria(DetachedCriteria criteria, FrontlineMessage.Status... statuses) {
 		criteria.add(Restrictions.in(Field.STATUS.getFieldName(), statuses));
 	}
 	
 	/**
 	 * 
 	 */
-	private PartialQuery<Message> createQueryStringForKeyword(boolean isCount, Message.Type messageType, Keyword keyword) {
-		PartialQuery<Message> q = new PartialQuery<Message>();
+	private PartialQuery<FrontlineMessage> createQueryStringForKeyword(boolean isCount, FrontlineMessage.Type messageType, Keyword keyword) {
+		PartialQuery<FrontlineMessage> q = new PartialQuery<FrontlineMessage>();
 		// Build a list of values to insert into the query string
 		String selectString = "message";
 		if (isCount)
 			selectString = "count(*)";
 		
-		q.append("SELECT " + selectString + " FROM Message message");
+		q.append("SELECT " + selectString + " FROM " + FrontlineMessage.class.getName() + " message");
 		
-		if(messageType != Message.Type.ALL) {
+		if(messageType != FrontlineMessage.Type.ALL) {
 			q.append("WHERE");
 			q.append("message.type=?", messageType);
 		}
@@ -373,8 +373,8 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 			q.appendWhereOrAnd();
 			String likeKeyword = keyword.getKeyword() + " %";
 			
-			q.append("(UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ?", keyword.getKeyword());
-			q.append("OR UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ?)", likeKeyword);
+			q.append("(UPPER(message." + FrontlineMessage.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ?", keyword.getKeyword());
+			q.append("OR UPPER(message." + FrontlineMessage.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ?)", likeKeyword);
 		}
 		
 		List<String> similarKeywords = getSimilarKeywords(keyword);
@@ -389,8 +389,8 @@ public class HibernateMessageDao extends BaseHibernateDao<Message> implements Me
 				String similarKeyword = similarKeywords.get(i);
 				String likeSimilarKeyword = similarKeyword + " %";
 				
-				q.append("NOT (UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ?", similarKeyword);
-				q.append("OR UPPER(message." + Message.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ?)", likeSimilarKeyword);
+				q.append("NOT (UPPER(message." + FrontlineMessage.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ?", similarKeyword);
+				q.append("OR UPPER(message." + FrontlineMessage.Field.MESSAGE_CONTENT.getFieldName() + ") LIKE ?)", likeSimilarKeyword);
 				
 			}
 		}

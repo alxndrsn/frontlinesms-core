@@ -35,7 +35,7 @@ import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
-import net.frontlinesms.data.domain.Message;
+import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
@@ -613,9 +613,9 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			// Here, the FIELD property is set on each column of the message table.  These field objects are
 			// then used for easy sorting of the message table.
 			if(text != null) {
-				if (text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_NAME))) ui.putProperty(o, PROPERTY_FIELD, Message.Field.STATUS);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_PHONE_NUMBER))) ui.putProperty(o, PROPERTY_FIELD, Message.Field.DATE);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_E_MAIL_ADDRESS))) ui.putProperty(o, PROPERTY_FIELD, Message.Field.SENDER_MSISDN);
+				if (text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_NAME))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.STATUS);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_PHONE_NUMBER))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.DATE);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_E_MAIL_ADDRESS))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.SENDER_MSISDN);
 			}
 		}
 	}

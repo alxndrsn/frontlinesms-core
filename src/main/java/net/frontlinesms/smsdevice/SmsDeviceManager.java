@@ -25,9 +25,9 @@ import java.util.concurrent.*;
 import serial.*;
 
 import net.frontlinesms.CommUtils;
-import net.frontlinesms.Utils;
-import net.frontlinesms.data.domain.Message;
-import net.frontlinesms.data.domain.Message.Status;
+import net.frontlinesms.FrontlineUtils;
+import net.frontlinesms.data.domain.FrontlineMessage;
+import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.smsdevice.events.NoSmsDevicesConnectedNotification;
@@ -75,11 +75,11 @@ import org.smslib.util.GsmAlphabet;
  */
 public class SmsDeviceManager extends Thread implements SmsListener  {
 	/** List of GSM 7bit text messages queued to be sent. */
-	private final ConcurrentLinkedQueue<Message> gsm7bitOutbox = new ConcurrentLinkedQueue<Message>();
+	private final ConcurrentLinkedQueue<FrontlineMessage> gsm7bitOutbox = new ConcurrentLinkedQueue<FrontlineMessage>();
 	/** List of UCS2 text messages queued to be sent. */
-	private final ConcurrentLinkedQueue<Message> ucs2Outbox = new ConcurrentLinkedQueue<Message>();
+	private final ConcurrentLinkedQueue<FrontlineMessage> ucs2Outbox = new ConcurrentLinkedQueue<FrontlineMessage>();
 	/** List of binary messages queued to be sent. */
-	private final ConcurrentLinkedQueue<Message> binOutbox = new ConcurrentLinkedQueue<Message>();
+	private final ConcurrentLinkedQueue<FrontlineMessage> binOutbox = new ConcurrentLinkedQueue<FrontlineMessage>();
 	/** List of phone handlers that this manager is currently looking after. */
 	private final ConcurrentMap<String, SmsModem> phoneHandlers = new ConcurrentHashMap<String, SmsModem>();
 	/** Set of SMS internet services */
@@ -103,7 +103,7 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 	private final HashSet<String> connectedSerials = new HashSet<String>();
 	private String[] portIgnoreList;
 
-	private static Logger LOG = Utils.getLogger(SmsDeviceManager.class);
+	private static Logger LOG = FrontlineUtils.getLogger(SmsDeviceManager.class);
 
 	/**
 	 * Create a polling-variant SMS Handler.
@@ -132,7 +132,7 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 			// Sleep for a second to ensure lists are not constantly being reshuffled.  Processing dispatch
 			// and received messages is not really time-critical, otherwise it might be worth sleeping for
 			// less time.
-			Utils.sleep_ignoreInterrupts(1000);
+			FrontlineUtils.sleep_ignoreInterrupts(1000);
 			
 			doRun();
 		}
@@ -218,7 +218,7 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 	 * @param smsMessage
 	 * @return the Message object 
 	 */
-	public void sendSMS(Message outgoingMessage) {
+	public void sendSMS(FrontlineMessage outgoingMessage) {
 		LOG.trace("ENTER");
 		outgoingMessage.setStatus(Status.OUTBOX);
 		switch(MessageType.get(outgoingMessage)) {
@@ -245,7 +245,7 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 	 * Remove the supplied message from outbox.
 	 * @param deleted
 	 */
-	public void removeFromOutbox(Message deleted) {
+	public void removeFromOutbox(FrontlineMessage deleted) {
 		if(gsm7bitOutbox.remove(deleted)) {
 			if(LOG.isDebugEnabled()) LOG.debug("Message [" + deleted + "] removed from outbox. Size is [" + gsm7bitOutbox.size() + "]");
 		} else if(ucs2Outbox.remove(deleted)) {
@@ -282,7 +282,7 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 		if (smsListener != null) smsListener.incomingMessageEvent(receiver, msg);
 	}
 
-	public void outgoingMessageEvent(SmsDevice sender, Message msg) {
+	public void outgoingMessageEvent(SmsDevice sender, FrontlineMessage msg) {
 		if (smsListener != null) smsListener.outgoingMessageEvent(sender, msg);
 		if (msg.getStatus() == Status.FAILED) {
 			if (msg.getRetriesRemaining() > 0) {
@@ -593,19 +593,19 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 	
 	/** Dispatch all messages in {@link #gsm7bitOutbox} to suitable {@link SmsDevice}s */
 	private void dispatchGsm7bitTextSms() {
-		List<Message> messages = removeAll(this.gsm7bitOutbox);
+		List<FrontlineMessage> messages = removeAll(this.gsm7bitOutbox);
 		dispatchSms(messages, MessageType.GSM7BIT_TEXT);
 	}
 	
 	/** Dispatch all messages in {@link #outbox} to suitable {@link SmsDevice}s */
 	private void dispatchUcs2TextSms() {
-		List<Message> messages = removeAll(this.ucs2Outbox);
+		List<FrontlineMessage> messages = removeAll(this.ucs2Outbox);
 		dispatchSms(messages, MessageType.UCS2_TEXT);
 	}
 	
 	/** Dispatch all messages in {@link #binOutbox} to suitable {@link SmsDevice}s */
 	private void dispatchBinarySms() {
-		List<Message> messages = removeAll(this.binOutbox);
+		List<FrontlineMessage> messages = removeAll(this.binOutbox);
 		dispatchSms(messages, MessageType.BINARY);
 	}
 	
@@ -613,7 +613,7 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 	 * @param messages messages to dispatch
 	 * @param binary <code>true</code> if the messages are binary, <code>false</code> if they are text
 	 */
-	private void dispatchSms(List<Message> messages, MessageType messageType) {
+	private void dispatchSms(List<FrontlineMessage> messages, MessageType messageType) {
 		if(messages.size() > 0) {
 			// Try dispatching to SmsInternetServices
 			List<SmsInternetService> internetServices = getSmsInternetServicesForSending(messageType);
@@ -641,7 +641,7 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 	 * @param messageType The {@link MessageType}
 	 * @return The outbox corresponding to the {@link MessageType}
 	 */
-	private ConcurrentLinkedQueue<Message> getOutboxFromType(MessageType messageType) {
+	private ConcurrentLinkedQueue<FrontlineMessage> getOutboxFromType(MessageType messageType) {
 		switch (messageType) {
 		case BINARY:
 			return binOutbox;
@@ -654,14 +654,14 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 	}
 
 	/**
-	 * Dispatch some SMS {@link Message}s to some {@link SmsDevice}s. 
+	 * Dispatch some SMS {@link FrontlineMessage}s to some {@link SmsDevice}s. 
 	 * @param devices
 	 * @param messages
 	 */
-	private void dispatchSms(List<? extends SmsDevice> devices, List<Message> messages) {
+	private void dispatchSms(List<? extends SmsDevice> devices, List<FrontlineMessage> messages) {
 		int deviceCount = devices.size();
 		int messageIndex = -1;
-		for(Message m : messages) {
+		for(FrontlineMessage m : messages) {
 			SmsDevice device = devices.get(++messageIndex % deviceCount);
 			// Presumably the device will complain somehow if it is no longer connected
 			// etc.  TODO we should actually check what happens!
@@ -671,9 +671,9 @@ public class SmsDeviceManager extends Thread implements SmsListener  {
 	}
 
 	/** Removes and returns all messages currently available in a list. */
-	private List<Message> removeAll(ConcurrentLinkedQueue<Message> outbox) {
-		LinkedList<Message> retrieved = new LinkedList<Message>();
-		Message m;
+	private List<FrontlineMessage> removeAll(ConcurrentLinkedQueue<FrontlineMessage> outbox) {
+		LinkedList<FrontlineMessage> retrieved = new LinkedList<FrontlineMessage>();
+		FrontlineMessage m;
 		while((m=outbox.poll())!=null) retrieved.add(m);
 		return retrieved;
 	}
@@ -739,7 +739,7 @@ enum MessageType {
 	UCS2_TEXT,
 	BINARY;
 	
-	public static MessageType get(Message message) {
+	public static MessageType get(FrontlineMessage message) {
 		if(message.isBinaryMessage()) {
 			return BINARY;
 		} else if(GsmAlphabet.areAllCharactersValidGSM(message.getTextContent())) {

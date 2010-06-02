@@ -28,7 +28,7 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import net.frontlinesms.FrontlineSMSConstants;
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import thinlet.Thinlet;
 
@@ -49,7 +49,7 @@ public class DateSelecter {
 	private static final String UI_FILE_DATE_SELECTER_FORM = "/ui/dialog/dateSelecter.xml";
 	
 	/** Logger for this class */
-	private static Logger LOG = Utils.getLogger(DateSelecter.class);
+	private static Logger LOG = FrontlineUtils.getLogger(DateSelecter.class);
 
 //> INSTANCE PROPERTIES
 	/** A calendar object with a poorly-defined role */

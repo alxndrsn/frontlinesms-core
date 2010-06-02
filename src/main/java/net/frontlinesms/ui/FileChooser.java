@@ -14,7 +14,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import net.frontlinesms.FrontlineSMSConstants;
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
@@ -28,7 +28,7 @@ public abstract class FileChooser implements ThinletUiEventHandler {
 	private static final String UI_FILE_FILE_CHOOSER_FORM = "/ui/core/util/dgFileChooser.xml";
 	
 //> INSTANCE PROPERTIES
-	private Logger log = Utils.getLogger(this.getClass());
+	private Logger log = FrontlineUtils.getLogger(this.getClass());
 	final FrontlineUI ui;
 	private final Mode mode;
 	private File currentDirectory;
@@ -181,7 +181,7 @@ public abstract class FileChooser implements ThinletUiEventHandler {
 		for (File f : contents) {
 			orderedContents.add(f);
 		}
-		Collections.sort(orderedContents, new Utils.FileComparator());
+		Collections.sort(orderedContents, new FrontlineUtils.FileComparator());
 		return orderedContents;
 	}
 	

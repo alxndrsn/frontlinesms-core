@@ -24,8 +24,8 @@ import java.util.*;
 
 import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
-import net.frontlinesms.data.domain.Message.Status;
-import net.frontlinesms.data.domain.Message.Type;
+import net.frontlinesms.data.domain.FrontlineMessage.Status;
+import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.listener.*;
@@ -81,7 +81,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
  */
 public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	/** Logging object */
-	private static Logger LOG = Utils.getLogger(FrontlineSMS.class);
+	private static Logger LOG = FrontlineUtils.getLogger(FrontlineSMS.class);
 	/** SMS device emulator */
 	public static final SmsDevice EMULATOR = new DummySmsDevice(FrontlineSMSConstants.EMULATOR_MSISDN);
 	
@@ -96,7 +96,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	private GroupMembershipDao groupMembershipDao;
 	/** Data Access Object for {@link Contact}s */
 	private ContactDao contactDao;
-	/** Data Access Object for {@link Message}s */
+	/** Data Access Object for {@link FrontlineMessage}s */
 	private MessageDao messageDao;
 	/** Data Access Object for {@link KeywordAction}s */
 	private KeywordActionDao keywordActionDao;
@@ -222,7 +222,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 
 		LOG.debug("Re-Loading messages to outbox.");
 		//We need to reload all messages, which status is OUTBOX, to the outbox.
-		for (Message m : messageDao.getMessages(Type.OUTBOUND, Status.OUTBOX, Status.PENDING)) {
+		for (FrontlineMessage m : messageDao.getMessages(Type.OUTBOUND, Status.OUTBOX, Status.PENDING)) {
 			smsDeviceManager.sendSMS(m);
 		}
 
@@ -362,7 +362,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	}
 
 	/** Passes an outgoing message event to the SMS Listener if one is specified. */
-	public synchronized void outgoingMessageEvent(SmsDevice sender, Message outgoingMessage) {
+	public synchronized void outgoingMessageEvent(SmsDevice sender, FrontlineMessage outgoingMessage) {
 		// The message status will have changed, so save it here
 		this.messageDao.updateMessage(outgoingMessage);
 		
@@ -393,7 +393,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 
 //> SMS SEND METHODS
 	/** Persists and sends an SMS message. */
-	public void sendMessage(Message message) {
+	public void sendMessage(FrontlineMessage message) {
 		messageDao.saveMessage(message);
 		smsDeviceManager.sendSMS(message);
 		if (uiListener != null) { 
@@ -408,19 +408,19 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	 * 
 	 * @param targetNumber The recipient number.
 	 * @param textContent The message to be sent.
-	 * @return the {@link Message} describing the sent message
+	 * @return the {@link FrontlineMessage} describing the sent message
 	 */
-	public Message sendTextMessage(String targetNumber, String textContent) {
+	public FrontlineMessage sendTextMessage(String targetNumber, String textContent) {
 		LOG.trace("ENTER");
-		Message m;
+		FrontlineMessage m;
 		if (targetNumber.equals(FrontlineSMSConstants.EMULATOR_MSISDN)) {
-			m = Message.createOutgoingMessage(System.currentTimeMillis(), FrontlineSMSConstants.EMULATOR_MSISDN, FrontlineSMSConstants.EMULATOR_MSISDN, textContent.trim());
+			m = FrontlineMessage.createOutgoingMessage(System.currentTimeMillis(), FrontlineSMSConstants.EMULATOR_MSISDN, FrontlineSMSConstants.EMULATOR_MSISDN, textContent.trim());
 			m.setStatus(Status.SENT);
 			messageDao.saveMessage(m);
 			outgoingMessageEvent(EMULATOR, m);
 			incomingMessageEvent(EMULATOR, new CIncomingMessage(System.currentTimeMillis(), FrontlineSMSConstants.EMULATOR_MSISDN, textContent.trim(), 1, "NYI"));
 		} else {
-			m = Message.createOutgoingMessage(System.currentTimeMillis(), "", targetNumber, textContent.trim());
+			m = FrontlineMessage.createOutgoingMessage(System.currentTimeMillis(), "", targetNumber, textContent.trim());
 			this.sendMessage(m);
 		}
 		LOG.trace("EXIT");

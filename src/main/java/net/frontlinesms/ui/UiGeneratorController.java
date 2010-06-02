@@ -34,8 +34,8 @@ import java.util.Set;
 import net.frontlinesms.*;
 import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
-import net.frontlinesms.data.domain.Message.Status;
-import net.frontlinesms.data.domain.Message.Type;
+import net.frontlinesms.data.domain.FrontlineMessage.Status;
+import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.debug.RandomDataGenerator;
 import net.frontlinesms.email.EmailException;
@@ -96,7 +96,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 
 //> INSTANCE PROPERTIES
 	/** Logging object */
-	public Logger LOG = Utils.getLogger(UiGeneratorController.class);
+	public Logger LOG = FrontlineUtils.getLogger(UiGeneratorController.class);
 	
 	/** The {@link FrontlineSMS} instance that this UI is attached to. */
 	private FrontlineSMS frontlineController;
@@ -115,7 +115,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	private final GroupDao groupDao;
 	/** Data Access Object for {@link GroupMembership}s */
 	private final GroupMembershipDao groupMembershipDao;
-	/** Data Access Object for {@link Message}s */
+	/** Data Access Object for {@link FrontlineMessage}s */
 	private final MessageDao messageFactory;
 	/** Data Access Object for {@link SmsModemSettings}s */
 	private final SmsModemSettingsDao phoneDetailsManager;
@@ -445,7 +445,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param message The message whose recipient to get the name of
 	 * @return This will be the name of the contact who received the message, or the recipient's phone number if they are not a contact.
 	 */
-	public String getRecipientDisplayValue(Message message) {
+	public String getRecipientDisplayValue(FrontlineMessage message) {
 		Contact recipient = contactDao.getFromMsisdn(message.getRecipientMsisdn());
 		String recipientDisplayName = recipient != null ? recipient.getDisplayName() : message.getRecipientMsisdn();
 		return recipientDisplayName;
@@ -457,7 +457,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @return This will be the name of the contact who sent the message, or the sender's phone number if they are not a contact.
 	 * @deprecated should be moved to message tab cont
 	 */
-	public String getSenderDisplayValue(Message message) {
+	public String getSenderDisplayValue(FrontlineMessage message) {
 		Contact sender = contactDao.getFromMsisdn(message.getSenderMsisdn());
 		String senderDisplayName = sender != null ? sender.getDisplayName() : message.getSenderMsisdn();
 		return senderDisplayName;
@@ -605,10 +605,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Shows the pending message dialog.
 	 * @param messages thy messages which are pending
 	 */
-	private void showPendingMessages(Collection<Message> messages) {
+	private void showPendingMessages(Collection<FrontlineMessage> messages) {
 		Object pendingMsgForm = loadComponentFromFile(UI_FILE_PENDING_MESSAGES_FORM);
 		Object list = find(pendingMsgForm, COMPONENT_PENDING_LIST);
-		for (Message m : messages) {
+		for (FrontlineMessage m : messages) {
 			add(list, getRowForPending(m));
 		}
 		add(pendingMsgForm);
@@ -703,9 +703,9 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				show_composeMessageForm(recipients);
 			} else if (attachedItem instanceof Group) {
 				show_composeMessageForm((Group) attachedItem);
-			} else if (attachedItem instanceof Message) {
+			} else if (attachedItem instanceof FrontlineMessage) {
 				Set<Object> recipients = new HashSet<Object>();
-				Message message = (Message) attachedItem;
+				FrontlineMessage message = (FrontlineMessage) attachedItem;
 				// We should only attempt to reply to messages we have received - otherwise
 				// we could end up texting ourselves a lot!
 				if(message.getType() == Type.RECEIVED) {
@@ -936,7 +936,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		saveWindowSize();
 		boolean somethingToDo = false;
 		
-		Collection<Message> pending = messageFactory.getMessages(Type.OUTBOUND, Status.PENDING);
+		Collection<FrontlineMessage> pending = messageFactory.getMessages(Type.OUTBOUND, Status.PENDING);
 		if(LOG.isDebugEnabled()) LOG.debug("Pending Messages size [" + pending.size() + "]");
 		if (pending.size() > 0) {
 			showPendingMessages(pending);
@@ -948,7 +948,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	public void close() {
 		LOG.trace("ENTER");
-		Collection<Message> pending = messageFactory.getMessages(Type.OUTBOUND, Status.PENDING);
+		Collection<FrontlineMessage> pending = messageFactory.getMessages(Type.OUTBOUND, Status.PENDING);
 		LOG.debug("Pending Messages size [" + pending.size() + "]");
 		if (pending.size() > 0) {
 			showPendingMessages(pending);
@@ -968,7 +968,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Method called when the user make the final decision to close the app.
 	 */
 	public void exit() {
-		for (Message m : messageFactory.getMessages(Type.OUTBOUND, Status.PENDING)) {
+		for (FrontlineMessage m : messageFactory.getMessages(Type.OUTBOUND, Status.PENDING)) {
 			m.setStatus(Status.OUTBOX);
 		}
 		saveWindowSize();
@@ -1003,8 +1003,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param component
 	 * @return The Message instance.
 	 */
-	public Message getMessage(Object component) {
-		return (Message) getAttachedObject(component);
+	public FrontlineMessage getMessage(Object component) {
+		return (FrontlineMessage) getAttachedObject(component);
 	}
 
 	/**
@@ -1122,11 +1122,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 //	}
 	
 	/**
-	 * Get the status of a {@link Message} as a {@link String}.
+	 * Get the status of a {@link FrontlineMessage} as a {@link String}.
 	 * @param message
 	 * @return {@link String} representation of the status.
 	 */
-	public static final String getMessageStatusAsString(Message message) {
+	public static final String getMessageStatusAsString(FrontlineMessage message) {
 		switch(message.getStatus()) {
 			case DRAFT:
 				return InternationalisationUtils.getI18NString(COMMON_DRAFT);
@@ -1317,7 +1317,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param message
 	 * @return
 	 */
-	public Object getRow(Message message) {
+	public Object getRow(FrontlineMessage message) {
 		Object row = createTableRow(message);
 
 		String icon;
@@ -1360,7 +1360,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param message
 	 * @return
 	 */
-	private Object getRowForPending(Message message) {
+	private Object getRowForPending(FrontlineMessage message) {
 		Object row = createTableRow(message);
 
 		String senderDisplayName = getSenderDisplayValue(message);
@@ -1498,7 +1498,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		add(about);
 	}
 
-	public void incomingMessageEvent(Message message) {
+	public void incomingMessageEvent(FrontlineMessage message) {
 		LOG.trace("ENTER");
 		if (currentTab.equals(TAB_MESSAGE_HISTORY)) {
 			this.messageTabController.incomingMessageEvent(message);
@@ -1511,7 +1511,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		LOG.trace("EXIT");
 	}
 
-	public void outgoingMessageEvent(Message message) {
+	public void outgoingMessageEvent(FrontlineMessage message) {
 		LOG.trace("ENTER");
 		LOG.debug("Message [" + message.getTextContent() + "], Status [" + message.getStatus() + "]");
 		if (currentTab.equals(TAB_MESSAGE_HISTORY)) {
@@ -1795,7 +1795,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	public void dbgGenerateOutgoingSms() {
-		Message testMessage = Message.createOutgoingMessage(System.currentTimeMillis(), null, "+123456789", "Test outgoing SMS");
+		FrontlineMessage testMessage = FrontlineMessage.createOutgoingMessage(System.currentTimeMillis(), null, "+123456789", "Test outgoing SMS");
 		this.messageFactory.saveMessage(testMessage);
 		this.frontlineController.outgoingMessageEvent(FrontlineSMS.EMULATOR, testMessage);
 	}
@@ -1820,6 +1820,16 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		synchronized (deviceConnectionDialogHandlerLock) {
 			this.remove(dialog);
 			this.deviceConnectionDialogHandler = null;
+		}
+	}
+
+	/**
+	 * Refreshes the contact tab iff it is currently visible.  If it is not visible,
+	 * it will not be refreshed until it is show again.
+	 */
+	public void refreshContactsTab() {
+		if (this.currentTab.equals(TAB_CONTACT_MANAGER)) {
+			this.contactsTabController.refresh();
 		}
 	}
 }

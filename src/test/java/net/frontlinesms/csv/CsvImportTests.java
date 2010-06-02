@@ -94,18 +94,21 @@ public class CsvImportTests extends TestCase {
 					readLine.length);
 			for (int i = 0; i < expectedLine.length; i++) {
 				if(!Arrays.deepEquals(readLine, expectedLine)) {
-					for (int j = 0; j < expectedLine.length; j++) {
-						String expected = expectedLine[j];
-						String read = readLine[j];
-						if(!read.equals(expected)) {
-							for (int k = 0; k < expected.length(); k++) {
-								char e = expected.charAt(k);
-								char r = read.charAt(k);
-								log.trace("(" + e + ")" + new Integer(e) + " -> ()" + new Integer(r) + "(" + r + ")");
+					try {
+						for (int j = 0; j < expectedLine.length; j++) {
+							String expected = expectedLine[j];
+							String read = readLine[j];
+							if(!read.equals(expected)) {
+								for (int k = 0; k < expected.length(); k++) {
+									char e = expected.charAt(k);
+									char r = read.charAt(k);
+									log.trace("(" + e + ")" + new Integer(e) + " -> ()" + new Integer(r) + "(" + r + ")");
+								}
 							}
 						}
+					} finally {
+						fail("Line contents differ in '" + importTestFile + "', read:###\n" + toString(readLine) + "\n###\n" + toString(expectedLine) + "\n###");
 					}
-					fail("Line contents differ in '" + importTestFile + "', read:###\n" + toString(readLine) + "\n###\n" + toString(expectedLine) + "\n###");
 				}
 			}
 		}
@@ -116,11 +119,12 @@ public class CsvImportTests extends TestCase {
 	 * @return The list of Strings contained in a pair of braces and separated by commas
 	 */
 	private static final String toString(String[] strings) {
-		String ret = "{";
+		StringBuilder bob = new StringBuilder();
 		for(String s : strings) {
-			ret += s + ", ";
+			if(bob.length() > 0) bob.append(", ");
+			bob.append(s);
 		}
-		return ret.substring(0, ret.length()-2) + "}";
+		return "{" + bob.toString() + "}";
 	}
 	
 	/**
@@ -158,6 +162,22 @@ public class CsvImportTests extends TestCase {
 						"line \"0\"\r\ncell \"3\"",
 						"\r\n\r\n\r\nline\t0\tcell\t4\""
 					}
+			};
+		case 3:
+			return new String[][]{
+					{"Name","Mobile Number","Other Mobile Number","E-mail Address","Current Status","Notes","Group(s)"},
+					{"Morgan","07691321654","","","Dormant","dangerous","wrecking crew"},
+					{"Test Number","000","","","Active"},
+					{"alex","123456789","","","Active"},
+					{"laura","07788112233","+44123456789","lol@example.com","Active"},
+			};
+		case 4:
+			return new String[][]{
+					{"Name","Mobile Number","Other Mobile Number","E-mail Address","Current Status","Notes","Group(s)"},
+					{"Morgan","07691321654","","","Dormant","dangerous","wrecking crew"},
+					{"Test Number","000","","","Active","",""},
+					{"alex","123456789","","","Active","",""},
+					{"laura","07788112233","+44123456789","lol@example.com","Active","",""},
 			};
 		default: throw new RuntimeException("Unrecognized test: " + testNum);
 		}

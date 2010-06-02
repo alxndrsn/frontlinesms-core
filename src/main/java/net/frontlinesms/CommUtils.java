@@ -37,7 +37,7 @@ import org.apache.log4j.Logger;
  */
 public final class CommUtils {
 	/** Logging object */
-	private static Logger LOG = Utils.getLogger(CommUtils.class);
+	private static Logger LOG = FrontlineUtils.getLogger(CommUtils.class);
 	
 	/** Flag indicating whether the preferred COM package has been set. */
 	private static boolean setPackage;

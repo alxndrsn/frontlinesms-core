@@ -5,7 +5,7 @@ package net.frontlinesms.resources;
 
 import java.io.IOException;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 
 import org.apache.log4j.Logger;
 
@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 public class ClasspathPropertySet extends BasePropertySet {
 //> STATIC CONSTANTS
 	/** Logging object for this instance. */
-	public static final Logger LOG = Utils.getLogger(ClasspathPropertySet.class);
+	public static final Logger LOG = FrontlineUtils.getLogger(ClasspathPropertySet.class);
 	
 //> INSTANCE PROPERTIES
 

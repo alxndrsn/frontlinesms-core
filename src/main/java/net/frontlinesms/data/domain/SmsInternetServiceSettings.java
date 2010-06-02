@@ -9,7 +9,7 @@ import java.util.Map;
 
 import javax.persistence.*;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
 import net.frontlinesms.smsdevice.properties.*;
 
@@ -87,7 +87,7 @@ public class SmsInternetServiceSettings {
 		if (value instanceof String) stringValue = (String)value;
 		else if (value instanceof Boolean) stringValue = Boolean.toString((Boolean)value);
 		else if (value instanceof Integer) stringValue = Integer.toString((Integer)value);
-		else if (value instanceof PasswordString) stringValue = Utils.encodeBase64(((PasswordString)value).getValue());
+		else if (value instanceof PasswordString) stringValue = FrontlineUtils.encodeBase64(((PasswordString)value).getValue());
 		else if (value instanceof OptionalSection) stringValue = Boolean.toString(((OptionalSection)value).getValue());
 		else if (value instanceof Enum<?>) stringValue = ((Enum<?>)value).name();
 		else if (value instanceof PhoneSection) stringValue = ((PhoneSection)value).getValue();
@@ -117,7 +117,7 @@ public class SmsInternetServiceSettings {
 		if (property.getClass().equals(Integer.class))
 			return Integer.parseInt(stringValue);
 		if (property.getClass().equals(PasswordString.class))
-			return new PasswordString(Utils.decodeBase64(stringValue));
+			return new PasswordString(FrontlineUtils.decodeBase64(stringValue));
 		if (property.getClass().equals(OptionalSection.class)) {
 			return Boolean.parseBoolean(stringValue);
 		}

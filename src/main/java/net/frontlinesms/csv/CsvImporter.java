@@ -22,7 +22,7 @@ package net.frontlinesms.csv;
 import java.io.File;
 import java.io.IOException;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.data.DuplicateKeyException;
@@ -42,7 +42,7 @@ import org.apache.log4j.Logger;
  */
 public class CsvImporter {
 	/** Logging object */
-	private static Logger LOG = Utils.getLogger(CsvImporter.class); 
+	private static Logger LOG = FrontlineUtils.getLogger(CsvImporter.class); 
 	
 	/**
 	 * Import contacts from a CSV file.

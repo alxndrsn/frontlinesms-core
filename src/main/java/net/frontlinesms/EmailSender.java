@@ -69,7 +69,7 @@ public class EmailSender extends Thread {
 	
 	private EmailAccount sender;
 	
-	private static Logger LOG = Utils.getLogger(EmailSender.class);
+	private static Logger LOG = FrontlineUtils.getLogger(EmailSender.class);
 	
 	public EmailSender(EmailAccount account, EmailListener listener) {
 		super("EmailSender :: " + account.getAccountName());
@@ -111,7 +111,7 @@ public class EmailSender extends Thread {
 				this.serverPort = sender.getAccountServerPort();
 				send();
 			}
-			Utils.sleep_ignoreInterrupts(5000);
+			FrontlineUtils.sleep_ignoreInterrupts(5000);
 		}
 		LOG.trace("EXIT");
 	}
@@ -210,7 +210,7 @@ public class EmailSender extends Thread {
 			stopRunning();
 		} else if (!connectionOk && retries > 0) {
 			LOG.debug("This server could not be reached. Waiting [" + SLEEP_TIME + "ms] to try again!");
-			Utils.sleep_ignoreInterrupts(SLEEP_TIME);
+			FrontlineUtils.sleep_ignoreInterrupts(SLEEP_TIME);
 			for (Email mail : toAdd) {
 				outbox.add(mail);
 			}

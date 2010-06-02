@@ -8,7 +8,7 @@ import java.util.Comparator;
 import java.util.Enumeration;
 
 import net.frontlinesms.CommUtils;
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.SmsModemSettings;
 import net.frontlinesms.data.repository.SmsModemSettingsDao;
 import net.frontlinesms.smsdevice.SmsDevice;
@@ -532,7 +532,7 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 
 			port = handset.getPort();
 			baudRate = Integer.toString(handset.getBaudRate());
-			makeAndModel = Utils.getManufacturerAndModel(handset.getManufacturer(), handset.getModel());
+			makeAndModel = FrontlineUtils.getManufacturerAndModel(handset.getManufacturer(), handset.getModel());
 			serial = handset.getSerial();
 			
 			statusString = getSmsDeviceStatusAsString(handset);

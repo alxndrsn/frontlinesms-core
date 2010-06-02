@@ -3,7 +3,7 @@
  */
 package net.frontlinesms.smsdevice;
 
-import net.frontlinesms.data.domain.Message;
+import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.listener.SmsListener;
 
 /**
@@ -82,9 +82,9 @@ public class DummySmsDevice implements SmsDevice {
 	}
 
 	/** 
-	 * @see net.frontlinesms.smsdevice.SmsDevice#sendSMS(net.frontlinesms.data.domain.Message)
+	 * @see net.frontlinesms.smsdevice.SmsDevice#sendSMS(net.frontlinesms.data.domain.FrontlineMessage)
 	 */
-	public void sendSMS(Message outgoingMessage) {
+	public void sendSMS(FrontlineMessage outgoingMessage) {
 		/* do nothing */
 
 	}

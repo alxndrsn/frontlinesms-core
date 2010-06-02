@@ -24,9 +24,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.*;
-import net.frontlinesms.data.domain.Message.Status;
+import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.smsdevice.properties.*;
 
@@ -43,7 +43,7 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 	
 //> CONSTANTS
 	/** Logging object */
-	private static Logger LOG = Utils.getLogger(AbstractSmsInternetService.class);
+	private static Logger LOG = FrontlineUtils.getLogger(AbstractSmsInternetService.class);
 	/** Property name: use this service for sending SMS */
 	protected static final String PROPERTY_USE_FOR_SENDING = "common.use.for.sending";
 	/** Property name: use this service for receiving SMS */
@@ -53,7 +53,7 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 	/** The active thread running this service */
 	private SmsInternetServiceThread thread;
 	/** Queue of SMS messages waiting to be sent with this service */
-	protected ConcurrentLinkedQueue<Message> outbox = new ConcurrentLinkedQueue<Message>();
+	protected ConcurrentLinkedQueue<FrontlineMessage> outbox = new ConcurrentLinkedQueue<FrontlineMessage>();
 	/** The SmsListener to which this phone handler should report SMS Message events. */
 	protected SmsListener smsListener;
 	/** Settings for this service */
@@ -67,7 +67,7 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 //> ACCESSOR METHODS
 	
 	/** @return This internet service outbox. */
-	public ConcurrentLinkedQueue<Message> getOutbox() {
+	public ConcurrentLinkedQueue<FrontlineMessage> getOutbox() {
 		return outbox;
 	}
 	
@@ -114,7 +114,7 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 	/** 
 	 * Adds the supplied message to the outbox. 
 	 */
-	public void sendSMS(Message outgoingMessage) {
+	public void sendSMS(FrontlineMessage outgoingMessage) {
 		LOG.trace("ENTER");
 		outgoingMessage.setStatus(Status.PENDING);
 		outgoingMessage.setSenderMsisdn(getMsisdn());
@@ -178,7 +178,13 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 			newThread.start();
 		} catch(SmsInternetServiceInitialisationException ex) {
 			LOG.error("There was an error starting SMS Internet Service.", ex);
+			
+			// stopThisThing() updates the status to a meaningless "not connected" message, so 
+			// we need to keep the old, meaningul message from before
+			SmsInternetServiceStatus status = getStatus();
+			String statusDetail = getStatusDetail();
 			this.stopThisThing();
+			this.setStatus(status, statusDetail);
 		}
 	}
 	
@@ -211,7 +217,7 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 			while (running) {
 				boolean sleep = true;
 				if (isConnected() && isUseForSending()) {
-					Message m = outbox.poll();
+					FrontlineMessage m = outbox.poll();
 					if (m != null) {
 						LOG.debug("Sending message [" + m.toString() + "]");
 						long startTime = System.currentTimeMillis();
@@ -235,8 +241,8 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 				// TODO verify delivery reports?
 				// If this thread is still running, we should have a little snooze
 				if (running) {
-					if (sleep) Utils.sleep_ignoreInterrupts(5000); /* 5 seconds */
-					else Utils.sleep_ignoreInterrupts(100); /* 0.1 seconds */
+					if (sleep) FrontlineUtils.sleep_ignoreInterrupts(5000); /* 5 seconds */
+					else FrontlineUtils.sleep_ignoreInterrupts(100); /* 0.1 seconds */
 				}
 			}
 			LOG.trace("EXIT");
@@ -257,7 +263,7 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 	 * Send an SMS message using this phone handler.
 	 * @param message The message to be sent.
 	 */
-	protected abstract void sendSmsDirect(Message message);
+	protected abstract void sendSmsDirect(FrontlineMessage message);
 	
 	/**
 	 * Attempt to receive SMS messages from this service.

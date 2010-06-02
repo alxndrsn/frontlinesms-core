@@ -22,8 +22,8 @@ package net.frontlinesms.smsdevice.internet;
 import java.util.LinkedHashMap;
 
 import net.frontlinesms.*;
-import net.frontlinesms.data.domain.Message;
-import net.frontlinesms.data.domain.Message.Status;
+import net.frontlinesms.data.domain.FrontlineMessage;
+import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.smsdevice.Provider;
 import net.frontlinesms.smsdevice.properties.*;
 
@@ -50,7 +50,7 @@ public class ClickatellInternetService extends AbstractSmsInternetService {
 	protected static final String PROPERTY_SSL = PROPERTY_PREFIX + "ssl";
 
 	/** Logging object */
-	private static Logger LOG = Utils.getLogger(ClickatellInternetService.class);
+	private static Logger LOG = FrontlineUtils.getLogger(ClickatellInternetService.class);
 	private ClickatellHTTPGateway gateway;
 	private boolean connected;
 	private Service service;
@@ -76,7 +76,7 @@ public class ClickatellInternetService extends AbstractSmsInternetService {
 	 * Send an SMS message using this phone handler.
 	 * @param message The message to be sent.
 	 */
-	protected void sendSmsDirect(Message message) {
+	protected void sendSmsDirect(FrontlineMessage message) {
 		LOG.trace("ENTER");
 		LOG.debug(Library.getLibraryDescription());
 		LOG.debug("Version: " + Library.getLibraryVersion());

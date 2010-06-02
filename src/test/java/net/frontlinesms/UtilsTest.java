@@ -13,7 +13,7 @@ import net.frontlinesms.junit.BaseTestCase;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
- * Unit tests for {@link Utils} class.
+ * Unit tests for {@link FrontlineUtils} class.
  * @author Alex Anderson <alex@frontlinesms.com>
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
@@ -23,10 +23,10 @@ public class UtilsTest extends BaseTestCase {
 		Thinlet.DEFAULT_ENGLISH_BUNDLE = InternationalisationUtils.getDefaultLanguageBundle().getProperties();
 		long date;
 		
-		date = Utils.getLongDateFromStringDate("", true);
+		date = FrontlineUtils.getLongDateFromStringDate("", true);
 		assertTrue(System.currentTimeMillis() >= date);
-		assertTrue(Utils.getLongDateFromStringDate("20/04/2009", true) < Utils.getLongDateFromStringDate("19/04/2010", true));
-		assertTrue(Utils.getLongDateFromStringDate("20/04/09", true) < Utils.getLongDateFromStringDate("19/04/10", true));
+		assertTrue(FrontlineUtils.getLongDateFromStringDate("20/04/2009", true) < FrontlineUtils.getLongDateFromStringDate("19/04/2010", true));
+		assertTrue(FrontlineUtils.getLongDateFromStringDate("20/04/09", true) < FrontlineUtils.getLongDateFromStringDate("19/04/10", true));
 	}
 	
 	public void testGetFilenameWithoutExtension() {
@@ -41,6 +41,6 @@ public class UtilsTest extends BaseTestCase {
 	
 	private void testGetFilenameWithoutExtension(String path, String expectedNameWithoutExtension) {
 		File file = new File(path);
-		assertEquals(expectedNameWithoutExtension, Utils.getFilenameWithoutExtension(file));
+		assertEquals(expectedNameWithoutExtension, FrontlineUtils.getFilenameWithoutExtension(file));
 	}
 }

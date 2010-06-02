@@ -25,7 +25,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.zip.*;
 
-import net.frontlinesms.Utils;
+import net.frontlinesms.FrontlineUtils;
 
 import org.apache.log4j.Logger;
 
@@ -40,7 +40,7 @@ public class ResourceUtils {
 	public static final String SYSPROPERTY_USER_HOME = "user.home";
 	
 	/** Logging object for this class */
-	private static Logger LOG = Utils.getLogger(ResourceUtils.class);
+	private static Logger LOG = FrontlineUtils.getLogger(ResourceUtils.class);
 	/** The size of byte buffers used in this class. */
 	private static final int BUFFER_SIZE = 2048;
 	/** Name of directory that discarded resources are put in after an upgrade of FrontlineSMS. */

@@ -9,7 +9,7 @@
 		<mapping class="net.frontlinesms.data.domain.GroupMembership" />
 		<mapping class="net.frontlinesms.data.domain.Keyword" />
 		<mapping class="net.frontlinesms.data.domain.KeywordAction" />
-		<mapping class="net.frontlinesms.data.domain.Message" />
+		<mapping class="net.frontlinesms.data.domain.FrontlineMessage" />
 		<mapping class="net.frontlinesms.data.domain.SmsInternetServiceSettings" />
 		<mapping class="net.frontlinesms.data.domain.SmsInternetServiceSettingValue" />
 		<mapping class="net.frontlinesms.data.domain.SmsModemSettings" />
