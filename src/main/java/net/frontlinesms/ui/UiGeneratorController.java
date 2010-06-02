@@ -1631,7 +1631,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 					// Problem writing logs.zip
 					LOG.debug("", e);
 					try {
-						ErrorUtils.sendToFrontlineSupport(userName, userEmail, null);
+						ErrorUtils.sendLogsToFrontlineSupport(userName, userEmail, null);
 					} catch (EmailException e1) {
 						LOG.debug("", e1);
 					}

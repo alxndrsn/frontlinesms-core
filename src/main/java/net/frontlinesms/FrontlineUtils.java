@@ -44,6 +44,8 @@ import java.util.Comparator;
 import java.util.Date;
 
 import net.frontlinesms.data.domain.*;
+import net.frontlinesms.email.EmailException;
+import net.frontlinesms.email.smtp.SmtpEmailSender;
 import net.frontlinesms.encoding.Base64Utils;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -507,5 +509,35 @@ public class FrontlineUtils {
 		int dotIndex = filename.lastIndexOf('.');
 		if(dotIndex > -1) filename = filename.substring(0, dotIndex);
 		return filename;
+	}
+	
+	/**
+	 * Send an E-Mail to the FrontlineSMS Support email account.
+	 * TODO smtp sending should be refactored into email.smtp.SmtpMessageSender
+	 * @param fromName
+	 * @param fromEmailAddress
+	 * @param attachment
+	 * @throws MessagingException
+	 */
+	public static void sendToFrontlineSupport(String fromName, String fromEmailAddress, String subject, String textContent, String attachment) throws EmailException {
+		sendEmail(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL_SERVER, fromName, fromEmailAddress, subject, textContent, attachment);
+	}
+	
+	/**
+	 * Send an E-Mail to the given e-mail address.
+	 * TODO smtp sending should be refactored into email.smtp.SmtpMessageSender
+	 * @param fromName
+	 * @param fromEmailAddress
+	 * @param attachment
+	 * @throws MessagingException
+	 */
+	public static void sendEmail(String recipientEmailAddress, String fromName, String fromEmailAddress, String subject, String textContent, String attachment) throws EmailException {
+		SmtpEmailSender emailSender = new SmtpEmailSender(recipientEmailAddress);
+	
+	    emailSender.sendEmail(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL,
+							  emailSender.getLocalEmailAddress(fromEmailAddress, fromEmailAddress),
+							  subject,
+							  textContent,
+							  new File(attachment));
 	}
 }
