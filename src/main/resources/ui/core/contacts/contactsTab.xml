@@ -29,7 +29,7 @@
 	        <panel border="true" bottom="4" columns="3" gap="8" icon="/icons/user.png" left="4" name="pnContacts" right="4" text="i18n.common.contacts" top="4" weightx="1" weighty="1">
 	            <textfield action="setContactFilter(contactManager_contactFilter.text)" name="contactManager_contactFilter" tooltip="i18n.tooltip.search.here" weightx="1" perform="filterContacts"/>
 	            <button icon="/icons/search.png" text="i18n.common.search" action="filterContacts"/>
-	            <table action="enabledButtonsAfterSelection(this)" delete="showConfirmationDialog('deleteSelectedContacts')" colspan="3" name="contactManager_contactList" perform="showContactDetails(this)" enter="showContactDetails(this)" selection="multiple" weightx="1" weighty="1">
+	            <table action="enabledButtonsAfterSelection(this)" delete="showConfirmationDialog('deleteSelectedContacts')" colspan="3" name="contactManager_contactList" perform="showContactDetails(this)" selection="multiple" weightx="1" weighty="1">
 	                <header>
 	                	<column icon="/icons/status.png" text="i18n.common.active" width="52"/>
 	                    <column icon="/icons/user.png" text="i18n.common.name" width="150"/>
