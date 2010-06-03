@@ -23,6 +23,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_ST
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,6 +36,7 @@ import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
+import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.FrontlineMessage;
@@ -45,6 +47,7 @@ import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
+import net.frontlinesms.mmsdevice.MmsPollingEmailReceiver;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiProperties;
@@ -829,6 +832,15 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	/** @see UiGeneratorController#showDateSelecter(Object) */
 	public void showDateSelecter(Object textField) {
 		this.ui.showDateSelecter(textField);
+	}
+	
+
+	
+	public void dbgGenerateMms() {
+		Collection<FrontlineMultimediaMessage> mms = new MmsPollingEmailReceiver().dbgCreateMessagesFromClasspath();
+		for(FrontlineMultimediaMessage mm : mms) {
+			this.ui.getFrontlineController().getMessageDao().saveMessage(mm);
+		}
 	}
 	
 //> HELPER METHODS

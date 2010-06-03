@@ -141,6 +141,11 @@ public class FrontlineMessage {
 	/** Default constructor empty for hibernate */
 	FrontlineMessage() {}
 	
+	protected FrontlineMessage(Type type, String textContent) {
+		this.type = type;
+		this.textMessageContent = textContent;
+	}
+	
 //> ACCESSOR METHODS
 	/**
 	 * Gets the type of this Message.  Should be one of the Message.TYPE_ constants.

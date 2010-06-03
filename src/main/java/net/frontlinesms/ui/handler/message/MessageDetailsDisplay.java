@@ -58,7 +58,7 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 			}
 			return contentComponents.toArray();
 		} else {
-			// It#s a standard text message
+			// It's a standard text message
 			Object textContent = ui.createTextarea("tfContent", message.getTextContent(), 8);
 			ui.setWeight(textContent, 1, 1);
 			return new Object[]{textContent}; 
