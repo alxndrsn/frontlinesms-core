@@ -147,6 +147,15 @@ public class ExtendedThinlet extends Thinlet {
 	public void setColumns(Object component, int columns) {
 		setInteger(component, ATTRIBUTE_COLUMNS, columns);
 	}
+	
+	/**
+	 * Sets the number of rows of a thinlet component.
+	 * @param component
+	 * @param columns
+	 */
+	public void setRows(Object component, int rows) {
+		setInteger(component, ROWS, rows);
+	}
 
 	/**
 	 * Sets the colspan attribute of a thinlet component.
@@ -523,6 +532,20 @@ public class ExtendedThinlet extends Thinlet {
 		Object item = Thinlet.create(TEXTFIELD);
 		setText(item, initialText);
 		setName(item, name);
+		return item;
+	}
+	
+	/**
+	 * Creates a textfield with the supplied object name and initial text.
+	 * @param name
+	 * @param initialText
+	 * @return a Thinlet textfield component
+	 */
+	public final Object createTextarea(String name, String initialText, int rows) {
+		Object item = Thinlet.create(TEXTAREA);
+		setText(item, initialText);
+		setName(item, name);
+		setRows(item, rows);
 		return item;
 	}
 	
