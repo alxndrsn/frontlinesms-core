@@ -4,6 +4,7 @@
 package net.frontlinesms.data.repository.hibernate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -14,6 +15,7 @@ import net.frontlinesms.junit.HibernateTestCase;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
+import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
@@ -299,11 +301,57 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 	}
 	
 	public void testMultimediaMessageRetrieval() {
-		FrontlineMultimediaMessage mms = new FrontlineMultimediaMessage();
-		this.dao.saveMessage(mms);
-		List<FrontlineMessage> messages = this.dao.getAllMessages();
-		assertEquals(1, messages.size());
-		assertEquals(FrontlineMultimediaMessage.class, messages.get(0).getClass());
+		// Text message
+		{
+			FrontlineMultimediaMessage mms = new FrontlineMultimediaMessage(
+					FrontlineMessage.Type.RECEIVED, "summary here", Arrays.asList(new FrontlineMultimediaMessagePart[]{
+							FrontlineMultimediaMessagePart.createTextPart("Hullo")
+					}));
+			this.dao.saveMessage(mms);
+			
+			List<FrontlineMessage> messages = this.dao.getAllMessages();
+			assertEquals(1, messages.size());
+			
+			FrontlineMessage actualMessage = messages.get(0);
+			assertEquals(FrontlineMultimediaMessage.class, actualMessage.getClass());
+			assertEquals(1, (((FrontlineMultimediaMessage) actualMessage).getMultimediaParts().size()));
+		}
+		
+		// Binary message
+		{
+			FrontlineMultimediaMessage mms = new FrontlineMultimediaMessage(
+					FrontlineMessage.Type.RECEIVED, "summary here", Arrays.asList(new FrontlineMultimediaMessagePart[]{
+							FrontlineMultimediaMessagePart.createBinaryPart("/somewhere/something.wot")
+					}));
+			this.dao.saveMessage(mms);
+			
+			List<FrontlineMessage> messages = this.dao.getAllMessages();
+			assertEquals(2, messages.size());
+			
+			FrontlineMessage actualMessage = messages.get(1);
+			assertEquals(FrontlineMultimediaMessage.class, actualMessage.getClass());
+			assertEquals(1, (((FrontlineMultimediaMessage) actualMessage).getMultimediaParts().size()));
+		}
+		
+		// Mixed message
+		{
+			FrontlineMultimediaMessage mms = new FrontlineMultimediaMessage(
+					FrontlineMessage.Type.RECEIVED, "summary here", Arrays.asList(new FrontlineMultimediaMessagePart[]{
+							FrontlineMultimediaMessagePart.createTextPart("another message"),
+							FrontlineMultimediaMessagePart.createBinaryPart("/somewhereElse/somethingElse.who"),
+							FrontlineMultimediaMessagePart.createTextPart("The End."),
+					}));
+			this.dao.saveMessage(mms);
+			
+			List<FrontlineMessage> messages = this.dao.getAllMessages();
+			assertEquals(3, messages.size());
+			
+			FrontlineMessage actualMessage = messages.get(2);
+			assertEquals(FrontlineMultimediaMessage.class, actualMessage.getClass());
+			assertEquals(3, (((FrontlineMultimediaMessage) actualMessage).getMultimediaParts().size()));
+		}
+		
+		// Delete messages
 	}
 
 //> INSTANCE HELPER METHODS

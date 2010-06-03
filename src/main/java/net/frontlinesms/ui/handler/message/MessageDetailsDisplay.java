@@ -6,6 +6,7 @@ package net.frontlinesms.ui.handler.message;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
@@ -52,11 +53,12 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 		if(message instanceof FrontlineMultimediaMessage) {
 			FrontlineMultimediaMessage mm = (FrontlineMultimediaMessage) message;
 			List<FrontlineMultimediaMessagePart> parts = mm.getMultimediaParts();
-			ArrayList<Object> contentComponents = new ArrayList<Object>(parts.size());
-			for(FrontlineMultimediaMessagePart part : parts) {
-				contentComponents.add(getComponent(part));
+			
+			if(parts.size() == 0) {
+				return new Object[]{ui.createLabel("[i18n] No content.")}; // FIXME i18n
+			} else {
+				return getContentComponents(parts);
 			}
-			return contentComponents.toArray();
 		} else {
 			// It's a standard text message
 			Object textContent = ui.createTextarea("tfContent", message.getTextContent(), 8);
@@ -65,8 +67,33 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 		}
 	}
 
+	private Object[] getContentComponents(List<FrontlineMultimediaMessagePart> parts) {
+		ArrayList<Object> contentComponents = new ArrayList<Object>(parts.size());
+		for(FrontlineMultimediaMessagePart part : parts) {
+			contentComponents.add(getComponent(part));
+		}
+		return contentComponents.toArray();
+	}
+
 	private Object getComponent(FrontlineMultimediaMessagePart part) {
-		return ui.createLabel(part.getClass().getName());
+		Object component;
+		if(!part.isBinary()) {
+			component = ui.createTextarea("", part.getTextContent(), 3);
+		} else {
+			Object panel = ui.createPanel("");
+			ui.setColumns(panel, 2);
+			Object label = ui.createLabel(part.getFilename());
+			ui.add(panel, label);
+			ui.add(panel, ui.createButton("[i18n] Open", "openMultimediaPart('" + part.getFilename() + "')", panel, this));
+			ui.setWeight(label, 1, 0);
+			component = panel;
+		}
+		ui.setWeight(component, 1, 1);
+		return component;
+	}
+	
+	public void openMultimediaPart(String filename) {
+		FrontlineUtils.openExternalBrowser(filename);
 	}
 
 	/**

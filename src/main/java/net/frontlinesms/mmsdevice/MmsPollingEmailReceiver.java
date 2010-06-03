@@ -50,11 +50,22 @@ public class MmsPollingEmailReceiver {
 		List<FrontlineMultimediaMessagePart> multimediaParts = new ArrayList<FrontlineMultimediaMessagePart>();
 		for(MmsMessagePart part : mms.getParts()) {
 			if(textContent.length() > 0) textContent.append("; ");
+			
+			String text;
+			FrontlineMultimediaMessagePart mmPart;
 			if(part instanceof TextMmsMessagePart) {
-				textContent.append(((TextMmsMessagePart) part).toString());
+				text = ((TextMmsMessagePart) part).toString();
+				mmPart = FrontlineMultimediaMessagePart.createTextPart(text);
 			} else if(part instanceof ImageMmsMessagePart) {
-				textContent.append("Image: " + (((ImageMmsMessagePart) part).getFilename()));
+				ImageMmsMessagePart imagePart = (ImageMmsMessagePart) part;
+				text = "Image: " + imagePart.getFilename();
+				mmPart = FrontlineMultimediaMessagePart.createBinaryPart(imagePart.getFilename());
+			} else {
+				text = "Unhandled: " + part.toString();
+				mmPart = FrontlineMultimediaMessagePart.createTextPart("Unhandled: TODO handle this!");
 			}
+			textContent.append(text);
+			multimediaParts.add(mmPart);
 		}
 		
 		FrontlineMultimediaMessage message = new FrontlineMultimediaMessage(Type.RECEIVED, textContent.toString(), multimediaParts);

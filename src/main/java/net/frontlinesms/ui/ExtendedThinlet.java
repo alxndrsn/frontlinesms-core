@@ -444,6 +444,21 @@ public class ExtendedThinlet extends Thinlet {
 	}
 	
 	/**
+	 * Create's a Thinlet UI Component of type BUTTON and set's the button's
+	 * action and text label.
+	 * @param text
+	 * @param action
+	 * @param root
+	 * @return
+	 */
+	public final Object createButton(String text, String action, Object root, ThinletUiEventHandler handler) {
+		Object button = Thinlet.create(BUTTON);
+		setString(button, TEXT, text);
+		setMethod(button, ATTRIBUTE_ACTION, action, root, handler);
+		return button;
+	}
+	
+	/**
 	 * Create's a Thinlet UI Component of type BUTTON with type LINK.  The button's
 	 * action and text label are also set.
 	 * @param text
