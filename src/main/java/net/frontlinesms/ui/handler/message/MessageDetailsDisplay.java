@@ -10,6 +10,7 @@ import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
+import net.frontlinesms.mmsdevice.MmsPollingEmailReceiver;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -78,13 +79,13 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 	private Object getComponent(FrontlineMultimediaMessagePart part) {
 		Object component;
 		if(!part.isBinary()) {
-			component = ui.createTextarea("", part.getTextContent(), 3);
+			component = ui.createTextarea("", part.getTextContent(), 0);
 		} else {
 			Object panel = ui.createPanel("");
 			ui.setColumns(panel, 2);
 			Object label = ui.createLabel(part.getFilename());
 			ui.add(panel, label);
-			ui.add(panel, ui.createButton("[i18n] Open", "openMultimediaPart('" + part.getFilename() + "')", panel, this));
+			ui.add(panel, ui.createButton("[i18n] Open", "openMultimediaPart('" + MmsPollingEmailReceiver.getFile(part).getPath() + "')", panel, this));
 			ui.setWeight(label, 1, 0);
 			component = panel;
 		}

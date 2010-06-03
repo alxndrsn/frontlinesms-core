@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dialog name="messageDialog" close="removeDialog(this)" 
 		closable="true" modal="true" resizable="true"
-		icon="/icons/sms_details.png" text="i18n.common.message.details"
-		width="320" height="320" 
-		columns="2" gap="10" bottom="10" left="10" top="10" right="10">
-    <label icon="/icons/status.png" text="i18n.common.status"/>
-    <textfield editable="false" name="tfStatus" weightx="1"/>
-    <label icon="/icons/time.png" text="i18n.common.date"/>
-    <textfield editable="false" name="tfDate" weightx="1"/>
-    <label icon="/icons/user_sender.png" text="i18n.common.sender"/>
-    <textfield editable="false" name="tfSender" weightx="1"/>
-    <label icon="/icons/user_receiver.png" text="i18n.common.recipient"/>
-    <textfield editable="false" name="tfRecipient" weightx="1"/>
-    <label icon="/icons/message.png" text="i18n.common.message" valign="top"/>
-    
-    <panel name="pnContent" gap="10" weightx="1" weighty="1" columns="1"/>
-    
-    <panel colspan="2" halign="center" weightx="1">
-        <button action="removeDialog(messageDialog)" icon="/icons/tick.png" text="i18n.action.ok"/>
+		icon="/icons/sms_details.png" text="i18n.common.message.details">
+	<panel weightx="1" weighty="1" scrollable="true" columns="2"
+			gap="10" bottom="10" left="10" top="10" right="10">
+	    <label icon="/icons/status.png" text="i18n.common.status"/>
+	    <textfield editable="false" name="tfStatus" weightx="1" columns="40"/>
+	    <label icon="/icons/time.png" text="i18n.common.date"/>
+	    <textfield editable="false" name="tfDate" weightx="1"/>
+	    <label icon="/icons/user_sender.png" text="i18n.common.sender"/>
+	    <textfield editable="false" name="tfSender" weightx="1"/>
+	    <label icon="/icons/user_receiver.png" text="i18n.common.recipient"/>
+	    <textfield editable="false" name="tfRecipient" weightx="1"/>
+	    <label icon="/icons/message.png" text="i18n.common.message" valign="top"/>
+	    
+	    <panel name="pnContent" gap="10" weightx="1" weighty="1" columns="1"/>
+	    
+	    <panel colspan="2" halign="center" weightx="1">
+	        <button type="cancel" action="removeDialog(messageDialog)" icon="/icons/tick.png" text="i18n.action.ok"/>
+	    </panel>
     </panel>
 </dialog>
