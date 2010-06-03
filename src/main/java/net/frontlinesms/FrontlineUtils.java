@@ -520,7 +520,7 @@ public class FrontlineUtils {
 	 * @throws MessagingException
 	 */
 	public static void sendToFrontlineSupport(String fromName, String fromEmailAddress, String subject, String textContent, String attachment) throws EmailException {
-		sendEmail(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL_SERVER, fromName, fromEmailAddress, subject, textContent, attachment);
+		sendEmail(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL, fromName, fromEmailAddress, subject, textContent, attachment);
 	}
 	
 	/**
@@ -532,10 +532,10 @@ public class FrontlineUtils {
 	 * @throws MessagingException
 	 */
 	public static void sendEmail(String recipientEmailAddress, String fromName, String fromEmailAddress, String subject, String textContent, String attachment) throws EmailException {
-		SmtpEmailSender emailSender = new SmtpEmailSender(recipientEmailAddress);
+		SmtpEmailSender emailSender = new SmtpEmailSender(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL_SERVER);
 	
-	    emailSender.sendEmail(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL,
-							  emailSender.getLocalEmailAddress(fromEmailAddress, fromEmailAddress),
+	    emailSender.sendEmail(recipientEmailAddress,
+							  emailSender.getLocalEmailAddress(fromEmailAddress, fromName),
 							  subject,
 							  textContent,
 							  new File(attachment));
