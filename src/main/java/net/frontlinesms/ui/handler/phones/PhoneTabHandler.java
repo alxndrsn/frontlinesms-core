@@ -106,7 +106,7 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 	/** The manager of {@link SmsDevice}s */
 	private final SmsDeviceManager phoneManager;
 	/** Data Access Object for {@link SmsModemSettings}s */
-	private final SmsModemSettingsDao phoneDetailsManager;
+	private final SmsModemSettingsDao smsModelSettingsDao;
 
 //> CONSTRUCTORS
 	/**
@@ -116,7 +116,7 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 	public PhoneTabHandler(UiGeneratorController ui) {
 		super(ui);
 		this.phoneManager = ui.getPhoneManager();
-		this.phoneDetailsManager = ui.getPhoneDetailsManager();
+		this.smsModelSettingsDao = ui.getPhoneDetailsManager();
 	}
 	
 	@Override
@@ -362,7 +362,7 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 			if (deviceStatus.equals(SmsModemStatus.CONNECTED)) {
 				log.debug("Phone is connected. Try to read details from database!");
 				String serial = activeDevice.getSerial();
-				SmsModemSettings settings = phoneDetailsManager.getSmsModemSettings(serial);
+				SmsModemSettings settings = smsModelSettingsDao.getSmsModemSettings(serial);
 				
 				// If this is the first time we've attached this phone, or no settings were
 				// saved last time, we should show the settings dialog automatically
@@ -370,6 +370,13 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 					log.debug("User need to make setting related this phone.");
 					showPhoneSettingsDialog(activeDevice, true);
 				} else {
+					// Let's update the Manufacturer & Model for this device, if it wasn't previously set
+					if (settings.getManufacturer() == null || settings.getModel() == null) {
+						settings.setManufacturer(activeDevice.getManufacturer());
+						settings.setModel(activeDevice.getModel());
+						
+						smsModelSettingsDao.updateSmsModemSettings(settings);
+					}
 					activeDevice.setUseForSending(settings.useForSending());
 					activeDevice.setUseDeliveryReports(settings.useDeliveryReports());
 
@@ -425,6 +432,8 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 	public void updatePhoneDetails(Object dialog) {
 		SmsModem phone = ui.getAttachedObject(dialog, SmsModem.class);
 		String serial = phone.getSerial();
+		String manufacturer = phone.getManufacturer();
+		String model = phone.getModel();
 
 		boolean useForSending;
 		boolean useDeliveryReports;
@@ -452,16 +461,16 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 			deleteMessagesAfterReceiving = false;
 		}
 		
-		SmsModemSettings settings = this.phoneDetailsManager.getSmsModemSettings(serial);
+		SmsModemSettings settings = this.smsModelSettingsDao.getSmsModemSettings(serial);
 		if(settings != null) {
 			settings.setDeleteMessagesAfterReceiving(deleteMessagesAfterReceiving);
 			settings.setUseDeliveryReports(useDeliveryReports);
 			settings.setUseForReceiving(useForReceiving);
 			settings.setUseForSending(useForSending);
-			this.phoneDetailsManager.updateSmsModemSettings(settings);
+			this.smsModelSettingsDao.updateSmsModemSettings(settings);
 		} else {
-			settings = new SmsModemSettings(serial, useForSending, useForReceiving, deleteMessagesAfterReceiving, useDeliveryReports);
-			this.phoneDetailsManager.saveSmsModemSettings(settings);
+			settings = new SmsModemSettings(serial, manufacturer, model, useForSending, useForReceiving, deleteMessagesAfterReceiving, useDeliveryReports);
+			this.smsModelSettingsDao.saveSmsModemSettings(settings);
 		}
 		
 		// Phone settings may have changed.  As we're now displaying these on the table, we

@@ -29,7 +29,7 @@ public class HibernateSmsModemSettingsDaoTest extends HibernateTestCase {
 	 * Test everything all at once!
 	 */
 	public void test() {
-		SmsModemSettings settingsOne = new SmsModemSettings(SERIAL_ONE, true, false, true, false);
+		SmsModemSettings settingsOne = new SmsModemSettings(SERIAL_ONE, "Manufacturer", "Model", true, false, true, false);
 		
 		assertNull(dao.getSmsModemSettings(SERIAL_ONE));
 		
@@ -37,7 +37,7 @@ public class HibernateSmsModemSettingsDaoTest extends HibernateTestCase {
 		
 		assertEquals(settingsOne, dao.getSmsModemSettings(SERIAL_ONE));
 
-		SmsModemSettings settingsTwo = new SmsModemSettings(SERIAL_TWO, false, true, false, true);
+		SmsModemSettings settingsTwo = new SmsModemSettings(SERIAL_TWO, "Manufacturer", "Model", false, true, false, true);
 		
 		assertNull(dao.getSmsModemSettings(SERIAL_TWO));
 		

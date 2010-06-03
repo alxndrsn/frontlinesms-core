@@ -19,6 +19,9 @@ public class SmsModemSettings {
 	private long id;
 	@Column(name=FIELD_SERIAL)
 	private String serial;
+	private String manufacturer;
+	private String model;
+
 	private boolean useForSending;
 	private boolean useForReceiving;
 	private boolean deleteMessagesAfterReceiving;
@@ -36,8 +39,10 @@ public class SmsModemSettings {
 	 * @param deleteMessagesAfterReceiving whether messages should be deleted from the device after being read by FrontlineSMS 
 	 * @param useDeliveryReports whether delivery reports should be used with this device
 	 */
-	public SmsModemSettings(String serial, boolean useForSending, boolean useForReceiving, boolean deleteMessagesAfterReceiving, boolean useDeliveryReports) {
+	public SmsModemSettings(String serial, String manufacturer, String model, boolean useForSending, boolean useForReceiving, boolean deleteMessagesAfterReceiving, boolean useDeliveryReports) {
 		this.serial = serial;
+		this.manufacturer = manufacturer;
+		this.model = model;
 		this.useForSending = useForSending;
 		this.useForReceiving = useForReceiving;
 		this.deleteMessagesAfterReceiving = deleteMessagesAfterReceiving;
@@ -48,6 +53,23 @@ public class SmsModemSettings {
 	public String getSerial() {
 		return serial;
 	}
+	
+	public String getManufacturer() {
+		return manufacturer;
+	}
+
+	public void setManufacturer(String make) {
+		this.manufacturer = make;
+	}
+
+	public String getModel() {
+		return model;
+	}
+
+	public void setModel(String model) {
+		this.model = model;
+	}
+	
 	public boolean useForSending() {
 		return useForSending;
 	}
