@@ -45,10 +45,11 @@ public abstract class LanguageBundle {
 	public static final String KEY_LANGUAGE_NAME = "bundle.language.name";
 	/** Key used to extract the ISO 3166-1 alpha-2 2-letter country code of the flag used for this language. */
 	public static final String KEY_LANGUAGE_COUNTRY = "bundle.language.country";
+	/** Key used to extract the font used for this language. */
+	public static final String KEY_LANGUAGE_FONT = "bundle.language.fonts";
 	/** Key used to extract whether the language is right-to-left or not from the bundle */
 	public static final String KEY_RIGHT_TO_LEFT = "language.direction.right.to.left";
 	/** Key used to extract the name of the font to be used */
-	public static final String KEY_FONT_NAME = "font.name";
 	
 	/** Logging object for this class */
 	private static final Logger LOG = FrontlineUtils.getLogger(LanguageBundle.class);
@@ -69,6 +70,7 @@ public abstract class LanguageBundle {
 		checkRequiredProperty(KEY_LANGUAGE_CODE);
 		checkRequiredProperty(KEY_LANGUAGE_NAME);
 		checkRequiredProperty(KEY_LANGUAGE_COUNTRY);
+		// We don't check the Font property, which is not required
 	}
 	
 //> PRIVATE HELPER METHODS
@@ -108,6 +110,11 @@ public abstract class LanguageBundle {
 	/** @return the ISO-???? code relating to this language */
 	public String getLanguageCode() {
 		return getValue(KEY_LANGUAGE_CODE);
+	}
+	
+	/** @return the font used for this language bundle */
+	public String getLanguageFont() {
+		return this.getValue(KEY_LANGUAGE_FONT, null);
 	}
 	
 	/** @return <code>true</code> if this language is displayed right-to-left; <code>false</code> otherwise */
@@ -169,7 +176,7 @@ public abstract class LanguageBundle {
 	
 	/** @return an ordered array of font names to try to use for this language, or <code>null</code> if no font is specified */
 	private String[] getFontNames() {
-		String fontNames = this.getValue(KEY_FONT_NAME, null);
+		String fontNames = this.getValue(KEY_LANGUAGE_FONT, null);
 		if(fontNames == null) {
 			return null;
 		} else {
@@ -219,6 +226,12 @@ public abstract class LanguageBundle {
 	public void setLanguageCode(String languageCode) {
 		this.properties.put(KEY_LANGUAGE_CODE, languageCode);
 	}
+	
+	/** Sets the font for this language bundle */
+	public void setLanguageFont(String fontName) {
+		this.properties.put(KEY_LANGUAGE_FONT, fontName);
+	}
+	
 //> STATIC HELPER METHODS
 	/**
 	 * This method iterates through the properties and try to find properties looking like prefix.0, prefix.1 etc.
