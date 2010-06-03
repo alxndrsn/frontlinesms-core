@@ -473,6 +473,20 @@ public class ExtendedThinlet extends Thinlet {
 	}
 	
 	/**
+	 * Create's a Thinlet UI Component of type BUTTON with type LINK.  The button's
+	 * action and text label are also set.
+	 * @param text
+	 * @param action
+	 * @param root
+	 * @return
+	 */
+	public final Object createLink(String text, String action, Object root, ThinletUiEventHandler handler) {
+		Object button = createButton(text, action, root, handler);
+		setChoice(button, "type", "link");
+		return button;
+	}
+	
+	/**
 	 * Create's a Thinlet UI Component of type BUTTON and set's the button's
 	 * action and text label.
 	 * TODO how often is this used?

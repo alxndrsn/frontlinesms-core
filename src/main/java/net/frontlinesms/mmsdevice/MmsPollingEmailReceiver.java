@@ -3,10 +3,11 @@
  */
 package net.frontlinesms.mmsdevice;
 
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import net.frontlinesms.mms.MmsReceiveException;
 import net.frontlinesms.mms.TextMmsMessagePart;
 import net.frontlinesms.mms.email.pop.FileSystemMmsReceiver;
 import net.frontlinesms.resources.ResourceUtils;
+import net.frontlinesms.ui.FrontlineUiUtils;
 
 /**
  * @author aga
@@ -88,11 +90,22 @@ public class MmsPollingEmailReceiver {
 	private FrontlineMultimediaMessagePart createBinaryPart(
 			ImageMmsMessagePart imagePart) {
 		// save the binary data to file
-		FrontlineMultimediaMessagePart fmmPart = FrontlineMultimediaMessagePart.createBinaryPart(imagePart.getFilename());
+		FrontlineMultimediaMessagePart fmmPart = FrontlineMultimediaMessagePart.createBinaryPart(imagePart.getFilename()/*, getThumbnail(imagePart)*/);
 		writeFile(getFile(fmmPart), imagePart.getData());
 		return fmmPart; 
 	}
 	
+//	private byte[] getThumbnail(ImageMmsMessagePart imagePart) {
+//		Image img = FrontlineUiUtils.getImage(imagePart.getData());
+//		Image thumb = FrontlineUiUtils.getLimitedSizeImageFromImage(img, 300, 200);
+//		BufferedImage bufferedThumb = FrontlineUiUtils.getBufferedImage(thumb);
+//		try {
+//			return FrontlineUiUtils.getImageAsBytes(bufferedThumb, "jpeg");
+//		} catch (IOException e) {
+//			return new byte[0];
+//		}
+//	}
+
 	private static void writeFile(File file, byte[] data) {
 		FileOutputStream fos = null;
 		BufferedOutputStream out = null;

@@ -17,6 +17,9 @@ public class FrontlineMultimediaMessagePart {
 	private String content;
 	/** <code>true</code> if {@link #content} links to the binary file name; <code>false</code> if {@link #content} contains the text content of this part */
 	private boolean binary;
+//	/** Thumbnail of an image.  Could be used as preview for other types in future. */
+//	@Column(length=160000)
+//	private byte[] thumb;
 	
 	FrontlineMultimediaMessagePart() {}
 	
@@ -24,6 +27,13 @@ public class FrontlineMultimediaMessagePart {
 		this.binary = binary;
 		this.content = content;
 	}
+	
+//	public void setThumb(byte[] thumb) {
+//		this.thumb = thumb;
+//	}
+//	public byte[] getThumb() {
+//		return thumb;
+//	}
 	
 	public String getFilename() {
 		if(!isBinary()) throw new IllegalStateException("Should not be calling this method on a text part.");
@@ -43,7 +53,9 @@ public class FrontlineMultimediaMessagePart {
 	public static FrontlineMultimediaMessagePart createTextPart(String textContent) {
 		return new FrontlineMultimediaMessagePart(false, textContent);
 	}
-	public static FrontlineMultimediaMessagePart createBinaryPart(String filename) {
-		return new FrontlineMultimediaMessagePart(true, filename);
+	public static FrontlineMultimediaMessagePart createBinaryPart(String filename/*, byte[] thumb*/) {
+		FrontlineMultimediaMessagePart part = new FrontlineMultimediaMessagePart(true, filename);
+//		part.setThumb(thumb);
+		return part;
 	}
 }
