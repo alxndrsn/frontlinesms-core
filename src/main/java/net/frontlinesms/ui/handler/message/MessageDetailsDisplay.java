@@ -83,7 +83,7 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 	private Object getComponent(FrontlineMultimediaMessagePart part) {
 		Object component;
 		if(!part.isBinary()) {
-			component = ui.createTextarea("", part.getTextContent(), 0);
+			component = ui.createTextarea("", part.getTextContent(), (part.toString().length() + 44) / 45);
 		} else {
 			Object panel = ui.createPanel("");
 			ui.setColumns(panel, 1);
@@ -101,9 +101,6 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 			}
 			
 			ui.add(panel, ui.createLink("[ " + part.getFilename() + " ]", openAction, panel, this));
-			
-			
-//			ui.setWeight(label, 1, 0);
 			component = panel;
 		}
 		ui.setWeight(component, 1, 1);
@@ -121,5 +118,15 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 	 */
 	public void removeDialog(Object dialog) {
 		this.ui.removeDialog(dialog);
+	}
+	
+	public static void main(String[] args) {
+		len("Relaxing on a Sunday with a nice cuppa and a");
+		len("pair of flip flops. This is my first MMS on this");
+	}
+	
+
+	private static void len(String string) {
+		System.out.println(string + " : " + string.length());
 	}
 }

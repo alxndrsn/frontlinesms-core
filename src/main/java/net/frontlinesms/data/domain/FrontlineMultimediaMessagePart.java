@@ -14,12 +14,11 @@ public class FrontlineMultimediaMessagePart {
 	/** Unique id for this entity.  This is for hibernate usage. */
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY) @Column(unique=true,nullable=false,updatable=false) @SuppressWarnings("unused")
 	private long id;
+	/** The content of the part, if text, or the name of the file where the data is stored. */
+	@Column(length=4096) // arbitrary size that is bigger than people are likely to type on a handset
 	private String content;
 	/** <code>true</code> if {@link #content} links to the binary file name; <code>false</code> if {@link #content} contains the text content of this part */
 	private boolean binary;
-//	/** Thumbnail of an image.  Could be used as preview for other types in future. */
-//	@Column(length=160000)
-//	private byte[] thumb;
 	
 	FrontlineMultimediaMessagePart() {}
 	
@@ -28,16 +27,13 @@ public class FrontlineMultimediaMessagePart {
 		this.content = content;
 	}
 	
-//	public void setThumb(byte[] thumb) {
-//		this.thumb = thumb;
-//	}
-//	public byte[] getThumb() {
-//		return thumb;
-//	}
-	
 	public String getFilename() {
 		if(!isBinary()) throw new IllegalStateException("Should not be calling this method on a text part.");
 		return this.content;
+	}
+	public void setFilename(String filename) {
+		if(!isBinary()) throw new IllegalStateException("Should not be calling this method on a text part.");
+		this.content = filename;
 	}
 	
 	public String getTextContent() {
@@ -53,9 +49,8 @@ public class FrontlineMultimediaMessagePart {
 	public static FrontlineMultimediaMessagePart createTextPart(String textContent) {
 		return new FrontlineMultimediaMessagePart(false, textContent);
 	}
-	public static FrontlineMultimediaMessagePart createBinaryPart(String filename/*, byte[] thumb*/) {
+	public static FrontlineMultimediaMessagePart createBinaryPart(String filename) {
 		FrontlineMultimediaMessagePart part = new FrontlineMultimediaMessagePart(true, filename);
-//		part.setThumb(thumb);
 		return part;
 	}
 }

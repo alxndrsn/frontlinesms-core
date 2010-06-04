@@ -502,10 +502,45 @@ public class FrontlineUtils {
 	 * Gets the name of the supplied file without the extension.
 	 * @param file
 	 */
-	public static String getFilenameWithoutExtension(File file) {
-		String filename = file.getName();
+	public static String getFilenameWithoutFinalExtension(File file) {
+		return getFilenameWithoutFinalExtension(file.getName());
+	}
+	public static String getFilenameWithoutFinalExtension(String filename) {
 		int dotIndex = filename.lastIndexOf('.');
 		if(dotIndex > -1) filename = filename.substring(0, dotIndex);
 		return filename;
+	}
+
+	/**
+	 * Gets the name of the supplied file without any extension.
+	 * @param file
+	 */
+	public static String getFilenameWithoutAnyExtension(File file) {
+		return getFilenameWithoutAnyExtension(file.getName());
+	}
+	public static String getFilenameWithoutAnyExtension(String filename) {
+		int dotIndex = filename.indexOf('.');
+		if(dotIndex > -1) filename = filename.substring(0, dotIndex);
+		return filename;
+	}
+
+	public static String getFinalFileExtension(File file) {
+		return getFinalFileExtension(file.getName());
+	}
+	/** return the extension of a file */
+	public static String getFinalFileExtension(String filename) {
+		int dotIndex = filename.lastIndexOf('.');
+		if(dotIndex == -1) return "";
+		else return filename.substring(dotIndex+1);
+	}
+
+	public static String getWholeFileExtension(File file) {
+		return getWholeFileExtension(file.getName());
+	}
+	/** return the extension of a file */
+	public static String getWholeFileExtension(String filename) {
+		int dotIndex = filename.indexOf('.');
+		if(dotIndex == -1) return "";
+		else return filename.substring(dotIndex+1);
 	}
 }

@@ -3,9 +3,6 @@
  */
 package net.frontlinesms.mmsdevice;
 
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.log4j.Logger;
 
@@ -28,7 +26,6 @@ import net.frontlinesms.mms.MmsReceiveException;
 import net.frontlinesms.mms.TextMmsMessagePart;
 import net.frontlinesms.mms.email.pop.FileSystemMmsReceiver;
 import net.frontlinesms.resources.ResourceUtils;
-import net.frontlinesms.ui.FrontlineUiUtils;
 
 /**
  * @author aga
@@ -91,20 +88,22 @@ public class MmsPollingEmailReceiver {
 			ImageMmsMessagePart imagePart) {
 		// save the binary data to file
 		FrontlineMultimediaMessagePart fmmPart = FrontlineMultimediaMessagePart.createBinaryPart(imagePart.getFilename()/*, getThumbnail(imagePart)*/);
-		writeFile(getFile(fmmPart), imagePart.getData());
+
+		File localFile = getFile(fmmPart);
+		while(localFile.exists()) {
+			// need to handle file collisions here - e.g. rename the file
+			fmmPart.setFilename(getAlternateFilename(fmmPart.getFilename()));
+			localFile = getFile(fmmPart);
+		}
+		writeFile(localFile, imagePart.getData());
 		return fmmPart; 
 	}
 	
-//	private byte[] getThumbnail(ImageMmsMessagePart imagePart) {
-//		Image img = FrontlineUiUtils.getImage(imagePart.getData());
-//		Image thumb = FrontlineUiUtils.getLimitedSizeImageFromImage(img, 300, 200);
-//		BufferedImage bufferedThumb = FrontlineUiUtils.getBufferedImage(thumb);
-//		try {
-//			return FrontlineUiUtils.getImageAsBytes(bufferedThumb, "jpeg");
-//		} catch (IOException e) {
-//			return new byte[0];
-//		}
-//	}
+	private String getAlternateFilename(String filename) {
+		String namePart = FrontlineUtils.getFilenameWithoutAnyExtension(filename);
+		String extension = FrontlineUtils.getWholeFileExtension(filename);
+		return namePart + '_' + new Random().nextInt(99) + '.' + extension;
+	}
 
 	private static void writeFile(File file, byte[] data) {
 		FileOutputStream fos = null;
@@ -116,7 +115,6 @@ public class MmsPollingEmailReceiver {
 			out.write(data);
 		} catch (IOException ex) {
 			log.warn("Failed to write MMS file: " + file.getAbsolutePath(), ex);
-			throw new RuntimeException(ex); // FIXME remove this
 		} finally {
 			if(out != null) try { out.close(); } catch(IOException ex) { /* ah well :/ */ }
 			if(fos != null) try { fos.close(); } catch(IOException ex) { /* ah well :/ */ }
@@ -124,6 +122,6 @@ public class MmsPollingEmailReceiver {
 	}
 
 	public static File getFile(FrontlineMultimediaMessagePart part) {
-		return new File(new File(ResourceUtils.getPropertiesDirectory(), "mms"), part.getFilename());
+		return new File(new File(ResourceUtils.getConfigDirectoryPath(), "data/mms"), part.getFilename());
 	}
 }

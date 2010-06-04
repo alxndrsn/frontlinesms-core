@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tab text="i18n.tab.message.history" icon="/icons/big_history.png" name=":messageHistory">
 	<panel bottom="9" columns="2" gap="9" left="9" top="9" weightx="1" weighty="1">
-		<button text="generate mms" action="dbgGenerateMms"/>
 	    <label icon="/icons/header/messageHistory.png" valign="top"/>
 	    <splitpane rowspan="2" divider="300" weightx="1" weighty="1">
 	        <panel name="pnFilter" columns="1" gap="9" left="9" right="9" weighty="1">
