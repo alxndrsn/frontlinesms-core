@@ -47,12 +47,12 @@ public class CsvImporter {
 	/**
 	 * Import contacts from a CSV file.
 	 * @param importFile the file to import from
-	 * @param contactFactory
+	 * @param contactDao
 	 * @param rowFormat 
 	 * @throws IOException If there was a problem accessing the file
 	 * @throws CsvParseException If there was a problem with the format of the file
 	 */
-	public static void importContacts(File importFile, ContactDao contactFactory, CsvRowFormat rowFormat) throws IOException, CsvParseException {
+	public static void importContacts(File importFile, ContactDao contactDao, CsvRowFormat rowFormat) throws IOException, CsvParseException {
 		LOG.trace("ENTER");
 		if(LOG.isDebugEnabled()) LOG.debug("File [" + importFile.getAbsolutePath() + "]");
 		Utf8FileReader reader = null;
@@ -70,7 +70,7 @@ public class CsvImporter {
 				boolean active = Boolean.valueOf(getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_STATUS));
 				try {
 					Contact c = new Contact(name, number, otherPhoneNumber, email, notes, active);
-					contactFactory.saveContact(c);
+					contactDao.saveContact(c);
 				} catch (DuplicateKeyException e) {
 					// FIXME should actually pass details of this back to the user.
 					LOG.debug("Contact already exist with this number [" + number + "]", e);

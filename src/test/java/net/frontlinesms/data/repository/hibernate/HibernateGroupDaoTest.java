@@ -108,7 +108,7 @@ public class HibernateGroupDaoTest extends HibernateTestCase {
 		Group fetchedChild = groupDao.getGroupByPath("/parent/child");
 		assertEquals(child, fetchedChild);
 		
-		//EventBus mockEventBus = mock(EventBus.class);
+		EventBus mockEventBus = mock(EventBus.class);
 		//((HibernateGroupDao)groupDao).setEventBus(mockEventBus);
 		
 		// Delete the parent group

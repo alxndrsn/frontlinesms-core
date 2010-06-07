@@ -10,6 +10,7 @@ import static net.frontlinesms.FrontlineSMSConstants.COMMON_E_MAIL_ADDRESS;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_NAME;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_PHONE_NUMBER;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_CONTACTS_DELETED;
+import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_CONTACT_MANAGER_LOADED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUPS_AND_CONTACTS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUP_ALREADY_EXISTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_REMOVING_CONTACTS;
@@ -26,6 +27,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_G
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_CONTACTS;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_SEND_SMS_BUTTON;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_VIEW_CONTACT_BUTTON;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_CONTACT_MANAGER;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -39,8 +41,11 @@ import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
+import net.frontlinesms.events.EventObserver;
+import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.handler.ComponentPagingHandler;
 import net.frontlinesms.ui.handler.PagedComponentItemProvider;
@@ -55,7 +60,7 @@ import thinlet.ThinletText;
  * @author Alex Anderson <alex@frontlinesms.com>
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
-public class ContactsTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterPanelOwner, ContactEditorOwner {
+public class ContactsTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterPanelOwner, ContactEditorOwner, EventObserver {
 	//> STATIC CONSTANTS
 	/** UI XML File Path: the Home Tab itself */
 	private static final String UI_FILE_CONTACTS_TAB = "/ui/core/contacts/contactsTab.xml";
@@ -112,6 +117,9 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	public void init() {
 		super.init();
 		this.groupSelecter.init(ui.getRootGroup());
+		// We register the observer to the UIGeneratorController, which notifies when tabs have changed
+		this.ui.getFrontlineController().getEventBus().registerObserver(this);
+		
 		ui.add(find(COMPONENT_GROUP_SELECTER_CONTAINER), this.groupSelecter.getPanelComponent(), 0);
 	}
 
@@ -617,6 +625,20 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 				if (text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_NAME))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.STATUS);
 				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_PHONE_NUMBER))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.DATE);
 				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_E_MAIL_ADDRESS))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.SENDER_MSISDN);
+			}
+		}
+	}
+	
+	/**
+	 * UI event called when the user changes tab
+	 */
+	public void notify(FrontlineEventNotification notification) {
+		// This object is registered to the UIGeneratorController and get notified when the users changes tab
+		if(notification instanceof TabChangedNotification) {
+			String newTabName = ((TabChangedNotification) notification).getNewTabName();
+			if (newTabName.equals(TAB_CONTACT_MANAGER)) {
+				this.refresh();
+				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_CONTACT_MANAGER_LOADED));
 			}
 		}
 	}

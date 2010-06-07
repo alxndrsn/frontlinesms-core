@@ -3,6 +3,9 @@
  */
 package net.frontlinesms.ui.handler.phones;
 
+import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_MODEM_LIST_UPDATED;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_ADVANCED_PHONE_MANAGER;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -11,6 +14,8 @@ import net.frontlinesms.CommUtils;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.SmsModemSettings;
 import net.frontlinesms.data.repository.SmsModemSettingsDao;
+import net.frontlinesms.events.EventObserver;
+import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.smsdevice.SmsDevice;
 import net.frontlinesms.smsdevice.SmsDeviceEventListener;
 import net.frontlinesms.smsdevice.SmsDeviceManager;
@@ -23,6 +28,7 @@ import net.frontlinesms.ui.Event;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
@@ -38,7 +44,7 @@ import serial.NoSuchPortException;
  * @author Alex
  */
 @TextResourceKeyOwner(prefix={"COMMON_", "I18N_", "MESSAGE_"})
-public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventListener {
+public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventListener, EventObserver {
 //> STATIC CONSTANTS
 	/** The fully-qualified name of the default {@link CATHandler} class. */
 	private static final String DEFAULT_CAT_HANDLER_CLASS_NAME = CATHandler.class.getName();
@@ -121,6 +127,9 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 	
 	@Override
 	protected Object initialiseTab() {
+		// We register the observer to the UIGeneratorController, which notifies when tabs have changed
+		this.ui.getFrontlineController().getEventBus().registerObserver(this);
+		
 		return ui.loadComponentFromFile(UI_FILE_PHONES_TAB, this);
 	}
 
@@ -590,5 +599,19 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 	 */
 	private static String getSmsDeviceStatusAsString(SmsDevice device) {
 		return InternationalisationUtils.getI18NString(device.getStatus().getI18nKey(), device.getStatusDetail());
+	}
+	
+	/**
+	 * UI event called when the user changes tab
+	 */
+	public void notify(FrontlineEventNotification notification) {
+		// This object is registered to the UIGeneratorController and get notified when the users changes tab
+		if(notification instanceof TabChangedNotification) {
+			String newTabName = ((TabChangedNotification) notification).getNewTabName();
+			if (newTabName.equals(TAB_ADVANCED_PHONE_MANAGER)) {
+				this.refresh();
+				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_MODEM_LIST_UPDATED));
+			}
+		}
 	}
 }

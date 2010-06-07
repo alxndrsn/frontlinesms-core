@@ -9,6 +9,7 @@ import static net.frontlinesms.FrontlineSMSConstants.COMMON_RECIPIENT;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_SENDER;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_STATUS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_MESSAGES_DELETED;
+import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_MESSAGES_LOADED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_REMOVING_MESSAGES;
 import static net.frontlinesms.FrontlineSMSConstants.PROPERTY_FIELD;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_CONTACTS;
@@ -20,6 +21,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RECEI
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_SENT_MESSAGES_TOGGLE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_END_DATE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_START_DATE;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_MESSAGE_HISTORY;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -45,9 +47,12 @@ import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
+import net.frontlinesms.events.EventObserver;
+import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiProperties;
+import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.handler.ComponentPagingHandler;
 import net.frontlinesms.ui.handler.PagedComponentItemProvider;
@@ -63,7 +68,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * @author Carlos Eduardo Genz
  * <li> kadu(at)masabi(dot)com
  */
-public class MessageHistoryTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterPanelOwner {
+public class MessageHistoryTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterPanelOwner, EventObserver {
 	
 //> CONSTANTS
 	/** Path to the Thinlet XML layout file for the message history tab */
@@ -190,6 +195,9 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		LOG.trace("ENTRY");
 
 		Object tabComponent = ui.loadComponentFromFile(UI_FILE_MESSAGES_TAB, this);
+		
+		// We register the observer to the UIGeneratorController, which notifies when tabs have changed
+		this.ui.getFrontlineController().getEventBus().registerObserver(this);
 		
 		messageListComponent = ui.find(tabComponent, COMPONENT_MESSAGE_LIST);
 		messagePagingHandler = new ComponentPagingHandler(this.ui, this, this.messageListComponent);
@@ -857,5 +865,19 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			phoneNumbers.add(c.getPhoneNumber());
 		}
 		return phoneNumbers;
+	}
+	
+	/**
+	 * UI event called when the user changes tab
+	 */
+	public void notify(FrontlineEventNotification notification) {
+		// This object is registered to the UIGeneratorController and get notified when the users changes tab
+		if(notification instanceof TabChangedNotification) {
+			String newTabName = ((TabChangedNotification) notification).getNewTabName();
+			if (newTabName.equals(TAB_MESSAGE_HISTORY)) {
+				this.refresh();
+				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGES_LOADED));
+			}
+		}
 	}
 }

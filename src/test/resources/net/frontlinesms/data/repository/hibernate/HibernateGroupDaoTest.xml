@@ -6,7 +6,7 @@
 	<!-- import an in-memory database and related hibernate paraphenalia -->
 	<import resource="classpath:frontlinesms-spring-hibernate-junit.xml" />
 	
-	<bean id="hibernateGroupDao" class="net.frontlinesms.data.repository.hibernate.HibernateGroupDao" parent="baseHibernateDao"/>
+	<bean id="groupDao" class="net.frontlinesms.data.repository.hibernate.HibernateGroupDao" parent="baseHibernateDao"/>
 	
 	<bean id="groupMembershipDao" class="net.frontlinesms.data.repository.hibernate.HibernateGroupMembershipDao" parent="baseHibernateDao"/>
 	

@@ -1407,22 +1407,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		
 		LOG.debug("Current tab [" + currentTab + "]");
 		if (currentTab == null) return;
-		if (currentTab.equals(TAB_CONTACT_MANAGER)) {
-			this.contactsTabController.refresh();
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_CONTACT_MANAGER_LOADED));
-		} else if (currentTab.equals(TAB_ADVANCED_PHONE_MANAGER)) {
-			this.phoneTabController.refresh();
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_MODEM_LIST_UPDATED));
-		} else if (currentTab.equals(TAB_MESSAGE_HISTORY)) {
-			this.messageTabController.refresh();
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGES_LOADED));
-		} else if (currentTab.equals(TAB_KEYWORD_MANAGER)) {
-			this.keywordTabHandler.refresh();
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_KEYWORDS_LOADED));
-		} else if (currentTab.equals(TAB_EMAIL_LOG)) {
-			this.emailTabHandler.refresh();
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_EMAILS_LOADED));
-		}
 		LOG.trace("EXIT");
 	}
 
