@@ -5,7 +5,9 @@ package net.frontlinesms.data.repository.hibernate;
 
 import java.util.List;
 
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,8 +63,14 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 		}
 		
 		// Finally, we delete all child groups and the group itself
-		String deleteGroupsQuery = "DELETE from " + Group.TABLE_NAME + " WHERE path=? OR path LIKE ?";
-		super.getHibernateTemplate().bulkUpdate(deleteGroupsQuery, paramValues);
+		DetachedCriteria criteria = super.getCriterion();
+		Criterion equals = Restrictions.eq(Group.Field.PATH.getFieldName(), paramValues[0]);
+		Criterion like = Restrictions.like(Group.Field.PATH.getFieldName(), paramValues[1].toString(), MatchMode.START);  
+		criteria.add(Restrictions.or(equals, like));
+		List<Group> groups = getList(criteria);
+		for (Group deletedGroup : groups) {
+			this.delete(deletedGroup);
+		}
 	}
 	
 	/** @return params for matching this group and its children */

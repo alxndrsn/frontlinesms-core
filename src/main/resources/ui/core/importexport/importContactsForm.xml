@@ -7,8 +7,8 @@
             <button action="showOpenModeFileChooser(tfDirectory)" icon="/icons/browse.png" text="i18n.action.browse" weightx="1"/>
         </panel>
         <panel colspan="2" gap="5" halign="center">
-            <button action="doImport(importContactsDialog, tfDirectory.text)" icon="/icons/importContacts.png" text="i18n.common.import"/>
-            <button action="removeDialog(importContactsDialog)" icon="/icons/cross.png" text="i18n.action.cancel"/>
+            <button type="default" action="doImport(importContactsDialog, tfDirectory.text)" icon="/icons/importContacts.png" text="i18n.common.import"/>
+            <button type="cancel" action="removeDialog(importContactsDialog)" icon="/icons/cross.png" text="i18n.action.cancel"/>
         </panel>
     </panel>
 </dialog>

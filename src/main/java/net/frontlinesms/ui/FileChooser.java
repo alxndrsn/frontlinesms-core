@@ -178,10 +178,12 @@ public abstract class FileChooser implements ThinletUiEventHandler {
 	private List<File> getOrderedContents(File directory) {
 		File[] contents = directory == null ? File.listRoots() : directory.listFiles();
 		List<File> orderedContents = new ArrayList<File>();
-		for (File f : contents) {
-			orderedContents.add(f);
+		if (contents != null) {
+			for (File f : contents) {
+				orderedContents.add(f);
+			}
+			Collections.sort(orderedContents, new FrontlineUtils.FileComparator());
 		}
-		Collections.sort(orderedContents, new FrontlineUtils.FileComparator());
 		return orderedContents;
 	}
 	

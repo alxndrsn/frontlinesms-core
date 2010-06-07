@@ -52,7 +52,8 @@ import thinlet.ThinletText;
 
 /**
  * Event handler for the Contacts tab and associated dialogs.
- * @author Alex alex@frontlinesms.com
+ * @author Alex Anderson <alex@frontlinesms.com>
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 public class ContactsTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterPanelOwner, ContactEditorOwner {
 	//> STATIC CONSTANTS
@@ -429,7 +430,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		
 		Object sms = ui.find(find(COMPONENT_GROUP_SELECTER_CONTAINER), COMPONENT_SEND_SMS_BUTTON_GROUP_SIDE);
 		ui.setEnabled(sms, selectedGroup != null);
-		ui.alert(InternationalisationUtils.getI18NString(MESSAGE_GROUPS_AND_CONTACTS_DELETED));
+		ui.infoMessage(InternationalisationUtils.getI18NString(MESSAGE_GROUPS_AND_CONTACTS_DELETED));
 		refresh();
 		log.trace("EXIT");
 	}
