@@ -4,6 +4,7 @@
 package net.frontlinesms.ui.handler.message;
 
 import java.awt.Image;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,15 +14,14 @@ import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
-import net.frontlinesms.mmsdevice.MmsPollingEmailReceiver;
+import net.frontlinesms.mmsdevice.MmsDeviceUtils;
 import net.frontlinesms.ui.FrontlineUiUtils;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
- * @author aga
- *
+ * @author Alex Anderson <alex@frontlinesms.com>
  */
 public class MessageDetailsDisplay implements ThinletUiEventHandler {
 	/** Path to the Thinlet XML layout file for the message details form */
@@ -88,11 +88,12 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 			Object panel = ui.createPanel("");
 			ui.setColumns(panel, 1);
 
-			String openAction = "openMultimediaPart('" + MmsPollingEmailReceiver.getFile(part).getPath() + "')";
+			File mediaFile = MmsDeviceUtils.getFile(part);
+			String openAction = "openMultimediaPart('" + mediaFile.getPath() + "')";
 			
 			Image thumb = null;
 			try {
-				thumb = FrontlineUiUtils.getLimitedSizeImage(ImageIO.read(MmsPollingEmailReceiver.getFile(part)), 64, 64);
+				thumb = FrontlineUiUtils.getLimitedSizeImage(ImageIO.read(mediaFile), 64, 64);
 			} catch(Exception ex) {}
 			if(thumb != null) {
 				Object thumbComponent = ui.createLink("", openAction, panel, this);

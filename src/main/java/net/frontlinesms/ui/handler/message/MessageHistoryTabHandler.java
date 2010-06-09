@@ -43,10 +43,14 @@ import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMessage.Field;
 import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
+import net.frontlinesms.data.events.DatabaseEntityNotification;
+import net.frontlinesms.data.events.EntitySavedNotification;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
+import net.frontlinesms.events.EventObserver;
+import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.mmsdevice.MmsPollingEmailReceiver;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
@@ -66,7 +70,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * @author Carlos Eduardo Genz
  * <li> kadu(at)masabi(dot)com
  */
-public class MessageHistoryTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterPanelOwner {
+public class MessageHistoryTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterPanelOwner, EventObserver {
 	
 //> CONSTANTS
 	/** Path to the Thinlet XML layout file for the message history tab */
@@ -149,6 +153,18 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	/** Refresh the view. */
 	public void refresh() {
 		resetMessageHistoryFilter();
+	}
+	
+	public void notify(FrontlineEventNotification notification) {
+		if(notification instanceof EntitySavedNotification<?>) {
+			Object entity = ((EntitySavedNotification<?>) notification).getDatabaseEntity();
+			if(entity instanceof FrontlineMessage) {
+				if(entity instanceof FrontlineMultimediaMessage) {
+					// TODO check if the list is visible before refreshing
+					refresh();
+				}
+			}
+		}
 	}
 	
 	/**
@@ -832,15 +848,6 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	/** @see UiGeneratorController#showDateSelecter(Object) */
 	public void showDateSelecter(Object textField) {
 		this.ui.showDateSelecter(textField);
-	}
-	
-
-	
-	public void dbgGenerateMms() {
-		Collection<FrontlineMultimediaMessage> mms = new MmsPollingEmailReceiver().dbgCreateMessagesFromClasspath();
-		for(FrontlineMultimediaMessage mm : mms) {
-			this.ui.getFrontlineController().getMessageDao().saveMessage(mm);
-		}
 	}
 	
 //> HELPER METHODS

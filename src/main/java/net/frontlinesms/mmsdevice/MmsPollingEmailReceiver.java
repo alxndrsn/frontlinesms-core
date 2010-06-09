@@ -3,125 +3,169 @@
  */
 package net.frontlinesms.mmsdevice;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Random;
+
+import javax.mail.Message;
 
 import org.apache.log4j.Logger;
+import org.smslib.CIncomingMessage;
 
 import net.frontlinesms.FrontlineUtils;
-import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
-import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
-import net.frontlinesms.data.domain.FrontlineMessage.Status;
-import net.frontlinesms.data.domain.FrontlineMessage.Type;
-import net.frontlinesms.mms.ImageMmsMessagePart;
+import net.frontlinesms.data.domain.EmailAccount;
+import net.frontlinesms.data.domain.FrontlineMessage;
+import net.frontlinesms.data.repository.MessageDao;
+import net.frontlinesms.email.pop.PopMessageProcessor;
+import net.frontlinesms.email.pop.PopMessageReceiver;
+import net.frontlinesms.email.pop.PopReceiveException;
+import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.mms.MmsMessage;
-import net.frontlinesms.mms.MmsMessagePart;
 import net.frontlinesms.mms.MmsReceiveException;
-import net.frontlinesms.mms.TextMmsMessagePart;
-import net.frontlinesms.mms.email.pop.FileSystemMmsReceiver;
-import net.frontlinesms.resources.ResourceUtils;
+import net.frontlinesms.mms.email.pop.PopEmailMmsReceiver;
+import net.frontlinesms.smsdevice.SmsDevice;
+import net.frontlinesms.smsdevice.SmsDeviceStatus;
 
 /**
  * @author aga
  *
  */
-public class MmsPollingEmailReceiver {
+public class MmsPollingEmailReceiver implements MmsDevice {
+	private final Logger log = FrontlineUtils.getLogger(this.getClass());
 
-	private static final Logger log = FrontlineUtils.getLogger(MmsPollingEmailReceiver.class);
+	private MmsDeviceStatus status;
+	private String statusDetail;
 	
-	public Collection<FrontlineMultimediaMessage> dbgCreateMessagesFromClasspath() {
-		ArrayList<FrontlineMultimediaMessage> messages = new ArrayList<FrontlineMultimediaMessage>();
+	private MessageDao messageDao;
+
+	private Thread emailReceiver;
+	private EmailAccount emailAccount;
+
+	void setStatus(MmsDeviceStatus status, String statusDetail) {
+		this.status = status;
+		this.statusDetail = statusDetail;
+	}
 	
-		Collection<MmsMessage> mms;
-		try {
-			mms = new FileSystemMmsReceiver("../MyMmsGateway/src/test/resources/net/frontlinesms/mms/email/pop/parser/uk/").receive();
-		} catch (MmsReceiveException e) {
-			throw new RuntimeException(e);
+	public void setEmailAccount(EmailAccount emailAccount) {
+		this.emailAccount = emailAccount;
+	}
+	
+	public synchronized void connectDevice() {
+		if(this.emailReceiver != null) {
+			// stop the current device
+			this.emailReceiver.interrupt();
 		}
-		
-		for(MmsMessage mm : mms) {
-			messages.add(create(mm));
-		}
-		
-		return messages;
+		this.emailReceiver = new Thread(new EmailReceiver(this, emailAccount));
+		this.emailReceiver.start();
 	}
 
-	/** Create a new {@link FrontlineMultimediaMessage} from a {@link MmsMessage} */
-	private FrontlineMultimediaMessage create(MmsMessage mms) {
-		StringBuilder textContent = new StringBuilder();
-		List<FrontlineMultimediaMessagePart> multimediaParts = new ArrayList<FrontlineMultimediaMessagePart>();
-		for(MmsMessagePart part : mms.getParts()) {
-			if(textContent.length() > 0) textContent.append("; ");
-			
-			String text;
-			FrontlineMultimediaMessagePart mmPart;
-			if(part instanceof TextMmsMessagePart) {
-				TextMmsMessagePart textPart = (TextMmsMessagePart) part;
-				text = textPart.toString();
-				mmPart = FrontlineMultimediaMessagePart.createTextPart(textPart.getContent());
-			} else if(part instanceof ImageMmsMessagePart) {
-				ImageMmsMessagePart imagePart = (ImageMmsMessagePart) part;
-				text = "Image: " + imagePart.getFilename();
-				mmPart = createBinaryPart(imagePart);
-			} else {
-				text = "Unhandled: " + part.toString();
-				mmPart = FrontlineMultimediaMessagePart.createTextPart("Unhandled: TODO handle this!");
+	public synchronized void disconnectDevice() {
+		if(this.emailReceiver != null) {
+			this.emailReceiver.interrupt();
+			this.emailReceiver = null;
+		}
+	}
+	
+	public MmsDeviceStatus getStatus() {
+		return this.status;
+	}
+
+	public String getStatusDetail() {
+		return this.statusDetail;
+	}
+	
+	public String getDescription() {
+		return this.emailAccount != null ? 
+				this.emailAccount.getAccountName() :
+				null;
+	}
+
+	void handleReceived(Collection<MmsMessage> messages) {
+		for(MmsMessage message : messages) {
+			try {
+				this.messageDao.saveMessage(MmsDeviceUtils.create(message));
+			} catch(Exception ex) {
+				log.warn("Error saving MMS message.", ex);
 			}
-			textContent.append(text);
-			multimediaParts.add(mmPart);
 		}
-		
-		FrontlineMultimediaMessage message = new FrontlineMultimediaMessage(Type.RECEIVED, textContent.toString(), multimediaParts);
-		message.setRecipientMsisdn("set me please"); // FIXME get recipient address from mms
-		message.setSenderMsisdn(mms.getSender());
-		message.setStatus(Status.RECEIVED);
-		return message;
 	}
+}
 
-	private FrontlineMultimediaMessagePart createBinaryPart(
-			ImageMmsMessagePart imagePart) {
-		// save the binary data to file
-		FrontlineMultimediaMessagePart fmmPart = FrontlineMultimediaMessagePart.createBinaryPart(imagePart.getFilename()/*, getThumbnail(imagePart)*/);
-
-		File localFile = getFile(fmmPart);
-		while(localFile.exists()) {
-			// need to handle file collisions here - e.g. rename the file
-			fmmPart.setFilename(getAlternateFilename(fmmPart.getFilename()));
-			localFile = getFile(fmmPart);
-		}
-		writeFile(localFile, imagePart.getData());
-		return fmmPart; 
+class EmailReceiver implements Runnable {
+	private static final long SLEEP_TIME = 60*1000;
+	
+	private MmsPollingEmailReceiver parent;
+	private PopEmailMmsReceiver pemr;
+	private boolean keepAlive;
+	
+	private String hostAddress;
+	private String password;
+	private int port;
+	private String username;
+	private boolean useSsl;
+	
+	EmailReceiver(MmsPollingEmailReceiver parent, EmailAccount account) {
+		this.parent = parent;
 	}
 	
-	private String getAlternateFilename(String filename) {
-		String namePart = FrontlineUtils.getFilenameWithoutAnyExtension(filename);
-		String extension = FrontlineUtils.getWholeFileExtension(filename);
-		return namePart + '_' + new Random().nextInt(99) + '.' + extension;
-	}
-
-	private static void writeFile(File file, byte[] data) {
-		FileOutputStream fos = null;
-		BufferedOutputStream out = null;
-		try {
-			file.getParentFile().mkdirs();
-			fos = new FileOutputStream(file);
-			out = new BufferedOutputStream(fos);
-			out.write(data);
-		} catch (IOException ex) {
-			log.warn("Failed to write MMS file: " + file.getAbsolutePath(), ex);
-		} finally {
-			if(out != null) try { out.close(); } catch(IOException ex) { /* ah well :/ */ }
-			if(fos != null) try { fos.close(); } catch(IOException ex) { /* ah well :/ */ }
+	public void run() {
+		this.keepAlive = true;
+		
+		while(keepAlive) {
+			try {
+				Collection<MmsMessage> messages = pemr.receive();
+				parent.handleReceived(messages);
+				
+				Thread.sleep(SLEEP_TIME);
+			} catch(MmsReceiveException ex) {
+				parent.setStatus(MmsDeviceStatus.PROBLEM, ex.getMessage());
+			} catch(InterruptedException ex) {
+				keepAlive = false;
+			}
 		}
 	}
-
-	public static File getFile(FrontlineMultimediaMessagePart part) {
-		return new File(new File(ResourceUtils.getConfigDirectoryPath(), "data/mms"), part.getFilename());
-	}
+	
+//	private static final long SLEEP_TIME = 60*1000;
+//	
+//	private MmsPollingEmailReceiver parent;
+//	private boolean keepAlive;
+//	
+//	private String hostAddress;
+//	private String password;
+//	private int port;
+//	private String username;
+//	private boolean useSsl;
+//	
+//	EmailReceiver(MmsPollingEmailReceiver parent, EmailAccount account) {
+//		this.parent = parent;
+//	}
+//	
+//	public void run() {
+//		this.keepAlive = true;
+//		
+//		while(keepAlive) {
+//			try {
+//				triggerReceive();
+//				
+//				Thread.sleep(SLEEP_TIME);
+//			} catch(InterruptedException ex) {
+//				keepAlive = false;
+//			}
+//		}
+//	}
+//
+//	private void triggerReceive() {
+////		PopMessageReceiver receiver = new PopMessageReceiver(this.parent);
+//		PopEmailMmsReceiver receiver = new PopEmailMmsReceiver();
+//		
+//		receiver.setHostAddress(hostAddress);
+//		receiver.setHostPassword(password);
+//		receiver.setHostPort(port);
+//		receiver.setHostUsername(username);
+//		receiver.setUseSsl(useSsl);
+//		
+//		try {
+//			Collection<MmsMessage> receivedMessages = receiver.receive();
+//		} catch(PopReceiveException ex) {
+//			parent.setStatus(MmsDeviceStatus.PROBLEM, ex.getMessage());
+//		}
+//	}
 }
