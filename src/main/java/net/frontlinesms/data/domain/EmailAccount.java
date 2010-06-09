@@ -28,8 +28,12 @@ import javax.persistence.*;
 @Entity
 public class EmailAccount {
 //> CONSTANTS
+	public static final int DEFAULT_POP_PORT = 110;
+	public static final int DEFAULT_POPSSL_PORT = 992;
 	public static final int DEFAULT_SMTP_PORT = 25;
 	public static final int DEFAULT_SMTPS_PORT = 465;
+	
+	public static final String FIELD_IS_FOR_RECEIVING = "isForReceiving";
 
 //> PROPERTIES
 	/** Unique id for this entity.  This is for hibernate usage. */
@@ -42,6 +46,8 @@ public class EmailAccount {
 	private String accountPassword;
 	private Integer accountServerPort;
 	private boolean useSsl;
+	@Column(name=FIELD_IS_FOR_RECEIVING)
+	private Boolean isForReceiving = true;
 	
 //> CONSTRUCTORS
 	/** Empty constructor required for hibernate */
@@ -55,12 +61,13 @@ public class EmailAccount {
 	 * @param accountPassword The password to connect to this account.
 	 * @param useSsl 
 	 */
-	public EmailAccount(String accountName, String accountServer, int accountServerPort, String accountPassword, boolean useSsl) {
+	public EmailAccount(String accountName, String accountServer, int accountServerPort, String accountPassword, boolean useSsl, boolean isForReceiving) {
 		this.accountName = accountName;
 		this.accountServer = accountServer;
 		this.accountServerPort = accountServerPort;
 		this.accountPassword = accountPassword;
 		this.useSsl = useSsl;
+		this.isForReceiving = isForReceiving;
 	}
 	
 //> ACCESSOR METHODS
@@ -102,6 +109,13 @@ public class EmailAccount {
 	 */
 	public boolean useSsl() {
 		return this.useSsl;
+	}
+	
+	/**
+	 * @return <code>true</code> if this account is used for receiving e-mails, <code>false</code> otherwise.
+	 */
+	public boolean isForReceiving() {
+		return (this.isForReceiving == null ? false : this.isForReceiving.booleanValue());
 	}
 	
 	/**

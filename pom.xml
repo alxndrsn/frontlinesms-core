@@ -312,5 +312,12 @@
 			<artifactId>h2</artifactId>
 			<version>1.2.127</version>
 		</dependency>
+		<dependency>
+			<groupId>net.frontlinesms.core.mms</groupId>
+			<artifactId>mmsgateway</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 </project>

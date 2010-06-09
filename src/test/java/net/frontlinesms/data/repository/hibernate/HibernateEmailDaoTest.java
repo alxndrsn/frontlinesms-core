@@ -31,15 +31,15 @@ public class HibernateEmailDaoTest extends HibernateTestCase {
 
 //> TEST METHODS
 	public void test() throws DuplicateKeyException {
-		EmailAccount EMAIL_ACCOUNT = new EmailAccount("test@frontlinesms.net", "frontlinesms.net", 123, "secretpassword", false);
-		emailAccountDao.saveEmailAccount(EMAIL_ACCOUNT);
+		EmailAccount emailAccount = new EmailAccount("test@frontlinesms.net", "frontlinesms.net", 123, "secretpassword", false, false);
+		emailAccountDao.saveEmailAccount(emailAccount);
 		
 		assertEquals(0, emailDao.getAllEmails().size());
 		assertEquals(emailDao.getAllEmails().size(), emailDao.getEmailCount());
 		assertEquals(emailDao.getAllEmails(), emailDao.getEmailsWithLimitWithoutSorting(0, Integer.MAX_VALUE));
 		assertEquals(emailDao.getAllEmails(), emailDao.getEmailsWithLimit(Email.Field.EMAIL_CONTENT, Order.ASCENDING, 0, Integer.MAX_VALUE));
 		
-		Email email = new Email(EMAIL_ACCOUNT, "all@myfriends.com", "About the weekend", "Hey guys,\nJust a quick note about the weekend.  I can't wait.\rLove from Mr. Test");
+		Email email = new Email(emailAccount, "all@myfriends.com", "About the weekend", "Hey guys,\nJust a quick note about the weekend.  I can't wait.\rLove from Mr. Test");
 		emailDao.saveEmail(email);
 
 		assertEquals(1, emailDao.getAllEmails().size());

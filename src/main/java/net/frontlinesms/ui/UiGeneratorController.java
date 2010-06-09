@@ -31,6 +31,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.Column;
+
 import net.frontlinesms.*;
 import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
@@ -815,12 +817,12 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		setText(tf, selectedContact.getPhoneNumber());
 		remove(dialog);
 	}
-
+	
 	/**
 	 * Shows the email accounts settings dialog.
 	 */
-	public void showEmailAccountsSettings() {
-		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this);
+	public void showMmsEmailAccountsSettings() {
+		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this, true);
 		add(emailAccountDialogHandler.getDialog());
 	}
 
