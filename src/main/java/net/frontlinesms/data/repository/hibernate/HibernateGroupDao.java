@@ -3,6 +3,7 @@
  */
 package net.frontlinesms.data.repository.hibernate;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.criterion.Criterion;
@@ -68,7 +69,9 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 		Criterion like = Restrictions.like(Group.Field.PATH.getFieldName(), paramValues[1].toString(), MatchMode.START);  
 		criteria.add(Restrictions.or(equals, like));
 		List<Group> groups = getList(criteria);
+		Collections.sort(groups);
 		for (Group deletedGroup : groups) {
+			System.err.println("Delete group: " + deletedGroup);
 			this.delete(deletedGroup);
 		}
 	}
