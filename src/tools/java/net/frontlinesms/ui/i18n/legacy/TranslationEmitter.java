@@ -30,7 +30,7 @@ public class TranslationEmitter {
 	
 	/** Translation keys that are protected.  These keys are embedded in a {@link LanguageBundle} but are not actually for translation, e.g. {@link LanguageBundle#KEY_LANGUAGE_CODE} */
 	private static final String[] PROTECTED_KEYS = {
-		LanguageBundle.KEY_FONT_NAME,
+		LanguageBundle.KEY_LANGUAGE_FONT,
 		LanguageBundle.KEY_LANGUAGE_CODE,
 		LanguageBundle.KEY_LANGUAGE_COUNTRY,
 		LanguageBundle.KEY_LANGUAGE_NAME,
