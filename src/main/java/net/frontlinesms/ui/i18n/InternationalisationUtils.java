@@ -291,7 +291,9 @@ public class InternationalisationUtils {
 						LOG.warn("Duplicate key in language file '': ''");
 					} else {
 						String value = line.substring(splitChar + 1).trim();
-						i18nStrings.put(key, value);
+						if (!value.equals("")) {
+							i18nStrings.put(key, value);
+						}
 					}
 				}
 			}
