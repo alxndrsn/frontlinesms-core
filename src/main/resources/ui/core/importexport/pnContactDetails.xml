@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <panel bottom="5" columns="2" gap="5" left="5" name="pnContactInfo" right="5" top="5" weightx="1" weighty="1">
-    <checkbox icon="/icons/user.png" name="cbName" selected="true" text="i18n.common.name"/>
-    <checkbox icon="/icons/phone_number.png" name="cbPhone" selected="true" text="i18n.common.phone.number"/>
-    <checkbox icon="/icons/phone_number.png" name="cbOtherPhone" selected="true" text="i18n.common.other.phone.number"/>
-    <checkbox icon="/icons/email.png" name="cbContactEmail" selected="true" text="i18n.common.email.address"/>
-    <checkbox icon="/icons/user_active.png" name="cbStatus" selected="true" text="i18n.common.current.status"/>
-    <checkbox icon="/icons/note.png" name="cbContactNotes" selected="true" text="i18n.common.notes"/>
-    <checkbox colspan="2" icon="/icons/group.png" name="cbGroups" selected="true" text="i18n.common.groups"/>
+    <checkbox action="refreshValuesTable" icon="/icons/user.png" name="cbName" selected="true" text="i18n.common.name"/>
+    <checkbox action="refreshValuesTable" icon="/icons/phone_number.png" name="cbPhone" selected="true" text="i18n.common.phone.number"/>
+    <checkbox action="refreshValuesTable" icon="/icons/phone_number.png" name="cbOtherPhone" selected="true" text="i18n.common.other.phone.number"/>
+    <checkbox action="refreshValuesTable" icon="/icons/email.png" name="cbContactEmail" selected="true" text="i18n.common.email.address"/>
+    <checkbox action="refreshValuesTable" icon="/icons/user_active.png" name="cbStatus" selected="true" text="i18n.common.current.status"/>
+    <checkbox action="refreshValuesTable" icon="/icons/note.png" name="cbContactNotes" selected="true" text="i18n.common.notes"/>
+    <checkbox action="refreshValuesTable" colspan="2" icon="/icons/group.png" name="cbGroups" selected="true" text="i18n.common.groups"/>
 </panel>

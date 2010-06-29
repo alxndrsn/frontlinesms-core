@@ -54,8 +54,8 @@
 	    	<label text="i18n.stats.dialog.collect.allow"/>
 		</panel>
 		<panel gap="5" halign="center">
-		    <button icon="/icons/tick.png" action="sendStatistics" name="contactSelecter_okButton" text="i18n.action.yes"/>
-		    <button action="removeDialog" icon="/icons/cross.png" text="i18n.action.no"/>
+		    <button type="default" icon="/icons/tick.png" action="sendStatistics" name="contactSelecter_okButton" text="i18n.action.yes"/>
+		    <button type="cancel" action="removeDialog" icon="/icons/cross.png" text="i18n.action.no"/>
 		</panel>
 	</panel>
 </dialog>

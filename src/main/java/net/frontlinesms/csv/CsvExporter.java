@@ -48,7 +48,9 @@ public class CsvExporter {
 	
 //> STATIC CONSTANTS
 	/** File extension for comma-separated value files */
-	public static final String CSV_EXTENSION = ".csv";
+	public static final String CSV_FORMAT = "csv";
+	public static final String CSV_EXTENSION = "." + CSV_FORMAT;
+	
 	/** Logging object */
 	protected static Logger LOG = FrontlineUtils.getLogger(CsvExporter.class);
 			

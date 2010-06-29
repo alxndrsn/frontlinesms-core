@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 import org.apache.log4j.Logger;
 
 import net.frontlinesms.FrontlineUtils;
@@ -16,14 +19,15 @@ import net.frontlinesms.csv.CsvImporter;
 import net.frontlinesms.csv.CsvRowFormat;
 import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.domain.Contact;
+import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.repository.ContactDao;
+import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
-import net.frontlinesms.ui.FileChooser;
 import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
@@ -119,11 +123,18 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	/** Thinlet Component Name: TODO document */
 	private static final String COMPONENT_CB_CONTACT_NAME = "cbContactName";
 	/** Thinlet Component Name: TODO document */
+	public static final String COMPONENT_CB_GROUPS = "cbGroups";
+	/** Thinlet Component Name: TODO document */
 	private static final String COMPONENT_CB_RECEIVED = "cbReceived";
 	/** Thinlet Component Name: TODO document */
 	private static final String COMPONENT_CB_SENT = "cbSent";
 	/** Thinlet component name: button for executing EXPORT action */
 	private static final String COMPONENT_BT_DO_EXPORT = "btDoExport";
+	/** Thinlet component name: list displaying values from the CSV file */
+	private static final String COMPONENT_TB_VALUES = "tbValues";
+	private static final String COMPONENT_PN_CHECKBOXES = "pnContactInfo"; // TODO: get this changed
+	private static final String COMPONENT_PN_VALUES_TABLE = "pnValuesTable";
+	private static final String COMPONENT_PN_DETAILS = "pnDetails";
 	
 //> STATIC CONSTANTS
 	public enum EntityType {
@@ -152,6 +163,8 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private final ContactDao contactDao;
 	/** Data access object for determining group memberships */
 	private final GroupMembershipDao groupMembershipDao;
+	/** Data access object for {@link Group}s */
+	private final GroupDao groupDao;
 	/** Data access object for {@link FrontlineMessage}s */
 	private final MessageDao messageDao;
 	/** Data access object for {@link Keyword}s */
@@ -182,6 +195,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		this.groupMembershipDao = uiController.getFrontlineController().getGroupMembershipDao();
 		this.messageDao = uiController.getFrontlineController().getMessageDao();
 		this.keywordDao = uiController.getFrontlineController().getKeywordDao();
+		this.groupDao = uiController.getFrontlineController().getGroupDao();
 	}
 	
 //> ACCESSORS
@@ -254,7 +268,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 			// Do the import
 			if(type == EntityType.CONTACTS) {
 				CsvRowFormat rowFormat = getRowFormatForContact();
-				CsvImporter.importContacts(new File(dataPath), this.contactDao, rowFormat);
+				CsvImporter.importContacts(new File(dataPath), this.contactDao, this.groupMembershipDao, this.groupDao, rowFormat);
 				uiController.refreshContactsTab();
 			} else {
 				throw new IllegalStateException("Import is not supported for: " + getType());
@@ -436,7 +450,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		
 		String titleI18nKey = getWizardTitleI18nKey();
 		uiController.setText(this.wizardDialog, InternationalisationUtils.getI18NString(titleI18nKey));
-		uiController.add(this.wizardDialog, uiController.loadComponentFromFile(uiFile, this), 1);
+		uiController.add(this.uiController.find(this.wizardDialog, COMPONENT_PN_DETAILS), uiController.loadComponentFromFile(uiFile, this));
 
 		// Add the wizard to the Thinlet controller
 		uiController.add(this.wizardDialog);
@@ -575,13 +589,28 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	 */
 	private CsvRowFormat getRowFormatForContact() {
 		CsvRowFormat rowFormat = new CsvRowFormat();
-		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NAME, COMPONENT_CB_NAME);
-		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_PHONE, COMPONENT_CB_PHONE);
-		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE, COMPONENT_CB_OTHER_PHONE);
-		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_EMAIL, COMPONENT_CB_EMAIL);
-		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_STATUS, COMPONENT_CB_STATUS);
-		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NOTES, COMPONENT_CB_NOTES);
-		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_GROUPS, UiGeneratorControllerConstants.COMPONENT_CB_GROUPS);
+//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NAME, COMPONENT_CB_NAME);
+//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_PHONE, COMPONENT_CB_PHONE);
+//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE, COMPONENT_CB_OTHER_PHONE);
+//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_EMAIL, COMPONENT_CB_EMAIL);
+//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_STATUS, COMPONENT_CB_STATUS);
+//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NOTES, COMPONENT_CB_NOTES);
+//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_GROUPS, UiGeneratorControllerConstants.COMPONENT_CB_GROUPS);
+		if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_NAME))) {
+			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NAME, COMPONENT_CB_NAME);
+		} if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_PHONE))) {
+			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_PHONE, COMPONENT_CB_PHONE);
+		} if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_OTHER_PHONE))) {
+			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE, COMPONENT_CB_OTHER_PHONE);
+		} if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_EMAIL))) {
+			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_EMAIL, COMPONENT_CB_EMAIL);
+		} if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_STATUS))) {
+			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_STATUS, COMPONENT_CB_STATUS);
+		} if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_NOTES))) {
+			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NOTES, COMPONENT_CB_NOTES);
+		} if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_GROUPS))) {
+			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_GROUPS, COMPONENT_CB_GROUPS);
+		}
 		return rowFormat;
 	}
 	
@@ -595,18 +624,66 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	/** @param textFieldToBeSet Thinlet textfield whose value will be set with the selected file
 	 * @see FrontlineUI#showOpenModeFileChooser(Object) */
 	public void showOpenModeFileChooser(Object textFieldToBeSet) {
-		this.uiController.showOpenModeFileChooser(textFieldToBeSet);
+		//this.uiController.showOpenModeFileChooser(textFieldToBeSet);
+		JFileChooser fc = new JFileChooser();
+		fc.setFileFilter(new FileNameExtensionFilter("FrontlineSMS Exported Contacts (" + CsvExporter.CSV_EXTENSION + ")", CsvExporter.CSV_FORMAT));
+		int returnVal = fc.showDialog(null, InternationalisationUtils.getI18NString("medic.common.label.open"));
+		if(returnVal == JFileChooser.APPROVE_OPTION){
+			this.uiController.setText(textFieldToBeSet, fc.getSelectedFile().getAbsolutePath());
+			this.loadCsvFile(fc.getSelectedFile().getAbsolutePath());
+		}
 	}
 	
 	/** @param textFieldToBeSet Thinlet textfield whose value will be set with the selected file
 	 * @see FrontlineUI#showOpenModeFileChooser(Object) */
 	public void showSaveModeFileChooser(Object textFieldToBeSet) {
-		FileChooser.showSaveModeFileChooser(this.uiController, this, "setFilename");
+		//FileChooser.showSaveModeFileChooser(this.uiController, this, "setFilename");
+		JFileChooser fc = new JFileChooser();
+		fc.setSelectedFile(new File("FrontlineSMS_Contacts.csv"));
+		int returnVal = fc.showDialog(null, InternationalisationUtils.getI18NString("medic.common.label.open"));
+		if(returnVal == JFileChooser.APPROVE_OPTION){
+			this.uiController.setText(textFieldToBeSet, fc.getSelectedFile().getAbsolutePath());
+			this.filenameModified(fc.getSelectedFile().getAbsolutePath());
+		}
 	}
 	
 	public void setFilename(String filename) {
 		uiController.setText(uiController.find(this.wizardDialog, "tfFilename"), filename);
 		filenameModified(filename);
+	}
+	
+	private void loadCsvFile (String filename) {
+		File csvFile = new File(filename);
+		
+		Object pnValuesTable = this.uiController.find(this.wizardDialog, COMPONENT_PN_VALUES_TABLE);
+		this.uiController.setVisible(pnValuesTable, true);
+		this.refreshValuesTable();
+	}
+
+	public void refreshValuesTable() {
+		Object pnValuesTable = this.uiController.find(this.wizardDialog, COMPONENT_PN_VALUES_TABLE);
+		
+		if (pnValuesTable != null) {
+			Object pnCheckboxes = this.uiController.find(this.wizardDialog, COMPONENT_PN_CHECKBOXES);
+			Object[] checkboxes = this.uiController.getItems(pnCheckboxes);
+			
+			Object valuesTable = this.uiController.find(this.wizardDialog, COMPONENT_TB_VALUES);
+			Object header = this.uiController.createTableHeader("pwals");
+			
+			for (Object checkbox : checkboxes) {
+				if (this.uiController.isSelected(checkbox)) {
+					String attributeName = this.uiController.getText(checkbox);
+					this.uiController.add(header, this.uiController.createColumn(attributeName, attributeName));
+				}
+			}
+			this.uiController.add(valuesTable, header);
+		
+			this.uiController.setVisible(pnValuesTable, this.uiController.getItems(header).length != 0);
+		}
+//		Object row = this.uiController.createTableRow("pwals");
+//		this.uiController.add(row, this.uiController.createTableCell("pwals 1"));
+//		this.uiController.add(row, this.uiController.createTableCell("pwals 2"));
+//		this.uiController.add(valuesTable, row);
 	}
 
 //> STATIC FACTORIES
