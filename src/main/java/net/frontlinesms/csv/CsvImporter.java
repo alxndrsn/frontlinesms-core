@@ -21,6 +21,7 @@ package net.frontlinesms.csv;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -108,45 +109,43 @@ public class CsvImporter {
 		LOG.trace("EXIT");
 	}
 
-//	/**
-//	 * Import contacts from a CSV file.
-//	 * @param importFile the file to import from
-//	 * @param contactDao
-//	 * @param rowFormat 
-//	 * @throws IOException If there was a problem accessing the file
-//	 * @throws CsvParseException If there was a problem with the format of the file
-//	 */
-//	public static void getContactsFromCsvFile(String filename) throws IOException, CsvParseException {
-//		LOG.trace("ENTER");
-//		File importFile = new File(filename);
-//		
-//		if(LOG.isDebugEnabled()) LOG.debug("File [" + importFile.getAbsolutePath() + "]");
-//		Utf8FileReader reader = null;
-//		try {
-//			reader = new Utf8FileReader(importFile);
-//			int total = 0;
-//			String[] lineValues;
-//			while((lineValues = CsvUtils.readLine(reader)) != null) {
-//				if (total++ == 0) continue;
+	/**
+	 * Import contacts from a CSV file.
+	 * @param filename the file to import from
+	 * @param rowFormat 
+	 * @throws IOException If there was a problem accessing the file
+	 * @throws CsvParseException If there was a problem with the format of the file
+	 */
+	public static List<String[]> getContactsFromCsvFile(String filename) throws IOException, CsvParseException {
+		LOG.trace("ENTER");
+		File importFile = new File(filename);
+		List<String[]> contactsList = new ArrayList<String[]>();
+		
+		if(LOG.isDebugEnabled()) LOG.debug("File [" + importFile.getAbsolutePath() + "]");
+		Utf8FileReader reader = null;
+		try {
+			reader = new Utf8FileReader(importFile);
+			int total = 0;
+			String[] lineValues;
+			while((lineValues = CsvUtils.readLine(reader)) != null) {
+				if (total++ == 0) continue;
+				contactsList.add(lineValues);
 //				String name = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_NAME);
 //				String number = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_PHONE);
 //				String email = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_EMAIL);
 //				String notes = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_NOTES);
 //				String otherPhoneNumber = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE);
 //				boolean active = Boolean.valueOf(getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_STATUS));
-//				try {
-//					Contact c = new Contact(name, number, otherPhoneNumber, email, notes, active);
-//					contactDao.saveContact(c);
-//				} catch (DuplicateKeyException e) {
-//					// FIXME should actually pass details of this back to the user.
-//					LOG.debug("Contact already exist with this number [" + number + "]", e);
-//				}		
-//			}
-//		} finally {
-//			if (reader != null) reader.close();
-//		}
-//		LOG.trace("EXIT");
-//	}
+//				
+//				Contact c = new Contact(name, number, otherPhoneNumber, email, notes, active);		
+			}
+		} finally {
+			if (reader != null) reader.close();
+		}
+		
+		LOG.trace("EXIT");
+		return contactsList;
+	}
 
 //> STATIC HELPER METHODS	
 	/**
@@ -170,7 +169,7 @@ public class CsvImporter {
 	 * @param marker The marker we are looking for in the row format
 	 * @return The value in the specified index of the array, or an empty string if the array index is out of bounds.
 	 */
-	private static String getString(String[] values, CsvRowFormat rowFormat, String marker) {
+	public static String getString(String[] values, CsvRowFormat rowFormat, String marker) {
 		Integer index = rowFormat.getIndex(marker);
 		if(index == null) return "";
 		else return getString(values, index);

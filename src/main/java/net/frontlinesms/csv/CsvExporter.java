@@ -55,7 +55,7 @@ public class CsvExporter {
 	protected static Logger LOG = FrontlineUtils.getLogger(CsvExporter.class);
 			
 	/** The delimiter to use between group names when they are exported. */
-	protected static final String GROUPS_DELIMITER = "\\"; 
+	public static final String GROUPS_DELIMITER = "\\"; 
 	
 //> UTILITY METHODS
 	/**
