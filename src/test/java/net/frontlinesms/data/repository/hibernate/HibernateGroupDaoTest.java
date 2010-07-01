@@ -205,6 +205,24 @@ public class HibernateGroupDaoTest extends HibernateTestCase {
 		this.assertEquals(expectedResult, this.groupDao.getChildGroups(getRootGroup()));
 	}
 	
+	public void testCreateGroupIfAbsent() throws DuplicateKeyException {
+		this.groupDao.createGroupIfAbsent("/A");
+		this.groupDao.createGroupIfAbsent("B/2/a");
+		assertTrue(this.groupDao.getGroupByPath("/A") != null);
+		assertTrue(this.groupDao.getGroupByPath("/B") != null);
+		assertTrue(this.groupDao.getGroupByPath("/B/2") != null);
+		assertTrue(this.groupDao.getGroupByPath("/B/2/a") != null);
+		
+		this.groupDao.createGroupIfAbsent("/B/2/c");		
+		assertTrue(this.groupDao.getGroupByPath("/B/2/a") != null);
+		assertTrue(this.groupDao.getGroupByPath("/B/2/c") != null);
+		
+		this.groupDao.createGroupIfAbsent("GroupB/Group2/Groupa");
+		assertTrue(this.groupDao.getGroupByPath("/GroupB") != null);
+		assertTrue(this.groupDao.getGroupByPath("/GroupB/Group2") != null);
+		assertTrue(this.groupDao.getGroupByPath("/GroupB/Group2/Groupa") != null);
+	}
+	
 	/**
 	 * Check if both arrays passed in parameter are identical, order included
 	 * @param expectedResult

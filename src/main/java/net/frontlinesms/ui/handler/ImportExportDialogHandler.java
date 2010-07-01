@@ -372,6 +372,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		if(log.isDebugEnabled()) log.debug("Row Format: " + rowFormat);
 		CsvExporter.exportMessages(new File(filename), messages, rowFormat, contactDao);
 		uiController.setStatus(InternationalisationUtils.getI18NString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
+		this.uiController.infoMessage(InternationalisationUtils.getI18NString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
 	}
 	
 	/**
@@ -393,6 +394,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		
 		CsvExporter.exportContacts(new File(filename), contacts, groupMembershipDao, rowFormat);
 		uiController.setStatus(InternationalisationUtils.getI18NString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
+		this.uiController.infoMessage(InternationalisationUtils.getI18NString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
 	}
 	
 	/**
@@ -415,6 +417,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		log.debug("Row Format [" + rowFormat + "]");
 		CsvExporter.exportKeywords(new File(filename), keywords, rowFormat, this.contactDao, this.messageDao, messageType);
 		uiController.setStatus(InternationalisationUtils.getI18NString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
+		this.uiController.infoMessage(InternationalisationUtils.getI18NString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
 	}
 	
 	/**
@@ -460,7 +463,13 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		
 		String titleI18nKey = getWizardTitleI18nKey();
 		uiController.setText(this.wizardDialog, InternationalisationUtils.getI18NString(titleI18nKey));
-		uiController.add(this.uiController.find(this.wizardDialog, COMPONENT_PN_DETAILS), uiController.loadComponentFromFile(uiFile, this));
+		
+		Object pnDetails = this.uiController.find(this.wizardDialog, COMPONENT_PN_DETAILS);
+		if (pnDetails == null) {
+			uiController.add(this.wizardDialog, uiController.loadComponentFromFile(uiFile, this), 2);
+		} else {
+			uiController.add(pnDetails, uiController.loadComponentFromFile(uiFile, this));
+		}
 
 		// Add the wizard to the Thinlet controller
 		uiController.add(this.wizardDialog);

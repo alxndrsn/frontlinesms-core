@@ -83,8 +83,6 @@ public class CsvImporter {
 					contactDao.saveContact(c);
 					
 					// We make the contact join its groups
-					//List<String> pathList = Arrays.asList(groups.split(GROUPS_DELIMITER));
-					//Collections.sort(pathList, new FrontlineGroupPathComparator());
 					String[] pathList = groups.split(GROUPS_DELIMITER);
 					for (String path : pathList) {
 						if (path.length() == 0) continue;
