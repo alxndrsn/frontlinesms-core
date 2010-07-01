@@ -16,7 +16,6 @@ import org.apache.log4j.Logger;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.csv.CsvExporter;
 import net.frontlinesms.csv.CsvImporter;
-import net.frontlinesms.csv.CsvParseException;
 import net.frontlinesms.csv.CsvRowFormat;
 import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.domain.Contact;
@@ -658,7 +657,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	public void showSaveModeFileChooser(Object textFieldToBeSet) {
 		//FileChooser.showSaveModeFileChooser(this.uiController, this, "setFilename");
 		JFileChooser fc = new JFileChooser();
-		fc.setSelectedFile(new File("FrontlineSMS_Contacts.csv"));
+		fc.setSelectedFile(new File("FrontlineSMS_Export.csv"));
 		int returnVal = fc.showDialog(null, InternationalisationUtils.getI18NString("medic.common.label.open"));
 		if(returnVal == JFileChooser.APPROVE_OPTION){
 			this.uiController.setText(textFieldToBeSet, fc.getSelectedFile().getAbsolutePath());
