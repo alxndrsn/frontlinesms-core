@@ -28,11 +28,9 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.Column;
 
 import net.frontlinesms.*;
 import net.frontlinesms.data.*;
@@ -45,11 +43,12 @@ import net.frontlinesms.email.EmailException;
 import net.frontlinesms.events.*;
 import net.frontlinesms.listener.EmailListener;
 import net.frontlinesms.listener.UIListener;
+import net.frontlinesms.messaging.sms.SmsService;
+import net.frontlinesms.messaging.sms.SmsServiceManager;
+import net.frontlinesms.messaging.sms.events.NoSmsServicesConnectedNotification;
+import net.frontlinesms.messaging.sms.internet.SmsInternetService;
 import net.frontlinesms.plugins.*;
 import net.frontlinesms.resources.ResourceUtils;
-import net.frontlinesms.smsdevice.*;
-import net.frontlinesms.smsdevice.events.*;
-import net.frontlinesms.smsdevice.internet.SmsInternetService;
 import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.*;
 import net.frontlinesms.ui.handler.contacts.*;
@@ -107,8 +106,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/** The INTERNAL NAME of the tab (a thinlet UI component) currently active */
 	private String currentTab;
 	
-	/** The manager of {@link SmsDevice}s */
-	private final SmsDeviceManager phoneManager;
+	/** The manager of {@link SmsService}s */
+	private final SmsServiceManager phoneManager;
 	/** Manager of {@link PluginController}s */
 	private final PluginManager pluginManager;
 	
@@ -1679,7 +1678,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		return this.frontlineController;
 	}
 	/** @return {@link #phoneManager} */
-	public SmsDeviceManager getPhoneManager() {
+	public SmsServiceManager getPhoneManager() {
 		return this.phoneManager;
 	}
 	/** @return {@link #phoneDetailsManager} */
@@ -1788,13 +1787,13 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	/** Handle notifications from the {@link EventBus} */
 	public void notify(FrontlineEventNotification notification) {
-		if(notification instanceof NoSmsDevicesConnectedNotification) {
+		if(notification instanceof NoSmsServicesConnectedNotification) {
 			// Unable to connect to SMS devices.  If enabled, show the help dialog to prompt connection 
 			if (AppProperties.getInstance().isDeviceConnectionDialogEnabled()) {
 				synchronized (deviceConnectionDialogHandlerLock) {
 					if (deviceConnectionDialogHandler == null) {
 						deviceConnectionDialogHandler = new NoPhonesDetectedDialogHandler(this);
-						deviceConnectionDialogHandler.initDialog((NoSmsDevicesConnectedNotification) notification);
+						deviceConnectionDialogHandler.initDialog((NoSmsServicesConnectedNotification) notification);
 						add(deviceConnectionDialogHandler.getDialog());
 					}
 				}

@@ -93,6 +93,8 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler, EventOb
 		for (EmailAccount acc : emailAccounts) {
 			this.ui.add(table, ui.getRow(acc));
 		}
+		
+		this.enableBottomButtons(table);
 	}
 
 //> UI EVENT METHODS

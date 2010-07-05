@@ -251,8 +251,6 @@ public class SMSGatewayProxy
 
 	public int GetBalance ( String sUsername, String sPassword ) throws IntelliSMSException
 	{
-		String sBal;
-
 		String sUrl = "smsgateway/getbalance/default.aspx";
 		
 		String sFormData = "";
@@ -266,7 +264,6 @@ public class SMSGatewayProxy
 			throw new IntelliSMSException ( ResultCodes.InternalError, "Unable to encode supplied text strings", e );
 		}
 
-		String sRawResponse;
 		SMSGatewayRequestResult objSMSGatewayRequestResult = m_SMSGatewayService.MakeServiceRequest ( sUrl, sFormData, "BALANCE:", false );
 
 		int nBal = 0;

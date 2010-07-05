@@ -35,7 +35,7 @@ import net.frontlinesms.data.repository.*;
 import net.frontlinesms.data.*;
 import net.frontlinesms.listener.IncomingMessageListener;
 import net.frontlinesms.listener.UIListener;
-import net.frontlinesms.smsdevice.SmsDevice;
+import net.frontlinesms.messaging.sms.SmsService;
 
 import org.apache.log4j.Logger;
 import org.jdom.JDOMException;
@@ -93,7 +93,7 @@ public class IncomingMessageProcessor extends Thread {
 		this.uiListener = uiListener;
 	}
 
-	public void queue(SmsDevice receiver, CIncomingMessage incomingMessage) {
+	public void queue(SmsService receiver, CIncomingMessage incomingMessage) {
 		LOG.trace("Adding message to queue: " + receiver.hashCode() + ":" + incomingMessage.hashCode());
 		incomingMessageQueue.add(new IncomingMessageDetails(receiver, incomingMessage));
 	}
@@ -144,7 +144,7 @@ public class IncomingMessageProcessor extends Thread {
 	
 	private void processIncomingMessageDetails(IncomingMessageDetails incomingMessageDetails) {
 		CIncomingMessage incomingMessage = incomingMessageDetails.getMessage();
-		SmsDevice receiver = incomingMessageDetails.getReceiver();
+		SmsService receiver = incomingMessageDetails.getReceiver();
 		LOG.trace("Got message from queue: " + receiver.hashCode() + ":" + incomingMessage.hashCode());
 		
 		// Check the incoming message details with the KeywordFactory to make sure there are no details
@@ -513,13 +513,13 @@ class IncomingMessageDetails implements IncomingMessageProcessorQueueItem {
 	/** the message received */
 	private final CIncomingMessage message;
 	/** the device the message was received on */
-	private final SmsDevice receiver;
+	private final SmsService receiver;
 //> CONSTRUCTOR
 	/**
 	 * @param receiver The device which this message was received on. 
 	 * @param message The message
 	 */
-	public IncomingMessageDetails(SmsDevice receiver, CIncomingMessage message) {
+	public IncomingMessageDetails(SmsService receiver, CIncomingMessage message) {
 		this.receiver = receiver;
 		this.message = message;
 	}
@@ -529,7 +529,7 @@ class IncomingMessageDetails implements IncomingMessageProcessorQueueItem {
 		return message;
 	}
 	/** @return the device the message was received on */
-	public SmsDevice getReceiver() {
+	public SmsService getReceiver() {
 		return receiver;
 	}
 }

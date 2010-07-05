@@ -3,17 +3,10 @@
  */
 package net.frontlinesms.data.domain;
 
-import static org.mockito.Mockito.*;
 import thinlet.Thinlet;
 
-import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.FrontlineSMSConstants;
-import net.frontlinesms.data.repository.KeywordActionDao;
-import net.frontlinesms.data.repository.KeywordDao;
-import net.frontlinesms.data.repository.hibernate.HibernateKeywordActionDao;
-import net.frontlinesms.data.repository.hibernate.HibernateKeywordDao;
 import net.frontlinesms.junit.BaseTestCase;
-import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.keyword.KeywordTabHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 

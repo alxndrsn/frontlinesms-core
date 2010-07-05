@@ -19,8 +19,6 @@
  */
 package net.frontlinesms.listener;
 import net.frontlinesms.data.domain.*;
-import net.frontlinesms.smsdevice.SmsDevice;
-import net.frontlinesms.smsdevice.SmsDeviceStatus;
 
 public interface UIListener extends IncomingMessageListener {
 	

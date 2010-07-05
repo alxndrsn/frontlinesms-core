@@ -57,10 +57,9 @@ import org.apache.log4j.LogManager;
 import serial.SerialClassFactory;
 
 import net.frontlinesms.email.EmailException;
-import net.frontlinesms.email.smtp.SmtpEmailSender;
+import net.frontlinesms.messaging.CommProperties;
 import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
-import net.frontlinesms.smsdevice.CommProperties;
 import net.frontlinesms.ui.SimpleConstraints;
 import net.frontlinesms.ui.SimpleLayout;
 

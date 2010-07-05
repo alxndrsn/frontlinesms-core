@@ -4,7 +4,7 @@
 package net.frontlinesms.data.repository.hibernate;
 
 import net.frontlinesms.junit.HibernateTestCase;
-import net.frontlinesms.smsdevice.internet.ClickatellInternetService;
+import net.frontlinesms.messaging.sms.internet.ClickatellInternetService;
 
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.SmsInternetServiceSettings;

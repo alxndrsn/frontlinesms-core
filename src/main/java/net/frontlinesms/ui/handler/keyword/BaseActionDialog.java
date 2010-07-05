@@ -7,8 +7,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_EN
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_START_DATE;
 
 import java.text.ParseException;
-import java.util.Date;
-
 import org.apache.log4j.Logger;
 
 import net.frontlinesms.FrontlineUtils;

@@ -16,14 +16,14 @@ import net.frontlinesms.data.domain.SmsModemSettings;
 import net.frontlinesms.data.repository.SmsModemSettingsDao;
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
-import net.frontlinesms.smsdevice.SmsDevice;
-import net.frontlinesms.smsdevice.SmsDeviceEventListener;
-import net.frontlinesms.smsdevice.SmsDeviceManager;
-import net.frontlinesms.smsdevice.SmsDeviceStatus;
-import net.frontlinesms.smsdevice.SmsModem;
-import net.frontlinesms.smsdevice.SmsModemStatus;
-import net.frontlinesms.smsdevice.internet.SmsInternetService;
-import net.frontlinesms.smsdevice.internet.SmsInternetServiceStatus;
+import net.frontlinesms.messaging.sms.SmsService;
+import net.frontlinesms.messaging.sms.SmsServiceEventListener;
+import net.frontlinesms.messaging.sms.SmsServiceManager;
+import net.frontlinesms.messaging.sms.SmsServiceStatus;
+import net.frontlinesms.messaging.sms.internet.SmsInternetService;
+import net.frontlinesms.messaging.sms.internet.SmsInternetServiceStatus;
+import net.frontlinesms.messaging.sms.modem.SmsModem;
+import net.frontlinesms.messaging.sms.modem.SmsModemStatus;
 import net.frontlinesms.ui.Event;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
@@ -44,13 +44,13 @@ import serial.NoSuchPortException;
  * @author Alex
  */
 @TextResourceKeyOwner(prefix={"COMMON_", "I18N_", "MESSAGE_"})
-public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventListener, EventObserver {
+public class PhoneTabHandler extends BaseTabHandler implements SmsServiceEventListener, EventObserver {
 //> STATIC CONSTANTS
 	/** The fully-qualified name of the default {@link CATHandler} class. */
 	private static final String DEFAULT_CAT_HANDLER_CLASS_NAME = CATHandler.class.getName();
-	/** {@link Comparator} used for sorting {@link SmsDevice}s into a friendly order. */
-	private static final Comparator<? super SmsDevice> SMS_DEVICE_COMPARATOR = new Comparator<SmsDevice>() {
-			public int compare(SmsDevice one, SmsDevice tother) {
+	/** {@link Comparator} used for sorting {@link SmsService}s into a friendly order. */
+	private static final Comparator<? super SmsService> SMS_DEVICE_COMPARATOR = new Comparator<SmsService>() {
+			public int compare(SmsService one, SmsService tother) {
 				boolean oneIsModem = one instanceof SmsModem;
 				boolean totherIsModem = tother instanceof SmsModem;
 				if(!oneIsModem && !totherIsModem) return 0;
@@ -83,8 +83,6 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 	private static final String MESSAGE_PORT_NOT_FOUND = "message.port.not.found";
 	/** I18n Text Key: TODO */
 	private static final String MESSAGE_PORT_ALREADY_CONNECTED = "message.port.already.connected";
-	/** I18n Text Key: TODO */
-	private static final String MESSAGE_PHONE = "common.phone";
 	/** I18n Text Key: The requested port is already in use. */
 	private static final String I18N_PORT_IN_USE = "com.port.inuse";
 	
@@ -109,8 +107,8 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 //> INSTANCE PROPERTIES
 	/** Object to synchronize on before updating the phones list.  This is to prevent the list being rewritten by two different sources at the same time. */
 	private final Object PHONES_LIST_SYNCH_OBJECT = new Object();
-	/** The manager of {@link SmsDevice}s */
-	private final SmsDeviceManager phoneManager;
+	/** The manager of {@link SmsService}s */
+	private final SmsServiceManager phoneManager;
 	/** Data Access Object for {@link SmsModemSettings}s */
 	private final SmsModemSettingsDao smsModelSettingsDao;
 
@@ -148,7 +146,7 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 	public void showPhoneSettingsDialog(Object list) {
 		Object selected = ui.getSelectedItem(list);
 		if (selected != null) {
-			SmsDevice selectedPhone = ui.getAttachedObject(selected, SmsDevice.class);
+			SmsService selectedPhone = ui.getAttachedObject(selected, SmsService.class);
 			if (selectedPhone instanceof SmsModem) {
 				if (!((SmsModem) selectedPhone).isDisconnecting())
 					showPhoneSettingsDialog((SmsModem) selectedPhone, false);
@@ -215,21 +213,21 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 	}
 
 	/**
-	 * Disconnect from a specific {@link SmsDevice}.
-	 * @param list The list of connected {@link SmsDevice}s in the Phones tab.
+	 * Disconnect from a specific {@link SmsService}.
+	 * @param list The list of connected {@link SmsService}s in the Phones tab.
 	 */
 	public void disconnectFromSelected(Object list) {
-		SmsDevice dev = ui.getAttachedObject(ui.getSelectedItem(list), SmsDevice.class); 
+		SmsService dev = ui.getAttachedObject(ui.getSelectedItem(list), SmsService.class); 
 		phoneManager.disconnect(dev);
 		refresh();
 	}
 	
 	/**
-	 * Stop detection of the {@link SmsDevice} on a specific port.
-	 * @param list The list of ports which are currently being probed for connected {@link SmsDevice}s.
+	 * Stop detection of the {@link SmsService} on a specific port.
+	 * @param list The list of ports which are currently being probed for connected {@link SmsService}s.
 	 */
 	public void stopDetection(Object list) {
-		SmsDevice dev = ui.getAttachedObject(ui.getSelectedItem(list), SmsDevice.class);
+		SmsService dev = ui.getAttachedObject(ui.getSelectedItem(list), SmsService.class);
 		if (dev instanceof SmsModem) {
 			SmsModem modem = (SmsModem) dev;
 			phoneManager.stopDetection(modem.getPort());
@@ -249,7 +247,7 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 		if (selected == null) {
 			ui.setVisible(popUp, false);
 		} else {
-			SmsDevice dev = ui.getAttachedObject(selected, SmsDevice.class);
+			SmsService dev = ui.getAttachedObject(selected, SmsService.class);
 			if (dev instanceof SmsModem) {
 				SmsModem modem = (SmsModem) dev;
 				ui.setVisible(ui.find(popUp, "miEditPhone"), false);
@@ -270,7 +268,7 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 	 */
 	public void connectToSelectedPhoneHandler() {
 		Object modemListError = ui.find(COMPONENT_PHONE_MANAGER_MODEM_LIST_ERROR);
-		SmsDevice selectedPhoneHandler = ui.getAttachedObject(ui.getSelectedItem(modemListError), SmsDevice.class);
+		SmsService selectedPhoneHandler = ui.getAttachedObject(ui.getSelectedItem(modemListError), SmsService.class);
 		if(selectedPhoneHandler != null) {
 			if (selectedPhoneHandler instanceof SmsModem) {
 				SmsModem modem = (SmsModem) selectedPhoneHandler;
@@ -310,7 +308,7 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 		}
 		
 		Object selected = ui.getSelectedItem(list);
-		SmsDevice selectedPhone = ui.getAttachedObject(selected, SmsDevice.class);
+		SmsService selectedPhone = ui.getAttachedObject(selected, SmsService.class);
 		if (selectedPhone instanceof SmsModem) {
 			SmsModem modem = (SmsModem) selectedPhone;
 			ui.setText(ui.find(configDialog,"lbPortName"), modem.getPort());
@@ -360,7 +358,7 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 	 * @param device
 	 * @param deviceStatus
 	 */
-	public void smsDeviceEvent(SmsDevice device, SmsDeviceStatus deviceStatus) {
+	public void smsDeviceEvent(SmsService device, SmsServiceStatus deviceStatus) {
 		log.trace("ENTER");
 		
 		// Handle modems first
@@ -504,13 +502,13 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 			ui.removeAll(getModemListComponent());
 			ui.removeAll(modemListError);
 
-			SmsDevice[] smsDevices = phoneManager.getAllPhones().toArray(new SmsDevice[0]);
+			SmsService[] smsDevices = phoneManager.getAllPhones().toArray(new SmsService[0]);
 			
 			// Sort the SmsDevices by port name
 			Arrays.sort(smsDevices, SMS_DEVICE_COMPARATOR);
 			
 			// Add the SmsDevices to the relevant tables
-			for (SmsDevice dev : smsDevices) {
+			for (SmsService dev : smsDevices) {
 				if (dev.isConnected()) {
 					ui.add(getModemListComponent(), getTableRow(dev, true));
 				} else {
@@ -531,7 +529,7 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 	 * @param isConnected <code>true</code> if the supplied device is to appear in the "connected" list; <code>false</code> otherwise
 	 * @return Thinlet table row component detailing the supplied device.
 	 */
-	private Object getTableRow(SmsDevice dev, boolean isConnected) {
+	private Object getTableRow(SmsService dev, boolean isConnected) {
 		Object row = ui.createTableRow(dev);
 
 // FIXME these now share getMsisdn() code.
@@ -593,11 +591,11 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 
 //> STATIC HELPER METHODS
 	/**
-	 * Gets the status of an {@link SmsDevice} as an internationalised {@link String}.
+	 * Gets the status of an {@link SmsService} as an internationalised {@link String}.
 	 * @param device
-	 * @return An internationalised {@link String} describing the status of the {@link SmsDevice}.
+	 * @return An internationalised {@link String} describing the status of the {@link SmsService}.
 	 */
-	private static String getSmsDeviceStatusAsString(SmsDevice device) {
+	private static String getSmsDeviceStatusAsString(SmsService device) {
 		return InternationalisationUtils.getI18NString(device.getStatus().getI18nKey(), device.getStatusDetail());
 	}
 	

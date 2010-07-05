@@ -140,9 +140,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private static final String COMPONENT_PN_CHECKBOXES = "pnContactInfo"; // TODO: get this changed
 	private static final String COMPONENT_PN_VALUES_TABLE = "pnValuesTable";
 	private static final String COMPONENT_PN_DETAILS = "pnDetails";
-	private static final int UI_TABLE_WIDTH = 600;
-	
-//> STATIC CONSTANTS
+	//> STATIC CONSTANTS
 	public enum EntityType {
 		/** Export entity type: {@link Contact} */
 		CONTACTS,

@@ -1,6 +1,5 @@
 package IntelliSoftware.SMSGateway.SDK.IntelliSMSJavaSDK;
 
-import java.io.*;
 import IntelliSoftware.Common.*;
 import IntelliSoftware.SMSGateway.SDK.IntelliSMSJavaSDK.Internal.*;
 

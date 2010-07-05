@@ -1,7 +1,5 @@
 package IntelliSoftware.SMSGateway.SDK.IntelliSMSJavaSDK.Internal;
 
-import java.io.*;
-import java.lang.*;
 import IntelliSoftware.Common.*;
 import IntelliSoftware.SMSGateway.SDK.IntelliSMSJavaSDK.*;
 
@@ -196,8 +194,6 @@ class SMSGatewayService
 		SMSGatewayRequestResult objSMSGatewayRequestResult = new SMSGatewayRequestResult();
 
 		String sDelayTimePrefix = "DELAY:";
-
-		String sRetCode = "";
 
 		try
 		{

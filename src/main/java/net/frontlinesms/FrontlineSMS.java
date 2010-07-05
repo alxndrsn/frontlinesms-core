@@ -29,13 +29,16 @@ import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.listener.*;
+import net.frontlinesms.messaging.sms.DummySmsService;
+import net.frontlinesms.messaging.sms.SmsService;
+import net.frontlinesms.messaging.sms.SmsServiceEventListener;
+import net.frontlinesms.messaging.sms.SmsServiceManager;
+import net.frontlinesms.messaging.sms.SmsServiceStatus;
+import net.frontlinesms.messaging.sms.internet.SmsInternetService;
 import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginControllerProperties;
 import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
-import net.frontlinesms.smsdevice.*;
-import net.frontlinesms.smsdevice.internet.SmsInternetService;
-
 import org.apache.log4j.Logger;
 import org.smslib.CIncomingMessage;
 import org.springframework.beans.MutablePropertyValues;
@@ -83,7 +86,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	/** Logging object */
 	private static Logger LOG = FrontlineUtils.getLogger(FrontlineSMS.class);
 	/** SMS device emulator */
-	public static final SmsDevice EMULATOR = new DummySmsDevice(FrontlineSMSConstants.EMULATOR_MSISDN);
+	public static final SmsService EMULATOR = new DummySmsService(FrontlineSMSConstants.EMULATOR_MSISDN);
 	
 //> INSTANCE VARIABLES
 
@@ -113,7 +116,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	/** Class that handles sending of email messages */
 	private EmailServerHandler emailServerManager;
 	/** Manager of SMS devices */
-	private SmsDeviceManager smsDeviceManager;
+	private SmsServiceManager smsDeviceManager;
 	/** Asynchronous processor of received messages. */
 	private IncomingMessageProcessor incomingMessageProcessor;
 	private PluginManager pluginManager;
@@ -123,8 +126,8 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	private EmailListener emailListener;
 	/** Listener for UI-related events */
 	private UIListener uiListener;
-	/** Listener for {@link SmsDevice} events. */
-	private SmsDeviceEventListener smsDeviceEventListener;
+	/** Listener for {@link SmsService} events. */
+	private SmsServiceEventListener smsDeviceEventListener;
 	/** Main {@link EventBus} through which all core events should be channelled. */
 	private EventBus eventBus;
 	
@@ -207,7 +210,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		incomingMessageProcessor.start();
 		
 		LOG.debug("Starting Phone Manager...");
-		smsDeviceManager = new SmsDeviceManager();
+		smsDeviceManager = new SmsServiceManager();
 		smsDeviceManager.setSmsListener(this);
 		smsDeviceManager.setEventBus(getEventBus());
 		smsDeviceManager.listComPortsAndOwners(false);
@@ -357,12 +360,12 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	
 //> EVENT HANDLER METHODS
 	/** Called by the SmsHandler when an SMS message is received. */
-	public synchronized void incomingMessageEvent(SmsDevice receiver, CIncomingMessage incomingMessage) {
+	public synchronized void incomingMessageEvent(SmsService receiver, CIncomingMessage incomingMessage) {
 		this.incomingMessageProcessor.queue(receiver, incomingMessage);
 	}
 
 	/** Passes an outgoing message event to the SMS Listener if one is specified. */
-	public synchronized void outgoingMessageEvent(SmsDevice sender, FrontlineMessage outgoingMessage) {
+	public synchronized void outgoingMessageEvent(SmsService sender, FrontlineMessage outgoingMessage) {
 		// The message status will have changed, so save it here
 		this.messageDao.updateMessage(outgoingMessage);
 		
@@ -373,7 +376,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	}
 
 	/** Passes a device event to the SMS Listener if one is specified. */
-	public void smsDeviceEvent(SmsDevice activeDevice, SmsDeviceStatus status) {
+	public void smsDeviceEvent(SmsService activeDevice, SmsServiceStatus status) {
 		// FIXME these events MUST be queued and processed on a separate thread
 		// FIXME should log this message here
 		if (this.smsDeviceEventListener != null) {
@@ -491,13 +494,13 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		this.incomingMessageProcessor.setUiListener(uiListener);
 	}
 	
-	/** @param smsDeviceEventListener new value for {@link #smsDeviceEvent(SmsDevice, SmsDeviceStatus)} */
-	public void setSmsDeviceEventListener(SmsDeviceEventListener smsDeviceEventListener) {
+	/** @param smsDeviceEventListener new value for {@link #smsDeviceEvent(SmsService, SmsServiceStatus)} */
+	public void setSmsDeviceEventListener(SmsServiceEventListener smsDeviceEventListener) {
 		this.smsDeviceEventListener = smsDeviceEventListener;
 	}
 	
 	/** @return {@link #smsDeviceManager} */
-	public SmsDeviceManager getSmsDeviceManager() {
+	public SmsServiceManager getSmsDeviceManager() {
 		return this.smsDeviceManager;
 	}
 

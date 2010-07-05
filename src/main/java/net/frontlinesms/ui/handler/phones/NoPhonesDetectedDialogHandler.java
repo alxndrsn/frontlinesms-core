@@ -7,7 +7,7 @@ import java.awt.Image;
 
 import net.frontlinesms.AppProperties;
 import net.frontlinesms.FrontlineUtils;
-import net.frontlinesms.smsdevice.events.NoSmsDevicesConnectedNotification;
+import net.frontlinesms.messaging.sms.events.NoSmsServicesConnectedNotification;
 import net.frontlinesms.ui.DatabaseSettings;
 import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.ThinletUiEventHandler;
@@ -78,13 +78,13 @@ public class NoPhonesDetectedDialogHandler implements ThinletUiEventHandler {
 	/**
 	 * Setup the details of the dialog.
 	 */
-	public void initDialog(NoSmsDevicesConnectedNotification notification) {
+	public void initDialog(NoSmsServicesConnectedNotification notification) {
 		this.dialogComponent = uiController.loadComponentFromFile(UI_FILE_DEVICE_CONNECTION_DIALOG, this);
 		this.populatePanel(notification);
 	}
 
 	/** Populate the panel containing settings specific to the currently-selected {@link DatabaseSettings}. */
-	private void populatePanel(NoSmsDevicesConnectedNotification notification) {
+	private void populatePanel(NoSmsServicesConnectedNotification notification) {
 		// Populate the dialog depending on the content of the notification
 		// if there were NO DEVICES detected, show the NO DEVICES panel
 		setVisible(COMPONENT_NO_DEVICES_PARENT_PANEL, notification.isNoDevices(),

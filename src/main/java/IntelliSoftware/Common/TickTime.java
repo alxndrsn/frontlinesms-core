@@ -1,7 +1,5 @@
 package IntelliSoftware.Common;
 
-import java.io.*;
-
 public class TickTime
 {
 	long m_TickCount = 0;

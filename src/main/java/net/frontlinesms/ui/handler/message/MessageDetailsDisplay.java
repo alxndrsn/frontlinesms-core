@@ -13,7 +13,7 @@ import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
-import net.frontlinesms.mmsdevice.MmsPollingEmailReceiver;
+import net.frontlinesms.messaging.mms.email.MmsPollingEmailReceiver;
 import net.frontlinesms.ui.FrontlineUiUtils;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;

@@ -51,7 +51,7 @@ import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
-import net.frontlinesms.mmsdevice.MmsPollingEmailReceiver;
+import net.frontlinesms.messaging.mms.email.MmsPollingEmailReceiver;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiProperties;

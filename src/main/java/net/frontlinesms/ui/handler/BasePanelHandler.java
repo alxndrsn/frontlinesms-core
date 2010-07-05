@@ -6,11 +6,9 @@ package net.frontlinesms.ui.handler;
 import org.apache.log4j.Logger;
 
 import net.frontlinesms.FrontlineUtils;
-import net.frontlinesms.ui.ExtendedThinlet;
 import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
-import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
  * Base event handler for a UI dialog component.

@@ -22,7 +22,7 @@ import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.junit.BaseTestCase;
 import net.frontlinesms.listener.UIListener;
-import net.frontlinesms.smsdevice.SmsDevice;
+import net.frontlinesms.messaging.sms.SmsService;
 
 /**
  * Tests for the {@link IncomingMessageProcessor} class.
@@ -175,7 +175,7 @@ public class IncomingMessageProcessorTest extends BaseTestCase {
 	 * @return
 	 */
 	private FrontlineMessage testMessageReceive(CIncomingMessage message) {
-		SmsDevice receiver = mock(SmsDevice.class);
+		SmsService receiver = mock(SmsService.class);
 		imp.queue(receiver, message);
 		
 		// Wait for the message to be processed, and then check that the expected steps were taken
