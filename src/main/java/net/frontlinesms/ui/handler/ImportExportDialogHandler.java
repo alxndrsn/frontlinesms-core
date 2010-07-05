@@ -733,8 +733,6 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 				}
 				this.uiController.add(valuesTable, row);
 			}
-		
-			this.uiController.setVisible(pnValuesTable, this.uiController.getItems(header).length != 0);
 		}
 	}
 
