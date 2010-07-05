@@ -82,4 +82,8 @@ public class UnmodifiableGroupDao implements GroupDao {
 	public void deleteGroup(Group group, boolean destroyContacts) {
 		throw new IllegalStateException();
 	}
+	/** @deprecated */
+	public Group createGroupIfAbsent(String path) {
+		throw new IllegalStateException();
+	}
 }

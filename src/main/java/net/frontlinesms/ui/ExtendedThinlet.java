@@ -317,6 +317,18 @@ public class ExtendedThinlet extends Thinlet {
 		setAttachedObject(node, attachedObject);
 		return node;
 	}
+	
+	/**
+	 * Create a Thinlet UI Component of type table row, and attaches the
+	 * supplied object to it.
+	 * @param attachedObject
+	 * @return a table row with an object attached
+	 */
+	public final Object createTableHeader(Object attachedObject) {
+    	Object header = Thinlet.create(HEADER);
+    	setAttachedObject(header, attachedObject);
+    	return header;
+    }
 
 	/**
 	 * Create a Thinlet UI Component of type table row, and attaches the
@@ -432,13 +444,21 @@ public class ExtendedThinlet extends Thinlet {
 	 * TEXT attribute to the supplied text and attaches the supplied OBJECT.
 	 * @param text
 	 * @param attachedObject
+	 * @param width
 	 * @return
 	 */
-	public final Object createColumn(String text, Object attachedObject) {
+	public final Object createColumn(String text, Object attachedObject, int width) {
 		Object item = Thinlet.create(COLUMN);
 		setString(item, TEXT, text);
 		setAttachedObject(item, attachedObject);
+		if (width > 0) {
+			setWidth(item, width);
+		}
 		return item;
+	}
+	
+	public final Object createColumn(String text, Object attachedObject) {
+		return createColumn(text, attachedObject, 0);
 	}
 	
 	/**

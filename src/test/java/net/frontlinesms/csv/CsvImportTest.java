@@ -10,7 +10,17 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Arrays;
 
+import net.frontlinesms.data.DuplicateKeyException;
+import net.frontlinesms.data.domain.Contact;
+import net.frontlinesms.data.domain.Group;
+import net.frontlinesms.data.repository.ContactDao;
+import net.frontlinesms.data.repository.GroupDao;
+import net.frontlinesms.data.repository.GroupMembershipDao;
+
 import org.apache.log4j.Logger;
+import org.mockito.internal.verification.Times;
+
+import static org.mockito.Mockito.*;
 
 import junit.framework.TestCase;
 
@@ -18,7 +28,8 @@ import junit.framework.TestCase;
  * Test class for {@link CsvImporter}.
  * @author Alex
  */
-public class CsvImportTests extends TestCase {
+public class CsvImportTest extends TestCase {
+	
 //> CONSTANTS
 	/** Path to the test resources folder.  TODO should probably get these relative to the current {@link ClassLoader}'s path. */
 	private static final String RESOURCE_PATH = "src/test/resources/net/frontlinesms/csv/";
@@ -53,6 +64,37 @@ public class CsvImportTests extends TestCase {
 		}
 	}
 	
+	public void testImportContactsWithGroups () {
+		File importFile = new File(RESOURCE_PATH + "ImportWithGroups.csv");
+		CsvRowFormat rowFormat = getRowFormatForContacts();
+		
+		ContactDao contactDao = mock(ContactDao.class);
+		GroupDao groupDao = mock(GroupDao.class);
+		GroupMembershipDao groupMembershipDao = mock(GroupMembershipDao.class);
+		
+		try {
+			CsvImporter.importContacts(importFile, contactDao, groupMembershipDao, groupDao, rowFormat);
+			
+			verify(contactDao, new Times(4)).saveContact(any(Contact.class));
+			// TODO: check creation of groups
+		} catch (Exception e) {
+			fail();
+		}		
+	}
+	
+	private CsvRowFormat getRowFormatForContacts() {
+		CsvRowFormat rowFormat = new CsvRowFormat();
+		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_NAME);
+		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_PHONE);
+		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_OTHER_PHONE);
+		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_EMAIL);
+		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_STATUS);
+		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_NOTES);
+		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_GROUPS);
+		
+		return rowFormat;
+	}
+
 	/**
 	 * Get all import test files from /test/net/frontlinesms/csv/import/, and read
 	 * them in.  The files should all fail parsing in some way!

@@ -144,4 +144,26 @@ public class HibernateGroupDao extends BaseHibernateDao<Group> implements GroupD
 	protected <T> List<T> getList(Class<T> entityClass, String hqlQuery, Object... values) {
 		return this.getHibernateTemplate().find(hqlQuery, values);
 	}
+
+	public Group createGroupIfAbsent(String path) throws DuplicateKeyException {
+		if (path.length() == 0) {
+			return new Group(null, null);
+		} else {
+			Group group = getGroupByPath(path);
+			
+			if (group == null) {
+				int pos = path.lastIndexOf(Group.PATH_SEPARATOR);
+				if (pos == -1) pos = 0;
+				Group parent = this.createGroupIfAbsent(path.substring(0, pos));
+				path = path.substring(pos, path.length());
+				if (path.startsWith(String.valueOf(Group.PATH_SEPARATOR))) {
+					path = path.substring(1, path.length());
+				}
+				group = new Group(parent, path);
+				saveGroup(group);
+			}
+			
+			return group;
+		}
+	}
 }

@@ -154,7 +154,7 @@ public class FrontlineUtils {
 	public static String contactGroupsAsString(Collection<Group> groupCollection, String groups_delimiter) {
 		String groups = "";
 		for (Group g : groupCollection) {
-			groups += g.getName() + groups_delimiter;
+			groups += g.getPath() + groups_delimiter;
 		}
 		if (groups.endsWith(groups_delimiter)) {
 			groups = groups.substring(0, groups.length() - groups_delimiter.length());

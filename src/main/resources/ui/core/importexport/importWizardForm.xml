@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<dialog closable="true" columns="1" close="removeDialog(this)" bottom="5" font="bold" gap="5" icon="/icons/import.png"
-		left="5" modal="true" name="importWizardDialog" right="5" text="i18n.common.import" top="5">
-    <label alignment="center" font="bold" i18n="true" text="i18n.importexport.details.choose"/>
-    
-    <panel bottom="5" columns="1" gap="5" left="5" right="5" top="5" weightx="1" weighty="1">
-        <panel bottom="3" colspan="2" gap="5" top="3">
-            <label text="i18n.common.directory"/>
-            <textfield columns="45" name="tfDirectory" weightx="1"/>
-            <button action="showOpenModeFileChooser(tfDirectory)" icon="/icons/browse.png" text="i18n.action.browse" weightx="1"/>
-        </panel>
-        <panel gap="5" halign="center">
-            <button action="doImport(tfDirectory.text)" icon="/icons/import.png" text="i18n.common.import"/>
-            <button action="removeDialog(importWizardDialog)" icon="/icons/cross.png" text="i18n.action.cancel"/>
-        </panel>
+<dialog closable="true" columns="2" close="removeDialog(this)" bottom="5" font="bold" gap="5" icon="/icons/import.png"
+		left="5" modal="false" name="importWizardDialog" right="5" text="i18n.common.import" top="5">
+    <panel bottom="3" colspan="2" gap="5" top="3">
+	    <label text="i18n.common.directory"/>
+	    <textfield columns="45" name="tfDirectory" weightx="1"/>
+	    <button action="showOpenModeFileChooser(tfDirectory)" icon="/icons/browse.png" text="i18n.action.browse" weightx="1"/>
+	</panel>
+	<panel colspan="2" columns="1" name="pnDetails" bottom="3" gap="5" top="3" halign="center">
+		<label alignment="center" font="bold" i18n="true" text="i18n.importexport.details.choose"/>
     </panel>
+	<panel name="pnValuesTable" gap="8" colspan="2" text="Preview" border="true">
+		 <table name="tbValues" weightx="1" weighty="1" height="140" width="600">
+			<!-- This will be populated at runtime with the list of values inside the CSV file -->
+		</table>    
+	</panel>
+	<panel gap="5" halign="center" colspan="2">
+	    <button type="default" action="doImport(tfDirectory.text)" icon="/icons/import.png" text="i18n.common.import"/>
+	    <button type="cancel" action="removeDialog(importWizardDialog)" icon="/icons/cross.png" text="i18n.action.cancel"/>
+	</panel>
 </dialog>

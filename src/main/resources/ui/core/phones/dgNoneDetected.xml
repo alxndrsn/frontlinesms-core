@@ -29,7 +29,7 @@
     	<checkbox colspan="2" name="cbAlwaysShow" action="manageAlwaysShow(cbAlwaysShow.selected)" selected="true" text="i18n.device.connection.always.show"/>
     </panel>
     <panel columns="2" gap="7" halign="center">
-	    <button action="retryDeviceConnection" text="i18n.common.db.retry" icon="/icons/refresh.png"/>
-	    <button action="removeDialog(deviceConnectionDialog)" icon="/icons/cross.png" name="btCancel" text="i18n.action.close"/>
+	    <button type="default" action="retryDeviceConnection" text="i18n.common.db.retry" icon="/icons/refresh.png"/>
+	    <button type="cancel" action="removeDialog(deviceConnectionDialog)" icon="/icons/cross.png" name="btCancel" text="i18n.action.close"/>
 	</panel>
 </dialog>
