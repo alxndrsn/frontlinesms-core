@@ -36,7 +36,7 @@ public class HibernateEmailAccountDaoTest extends HibernateTestCase {
 		String accountServer = "FrontlineSMS Test";
 		int accountServerPort = 123;
 		String accountPassword = "secretpassword";
-		EmailAccount account = new EmailAccount(accountName, accountServer, accountServerPort, accountPassword, useSsl);
+		EmailAccount account = new EmailAccount(accountName, accountServer, accountServerPort, accountPassword, useSsl, false);
 		emailAccountDao.saveEmailAccount(account);
 		assertEquals(1, emailAccountDao.getAllEmailAccounts().size());
 		
@@ -65,9 +65,9 @@ public class HibernateEmailAccountDaoTest extends HibernateTestCase {
 		String accountServer = "FrontlineSMS Test";
 		int accountServerPort = 123;
 		String accountPassword = "secretpassword";
-		EmailAccount account = new EmailAccount(accountName, accountServer, accountServerPort, accountPassword, useSsl);
+		EmailAccount account = new EmailAccount(accountName, accountServer, accountServerPort, accountPassword, useSsl, false);
 		emailAccountDao.saveEmailAccount(account);
-		EmailAccount duplicateAccount = new EmailAccount(accountName, accountServer, accountServerPort, accountPassword, useSsl);
+		EmailAccount duplicateAccount = new EmailAccount(accountName, accountServer, accountServerPort, accountPassword, useSsl, false);
 		try {
 			System.out.println("Preparing to save...");
 			emailAccountDao.saveEmailAccount(duplicateAccount);

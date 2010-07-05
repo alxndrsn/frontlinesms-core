@@ -61,7 +61,7 @@ public class EmailActionDialog extends BaseActionDialog implements EventObserver
 		super(ui, owner);
 		this.emailAccountDao = ui.getFrontlineController().getEmailAccountFactory();
 		
-		// register with the eventbus to receive notification of new email accounts
+		// Register with the eventbus to receive notification of new email accounts
 		ui.getFrontlineController().getEventBus().registerObserver(this);
 	}
 	
@@ -89,7 +89,7 @@ public class EmailActionDialog extends BaseActionDialog implements EventObserver
 	public void refreshEmailAccountList() {
 		Object list = find(COMPONENT_MAIL_LIST);
 		this.ui.removeAll(list);
-		for (EmailAccount acc : emailAccountDao.getAllEmailAccounts()) {
+		for (EmailAccount acc : emailAccountDao.getSendingEmailAccounts()) {
 			log.debug("Adding existent e-mail account [" + acc.getAccountName() + "] to list");
 			Object item = ui.createListItem(acc.getAccountName(), acc);
 			ui.setIcon(item, Icon.SERVER);
@@ -239,7 +239,7 @@ public class EmailActionDialog extends BaseActionDialog implements EventObserver
 //> UI PASSTHROUGH METHODS
 	/** Show the email account settings dialog. */
 	public void showEmailAccountsSettings() {
-		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this.ui);
+		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this.ui, false);
 		ui.add(emailAccountDialogHandler.getDialog());
 	}
 }

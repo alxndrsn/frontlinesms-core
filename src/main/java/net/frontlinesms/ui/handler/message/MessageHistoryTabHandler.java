@@ -25,6 +25,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_MESSAGE_HIS
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,6 +38,7 @@ import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
+import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.FrontlineMessage;
@@ -49,6 +51,7 @@ import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
+import net.frontlinesms.mmsdevice.MmsPollingEmailReceiver;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiProperties;
@@ -73,8 +76,6 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 //> CONSTANTS
 	/** Path to the Thinlet XML layout file for the message history tab */
 	private static final String UI_FILE_MESSAGES_TAB = "/ui/core/messages/messagesTab.xml";
-	/** Path to the Thinlet XML layout file for the message details form */
-	public static final String UI_FILE_MSG_DETAILS_FORM = "/ui/core/messages/dgMessageDetails.xml";
 
 	/** UI Component name: the list of messages */
 	public static final String COMPONENT_MESSAGE_LIST = "messageList";
@@ -627,20 +628,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		Object selected = ui.getSelectedItem(this.messageListComponent);
 		if (selected != null) {
 			FrontlineMessage message = ui.getMessage(selected);
-			Object details = ui.loadComponentFromFile(UI_FILE_MSG_DETAILS_FORM, this);
-			String senderDisplayName = ui.getSenderDisplayValue(message);
-			String recipientDisplayName = ui.getRecipientDisplayValue(message);
-			String status = UiGeneratorController.getMessageStatusAsString(message);
-			String date = InternationalisationUtils.getDatetimeFormat().format(message.getDate());
-			String content = message.getTextContent();
-			
-			ui.setText(ui.find(details, "tfStatus"), status);
-			ui.setText(ui.find(details, "tfSender"), senderDisplayName);
-			ui.setText(ui.find(details, "tfRecipient"), recipientDisplayName);
-			ui.setText(ui.find(details, "tfDate"), date);
-			ui.setText(ui.find(details, "tfContent"), content);
-			
-			ui.add(details);
+			new MessageDetailsDisplay(ui).show(message);
 		}
 	}
 	
@@ -852,6 +840,15 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	/** @see UiGeneratorController#showDateSelecter(Object) */
 	public void showDateSelecter(Object textField) {
 		this.ui.showDateSelecter(textField);
+	}
+	
+
+	
+	public void dbgGenerateMms() {
+		Collection<FrontlineMultimediaMessage> mms = new MmsPollingEmailReceiver().dbgCreateMessagesFromClasspath();
+		for(FrontlineMultimediaMessage mm : mms) {
+			this.ui.getFrontlineController().getMessageDao().saveMessage(mm);
+		}
 	}
 	
 //> HELPER METHODS

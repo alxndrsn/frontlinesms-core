@@ -3,8 +3,7 @@
     <label text="i18n.sentence.impossible.to.connect"/>
     <label text="i18n.sentence.would.you.like.to.create.account"/>
     <panel gap="10" halign="center">
-    	<button action="createAccount(connectionWarning)" icon="/icons/tick.png" name="btYes" text="i18n.action.yes"/>
-        <button action="removeDialog(connectionWarning)" icon="/icons/cross.png" name="btNo" text="i18n.action.no"/>
-        <button action="removeDialog(connectionWarning)" name="btCancel" text="i18n.action.cancel"/>
+    	<button type="default" action="createAccount(connectionWarning)" icon="/icons/tick.png" name="btYes" text="i18n.action.yes"/>
+        <button type="cancel" action="removeDialog(connectionWarning)" icon="/icons/cross.png" name="btNo" text="i18n.action.no"/>
     </panel>
 </dialog>

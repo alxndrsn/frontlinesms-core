@@ -36,6 +36,18 @@ public interface EmailAccountDao {
 	public Collection<EmailAccount> getAllEmailAccounts();
 	
 	/**
+	 * Returns all sending email accounts saved in the data source
+	 * @return all sending email accounts in the data source
+	 */
+	public Collection<EmailAccount> getSendingEmailAccounts();
+	
+	/**
+	 * Returns all receiving email accounts saved in the data source
+	 * @return all receiving email accounts in the data source
+	 */
+	public Collection<EmailAccount> getReceivingEmailAccounts();
+	
+	/**
 	 * Delete the supplied account from the data source.
 	 * @param account
 	 */
