@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -890,8 +891,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		if (cost.length() == 0) this.setCostPerSms(0);
 		else {
 			try {
-				cost = cost.replace(',', '.');
-				cost = cost.replace(';', '.');
+				cost = cost.replace(',', '.').replace(';', '.');
 				double costPerSMS = (InternationalisationUtils.parseCurrency(cost))/* * Utils.TIMES_TO_INT*/;//FIXME this will likely give some very odd costs - needs adjusting for moving decimal point.
 				this.setCostPerSms(costPerSMS);
 			} catch (ParseException e) {

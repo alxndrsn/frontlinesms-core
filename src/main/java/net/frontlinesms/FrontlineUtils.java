@@ -111,7 +111,7 @@ public class FrontlineUtils {
 			
 			// If we are looking for a conversion of a start date, then no worries, because the first milliseconds of
 			// the given day is returned
-			if (!isStartDate) {
+			if (!isStartDate && !dateFieldString.contains(" ")) { // We just do that if the format is a simple format (without time)
 				// Otherwise, we're looking for the last milliseconds of the given day
 				// So, we seek the first millisecond of the day after
 				c.add(Calendar.DATE, 1);
@@ -154,7 +154,7 @@ public class FrontlineUtils {
 	public static String contactGroupsAsString(Collection<Group> groupCollection, String groups_delimiter) {
 		String groups = "";
 		for (Group g : groupCollection) {
-			groups += g.getName() + groups_delimiter;
+			groups += g.getPath() + groups_delimiter;
 		}
 		if (groups.endsWith(groups_delimiter)) {
 			groups = groups.substring(0, groups.length() - groups_delimiter.length());

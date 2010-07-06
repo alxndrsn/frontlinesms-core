@@ -29,7 +29,7 @@ import net.frontlinesms.data.EntityField;
  * @author Alex
  */
 @Entity(name=Group.TABLE_NAME)
-public class Group {
+public class Group implements Comparable<Group> {
 
 //> DATABASE NAMES
 	/** Table name */
@@ -184,6 +184,14 @@ public class Group {
 	@Override
 	public String toString() {
 		return this.path;
+	}
+
+	public int compareTo(Group o) {
+		if (o.getPath().split("/").length > this.getPath().split("/").length) {
+			return 1;
+		} else {
+			return -1;
+		}
 	}
 	
 }
