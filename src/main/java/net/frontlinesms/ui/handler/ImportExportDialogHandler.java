@@ -628,14 +628,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	 * @see FrontlineUI#showOpenModeFileChooser(Object) */
 	public void showOpenModeFileChooser() {
 		FileChooser fc = FileChooser.createFileChooser(this.uiController, this, "openChooseComplete");
-//		this.uiController.showOpenModeFileChooser(textFieldToBeSet);
-//		JFileChooser fc = new JFileChooser();
 		fc.setFileFilter(new FileNameExtensionFilter("FrontlineSMS Exported Contacts (" + CsvExporter.CSV_EXTENSION + ")", CsvExporter.CSV_FORMAT));
-//		int returnVal = fc.showDialog(null, InternationalisationUtils.getI18NString("medic.common.label.open"));
-//		if(returnVal == JFileChooser.APPROVE_OPTION){
-//			this.uiController.setText(textFieldToBeSet, fc.getSelectedFile().getAbsolutePath());
-//			this.loadCsvFile(fc.getSelectedFile().getAbsolutePath());
-//		}
 		fc.show();
 	}
 	
@@ -649,13 +642,6 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	public void showSaveModeFileChooser(Object textFieldToBeSet) {
 		FileChooser fc = FileChooser.createFileChooser(this.uiController, this, "saveChooseComplete");
 		fc.show();
-//		JFileChooser fc = new JFileChooser();
-//		fc.setSelectedFile(new File("FrontlineSMS_Export.csv"));
-//		int returnVal = fc.showDialog(null, InternationalisationUtils.getI18NString("medic.common.label.open"));
-//		if(returnVal == JFileChooser.APPROVE_OPTION){
-//			this.uiController.setText(textFieldToBeSet, fc.getSelectedFile().getAbsolutePath());
-//			this.filenameModified(fc.getSelectedFile().getAbsolutePath());
-//		}
 	}
 	
 	public void saveChooseComplete(String filename) {
