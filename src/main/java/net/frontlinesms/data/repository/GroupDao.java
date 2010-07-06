@@ -77,6 +77,4 @@ public interface GroupDao {
 	public void updateGroup(Group group);
 
 	public boolean hasDescendants(Group group);
-	
-	public Group createGroupIfAbsent (String path) throws DuplicateKeyException;
 }

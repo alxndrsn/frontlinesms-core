@@ -29,7 +29,7 @@ import net.frontlinesms.data.EntityField;
  * @author Alex
  */
 @Entity(name=Group.TABLE_NAME)
-public class Group implements Comparable<Group> {
+public class Group {
 
 //> DATABASE NAMES
 	/** Table name */
@@ -137,7 +137,7 @@ public class Group implements Comparable<Group> {
 		}
 	}
 	
-	private static String getParentPath(String path) {
+	public static String getParentPath(String path) {
 		if(path.length() == 0) return "";
 		
 		String parentPath = path.substring(0, path.lastIndexOf(PATH_SEPARATOR));
@@ -185,13 +185,4 @@ public class Group implements Comparable<Group> {
 	public String toString() {
 		return this.path;
 	}
-
-	public int compareTo(Group o) {
-		if (o.getPath().split("/").length > this.getPath().split("/").length) {
-			return 1;
-		} else {
-			return -1;
-		}
-	}
-	
 }

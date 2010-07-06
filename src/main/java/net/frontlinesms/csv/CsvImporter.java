@@ -22,9 +22,7 @@ package net.frontlinesms.csv;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.regex.PatternSyntaxException;
 
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.*;
@@ -92,7 +90,7 @@ public class CsvImporter {
 								path = Group.PATH_SEPARATOR + path;
 							}
 							
-							Group group = groupDao.createGroupIfAbsent(path);
+							Group group = createGroupIfAbsent(groupDao, path);
 							groupMembershipDao.addMember(group, c);
 						}
 					} catch (DuplicateKeyException e) {
@@ -166,5 +164,37 @@ public class CsvImporter {
 		Integer index = rowFormat.getIndex(marker);
 		if(index == null) return "";
 		else return getString(values, index);
+	}
+
+	/**
+	 * Creates the group and all parent groups for a supplied path.
+	 * The behaviour of this method is undefined if a group is deleted externally while this method
+	 * is executing.
+	 * @param groupDao
+	 * @param path
+	 * @return
+	 */
+	static Group createGroupIfAbsent(GroupDao groupDao, String path) {
+		if (path.length() == 0) {
+			return new Group(null, null);
+		} else {
+			int pos = path.lastIndexOf(Group.PATH_SEPARATOR);
+			if (pos == -1) pos = 0;
+			
+			Group parent = createGroupIfAbsent(groupDao, path.substring(0, pos));
+			path = path.substring(pos, path.length());
+			if (path.startsWith(String.valueOf(Group.PATH_SEPARATOR))) {
+				path = path.substring(1, path.length());
+			}
+			
+			Group group = new Group(parent, path);
+			try {
+				groupDao.saveGroup(group);
+			} catch (DuplicateKeyException ex) {
+				// It's not a problem if this group already exists
+			}
+			
+			return group;
+		}
 	}
 }
