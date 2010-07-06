@@ -140,7 +140,6 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private static final String COMPONENT_PN_CHECKBOXES = "pnContactInfo"; // TODO: get this changed
 	private static final String COMPONENT_PN_VALUES_TABLE = "pnValuesTable";
 	private static final String COMPONENT_PN_DETAILS = "pnDetails";
-	private static final int UI_TABLE_WIDTH = 600;
 	
 //> STATIC CONSTANTS
 	public enum EntityType {
@@ -699,7 +698,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 			int statusIndex = -1;
 			
 			/** HEADER */
-			Object header = this.uiController.createTableHeader("header");
+			Object header = this.uiController.createTableHeader();
 			
 			for (Object checkbox : checkboxes) {
 				if (this.uiController.isSelected(checkbox)) {
@@ -716,7 +715,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 			
 			/** Lines */
 			for (String[] lineValues : this.importedContactsList) {
-				Object row = this.uiController.createTableRow("row");
+				Object row = this.uiController.createTableRow();
 				for (int i = 0 ; i < columnsNumber && i < lineValues.length ; ++i) {
 					Object cell;
 					if (i == statusIndex) { // We're creating the status cell
