@@ -606,28 +606,13 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	 */
 	private CsvRowFormat getRowFormatForContact() {
 		CsvRowFormat rowFormat = new CsvRowFormat();
-//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NAME, COMPONENT_CB_NAME);
-//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_PHONE, COMPONENT_CB_PHONE);
-//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE, COMPONENT_CB_OTHER_PHONE);
-//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_EMAIL, COMPONENT_CB_EMAIL);
-//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_STATUS, COMPONENT_CB_STATUS);
-//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NOTES, COMPONENT_CB_NOTES);
-//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_GROUPS, UiGeneratorControllerConstants.COMPONENT_CB_GROUPS);
-		if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_NAME))) {
-			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NAME, COMPONENT_CB_NAME);
-		} if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_PHONE))) {
-			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_PHONE, COMPONENT_CB_PHONE);
-		} if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_OTHER_PHONE))) {
-			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE, COMPONENT_CB_OTHER_PHONE);
-		} if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_EMAIL))) {
-			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_EMAIL, COMPONENT_CB_EMAIL);
-		} if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_STATUS))) {
-			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_STATUS, COMPONENT_CB_STATUS);
-		} if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_NOTES))) {
-			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NOTES, COMPONENT_CB_NOTES);
-		} if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_GROUPS))) {
-			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_GROUPS, COMPONENT_CB_GROUPS);
-		}
+		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NAME, COMPONENT_CB_NAME);
+		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_PHONE, COMPONENT_CB_PHONE);
+		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE, COMPONENT_CB_OTHER_PHONE);
+		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_EMAIL, COMPONENT_CB_EMAIL);
+		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_STATUS, COMPONENT_CB_STATUS);
+		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NOTES, COMPONENT_CB_NOTES);
+		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_GROUPS, COMPONENT_CB_GROUPS);
 		return rowFormat;
 	}
 	
