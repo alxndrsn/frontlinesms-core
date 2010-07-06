@@ -866,17 +866,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 		LOG.trace("EXIT");
 	}
-
-	/**
-	 * This method is used to show an export dialog, where the user can select the
-	 * desired place to create the export file.
-	 */
-	public void show_exportDialogForm(Object o) {
-		String name = getString(o, Thinlet.NAME);
-		Object exportDialog = loadComponentFromFile(UI_FILE_EXPORT_DIALOG_FORM);
-		setAttachedObject(exportDialog, name);
-		add(exportDialog);
-	}
 	
 	/*
 	 * Presumably this should be part of the messaging panel controller 

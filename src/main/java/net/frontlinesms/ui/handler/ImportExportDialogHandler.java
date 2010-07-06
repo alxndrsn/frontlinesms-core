@@ -28,6 +28,7 @@ import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
+import net.frontlinesms.ui.FileChooser;
 import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
@@ -625,31 +626,39 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	
 	/** @param textFieldToBeSet Thinlet textfield whose value will be set with the selected file
 	 * @see FrontlineUI#showOpenModeFileChooser(Object) */
-	public void showOpenModeFileChooser(Object textFieldToBeSet) {
-		//this.uiController.showOpenModeFileChooser(textFieldToBeSet);
-		JFileChooser fc = new JFileChooser();
+	public void showOpenModeFileChooser() {
+		FileChooser fc = FileChooser.createFileChooser(this.uiController, this, "openChooseComplete");
+//		this.uiController.showOpenModeFileChooser(textFieldToBeSet);
+//		JFileChooser fc = new JFileChooser();
 		fc.setFileFilter(new FileNameExtensionFilter("FrontlineSMS Exported Contacts (" + CsvExporter.CSV_EXTENSION + ")", CsvExporter.CSV_FORMAT));
-		int returnVal = fc.showDialog(null, InternationalisationUtils.getI18NString("medic.common.label.open"));
-		if(returnVal == JFileChooser.APPROVE_OPTION){
-			this.uiController.setText(textFieldToBeSet, fc.getSelectedFile().getAbsolutePath());
-			this.loadCsvFile(fc.getSelectedFile().getAbsolutePath());
-		}
+//		int returnVal = fc.showDialog(null, InternationalisationUtils.getI18NString("medic.common.label.open"));
+//		if(returnVal == JFileChooser.APPROVE_OPTION){
+//			this.uiController.setText(textFieldToBeSet, fc.getSelectedFile().getAbsolutePath());
+//			this.loadCsvFile(fc.getSelectedFile().getAbsolutePath());
+//		}
+		fc.show();
+	}
+	
+	public void openChooseComplete(String filePath) {
+		this.uiController.setText(uiController.find(this.wizardDialog, "tfDirectory"), filePath);
+		this.loadCsvFile(filePath);
 	}
 	
 	/** @param textFieldToBeSet Thinlet textfield whose value will be set with the selected file
 	 * @see FrontlineUI#showOpenModeFileChooser(Object) */
 	public void showSaveModeFileChooser(Object textFieldToBeSet) {
-		//FileChooser.showSaveModeFileChooser(this.uiController, this, "setFilename");
-		JFileChooser fc = new JFileChooser();
-		fc.setSelectedFile(new File("FrontlineSMS_Export.csv"));
-		int returnVal = fc.showDialog(null, InternationalisationUtils.getI18NString("medic.common.label.open"));
-		if(returnVal == JFileChooser.APPROVE_OPTION){
-			this.uiController.setText(textFieldToBeSet, fc.getSelectedFile().getAbsolutePath());
-			this.filenameModified(fc.getSelectedFile().getAbsolutePath());
-		}
+		FileChooser fc = FileChooser.createFileChooser(this.uiController, this, "saveChooseComplete");
+		fc.show();
+//		JFileChooser fc = new JFileChooser();
+//		fc.setSelectedFile(new File("FrontlineSMS_Export.csv"));
+//		int returnVal = fc.showDialog(null, InternationalisationUtils.getI18NString("medic.common.label.open"));
+//		if(returnVal == JFileChooser.APPROVE_OPTION){
+//			this.uiController.setText(textFieldToBeSet, fc.getSelectedFile().getAbsolutePath());
+//			this.filenameModified(fc.getSelectedFile().getAbsolutePath());
+//		}
 	}
 	
-	public void setFilename(String filename) {
+	public void saveChooseComplete(String filename) {
 		uiController.setText(uiController.find(this.wizardDialog, "tfFilename"), filename);
 		filenameModified(filename);
 	}
