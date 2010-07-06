@@ -26,9 +26,10 @@ import static org.mockito.Mockito.*;
 
 /**
  * Test class for {@link CsvImporter}.
- * @author Alex
+ * @author Alex Anderson <alex@frontlinesms.com>
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
-public class CsvImportTest extends HibernateTestCase {
+public class CsvImporterTest extends HibernateTestCase {
 	
 //> CONSTANTS
 	/** Path to the test resources folder.  TODO should probably get these relative to the current {@link ClassLoader}'s path. */
@@ -99,23 +100,23 @@ public class CsvImportTest extends HibernateTestCase {
 		return rowFormat;
 	}
 	
-	public void testCreateGroupIfAbsent() throws DuplicateKeyException {
-		CsvImporter.createGroupIfAbsent(groupDao, "/A");
-		CsvImporter.createGroupIfAbsent(groupDao, "B/2/a");
+	public void testCreateGroups() throws DuplicateKeyException {
+		CsvImporter.createGroups(groupDao, "/A");
+		CsvImporter.createGroups(groupDao, "B/2/a");
 		assertTrue(groupDao.getGroupByPath("/A") != null);
 		assertTrue(groupDao.getGroupByPath("/B") != null);
 		assertTrue(groupDao.getGroupByPath("/B/2") != null);
 		assertTrue(groupDao.getGroupByPath("/B/2/a") != null);
 		
 		// Test that method does not fail if asked to create already-existing groups
-		CsvImporter.createGroupIfAbsent(groupDao, "/A");
-		CsvImporter.createGroupIfAbsent(groupDao, "B/2/a");
+		CsvImporter.createGroups(groupDao, "/A");
+		CsvImporter.createGroups(groupDao, "B/2/a");
 		
-		CsvImporter.createGroupIfAbsent(groupDao, "/B/2/c");		
+		CsvImporter.createGroups(groupDao, "/B/2/c");		
 		assertTrue(groupDao.getGroupByPath("/B/2/a") != null);
 		assertTrue(groupDao.getGroupByPath("/B/2/c") != null);
 		
-		CsvImporter.createGroupIfAbsent(groupDao, "GroupB/Group2/Groupa");
+		CsvImporter.createGroups(groupDao, "GroupB/Group2/Groupa");
 		assertTrue(groupDao.getGroupByPath("/GroupB") != null);
 		assertTrue(groupDao.getGroupByPath("/GroupB/Group2") != null);
 		assertTrue(groupDao.getGroupByPath("/GroupB/Group2/Groupa") != null);

@@ -90,7 +90,7 @@ public class CsvImporter {
 								path = Group.PATH_SEPARATOR + path;
 							}
 							
-							Group group = createGroupIfAbsent(groupDao, path);
+							Group group = createGroups(groupDao, path);
 							groupMembershipDao.addMember(group, c);
 						}
 					} catch (DuplicateKeyException e) {
@@ -174,14 +174,14 @@ public class CsvImporter {
 	 * @param path
 	 * @return
 	 */
-	static Group createGroupIfAbsent(GroupDao groupDao, String path) {
+	static Group createGroups(GroupDao groupDao, String path) {
 		if (path.length() == 0) {
 			return new Group(null, null);
 		} else {
 			int pos = path.lastIndexOf(Group.PATH_SEPARATOR);
 			if (pos == -1) pos = 0;
 			
-			Group parent = createGroupIfAbsent(groupDao, path.substring(0, pos));
+			Group parent = createGroups(groupDao, path.substring(0, pos));
 			path = path.substring(pos, path.length());
 			if (path.startsWith(String.valueOf(Group.PATH_SEPARATOR))) {
 				path = path.substring(1, path.length());
