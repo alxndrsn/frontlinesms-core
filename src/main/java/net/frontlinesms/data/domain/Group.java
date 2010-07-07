@@ -137,7 +137,7 @@ public class Group {
 		}
 	}
 	
-	private static String getParentPath(String path) {
+	public static String getParentPath(String path) {
 		if(path.length() == 0) return "";
 		
 		String parentPath = path.substring(0, path.lastIndexOf(PATH_SEPARATOR));
@@ -185,5 +185,4 @@ public class Group {
 	public String toString() {
 		return this.path;
 	}
-	
 }

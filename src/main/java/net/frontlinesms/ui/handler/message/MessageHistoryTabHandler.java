@@ -9,6 +9,7 @@ import static net.frontlinesms.FrontlineSMSConstants.COMMON_RECIPIENT;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_SENDER;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_STATUS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_MESSAGES_DELETED;
+import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_MESSAGES_LOADED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_REMOVING_MESSAGES;
 import static net.frontlinesms.FrontlineSMSConstants.PROPERTY_FIELD;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_CONTACTS;
@@ -20,6 +21,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RECEI
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_SENT_MESSAGES_TOGGLE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_END_DATE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_START_DATE;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_MESSAGE_HISTORY;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -55,6 +57,7 @@ import net.frontlinesms.mmsdevice.MmsPollingEmailReceiver;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiProperties;
+import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.handler.ComponentPagingHandler;
 import net.frontlinesms.ui.handler.PagedComponentItemProvider;
@@ -154,7 +157,10 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	public void refresh() {
 		resetMessageHistoryFilter();
 	}
-	
+
+	/**
+	 * UI event called when the user changes tab
+	 */
 	public void notify(FrontlineEventNotification notification) {
 		if(notification instanceof EntitySavedNotification<?>) {
 			Object entity = ((EntitySavedNotification<?>) notification).getDatabaseEntity();
@@ -163,6 +169,13 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 					// TODO check if the list is visible before refreshing
 					refresh();
 				}
+			}
+		} else if(notification instanceof TabChangedNotification) {
+			// This object is registered to the UIGeneratorController and get notified when the users changes tab
+			String newTabName = ((TabChangedNotification) notification).getNewTabName();
+			if (newTabName.equals(TAB_MESSAGE_HISTORY)) {
+				this.refresh();
+				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGES_LOADED));
 			}
 		}
 	}
@@ -207,6 +220,9 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		LOG.trace("ENTRY");
 
 		Object tabComponent = ui.loadComponentFromFile(UI_FILE_MESSAGES_TAB, this);
+		
+		// We register the observer to the UIGeneratorController, which notifies when tabs have changed
+		this.ui.getFrontlineController().getEventBus().registerObserver(this);
 		
 		messageListComponent = ui.find(tabComponent, COMPONENT_MESSAGE_LIST);
 		messagePagingHandler = new ComponentPagingHandler(this.ui, this, this.messageListComponent);

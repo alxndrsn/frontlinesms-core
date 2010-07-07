@@ -61,7 +61,15 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	 * @return the flag image for the language bundle, or <code>null</code> if none could be found.
 	 */
 	public Image getFlagIcon(LanguageBundle languageBundle) {
-		String country = languageBundle.getCountry();
+		return getFlagIcon(languageBundle.getCountry());
+	}
+	
+	/**
+	 * Gets the icon for a specific country
+	 * @param languageBundle
+	 * @return the flag image for the language bundle, or <code>null</code> if none could be found.
+	 */
+	public Image getFlagIcon(String country) {
 		String flagFile = country != null ? "/icons/flags/" + country + ".png" : null;
 		return country == null ? null : getIcon(flagFile);
 	}
@@ -101,23 +109,11 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	}
 	
 	/**
-	 * Event fired when the browse button is pressed, during an export action. 
-	 * This method opens a fileChooser, showing only directories.
-	 * The user will select a directory and write the file name he/she wants.
+	 * This method opens a fileChooser.
 	 * @param textFieldToBeSet The text field whose value should be sert to the chosen file
 	 */
-	public void showSaveModeFileChooser(Object textFieldToBeSet) {
-		FileChooser.showSaveModeFileChooser(this, textFieldToBeSet);
-	}
-	
-	/**
-	 * Event fired when the browse button is pressed, during an import action. 
-	 * This method opens a fileChooser, showing directories and files.
-	 * The user will select a directory and write the file name he/she wants.
-	 * @param textFieldToBeSet The text field whose value should be sert to the chosen file
-	 */
-	public void showOpenModeFileChooser(Object textFieldToBeSet) {
-		FileChooser.showOpenModeFileChooser(this, textFieldToBeSet);
+	public void showFileChooser(Object textFieldToBeSet) {
+		FileChooser.showFileChooser(this, textFieldToBeSet);
 	}
 
 	/**

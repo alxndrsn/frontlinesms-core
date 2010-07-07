@@ -3,6 +3,9 @@
  */
 package net.frontlinesms.ui.handler.phones;
 
+import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_MODEM_LIST_UPDATED;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_ADVANCED_PHONE_MANAGER;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -11,6 +14,8 @@ import net.frontlinesms.CommUtils;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.SmsModemSettings;
 import net.frontlinesms.data.repository.SmsModemSettingsDao;
+import net.frontlinesms.events.EventObserver;
+import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.smsdevice.SmsDevice;
 import net.frontlinesms.smsdevice.SmsDeviceEventListener;
 import net.frontlinesms.smsdevice.SmsDeviceManager;
@@ -23,6 +28,7 @@ import net.frontlinesms.ui.Event;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
@@ -38,7 +44,7 @@ import serial.NoSuchPortException;
  * @author Alex
  */
 @TextResourceKeyOwner(prefix={"COMMON_", "I18N_", "MESSAGE_"})
-public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventListener {
+public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventListener, EventObserver {
 //> STATIC CONSTANTS
 	/** The fully-qualified name of the default {@link CATHandler} class. */
 	private static final String DEFAULT_CAT_HANDLER_CLASS_NAME = CATHandler.class.getName();
@@ -106,7 +112,7 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 	/** The manager of {@link SmsDevice}s */
 	private final SmsDeviceManager phoneManager;
 	/** Data Access Object for {@link SmsModemSettings}s */
-	private final SmsModemSettingsDao phoneDetailsManager;
+	private final SmsModemSettingsDao smsModelSettingsDao;
 
 //> CONSTRUCTORS
 	/**
@@ -116,11 +122,14 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 	public PhoneTabHandler(UiGeneratorController ui) {
 		super(ui);
 		this.phoneManager = ui.getPhoneManager();
-		this.phoneDetailsManager = ui.getPhoneDetailsManager();
+		this.smsModelSettingsDao = ui.getPhoneDetailsManager();
 	}
 	
 	@Override
 	protected Object initialiseTab() {
+		// We register the observer to the UIGeneratorController, which notifies when tabs have changed
+		this.ui.getFrontlineController().getEventBus().registerObserver(this);
+		
 		return ui.loadComponentFromFile(UI_FILE_PHONES_TAB, this);
 	}
 
@@ -362,7 +371,7 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 			if (deviceStatus.equals(SmsModemStatus.CONNECTED)) {
 				log.debug("Phone is connected. Try to read details from database!");
 				String serial = activeDevice.getSerial();
-				SmsModemSettings settings = phoneDetailsManager.getSmsModemSettings(serial);
+				SmsModemSettings settings = smsModelSettingsDao.getSmsModemSettings(serial);
 				
 				// If this is the first time we've attached this phone, or no settings were
 				// saved last time, we should show the settings dialog automatically
@@ -370,6 +379,13 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 					log.debug("User need to make setting related this phone.");
 					showPhoneSettingsDialog(activeDevice, true);
 				} else {
+					// Let's update the Manufacturer & Model for this device, if it wasn't previously set
+					if (settings.getManufacturer() == null || settings.getModel() == null) {
+						settings.setManufacturer(activeDevice.getManufacturer());
+						settings.setModel(activeDevice.getModel());
+						
+						smsModelSettingsDao.updateSmsModemSettings(settings);
+					}
 					activeDevice.setUseForSending(settings.useForSending());
 					activeDevice.setUseDeliveryReports(settings.useDeliveryReports());
 
@@ -425,6 +441,8 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 	public void updatePhoneDetails(Object dialog) {
 		SmsModem phone = ui.getAttachedObject(dialog, SmsModem.class);
 		String serial = phone.getSerial();
+		String manufacturer = phone.getManufacturer();
+		String model = phone.getModel();
 
 		boolean useForSending;
 		boolean useDeliveryReports;
@@ -452,16 +470,16 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 			deleteMessagesAfterReceiving = false;
 		}
 		
-		SmsModemSettings settings = this.phoneDetailsManager.getSmsModemSettings(serial);
+		SmsModemSettings settings = this.smsModelSettingsDao.getSmsModemSettings(serial);
 		if(settings != null) {
 			settings.setDeleteMessagesAfterReceiving(deleteMessagesAfterReceiving);
 			settings.setUseDeliveryReports(useDeliveryReports);
 			settings.setUseForReceiving(useForReceiving);
 			settings.setUseForSending(useForSending);
-			this.phoneDetailsManager.updateSmsModemSettings(settings);
+			this.smsModelSettingsDao.updateSmsModemSettings(settings);
 		} else {
-			settings = new SmsModemSettings(serial, useForSending, useForReceiving, deleteMessagesAfterReceiving, useDeliveryReports);
-			this.phoneDetailsManager.saveSmsModemSettings(settings);
+			settings = new SmsModemSettings(serial, manufacturer, model, useForSending, useForReceiving, deleteMessagesAfterReceiving, useDeliveryReports);
+			this.smsModelSettingsDao.saveSmsModemSettings(settings);
 		}
 		
 		// Phone settings may have changed.  As we're now displaying these on the table, we
@@ -581,5 +599,19 @@ public class PhoneTabHandler extends BaseTabHandler implements SmsDeviceEventLis
 	 */
 	private static String getSmsDeviceStatusAsString(SmsDevice device) {
 		return InternationalisationUtils.getI18NString(device.getStatus().getI18nKey(), device.getStatusDetail());
+	}
+	
+	/**
+	 * UI event called when the user changes tab
+	 */
+	public void notify(FrontlineEventNotification notification) {
+		// This object is registered to the UIGeneratorController and get notified when the users changes tab
+		if(notification instanceof TabChangedNotification) {
+			String newTabName = ((TabChangedNotification) notification).getNewTabName();
+			if (newTabName.equals(TAB_ADVANCED_PHONE_MANAGER)) {
+				this.refresh();
+				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_MODEM_LIST_UPDATED));
+			}
+		}
 	}
 }

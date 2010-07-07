@@ -197,8 +197,8 @@ public class HomeTabHandler extends BaseTabHandler {
 	 * @param component
 	 * @see UiGeneratorController#showOpenModeFileChooser(Object)
 	 */
-	public void showOpenModeFileChooser(Object component) {
-		this.ui.showOpenModeFileChooser(component);
+	public void showFileChooser(Object component) {
+		this.ui.showFileChooser(component);
 	}
 	
 //> INSTANCE HELPER METHODS	

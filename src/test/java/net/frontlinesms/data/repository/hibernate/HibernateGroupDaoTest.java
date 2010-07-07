@@ -18,7 +18,13 @@ import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordActionDao;
 import net.frontlinesms.data.repository.KeywordDao;
+import net.frontlinesms.events.EventBus;
+import net.frontlinesms.events.FrontlineEventNotification;
 
+import static org.mockito.Mockito.*;
+
+import org.mockito.internal.verification.Times;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 
 /**
@@ -26,12 +32,14 @@ import org.springframework.beans.factory.annotation.Required;
  * @author Alex   Anderson <alex@frontlinesms.com>
  * @author Morgan Belkadi  <morgan@frontlinesms.com>
  */
+
 public class HibernateGroupDaoTest extends HibernateTestCase {
 //> PROPERTIES
 //	/** Embedded shared test code from InMemoryDownloadDaoTest - Removes need to CopyAndPaste shared test code */
 //	private final ReusableGroupDaoTest test = new ReusableGroupDaoTest() { /* nothing needs to be added */ };
 	
 	private ContactDao contactDao;
+	//@Autowired()
 	private GroupDao groupDao;
 	private GroupMembershipDao groupMembershipDao;
 	private KeywordDao keywordDao;
@@ -95,13 +103,18 @@ public class HibernateGroupDaoTest extends HibernateTestCase {
 		
 		// Confirm that the parent and child are both present in the database
 		Group fetchedParent = groupDao.getGroupByPath("/parent");
+		
 		assertEquals(parent, fetchedParent);
 		Group fetchedChild = groupDao.getGroupByPath("/parent/child");
 		assertEquals(child, fetchedChild);
 		
+		EventBus mockEventBus = mock(EventBus.class);
+		//((HibernateGroupDao)groupDao).setEventBus(mockEventBus);
+		
 		// Delete the parent group
 		groupDao.deleteGroup(parent, false);
-
+		//verify(mockEventBus, new Times(2)).notifyObservers(any(FrontlineEventNotification.class));
+		
 		// Confirm that the parent and child are both deleted from the database
 		assertNull(groupDao.getGroupByPath("/parent"));
 		assertNull(groupDao.getGroupByPath("/parent/child"));
@@ -245,10 +258,10 @@ public class HibernateGroupDaoTest extends HibernateTestCase {
 //> TEST SETUP/TEARDOWN
 	
 //> ACCESSORS
-	/** @param d The DAO to use for the test. */
+	/** @param groupDao The DAO to use for the test. */
 	@Required
-	public void setGroupDao(GroupDao d) {
-		this.groupDao = d;
+	public void setGroupDao(GroupDao groupDao) {
+		this.groupDao = groupDao;
 	}
 
 	@Required

@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
@@ -112,7 +113,7 @@ public class Main {
 		String extraTextResourcePath = languagebundleDirectoryPath + '/' + resourceFileBaseName + ".properties";
 		Map<String, String> extraTextResources = InternationalisationUtils.loadTextResources(extraTextResourcePath, new FileInputStream(extraTextResourcePath));
 		
-		String baseTranslationFileName = "src/main/resources/resources/languages/frontlineSMS.properties";
+		String baseTranslationFileName = "src/main/resources/resources/languages/" + InternationalisationUtils.DEFAULT_LANGUAGE_BUNDLE_FILENAME;
 		Map<String, String> baseTextResources = null;
 		if(!baseTranslationFileName.equals(extraTextResourcePath)) {
 			baseTextResources = InternationalisationUtils.loadTextResources(baseTranslationFileName, new FileInputStream(baseTranslationFileName));

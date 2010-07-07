@@ -44,6 +44,8 @@ import java.util.Comparator;
 import java.util.Date;
 
 import net.frontlinesms.data.domain.*;
+import net.frontlinesms.email.EmailException;
+import net.frontlinesms.email.smtp.SmtpEmailSender;
 import net.frontlinesms.encoding.Base64Utils;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -109,7 +111,7 @@ public class FrontlineUtils {
 			
 			// If we are looking for a conversion of a start date, then no worries, because the first milliseconds of
 			// the given day is returned
-			if (!isStartDate) {
+			if (!isStartDate && !dateFieldString.contains(" ")) { // We just do that if the format is a simple format (without time)
 				// Otherwise, we're looking for the last milliseconds of the given day
 				// So, we seek the first millisecond of the day after
 				c.add(Calendar.DATE, 1);
@@ -152,7 +154,7 @@ public class FrontlineUtils {
 	public static String contactGroupsAsString(Collection<Group> groupCollection, String groups_delimiter) {
 		String groups = "";
 		for (Group g : groupCollection) {
-			groups += g.getName() + groups_delimiter;
+			groups += g.getPath() + groups_delimiter;
 		}
 		if (groups.endsWith(groups_delimiter)) {
 			groups = groups.substring(0, groups.length() - groups_delimiter.length());
@@ -542,5 +544,35 @@ public class FrontlineUtils {
 		int dotIndex = filename.indexOf('.');
 		if(dotIndex == -1) return "";
 		else return filename.substring(dotIndex+1);
+	}
+	
+	/**
+	 * Send an E-Mail to the FrontlineSMS Support email account.
+	 * TODO smtp sending should be refactored into email.smtp.SmtpMessageSender
+	 * @param fromName
+	 * @param fromEmailAddress
+	 * @param attachment
+	 * @throws MessagingException
+	 */
+	public static void sendToFrontlineSupport(String fromName, String fromEmailAddress, String subject, String textContent, String attachment) throws EmailException {
+		sendEmail(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL, fromName, fromEmailAddress, subject, textContent, attachment);
+	}
+	
+	/**
+	 * Send an E-Mail to the given e-mail address.
+	 * TODO smtp sending should be refactored into email.smtp.SmtpMessageSender
+	 * @param fromName
+	 * @param fromEmailAddress
+	 * @param attachment
+	 * @throws MessagingException
+	 */
+	public static void sendEmail(String recipientEmailAddress, String fromName, String fromEmailAddress, String subject, String textContent, String attachment) throws EmailException {
+		SmtpEmailSender emailSender = new SmtpEmailSender(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL_SERVER);
+	
+	    emailSender.sendEmail(recipientEmailAddress,
+							  emailSender.getLocalEmailAddress(fromEmailAddress, fromName),
+							  subject,
+							  textContent,
+							  new File(attachment));
 	}
 }

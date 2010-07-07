@@ -3,6 +3,7 @@ package net.frontlinesms.data;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -40,6 +41,7 @@ public class StatisticsManager {
 	private static final String I18N_KEY_STATS_LAST_SUBMISSION_DATE = "stats.data.last.submission.date";
 	private static final String I18N_KEY_STATS_OS = "stats.data.os";
 	private static final String I18N_KEY_STATS_PHONES_CONNECTED = "stats.data.phones.connected";
+	private static final String I18N_KEY_STATS_PHONES_DETAILS = "stats.data.phones.details";
 	private static final String I18N_KEY_STATS_RECEIVED_MESSAGES = FrontlineSMSConstants.COMMON_RECEIVED_MESSAGES;
 	private static final String I18N_KEY_STATS_RECEIVED_MESSAGES_SINCE_LAST_SUBMISSION = "stats.data.received.messages.since.last.submission";
 	private static final String I18N_KEY_STATS_SENT_MESSAGES = FrontlineSMSConstants.COMMON_SENT_MESSAGES;
@@ -142,6 +144,7 @@ public class StatisticsManager {
 		this.collectNumberOfKeyword();
 		this.collectNumberOfKeywordActions();
 		this.collectNumberOfRecognizedPhones();
+		this.collectPhonesDetails();
 		this.collectSmsInternetServices();
 		this.collectLanguage();
 		
@@ -248,6 +251,23 @@ public class StatisticsManager {
 		this.statisticsList.put(I18N_KEY_STATS_PHONES_CONNECTED, String.valueOf(numberOfRecognizedPhones));
 	}
 	
+	/**
+	 * Collects the details on the phones recognized by FLSMS on this computer
+	 */
+	private void collectPhonesDetails() {
+		StringBuilder phonesWorking = new StringBuilder();
+		
+		final List<SmsModemSettings> modemsSettings = smsModemSettingsDao.getAll();
+		for (int i = 0 ; i < modemsSettings.size() ; ++i) {
+			SmsModemSettings modemSettings = modemsSettings.get(i);
+			if (modemSettings.getManufacturer() != null) {
+				if (i > 0) phonesWorking.append(", ");
+				phonesWorking.append(modemSettings.getManufacturer() + STATS_LIST_KEY_SEPARATOR + modemSettings.getModel());
+			}
+		}
+		this.statisticsList.put(I18N_KEY_STATS_PHONES_DETAILS, phonesWorking.toString());
+	}
+	
 	/** Collects the number of {@link SmsInternetService} accounts. */
 	@SuppressWarnings("unchecked")
 	private void collectSmsInternetServices() {
@@ -261,7 +281,6 @@ public class StatisticsManager {
 			} else {
 				counts.put(className, counts.get(className) + 1);
 			}
-			
 		}
 		
 		for(Entry<String, Integer> e : counts.entrySet()) {
@@ -310,13 +329,44 @@ public class StatisticsManager {
 				statsOutput.append(shortKey);
 				statsOutput.append(STATISTICS_SMS_OPTIONAL_KEY_VALUE_SEPARATOR);
 			}
-			statsOutput.append(entry.getValue());
+			if (key.equals(I18N_KEY_STATS_PHONES_DETAILS)) {
+				statsOutput.append(this.shortenPhonesDetails(entry.getValue()));
+			} else {
+				statsOutput.append(entry.getValue());
+			}
 		}
 		
 		return STATISTICS_SMS_KEYWORD + " " + 
 				statsOutput.toString();
 	}
 	
+	private String shortenPhonesDetails(String phonesDetails) {
+		StringBuilder shortenedPhonesDetails = new StringBuilder();
+		
+		for (String phoneDetails : phonesDetails.split(", ")) {
+			// For each phone details
+			String [] details = phoneDetails.split(STATS_LIST_KEY_SEPARATOR);
+			String manufactuer = details[0];
+			
+			// We take the two first characters of the Manufacturer and the whole model
+			// Ex.: SonyEricsson K800i > SoK800i
+			if (manufactuer.length() < 3) {
+				shortenedPhonesDetails.append(manufactuer);
+			} else {
+				shortenedPhonesDetails.append(manufactuer.substring(0, 2));
+			}
+			if (details.length > 1) {
+				// if there is a model (just in case there is not), we remove spaces to gain space
+				shortenedPhonesDetails.append(details[1]);
+			}
+			shortenedPhonesDetails.append(STATS_LIST_KEY_SEPARATOR);
+		}
+		if (shortenedPhonesDetails.length() > 0) {
+			shortenedPhonesDetails.deleteCharAt(shortenedPhonesDetails.length() - 1);
+		}
+		return shortenedPhonesDetails.toString();
+	}
+
 	/**
 	 * Generate the text which will be sent via e-mail
 	 * It represents each data with its full title

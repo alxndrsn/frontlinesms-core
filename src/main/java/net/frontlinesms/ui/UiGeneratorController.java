@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -47,6 +48,7 @@ import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.smsdevice.*;
 import net.frontlinesms.smsdevice.events.*;
 import net.frontlinesms.smsdevice.internet.SmsInternetService;
+import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.*;
 import net.frontlinesms.ui.handler.contacts.*;
 import net.frontlinesms.ui.handler.core.DatabaseSettingsPanel;
@@ -546,6 +548,14 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Shows a general dialog asking the user to confirm his action.
 	 * @return the confirmation dialog
 	 */
+	public Object showConfirmationDialog(String methodToBeCalled, String confirmationMessageKey) {
+		return showConfirmationDialog(methodToBeCalled, this, confirmationMessageKey);
+	}
+	
+	/**
+	 * Shows a general dialog asking the user to confirm his action.
+	 * @return the confirmation dialog
+	 */
 	public Object showConfirmationDialog(String methodToBeCalled, ThinletUiEventHandler handler, String confirmationMessageKey) {
 		Object conf = loadComponentFromFile(UI_FILE_CONFIRMATION_DIALOG_FORM);
 		setMethod(find(conf, COMPONENT_BT_CONTINUE), ATTRIBUTE_ACTION, methodToBeCalled, conf, handler);
@@ -856,17 +866,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 		LOG.trace("EXIT");
 	}
-
-	/**
-	 * This method is used to show an export dialog, where the user can select the
-	 * desired place to create the export file.
-	 */
-	public void show_exportDialogForm(Object o) {
-		String name = getString(o, Thinlet.NAME);
-		Object exportDialog = loadComponentFromFile(UI_FILE_EXPORT_DIALOG_FORM);
-		setAttachedObject(exportDialog, name);
-		add(exportDialog);
-	}
 	
 	/*
 	 * Presumably this should be part of the messaging panel controller 
@@ -881,8 +880,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		if (cost.length() == 0) this.setCostPerSms(0);
 		else {
 			try {
-				cost = cost.replace(',', '.');
-				cost = cost.replace(';', '.');
+				cost = cost.replace(',', '.').replace(';', '.');
 				double costPerSMS = (InternationalisationUtils.parseCurrency(cost))/* * Utils.TIMES_TO_INT*/;//FIXME this will likely give some very odd costs - needs adjusting for moving decimal point.
 				this.setCostPerSms(costPerSMS);
 			} catch (ParseException e) {
@@ -1394,24 +1392,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		LOG.trace("ENTER");
 		Object newTab = getSelectedItem(tabbedPane);
 		currentTab = getString(newTab, NAME);
+		this.frontlineController.getEventBus().notifyObservers(new TabChangedNotification(currentTab));
+		
 		LOG.debug("Current tab [" + currentTab + "]");
 		if (currentTab == null) return;
-		if (currentTab.equals(TAB_CONTACT_MANAGER)) {
-			this.contactsTabController.refresh();
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_CONTACT_MANAGER_LOADED));
-		} else if (currentTab.equals(TAB_ADVANCED_PHONE_MANAGER)) {
-			this.phoneTabController.refresh();
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_MODEM_LIST_UPDATED));
-		} else if (currentTab.equals(TAB_MESSAGE_HISTORY)) {
-			this.messageTabController.refresh();
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGES_LOADED));
-		} else if (currentTab.equals(TAB_KEYWORD_MANAGER)) {
-			this.keywordTabHandler.refresh();
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_KEYWORDS_LOADED));
-		} else if (currentTab.equals(TAB_EMAIL_LOG)) {
-			this.emailTabHandler.refresh();
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_EMAILS_LOADED));
-		}
 		LOG.trace("EXIT");
 	}
 
@@ -1620,7 +1604,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 					// Problem writing logs.zip
 					LOG.debug("", e);
 					try {
-						ErrorUtils.sendToFrontlineSupport(userName, userEmail, null);
+						ErrorUtils.sendLogsToFrontlineSupport(userName, userEmail, null);
 					} catch (EmailException e1) {
 						LOG.debug("", e1);
 					}

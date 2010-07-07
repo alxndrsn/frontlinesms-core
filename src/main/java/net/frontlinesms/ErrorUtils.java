@@ -112,7 +112,7 @@ public class ErrorUtils {
 			// Problem writing logs.zip
 			JOptionPane.showMessageDialog(null, "Unable to send logs at this time.");
 			try {
-				sendToFrontlineSupport(userName, userEmail, null);
+				sendLogsToFrontlineSupport(userName, userEmail, null);
 				return true;
 			} catch (EmailException e1) {
 				// If it fails, there is nothing we can do.
@@ -356,7 +356,7 @@ public class ErrorUtils {
 		try {
 			ResourceUtils.zip(ResourceUtils.getConfigDirectoryPath() + "logs",
 					new File(ResourceUtils.getConfigDirectoryPath() + FrontlineSMSConstants.ZIPPED_LOGS_FILENAME));
-			sendToFrontlineSupport(name, emailAddress, ResourceUtils.getConfigDirectoryPath() + FrontlineSMSConstants.ZIPPED_LOGS_FILENAME);
+			sendLogsToFrontlineSupport(name, emailAddress, ResourceUtils.getConfigDirectoryPath() + FrontlineSMSConstants.ZIPPED_LOGS_FILENAME);
 		} finally {
 			if (resetConfiguration) {
 				FrontlineUtils.loadLogConfiguration();
@@ -372,21 +372,17 @@ public class ErrorUtils {
 	 * @param attachment
 	 * @throws MessagingException
 	 */
-	public static void sendToFrontlineSupport(String fromName, String fromEmailAddress, String attachment) throws EmailException {
-		SmtpEmailSender emailSender = new SmtpEmailSender(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL_SERVER);
-	
-	    StringBuilder sb = new StringBuilder();
+	public static void sendLogsToFrontlineSupport(String fromName, String fromEmailAddress, String attachment) throws EmailException {
+		StringBuilder sb = new StringBuilder();
 	    appendFrontlineProperties(sb);
 	    appendSystemProperties(sb);
 	    appendCommProperties(sb);
 	    appendPluginProperties(sb);
-	    String textContent = sb.toString();
 	    
-		emailSender.sendEmail(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL,
-				emailSender.getLocalEmailAddress(fromEmailAddress, fromEmailAddress),
-				"FrontlineSMS log files",
-				textContent,
-				new File(attachment));
+	    String textContent = sb.toString();
+	    String subject = "FrontlineSMS log files";
+	    
+		FrontlineUtils.sendToFrontlineSupport(fromName, fromEmailAddress, subject, textContent, attachment);
 	}
 	
 	/**

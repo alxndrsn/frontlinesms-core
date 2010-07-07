@@ -21,6 +21,8 @@ package net.frontlinesms.csv;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.*;
@@ -44,41 +46,96 @@ public class CsvImporter {
 	/** Logging object */
 	private static Logger LOG = FrontlineUtils.getLogger(CsvImporter.class); 
 	
+	/** The delimiter to use between group names when they are exported. */
+	protected static final String GROUPS_DELIMITER = "\\\\"; 
+	
 	/**
 	 * Import contacts from a CSV file.
 	 * @param importFile the file to import from
-	 * @param contactFactory
+	 * @param contactDao
 	 * @param rowFormat 
 	 * @throws IOException If there was a problem accessing the file
 	 * @throws CsvParseException If there was a problem with the format of the file
 	 */
-	public static void importContacts(File importFile, ContactDao contactFactory, CsvRowFormat rowFormat) throws IOException, CsvParseException {
+	public static void importContacts(File importFile, ContactDao contactDao, GroupMembershipDao groupMembershipDao, GroupDao groupDao, CsvRowFormat rowFormat) throws IOException, CsvParseException {
 		LOG.trace("ENTER");
 		if(LOG.isDebugEnabled()) LOG.debug("File [" + importFile.getAbsolutePath() + "]");
 		Utf8FileReader reader = null;
 		try {
 			reader = new Utf8FileReader(importFile);
-			
+			boolean firstLine = true;
 			String[] lineValues;
 			while((lineValues = CsvUtils.readLine(reader)) != null) {
-				String name = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_NAME);
-				String number = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_PHONE);
-				String email = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_EMAIL);
-				String notes = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_NOTES);
-				String otherPhoneNumber = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE);
-				boolean active = Boolean.valueOf(getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_STATUS));
-				try {
-					Contact c = new Contact(name, number, otherPhoneNumber, email, notes, active);
-					contactFactory.saveContact(c);
-				} catch (DuplicateKeyException e) {
-					// FIXME should actually pass details of this back to the user.
-					LOG.debug("Contact already exist with this number [" + number + "]", e);
-				}		
+				if(firstLine) {
+					// Ignore the first line of the CSV file as it should be the column titles
+					firstLine = false;
+				} else {
+					String name = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_NAME);
+					String number = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_PHONE);
+					String email = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_EMAIL);
+					String notes = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_NOTES);
+					String otherPhoneNumber = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE);
+					boolean active = Boolean.valueOf(getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_STATUS));
+					String groups = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_GROUPS);
+					try {
+						Contact c = new Contact(name, number, otherPhoneNumber, email, notes, active);
+						contactDao.saveContact(c);
+						
+						// We make the contact join its groups
+						String[] pathList = groups.split(GROUPS_DELIMITER);
+						for (String path : pathList) {
+							if (path.length() == 0) continue;
+							
+							if (!path.startsWith(String.valueOf(Group.PATH_SEPARATOR))) {
+								path = Group.PATH_SEPARATOR + path;
+							}
+							
+							Group group = createGroups(groupDao, path);
+							groupMembershipDao.addMember(group, c);
+						}
+					} catch (DuplicateKeyException e) {
+						// FIXME should actually pass details of this back to the user.
+						LOG.debug("Contact already exist with this number [" + number + "]", e);
+					}
+				}
 			}
 		} finally {
 			if (reader != null) reader.close();
 		}
 		LOG.trace("EXIT");
+	}
+
+	/**
+	 * Import contacts from a CSV file.
+	 * @param filename the file to import from
+	 * @param rowFormat 
+	 * @throws IOException If there was a problem accessing the file
+	 * @throws CsvParseException If there was a problem with the format of the file
+	 */
+	public static List<String[]> getContactsFromCsvFile(String filename) throws IOException, CsvParseException {
+		LOG.trace("ENTER");
+		File importFile = new File(filename);
+		List<String[]> contactsList = new ArrayList<String[]>();
+		
+		if(LOG.isDebugEnabled()) LOG.debug("File [" + importFile.getAbsolutePath() + "]");
+		Utf8FileReader reader = null;
+		try {
+			reader = new Utf8FileReader(importFile);
+			boolean firstLine = true;
+			String[] lineValues;
+			while((lineValues = CsvUtils.readLine(reader)) != null) {
+				if(firstLine) {
+					firstLine = false;
+				} else {
+					contactsList.add(lineValues);
+				}
+			}
+		} finally {
+			if (reader != null) reader.close();
+		}
+		
+		LOG.trace("EXIT");
+		return contactsList;
 	}
 
 //> STATIC HELPER METHODS	
@@ -107,5 +164,37 @@ public class CsvImporter {
 		Integer index = rowFormat.getIndex(marker);
 		if(index == null) return "";
 		else return getString(values, index);
+	}
+
+	/**
+	 * Creates the group and all parent groups for a supplied path.
+	 * The behaviour of this method is undefined if a group is deleted externally while this method
+	 * is executing.
+	 * @param groupDao
+	 * @param path
+	 * @return
+	 */
+	static Group createGroups(GroupDao groupDao, String path) {
+		if (path.length() == 0) {
+			return new Group(null, null);
+		} else {
+			int pos = path.lastIndexOf(Group.PATH_SEPARATOR);
+			if (pos == -1) pos = 0;
+			
+			Group parent = createGroups(groupDao, path.substring(0, pos));
+			path = path.substring(pos, path.length());
+			if (path.startsWith(String.valueOf(Group.PATH_SEPARATOR))) {
+				path = path.substring(1, path.length());
+			}
+			
+			Group group = new Group(parent, path);
+			try {
+				groupDao.saveGroup(group);
+			} catch (DuplicateKeyException ex) {
+				// It's not a problem if this group already exists
+			}
+			
+			return group;
+		}
 	}
 }

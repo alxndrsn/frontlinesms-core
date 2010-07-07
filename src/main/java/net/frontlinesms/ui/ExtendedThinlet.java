@@ -3,6 +3,7 @@
  */
 package net.frontlinesms.ui;
 
+import java.awt.Font;
 import java.awt.Image;
 
 import thinlet.Thinlet;
@@ -325,6 +326,37 @@ public class ExtendedThinlet extends Thinlet {
 		setAttachedObject(node, attachedObject);
 		return node;
 	}
+	
+	/**
+	 * Create a Thinlet UI Component of type table row.
+	 * @return a table row with an object attached
+	 */
+	public final Object createTableHeader() {
+		Object header = Thinlet.create(HEADER);
+		return header;
+    }
+	
+	/**
+	 * Create a Thinlet UI Component of type table row, and attaches the
+	 * supplied object to it.
+	 * @param attachedObject
+	 * @return a table row with an object attached
+	 */
+	public final Object createTableHeader(Object attachedObject) {
+		Object header = createTableHeader();
+		setAttachedObject(header, attachedObject);
+		return header;
+    }
+
+	/**
+	 * Create a Thinlet UI Component of type table row.
+	 * @param attachedObject
+	 * @return a table row with an object attached
+	 */
+	public final Object createTableRow() {
+    	Object row = Thinlet.create(ROW);
+    	return row;
+    }
 
 	/**
 	 * Create a Thinlet UI Component of type table row, and attaches the
@@ -333,7 +365,7 @@ public class ExtendedThinlet extends Thinlet {
 	 * @return a table row with an object attached
 	 */
 	public final Object createTableRow(Object attachedObject) {
-    	Object row = Thinlet.create(ROW);
+    	Object row = createTableRow();
     	setAttachedObject(row, attachedObject);
     	return row;
     }
@@ -355,6 +387,21 @@ public class ExtendedThinlet extends Thinlet {
 	public final Object createTableCell(String text) {
 		Object cell = Thinlet.create(CELL);
 		setString(cell, TEXT, text);
+		return cell;
+	}
+	
+	/**
+	 * Creates a UI table cell component containing the specified text. 
+	 * @param text
+	 * @return a table cell
+	 */
+	public final Object createTableCell(String text, boolean bold) {
+		Object cell = Thinlet.create(CELL);
+		setString(cell, TEXT, text);
+		if (bold) {
+			Font boldFont = super.getFont().deriveFont(Font.BOLD);
+			setFont(cell, boldFont);
+		}
 		return cell;
 	}
         
@@ -383,6 +430,26 @@ public class ExtendedThinlet extends Thinlet {
 		Object item = Thinlet.create(ITEM);
 		setString(item, TEXT, text);
 		setAttachedObject(item, attachedObject);
+		return item;
+	}
+	
+	/**
+	 * Creates a Thinlet UI Component of type LIST ITEM, set's the component's
+	 * TEXT attribute to the supplied text and attaches the supplied OBJECT.
+	 * @param text
+	 * @param attachedObject
+	 * @return a list item with the supplied attachment 
+	 */
+	public final Object createListItem(String text, Object attachedObject, boolean bold) {
+		Object item = Thinlet.create(ITEM);
+		setString(item, TEXT, text);
+		setAttachedObject(item, attachedObject);
+		
+		if (bold) {
+			Font boldFont = super.getFont().deriveFont(Font.BOLD);
+			setFont(item, boldFont);
+		}
+		
 		return item;
 	}
 	

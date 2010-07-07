@@ -39,7 +39,7 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	private final Class<E> clazz;
 	/** The unqualified name of {@link #clazz} */
 	private final String className;
-	/**EventNotifier that sends out FrontlineEvents**/
+	/** EventNotifier that sends out FrontlineEvents **/
 	@Autowired
 	private EventBus eventBus;
 	
@@ -53,6 +53,10 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	
 	public void setEventBus(EventBus eventBus){
 		this.eventBus = eventBus;
+	}
+	
+	protected EventBus getEventBus() {
+		return eventBus;
 	}
 	
 	/**

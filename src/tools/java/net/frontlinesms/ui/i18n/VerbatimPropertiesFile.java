@@ -14,7 +14,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -68,7 +67,7 @@ public class VerbatimPropertiesFile implements Cloneable {
 //> STATIC UTILITY METHODS
 	private static boolean hasValue(String line) {
 		line = line.trim();
-		return line.length()>0 && line.charAt(0)!='#';
+		return line.length() > 0 && line.charAt(0) != '#';
 	}
 	
 	private static String getValue(String line) {

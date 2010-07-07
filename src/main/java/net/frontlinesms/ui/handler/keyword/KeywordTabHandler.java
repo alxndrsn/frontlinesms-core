@@ -7,6 +7,7 @@ import static net.frontlinesms.FrontlineSMSConstants.COMMON_BLANK;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_EDITING_KEYWORD;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_KEYWORD_ACTIONS_OF;
 import static net.frontlinesms.FrontlineSMSConstants.DEFAULT_END_DATE;
+import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_KEYWORDS_LOADED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_KEYWORD_EXISTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_KEYWORD_SAVED;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_ACTION_LIST;
@@ -20,6 +21,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_K
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_DESCRIPTION;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_KEYWORD;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_TITLE;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_KEYWORD_MANAGER;
 
 import java.text.ParseException;
 import java.util.Collection;
@@ -35,7 +37,10 @@ import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
 import net.frontlinesms.data.repository.KeywordActionDao;
 import net.frontlinesms.data.repository.KeywordDao;
+import net.frontlinesms.events.EventObserver;
+import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.handler.ComponentPagingHandler;
 import net.frontlinesms.ui.handler.PagedComponentItemProvider;
@@ -49,7 +54,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * @author Alex Anderson alex@frontlinesms.com
  * @author Carlos Eduardo Genz kadu@masabi.com
  */
-public class KeywordTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterDialogOwner {
+public class KeywordTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterDialogOwner, EventObserver {
 //> UI LAYOUT FILES
 	public static final String UI_FILE_KEYWORDS_TAB = "/ui/core/keyword/keywordsTab.xml";
 	public static final String UI_FILE_KEYWORDS_SIMPLE_VIEW = "/ui/core/keyword/pnSimpleView.xml";
@@ -94,6 +99,8 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		Object tabComponent = ui.loadComponentFromFile(UI_FILE_KEYWORDS_TAB, this);
 		this.keywordListComponent = ui.find(tabComponent, COMPONENT_KEYWORD_LIST);
 		this.keywordListPagingHandler = new ComponentPagingHandler(ui, this, keywordListComponent);
+		// We register the observer to the UIGeneratorController, which notifies when tabs have changed
+		this.ui.getFrontlineController().getEventBus().registerObserver(this);
 		
 		// Add the paging controls just below the list of keyword
 		Object pageControls = keywordListPagingHandler.getPanel();
@@ -816,5 +823,19 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		boolean hasDescription = (keyword.getDescription() != null && keyword.getDescription().length() > 0); 
 		if (keyword.getKeyword().length() == 0 && !hasDescription) return InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_BLANK_KEYWORD_DESCRIPTION);
 		else return keyword.getDescription();		
+	}
+	
+	/**
+	 * UI event called when the user changes tab
+	 */
+	public void notify(FrontlineEventNotification notification) {
+		// This object is registered to the UIGeneratorController and get notified when the users changes tab
+		if(notification instanceof TabChangedNotification) {
+			String newTabName = ((TabChangedNotification) notification).getNewTabName();
+			if (newTabName.equals(TAB_KEYWORD_MANAGER)) {
+				this.refresh();
+				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_KEYWORDS_LOADED));
+			}
+		}
 	}
 }

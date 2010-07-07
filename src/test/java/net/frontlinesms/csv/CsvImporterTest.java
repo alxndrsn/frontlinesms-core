@@ -10,15 +10,27 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.apache.log4j.Logger;
+import net.frontlinesms.data.DuplicateKeyException;
+import net.frontlinesms.data.domain.Contact;
+import net.frontlinesms.data.domain.Group;
+import net.frontlinesms.data.repository.ContactDao;
+import net.frontlinesms.data.repository.GroupDao;
+import net.frontlinesms.data.repository.GroupMembershipDao;
+import net.frontlinesms.junit.HibernateTestCase;
 
-import junit.framework.TestCase;
+import org.apache.log4j.Logger;
+import org.mockito.internal.verification.Times;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.mockito.Mockito.*;
 
 /**
  * Test class for {@link CsvImporter}.
- * @author Alex
+ * @author Alex Anderson <alex@frontlinesms.com>
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
-public class CsvImportTests extends TestCase {
+public class CsvImporterTest extends HibernateTestCase {
+	
 //> CONSTANTS
 	/** Path to the test resources folder.  TODO should probably get these relative to the current {@link ClassLoader}'s path. */
 	private static final String RESOURCE_PATH = "src/test/resources/net/frontlinesms/csv/";
@@ -40,6 +52,10 @@ public class CsvImportTests extends TestCase {
 	/** Logging object */
 	private final Logger log = Logger.getLogger(this.getClass());
 	
+	/** DAO for {@link Group}s; used in {@link #testCreateGroupIfAbsent()} */
+	@Autowired
+	private GroupDao groupDao;
+	
 	/**
 	 * Get all import test files from /test/net/frontlinesms/csv/import/, and read
 	 * them in.  Compare them to test results, which are hard coded here.
@@ -53,6 +69,59 @@ public class CsvImportTests extends TestCase {
 		}
 	}
 	
+	public void testImportContactsWithGroups () {
+		File importFile = new File(RESOURCE_PATH + "ImportWithGroups.csv");
+		CsvRowFormat rowFormat = getRowFormatForContacts();
+		
+		ContactDao contactDao = mock(ContactDao.class);
+		GroupDao groupDao = mock(GroupDao.class);
+		GroupMembershipDao groupMembershipDao = mock(GroupMembershipDao.class);
+		
+		try {
+			CsvImporter.importContacts(importFile, contactDao, groupMembershipDao, groupDao, rowFormat);
+			
+			verify(contactDao, new Times(4)).saveContact(any(Contact.class));
+			// TODO: check creation of groups
+		} catch (Exception e) {
+			fail();
+		}		
+	}
+	
+	private CsvRowFormat getRowFormatForContacts() {
+		CsvRowFormat rowFormat = new CsvRowFormat();
+		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_NAME);
+		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_PHONE);
+		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_OTHER_PHONE);
+		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_EMAIL);
+		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_STATUS);
+		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_NOTES);
+		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_GROUPS);
+		
+		return rowFormat;
+	}
+	
+	public void testCreateGroups() throws DuplicateKeyException {
+		CsvImporter.createGroups(groupDao, "/A");
+		CsvImporter.createGroups(groupDao, "B/2/a");
+		assertTrue(groupDao.getGroupByPath("/A") != null);
+		assertTrue(groupDao.getGroupByPath("/B") != null);
+		assertTrue(groupDao.getGroupByPath("/B/2") != null);
+		assertTrue(groupDao.getGroupByPath("/B/2/a") != null);
+		
+		// Test that method does not fail if asked to create already-existing groups
+		CsvImporter.createGroups(groupDao, "/A");
+		CsvImporter.createGroups(groupDao, "B/2/a");
+		
+		CsvImporter.createGroups(groupDao, "/B/2/c");		
+		assertTrue(groupDao.getGroupByPath("/B/2/a") != null);
+		assertTrue(groupDao.getGroupByPath("/B/2/c") != null);
+		
+		CsvImporter.createGroups(groupDao, "GroupB/Group2/Groupa");
+		assertTrue(groupDao.getGroupByPath("/GroupB") != null);
+		assertTrue(groupDao.getGroupByPath("/GroupB/Group2") != null);
+		assertTrue(groupDao.getGroupByPath("/GroupB/Group2/Groupa") != null);
+	}
+
 	/**
 	 * Get all import test files from /test/net/frontlinesms/csv/import/, and read
 	 * them in.  The files should all fail parsing in some way!

@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-import net.frontlinesms.plugins.translation.MasterTranslationFile;
 import net.frontlinesms.resources.FilePropertySet;
 
 /**
