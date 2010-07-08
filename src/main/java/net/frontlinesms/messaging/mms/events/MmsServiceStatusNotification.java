@@ -1,8 +1,7 @@
-package net.frontlinesms.messaging.sms.events;
+package net.frontlinesms.messaging.mms.events;
 
 import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.messaging.sms.SmsService;
-import net.frontlinesms.messaging.sms.SmsServiceEventListener;
 import net.frontlinesms.messaging.sms.SmsServiceStatus;
 /**
  * A superclass for notifications involving device connections.
@@ -12,10 +11,10 @@ import net.frontlinesms.messaging.sms.SmsServiceStatus;
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  * @author Alex Anderson <alex@frontlinesms.com>
  */
-public class SmsServiceNotification implements FrontlineEventNotification {
+public class MmsServiceStatusNotification implements FrontlineEventNotification {
 	private SmsServiceStatus status;
 	
-	public SmsServiceNotification (SmsServiceStatus status) {
+	public MmsServiceStatusNotification (SmsServiceStatus status) {
 		this.status = status;
 	}
 

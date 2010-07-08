@@ -3,12 +3,14 @@
  */
 package net.frontlinesms.ui.handler.email;
 
-import net.frontlinesms.EmailSender;
+import javax.mail.MessagingException;
+
 import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.repository.EmailAccountDao;
+import net.frontlinesms.email.EmailUtils;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -29,6 +31,7 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 	/** UI XML File Path: This is the outline for the dialog */
 	private static final String UI_FILE_EMAIL_ACCOUNT_FORM = "/ui/core/email/dgAccountSettings.xml";
 	private static final String UI_FILE_CONNECTION_WARNING_FORM = "/ui/core/email/dgConnectionWarning.xml";
+	private static final String UI_FILE_CONNECTION_WARNING_ERROR_MESSAGE = "/ui/core/email/dgConnectionWarningError.xml";
 	
 //> THINLET COMPONENT NAMES
 
@@ -52,6 +55,10 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 	private static final String EXAMPLE_SERVER_POP = "email.account.example.server.pop";
 	private static final String EXAMPLE_SERVER_SMTP = "email.account.example.server.smtp";
 	
+	private static final int DEFAULT_PORT_POP = 110;
+	private static final int DEFAULT_PORT_SMTP = 25;
+	private static final String UI_COMPONENT_TA_ERROR_MESSAGE = "taErrorMessage";
+	
 //> INSTANCE PROPERTIES
 	/** Logging object */
 	private final Logger log = FrontlineUtils.getLogger(this.getClass());
@@ -63,6 +70,7 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 	private boolean isForReceiving;
 	private EmailAccountDao emailAccountDao;
 	private EmailAccount originalEmailAccount;
+	private String connectionWarningMessage;
 
 //> CONSTRUCTORS
 	/**
@@ -91,19 +99,23 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 	public void initDialog(EmailAccount emailAccount) {
 		this.dialogComponent = ui.loadComponentFromFile(UI_FILE_EMAIL_ACCOUNT_FORM, this);
 		
-		this.originalEmailAccount = emailAccount; 
-		if (emailAccount != null) {
-			ui.setText(dialogComponent, InternationalisationUtils.getI18NString(I18N_EDITING_EMAIL_ACCOUNT, emailAccount.getAccountName()));
-			this.populatePanel();
-		}
+		Object tfPort = ui.find(dialogComponent, UI_COMPONENT_TF_ACCOUNT_SERVER_PORT);
 		
 		if (this.isForReceiving) {
 			ui.setText(find(UI_COMPONENT_LB_EXAMPLE_PORT), InternationalisationUtils.getI18NString(EXAMPLE_PORT_POP));
 			ui.setText(find(UI_COMPONENT_LB_EXAMPLE_SERVER), InternationalisationUtils.getI18NString(EXAMPLE_SERVER_POP));
+			ui.setText(tfPort, String.valueOf(DEFAULT_PORT_POP));
 		} else {
 			ui.setText(dialogComponent, InternationalisationUtils.getI18NString(I18N_NEW_ACCOUNT));
 			ui.setText(find(UI_COMPONENT_LB_EXAMPLE_PORT), InternationalisationUtils.getI18NString(EXAMPLE_PORT_SMTP));
 			ui.setText(find(UI_COMPONENT_LB_EXAMPLE_SERVER), InternationalisationUtils.getI18NString(EXAMPLE_SERVER_SMTP));
+			ui.setText(tfPort, String.valueOf(DEFAULT_PORT_SMTP));
+		}
+		
+		this.originalEmailAccount = emailAccount; 
+		if (emailAccount != null) {
+			ui.setText(dialogComponent, InternationalisationUtils.getI18NString(I18N_EDITING_EMAIL_ACCOUNT, emailAccount.getAccountName()));
+			this.populatePanel();
 		}
 	}
 
@@ -219,42 +231,54 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 		}
 		
 		try {
-				log.debug("Testing connection to [" + server + "]");
-				if (EmailSender.testConnection(server, accountName, serverPort, password, useSSL)) {
-					log.debug("Connection was successful, creating account [" + accountName + "]");
-					
-					if (this.originalEmailAccount == null) {
-						EmailAccount account = new EmailAccount(accountName, server, serverPort, password, useSSL, this.isForReceiving);
-						emailAccountDao.saveEmailAccount(account);
-					} else {
-						this.originalEmailAccount.setAccountName(accountName);
-						this.originalEmailAccount.setAccountServer(server);
-						this.originalEmailAccount.setAccountServerPort(serverPort);
-						this.originalEmailAccount.setAccountPassword(password);
-						this.originalEmailAccount.setUseSSL(useSSL);
-						// We're not setting the isForReceiving flag, as it must never change
-						
-						emailAccountDao.updateEmailAccount(this.originalEmailAccount);
-					}
-					
-					ui.removeDialog(this.dialogComponent);
-				} else {
-					log.debug("Connection failed.");
-					Object connectWarning = ui.loadComponentFromFile(UI_FILE_CONNECTION_WARNING_FORM, this);
-					ui.setAttachedObject(connectWarning, dialog);
-					ui.add(connectWarning);
-				}
-		} catch (DuplicateKeyException e) {
+			log.debug("Testing connection to [" + server + "]");
+			EmailUtils.testConnection(isForReceiving, server, accountName, serverPort, password, useSSL); // Exception catched if failed 
+			log.debug("Connection was successful, creating account [" + accountName + "]");
+			
+			if (this.originalEmailAccount == null) {
+				EmailAccount account = new EmailAccount(accountName, server, serverPort, password, useSSL, this.isForReceiving);
+				emailAccountDao.saveEmailAccount(account);
+			} else {
+				this.originalEmailAccount.setAccountName(accountName);
+				this.originalEmailAccount.setAccountServer(server);
+				this.originalEmailAccount.setAccountServerPort(serverPort);
+				this.originalEmailAccount.setAccountPassword(password);
+				this.originalEmailAccount.setUseSSL(useSSL);
+				// We're not setting the isForReceiving flag, as it must never change
+				
+				emailAccountDao.updateEmailAccount(this.originalEmailAccount);
+			}
+			
+			ui.removeDialog(this.dialogComponent);
+		} catch (MessagingException e) {
+			log.info("Fail to connect to server [" + server + "]");
+			log.debug("Fail to connect to server [" + server + "]", e);
+			
+			this.connectionWarningMessage = e.getMessage() + "\n" + e.getNextException();
+			this.showConnectionWarningDialog(dialog);
+		}  catch (DuplicateKeyException e) {
 			log.debug(InternationalisationUtils.getI18NString(I18N_ACCOUNT_NAME_ALREADY_EXISTS), e);
 			ui.alert(InternationalisationUtils.getI18NString(I18N_ACCOUNT_NAME_ALREADY_EXISTS));
 		}
 		log.trace("EXIT");
 	}
 	
+	private void showConnectionWarningDialog(Object dialog) {
+		Object connectWarning = ui.loadComponentFromFile(UI_FILE_CONNECTION_WARNING_FORM, this);
+		ui.setAttachedObject(connectWarning, dialog);
+		ui.add(connectWarning);
+	}
+
 	/** @param dialog the dialog to remove
 	 * @see UiGeneratorController#remove(Object) */
 	public void removeDialog(Object dialog) {
 		this.ui.closeDeviceConnectionDialog(dialog);
+	}
+	
+	public void showDetails () {
+		Object errorPanel = ui.loadComponentFromFile(UI_FILE_CONNECTION_WARNING_ERROR_MESSAGE, this);
+		ui.setText(this.ui.find(errorPanel, UI_COMPONENT_TA_ERROR_MESSAGE), this.connectionWarningMessage);
+		ui.add(errorPanel);
 	}
 
 }

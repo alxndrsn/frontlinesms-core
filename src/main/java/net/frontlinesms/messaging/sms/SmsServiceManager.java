@@ -29,6 +29,7 @@ import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.events.EventBus;
+import net.frontlinesms.listener.FrontlineMessagingListener;
 import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.messaging.CommProperties;
 import net.frontlinesms.messaging.sms.events.NoSmsServicesConnectedNotification;
@@ -485,7 +486,7 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 	}
 
 	public void addSmsInternetService(SmsInternetService smsInternetService) {
-		smsInternetService.setSmsListener(smsListener);
+		smsInternetService.setSmsListener((SmsListener)smsListener);
 		if (smsInternetServices.contains(smsInternetService)) {
 			smsInternetService.restartThisThing();
 		} else {

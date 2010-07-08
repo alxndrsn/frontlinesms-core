@@ -38,6 +38,7 @@ import javax.mail.internet.MimeMessage;
 import org.apache.log4j.Logger;
 
 import net.frontlinesms.data.domain.*;
+import net.frontlinesms.email.EmailUtils;
 import net.frontlinesms.listener.EmailListener;
 
 /**
@@ -49,9 +50,6 @@ import net.frontlinesms.listener.EmailListener;
  * <li> kadu(at)masabi(dot)com
  */
 public class EmailSender extends Thread {
-	private static final String SMTPS = "smtps";
-	private static final boolean STARTTLS = true;
-	private static final boolean AUTH = true;
 	private static final boolean DEBUG_SESSION = false;
 	
 	private boolean running;
@@ -218,23 +216,6 @@ public class EmailSender extends Thread {
 		}
 		LOG.trace("EXIT");
 	}
-
-	/**
-	 * Connects to the supplied server using the supplied information.
-	 * 
-	 * @param smtpHost
-	 * @param from
-	 * @param pass
-	 * @param useSSL
-	 * @param session
-	 * @return
-	 * @throws MessagingException
-	 */
-	private static Transport connect(String smtpHost, String from, int serverPort, String pass, boolean useSSL, Session session) throws MessagingException {
-		Transport transport = session.getTransport();
-        transport.connect(smtpHost, serverPort, from, pass);
-        return transport;
-	}
 	
 	/**
 	 * Connects to the server
@@ -255,28 +236,6 @@ public class EmailSender extends Thread {
         LOG.trace("EXIT");
         return transport;
 	}
-	
-	/**
-	 * Returns a new session for this server, using SMTP or SMTPS according to supplied
-	 * information.
-	 * 
-	 * @param smtpHost
-	 * @param from
-	 * @param pass
-	 * @param useSSL
-	 * @return
-	 */
-	private static Session getSession(String smtpHost, String from, int serverPort, String pass, boolean useSSL) {
-		Properties props = getPropertiesForHost(smtpHost, serverPort, useSSL);
-		Session session;
-		if (useSSL) {
-			session = Session.getInstance(props);
-		} else {
-			session = Session.getInstance(props, new EmailSender.SMTPAuthenticator(from, pass));
-		}
-		session.setDebug(DEBUG_SESSION);
-		return session;
-	}
 
 	/**
 	 * Returns a new session for this server.
@@ -287,12 +246,12 @@ public class EmailSender extends Thread {
 		LOG.trace("ENTER");
 		LOG.debug("Host [" + server + "]");
 		LOG.debug("Use SSL [" + isSSL + "]");
-		Properties props = getPropertiesForHost(server, serverPort, isSSL);
+		Properties props = EmailUtils.getPropertiesForHost(server, serverPort, isSSL);
 		Session session;
 		if (isSSL) {
 			session = Session.getInstance(props);
 		} else {
-			session = Session.getInstance(props, new EmailSender.SMTPAuthenticator(account, password));
+			session = Session.getInstance(props, new EmailSender.FrontlineEmailAuthenticator(account, password));
 		}
 		session.setDebug(DEBUG_SESSION);
 		LOG.trace("EXIT");
@@ -300,61 +259,14 @@ public class EmailSender extends Thread {
 	}
 	
 	/**
-	 * Returns the properties for this server, using SMTP os SMTPS according to
-	 * supplied information.
-	 * 
-	 * @param smtpHost
-	 * @param useSSL
-	 * @return
-	 */
-	private static Properties getPropertiesForHost(String smtpHost, int serverPort, boolean useSSL) {
-		Properties props = new Properties();
-		if (!useSSL) {
-			props.put("mail.smtp.host", smtpHost);
-			props.put("mail.smtp.port", String.valueOf(serverPort));
-			props.put("mail.smtp.starttls.enable", String.valueOf(STARTTLS));
-		} else {
-			 props.put("mail.transport.protocol", SMTPS);
-		     props.put("mail.smtps.host", smtpHost);
-		}
-		props.put("mail.smtp.auth", String.valueOf(AUTH));
-		return props;
-	}
-
-	/**
-	 * Try to connect to the supplied server.
-	 * 
-	 * @param smtpHost
-	 * @param account
-	 * @param password
-	 * @param useSSL
-	 * @return TRUE if successful, FALSE otherwise.
-	 */
-	public static boolean testConnection(String smtpHost, String account, int serverPort, String password, boolean useSSL) {
-		LOG.trace("ENTER");
-		Session session = getSession(smtpHost, account, serverPort, password, useSSL);
-		boolean connectionOk = false;
-		try {
-			connect(smtpHost, account, serverPort, password, useSSL, session);
-			connectionOk = true;
-		} catch (MessagingException e) {
-			LOG.info("Fail to connect to server [" + smtpHost + "]");
-			LOG.debug("Fail to connect to server [" + smtpHost + "]", e);
-		}
-		LOG.debug("Returning [" + connectionOk + "]");
-		LOG.trace("EXIT");
-		return connectionOk;
-	}
-	
-	/**
 	 * SMTPAuthenticator is used to do simple authentication when the SMTP
 	 * server requires it.
 	 */
-	private static class SMTPAuthenticator extends Authenticator {
+	public static class FrontlineEmailAuthenticator extends Authenticator {
 		private String user;
 		private String pass;
 
-		public SMTPAuthenticator(String user, String pass) {
+		public FrontlineEmailAuthenticator(String user, String pass) {
 			this.user = user;
 			this.pass = pass;
 		}

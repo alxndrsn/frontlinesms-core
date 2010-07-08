@@ -46,6 +46,7 @@ public class EmailAccount {
 	private String accountPassword;
 	private Integer accountServerPort;
 	private boolean useSsl;
+	private Long lastCheck;
 	@Column(name=FIELD_IS_FOR_RECEIVING)
 	private Boolean isForReceiving = true;
 	
@@ -211,5 +212,13 @@ public class EmailAccount {
 		if (useSsl != other.useSsl)
 			return false;
 		return true;
+	}
+
+	public void setLastCheck(Long lastCheck) {
+		this.lastCheck = lastCheck;
+	}
+
+	public Long getLastCheck() {
+		return lastCheck;
 	}
 }

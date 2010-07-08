@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms;
+package net.frontlinesms.messaging.sms;
 
 import static org.mockito.Mockito.*;
 
@@ -11,6 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.smslib.CIncomingMessage;
 
+import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
@@ -22,10 +23,11 @@ import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.junit.BaseTestCase;
 import net.frontlinesms.listener.UIListener;
+import net.frontlinesms.messaging.sms.IncomingSmsProcessor;
 import net.frontlinesms.messaging.sms.SmsService;
 
 /**
- * Tests for the {@link IncomingMessageProcessor} class.
+ * Tests for the {@link IncomingSmsProcessor} class.
  * @author Alex Anderson <alex@frontlinesms.com>
  */
 public class IncomingMessageProcessorTest extends BaseTestCase {
@@ -37,7 +39,7 @@ public class IncomingMessageProcessorTest extends BaseTestCase {
 	private KeywordDao keywordDao;
 	private KeywordActionDao keywordActionDao;
 	
-	private IncomingMessageProcessor imp;
+	private IncomingSmsProcessor imp;
 	private BlockingIncomingMessageEventListener bimel;
 	
 //> TEST META METHODS
@@ -57,7 +59,7 @@ public class IncomingMessageProcessorTest extends BaseTestCase {
 		keywordActionDao = mock(KeywordActionDao.class);
 		when(frontline.getKeywordActionDao()).thenReturn(keywordActionDao);
 		
-		imp = new IncomingMessageProcessor(frontline);
+		imp = new IncomingSmsProcessor(frontline);
 		bimel = new BlockingIncomingMessageEventListener();
 		imp.setUiListener(bimel);
 		imp.start();
@@ -187,9 +189,9 @@ public class IncomingMessageProcessorTest extends BaseTestCase {
 }
 
 /**
- * This class is used as the {@link UIListener} for the {@link IncomingMessageProcessor} that we are testing.
+ * This class is used as the {@link UIListener} for the {@link IncomingSmsProcessor} that we are testing.
  * Using the method {@link BlockingIncomingMessageEventListener#getIncomingMessage()} we can wait until the
- * {@link IncomingMessageProcessor} has finished processing a message before checking the state of the test
+ * {@link IncomingSmsProcessor} has finished processing a message before checking the state of the test
  * objects.
  * @author aga
  */

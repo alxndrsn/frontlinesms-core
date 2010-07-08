@@ -96,7 +96,8 @@ class SMSGatewayService
 
 			try
 			{
-				Thread.currentThread().sleep ( nDelay * 1000 );
+				Thread.currentThread();
+				Thread.sleep ( nDelay * 1000 );
 			}
 			catch ( InterruptedException e )
 			{
@@ -208,7 +209,7 @@ class SMSGatewayService
 				int IdStart = sResponse.lastIndexOf(sReturnCodePrefix) + sReturnCodePrefix.length();
 
 				StringUtils objStringUtils = new StringUtils();
-				int IdEnd = objStringUtils.LastindexOfAny( sResponse, "0123456789" );
+				int IdEnd = StringUtils.LastindexOfAny( sResponse, "0123456789" );
 
 				objSMSGatewayRequestResult.RetCode = sResponse.substring ( IdStart, IdEnd /*-IdStart*/ +1 );
 
@@ -219,7 +220,7 @@ class SMSGatewayService
 				int IdStart = sResponse.lastIndexOf(sDelayTimePrefix) + sDelayTimePrefix.length();
 
 				StringUtils objStringUtils = new StringUtils();
-				int IdEnd = objStringUtils.LastindexOfAny( sResponse, "0123456789" );
+				int IdEnd = StringUtils.LastindexOfAny( sResponse, "0123456789" );
 
 				objSMSGatewayRequestResult.RetCode = sResponse.substring ( IdStart, IdEnd /*-IdStart*/ +1 );
 

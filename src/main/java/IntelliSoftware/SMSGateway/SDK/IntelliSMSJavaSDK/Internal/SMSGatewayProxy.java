@@ -99,7 +99,7 @@ public class SMSGatewayProxy
 		try
 		{
 			StringUtils objStringUtils = new StringUtils();
-			sText = objStringUtils.TruncateString ( sText, c_nTextMessage_MaxSize * 5 );
+			sText = StringUtils.TruncateString ( sText, c_nTextMessage_MaxSize * 5 );
 
 			sFormData += "username=" + URLEncoder.encode(sUsername,"UTF-8") + "&";
 			sFormData += "password=" + URLEncoder.encode(sPassword,"UTF-8") + "&";
@@ -378,7 +378,7 @@ public class SMSGatewayProxy
 			int IdStart = sResponse.indexOf ( c_sIdPrefix ) + c_sIdPrefix.length();
 
 			StringUtils objStringUtils = new StringUtils();
-			int IdEnd = objStringUtils.LastindexOfAny ( sResponse, "0123456789" );
+			int IdEnd = StringUtils.LastindexOfAny ( sResponse, "0123456789" );
 
 			objSendStatus.MessageId = sResponse.substring ( IdStart, IdEnd /*-IdStart*/ +1 );
 

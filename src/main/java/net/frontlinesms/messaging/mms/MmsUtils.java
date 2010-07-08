@@ -1,14 +1,11 @@
-/**
- * 
- */
-package net.frontlinesms.messaging.mms.email;
+package net.frontlinesms.messaging.mms;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -22,38 +19,23 @@ import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.mms.ImageMmsMessagePart;
 import net.frontlinesms.mms.MmsMessage;
 import net.frontlinesms.mms.MmsMessagePart;
-import net.frontlinesms.mms.MmsReceiveException;
 import net.frontlinesms.mms.TextMmsMessagePart;
-import net.frontlinesms.mms.email.pop.FileSystemMmsReceiver;
+import net.frontlinesms.mms.email.pop.EmailMmsParser;
+import net.frontlinesms.mms.email.pop.parser.uk.O2UkMmsParser;
+import net.frontlinesms.mms.email.pop.parser.uk.OrangeUkMmsParser;
+import net.frontlinesms.mms.email.pop.parser.uk.ThreeUkMmsParser;
+import net.frontlinesms.mms.email.pop.parser.uk.TmobileUkMmsParser;
+import net.frontlinesms.mms.email.pop.parser.uk.VodafoneUkMmsParser;
+import net.frontlinesms.mms.email.pop.parser.us.AttUsMmsParser;
 import net.frontlinesms.resources.ResourceUtils;
 
-/**
- * @author aga
- *
- */
-public class MmsPollingEmailReceiver {
-
-	private static final Logger log = FrontlineUtils.getLogger(MmsPollingEmailReceiver.class);
+public class MmsUtils {
 	
-	public Collection<FrontlineMultimediaMessage> dbgCreateMessagesFromClasspath() {
-		ArrayList<FrontlineMultimediaMessage> messages = new ArrayList<FrontlineMultimediaMessage>();
+	private static final Logger log = FrontlineUtils.getLogger(MmsUtils.class);
 	
-		Collection<MmsMessage> mms;
-		try {
-			mms = new FileSystemMmsReceiver("../MyMmsGateway/src/test/resources/net/frontlinesms/mms/email/pop/parser/uk/").receive();
-		} catch (MmsReceiveException e) {
-			throw new RuntimeException(e);
-		}
-		
-		for(MmsMessage mm : mms) {
-			messages.add(create(mm));
-		}
-		
-		return messages;
-	}
-
+	
 	/** Create a new {@link FrontlineMultimediaMessage} from a {@link MmsMessage} */
-	private FrontlineMultimediaMessage create(MmsMessage mms) {
+	public static FrontlineMultimediaMessage create(MmsMessage mms) {
 		StringBuilder textContent = new StringBuilder();
 		List<FrontlineMultimediaMessagePart> multimediaParts = new ArrayList<FrontlineMultimediaMessagePart>();
 		for(MmsMessagePart part : mms.getParts()) {
@@ -84,7 +66,7 @@ public class MmsPollingEmailReceiver {
 		return message;
 	}
 
-	private FrontlineMultimediaMessagePart createBinaryPart(
+	private static FrontlineMultimediaMessagePart createBinaryPart(
 			ImageMmsMessagePart imagePart) {
 		// save the binary data to file
 		FrontlineMultimediaMessagePart fmmPart = FrontlineMultimediaMessagePart.createBinaryPart(imagePart.getFilename()/*, getThumbnail(imagePart)*/);
@@ -99,7 +81,7 @@ public class MmsPollingEmailReceiver {
 		return fmmPart; 
 	}
 	
-	private String getAlternateFilename(String filename) {
+	private static String getAlternateFilename(String filename) {
 		String namePart = FrontlineUtils.getFilenameWithoutAnyExtension(filename);
 		String extension = FrontlineUtils.getWholeFileExtension(filename);
 		return namePart + '_' + new Random().nextInt(99) + '.' + extension;
@@ -120,8 +102,19 @@ public class MmsPollingEmailReceiver {
 			if(fos != null) try { fos.close(); } catch(IOException ex) { /* ah well :/ */ }
 		}
 	}
-
+	
 	public static File getFile(FrontlineMultimediaMessagePart part) {
 		return new File(new File(ResourceUtils.getConfigDirectoryPath(), "data/mms"), part.getFilename());
+	}
+	
+	public static List<EmailMmsParser> getAllEmailMmsParsers () {
+		return Arrays.asList(new EmailMmsParser[]{
+				new O2UkMmsParser(),
+				new OrangeUkMmsParser(),
+				new ThreeUkMmsParser(),
+				new TmobileUkMmsParser(),
+				new VodafoneUkMmsParser(),
+				new AttUsMmsParser(),
+				});
 	}
 }

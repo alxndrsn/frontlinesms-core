@@ -185,7 +185,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			}
 		}
 		
-		this.phoneManager = frontlineController.getSmsDeviceManager();
+		this.phoneManager = frontlineController.getSmsServiceManager();
 		this.contactDao = frontlineController.getContactDao();
 		this.groupDao = frontlineController.getGroupDao();
 		this.groupMembershipDao = frontlineController.getGroupMembershipDao();

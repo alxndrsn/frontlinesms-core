@@ -13,7 +13,7 @@ import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
-import net.frontlinesms.messaging.mms.email.MmsPollingEmailReceiver;
+import net.frontlinesms.messaging.mms.MmsUtils;
 import net.frontlinesms.ui.FrontlineUiUtils;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
@@ -88,11 +88,11 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 			Object panel = ui.createPanel("");
 			ui.setColumns(panel, 1);
 
-			String openAction = "openMultimediaPart('" + MmsPollingEmailReceiver.getFile(part).getPath() + "')";
+			String openAction = "openMultimediaPart('" + MmsUtils.getFile(part).getPath() + "')";
 			
 			Image thumb = null;
 			try {
-				thumb = FrontlineUiUtils.getLimitedSizeImage(ImageIO.read(MmsPollingEmailReceiver.getFile(part)), 64, 64);
+				thumb = FrontlineUiUtils.getLimitedSizeImage(ImageIO.read(MmsUtils.getFile(part)), 64, 64);
 			} catch(Exception ex) {}
 			if(thumb != null) {
 				Object thumbComponent = ui.createLink("", openAction, panel, this);

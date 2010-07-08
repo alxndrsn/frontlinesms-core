@@ -24,15 +24,6 @@ import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.messaging.FrontlineMessagingService;
 
 public interface MmsService extends FrontlineMessagingService {
-	/** Checks if this device is being used to send SMS messages. */
-	public boolean isUseForSending();
-
-	/** Set this device to be used for sending SMS messages. */
-	public void setUseForSending(boolean use);
-	
-	/** Check whether this device actually supports SMS receipt. */
-	public boolean supportsReceive();
-
 	/** Check if this device is being used to receive SMS messages. */
 	public boolean isUseForReceiving();
 	
@@ -40,29 +31,19 @@ public interface MmsService extends FrontlineMessagingService {
 	public void setUseForReceiving(boolean use);
 
 	/** Adds the supplied message to the outbox. */
-	public void sendSMS(FrontlineMessage outgoingMessage);
+	public void sendMMS(FrontlineMessage outgoingMessage);
 	
 	/** Sets the {@link SmsListener} attached to this {@link MmsService}. */
-	public void setSmsListener(SmsListener smsListener);
+	public void setMmsListener(SmsListener smsListener);
 	
 	/** Check whether this device is currently connected */
 	public boolean isConnected();
-	
-	/** Check whether this device actually supports sending binary sms. */
-	public boolean isBinarySendingSupported();
-
-	/** Gets the MSISDN to be displayed for this device. */
-	public String getMsisdn();
-	
-	/**
-	 * Checks whether this device supports sending sms messages in the UCS2 characterset.
-	 * FIXME this method is unnecessary as all handsets support UCS-2 so far!
-	 */
-	public boolean isUcs2SendingSupported();
 	
 	/** @return the status of this device */
 	public MmsServiceStatus getStatus();
 	
 	/** @return details relating to {@link #getStatus()}, or <code>null</code> if none are relevant. */
 	public String getStatusDetail();
+	
+	public String getName ();
 }

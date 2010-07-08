@@ -18,7 +18,7 @@ import net.frontlinesms.events.EventBus;
 import net.frontlinesms.junit.BaseTestCase;
 import net.frontlinesms.messaging.sms.MessageType;
 import net.frontlinesms.messaging.sms.SmsServiceManager;
-import net.frontlinesms.messaging.sms.events.SmsServiceNotification;
+import net.frontlinesms.messaging.sms.events.SmsServiceStatusNotification;
 import net.frontlinesms.messaging.sms.internet.SmsInternetService;
 import net.frontlinesms.messaging.sms.modem.SmsModem;
 import net.frontlinesms.messaging.sms.modem.SmsModemStatus;
@@ -250,23 +250,23 @@ public class SmsServiceManagerTest extends BaseTestCase {
 		when(modem1.getStatus()).thenReturn(SmsModemStatus.FAILED_TO_CONNECT);
 		when(modem2.getStatus()).thenReturn(SmsModemStatus.DORMANT);
 		manager.smsDeviceEvent(modem1, SmsModemStatus.FAILED_TO_CONNECT);
-		verify(mockEventBus, new NoMoreInteractions()).notifyObservers(any(SmsServiceNotification.class));
+		verify(mockEventBus, new NoMoreInteractions()).notifyObservers(any(SmsServiceStatusNotification.class));
 		
 		// Testing if the event is triggered with one failed-status device and a CONNECTING device <SHOULD NOT>
 		when(modem2.getStatus()).thenReturn(SmsModemStatus.CONNECTING);
 		manager.smsDeviceEvent(modem1, SmsModemStatus.FAILED_TO_CONNECT);
-		verify(mockEventBus, new NoMoreInteractions()).notifyObservers(any(SmsServiceNotification.class));
+		verify(mockEventBus, new NoMoreInteractions()).notifyObservers(any(SmsServiceStatusNotification.class));
 		
 		// Testing if the event is triggered with the connecting device failing <SHOULD>
 		when(modem2.getStatus()).thenReturn(SmsModemStatus.OWNED_BY_SOMEONE_ELSE);
 		manager.smsDeviceEvent(modem2, SmsModemStatus.OWNED_BY_SOMEONE_ELSE);
-		verify(mockEventBus, new Times(1)).notifyObservers(any(SmsServiceNotification.class));
+		verify(mockEventBus, new Times(1)).notifyObservers(any(SmsServiceStatusNotification.class));
 		
 		// Testing if the event is triggered with one failed-status device and a CONNECTED device <SHOULD NOT>
 		SmsModem modem3 = createMockModem(true, true, true, true);
 		addModem(manager, modem3, "connected");
 		manager.smsDeviceEvent(modem1, SmsModemStatus.FAILED_TO_CONNECT);
-		verify(mockEventBus, new NoMoreInteractions()).notifyObservers(any(SmsServiceNotification.class));
+		verify(mockEventBus, new NoMoreInteractions()).notifyObservers(any(SmsServiceStatusNotification.class));
 	}
 	
 	

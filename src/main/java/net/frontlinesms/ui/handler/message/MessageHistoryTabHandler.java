@@ -38,7 +38,6 @@ import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
-import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.FrontlineMessage;
@@ -51,7 +50,6 @@ import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
-import net.frontlinesms.messaging.mms.email.MmsPollingEmailReceiver;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiProperties;
@@ -844,12 +842,12 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	
 
 	
-	public void dbgGenerateMms() {
-		Collection<FrontlineMultimediaMessage> mms = new MmsPollingEmailReceiver().dbgCreateMessagesFromClasspath();
-		for(FrontlineMultimediaMessage mm : mms) {
-			this.ui.getFrontlineController().getMessageDao().saveMessage(mm);
-		}
-	}
+//	public void dbgGenerateMms() {
+//		Collection<FrontlineMultimediaMessage> mms = new MmsPollingEmailReceiver().dbgCreateMessagesFromClasspath();
+//		for(FrontlineMultimediaMessage mm : mms) {
+//			this.ui.getFrontlineController().getMessageDao().saveMessage(mm);
+//		}
+//	}
 	
 //> HELPER METHODS
 	public List<String> getPhoneNumbers(Group group) {
