@@ -12,7 +12,9 @@ import java.util.Enumeration;
 
 import net.frontlinesms.CommUtils;
 import net.frontlinesms.FrontlineUtils;
+import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.domain.SmsModemSettings;
+import net.frontlinesms.data.events.DatabaseEntityNotification;
 import net.frontlinesms.data.repository.SmsModemSettingsDao;
 import net.frontlinesms.email.EmailUtils;
 import net.frontlinesms.events.EventObserver;
@@ -23,6 +25,8 @@ import net.frontlinesms.messaging.FrontlineMessagingServiceEventListener;
 import net.frontlinesms.messaging.mms.MmsService;
 import net.frontlinesms.messaging.mms.MmsServiceManager;
 import net.frontlinesms.messaging.mms.email.MmsEmailService;
+import net.frontlinesms.messaging.mms.email.MmsEmailServiceStatus;
+import net.frontlinesms.messaging.mms.events.MmsServiceStatusNotification;
 import net.frontlinesms.messaging.sms.SmsService;
 import net.frontlinesms.messaging.sms.SmsServiceManager;
 import net.frontlinesms.messaging.sms.internet.SmsInternetService;
@@ -621,7 +625,11 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 		String icon = Icon.LED_RED;
 		if (mmsService instanceof MmsEmailService) {
 			MmsEmailService mmsEmailService = (MmsEmailService) mmsService;
-			if(mmsEmailService.isConnected()) {
+			if (mmsEmailService.getStatus().equals(MmsEmailServiceStatus.FAILED_TO_CONNECT)) {
+				icon = Icon.LED_RED;
+			} else if (mmsEmailService.getStatus().equals(MmsEmailServiceStatus.FETCHING)) {
+				icon = Icon.LED_AMBER;
+			} else {
 				icon = Icon.LED_GREEN;
 			}
 			
@@ -629,7 +637,7 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 			baudRate = "";
 			makeAndModel = mmsEmailService.getName();
 			serial = "";
-			statusString = "";
+			statusString = mmsEmailService.getStatus().getI18nKey();
 		
 
 			// Add "status cell" - "traffic light" showing how functional the device is
@@ -642,7 +650,7 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 			Object useForSendingCell = ui.createTableCell("");
 			ui.add(row, useForSendingCell);
 			Object useForReceiveCell = ui.createTableCell("");
-			if (mmsService.isConnected()) ui.setIcon(useForReceiveCell, Icon.TICK);
+			//if (mmsEmailService.isConnected()) ui.setIcon(useForReceiveCell, Icon.TICK);
 			ui.add(row, useForReceiveCell);
 			
 			ui.add(row, ui.createTableCell(statusString));
@@ -668,11 +676,19 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	 */
 	public void notify(FrontlineEventNotification notification) {
 		// This object is registered to the UIGeneratorController and get notified when the users changes tab
-		if(notification instanceof TabChangedNotification) {
+		if (notification instanceof TabChangedNotification) {
 			String newTabName = ((TabChangedNotification) notification).getNewTabName();
 			if (newTabName.equals(TAB_ADVANCED_PHONE_MANAGER)) {
 				this.refresh();
 				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_MODEM_LIST_UPDATED));
+			}
+		} else if (notification instanceof MmsServiceStatusNotification) {
+			this.refresh();
+		} else if (notification instanceof DatabaseEntityNotification<?>) {
+			// Database notification
+			if (((DatabaseEntityNotification<?>) notification).getDatabaseEntity() instanceof EmailAccount) {
+				// If there is any change in the E-Mail accounts, we refresh the list of Messaging Services
+				this.refresh();
 			}
 		}
 	}

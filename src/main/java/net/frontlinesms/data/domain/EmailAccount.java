@@ -40,7 +40,7 @@ public class EmailAccount {
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY) @Column(unique=true,nullable=false,updatable=false) @SuppressWarnings("unused")
 	private long id;
 	/** Username. It should be unique within the system, but may be changed. */
-	@Column(unique=true, nullable=true, updatable=true)
+	@Column(unique=true, nullable=true, updatable=true) // XXX: Should now be possible to have a username twice (Sending + Receiving). Does this require a database reload?
 	private String accountName;
 	private String accountServer;
 	private String accountPassword;

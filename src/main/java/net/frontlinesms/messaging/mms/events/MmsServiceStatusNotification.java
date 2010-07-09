@@ -1,24 +1,28 @@
 package net.frontlinesms.messaging.mms.events;
 
 import net.frontlinesms.events.FrontlineEventNotification;
-import net.frontlinesms.messaging.sms.SmsService;
-import net.frontlinesms.messaging.sms.SmsServiceStatus;
+import net.frontlinesms.messaging.mms.MmsService;
+import net.frontlinesms.messaging.mms.MmsServiceStatus;
 /**
- * A superclass for notifications involving device connections.
- * In the fullness of time, this notification type should be used to replace {@link SmsServiceEventListener}.
- * TODO to replace {@link SmsServiceEventListener}, this class will need to contain a reference to the {@link SmsService} which has triggered each notification.
+ * A class for notifications involving MMS.
  * 
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  * @author Alex Anderson <alex@frontlinesms.com>
  */
 public class MmsServiceStatusNotification implements FrontlineEventNotification {
-	private SmsServiceStatus status;
+	private MmsService mmsService;
+	private MmsServiceStatus status;
 	
-	public MmsServiceStatusNotification (SmsServiceStatus status) {
+	public MmsServiceStatusNotification (MmsService mmsService, MmsServiceStatus status) {
+		this.mmsService = mmsService;
 		this.status = status;
 	}
 
-	public SmsServiceStatus getStatus() {
+	public MmsServiceStatus getStatus() {
 		return status;
+	}
+
+	public MmsService getMmsService() {
+		return mmsService;
 	}
 }

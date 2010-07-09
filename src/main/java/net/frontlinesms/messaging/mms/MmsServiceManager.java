@@ -35,7 +35,9 @@ import net.frontlinesms.events.EventBus;
 import net.frontlinesms.listener.FrontlineMessagingListener;
 import net.frontlinesms.listener.MmsListener;
 import net.frontlinesms.messaging.mms.email.MmsEmailService;
+import net.frontlinesms.messaging.mms.email.MmsEmailServiceStatus;
 import net.frontlinesms.messaging.mms.events.MmsReceivedNotification;
+import net.frontlinesms.messaging.mms.events.MmsServiceStatusNotification;
 import net.frontlinesms.mms.MmsMessage;
 import net.frontlinesms.mms.MmsReceiveException;
 
@@ -152,6 +154,7 @@ public class MmsServiceManager extends Thread implements MmsListener  {
 	private void processMmsEmailReceiving() {
 		for (MmsEmailService mmsEmailService : this.mmsEmailServices) {
 			try {
+				mmsEmailService.setStatus(MmsEmailServiceStatus.FETCHING, this.eventBus);
 				Collection<MmsMessage> mmsMessages = mmsEmailService.receive();
 				
 				for (MmsMessage mmsMessage : mmsMessages) {
@@ -163,6 +166,8 @@ public class MmsServiceManager extends Thread implements MmsListener  {
 				}
 			} catch (MmsReceiveException e) {
 				// TODO Tell the user?
+			} finally {
+				mmsEmailService.setStatus(MmsEmailServiceStatus.READY, this.eventBus);
 			}
 		}
 	}
@@ -236,6 +241,10 @@ public class MmsServiceManager extends Thread implements MmsListener  {
 //			mmsListener.mmsDeviceEvent(device, serviceStatus);
 //		}
 //		LOG.trace("EXIT");
+	}
+
+	public void clearMmsEmailReceivers() {
+		this.mmsEmailServices.clear();
 	}
 	
 //	/**

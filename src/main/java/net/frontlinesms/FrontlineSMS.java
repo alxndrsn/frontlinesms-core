@@ -26,6 +26,7 @@ import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
+import net.frontlinesms.data.events.DatabaseEntityNotification;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.events.EventObserver;
@@ -312,6 +313,8 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 	 * Gives all receiving e-mail accounts to the {@link MmsServiceManager} so it can use them as {@link PopImapEmailMmsReceiver}s
 	 */
 	private void initMmsEmailServices() {
+		this.mmsServiceManager.clearMmsEmailReceivers();
+		
 		for (EmailAccount mmsEmailAccount : this.emailAccountDao.getReceivingEmailAccounts()) {
 			this.mmsServiceManager.addMmsEmailReceiver(mmsEmailAccount);
 			mmsEmailAccount.setLastCheck(System.currentTimeMillis());
@@ -606,6 +609,12 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 		if (notification instanceof MmsReceivedNotification) {
 			FrontlineMultimediaMessage frontlineMultimediaMessage = ((MmsReceivedNotification) notification).getFrontlineMultimediaMessage();
 			this.messageDao.saveMessage(frontlineMultimediaMessage);
+		} else if (notification instanceof DatabaseEntityNotification<?>) {
+			// Database notification
+			if (((DatabaseEntityNotification<?>) notification).getDatabaseEntity() instanceof EmailAccount) {
+				// If there is any change in the E-Mail accounts, we refresh the list of MmsEmailServices
+				this.initMmsEmailServices();
+			}
 		}
 	}
 }

@@ -191,7 +191,11 @@ public final class FrontlineSMSConstants {
 			"month.dec"
 	};
 	
-
+//> MMS DEVICE STATUS KEYS
+	/** Key for text: Fetching */
+	public static final String MMS_SERVICE_STATUS_FETCHING = "mms.email.fetching";
+	public static final String MMS_SERVICE_STATUS_READY = "mms.email.ready";
+	
 //> SMS DEVICE STATUS KEYS
 	/** Key for text: SMS Device Status: dormant */
 	public static final String SMS_DEVICE_STATUS_DORMANT = COMMON_DORMANT;
