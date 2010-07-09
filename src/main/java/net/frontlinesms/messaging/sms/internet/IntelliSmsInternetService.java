@@ -45,7 +45,7 @@ import IntelliSoftware.SMSGateway.SDK.IntelliSMSJavaSDK.*;
  * @date 31/01/2009
  */
 @Provider(name = "IntelliSms", icon = "/icons/sms_http.png") 
-public class IntelliSmsInternetService extends AbstractSmsInternetService implements PopMessageProcessor {
+public class IntelliSmsInternetService extends AbstractSmsInternetService implements PopImapMessageProcessor {
 	
 //> STATIC CONSTANTS
 	/** Default source port to use for an outgoing binary SMS message */
@@ -107,7 +107,7 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 	 * @return whether receive was successful
 	 */
 	protected synchronized void receiveSms() throws SmsInternetServiceReceiveException {
-		PopMessageReceiver receiver = new PopMessageReceiver(this);
+		PopImapMessageReceiver receiver = new PopImapMessageReceiver(this);
 		
 		receiver.setHostAddress(getEmailHost());
 		receiver.setHostPassword(getEmailPassword());
@@ -122,7 +122,7 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 		}
 	}
 	
-	public void processPopMessage(javax.mail.Message message) {
+	public void processMessage(javax.mail.Message message) {
 		try {
 			// We've got a message, so try and find it's text content.
 			String messageText = PopUtils.getMessageText(message);

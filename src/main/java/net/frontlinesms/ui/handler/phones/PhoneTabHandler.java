@@ -625,7 +625,7 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 				icon = Icon.LED_GREEN;
 			}
 			
-			port = EmailUtils.POP;
+			port = mmsEmailService.getProtocol();
 			baudRate = "";
 			makeAndModel = mmsEmailService.getName();
 			serial = "";

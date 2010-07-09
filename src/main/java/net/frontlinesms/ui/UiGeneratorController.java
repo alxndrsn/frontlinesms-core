@@ -1347,7 +1347,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public Object getRow(EmailAccount acc) {
 		Object row = createTableRow(acc);
 
-		Object iconCell = createTableCell("");
+		Object iconCell = createTableCell(acc.getProtocol());
 		setIcon(iconCell, acc.useSsl() ? Icon.SSL : Icon.NO_SSL);
 		add(row, iconCell);
 		add(row, createTableCell(acc.getAccountServer()));

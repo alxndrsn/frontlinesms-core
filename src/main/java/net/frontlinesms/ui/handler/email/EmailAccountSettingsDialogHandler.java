@@ -38,6 +38,10 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 	private static final String UI_COMPONENT_CB_USE_SSL = "cbUseSSL";
 	private static final String UI_COMPONENT_LB_EXAMPLE_PORT = "lbPortExample";
 	private static final String UI_COMPONENT_LB_EXAMPLE_SERVER = "lbServerExample";
+	private static final String UI_COMPONENT_RB_IMAP = "rbImap";
+	private static final String UI_COMPONENT_RB_POP = "rbPop";
+	private static final String UI_COMPONENT_PN_POP_IMAP = "pnPopImap";
+	private static final String UI_COMPONENT_TA_ERROR_MESSAGE = "taErrorMessage";
 	private static final String UI_COMPONENT_TF_ACCOUNT = "tfAccount";
 	private static final String UI_COMPONENT_TF_ACCOUNT_PASS = "tfAccountPass";
 	private static final String UI_COMPONENT_TF_ACCOUNT_SERVER_PORT = "tfPort";
@@ -47,7 +51,9 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 
 	private static final String I18N_ACCOUNT_NAME_BLANK = "message.account.name.blank";
 	private static final String I18N_ACCOUNT_NAME_ALREADY_EXISTS = "message.account.already.exists";
+	private static final String I18N_COMMON_EMAIL_ACCOUNT_SETTINGS = "common.email.account.settings";
 	private static final String I18N_EDITING_EMAIL_ACCOUNT = "common.editing.email.account";
+	private static final String I18N_MMS_EMAIL_ACCOUNT_SETTINGS = "mms.email.account.settings";
 	private static final String I18N_NEW_ACCOUNT = "common.new.account";
 	
 	private static final String EXAMPLE_PORT_POP = "email.account.example.port.pop";
@@ -57,7 +63,6 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 	
 	private static final int DEFAULT_PORT_POP = 110;
 	private static final int DEFAULT_PORT_SMTP = 25;
-	private static final String UI_COMPONENT_TA_ERROR_MESSAGE = "taErrorMessage";
 	
 //> INSTANCE PROPERTIES
 	/** Logging object */
@@ -98,21 +103,32 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 	 */
 	public void initDialog(EmailAccount emailAccount) {
 		this.dialogComponent = ui.loadComponentFromFile(UI_FILE_EMAIL_ACCOUNT_FORM, this);
+		this.originalEmailAccount = emailAccount; 
 		
 		Object tfPort = ui.find(dialogComponent, UI_COMPONENT_TF_ACCOUNT_SERVER_PORT);
+		
+		this.ui.setSelected(find(UI_COMPONENT_RB_IMAP), true);
+		this.ui.setSelected(find(UI_COMPONENT_RB_POP), false);
 		
 		if (this.isForReceiving) {
 			ui.setText(find(UI_COMPONENT_LB_EXAMPLE_PORT), InternationalisationUtils.getI18NString(EXAMPLE_PORT_POP));
 			ui.setText(find(UI_COMPONENT_LB_EXAMPLE_SERVER), InternationalisationUtils.getI18NString(EXAMPLE_SERVER_POP));
 			ui.setText(tfPort, String.valueOf(DEFAULT_PORT_POP));
+			this.ui.setText(dialogComponent, InternationalisationUtils.getI18NString(I18N_MMS_EMAIL_ACCOUNT_SETTINGS));
+			if (this.originalEmailAccount != null && this.originalEmailAccount.getProtocol().equals(EmailUtils.POP)) {
+				this.ui.setSelected(find(UI_COMPONENT_RB_IMAP), false);
+				this.ui.setSelected(find(UI_COMPONENT_RB_POP), true);
+			}
 		} else {
 			ui.setText(dialogComponent, InternationalisationUtils.getI18NString(I18N_NEW_ACCOUNT));
 			ui.setText(find(UI_COMPONENT_LB_EXAMPLE_PORT), InternationalisationUtils.getI18NString(EXAMPLE_PORT_SMTP));
 			ui.setText(find(UI_COMPONENT_LB_EXAMPLE_SERVER), InternationalisationUtils.getI18NString(EXAMPLE_SERVER_SMTP));
 			ui.setText(tfPort, String.valueOf(DEFAULT_PORT_SMTP));
+			this.ui.setText(dialogComponent, InternationalisationUtils.getI18NString(I18N_COMMON_EMAIL_ACCOUNT_SETTINGS));
 		}
 		
-		this.originalEmailAccount = emailAccount; 
+		this.ui.setVisible(find(UI_COMPONENT_PN_POP_IMAP), isForReceiving);
+		
 		if (emailAccount != null) {
 			ui.setText(dialogComponent, InternationalisationUtils.getI18NString(I18N_EDITING_EMAIL_ACCOUNT, emailAccount.getAccountName()));
 			this.populatePanel();
@@ -172,7 +188,7 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 		log.debug("SSL [" + useSSL + "]");
 		try {
 			if (this.originalEmailAccount == null) { // Then it's a new account
-				EmailAccount acc = new EmailAccount(accountName, server, serverPort, password, useSSL, this.isForReceiving);
+				EmailAccount acc = new EmailAccount(accountName, server, serverPort, password, useSSL, this.isForReceiving, getCurrentProtocol());
 				
 				emailAccountDao.saveEmailAccount(acc);
 				log.debug("Account [" + acc.getAccountName() + "] created!");
@@ -182,6 +198,7 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 				this.originalEmailAccount.setAccountServerPort(serverPort);
 				this.originalEmailAccount.setAccountPassword(password);
 				this.originalEmailAccount.setUseSSL(useSSL);
+				this.originalEmailAccount.setProtocol(getCurrentProtocol());
 				// We're not setting the isForReceiving flag, as it must never change
 				
 				emailAccountDao.updateEmailAccount(originalEmailAccount);
@@ -198,6 +215,11 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 		this.removeDialog(dialogComponent);
 	}
 	
+	private String getCurrentProtocol() {
+		return (!this.isForReceiving ? EmailUtils.SMTP 
+				: (ui.isSelected(ui.find(UI_COMPONENT_RB_POP)) ? EmailUtils.POP : EmailUtils.IMAP));
+	}
+
 	/**
 	 * This method is called when the save button is pressed in the new mail account dialog. 
 	 
@@ -210,6 +232,7 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 		String password = ui.getText(find(UI_COMPONENT_TF_ACCOUNT_PASS));
 		boolean useSSL = ui.isSelected(find(UI_COMPONENT_CB_USE_SSL));
 		String portAsString = ui.getText(find(UI_COMPONENT_TF_ACCOUNT_SERVER_PORT));
+		String protocol = getCurrentProtocol();
 		
 		int serverPort;
 		try {
@@ -232,11 +255,11 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 		
 		try {
 			log.debug("Testing connection to [" + server + "]");
-			EmailUtils.testConnection(isForReceiving, server, accountName, serverPort, password, useSSL); // Exception catched if failed 
+			EmailUtils.testConnection(isForReceiving, server, accountName, serverPort, password, useSSL, protocol); // Exception catched if failed 
 			log.debug("Connection was successful, creating account [" + accountName + "]");
 			
 			if (this.originalEmailAccount == null) {
-				EmailAccount account = new EmailAccount(accountName, server, serverPort, password, useSSL, this.isForReceiving);
+				EmailAccount account = new EmailAccount(accountName, server, serverPort, password, useSSL, this.isForReceiving, protocol);
 				emailAccountDao.saveEmailAccount(account);
 			} else {
 				this.originalEmailAccount.setAccountName(accountName);
@@ -244,6 +267,7 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 				this.originalEmailAccount.setAccountServerPort(serverPort);
 				this.originalEmailAccount.setAccountPassword(password);
 				this.originalEmailAccount.setUseSSL(useSSL);
+				this.originalEmailAccount.setProtocol(protocol);
 				// We're not setting the isForReceiving flag, as it must never change
 				
 				emailAccountDao.updateEmailAccount(this.originalEmailAccount);

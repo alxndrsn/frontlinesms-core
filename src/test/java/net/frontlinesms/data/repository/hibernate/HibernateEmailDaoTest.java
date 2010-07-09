@@ -11,6 +11,7 @@ import net.frontlinesms.data.domain.Email;
 import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.repository.EmailAccountDao;
 import net.frontlinesms.data.repository.EmailDao;
+import net.frontlinesms.email.EmailUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,7 +32,7 @@ public class HibernateEmailDaoTest extends HibernateTestCase {
 
 //> TEST METHODS
 	public void test() throws DuplicateKeyException {
-		EmailAccount emailAccount = new EmailAccount("test@frontlinesms.net", "frontlinesms.net", 123, "secretpassword", false, false);
+		EmailAccount emailAccount = new EmailAccount("test@frontlinesms.net", "frontlinesms.net", 123, "secretpassword", false, false, EmailUtils.SMTP);
 		emailAccountDao.saveEmailAccount(emailAccount);
 		
 		assertEquals(0, emailDao.getAllEmails().size());

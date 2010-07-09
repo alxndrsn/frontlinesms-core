@@ -2,7 +2,7 @@
 <dialog focusgained="enableBottomButtons(accountsList)" closable="true" bottom="10" columns="1" gap="10" icon="/icons/emailAccount_edit.png" left="10" modal="true" name="emailConfigDialog" right="10" top="10">
     <table action="enableBottomButtons(this)" perform="editEmailAccountSettings(accountsList)" delete="showConfirmationDialog('removeSelectedFromAccountList')" width="500" height="200" name="accountsList" weightx="1" weighty="1">
         <header>
-            <column width="19"/>
+            <column/>
             <column icon="/icons/emailAccount_server.png" text="i18n.common.email.account.server" width="200"/>
             <column icon="/icons/emailAccount.png" text="i18n.common.email.account" width="200"/>
         </header>

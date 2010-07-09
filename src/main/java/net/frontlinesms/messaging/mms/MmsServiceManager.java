@@ -146,18 +146,6 @@ public class MmsServiceManager extends Thread implements MmsListener  {
 	 */
 	public void stopRunning() {
 		this.running = false;
-
-//		// Disconnect all phones.
-//		for(SmsModem p : phoneHandlers.values()) {
-//			p.setDetecting(false);
-//			p.setAutoReconnect(false);
-//			handleDisconnect(p);
-//		}
-		
-		// Stop all SMS Internet Services
-//		for(SmsInternetService service : this.smsInternetServices) {
-//			service.stopThisThing();
-//		}
 	}
 	
 

@@ -29,7 +29,6 @@ import javax.mail.Transport;
 
 import net.frontlinesms.EmailSender;
 import net.frontlinesms.FrontlineUtils;
-import net.frontlinesms.EmailSender.FrontlineEmailAuthenticator;
 import net.frontlinesms.email.pop.PopUtils;
 
 import org.apache.log4j.Logger;
@@ -39,11 +38,19 @@ import org.apache.log4j.Logger;
  */
 public class EmailUtils {
 	private static Logger LOG = FrontlineUtils.getLogger(EmailUtils.class);
-	public static final String SMTPS = "smtps";
+	
+	public static final String IMAP = "IMAP";
 	public static final String POP = "POP";
+	public static final String SMTP = "SMTP";
+	public static final String SMTPS = "smtps";
+	private static final String TIMEOUT = "5000";
+	
 	private static final boolean STARTTLS = true;
 	private static final boolean AUTH = true;
 	private static final boolean DEBUG_SESSION = false;
+	
+	private static final Object SMTP_TRANSPORT_CLASS = "com.sun.mail.smtp.SMTPTransport";
+	private static final Object SMTPS_TRANSPORT_CLASS = "com.sun.mail.smtp.SMTPSSLTransport";
 	
 	/**
 	 * Connects to the supplied server using the supplied information.
@@ -96,15 +103,22 @@ public class EmailUtils {
 	 */
 	public static Properties getPropertiesForHost(String host, int serverPort, boolean useSSL) {
 		Properties props = new Properties();
+		String protocol = (useSSL ? SMTPS : SMTP);
+		
+		props.put("mail.transport.protocol", protocol);
+		props.put("mail." + protocol + ".host", host);
+		props.put("mail." + protocol + ".port", String.valueOf(serverPort));
+		props.put("mail." + protocol + ".host", host);
+		props.put("mail." + protocol + ".auth", String.valueOf(AUTH));
+		props.put("mail." + protocol + ".timeout", TIMEOUT);
+		props.put("mail." + protocol + ".connectiontimeout", TIMEOUT);
+
 		if (!useSSL) {
-			props.put("mail.smtp.host", host);
-			props.put("mail.smtp.port", String.valueOf(serverPort));
 			props.put("mail.smtp.starttls.enable", String.valueOf(STARTTLS));
+			props.put("mail." + protocol + ".class", SMTP_TRANSPORT_CLASS);
 		} else {
-			 props.put("mail.transport.protocol", SMTPS);
-		     props.put("mail.smtps.host", host);
+			props.put("mail." + protocol + ".class", SMTPS_TRANSPORT_CLASS);
 		}
-		props.put("mail.smtp.auth", String.valueOf(AUTH));
 		
 		return props;
 	}
@@ -120,12 +134,12 @@ public class EmailUtils {
 	 * @throws MessagingException 
 	 * @throws NoSuchProviderException 
 	 */
-	public static boolean testConnection(boolean isForReceiving, String host, String username, int hostPort, String password, boolean useSSL) throws MessagingException {
+	public static boolean testConnection(boolean isForReceiving, String host, String username, int hostPort, String password, boolean useSSL, String protocol) throws MessagingException {
 		LOG.trace("ENTER");
 		boolean connectionOk = false;
 		
 		if (isForReceiving) {
-			Store store = PopUtils.getPopStore(host, username, hostPort, password, useSSL);
+			Store store = PopUtils.getStore(host, username, hostPort, password, useSSL, protocol);
 			
 			try {
 				LOG.trace("Connecting to email store: " + host + ":" + hostPort);
@@ -137,14 +151,9 @@ public class EmailUtils {
 			}	
 		} else {
 			Session session = getSession(host, username, hostPort, password, useSSL);
-			
-			try {
-				connect(host, username, hostPort, password, useSSL, session);
-				connectionOk = true;
-			} catch (MessagingException e) {
-				LOG.info("Fail to connect to server [" + host + "]");
-				LOG.debug("Fail to connect to server [" + host + "]", e);
-			}
+
+			connect(host, username, hostPort, password, useSSL, session);
+			connectionOk = true;
 		}
 
 		LOG.debug("Returning [" + connectionOk + "]");

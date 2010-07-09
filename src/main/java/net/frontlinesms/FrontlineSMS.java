@@ -41,7 +41,7 @@ import net.frontlinesms.messaging.sms.SmsService;
 import net.frontlinesms.messaging.sms.SmsServiceManager;
 import net.frontlinesms.messaging.sms.SmsServiceStatus;
 import net.frontlinesms.messaging.sms.internet.SmsInternetService;
-import net.frontlinesms.mms.email.pop.PopEmailMmsReceiver;
+import net.frontlinesms.mms.email.pop.PopImapEmailMmsReceiver;
 import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginControllerProperties;
 import net.frontlinesms.plugins.PluginProperties;
@@ -268,6 +268,10 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 			LOG.debug("Stopping Phone Manager...");
 			smsServiceManager.stopRunning();
 		}
+		if (mmsServiceManager != null) {
+			LOG.debug("Stopping MMS Manager...");
+			mmsServiceManager.stopRunning();
+		}
 		if (emailServerManager != null) {
 			LOG.debug("Stopping E-mail Manager...");
 			emailServerManager.stopRunning();
@@ -305,7 +309,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 	}
 	
 	/**
-	 * Gives all receiving e-mail accounts to the {@link MmsServiceManager} so it can use them as {@link PopEmailMmsReceiver}s
+	 * Gives all receiving e-mail accounts to the {@link MmsServiceManager} so it can use them as {@link PopImapEmailMmsReceiver}s
 	 */
 	private void initMmsEmailServices() {
 		for (EmailAccount mmsEmailAccount : this.emailAccountDao.getReceivingEmailAccounts()) {

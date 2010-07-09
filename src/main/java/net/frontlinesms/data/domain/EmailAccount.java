@@ -39,7 +39,7 @@ public class EmailAccount {
 	/** Unique id for this entity.  This is for hibernate usage. */
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY) @Column(unique=true,nullable=false,updatable=false) @SuppressWarnings("unused")
 	private long id;
-	/** Phone number of this contact.  It should be unique within the system, but may be changed. */
+	/** Username. It should be unique within the system, but may be changed. */
 	@Column(unique=true, nullable=true, updatable=true)
 	private String accountName;
 	private String accountServer;
@@ -49,6 +49,7 @@ public class EmailAccount {
 	private Long lastCheck;
 	@Column(name=FIELD_IS_FOR_RECEIVING)
 	private Boolean isForReceiving = true;
+	private String protocol;
 	
 //> CONSTRUCTORS
 	/** Empty constructor required for hibernate */
@@ -62,13 +63,14 @@ public class EmailAccount {
 	 * @param accountPassword The password to connect to this account.
 	 * @param useSsl 
 	 */
-	public EmailAccount(String accountName, String accountServer, int accountServerPort, String accountPassword, boolean useSsl, boolean isForReceiving) {
+	public EmailAccount(String accountName, String accountServer, int accountServerPort, String accountPassword, boolean useSsl, boolean isForReceiving, String protocol) {
 		this.accountName = accountName;
 		this.accountServer = accountServer;
 		this.accountServerPort = accountServerPort;
 		this.accountPassword = accountPassword;
 		this.useSsl = useSsl;
 		this.isForReceiving = isForReceiving;
+		this.protocol = protocol;
 	}
 	
 //> ACCESSOR METHODS
@@ -220,5 +222,13 @@ public class EmailAccount {
 
 	public Long getLastCheck() {
 		return lastCheck;
+	}
+
+	public void setProtocol(String protocol) {
+		this.protocol = protocol;
+	}
+
+	public String getProtocol() {
+		return protocol;
 	}
 }
