@@ -2,8 +2,10 @@ package net.frontlinesms.messaging.mms.email;
 
 import java.util.Collection;
 
+import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.domain.FrontlineMessage;
+import net.frontlinesms.data.repository.EmailAccountDao;
 import net.frontlinesms.email.pop.PopImapMessageReceiver;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.listener.SmsListener;
@@ -16,13 +18,16 @@ import net.frontlinesms.mms.MmsReceiveException;
 import net.frontlinesms.mms.email.pop.PopImapEmailMmsReceiver;
 
 public class MmsEmailService implements MmsService {
-	private PopImapEmailMmsReceiver mmsReceiver;
+	private PopImapEmailMmsReceiver mmsEmailReceiver;
 	private PopImapMessageReceiver receiver;
+	private EmailAccount emailAccount;
 	private MmsServiceStatus status = MmsEmailServiceStatus.DORMANT;
 
 	public MmsEmailService (EmailAccount emailAccount) {
-		mmsReceiver = new PopImapEmailMmsReceiver();
-		receiver = new PopImapMessageReceiver(mmsReceiver);
+		this.emailAccount = emailAccount;
+		
+		mmsEmailReceiver = new PopImapEmailMmsReceiver();
+		receiver = new PopImapMessageReceiver(mmsEmailReceiver);
 		receiver.setHostAddress(emailAccount.getAccountServer());
 		receiver.setHostPassword(emailAccount.getAccountPassword());
 		receiver.setHostPort(emailAccount.getAccountServerPort());
@@ -31,12 +36,12 @@ public class MmsEmailService implements MmsService {
 		receiver.setLastCheck(emailAccount.getLastCheck());
 		receiver.setProtocol(emailAccount.getProtocol());
 		
-		mmsReceiver.addParsers(MmsUtils.getAllEmailMmsParsers());
-		mmsReceiver.setReceiver(receiver);
+		mmsEmailReceiver.addParsers(MmsUtils.getAllEmailMmsParsers());
+		mmsEmailReceiver.setReceiver(receiver);
 	}
 	
 	public Collection<MmsMessage> receive () throws MmsReceiveException {
-		return this.mmsReceiver.receive();
+		return this.mmsEmailReceiver.receive();
 	}
 
 	public MmsServiceStatus getStatus() {
@@ -89,5 +94,14 @@ public class MmsEmailService implements MmsService {
 		}
 	}
 
-	
+	public void updateLastCheck(EmailAccountDao emailAccountDao) {
+		long lastCheck = System.currentTimeMillis();
+		
+		this.mmsEmailReceiver.getReceiver().setLastCheck(lastCheck);
+		this.emailAccount.setLastCheck(lastCheck);
+		try {
+			emailAccountDao.updateEmailAccount(emailAccount);
+		
+		} catch (DuplicateKeyException e) { }
+	}
 }

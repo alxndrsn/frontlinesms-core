@@ -28,6 +28,7 @@ import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.events.DatabaseEntityNotification;
 import net.frontlinesms.data.repository.*;
+import net.frontlinesms.email.EmailUtils;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
@@ -234,6 +235,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 		
 		mmsServiceManager = new MmsServiceManager();
 		mmsServiceManager.setEventBus(getEventBus());
+		mmsServiceManager.setEmailAccountDao(this.emailAccountDao);
 		mmsServiceManager.start();
 
 		initSmsInternetServices();
@@ -317,10 +319,6 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 		
 		for (EmailAccount mmsEmailAccount : this.emailAccountDao.getReceivingEmailAccounts()) {
 			this.mmsServiceManager.addMmsEmailReceiver(mmsEmailAccount);
-			mmsEmailAccount.setLastCheck(System.currentTimeMillis());
-			try {
-				this.emailAccountDao.saveEmailAccount(mmsEmailAccount);
-			} catch (DuplicateKeyException e) { }
 		}
 	}
 	
@@ -613,6 +611,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 			// Database notification
 			if (((DatabaseEntityNotification<?>) notification).getDatabaseEntity() instanceof EmailAccount) {
 				// If there is any change in the E-Mail accounts, we refresh the list of MmsEmailServices
+				// XXX: for now, this is creating new instances of MmsEmailServices when the last check is set!
 				this.initMmsEmailServices();
 			}
 		}

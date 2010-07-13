@@ -16,7 +16,6 @@ import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.domain.SmsModemSettings;
 import net.frontlinesms.data.events.DatabaseEntityNotification;
 import net.frontlinesms.data.repository.SmsModemSettingsDao;
-import net.frontlinesms.email.EmailUtils;
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.messaging.FrontlineMessagingService;
@@ -683,6 +682,11 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_MODEM_LIST_UPDATED));
 			}
 		} else if (notification instanceof MmsServiceStatusNotification) {
+			MmsServiceStatusNotification mmsServiceStatusNotification = ((MmsServiceStatusNotification) notification);
+			if (mmsServiceStatusNotification.getStatus().equals(MmsEmailServiceStatus.FAILED_TO_CONNECT)) {
+				this.ui.newEvent(new Event(Event.TYPE_SMS_INTERNET_SERVICE_RECEIVING_FAILED, 
+											mmsServiceStatusNotification.getMmsService().getName() + " - " + InternationalisationUtils.getI18NString(COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED)));
+			}
 			this.refresh();
 		} else if (notification instanceof DatabaseEntityNotification<?>) {
 			// Database notification

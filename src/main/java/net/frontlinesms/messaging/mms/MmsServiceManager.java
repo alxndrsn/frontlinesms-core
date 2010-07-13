@@ -19,30 +19,22 @@
  */
 package net.frontlinesms.messaging.mms;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.EmailAccount;
-import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
-import net.frontlinesms.data.domain.FrontlineMessage.Status;
+import net.frontlinesms.data.repository.EmailAccountDao;
 import net.frontlinesms.events.EventBus;
-import net.frontlinesms.listener.FrontlineMessagingListener;
-import net.frontlinesms.listener.MmsListener;
 import net.frontlinesms.messaging.mms.email.MmsEmailService;
 import net.frontlinesms.messaging.mms.email.MmsEmailServiceStatus;
 import net.frontlinesms.messaging.mms.events.MmsReceivedNotification;
-import net.frontlinesms.messaging.mms.events.MmsServiceStatusNotification;
 import net.frontlinesms.mms.MmsMessage;
 import net.frontlinesms.mms.MmsReceiveException;
 
 import org.apache.log4j.Logger;
-import org.smslib.CIncomingMessage;
 
 /**
  * SmsHandler should be run as a separate thread.
@@ -79,15 +71,14 @@ import org.smslib.CIncomingMessage;
  * @author Ben Whitaker ben(at)masabi(dot)com
  * @author Alex Anderson alex(at)masabi(dot)com
  */
-public class MmsServiceManager extends Thread implements MmsListener  {
+public class MmsServiceManager extends Thread  {
 	private static final long POLLING_FREQUENCY = 15000;
-	/** Set of PopEmailMmsReceiver */
-	private Set<MmsEmailService> mmsEmailServices = new CopyOnWriteArraySet<MmsEmailService>();
-	/** Listener to be passed events from this */
-	private FrontlineMessagingListener mmsListener;
+	/** Set of {@link MmsEmailService} */
+	private final Set<MmsEmailService> mmsEmailServices = new CopyOnWriteArraySet<MmsEmailService>();
 	/** Flag indicating that the thread should continue running. */
 	private boolean running;
 	private EventBus eventBus;
+	private EmailAccountDao emailAccountDao;
 
 	private static Logger LOG = FrontlineUtils.getLogger(MmsServiceManager.class);
 
@@ -97,8 +88,6 @@ public class MmsServiceManager extends Thread implements MmsListener  {
 	 */
 	public MmsServiceManager() {
 		super("MmsServiceManager");
-		
-		this.mmsEmailServices = new HashSet<MmsEmailService>();
 	}
 	
 	public void addMmsEmailReceiver(EmailAccount emailAccount) {
@@ -107,40 +96,23 @@ public class MmsServiceManager extends Thread implements MmsListener  {
 		mmsEmailServices.add(mmsEmailService);
 	}
 
-	public void setMmsListener(FrontlineMessagingListener mmsListener) {
-		this.mmsListener = mmsListener;
-	}
-
 	public void setEventBus(EventBus eventBus) {
 		this.eventBus = eventBus;
 	}
 	
 	public MmsService[] getAllMmsServices () {
-		List<MmsService> mmsServices = new ArrayList<MmsService>();
-		
-		// TODO: Add MMS device services?
-		mmsServices.addAll(this.mmsEmailServices);
-		
-		return mmsServices.toArray(new MmsService[0]);
+		return this.mmsEmailServices.toArray(new MmsService[0]);
 	}
 
 	public void run() {
 		LOG.trace("ENTER");
 		running = true;
 		while (running) {
-			doRun();
+			processMmsEmailReceiving();
 			
 			FrontlineUtils.sleep_ignoreInterrupts(POLLING_FREQUENCY);
 		}
 		LOG.trace("EXIT");
-	}
-
-	/**
-	 * Run the looped behaviour from {@link #run()} once.
-	 * This method is separated for simple, unthreaded unit testing.
-	 */
-	void doRun() {
-		processMmsEmailReceiving();
 	}
 
 	/**
@@ -156,6 +128,7 @@ public class MmsServiceManager extends Thread implements MmsListener  {
 			try {
 				mmsEmailService.setStatus(MmsEmailServiceStatus.FETCHING, this.eventBus);
 				Collection<MmsMessage> mmsMessages = mmsEmailService.receive();
+				mmsEmailService.updateLastCheck(this.emailAccountDao);
 				
 				for (MmsMessage mmsMessage : mmsMessages) {
 					FrontlineMultimediaMessage frontlineMultimediaMessage = MmsUtils.create(mmsMessage);
@@ -164,28 +137,9 @@ public class MmsServiceManager extends Thread implements MmsListener  {
 						this.eventBus.notifyObservers(new MmsReceivedNotification(frontlineMultimediaMessage));
 					}
 				}
-			} catch (MmsReceiveException e) {
-				// TODO Tell the user?
-			} finally {
 				mmsEmailService.setStatus(MmsEmailServiceStatus.READY, this.eventBus);
-			}
-		}
-	}
-
-
-	public void incomingMessageEvent(MmsService receiver, CIncomingMessage msg) {
-		// If we've got a higher-level listener attached to this, pass the message 
-		// up to there.  Otherwise, add it to our internal list
-		if (mmsListener != null) mmsListener.incomingMessageEvent(receiver, msg);
-	}
-
-	public void outgoingMessageEvent(MmsService sender, FrontlineMessage msg) {
-		if (mmsListener != null) mmsListener.outgoingMessageEvent(sender, msg);
-		if (msg.getStatus() == Status.FAILED) {
-			if (msg.getRetriesRemaining() > 0) {
-				msg.setRetriesRemaining(msg.getRetriesRemaining() - 1);
-				msg.setSenderMsisdn("");
-				//sendSMS(msg);
+			} catch (MmsReceiveException e) {
+				mmsEmailService.setStatus(MmsEmailServiceStatus.FAILED_TO_CONNECT, this.eventBus);
 			}
 		}
 	}
@@ -245,6 +199,10 @@ public class MmsServiceManager extends Thread implements MmsListener  {
 
 	public void clearMmsEmailReceivers() {
 		this.mmsEmailServices.clear();
+	}
+
+	public void setEmailAccountDao(EmailAccountDao emailAccountDao) {
+		this.emailAccountDao = emailAccountDao;
 	}
 	
 //	/**

@@ -24,6 +24,7 @@ import java.util.*;
 import net.frontlinesms.*;
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.data.domain.FrontlineMessage.Status;
+import net.frontlinesms.email.EmailUtils;
 import net.frontlinesms.email.pop.*;
 import net.frontlinesms.messaging.Provider;
 import net.frontlinesms.messaging.sms.properties.OptionalSection;
@@ -114,6 +115,7 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 		receiver.setHostPort(getEmailHostPort());
 		receiver.setHostUsername(getEmailUsername());
 		receiver.setUseSsl(getEmailHostSSL());
+		receiver.setProtocol(EmailUtils.POP3);
 		
 		try {
 			receiver.receive();

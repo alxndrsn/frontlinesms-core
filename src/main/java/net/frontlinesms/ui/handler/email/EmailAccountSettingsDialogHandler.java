@@ -115,7 +115,7 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 			ui.setText(find(UI_COMPONENT_LB_EXAMPLE_SERVER), InternationalisationUtils.getI18NString(EXAMPLE_SERVER_POP));
 			ui.setText(tfPort, String.valueOf(DEFAULT_PORT_POP));
 			this.ui.setText(dialogComponent, InternationalisationUtils.getI18NString(I18N_MMS_EMAIL_ACCOUNT_SETTINGS));
-			if (this.originalEmailAccount != null && this.originalEmailAccount.getProtocol().equals(EmailUtils.POP)) {
+			if (this.originalEmailAccount != null && this.originalEmailAccount.getProtocol().equals(EmailUtils.POP3)) {
 				this.ui.setSelected(find(UI_COMPONENT_RB_IMAP), false);
 				this.ui.setSelected(find(UI_COMPONENT_RB_POP), true);
 			}
@@ -217,7 +217,7 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 	
 	private String getCurrentProtocol() {
 		return (!this.isForReceiving ? EmailUtils.SMTP 
-				: (ui.isSelected(ui.find(UI_COMPONENT_RB_POP)) ? EmailUtils.POP : EmailUtils.IMAP));
+				: (ui.isSelected(ui.find(UI_COMPONENT_RB_POP)) ? EmailUtils.POP3 : EmailUtils.IMAP));
 	}
 
 	/**
@@ -277,8 +277,10 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 		} catch (MessagingException e) {
 			log.info("Fail to connect to server [" + server + "]");
 			log.debug("Fail to connect to server [" + server + "]", e);
-			
-			this.connectionWarningMessage = e.getMessage() + "\n" + e.getNextException();
+			this.connectionWarningMessage = e.getMessage();
+			if (e.getNextException() != null) {
+				this.connectionWarningMessage += e.getNextException();
+			}
 			this.showConnectionWarningDialog(dialog);
 		}  catch (DuplicateKeyException e) {
 			log.debug(InternationalisationUtils.getI18NString(I18N_ACCOUNT_NAME_ALREADY_EXISTS), e);

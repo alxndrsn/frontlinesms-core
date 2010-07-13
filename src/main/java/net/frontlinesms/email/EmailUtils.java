@@ -40,7 +40,7 @@ public class EmailUtils {
 	private static Logger LOG = FrontlineUtils.getLogger(EmailUtils.class);
 	
 	public static final String IMAP = "IMAP";
-	public static final String POP = "POP";
+	public static final String POP3 = "POP3";
 	public static final String SMTP = "SMTP";
 	public static final String SMTPS = "smtps";
 	private static final String TIMEOUT = "5000";
