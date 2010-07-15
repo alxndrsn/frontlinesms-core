@@ -192,7 +192,7 @@ public final class FrontlineSMSConstants {
 	};
 	
 //> MMS DEVICE STATUS KEYS
-	/** Key for text: Fetching */
+	public static final String MMS_SERVICE_STATUS_DISABLED = "mms.email.disabled";
 	public static final String MMS_SERVICE_STATUS_FETCHING = "mms.email.fetching";
 	public static final String MMS_SERVICE_STATUS_READY = "mms.email.ready";
 	

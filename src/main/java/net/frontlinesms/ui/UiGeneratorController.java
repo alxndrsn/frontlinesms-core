@@ -1205,6 +1205,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void table_addCells(Object tableRow, String[] cellContents) {
 		for(String s : cellContents) add(tableRow, createTableCell(s));
 	}
+	
+	public void table_addCells(Object tableRow, String[] cellContents, boolean bold) {
+		for(String s : cellContents) add(tableRow, createTableCell(s, bold));
+	}
 
 	/**
 	 * Creates a list item Thinlet UI Component for the supplied keyword.  The keyword

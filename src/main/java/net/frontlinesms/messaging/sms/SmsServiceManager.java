@@ -363,7 +363,7 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 		boolean ownedPortsDetected = false;
 		boolean deviceDetectedOrDetectionInProgress = false;
 		
-		checkAll:for (SmsService device : getAllPhones()) {
+		checkAll:for (SmsService device : getAll()) {
 			if(device instanceof SmsModem) {
 				SmsModemStatus status = ((SmsModem)device).getStatus();
 				switch(status) {
@@ -440,7 +440,7 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 	 * or investigating.
 	 * @return
 	 */
-	public Collection<SmsService> getAllPhones() {
+	public Collection<SmsService> getAll() {
 		Set<SmsService> ret = new HashSet<SmsService>();
 		ret.addAll(phoneHandlers.values());
 		ret.addAll(smsInternetServices);

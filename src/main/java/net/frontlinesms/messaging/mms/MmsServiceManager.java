@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import net.frontlinesms.FrontlineUtils;
+import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.repository.EmailAccountDao;
@@ -68,13 +69,12 @@ import org.apache.log4j.Logger;
  * In the future this will be extended to be able to interface with 
  * internet based SMS services via HTTP, to handle bulk messaging.
  * 
- * @author Ben Whitaker ben(at)masabi(dot)com
- * @author Alex Anderson alex(at)masabi(dot)com
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 public class MmsServiceManager extends Thread  {
 	private static final long POLLING_FREQUENCY = 15000;
 	/** Set of {@link MmsEmailService} */
-	private final Set<MmsEmailService> mmsEmailServices = new CopyOnWriteArraySet<MmsEmailService>();
+	private final Set<MmsService> mmsEmailServices = new CopyOnWriteArraySet<MmsService>();
 	/** Flag indicating that the thread should continue running. */
 	private boolean running;
 	private EventBus eventBus;
@@ -95,13 +95,21 @@ public class MmsServiceManager extends Thread  {
 		
 		mmsEmailServices.add(mmsEmailService);
 	}
+	
+	public void removeMmsEmailReceiver(EmailAccount emailAccount) {
+		for (MmsService mmsEmailService : this.mmsEmailServices) {
+			if (((MmsEmailService)mmsEmailService).getEmailAccount().equals(emailAccount)) {
+				this.mmsEmailServices.remove(mmsEmailService);
+			}
+		}
+	}
 
 	public void setEventBus(EventBus eventBus) {
 		this.eventBus = eventBus;
 	}
 	
-	public MmsService[] getAllMmsServices () {
-		return this.mmsEmailServices.toArray(new MmsService[0]);
+	public Set<MmsService> getAll () {
+		return this.mmsEmailServices;
 	}
 
 	public void run() {
@@ -124,22 +132,25 @@ public class MmsServiceManager extends Thread  {
 	
 
 	private void processMmsEmailReceiving() {
-		for (MmsEmailService mmsEmailService : this.mmsEmailServices) {
-			try {
-				mmsEmailService.setStatus(MmsEmailServiceStatus.FETCHING, this.eventBus);
-				Collection<MmsMessage> mmsMessages = mmsEmailService.receive();
-				mmsEmailService.updateLastCheck(this.emailAccountDao);
-				
-				for (MmsMessage mmsMessage : mmsMessages) {
-					FrontlineMultimediaMessage frontlineMultimediaMessage = MmsUtils.create(mmsMessage);
-					if (this.eventBus != null) {
-						// Let's notify the observers that a new MMS has arrived
-						this.eventBus.notifyObservers(new MmsReceivedNotification(frontlineMultimediaMessage));
+		for (MmsService mmsService : this.mmsEmailServices) {
+			if (mmsService.isConnected()) {
+				MmsEmailService mmsEmailService = (MmsEmailService)mmsService;
+				try {
+					mmsEmailService.setStatus(MmsEmailServiceStatus.FETCHING, this.eventBus);
+					Collection<MmsMessage> mmsMessages = mmsEmailService.receive();
+					mmsEmailService.updateLastCheck(this.emailAccountDao);
+					
+					for (MmsMessage mmsMessage : mmsMessages) {
+						FrontlineMultimediaMessage frontlineMultimediaMessage = MmsUtils.create(mmsMessage);
+						if (this.eventBus != null) {
+							// Let's notify the observers that a new MMS has arrived
+							this.eventBus.notifyObservers(new MmsReceivedNotification(frontlineMultimediaMessage));
+						}
 					}
+					mmsEmailService.setStatus(MmsEmailServiceStatus.READY, this.eventBus);
+				} catch (MmsReceiveException e) {
+					mmsEmailService.setStatus(MmsEmailServiceStatus.FAILED_TO_CONNECT, this.eventBus);
 				}
-				mmsEmailService.setStatus(MmsEmailServiceStatus.READY, this.eventBus);
-			} catch (MmsReceiveException e) {
-				mmsEmailService.setStatus(MmsEmailServiceStatus.FAILED_TO_CONNECT, this.eventBus);
 			}
 		}
 	}
@@ -203,6 +214,35 @@ public class MmsServiceManager extends Thread  {
 
 	public void setEmailAccountDao(EmailAccountDao emailAccountDao) {
 		this.emailAccountDao = emailAccountDao;
+	}
+
+	public void enableMmsEmailService(MmsEmailService mmsEmailService, boolean enabled) {
+		mmsEmailService.setStatus((enabled ? MmsEmailServiceStatus.READY : MmsEmailServiceStatus.DISABLED), this.eventBus);
+		EmailAccount emailAccount = mmsEmailService.getEmailAccount();
+		emailAccount.setEnabled(enabled);
+		try {
+			this.emailAccountDao.updateEmailAccount(mmsEmailService.getEmailAccount());
+		} catch (DuplicateKeyException e) { }
+	}
+
+	/**
+	 * Update the {@link MmsEmailService}s
+	 */
+	public void updateMmsEmailService(EmailAccount emailAccount) {
+		for (MmsService mmsService : this.mmsEmailServices) {
+			MmsEmailService mmsEmailService = (MmsEmailService)mmsService;
+			if (mmsEmailService.getEmailAccount().isSameDatabaseEntity(emailAccount)) {
+				// This is the mmsEmailService which has been modified. We just have to recreate it if the 
+				// EmailAccount properties have been modified
+				if (!mmsEmailService.getEmailAccount().equals(emailAccount)) {
+					this.mmsEmailServices.remove(mmsEmailService);
+					this.mmsEmailServices.add(new MmsEmailService(emailAccount));
+				}  else {
+					// If the EmailAccount has been modified but equals the new one, this means only the lastCheck date or status has been changed
+					mmsEmailService.setStatus((emailAccount.isEnabled() ? MmsEmailServiceStatus.READY : MmsEmailServiceStatus.DISABLED), this.eventBus);
+				}
+			}
+		}
 	}
 	
 //	/**

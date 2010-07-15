@@ -3,7 +3,7 @@
 	<panel columns="4" top="9" bottom="9" left="9" right="9" gap="9">
 		<label rowspan="4" valign="top" icon="/icons/header/phoneManager.png"/>
 		<label icon="/icons/phone_working.png" text="i18n.common.working.devices" colspan="3"/>
-		<table name="phoneManager_modemList" colspan="3" weightx="2" weighty="2" perform="showPhoneSettingsDialog(this)">
+		<table name="phoneManager_modemList" action="managePopupMenu(this)" colspan="3" weightx="2" weighty="2" perform="showPhoneSettingsDialog(this)">
 			<header>
 				<column text="" width="18"/>
 				<column icon="/icons/port_open.png" text="i18n.common.port"/>
@@ -18,6 +18,7 @@
 			<popupmenu menushown="editPhoneEnabled(phoneManager_modemList, this)" name="popMenu">
 				<menuitem name="miDisconnect" text="i18n.action.disconnect" icon="/icons/phone_disconnect.png" action="disconnectFromSelected(phoneManager_modemList)"/>
 				<menuitem name="miEditPhone" text="i18n.action.view.edit.phone" icon="/icons/phone_edit.png" action="showPhoneSettingsDialog(phoneManager_modemList)"/>
+				<menuitem name="miDisable" text="i18n.action.disable" icon="/icons/phone_disconnect.png" action="enableMmsEmailService(phoneManager_modemList, 'false')"/>
 			</popupmenu>
 		</table>
 		<label icon="/icons/phone_notWorking.png" text="i18n.common.non.working.devices" colspan="3"/>
@@ -36,6 +37,7 @@
 				<menuitem name="miManualConnection" text="i18n.action.manually.connect" icon="/icons/phone_manualConfigure.png" action="showPhoneConfigDialog(phoneManager_modemListError)"/>
 				<menuitem name="miEditPhone" text="i18n.action.view.edit.phone" icon="/icons/phone_edit.png" action="showPhoneSettingsDialog(phoneManager_modemListError)"/>
 				<menuitem name="miCancelDetection" text="i18n.action.stop.detection" icon="/icons/stopDetection.png" action="stopDetection(phoneManager_modemListError)"/>
+				<menuitem name="miEnable" text="i18n.action.enable" icon="/icons/phone_edit.png" action="enableMmsEmailService(phoneManager_modemListError, 'true')"/>
 			</popupmenu>
 		</table>
 		<button tooltip="i18n.tooltip.click.for.help" valign="bottom" action="showHelpPage('phones.htm')" icon="/icons/big_help.png" type="link"/>

@@ -27,6 +27,8 @@ import net.frontlinesms.data.domain.*;
 import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.events.DatabaseEntityNotification;
+import net.frontlinesms.data.events.EntityDeletedNotification;
+import net.frontlinesms.data.events.EntitySavedNotification;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.email.EmailUtils;
 import net.frontlinesms.events.EventBus;
@@ -36,6 +38,7 @@ import net.frontlinesms.listener.*;
 import net.frontlinesms.messaging.FrontlineMessagingServiceEventListener;
 import net.frontlinesms.messaging.mms.IncomingMmsProcessor;
 import net.frontlinesms.messaging.mms.MmsServiceManager;
+import net.frontlinesms.messaging.mms.email.MmsEmailService;
 import net.frontlinesms.messaging.mms.events.MmsReceivedNotification;
 import net.frontlinesms.messaging.sms.DummySmsService;
 import net.frontlinesms.messaging.sms.IncomingSmsProcessor;
@@ -609,10 +612,16 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 			this.messageDao.saveMessage(frontlineMultimediaMessage);
 		} else if (notification instanceof DatabaseEntityNotification<?>) {
 			// Database notification
-			if (((DatabaseEntityNotification<?>) notification).getDatabaseEntity() instanceof EmailAccount) {
+			Object entity = ((DatabaseEntityNotification<?>) notification).getDatabaseEntity();
+			if (entity instanceof EmailAccount) {
 				// If there is any change in the E-Mail accounts, we refresh the list of MmsEmailServices
-				// XXX: for now, this is creating new instances of MmsEmailServices when the last check is set!
-				this.initMmsEmailServices();
+				if (notification instanceof EntityDeletedNotification<?>) {
+					this.mmsServiceManager.addMmsEmailReceiver((EmailAccount) entity);
+				} else if (notification instanceof EntitySavedNotification<?>) {
+					this.mmsServiceManager.removeMmsEmailReceiver((EmailAccount) entity);
+				} else {
+					this.mmsServiceManager.updateMmsEmailService((EmailAccount) entity);	
+				}
 			}
 		}
 	}

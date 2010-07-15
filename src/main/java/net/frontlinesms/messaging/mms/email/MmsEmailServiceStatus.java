@@ -14,7 +14,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 public enum MmsEmailServiceStatus implements MmsServiceStatus {
-	DORMANT(FrontlineSMSConstants.SMS_DEVICE_STATUS_DORMANT),
+	DISABLED(FrontlineSMSConstants.MMS_SERVICE_STATUS_DISABLED),
 	FAILED_TO_CONNECT(FrontlineSMSConstants.SMS_DEVICE_STATUS_FAILED_TO_CONNECT),
 	FETCHING(FrontlineSMSConstants.MMS_SERVICE_STATUS_FETCHING),
 	READY(FrontlineSMSConstants.MMS_SERVICE_STATUS_READY);
@@ -32,6 +32,6 @@ public enum MmsEmailServiceStatus implements MmsServiceStatus {
 //> ACCESSOR METHODS
 	/** @see MmsServiceStatus#getI18nKey() */
 	public String getI18nKey() {
-		return InternationalisationUtils.getI18NString(this.i18nKey);
+		return this.i18nKey;
 	}
 }

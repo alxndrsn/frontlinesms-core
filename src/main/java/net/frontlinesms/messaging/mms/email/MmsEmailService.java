@@ -21,10 +21,11 @@ public class MmsEmailService implements MmsService {
 	private PopImapEmailMmsReceiver mmsEmailReceiver;
 	private PopImapMessageReceiver receiver;
 	private EmailAccount emailAccount;
-	private MmsServiceStatus status = MmsEmailServiceStatus.DORMANT;
+	private MmsServiceStatus status = MmsEmailServiceStatus.READY;
 
 	public MmsEmailService (EmailAccount emailAccount) {
-		this.emailAccount = emailAccount;
+		this.setEmailAccount(emailAccount);
+		this.status = (emailAccount.isEnabled() ? MmsEmailServiceStatus.READY : MmsEmailServiceStatus.DISABLED);
 		
 		mmsEmailReceiver = new PopImapEmailMmsReceiver();
 		receiver = new PopImapMessageReceiver(mmsEmailReceiver);
@@ -54,8 +55,7 @@ public class MmsEmailService implements MmsService {
 	}
 
 	public boolean isConnected() {
-		// TODO Auto-generated method stub
-		return true;
+		return (!this.status.equals(MmsEmailServiceStatus.DISABLED));
 	}
 
 	public boolean isUseForReceiving() {
@@ -98,10 +98,18 @@ public class MmsEmailService implements MmsService {
 		long lastCheck = System.currentTimeMillis();
 		
 		this.mmsEmailReceiver.getReceiver().setLastCheck(lastCheck);
-		this.emailAccount.setLastCheck(lastCheck);
+		this.getEmailAccount().setLastCheck(lastCheck);
 		try {
-			emailAccountDao.updateEmailAccount(emailAccount);
+			emailAccountDao.updateEmailAccount(getEmailAccount());
 		
 		} catch (DuplicateKeyException e) { }
+	}
+
+	public void setEmailAccount(EmailAccount emailAccount) {
+		this.emailAccount = emailAccount;
+	}
+
+	public EmailAccount getEmailAccount() {
+		return emailAccount;
 	}
 }

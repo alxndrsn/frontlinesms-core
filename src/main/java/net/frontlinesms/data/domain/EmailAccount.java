@@ -50,6 +50,7 @@ public class EmailAccount {
 	@Column(name=FIELD_IS_FOR_RECEIVING)
 	private Boolean isForReceiving = true;
 	private String protocol;
+	private Boolean enabled = true;
 	
 //> CONSTRUCTORS
 	/** Empty constructor required for hibernate */
@@ -215,6 +216,15 @@ public class EmailAccount {
 			return false;
 		return true;
 	}
+	
+	/** 
+	 * 
+	 * @param emailAccount
+	 * @return <code>true</code> if this object is the same database entity than the one given in parameter, <code>false</code> otherwise. 
+	 */
+	public boolean isSameDatabaseEntity(EmailAccount emailAccount) {
+		return (this.id == emailAccount.id);
+	}
 
 	public void setLastCheck(Long lastCheck) {
 		this.lastCheck = lastCheck;
@@ -231,4 +241,13 @@ public class EmailAccount {
 	public String getProtocol() {
 		return protocol;
 	}
+
+	public void setEnabled(Boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	public Boolean isEnabled() {
+		return enabled;
+	}
+
 }
