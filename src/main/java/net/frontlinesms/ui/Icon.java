@@ -35,6 +35,7 @@ public class Icon {
 	public static final String SERVER = "/icons/emailAccount_server.png";
 	/** Icon for a file */
 	public static final String FILE = "/icons/file.png";
+	public static final String ATTACH = "/icons/attach.png";
 	public static final String SURVEY = "/icons/survey.png";
 	public static final String GROUP_LEAVE = "/icons/group_leave.png";
 	public static final String EMAIL = "/icons/email.png";
@@ -63,8 +64,13 @@ public class Icon {
 	public static final String SMS_ERROR = "/icons/sms_error.png";
 	public static final String SMS_DISABLED = "/icons/sms_disabled.png";
 	public static final String EMAIL_SEND = "/icons/email_send.png";
+	public static final String MMS = "/icons/mms.png";
+	public static final String MMS_RECEIVE = "/icons/mms_receive.png";
+	public static final String MMS_SEND = "/icons/mms_send.png";
 	public static final String PHONE_CONNECTED = "/icons/phone_working.png";
+	public static final String PHONE_NUMBER = "/icons/phone_number.png";
 	public static final String SMS_HISTORY = "/icons/history.png";
+	public static final String SMS_HTTP = "/icons/sms_http.png";
 	public static final String BIN = "/icons/bin.png";
 	public static final String SSL = LOCK;
 	public static final String NO_SSL = LOCK_OPEN;

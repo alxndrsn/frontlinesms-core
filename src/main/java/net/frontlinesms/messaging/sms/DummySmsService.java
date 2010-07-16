@@ -121,4 +121,24 @@ public class DummySmsService implements SmsService {
 		return false;
 	}
 
+	public String getServiceIdentification() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getServiceName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getPort() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getDisplayPort() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

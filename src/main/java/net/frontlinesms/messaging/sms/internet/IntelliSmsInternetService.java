@@ -30,6 +30,7 @@ import net.frontlinesms.messaging.Provider;
 import net.frontlinesms.messaging.sms.properties.OptionalSection;
 import net.frontlinesms.messaging.sms.properties.PasswordString;
 import net.frontlinesms.messaging.sms.properties.PhoneSection;
+import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
 
 import org.apache.log4j.Logger;
 import org.smslib.CIncomingMessage;
@@ -79,6 +80,7 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 	 * If they do ever implement them, we can activate, or better remove, this constant.
 	 */
 	private static final boolean PROXIES_SUPPORTED = false;
+
 	/** Logging object */
 	private static Logger LOG = FrontlineUtils.getLogger(IntelliSmsInternetService.class);
 
@@ -124,7 +126,7 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 		}
 	}
 	
-	public void processMessage(javax.mail.Message message) {
+	public void processMessage(javax.mail.Message message, Date date) {
 		try {
 			// We've got a message, so try and find it's text content.
 			String messageText = PopImapUtils.getMessageText(message);
@@ -440,6 +442,19 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 	protected void deinit() {
 		connected = false;
 		this.setStatus(SmsInternetServiceStatus.DISCONNECTED, null);
+	}
+	
+	public String getServiceName() {
+		return this.getUsername() + UI_NAME_SEPARATOR + SmsInternetServiceSettingsHandler.getProviderName(getClass());
+	}
+
+	public String getPort() {
+		return null;
+	}
+
+	public String getDisplayPort() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 //> STATIC HELPER METHODS

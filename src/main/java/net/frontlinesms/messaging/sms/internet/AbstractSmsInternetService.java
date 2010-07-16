@@ -49,6 +49,8 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 	protected static final String PROPERTY_USE_FOR_SENDING = "common.use.for.sending";
 	/** Property name: use this service for receiving SMS */
 	protected static final String PROPERTY_USE_FOR_RECEIVING = "common.use.for.receiving";
+	/** Separator used while displaying the name in the UI */
+	protected static final String UI_NAME_SEPARATOR = "@";
 	
 //> INSTANCE PROPERTIES
 	/** The active thread running this service */
@@ -59,7 +61,6 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 	protected SmsListener smsListener;
 	/** Settings for this service */
 	private SmsInternetServiceSettings settings;
-
 	/** The status of this device */
 	private SmsInternetServiceStatus status = SmsInternetServiceStatus.DORMANT;
 	/** Extra info relating to the current status. */
@@ -90,6 +91,10 @@ abstract class AbstractSmsInternetService implements SmsInternetService {
 	/** @return {@link #status} */
 	public SmsInternetServiceStatus getStatus() {
 		return this.status;
+	}
+	
+	public String getServiceIdentification() {
+		return this.getMsisdn();
 	}
 
 	/**

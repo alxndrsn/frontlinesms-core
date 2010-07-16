@@ -24,18 +24,12 @@ import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.messaging.FrontlineMessagingService;
 
 public interface SmsService extends FrontlineMessagingService {
-	/** Checks if this device is being used to send SMS messages. */
-	public boolean isUseForSending();
-
 	/** Set this device to be used for sending SMS messages. */
 	public void setUseForSending(boolean use);
 	
 	/** Check whether this device actually supports SMS receipt. */
 	public boolean supportsReceive();
 
-	/** Check if this device is being used to receive SMS messages. */
-	public boolean isUseForReceiving();
-	
 	/** Set this device to be used for receiving messages. */
 	public void setUseForReceiving(boolean use);
 
@@ -44,9 +38,6 @@ public interface SmsService extends FrontlineMessagingService {
 	
 	/** Sets the {@link SmsListener} attached to this {@link SmsService}. */
 	public void setSmsListener(SmsListener smsListener);
-	
-	/** Check whether this device is currently connected */
-	public boolean isConnected();
 	
 	/** Check whether this device actually supports sending binary sms. */
 	public boolean isBinarySendingSupported();
@@ -59,10 +50,4 @@ public interface SmsService extends FrontlineMessagingService {
 	 * FIXME this method is unnecessary as all handsets support UCS-2 so far!
 	 */
 	public boolean isUcs2SendingSupported();
-	
-	/** @return the status of this device */
-	public SmsServiceStatus getStatus();
-	
-	/** @return details relating to {@link #getStatus()}, or <code>null</code> if none are relevant. */
-	public String getStatusDetail();
 }

@@ -24,9 +24,6 @@ import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.messaging.FrontlineMessagingService;
 
 public interface MmsService extends FrontlineMessagingService {
-	/** Check if this device is being used to receive SMS messages. */
-	public boolean isUseForReceiving();
-	
 	/** Set this device to be used for receiving messages. */
 	public void setUseForReceiving(boolean use);
 
@@ -35,15 +32,4 @@ public interface MmsService extends FrontlineMessagingService {
 	
 	/** Sets the {@link SmsListener} attached to this {@link MmsService}. */
 	public void setMmsListener(SmsListener smsListener);
-	
-	/** Check whether this device is currently connected */
-	public boolean isConnected();
-	
-	/** @return the status of this device */
-	public MmsServiceStatus getStatus();
-	
-	/** @return details relating to {@link #getStatus()}, or <code>null</code> if none are relevant. */
-	public String getStatusDetail();
-	
-	public String getName ();
 }

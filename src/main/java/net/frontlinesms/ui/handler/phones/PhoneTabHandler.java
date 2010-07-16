@@ -6,15 +6,15 @@ package net.frontlinesms.ui.handler.phones;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_MODEM_LIST_UPDATED;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_ADVANCED_PHONE_MANAGER;
 
+import java.security.Provider.Service;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import net.frontlinesms.CommUtils;
-import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.domain.SmsModemSettings;
 import net.frontlinesms.data.events.DatabaseEntityNotification;
@@ -41,6 +41,7 @@ import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.BaseTabHandler;
+import net.frontlinesms.ui.handler.email.EmailAccountSettingsDialogHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
@@ -60,14 +61,23 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	/** The fully-qualified name of the default {@link CATHandler} class. */
 	private static final String DEFAULT_CAT_HANDLER_CLASS_NAME = CATHandler.class.getName();
 	/** {@link Comparator} used for sorting {@link FrontlineMessagingService}s into a friendly order. */
-	private static final Comparator<? super FrontlineMessagingService> SMS_DEVICE_COMPARATOR = new Comparator<FrontlineMessagingService>() {
+	private static final Comparator<? super FrontlineMessagingService> MESSAGING_SERVICE_COMPARATOR = new Comparator<FrontlineMessagingService>() {
 			public int compare(FrontlineMessagingService one, FrontlineMessagingService tother) {
-				boolean oneIsModem = one instanceof SmsModem;
-				boolean totherIsModem = tother instanceof SmsModem;
-				if(!oneIsModem && !totherIsModem) return 0;
-				if(!totherIsModem) return 1;
-				if(!oneIsModem) return -1;
-				int comparison = ((SmsModem)one).getPort().compareTo(((SmsModem)tother).getPort());
+				int comparison = 0;
+				
+				// Always Modems first, then Internet Services, then MMS Services
+				if (one instanceof SmsModem) {
+					if (tother instanceof SmsModem) {
+						comparison = ((SmsModem)one).getPort().compareTo(((SmsModem)tother).getPort());
+					} else {
+						comparison = -1;
+					}
+				} else if (one.getClass().equals(tother.getClass())) {
+					comparison = one.getServiceName().compareTo(tother.getServiceName());
+				} else if (one instanceof SmsInternetService) {
+					comparison = (tother instanceof SmsModem ? 1 : -1);
+				}
+				
 				return comparison;
 			}};
 	
@@ -96,13 +106,10 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	private static final String MESSAGE_PORT_ALREADY_CONNECTED = "message.port.already.connected";
 	/** I18n Text Key: The requested port is already in use. */
 	private static final String I18N_PORT_IN_USE = "com.port.inuse";
+	/** I18n Text Key: Last checked: %0. */
+	private static final String I18N_EMAIL_LAST_CHECKED = "email.last.checked";
 	
-//> THINLET UI COMPONENT NAMES
-	private static final String COMPONENT_MI_DISABLE = "miDisable";
-	private static final String COMPONENT_MI_DISCONNECT = "miDisconnect";
-	private static final String COMPONENT_MI_EDIT_PHONE = "miEditPhone";
-	private static final String COMPONENT_MI_ENABLE = "miEnable";
-	
+//> THINLET UI COMPONENT NAMES	
 	/** UI Compoenent name: TODO */
 	private static final String COMPONENT_RB_PHONE_DETAILS_ENABLE = "rbPhoneDetailsEnable";
 	/** UI Compoenent name: TODO */
@@ -166,14 +173,17 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	public void showPhoneSettingsDialog(Object list) {
 		Object selected = ui.getSelectedItem(list);
 		if (selected != null) {
-			FrontlineMessagingService selectedPhone = ui.getAttachedObject(selected, FrontlineMessagingService.class);
-			if (selectedPhone instanceof SmsModem) {
-				if (!((SmsModem) selectedPhone).isDisconnecting())
-					showPhoneSettingsDialog((SmsModem) selectedPhone, false);
-			} else {
-				// Http service.
+			FrontlineMessagingService service = ui.getAttachedObject(selected, FrontlineMessagingService.class);
+			if (service instanceof SmsModem) {
+				if (!((SmsModem) service).isDisconnecting())
+					showPhoneSettingsDialog((SmsModem) service, false);
+			} else if (service instanceof SmsInternetService) {
 				SmsInternetServiceSettingsHandler serviceHandler = new SmsInternetServiceSettingsHandler(this.ui);
-				serviceHandler.showConfigureService((SmsInternetService) selectedPhone, null);
+				serviceHandler.showConfigureService((SmsInternetService) service, null);
+			} else if (service instanceof MmsEmailService) {
+				EmailAccountSettingsDialogHandler emailAccountSettingsDialogHandler = new EmailAccountSettingsDialogHandler(ui, true);
+				emailAccountSettingsDialogHandler.initDialog(((MmsEmailService) service).getEmailAccount());
+				this.ui.add(emailAccountSettingsDialogHandler.getDialog());
 			}
 		}
 	}
@@ -237,9 +247,19 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	 * @param list The list of connected {@link FrontlineMessagingService}s in the Phones tab.
 	 */
 	public void disconnectFromSelected(Object list) {
-		SmsService dev = ui.getAttachedObject(ui.getSelectedItem(list), SmsService.class); 
-		phoneManager.disconnect(dev);
-		refresh();
+		Object selected = ui.getSelectedItem(list);
+		
+		if (selected != null) {
+			FrontlineMessagingService service = ui.getAttachedObject(selected, FrontlineMessagingService.class);
+			
+			if (service instanceof SmsService) {
+				phoneManager.disconnect((SmsService) service);
+			} else if (service instanceof MmsEmailService) {
+				this.mmsServiceManager.connectMmsEmailService((MmsEmailService) service, false);
+			}
+			
+			refresh();
+		}
 	}
 	
 	/**
@@ -268,46 +288,42 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 			ui.setVisible(popUp, false);
 		} else {
 			FrontlineMessagingService service = ui.getAttachedObject(selected, FrontlineMessagingService.class);
-			if (service instanceof MmsService) {
-				if (service instanceof MmsEmailService) {
-					for (Object o : ui.getItems(popUp)) {
-						ui.setVisible(o, ui.getName(o).equals(COMPONENT_MI_ENABLE));
-					}
-				}
+			if (service instanceof SmsModem) {
+				SmsModem modem = (SmsModem) service;
+				ui.setVisible(ui.find(popUp, "miEditPhone"), false);
+				ui.setVisible(ui.find(popUp, "miAutoConnect"), !modem.isDetecting() && !modem.isTryToConnect());
+				ui.setVisible(ui.find(popUp, "miManualConnection"), !modem.isDetecting() && !modem.isTryToConnect());
+				ui.setVisible(ui.find(popUp, "miCancelDetection"), modem.isDetecting());
 			} else {
-				if (service instanceof SmsModem) {
-					SmsModem modem = (SmsModem) service;
-					ui.setVisible(ui.find(popUp, COMPONENT_MI_ENABLE), false);
-					ui.setVisible(ui.find(popUp, "miEditPhone"), false);
-					ui.setVisible(ui.find(popUp, "miAutoConnect"), !modem.isDetecting() && !modem.isTryToConnect());
-					ui.setVisible(ui.find(popUp, "miManualConnection"), !modem.isDetecting() && !modem.isTryToConnect());
-					ui.setVisible(ui.find(popUp, "miCancelDetection"), modem.isDetecting());
-				} else {
-					for (Object o : ui.getItems(popUp)) {
-						ui.setVisible(o, ui.getName(o).equals("miEditPhone") || ui.getName(o).equals("miAutoConnect"));
-					}
+				for (Object o : ui.getItems(popUp)) {
+					ui.setVisible(o, ui.getName(o).equals("miEditPhone") || ui.getName(o).equals("miAutoConnect"));
 				}
 			}
 		}
 	}
 	
 	/**
-	 * Attempt to automatically connect to the phone handler currently selected in the list of
-	 * unconnected handsets.
+	 * Attempt to automatically connect to the service currently selected in the list of
+	 * unconnected services.
 	 */
 	public void connectToSelectedPhoneHandler() {
 		Object modemListError = ui.find(COMPONENT_PHONE_MANAGER_MODEM_LIST_ERROR);
-		FrontlineMessagingService selectedPhoneHandler = ui.getAttachedObject(ui.getSelectedItem(modemListError), FrontlineMessagingService.class);
-		if(selectedPhoneHandler != null) {
-			if (selectedPhoneHandler instanceof SmsModem) {
-				SmsModem modem = (SmsModem) selectedPhoneHandler;
+		Object selected = ui.getSelectedItem(modemListError);
+		
+		if (selected != null) {
+			FrontlineMessagingService service = ui.getAttachedObject(selected, FrontlineMessagingService.class);
+			
+			if (service instanceof SmsModem) {
+				SmsModem modem = (SmsModem) service;
 				try {
 					phoneManager.requestConnect(modem.getPort());
 				} catch (NoSuchPortException ex) {
 					log.info("", ex);
 				}
-			} else {
-				phoneManager.addSmsInternetService((SmsInternetService) selectedPhoneHandler);
+			} else if (service instanceof SmsInternetService) {
+				phoneManager.addSmsInternetService((SmsInternetService) service);
+			} else if (service instanceof MmsEmailService) {
+				this.mmsServiceManager.connectMmsEmailService((MmsEmailService) service, true);
 			}
 		}
 	}
@@ -515,14 +531,6 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 		
 		removeDialog(dialog);
 	}
-	
-	public void enableMmsEmailService (Object list, String enable) {
-		Object selected = ui.getSelectedItem(list);
-		if (selected != null && this.ui.getAttachedObject(selected) instanceof MmsEmailService) {
-			MmsEmailService mmsEmailService = this.ui.getAttachedObject(selected, MmsEmailService.class);
-			this.mmsServiceManager.enableMmsEmailService(mmsEmailService, Boolean.valueOf(enable));
-		}
-	}
 
 //> INSTANCE HELPER METHODS
 	/** 
@@ -543,206 +551,90 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 			messagingServices.addAll(this.phoneManager.getAll());
 			messagingServices.addAll(this.mmsServiceManager.getAll());
 			
-			for (FrontlineMessagingService messagingService : messagingServices) {
+			FrontlineMessagingService[] messagingServicesArray = messagingServices.toArray(new FrontlineMessagingService[0]);
+			Arrays.sort(messagingServicesArray, MESSAGING_SERVICE_COMPARATOR);
+			
+			for (FrontlineMessagingService messagingService : messagingServicesArray) {
 				if (messagingService.isConnected()) {
 					ui.add(getModemListComponent(), getTableRow(messagingService, true));
 				} else {
 					ui.add(modemListError, getTableRow(messagingService, false));
 				}
-			}
-			
-			
-//			/** SMS Services */
-//			SmsService[] smsServices = phoneManager.getAllPhones().toArray(new SmsService[0]);
-//			
-//			// Sort the SmsDevices by port name
-//			Arrays.sort(smsServices, SMS_DEVICE_COMPARATOR);
-//			
-//			// Add the SmsDevices to the relevant tables
-//			for (SmsService smsService : smsServices) {
-//				if (smsService.isConnected()) {
-//					ui.add(getModemListComponent(), getTableRow(smsService, true));
-//				} else {
-//					ui.add(modemListError, getTableRow(smsService, false));
-//				}
-//			}
-//			
-//			/** MMS Services */
-//			MmsService[] mmsServices = this.mmsServiceManager.getAllMmsServices();
-//			
-//			// Add the SmsDevices to the relevant tables
-//			for (MmsService mmsService : mmsServices) {
-//				if (mmsService.isConnected()) {
-//					ui.add(getModemListComponent(), getTableRow(mmsService));
-//				} else {
-//					ui.add(modemListError, getTableRow(mmsService));
-//				}
-//			}
-			
+			}			
 
 			ui.setSelectedIndex(getModemListComponent(), indexTop);
 			ui.setSelectedIndex(modemListError, index);
-			
-			this.managePopupMenu(find(COMPONENT_PHONE_MANAGER_MODEM_LIST));
-		}
-	}
-	
-	public void managePopupMenu (Object list) {
-		Object selectedService = this.ui.getSelectedItem(list);
-		if (selectedService != null) {
-			Object menuItemDisable = find(COMPONENT_MI_DISABLE);
-			Object menuItemDisconnect = find(COMPONENT_MI_DISCONNECT);
-			Object menuItemEditPhone = find(COMPONENT_MI_EDIT_PHONE);
-			Object menuItemEnable = find(COMPONENT_MI_ENABLE);
-			
-			Object service = this.ui.getAttachedObject(selectedService);
-			if (service instanceof MmsEmailService) {
-				if (((MmsEmailService) service).isConnected()) {
-					this.ui.setVisible(menuItemDisable, true);
-					this.ui.setVisible(menuItemDisconnect, false);
-					this.ui.setVisible(menuItemEditPhone, false);
-					this.ui.setVisible(menuItemEnable, false);
-				} else {
-					this.ui.setVisible(menuItemDisable, false);
-					this.ui.setVisible(menuItemDisconnect, false);
-					this.ui.setVisible(menuItemEditPhone, false);
-					this.ui.setVisible(menuItemEnable, true);
-				}
-			} else {
-				this.ui.setVisible(menuItemDisable, false);
-				this.ui.setVisible(menuItemDisconnect, true);
-				this.ui.setVisible(menuItemEditPhone, true);
-				this.ui.setVisible(menuItemEnable, false);
-			}
-			
 		}
 	}
 	
 	private Object getTableRow(FrontlineMessagingService service, boolean isConnected) {
-		if (service instanceof MmsService) {
-			return getTableRow((MmsService)service, isConnected);
-		} else {
-			return getTableRow((SmsService)service, isConnected);
-		}
-	}
-	
-	/**
-	 * Gets a table row Thinlet UI Component for the supplied handset.  This table row
-	 * is designed for display on the Phone Manager's handset list.  The PhoneHandler
-	 * object is attached to the component, and the component's icon is set appropriately.
-	 * @param smsService
-	 * @param isConnected <code>true</code> if the supplied device is to appear in the "connected" list; <code>false</code> otherwise
-	 * @return Thinlet table row component detailing the supplied device.
-	 */
-	private Object getTableRow(SmsService smsService, boolean isConnected) {
-		Object row = ui.createTableRow(smsService);
-		this.ui.setAttachedObject(row, smsService);
+		Object row = ui.createTableRow(service);
+		this.ui.setAttachedObject(row, service);
 
-// FIXME these now share getMsisdn() code.
-		final String fromMsisdn = smsService.getMsisdn();
-		final String statusString, makeAndModel, serial, port, baudRate;
-		final String icon;
-		if (smsService instanceof SmsModem) {
-			SmsModem handset = (SmsModem) smsService;
-			if(handset.isConnected()) {
-				icon = Icon.LED_GREEN;
-			} else if(handset.isPhonePresent()) {
-				icon = Icon.LED_AMBER;
-			} else {
-				icon = Icon.LED_RED;
-			}
-
-			port = handset.getPort();
-			baudRate = Integer.toString(handset.getBaudRate());
-			makeAndModel = FrontlineUtils.getManufacturerAndModel(handset.getManufacturer(), handset.getModel());
-			serial = handset.getSerial();
-			
-			statusString = getServiceStatusAsString(handset);
+		/** TYPE CELL (Icon) */
+		final String typeIcon;
+		if (service instanceof SmsModem) {
+			typeIcon = Icon.PHONE_NUMBER;
 		} else {
-			SmsInternetService serv = (SmsInternetService) smsService;
-			if(serv.isConnected()) {
-				icon = Icon.LED_GREEN;
-			} else {
-				icon = Icon.LED_RED;
-			}
-			
-			port = serv.isEncrypted() ? "HTTPS" : "HTTP";
-			baudRate = "";
-			makeAndModel = SmsInternetServiceSettingsHandler.getProviderName(serv.getClass());
-			serial = serv.getIdentifier();
-			statusString = getServiceStatusAsString(serv);
+			typeIcon = Icon.SMS_HTTP;
 		}
 
-		// Add "status cell" - "traffic light" showing how functional the device is
-		Object statusCell = ui.createTableCell("");
-		ui.setIcon(statusCell, icon);
-		ui.add(row, statusCell);
-
-		ui.table_addCells(row, new String[]{port, baudRate, fromMsisdn, makeAndModel, serial});
+		Object typeCell = ui.createTableCell("");
+		ui.setIcon(typeCell, typeIcon);
+		ui.add(row, typeCell);
 		
+		/** MESSAGE TYPE CELL (Icon) */
+		Object messageTypeCell = ui.createTableCell("");
+		if (service instanceof MmsService) {
+			ui.setIcon(messageTypeCell, Icon.MMS);
+		} else if (service.isConnected() || service instanceof SmsInternetService) {
+			ui.setIcon(messageTypeCell, Icon.SMS);
+		}
+		ui.add(row, messageTypeCell);
+		
+		
+		/** PORT CELL */
+		Object portCell = ui.createTableCell(service.getDisplayPort());
+		ui.add(row, portCell);
+		
+		/** NAME CELL */
+		Object nameCell = ui.createTableCell(service.getServiceName());
+		ui.add(row, nameCell);
+		
+		/** ID CELL */
+		Object idCell = ui.createTableCell(service.getServiceIdentification());
+		ui.add(row, idCell);
+		
+		
+		/** USE FOR RECEIVING/SENDING CELLS */
+		Object useForSendingCell = ui.createTableCell("");
+		Object useForReceiveCell = ui.createTableCell("");
 		if (isConnected) {
-			Object useForSendingCell = ui.createTableCell("");
-			if (smsService.isUseForSending()) ui.setIcon(useForSendingCell, Icon.TICK);
+			if (service.isUseForSending()) ui.setIcon(useForSendingCell, Icon.TICK);
+			if (service.isUseForReceiving()) ui.setIcon(useForReceiveCell, Icon.TICK);
 			ui.add(row, useForSendingCell);
-			Object useForReceiveCell = ui.createTableCell("");
-			if (smsService.isUseForReceiving()) ui.setIcon(useForReceiveCell, Icon.TICK);
 			ui.add(row, useForReceiveCell);
 		}
-		ui.add(row, ui.createTableCell(statusString));
 		
-		return row;
-	}
-	
-	/**
-	 * Gets a table row Thinlet UI Component for the supplied {@link MmsService}.  This table row
-	 * is designed for display on the Phone Manager's handset list. 
-	 * @param mmsService
-	 * @param isConnected <code>true</code> if the supplied device is to appear in the "connected" list; <code>false</code> otherwise
-	 * @return Thinlet table row component detailing the supplied device.
-	 */
-	private Object getTableRow(MmsService mmsService, boolean isConnected) {
-		Object row = ui.createTableRow(mmsService);
-		this.ui.setAttachedObject(row, mmsService);
-
-// FIXME these now share getMsisdn() code.
-		final String fromMsisdn = "";
-		final String statusString, makeAndModel, serial, port, baudRate;
-		String icon = Icon.LED_RED;
-		if (mmsService instanceof MmsEmailService) {
-			MmsEmailService mmsEmailService = (MmsEmailService) mmsService;
-			if (!mmsEmailService.isConnected() || mmsEmailService.getStatus().equals(MmsEmailServiceStatus.FAILED_TO_CONNECT)) {
-				icon = Icon.LED_RED;
-			} else if (mmsEmailService.getStatus().equals(MmsEmailServiceStatus.FETCHING)) {
-				icon = Icon.LED_AMBER;
-			} else {
-				icon = Icon.LED_GREEN;
-			}
-			
-			port = mmsEmailService.getProtocol();
-			baudRate = "";
-			makeAndModel = mmsEmailService.getName();
-			serial = "";
-			statusString = getServiceStatusAsString(mmsEmailService);
-
-			// Add "status cell" - "traffic light" showing how functional the device is
-			Object statusCell = ui.createTableCell("");
-			ui.setIcon(statusCell, icon);
-			ui.add(row, statusCell);
-	
-			ui.table_addCells(row, new String[]{port, baudRate, fromMsisdn, makeAndModel, serial});
-			
-			if (isConnected) {
-				Object useForSendingCell = ui.createTableCell("");
-				ui.add(row, useForSendingCell);
-				Object useForReceiveCell = ui.createTableCell("");
-				if (mmsEmailService.isConnected()) {
-					ui.setIcon(useForReceiveCell, Icon.TICK);
-				}
-				ui.add(row, useForReceiveCell);
-			}
-			
-			ui.add(row, ui.createTableCell(statusString));
+		
+		/** STATUS CELL */
+		// Add "status cell" - "traffic light" showing how functional the device is
+		final String statusIcon;
+		FrontlineMessagingServiceStatus status = service.getStatus();
+		if (status.equals(SmsModemStatus.CONNECTING) ||
+			status.equals(SmsModemStatus.DETECTED) ||
+			status.equals(SmsModemStatus.TRY_TO_CONNECT) ||
+			status.equals(MmsEmailServiceStatus.FETCHING)) {
+			statusIcon = Icon.LED_AMBER;	
+		} else if (service.isConnected()){
+			statusIcon = Icon.LED_GREEN;
+		} else {
+			statusIcon = Icon.LED_RED;
 		}
+	
+		Object statusCell = ui.createTableCell(getServiceStatusAsString(service));
+		ui.setIcon(statusCell, statusIcon);
+		ui.add(row, statusCell);
 		
 		return row;
 	}
@@ -756,7 +648,16 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	 * @return An internationalised {@link String} describing the status of the {@link FrontlineMessagingService}.
 	 */
 	private static String getServiceStatusAsString(FrontlineMessagingService service) {
-		return InternationalisationUtils.getI18NString(service.getStatus().getI18nKey(), service.getStatusDetail());
+		String statusString = InternationalisationUtils.getI18NString(service.getStatus().getI18nKey(), service.getStatusDetail());
+		
+		if (service instanceof MmsEmailService && service.getStatus().equals(MmsEmailServiceStatus.READY)) {
+			Long lastChecked = ((MmsEmailService) service).getEmailAccount().getLastCheck();
+			if (lastChecked != null) {
+				statusString += " - " + InternationalisationUtils.getI18NString(I18N_EMAIL_LAST_CHECKED, InternationalisationUtils.getDatetimeFormat().format(new Date (lastChecked)));
+			}
+		}
+		
+		return statusString;
 	}
 	
 	/**
@@ -774,7 +675,7 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 			MmsServiceStatusNotification mmsServiceStatusNotification = ((MmsServiceStatusNotification) notification);
 			if (mmsServiceStatusNotification.getStatus().equals(MmsEmailServiceStatus.FAILED_TO_CONNECT)) {
 				this.ui.newEvent(new Event(Event.TYPE_SMS_INTERNET_SERVICE_RECEIVING_FAILED, 
-											mmsServiceStatusNotification.getMmsService().getName() + " - " + InternationalisationUtils.getI18NString(COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED)));
+											mmsServiceStatusNotification.getMmsService().getServiceName() + " - " + InternationalisationUtils.getI18NString(COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED)));
 			}
 			this.refresh();
 		} else if (notification instanceof DatabaseEntityNotification<?>) {

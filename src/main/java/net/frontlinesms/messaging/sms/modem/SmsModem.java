@@ -65,6 +65,8 @@ public class SmsModem extends Thread implements SmsService {
 		57600,
 		115200
 	};
+	private static final String UI_DISPLAY_PORT_SEPARATOR = "@";
+	private static final String UI_BPS_SUFFIX = "Bps";
 
 	/** Logging object */
 	private static Logger LOG = FrontlineUtils.getLogger(SmsModem.class);
@@ -316,6 +318,14 @@ public class SmsModem extends Thread implements SmsService {
 	/** @return {@link #serialNumber} */
 	public String getSerial() {
 		return serialNumber;
+	}
+	
+	public String getServiceName() {
+		return FrontlineUtils.getManufacturerAndModel(getManufacturer(), getModel());
+	}
+	
+	public String getServiceidentification() {
+		return this.getMsisdn();
 	}
 
 	public void connect(){
@@ -888,7 +898,7 @@ public class SmsModem extends Thread implements SmsService {
 	public synchronized void disconnect() {
 		if (isConnected()) {
 			// Actually disconnecting the phone!
-			new Thread("Disconnecting [" + this.getName() + "]") {
+			new Thread("Disconnecting [" + this.getServiceName() + "]") {
 				public void run() {
 					disconnecting();
 				}
@@ -988,6 +998,14 @@ public class SmsModem extends Thread implements SmsService {
 			}
 		}
 		LOG.trace("EXIT");
+	}
+
+	public String getServiceIdentification() {
+		return getMsisdn();
+	}
+
+	public String getDisplayPort() {
+		return this.getPort();
 	}
 	
 //> STATIC HELPER METHODS

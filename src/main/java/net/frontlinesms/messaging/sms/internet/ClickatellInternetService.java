@@ -27,6 +27,7 @@ import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.messaging.Provider;
 import net.frontlinesms.messaging.sms.properties.PasswordString;
 import net.frontlinesms.messaging.sms.properties.PhoneSection;
+import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
 
 import org.apache.log4j.Logger;
 import org.smslib.ReceiveNotSupportedException;
@@ -273,6 +274,10 @@ public class ClickatellInternetService extends AbstractSmsInternetService {
 		return this.connected;
 	}
 
+	public String getServiceName() {
+		return this.getUsername() + UI_NAME_SEPARATOR + SmsInternetServiceSettingsHandler.getProviderName(getClass());
+	}
+
 	/**
 	 * Verifies if the gateway is running okay or we need to restart it.
 	 */
@@ -310,5 +315,14 @@ public class ClickatellInternetService extends AbstractSmsInternetService {
 	 */
 	public boolean isUcs2SendingSupported() {
 		return false;
+	}
+
+	public String getPort() {
+		return null;
+	}
+
+	public String getDisplayPort() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

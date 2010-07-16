@@ -6,7 +6,6 @@ package net.frontlinesms.messaging.mms.email;
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.messaging.mms.MmsServiceStatus;
 import net.frontlinesms.messaging.sms.modem.SmsModem;
-import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
  * Statuses for {@link SmsModem}
@@ -14,7 +13,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 public enum MmsEmailServiceStatus implements MmsServiceStatus {
-	DISABLED(FrontlineSMSConstants.MMS_SERVICE_STATUS_DISABLED),
+	DISCONNECTED(FrontlineSMSConstants.SMS_DEVICE_STATUS_DISCONNECT),
 	FAILED_TO_CONNECT(FrontlineSMSConstants.SMS_DEVICE_STATUS_FAILED_TO_CONNECT),
 	FETCHING(FrontlineSMSConstants.MMS_SERVICE_STATUS_FETCHING),
 	READY(FrontlineSMSConstants.MMS_SERVICE_STATUS_READY);

@@ -304,7 +304,7 @@ public class FrontlineMessage {
 		FrontlineMessage m = new FrontlineMessage();
 		m.type = Type.RECEIVED;
 		m.status = Status.RECEIVED;
-		m.date = dateReceived;
+		m.setDate(dateReceived);
 		m.senderMsisdn = senderMsisdn;
 		m.recipientMsisdn = recipientMsisdn;
 		m.recipientSmsPort = recipientPort;
@@ -328,7 +328,7 @@ public class FrontlineMessage {
 		FrontlineMessage m = new FrontlineMessage();
 		m.type = Type.OUTBOUND;
 		m.status = Status.DRAFT;
-		m.date = dateSent;
+		m.setDate(dateSent);
 		m.senderMsisdn = senderMsisdn;
 		m.recipientMsisdn = recipientMsisdn;
 		m.recipientSmsPort = recipientPort;
@@ -349,7 +349,7 @@ public class FrontlineMessage {
 		FrontlineMessage m = new FrontlineMessage();
 		m.type = Type.OUTBOUND;
 		m.status = Status.DRAFT;
-		m.date = dateSent;
+		m.setDate(dateSent);
 		m.senderMsisdn = senderMsisdn;
 		m.recipientMsisdn = recipientMsisdn;
 		m.textMessageContent = messageContent;
@@ -368,7 +368,7 @@ public class FrontlineMessage {
 		FrontlineMessage m = new FrontlineMessage();
 		m.type = Type.RECEIVED;
 		m.status = Status.RECEIVED;
-		m.date = dateReceived;
+		m.setDate(dateReceived);
 		m.senderMsisdn = senderMsisdn;
 		m.recipientMsisdn = recipientMsisdn;
 		m.textMessageContent = messageContent;
@@ -386,7 +386,7 @@ public class FrontlineMessage {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (int) (date ^ (date >>> 32));
+		result = prime * result + (int) (getDate() ^ (getDate() >>> 32));
 		result = prime * result + Arrays.hashCode(binaryMessageContent);
 		result = prime * result
 				+ ((textMessageContent == null) ? 0 : textMessageContent.hashCode());
@@ -423,7 +423,7 @@ public class FrontlineMessage {
 		if (getClass() != obj.getClass())
 			return false;
 		FrontlineMessage other = (FrontlineMessage) obj;
-		if (date != other.date)
+		if (getDate() != other.getDate())
 			return false;
 		if (!Arrays.equals(binaryMessageContent, other.binaryMessageContent))
 			return false;
@@ -459,5 +459,9 @@ public class FrontlineMessage {
 		if (type != other.type)
 			return false;
 		return true;
+	}
+
+	public void setDate(long date) {
+		this.date = date;
 	}
 }

@@ -1327,14 +1327,31 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 
 		String icon;
 		if (message.getType() == Type.RECEIVED) {
-			icon = Icon.SMS_RECEIVE;
+			if (message instanceof FrontlineMultimediaMessage) {
+				icon = Icon.MMS_RECEIVE;
+			} else {
+				icon = Icon.SMS_RECEIVE;
+			}
 		} else {
-			icon = Icon.SMS_SEND;
+			if (message instanceof FrontlineMultimediaMessage) {
+				icon = Icon.MMS_SEND;
+			} else {
+				icon = Icon.SMS_SEND;
+			}
 		}
-
 		Object iconCell = createTableCell("");
 		setIcon(iconCell, icon);
 		add(row, iconCell);
+		
+		
+		/** "ATTACHED" ICON (only for MMS containing multimedia parts) */
+		Object attachCell = createTableCell("");
+		if (message instanceof FrontlineMultimediaMessage && ((FrontlineMultimediaMessage) message).hasBinaryPart()) {
+			setIcon(attachCell, Icon.ATTACH);
+		}
+		add(row, attachCell);
+		
+
 		add(row, createTableCell(getMessageStatusAsString(message)));
 		add(row, createTableCell(InternationalisationUtils.getDatetimeFormat().format(message.getDate())));
 		add(row, createTableCell(message.getSenderMsisdn()));

@@ -60,9 +60,13 @@ public class MmsUtils {
 		}
 		
 		FrontlineMultimediaMessage message = new FrontlineMultimediaMessage(Type.RECEIVED, textContent.toString(), multimediaParts);
-		message.setRecipientMsisdn("set me please"); // FIXME get recipient address from mms
+		message.setRecipientMsisdn(mms.getReceiver());
 		message.setSenderMsisdn(mms.getSender());
 		message.setStatus(Status.RECEIVED);
+		if (mms.getDate() != null) {
+			message.setDate(mms.getDate().getTime());	
+		}
+		
 		return message;
 	}
 

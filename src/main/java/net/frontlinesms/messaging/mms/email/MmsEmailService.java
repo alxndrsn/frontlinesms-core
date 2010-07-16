@@ -25,10 +25,17 @@ public class MmsEmailService implements MmsService {
 
 	public MmsEmailService (EmailAccount emailAccount) {
 		this.setEmailAccount(emailAccount);
-		this.status = (emailAccount.isEnabled() ? MmsEmailServiceStatus.READY : MmsEmailServiceStatus.DISABLED);
+		this.status = (emailAccount.isEnabled() ? MmsEmailServiceStatus.READY : MmsEmailServiceStatus.DISCONNECTED);
 		
 		mmsEmailReceiver = new PopImapEmailMmsReceiver();
 		receiver = new PopImapMessageReceiver(mmsEmailReceiver);
+		populateReceiver(emailAccount);
+		
+		mmsEmailReceiver.addParsers(MmsUtils.getAllEmailMmsParsers());
+		mmsEmailReceiver.setReceiver(receiver);
+	}
+	
+	public void populateReceiver(EmailAccount emailAccount) {
 		receiver.setHostAddress(emailAccount.getAccountServer());
 		receiver.setHostPassword(emailAccount.getAccountPassword());
 		receiver.setHostPort(emailAccount.getAccountServerPort());
@@ -36,11 +43,8 @@ public class MmsEmailService implements MmsService {
 		receiver.setUseSsl(emailAccount.useSsl());
 		receiver.setLastCheck(emailAccount.getLastCheck());
 		receiver.setProtocol(emailAccount.getProtocol());
-		
-		mmsEmailReceiver.addParsers(MmsUtils.getAllEmailMmsParsers());
-		mmsEmailReceiver.setReceiver(receiver);
 	}
-	
+
 	public Collection<MmsMessage> receive () throws MmsReceiveException {
 		return this.mmsEmailReceiver.receive();
 	}
@@ -55,7 +59,7 @@ public class MmsEmailService implements MmsService {
 	}
 
 	public boolean isConnected() {
-		return (!this.status.equals(MmsEmailServiceStatus.DISABLED));
+		return (!this.status.equals(MmsEmailServiceStatus.DISCONNECTED) && !this.status.equals(MmsEmailServiceStatus.FAILED_TO_CONNECT));
 	}
 
 	public boolean isUseForReceiving() {
@@ -78,7 +82,11 @@ public class MmsEmailService implements MmsService {
 		
 	}
 	
-	public String getName () {
+	public String getServiceName () {
+		return this.receiver.getHostAddress();
+	}
+	
+	public String getUsername() {
 		return this.receiver.getHostUsername();
 	}
 	
@@ -111,5 +119,17 @@ public class MmsEmailService implements MmsService {
 
 	public EmailAccount getEmailAccount() {
 		return emailAccount;
+	}
+
+	public String getServiceIdentification() {
+		return this.getUsername();
+	}
+
+	public boolean isUseForSending() {
+		return false;
+	}
+
+	public String getDisplayPort() {
+		return null;
 	}
 }

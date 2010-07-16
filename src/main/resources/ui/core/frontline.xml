@@ -17,7 +17,7 @@
 			<menuitem icon="/icons/database_edit.png" text="i18n.menuitem.edit.db.settings" name="menu_editDatabase" action="showDatabaseConfigDialog"/>
 			<menuitem icon="/icons/frontline_icon.png" text="i18n.hometab.logo.settings" name="menu_showHometabSettings" action="showHomeTabSettings"/>
 			<separator />
-			<menuitem icon="/icons/sms.png" text="i18n.menuitem.mms.email.settings" name="menu_mmsEmailSettings" action="showMmsEmailAccountsSettings"/>
+			<menuitem icon="/icons/mms.png" text="i18n.menuitem.mms.email.settings" name="menu_mmsEmailSettings" action="showMmsEmailAccountsSettings"/>
 			<menuitem icon="/icons/sms_http_edit.png" text="i18n.smsdevice.internet.settings" action="showSmsInternetServiceSettings"/>
 			<separator />
 			<menu icon="/icons/language.png" text="i18n.menu.language" name="menu_language">

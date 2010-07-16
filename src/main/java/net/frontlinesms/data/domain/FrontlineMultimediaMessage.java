@@ -28,4 +28,13 @@ public class FrontlineMultimediaMessage extends FrontlineMessage {
 	public List<FrontlineMultimediaMessagePart> getMultimediaParts() {
 		return Collections.unmodifiableList(this.multimediaParts);
 	}
+	public boolean hasBinaryPart() {
+		for (FrontlineMultimediaMessagePart part : this.multimediaParts) {
+			if (part.isBinary()) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 }
