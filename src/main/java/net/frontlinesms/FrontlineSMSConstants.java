@@ -51,6 +51,7 @@ public final class FrontlineSMSConstants {
 	public static final String UNKNOWN_NOTES = "sentence.contact.added.automatically";
 
 	public static final String DEFAULT_START_PAGE = "0";
+	public static final int DEFAULT_MMS_POLLING_FREQUENCY = 30000;
 
 	public static final String TEST_NUMBER_NAME = "Test Number";
 	public static final String EMULATOR_MSISDN = "000";
@@ -145,6 +146,7 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_DATABASE_CONNECTION_PROBLEM = "common.db.connection.problem";
 	public static final String COMMON_RECEIVED_MESSAGES = "common.received.messages";
 	public static final String COMMON_SENT_MESSAGES = "common.sent.messages";
+	public static final String COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED = "common.sms.internet.service.receiving.failed";
 	
 	public static final String EVENT_DESCRIPTION = "event.description";
 	public static final String EVENT_DESCRIPTION_MULTI_RECIPIENTS = "event.description.multi.recipients";

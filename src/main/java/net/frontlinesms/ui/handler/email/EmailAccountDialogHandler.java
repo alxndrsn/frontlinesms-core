@@ -31,6 +31,7 @@ import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 public class EmailAccountDialogHandler implements ThinletUiEventHandler, EventObserver {
 //> UI LAYOUT FILES
 	private static final String UI_FILE_EMAIL_ACCOUNTS_SETTINGS_FORM = "/ui/core/email/dgServerConfig.xml";
+	private static final String UI_FILE_EMAIL_ACCOUNTS_LIST_FORM = "/ui/core/email/pnAccountsList.xml";
 	
 	//> THINLET COMPONENT NAMES
 	private static final String UI_COMPONENT_ACCOUNTS_LIST = "accountsList";
@@ -68,20 +69,23 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler, EventOb
 	
 	public Object getDialog() {
 		initDialog();
-		return this.dialogComponent;
+		return this.getDialogComponent();
 	}
 	
 	private void initDialog() {
-		this.dialogComponent = ui.loadComponentFromFile(UI_FILE_EMAIL_ACCOUNTS_SETTINGS_FORM, this);
+		this.setDialogComponent(ui.loadComponentFromFile(UI_FILE_EMAIL_ACCOUNTS_SETTINGS_FORM, this));
+		Object pnAccountsList = ui.loadComponentFromFile(UI_FILE_EMAIL_ACCOUNTS_LIST_FORM, this);
+		this.ui.add(this.getDialogComponent(), pnAccountsList, 0);
+		
 		if (this.isForReceiving) {
-			this.ui.setText(dialogComponent, InternationalisationUtils.getI18NString(I18N_MMS_EMAIL_ACCOUNT_SETTINGS));
+			this.ui.setText(getDialogComponent(), InternationalisationUtils.getI18NString(I18N_MMS_EMAIL_ACCOUNT_SETTINGS));
 		} else {
-			this.ui.setText(dialogComponent, InternationalisationUtils.getI18NString(I18N_COMMON_EMAIL_ACCOUNT_SETTINGS));
+			this.ui.setText(getDialogComponent(), InternationalisationUtils.getI18NString(I18N_COMMON_EMAIL_ACCOUNT_SETTINGS));
 		}
-		this.refreshAccountsList();
+		this.refresh();
 	}
 
-	private void refreshAccountsList() {
+	public void refresh() {
 		Object table = find(UI_COMPONENT_ACCOUNTS_LIST);
 		this.ui.removeAll(table);
 		Collection<EmailAccount> emailAccounts;
@@ -114,18 +118,18 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler, EventOb
 	}
 	
 	public void newEmailAccountSettings () {
-		showEmailAccountDialog(null);
+		showEmailAccountSettingsDialog(null);
 	}
 	
 	public void editEmailAccountSettings(Object list) {
 		Object selected = ui.getSelectedItem(list);
 		if (selected != null) {
 			EmailAccount emailAccount = (EmailAccount) ui.getAttachedObject(selected);
-			showEmailAccountDialog(emailAccount);
+			showEmailAccountSettingsDialog(emailAccount);
 		}
 	}
 	
-	private void showEmailAccountDialog(EmailAccount emailAccount) {
+	private void showEmailAccountSettingsDialog(EmailAccount emailAccount) {
 		EmailAccountSettingsDialogHandler emailAccountSettingsDialogHandler = new EmailAccountSettingsDialogHandler(ui, this.isForReceiving);
 		emailAccountSettingsDialogHandler.initDialog(emailAccount);
 		this.ui.add(emailAccountSettingsDialogHandler.getDialog());
@@ -185,7 +189,7 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler, EventOb
 			emailAccountDao.deleteEmailAccount(acc);
 		}
 		
-		this.refreshAccountsList();
+		this.refresh();
 		LOG.trace("EXIT");
 	}
 	
@@ -193,7 +197,7 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler, EventOb
 	public void notify(FrontlineEventNotification event) {
 		if(event instanceof DatabaseEntityNotification<?>) {
 			if(((DatabaseEntityNotification<?>)event).getDatabaseEntity() instanceof EmailAccount) {
-				this.refreshAccountsList();
+				this.refresh();
 			}
 		}
 	}
@@ -223,6 +227,14 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler, EventOb
 	 * @return the ui component, or <code>null</code> if it could not be found
 	 */
 	private Object find(String componentName) {
-		return ui.find(this.dialogComponent, componentName);
+		return ui.find(this.getDialogComponent(), componentName);
+	}
+
+	public void setDialogComponent(Object dialogComponent) {
+		this.dialogComponent = dialogComponent;
+	}
+
+	public Object getDialogComponent() {
+		return dialogComponent;
 	}
 }

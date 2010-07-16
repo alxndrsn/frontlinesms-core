@@ -35,7 +35,6 @@ import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.listener.*;
 import net.frontlinesms.messaging.FrontlineMessagingServiceEventListener;
-import net.frontlinesms.messaging.mms.IncomingMmsProcessor;
 import net.frontlinesms.messaging.mms.MmsServiceManager;
 import net.frontlinesms.messaging.mms.events.MmsReceivedNotification;
 import net.frontlinesms.messaging.sms.DummySmsService;
@@ -131,8 +130,6 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 	private MmsServiceManager mmsServiceManager;
 	/** Asynchronous processor of received SMS. */
 	private IncomingSmsProcessor incomingSmsProcessor;
-	/** Asynchronous processor of received MMS. */
-	private IncomingMmsProcessor incomingMmsProcessor;
 	private PluginManager pluginManager;
 
 	//> EVENT LISTENERS

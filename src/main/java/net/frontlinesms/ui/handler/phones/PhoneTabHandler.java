@@ -15,6 +15,7 @@ import java.util.Enumeration;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import net.frontlinesms.CommUtils;
+import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.domain.SmsModemSettings;
 import net.frontlinesms.data.events.DatabaseEntityNotification;
@@ -97,8 +98,6 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	/** I18n Text Key: TODO */
 	private static final String COMMON_SMS_INTERNET_SERVICE_CONNECTED = "common.sms.internet.service.connected";
 	/** I18n Text Key: TODO */
-	private static final String COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED = "common.sms.internet.service.receiving.failed";
-	/** I18n Text Key: TODO */
 	private static final String MESSAGE_INVALID_BAUD_RATE = "message.invalid.baud.rate";
 	/** I18n Text Key: TODO */
 	private static final String MESSAGE_PORT_NOT_FOUND = "message.port.not.found";
@@ -126,8 +125,6 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	private static final String COMPONENT_PHONE_MANAGER_MODEM_LIST = "phoneManager_modemList";
 	/** UI Compoenent name: TODO */
 	private static final String COMPONENT_PHONE_MANAGER_MODEM_LIST_ERROR = "phoneManager_modemListError";
-	/** UI Compoenent name: TODO */
-	private static final String COMPONENT_POPUP_MENU = "popMenu";
 
 //> INSTANCE PROPERTIES
 	/** Object to synchronize on before updating the phones list.  This is to prevent the list being rewritten by two different sources at the same time. */
@@ -452,7 +449,7 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 				ui.newEvent(new Event(
 						Event.TYPE_SMS_INTERNET_SERVICE_RECEIVING_FAILED,
 						SmsInternetServiceSettingsHandler.getProviderName(service.getClass()) + " - " + service.getIdentifier()
-						+ ": " + InternationalisationUtils.getI18NString(COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED)));
+						+ ": " + InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED)));
 			}
 		}
 		refresh();
@@ -672,11 +669,6 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_MODEM_LIST_UPDATED));
 			}
 		} else if (notification instanceof MmsServiceStatusNotification) {
-			MmsServiceStatusNotification mmsServiceStatusNotification = ((MmsServiceStatusNotification) notification);
-			if (mmsServiceStatusNotification.getStatus().equals(MmsEmailServiceStatus.FAILED_TO_CONNECT)) {
-				this.ui.newEvent(new Event(Event.TYPE_SMS_INTERNET_SERVICE_RECEIVING_FAILED, 
-											mmsServiceStatusNotification.getMmsService().getServiceName() + " - " + InternationalisationUtils.getI18NString(COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED)));
-			}
 			this.refresh();
 		} else if (notification instanceof DatabaseEntityNotification<?>) {
 			// Database notification

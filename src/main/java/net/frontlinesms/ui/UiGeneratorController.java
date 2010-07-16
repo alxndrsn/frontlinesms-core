@@ -43,6 +43,8 @@ import net.frontlinesms.email.EmailException;
 import net.frontlinesms.events.*;
 import net.frontlinesms.listener.EmailListener;
 import net.frontlinesms.listener.UIListener;
+import net.frontlinesms.messaging.mms.email.MmsEmailServiceStatus;
+import net.frontlinesms.messaging.mms.events.MmsServiceStatusNotification;
 import net.frontlinesms.messaging.sms.SmsService;
 import net.frontlinesms.messaging.sms.SmsServiceManager;
 import net.frontlinesms.messaging.sms.events.NoSmsServicesConnectedNotification;
@@ -56,6 +58,7 @@ import net.frontlinesms.ui.handler.core.DatabaseSettingsPanel;
 import net.frontlinesms.ui.handler.email.*;
 import net.frontlinesms.ui.handler.keyword.KeywordTabHandler;
 import net.frontlinesms.ui.handler.message.*;
+import net.frontlinesms.ui.handler.mms.MmsSettingsDialogHandler;
 import net.frontlinesms.ui.handler.phones.NoPhonesDetectedDialogHandler;
 import net.frontlinesms.ui.handler.phones.PhoneTabHandler;
 import net.frontlinesms.ui.i18n.*;
@@ -822,8 +825,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Shows the email accounts settings dialog.
 	 */
 	public void showMmsEmailAccountsSettings() {
-		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this, true);
-		add(emailAccountDialogHandler.getDialog());
+		MmsSettingsDialogHandler mmsSettingsDialogHandler = new MmsSettingsDialogHandler(this);
+		this.add(mmsSettingsDialogHandler.getDialog());
 	}
 
 	/**
@@ -1818,6 +1821,12 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 						add(deviceConnectionDialogHandler.getDialog());
 					}
 				}
+			}
+		} else if (notification instanceof MmsServiceStatusNotification) {
+			MmsServiceStatusNotification mmsServiceStatusNotification = ((MmsServiceStatusNotification) notification);
+			if (mmsServiceStatusNotification.getStatus().equals(MmsEmailServiceStatus.FAILED_TO_CONNECT)) {
+				this.newEvent(new Event(Event.TYPE_SMS_INTERNET_SERVICE_RECEIVING_FAILED, 
+											mmsServiceStatusNotification.getMmsService().getServiceName() + " - " + InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED)));
 			}
 		}
 	}

@@ -38,6 +38,7 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 	private static final String UI_COMPONENT_CB_USE_SSL = "cbUseSSL";
 	private static final String UI_COMPONENT_LB_EXAMPLE_PORT = "lbPortExample";
 	private static final String UI_COMPONENT_LB_EXAMPLE_SERVER = "lbServerExample";
+	private static final String UI_COMPONENT_LK_HELP = "lkHelp";
 	private static final String UI_COMPONENT_RB_IMAP = "rbImap";
 	private static final String UI_COMPONENT_RB_POP = "rbPop";
 	private static final String UI_COMPONENT_PN_POP_IMAP = "pnPopImap";
@@ -128,6 +129,7 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 		}
 		
 		this.ui.setVisible(find(UI_COMPONENT_PN_POP_IMAP), isForReceiving);
+		this.ui.setVisible(find(UI_COMPONENT_LK_HELP), isForReceiving);
 		
 		if (emailAccount != null) {
 			ui.setText(dialogComponent, InternationalisationUtils.getI18NString(I18N_EDITING_EMAIL_ACCOUNT, emailAccount.getAccountName()));

@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import net.frontlinesms.AppProperties;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.EmailAccount;
@@ -50,7 +51,6 @@ import org.apache.log4j.Logger;
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 public class MmsServiceManager extends Thread  {
-	private static final long POLLING_FREQUENCY = 15000;
 	/** Set of {@link MmsEmailService} */
 	private final Set<MmsService> mmsEmailServices = new CopyOnWriteArraySet<MmsService>();
 	/** Flag indicating that the thread should continue running. */
@@ -108,7 +108,7 @@ public class MmsServiceManager extends Thread  {
 		while (running) {
 			processMmsEmailReceiving();
 			
-			FrontlineUtils.sleep_ignoreInterrupts(POLLING_FREQUENCY);
+			FrontlineUtils.sleep_ignoreInterrupts(AppProperties.getInstance().getMmsPollingFrequency());
 		}
 		LOG.trace("EXIT");
 	}
