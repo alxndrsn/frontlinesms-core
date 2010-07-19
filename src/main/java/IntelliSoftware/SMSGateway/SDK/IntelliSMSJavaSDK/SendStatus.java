@@ -1,8 +1,5 @@
 package IntelliSoftware.SMSGateway.SDK.IntelliSMSJavaSDK;
 
-import java.io.*;
-import IntelliSoftware.Common.*;
-
 /// <summary>
 /// Send status for one recipient
 /// </summary>

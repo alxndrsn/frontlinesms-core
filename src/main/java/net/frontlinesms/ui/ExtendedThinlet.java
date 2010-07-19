@@ -659,6 +659,17 @@ public class ExtendedThinlet extends Thinlet {
 	}
 	
 	/**
+	 * @param name
+	 * @return A Thinlet Popup Menu
+	 */
+	public final Object createPopupMenu(String name) {
+		Object popupMenu = Thinlet.create(POPUPMENU);
+		setName(popupMenu, name);
+		
+		return popupMenu;
+	}
+	
+	/**
 	 * @param iconPath The path to the icon for this menu item
 	 * @param text The text for the menuitem
 	 * @return A Thinlet menuitem

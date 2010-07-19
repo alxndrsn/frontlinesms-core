@@ -28,9 +28,9 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
 
 import net.frontlinesms.*;
 import net.frontlinesms.data.*;
@@ -43,11 +43,14 @@ import net.frontlinesms.email.EmailException;
 import net.frontlinesms.events.*;
 import net.frontlinesms.listener.EmailListener;
 import net.frontlinesms.listener.UIListener;
+import net.frontlinesms.messaging.mms.email.MmsEmailServiceStatus;
+import net.frontlinesms.messaging.mms.events.MmsServiceStatusNotification;
+import net.frontlinesms.messaging.sms.SmsService;
+import net.frontlinesms.messaging.sms.SmsServiceManager;
+import net.frontlinesms.messaging.sms.events.NoSmsServicesConnectedNotification;
+import net.frontlinesms.messaging.sms.internet.SmsInternetService;
 import net.frontlinesms.plugins.*;
 import net.frontlinesms.resources.ResourceUtils;
-import net.frontlinesms.smsdevice.*;
-import net.frontlinesms.smsdevice.events.*;
-import net.frontlinesms.smsdevice.internet.SmsInternetService;
 import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.*;
 import net.frontlinesms.ui.handler.contacts.*;
@@ -55,6 +58,7 @@ import net.frontlinesms.ui.handler.core.DatabaseSettingsPanel;
 import net.frontlinesms.ui.handler.email.*;
 import net.frontlinesms.ui.handler.keyword.KeywordTabHandler;
 import net.frontlinesms.ui.handler.message.*;
+import net.frontlinesms.ui.handler.mms.MmsSettingsDialogHandler;
 import net.frontlinesms.ui.handler.phones.NoPhonesDetectedDialogHandler;
 import net.frontlinesms.ui.handler.phones.PhoneTabHandler;
 import net.frontlinesms.ui.i18n.*;
@@ -105,8 +109,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/** The INTERNAL NAME of the tab (a thinlet UI component) currently active */
 	private String currentTab;
 	
-	/** The manager of {@link SmsDevice}s */
-	private final SmsDeviceManager phoneManager;
+	/** The manager of {@link SmsService}s */
+	private final SmsServiceManager phoneManager;
 	/** Manager of {@link PluginController}s */
 	private final PluginManager pluginManager;
 	
@@ -184,7 +188,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			}
 		}
 		
-		this.phoneManager = frontlineController.getSmsDeviceManager();
+		this.phoneManager = frontlineController.getSmsServiceManager();
 		this.contactDao = frontlineController.getContactDao();
 		this.groupDao = frontlineController.getGroupDao();
 		this.groupMembershipDao = frontlineController.getGroupMembershipDao();
@@ -816,13 +820,13 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		setText(tf, selectedContact.getPhoneNumber());
 		remove(dialog);
 	}
-
+	
 	/**
 	 * Shows the email accounts settings dialog.
 	 */
-	public void showEmailAccountsSettings() {
-		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this);
-		add(emailAccountDialogHandler.getDialog());
+	public void showMmsEmailAccountsSettings() {
+		MmsSettingsDialogHandler mmsSettingsDialogHandler = new MmsSettingsDialogHandler(this);
+		this.add(mmsSettingsDialogHandler.getDialog());
 	}
 
 	/**
@@ -1193,6 +1197,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void table_addCells(Object tableRow, String[] cellContents) {
 		for(String s : cellContents) add(tableRow, createTableCell(s));
 	}
+	
+	public void table_addCells(Object tableRow, String[] cellContents, boolean bold) {
+		for(String s : cellContents) add(tableRow, createTableCell(s, bold));
+	}
 
 	/**
 	 * Creates a list item Thinlet UI Component for the supplied keyword.  The keyword
@@ -1311,14 +1319,31 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 
 		String icon;
 		if (message.getType() == Type.RECEIVED) {
-			icon = Icon.SMS_RECEIVE;
+			if (message instanceof FrontlineMultimediaMessage) {
+				icon = Icon.MMS_RECEIVE;
+			} else {
+				icon = Icon.SMS_RECEIVE;
+			}
 		} else {
-			icon = Icon.SMS_SEND;
+			if (message instanceof FrontlineMultimediaMessage) {
+				icon = Icon.MMS_SEND;
+			} else {
+				icon = Icon.SMS_SEND;
+			}
 		}
-
 		Object iconCell = createTableCell("");
 		setIcon(iconCell, icon);
 		add(row, iconCell);
+		
+		
+		/** "ATTACHED" ICON (only for MMS containing multimedia parts) */
+		Object attachCell = createTableCell("");
+		if (message instanceof FrontlineMultimediaMessage && ((FrontlineMultimediaMessage) message).hasBinaryPart()) {
+			setIcon(attachCell, Icon.ATTACH);
+		}
+		add(row, attachCell);
+		
+
 		add(row, createTableCell(getMessageStatusAsString(message)));
 		add(row, createTableCell(InternationalisationUtils.getDatetimeFormat().format(message.getDate())));
 		add(row, createTableCell(message.getSenderMsisdn()));
@@ -1335,7 +1360,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public Object getRow(EmailAccount acc) {
 		Object row = createTableRow(acc);
 
-		Object iconCell = createTableCell("");
+		Object iconCell = createTableCell(acc.getProtocol());
 		setIcon(iconCell, acc.useSsl() ? Icon.SSL : Icon.NO_SSL);
 		add(row, iconCell);
 		add(row, createTableCell(acc.getAccountServer()));
@@ -1666,7 +1691,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		return this.frontlineController;
 	}
 	/** @return {@link #phoneManager} */
-	public SmsDeviceManager getPhoneManager() {
+	public SmsServiceManager getPhoneManager() {
 		return this.phoneManager;
 	}
 	/** @return {@link #phoneDetailsManager} */
@@ -1775,16 +1800,22 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	/** Handle notifications from the {@link EventBus} */
 	public void notify(FrontlineEventNotification notification) {
-		if(notification instanceof NoSmsDevicesConnectedNotification) {
+		if(notification instanceof NoSmsServicesConnectedNotification) {
 			// Unable to connect to SMS devices.  If enabled, show the help dialog to prompt connection 
 			if (AppProperties.getInstance().isDeviceConnectionDialogEnabled()) {
 				synchronized (deviceConnectionDialogHandlerLock) {
 					if (deviceConnectionDialogHandler == null) {
 						deviceConnectionDialogHandler = new NoPhonesDetectedDialogHandler(this);
-						deviceConnectionDialogHandler.initDialog((NoSmsDevicesConnectedNotification) notification);
+						deviceConnectionDialogHandler.initDialog((NoSmsServicesConnectedNotification) notification);
 						add(deviceConnectionDialogHandler.getDialog());
 					}
 				}
+			}
+		} else if (notification instanceof MmsServiceStatusNotification) {
+			MmsServiceStatusNotification mmsServiceStatusNotification = ((MmsServiceStatusNotification) notification);
+			if (mmsServiceStatusNotification.getStatus().equals(MmsEmailServiceStatus.FAILED_TO_CONNECT)) {
+				this.newEvent(new Event(Event.TYPE_SMS_INTERNET_SERVICE_RECEIVING_FAILED, 
+											mmsServiceStatusNotification.getMmsService().getServiceName() + " - " + InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED)));
 			}
 		}
 	}

@@ -1,7 +1,5 @@
 package IntelliSoftware.SMSGateway.SDK.IntelliSMSJavaSDK.Internal;
 
-import java.io.*;
-import java.lang.*;
 import IntelliSoftware.Common.*;
 import IntelliSoftware.SMSGateway.SDK.IntelliSMSJavaSDK.*;
 
@@ -98,7 +96,8 @@ class SMSGatewayService
 
 			try
 			{
-				Thread.currentThread().sleep ( nDelay * 1000 );
+				Thread.currentThread();
+				Thread.sleep ( nDelay * 1000 );
 			}
 			catch ( InterruptedException e )
 			{
@@ -197,8 +196,6 @@ class SMSGatewayService
 
 		String sDelayTimePrefix = "DELAY:";
 
-		String sRetCode = "";
-
 		try
 		{
 			//NOTE: "application/x-www-form-urlencoded; charset:utf-8" is a non-standard ASP.NET
@@ -212,7 +209,7 @@ class SMSGatewayService
 				int IdStart = sResponse.lastIndexOf(sReturnCodePrefix) + sReturnCodePrefix.length();
 
 				StringUtils objStringUtils = new StringUtils();
-				int IdEnd = objStringUtils.LastindexOfAny( sResponse, "0123456789" );
+				int IdEnd = StringUtils.LastindexOfAny( sResponse, "0123456789" );
 
 				objSMSGatewayRequestResult.RetCode = sResponse.substring ( IdStart, IdEnd /*-IdStart*/ +1 );
 
@@ -223,7 +220,7 @@ class SMSGatewayService
 				int IdStart = sResponse.lastIndexOf(sDelayTimePrefix) + sDelayTimePrefix.length();
 
 				StringUtils objStringUtils = new StringUtils();
-				int IdEnd = objStringUtils.LastindexOfAny( sResponse, "0123456789" );
+				int IdEnd = StringUtils.LastindexOfAny( sResponse, "0123456789" );
 
 				objSMSGatewayRequestResult.RetCode = sResponse.substring ( IdStart, IdEnd /*-IdStart*/ +1 );
 

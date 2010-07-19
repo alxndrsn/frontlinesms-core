@@ -6,11 +6,6 @@ import java.security.*;
 
 public class HTTPConnection
 {
-	private boolean m_bUseProxy = false;
-	private String m_sProxyAddress = null;
-	private String m_sProxyUsername = null;
-	private String m_sProxyPassword = null;
-
 	public int Timeout = 60 * 1000;
 	public String UserAgent = "IntelliSoftware";
 
@@ -24,10 +19,6 @@ public class HTTPConnection
 
 	public void Open ( boolean bUseProxy, String sProxyAddress, String sProxyUsername, String sProxyPassword )
 	{
-		m_bUseProxy = bUseProxy;
-		m_sProxyAddress = sProxyAddress;
-		m_sProxyUsername = sProxyUsername;
-		m_sProxyPassword = sProxyPassword;
 	}
 
 	public void Close ()

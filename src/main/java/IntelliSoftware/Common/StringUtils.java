@@ -1,7 +1,5 @@
 package IntelliSoftware.Common;
 
-import java.io.*;
-
 
 public class StringUtils
 {

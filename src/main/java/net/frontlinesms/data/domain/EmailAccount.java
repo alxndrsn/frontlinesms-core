@@ -28,20 +28,29 @@ import javax.persistence.*;
 @Entity
 public class EmailAccount {
 //> CONSTANTS
+	public static final int DEFAULT_POP_PORT = 110;
+	public static final int DEFAULT_POPSSL_PORT = 992;
 	public static final int DEFAULT_SMTP_PORT = 25;
 	public static final int DEFAULT_SMTPS_PORT = 465;
+	
+	public static final String FIELD_IS_FOR_RECEIVING = "isForReceiving";
 
 //> PROPERTIES
 	/** Unique id for this entity.  This is for hibernate usage. */
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY) @Column(unique=true,nullable=false,updatable=false) @SuppressWarnings("unused")
 	private long id;
-	/** Phone number of this contact.  It should be unique within the system, but may be changed. */
-	@Column(unique=true, nullable=true, updatable=true)
+	/** Username. It should be unique within the system, but may be changed. */
+	@Column(unique=true, nullable=true, updatable=true) // XXX: Should now be possible to have a username twice (Sending + Receiving). Does this require a database reload?
 	private String accountName;
 	private String accountServer;
 	private String accountPassword;
 	private Integer accountServerPort;
 	private boolean useSsl;
+	private Long lastCheck;
+	@Column(name=FIELD_IS_FOR_RECEIVING)
+	private Boolean isForReceiving = true;
+	private String protocol;
+	private Boolean enabled = true;
 	
 //> CONSTRUCTORS
 	/** Empty constructor required for hibernate */
@@ -55,12 +64,14 @@ public class EmailAccount {
 	 * @param accountPassword The password to connect to this account.
 	 * @param useSsl 
 	 */
-	public EmailAccount(String accountName, String accountServer, int accountServerPort, String accountPassword, boolean useSsl) {
+	public EmailAccount(String accountName, String accountServer, int accountServerPort, String accountPassword, boolean useSsl, boolean isForReceiving, String protocol) {
 		this.accountName = accountName;
 		this.accountServer = accountServer;
 		this.accountServerPort = accountServerPort;
 		this.accountPassword = accountPassword;
 		this.useSsl = useSsl;
+		this.isForReceiving = isForReceiving;
+		this.protocol = protocol;
 	}
 	
 //> ACCESSOR METHODS
@@ -102,6 +113,13 @@ public class EmailAccount {
 	 */
 	public boolean useSsl() {
 		return this.useSsl;
+	}
+	
+	/**
+	 * @return <code>true</code> if this account is used for receiving e-mails, <code>false</code> otherwise.
+	 */
+	public boolean isForReceiving() {
+		return (this.isForReceiving == null ? false : this.isForReceiving.booleanValue());
 	}
 	
 	/**
@@ -198,4 +216,38 @@ public class EmailAccount {
 			return false;
 		return true;
 	}
+	
+	/** 
+	 * 
+	 * @param emailAccount
+	 * @return <code>true</code> if this object is the same database entity than the one given in parameter, <code>false</code> otherwise. 
+	 */
+	public boolean isSameDatabaseEntity(EmailAccount emailAccount) {
+		return (this.id == emailAccount.id);
+	}
+
+	public void setLastCheck(Long lastCheck) {
+		this.lastCheck = lastCheck;
+	}
+
+	public Long getLastCheck() {
+		return lastCheck;
+	}
+
+	public void setProtocol(String protocol) {
+		this.protocol = protocol;
+	}
+
+	public String getProtocol() {
+		return protocol;
+	}
+
+	public void setEnabled(Boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	public Boolean isEnabled() {
+		return enabled;
+	}
+
 }

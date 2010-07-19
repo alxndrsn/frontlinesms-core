@@ -25,8 +25,8 @@ import java.util.Enumeration;
 
 import serial.*;
 
+import net.frontlinesms.messaging.CommProperties;
 import net.frontlinesms.resources.ResourceUtils;
-import net.frontlinesms.smsdevice.CommProperties;
 
 import org.apache.log4j.Logger;
 

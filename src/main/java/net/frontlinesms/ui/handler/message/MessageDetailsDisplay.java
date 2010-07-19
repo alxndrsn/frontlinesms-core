@@ -14,7 +14,7 @@ import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
-import net.frontlinesms.mmsdevice.MmsDeviceUtils;
+import net.frontlinesms.messaging.mms.MmsUtils;
 import net.frontlinesms.ui.FrontlineUiUtils;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
@@ -88,7 +88,7 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 			Object panel = ui.createPanel("");
 			ui.setColumns(panel, 1);
 
-			File mediaFile = MmsDeviceUtils.getFile(part);
+			File mediaFile = MmsUtils.getFile(part);
 			String openAction = "openMultimediaPart('" + mediaFile.getPath() + "')";
 			
 			Image thumb = null;
