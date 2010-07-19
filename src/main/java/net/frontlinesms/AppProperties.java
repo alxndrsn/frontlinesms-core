@@ -132,8 +132,8 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	}
 	
 	/** Sets the MMS E-Mail polling frequency */
-	public void setMmsPollingFrequency(String pollFrequency) {
-		super.setProperty(KEY_MMS_POLLING_FREQUENCY, pollFrequency);
+	public void setMmsPollingFrequency(int pollFrequency) {
+		super.setProperty(KEY_MMS_POLLING_FREQUENCY, String.valueOf(pollFrequency));
 	}
 	
 	/** @return <code>true</code> if the device connection dialog must be shown when a connection problem occurs, <code>false</code> otherwise */

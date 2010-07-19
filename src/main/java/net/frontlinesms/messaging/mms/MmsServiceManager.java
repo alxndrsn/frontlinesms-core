@@ -44,7 +44,7 @@ import org.apache.log4j.Logger;
  * It handles the discovery of Multimedia Messages available on the e-mail accounts configures by the user, 
  * 
  * INCOMING MESSAGES
- * When a new MMS is filtered in the list of e-mails, en event is triggered through the {@link EventBus}
+ * When a new MMS is filtered in the list of e-mails, an event is triggered through the {@link EventBus}
  * 
  * Incoming messages are immediately removed from accounts with a POP protocol
  * 
@@ -107,7 +107,7 @@ public class MmsServiceManager extends Thread  {
 		running = true;
 		while (running) {
 			processMmsEmailReceiving();
-			
+
 			FrontlineUtils.sleep_ignoreInterrupts(AppProperties.getInstance().getMmsPollingFrequency());
 		}
 		LOG.trace("EXIT");

@@ -27,6 +27,7 @@ public class MmsSettingsDialogHandler implements ThinletUiEventHandler {
 	
 	private static final String I18N_MMS_EMAIL_ACCOUNTS = "mms.email.accounts";
 	private static final String I18N_SETTINGS_SAVED = "common.settings.saved";
+	private static final String I18N_ERROR_INVALID_NUMBER = "common.error.invalid.number";
 	
 //> INSTANCE PROPERTIES
 	
@@ -47,7 +48,7 @@ public class MmsSettingsDialogHandler implements ThinletUiEventHandler {
 		this.dialogComponent = ui.loadComponentFromFile(UI_FILE_MMS_SETTINGS_FORM, this);
 		EmailAccountDialogHandler dialogHandler = new EmailAccountDialogHandler(ui, true);
 		Object pnAccountsList = ui.loadComponentFromFile(UI_FILE_EMAIL_ACCOUNTS_LIST_FORM, dialogHandler);
-		this.ui.add(this.dialogComponent, pnAccountsList, 1);
+		this.ui.add(this.dialogComponent, pnAccountsList, 0);
 		
 		this.populate();
 		
@@ -61,7 +62,7 @@ public class MmsSettingsDialogHandler implements ThinletUiEventHandler {
 		this.ui.setText(accountsList, InternationalisationUtils.getI18NString(I18N_MMS_EMAIL_ACCOUNTS));
 		
 		AppProperties appProperties = AppProperties.getInstance();
-		this.ui.setText(find(UI_COMPONENT_TF_POLL_FREQUENCY), String.valueOf(appProperties.getMmsPollingFrequency()));
+		this.ui.setText(find(UI_COMPONENT_TF_POLL_FREQUENCY), String.valueOf(appProperties.getMmsPollingFrequency() / 1000));
 	}
 
 	/**
@@ -70,9 +71,20 @@ public class MmsSettingsDialogHandler implements ThinletUiEventHandler {
 	 */
 	public void saveSettings () {
 		String pollFrequency = this.ui.getText(find(UI_COMPONENT_TF_POLL_FREQUENCY));
+		int frequency = 0;
+		try {
+			frequency = Integer.parseInt(pollFrequency);
+		} catch (NumberFormatException e) {
+			frequency = 0;
+		}
+		
+		if (frequency < 1) {
+			this.ui.alert(InternationalisationUtils.getI18NString(I18N_ERROR_INVALID_NUMBER));
+			return;
+		}
 		
 		AppProperties appProperties = AppProperties.getInstance();
-		appProperties.setMmsPollingFrequency(pollFrequency);
+		appProperties.setMmsPollingFrequency(frequency * 1000);
 		appProperties.saveToDisk();
 		
 		this.ui.infoMessage(InternationalisationUtils.getI18NString(I18N_SETTINGS_SAVED));
