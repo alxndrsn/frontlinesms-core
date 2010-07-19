@@ -23,7 +23,6 @@ import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.junit.BaseTestCase;
 import net.frontlinesms.listener.UIListener;
-import net.frontlinesms.messaging.sms.IncomingSmsProcessor;
 import net.frontlinesms.messaging.sms.SmsService;
 
 /**

@@ -22,7 +22,14 @@ public class HibernateKeywordDao extends BaseHibernateDao<Keyword> implements Ke
 	public HibernateKeywordDao() {
 		super(Keyword.class);
 	}
-
+	
+	/** @see KeywordDao#getKeyword(String) */
+	public Keyword getKeyword(String name) {
+		DetachedCriteria criteria = super.getCriterion();
+		criteria.add(Restrictions.eq(Keyword.Field.KEYWORD.getFieldName(), name));
+		return super.getUnique(criteria);
+	}
+	
 	/** @see KeywordDao#deleteKeyword(Keyword) */
 	public void deleteKeyword(Keyword keyword) {
 		super.delete(keyword);

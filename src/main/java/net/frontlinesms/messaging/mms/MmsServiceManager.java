@@ -134,10 +134,9 @@ public class MmsServiceManager extends Thread  {
 					mmsEmailService.updateLastCheck(this.emailAccountDao);
 					
 					for (MmsMessage mmsMessage : mmsMessages) {
-						FrontlineMultimediaMessage frontlineMultimediaMessage = MmsUtils.create(mmsMessage);
 						if (this.eventBus != null) {
 							// Let's notify the observers that a new MMS has arrived
-							this.eventBus.notifyObservers(new MmsReceivedNotification(frontlineMultimediaMessage));
+							this.eventBus.notifyObservers(new MmsReceivedNotification(mmsMessage));
 						}
 					}
 					mmsEmailService.setStatus(MmsEmailServiceStatus.READY, this.eventBus);
