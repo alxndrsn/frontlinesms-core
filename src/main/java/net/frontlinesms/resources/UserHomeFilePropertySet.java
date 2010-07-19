@@ -19,18 +19,6 @@
  */
 package net.frontlinesms.resources;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import net.frontlinesms.FrontlineUtils;
 
 import org.apache.log4j.Logger;

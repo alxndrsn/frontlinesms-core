@@ -1,8 +1,5 @@
 package IntelliSoftware.SMSGateway.SDK.IntelliSMSJavaSDK;
 
-import java.io.*;
-import IntelliSoftware.Common.*;
-
 /// <summary>
 /// Error received from the IntelliSoftware SMS Internet gateway
 /// </summary>

@@ -16,6 +16,7 @@ import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.ui.Event;
 import net.frontlinesms.ui.FrontlineUI;
+import net.frontlinesms.ui.FrontlineUiUtils;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiGeneratorControllerConstants;
@@ -256,31 +257,9 @@ public class HomeTabHandler extends BaseTabHandler {
 					// If the "Keep original size" box is unchecked, we resize the image
 					if (!UiProperties.getInstance().isHometabLogoOriginalSizeKept())
 					{
-						int width = homeTabLogoImage.getWidth();
-						int height = homeTabLogoImage.getHeight();
-						
-						if (height > FRONTLINE_LOGO_MAX_HEIGHT) {
-							if (width > FRONTLINE_LOGO_MAX_WIDTH) {
-								if (width / FRONTLINE_LOGO_MAX_WIDTH > height / FRONTLINE_LOGO_MAX_HEIGHT) {
-									height *= (FRONTLINE_LOGO_MAX_WIDTH / width);
-									width = (int)(FRONTLINE_LOGO_MAX_WIDTH);
-								}
-								else {
-									width *= (FRONTLINE_LOGO_MAX_HEIGHT / height);
-									height = (int)FRONTLINE_LOGO_MAX_HEIGHT;
-								}
-							}
-							else {
-								width *= (FRONTLINE_LOGO_MAX_HEIGHT / height);
-								height = (int)FRONTLINE_LOGO_MAX_HEIGHT;
-							}
-						}
-						else if (width > FRONTLINE_LOGO_MAX_WIDTH) {
-							height *= (FRONTLINE_LOGO_MAX_WIDTH / width);
-							width = (int)(FRONTLINE_LOGO_MAX_WIDTH);
-						}
-						
-						ui.setIcon(lbLogo, homeTabLogoImage.getScaledInstance(width, height, BufferedImage.SCALE_SMOOTH));
+						ui.setIcon(lbLogo, 
+								FrontlineUiUtils.getLimitedSizeImage(homeTabLogoImage,
+										FRONTLINE_LOGO_MAX_WIDTH, FRONTLINE_LOGO_MAX_HEIGHT));
 					}
 					else
 						ui.setIcon(lbLogo, homeTabLogoImage);

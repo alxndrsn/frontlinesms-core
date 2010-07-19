@@ -99,7 +99,7 @@ public class SMSGatewayProxy
 		try
 		{
 			StringUtils objStringUtils = new StringUtils();
-			sText = objStringUtils.TruncateString ( sText, c_nTextMessage_MaxSize * 5 );
+			sText = StringUtils.TruncateString ( sText, c_nTextMessage_MaxSize * 5 );
 
 			sFormData += "username=" + URLEncoder.encode(sUsername,"UTF-8") + "&";
 			sFormData += "password=" + URLEncoder.encode(sPassword,"UTF-8") + "&";
@@ -251,8 +251,6 @@ public class SMSGatewayProxy
 
 	public int GetBalance ( String sUsername, String sPassword ) throws IntelliSMSException
 	{
-		String sBal;
-
 		String sUrl = "smsgateway/getbalance/default.aspx";
 		
 		String sFormData = "";
@@ -266,7 +264,6 @@ public class SMSGatewayProxy
 			throw new IntelliSMSException ( ResultCodes.InternalError, "Unable to encode supplied text strings", e );
 		}
 
-		String sRawResponse;
 		SMSGatewayRequestResult objSMSGatewayRequestResult = m_SMSGatewayService.MakeServiceRequest ( sUrl, sFormData, "BALANCE:", false );
 
 		int nBal = 0;
@@ -381,7 +378,7 @@ public class SMSGatewayProxy
 			int IdStart = sResponse.indexOf ( c_sIdPrefix ) + c_sIdPrefix.length();
 
 			StringUtils objStringUtils = new StringUtils();
-			int IdEnd = objStringUtils.LastindexOfAny ( sResponse, "0123456789" );
+			int IdEnd = StringUtils.LastindexOfAny ( sResponse, "0123456789" );
 
 			objSendStatus.MessageId = sResponse.substring ( IdStart, IdEnd /*-IdStart*/ +1 );
 

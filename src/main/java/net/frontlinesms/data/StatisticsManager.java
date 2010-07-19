@@ -23,8 +23,8 @@ import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.data.repository.SmsInternetServiceSettingsDao;
 import net.frontlinesms.data.repository.SmsModemSettingsDao;
-import net.frontlinesms.smsdevice.Provider;
-import net.frontlinesms.smsdevice.internet.SmsInternetService;
+import net.frontlinesms.messaging.Provider;
+import net.frontlinesms.messaging.sms.internet.SmsInternetService;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 import org.apache.log4j.Logger;

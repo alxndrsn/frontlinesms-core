@@ -140,8 +140,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private static final String COMPONENT_PN_CHECKBOXES = "pnContactInfo"; // TODO: get this changed
 	private static final String COMPONENT_PN_VALUES_TABLE = "pnValuesTable";
 	private static final String COMPONENT_PN_DETAILS = "pnDetails";
-	private static final int UI_TABLE_WIDTH = 600;
-	
+
 //> STATIC CONSTANTS
 	public enum EntityType {
 		/** Export entity type: {@link Contact} */
@@ -254,7 +253,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 
 //> PUBLIC UI METHODS
 	public void filenameModified(String text) {
-		boolean enableExport = FrontlineUtils.getFilenameWithoutExtension(new File(text)).length() > 0;
+		boolean enableExport = FrontlineUtils.getFilenameWithoutFinalExtension(new File(text)).length() > 0;
 		uiController.setEnabled(uiController.find(this.wizardDialog, COMPONENT_BT_DO_EXPORT), enableExport);
 	}
 	
