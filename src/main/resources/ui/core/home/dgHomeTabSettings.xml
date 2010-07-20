@@ -7,7 +7,7 @@
     <panel name="pnCustomImage" gap="5" weightx="1" columns="3">
         <label icon="/icons/image.png" text="i18n.common.image.source"/>
         <textfield columns="50" name="tfImageSource" weightx="1"/>
-        <button action="showOpenModeFileChooser(tfImageSource)" icon="/icons/browse.png" name="btBrowse" text="i18n.action.browse"/>
+        <button action="showFileChooser(tfImageSource)" icon="/icons/browse.png" name="btBrowse" text="i18n.action.browse"/>
     	<checkbox name="cbHomeTabLogoKeepOriginalSize" text="i18n.hometab.logo.settings.keeporiginalsize"/>
     </panel>
     <separator/>

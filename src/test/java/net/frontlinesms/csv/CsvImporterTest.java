@@ -14,19 +14,20 @@ import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
+import net.frontlinesms.junit.HibernateTestCase;
 
 import org.apache.log4j.Logger;
 import org.mockito.internal.verification.Times;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.mockito.Mockito.*;
 
-import junit.framework.TestCase;
-
 /**
  * Test class for {@link CsvImporter}.
- * @author Alex
+ * @author Alex Anderson <alex@frontlinesms.com>
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
-public class CsvImportTest extends TestCase {
+public class CsvImporterTest extends HibernateTestCase {
 	
 //> CONSTANTS
 	/** Path to the test resources folder.  TODO should probably get these relative to the current {@link ClassLoader}'s path. */
@@ -48,6 +49,10 @@ public class CsvImportTest extends TestCase {
 //> INSTANCE VARIABLES
 	/** Logging object */
 	private final Logger log = Logger.getLogger(this.getClass());
+	
+	/** DAO for {@link Group}s; used in {@link #testCreateGroupIfAbsent()} */
+	@Autowired
+	private GroupDao groupDao;
 	
 	/**
 	 * Get all import test files from /test/net/frontlinesms/csv/import/, and read
@@ -91,6 +96,28 @@ public class CsvImportTest extends TestCase {
 		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_GROUPS);
 		
 		return rowFormat;
+	}
+	
+	public void testCreateGroups() throws DuplicateKeyException {
+		CsvImporter.createGroups(groupDao, "/A");
+		CsvImporter.createGroups(groupDao, "B/2/a");
+		assertTrue(groupDao.getGroupByPath("/A") != null);
+		assertTrue(groupDao.getGroupByPath("/B") != null);
+		assertTrue(groupDao.getGroupByPath("/B/2") != null);
+		assertTrue(groupDao.getGroupByPath("/B/2/a") != null);
+		
+		// Test that method does not fail if asked to create already-existing groups
+		CsvImporter.createGroups(groupDao, "/A");
+		CsvImporter.createGroups(groupDao, "B/2/a");
+		
+		CsvImporter.createGroups(groupDao, "/B/2/c");		
+		assertTrue(groupDao.getGroupByPath("/B/2/a") != null);
+		assertTrue(groupDao.getGroupByPath("/B/2/c") != null);
+		
+		CsvImporter.createGroups(groupDao, "GroupB/Group2/Groupa");
+		assertTrue(groupDao.getGroupByPath("/GroupB") != null);
+		assertTrue(groupDao.getGroupByPath("/GroupB/Group2") != null);
+		assertTrue(groupDao.getGroupByPath("/GroupB/Group2/Groupa") != null);
 	}
 
 	/**

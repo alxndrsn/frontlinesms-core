@@ -4,7 +4,7 @@
     <panel bottom="3" colspan="2" gap="5" top="3">
 	    <label text="i18n.common.filename"/>
 	    <textfield columns="45" name="tfDirectory" weightx="1" enabled="false"/>
-	    <button action="showOpenModeFileChooser(tfDirectory)" icon="/icons/browse.png" text="i18n.action.browse" weightx="1"/>
+	    <button action="showOpenModeFileChooser" icon="/icons/browse.png" text="i18n.action.browse" weightx="1"/>
 	</panel>
 	<panel colspan="2" columns="1" name="pnDetails" bottom="3" gap="5" top="3" halign="center">
 		<label alignment="center" font="bold" i18n="true" text="i18n.importexport.details.choose"/>

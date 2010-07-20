@@ -19,7 +19,6 @@ import net.frontlinesms.csv.CsvImporter;
 import net.frontlinesms.csv.CsvRowFormat;
 import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.domain.Contact;
-import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
@@ -28,6 +27,7 @@ import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
+import net.frontlinesms.ui.FileChooser;
 import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
@@ -140,7 +140,6 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private static final String COMPONENT_PN_CHECKBOXES = "pnContactInfo"; // TODO: get this changed
 	private static final String COMPONENT_PN_VALUES_TABLE = "pnValuesTable";
 	private static final String COMPONENT_PN_DETAILS = "pnDetails";
-
 //> STATIC CONSTANTS
 	public enum EntityType {
 		/** Export entity type: {@link Contact} */
@@ -606,28 +605,13 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	 */
 	private CsvRowFormat getRowFormatForContact() {
 		CsvRowFormat rowFormat = new CsvRowFormat();
-//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NAME, COMPONENT_CB_NAME);
-//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_PHONE, COMPONENT_CB_PHONE);
-//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE, COMPONENT_CB_OTHER_PHONE);
-//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_EMAIL, COMPONENT_CB_EMAIL);
-//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_STATUS, COMPONENT_CB_STATUS);
-//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NOTES, COMPONENT_CB_NOTES);
-//		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_GROUPS, UiGeneratorControllerConstants.COMPONENT_CB_GROUPS);
-		if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_NAME))) {
-			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NAME, COMPONENT_CB_NAME);
-		} if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_PHONE))) {
-			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_PHONE, COMPONENT_CB_PHONE);
-		} if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_OTHER_PHONE))) {
-			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE, COMPONENT_CB_OTHER_PHONE);
-		} if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_EMAIL))) {
-			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_EMAIL, COMPONENT_CB_EMAIL);
-		} if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_STATUS))) {
-			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_STATUS, COMPONENT_CB_STATUS);
-		} if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_NOTES))) {
-			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NOTES, COMPONENT_CB_NOTES);
-		} if (this.uiController.isEnabled(this.uiController.find(this.wizardDialog, COMPONENT_CB_GROUPS))) {
-			addMarker(rowFormat, CsvUtils.MARKER_CONTACT_GROUPS, COMPONENT_CB_GROUPS);
-		}
+		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NAME, COMPONENT_CB_NAME);
+		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_PHONE, COMPONENT_CB_PHONE);
+		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE, COMPONENT_CB_OTHER_PHONE);
+		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_EMAIL, COMPONENT_CB_EMAIL);
+		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_STATUS, COMPONENT_CB_STATUS);
+		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NOTES, COMPONENT_CB_NOTES);
+		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_GROUPS, COMPONENT_CB_GROUPS);
 		return rowFormat;
 	}
 	
@@ -640,31 +624,26 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	
 	/** @param textFieldToBeSet Thinlet textfield whose value will be set with the selected file
 	 * @see FrontlineUI#showOpenModeFileChooser(Object) */
-	public void showOpenModeFileChooser(Object textFieldToBeSet) {
-		//this.uiController.showOpenModeFileChooser(textFieldToBeSet);
-		JFileChooser fc = new JFileChooser();
+
+	public void showOpenModeFileChooser() {
+		FileChooser fc = FileChooser.createFileChooser(this.uiController, this, "openChooseComplete");
 		fc.setFileFilter(new FileNameExtensionFilter("FrontlineSMS Exported Contacts (" + CsvExporter.CSV_EXTENSION + ")", CsvExporter.CSV_FORMAT));
-		int returnVal = fc.showDialog(null, InternationalisationUtils.getI18NString("medic.common.label.open"));
-		if(returnVal == JFileChooser.APPROVE_OPTION){
-			this.uiController.setText(textFieldToBeSet, fc.getSelectedFile().getAbsolutePath());
-			this.loadCsvFile(fc.getSelectedFile().getAbsolutePath());
-		}
+		fc.show();
+	}
+	
+	public void openChooseComplete(String filePath) {
+		this.uiController.setText(uiController.find(this.wizardDialog, "tfDirectory"), filePath);
+		this.loadCsvFile(filePath);
 	}
 	
 	/** @param textFieldToBeSet Thinlet textfield whose value will be set with the selected file
 	 * @see FrontlineUI#showOpenModeFileChooser(Object) */
 	public void showSaveModeFileChooser(Object textFieldToBeSet) {
-		//FileChooser.showSaveModeFileChooser(this.uiController, this, "setFilename");
-		JFileChooser fc = new JFileChooser();
-		fc.setSelectedFile(new File("FrontlineSMS_Export.csv"));
-		int returnVal = fc.showDialog(null, InternationalisationUtils.getI18NString("medic.common.label.open"));
-		if(returnVal == JFileChooser.APPROVE_OPTION){
-			this.uiController.setText(textFieldToBeSet, fc.getSelectedFile().getAbsolutePath());
-			this.filenameModified(fc.getSelectedFile().getAbsolutePath());
-		}
+		FileChooser fc = FileChooser.createFileChooser(this.uiController, this, "saveChooseComplete");
+		fc.show();
 	}
 	
-	public void setFilename(String filename) {
+	public void saveChooseComplete(String filename) {
 		uiController.setText(uiController.find(this.wizardDialog, "tfFilename"), filename);
 		filenameModified(filename);
 	}
@@ -698,7 +677,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 			int statusIndex = -1;
 			
 			/** HEADER */
-			Object header = this.uiController.createTableHeader("header");
+			Object header = this.uiController.createTableHeader();
 			
 			for (Object checkbox : checkboxes) {
 				if (this.uiController.isSelected(checkbox)) {
@@ -715,7 +694,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 			
 			/** Lines */
 			for (String[] lineValues : this.importedContactsList) {
-				Object row = this.uiController.createTableRow("row");
+				Object row = this.uiController.createTableRow();
 				for (int i = 0 ; i < columnsNumber && i < lineValues.length ; ++i) {
 					Object cell;
 					if (i == statusIndex) { // We're creating the status cell

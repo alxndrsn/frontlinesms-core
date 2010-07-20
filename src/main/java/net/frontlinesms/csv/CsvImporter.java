@@ -22,9 +22,7 @@ package net.frontlinesms.csv;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.regex.PatternSyntaxException;
 
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.*;
@@ -65,38 +63,40 @@ public class CsvImporter {
 		Utf8FileReader reader = null;
 		try {
 			reader = new Utf8FileReader(importFile);
-			int total = 0;
+			boolean firstLine = true;
 			String[] lineValues;
 			while((lineValues = CsvUtils.readLine(reader)) != null) {
-				if (total++ == 0) continue;
-				String name = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_NAME);
-				String number = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_PHONE);
-				String email = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_EMAIL);
-				String notes = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_NOTES);
-				String otherPhoneNumber = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE);
-				boolean active = Boolean.valueOf(getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_STATUS));
-				String groups = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_GROUPS);
-				try {
-					Contact c = new Contact(name, number, otherPhoneNumber, email, notes, active);
-					contactDao.saveContact(c);
-					
-					// We make the contact join its groups
-					String[] pathList = groups.split(GROUPS_DELIMITER);
-					for (String path : pathList) {
-						if (path.length() == 0) continue;
+				if(firstLine) {
+					// Ignore the first line of the CSV file as it should be the column titles
+					firstLine = false;
+				} else {
+					String name = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_NAME);
+					String number = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_PHONE);
+					String email = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_EMAIL);
+					String notes = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_NOTES);
+					String otherPhoneNumber = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE);
+					boolean active = Boolean.valueOf(getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_STATUS));
+					String groups = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_GROUPS);
+					try {
+						Contact c = new Contact(name, number, otherPhoneNumber, email, notes, active);
+						contactDao.saveContact(c);
 						
-						if (!path.startsWith(String.valueOf(Group.PATH_SEPARATOR))) {
-							path = Group.PATH_SEPARATOR + path;
+						// We make the contact join its groups
+						String[] pathList = groups.split(GROUPS_DELIMITER);
+						for (String path : pathList) {
+							if (path.length() == 0) continue;
+							
+							if (!path.startsWith(String.valueOf(Group.PATH_SEPARATOR))) {
+								path = Group.PATH_SEPARATOR + path;
+							}
+							
+							Group group = createGroups(groupDao, path);
+							groupMembershipDao.addMember(group, c);
 						}
-						
-						Group group = groupDao.createGroupIfAbsent(path);
-						groupMembershipDao.addMember(group, c);
+					} catch (DuplicateKeyException e) {
+						// FIXME should actually pass details of this back to the user.
+						LOG.debug("Contact already exist with this number [" + number + "]", e);
 					}
-				} catch (DuplicateKeyException e) {
-					// FIXME should actually pass details of this back to the user.
-					LOG.debug("Contact already exist with this number [" + number + "]", e);
-				} catch (PatternSyntaxException e) {
-					throw new RuntimeException(e.getMessage());
 				}
 			}
 		} finally {
@@ -121,19 +121,14 @@ public class CsvImporter {
 		Utf8FileReader reader = null;
 		try {
 			reader = new Utf8FileReader(importFile);
-			int total = 0;
+			boolean firstLine = true;
 			String[] lineValues;
 			while((lineValues = CsvUtils.readLine(reader)) != null) {
-				if (total++ == 0) continue;
-				contactsList.add(lineValues);
-//				String name = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_NAME);
-//				String number = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_PHONE);
-//				String email = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_EMAIL);
-//				String notes = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_NOTES);
-//				String otherPhoneNumber = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE);
-//				boolean active = Boolean.valueOf(getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_STATUS));
-//				
-//				Contact c = new Contact(name, number, otherPhoneNumber, email, notes, active);		
+				if(firstLine) {
+					firstLine = false;
+				} else {
+					contactsList.add(lineValues);
+				}
 			}
 		} finally {
 			if (reader != null) reader.close();
@@ -165,21 +160,41 @@ public class CsvImporter {
 	 * @param marker The marker we are looking for in the row format
 	 * @return The value in the specified index of the array, or an empty string if the array index is out of bounds.
 	 */
-	public static String getString(String[] values, CsvRowFormat rowFormat, String marker) {
+	private static String getString(String[] values, CsvRowFormat rowFormat, String marker) {
 		Integer index = rowFormat.getIndex(marker);
 		if(index == null) return "";
 		else return getString(values, index);
 	}
-	
-	public class FrontlineGroupPathComparator implements Comparator<String> {
 
-		public int compare(String o1, String o2) {
-			if (o1.split(GROUPS_DELIMITER).length <= o2.split(GROUPS_DELIMITER).length) {
-				return 1;
-			} else {
-				return -1;
+	/**
+	 * Creates the group and all parent groups for a supplied path.
+	 * The behaviour of this method is undefined if a group is deleted externally while this method
+	 * is executing.
+	 * @param groupDao
+	 * @param path
+	 * @return
+	 */
+	static Group createGroups(GroupDao groupDao, String path) {
+		if (path.length() == 0) {
+			return new Group(null, null);
+		} else {
+			int pos = path.lastIndexOf(Group.PATH_SEPARATOR);
+			if (pos == -1) pos = 0;
+			
+			Group parent = createGroups(groupDao, path.substring(0, pos));
+			path = path.substring(pos, path.length());
+			if (path.startsWith(String.valueOf(Group.PATH_SEPARATOR))) {
+				path = path.substring(1, path.length());
 			}
+			
+			Group group = new Group(parent, path);
+			try {
+				groupDao.saveGroup(group);
+			} catch (DuplicateKeyException ex) {
+				// It's not a problem if this group already exists
+			}
+			
+			return group;
 		}
-		
 	}
 }
