@@ -10,6 +10,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Arrays;
 
+import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;

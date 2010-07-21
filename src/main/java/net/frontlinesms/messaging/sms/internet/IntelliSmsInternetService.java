@@ -24,8 +24,7 @@ import java.util.*;
 import net.frontlinesms.*;
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.data.domain.FrontlineMessage.Status;
-import net.frontlinesms.email.EmailUtils;
-import net.frontlinesms.email.pop.*;
+import net.frontlinesms.email.receive.*;
 import net.frontlinesms.messaging.Provider;
 import net.frontlinesms.messaging.sms.properties.OptionalSection;
 import net.frontlinesms.messaging.sms.properties.PasswordString;
@@ -47,7 +46,7 @@ import IntelliSoftware.SMSGateway.SDK.IntelliSMSJavaSDK.*;
  * @date 31/01/2009
  */
 @Provider(name = "IntelliSms", icon = "/icons/sms_http.png") 
-public class IntelliSmsInternetService extends AbstractSmsInternetService implements PopImapMessageProcessor {
+public class IntelliSmsInternetService extends AbstractSmsInternetService implements EmailReceiveProcessor {
 	
 //> STATIC CONSTANTS
 	/** Default source port to use for an outgoing binary SMS message */
@@ -110,18 +109,18 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 	 * @return whether receive was successful
 	 */
 	protected synchronized void receiveSms() throws SmsInternetServiceReceiveException {
-		PopImapMessageReceiver receiver = new PopImapMessageReceiver(this);
+		EmailReceiver receiver = new EmailReceiver(this);
 		
 		receiver.setHostAddress(getEmailHost());
 		receiver.setHostPassword(getEmailPassword());
 		receiver.setHostPort(getEmailHostPort());
 		receiver.setHostUsername(getEmailUsername());
 		receiver.setUseSsl(getEmailHostSSL());
-		receiver.setProtocol(EmailUtils.POP3);
+		receiver.setProtocol(EmailReceiveProtocol.POP3);
 		
 		try {
 			receiver.receive();
-		} catch(PopReceiveException ex) {
+		} catch(EmailReceiveException ex) {
 			throw new SmsInternetServiceReceiveException(ex);
 		}
 	}
@@ -129,10 +128,10 @@ public class IntelliSmsInternetService extends AbstractSmsInternetService implem
 	public void processMessage(javax.mail.Message message, Date date) {
 		try {
 			// We've got a message, so try and find it's text content.
-			String messageText = PopImapUtils.getMessageText(message);
+			String messageText = EmailReceiveUtils.getMessageText(message);
 			// For now, if the message text was null then set it to an empty string
 			if(messageText == null) messageText = "";
-			this.processPopMessage(PopImapUtils.getSender(message), message.getSentDate().getTime(), message.getSubject(), messageText);
+			this.processPopMessage(EmailReceiveUtils.getSender(message), message.getSentDate().getTime(), message.getSubject(), messageText);
 		} catch (Exception ex) {
 			LOG.warn("Error processing email.");
 		}

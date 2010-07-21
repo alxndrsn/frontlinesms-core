@@ -19,8 +19,6 @@
  */
 package net.frontlinesms.messaging.sms.internet;
 
-import net.frontlinesms.email.pop.PopReceiveException;
-
 /**
  * Encapsulates all exceptions thrown during the receive method.
  *
@@ -29,11 +27,11 @@ import net.frontlinesms.email.pop.PopReceiveException;
  */
 @SuppressWarnings("serial")
 class SmsInternetServiceReceiveException extends Exception {
-	public SmsInternetServiceReceiveException(String string, Throwable t) {
-		super(string, t);
+	public SmsInternetServiceReceiveException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
-	public SmsInternetServiceReceiveException(PopReceiveException cause) {
+	public SmsInternetServiceReceiveException(Throwable cause) {
 		super(cause);
 	}
 }
