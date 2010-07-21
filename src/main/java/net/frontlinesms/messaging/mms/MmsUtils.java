@@ -16,11 +16,15 @@ import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
 import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
-import net.frontlinesms.mms.ImageMmsMessagePart;
+import net.frontlinesms.mms.MmsMultimediaPart;
 import net.frontlinesms.mms.MmsMessage;
 import net.frontlinesms.mms.MmsMessagePart;
 import net.frontlinesms.mms.TextMmsMessagePart;
 import net.frontlinesms.mms.email.pop.EmailMmsParser;
+import net.frontlinesms.mms.email.pop.parser.AbstractMmsParser;
+import net.frontlinesms.mms.email.pop.parser.GenericMmsParser;
+import net.frontlinesms.mms.email.pop.parser.ru.BeelineRuMmsParser;
+import net.frontlinesms.mms.email.pop.parser.ru.MegafonproRuMmsParser;
 import net.frontlinesms.mms.email.pop.parser.uk.O2UkMmsParser;
 import net.frontlinesms.mms.email.pop.parser.uk.OrangeUkMmsParser;
 import net.frontlinesms.mms.email.pop.parser.uk.ThreeUkMmsParser;
@@ -38,6 +42,7 @@ public class MmsUtils {
 	public static FrontlineMultimediaMessage create(MmsMessage mms) {
 		StringBuilder textContent = new StringBuilder();
 		List<FrontlineMultimediaMessagePart> multimediaParts = new ArrayList<FrontlineMultimediaMessagePart>();
+		
 		for(MmsMessagePart part : mms.getParts()) {
 			if(textContent.length() > 0) textContent.append("; ");
 			
@@ -47,19 +52,19 @@ public class MmsUtils {
 				TextMmsMessagePart textPart = (TextMmsMessagePart) part;
 				text = textPart.toString();
 				mmPart = FrontlineMultimediaMessagePart.createTextPart(textPart.getContent());
-			} else if(part instanceof ImageMmsMessagePart) {
-				ImageMmsMessagePart imagePart = (ImageMmsMessagePart) part;
+			} else if(part instanceof MmsMultimediaPart) {
+				MmsMultimediaPart imagePart = (MmsMultimediaPart) part;
 				text = "Image: " + imagePart.getFilename();
 				mmPart = createBinaryPart(imagePart);
 			} else {
 				text = "Unhandled: " + part.toString();
-				mmPart = FrontlineMultimediaMessagePart.createTextPart("Unhandled: TODO handle this!");
+				mmPart = FrontlineMultimediaMessagePart.createTextPart("Unhandled part!");
 			}
 			textContent.append(text);
 			multimediaParts.add(mmPart);
 		}
 		
-		FrontlineMultimediaMessage message = new FrontlineMultimediaMessage(Type.RECEIVED, textContent.toString(), multimediaParts);
+		FrontlineMultimediaMessage message = new FrontlineMultimediaMessage(Type.RECEIVED, mms.getSubject(), textContent.toString(), multimediaParts);
 		message.setRecipientMsisdn(mms.getReceiver());
 		message.setSenderMsisdn(mms.getSender());
 		message.setStatus(Status.RECEIVED);
@@ -71,7 +76,7 @@ public class MmsUtils {
 	}
 
 	private static FrontlineMultimediaMessagePart createBinaryPart(
-			ImageMmsMessagePart imagePart) {
+			MmsMultimediaPart imagePart) {
 		// save the binary data to file
 		FrontlineMultimediaMessagePart fmmPart = FrontlineMultimediaMessagePart.createBinaryPart(imagePart.getFilename()/*, getThumbnail(imagePart)*/);
 
@@ -113,12 +118,12 @@ public class MmsUtils {
 	
 	public static List<EmailMmsParser> getAllEmailMmsParsers () {
 		return Arrays.asList(new EmailMmsParser[]{
-				new O2UkMmsParser(),
-				new OrangeUkMmsParser(),
 				new ThreeUkMmsParser(),
 				new TmobileUkMmsParser(),
 				new VodafoneUkMmsParser(),
 				new AttUsMmsParser(),
+				
+				new GenericMmsParser(),
 				});
 	}
 }

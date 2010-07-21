@@ -1348,7 +1348,13 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		add(row, createTableCell(InternationalisationUtils.getDatetimeFormat().format(message.getDate())));
 		add(row, createTableCell(message.getSenderMsisdn()));
 		add(row, createTableCell(message.getRecipientMsisdn()));
-		add(row, createTableCell(message.getTextContent()));
+		
+		if (message instanceof FrontlineMultimediaMessage && ((FrontlineMultimediaMessage) message).getSubject().length() > 0) {
+			add(row, createTableCell(((FrontlineMultimediaMessage) message).getSubject()));
+		} else {
+			add(row, createTableCell(message.getTextContent()));
+		}
+		
 		return row;
 	}
 

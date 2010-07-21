@@ -303,7 +303,7 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 		// Text message
 		{
 			FrontlineMultimediaMessage mms = new FrontlineMultimediaMessage(
-					FrontlineMessage.Type.RECEIVED, "summary here", Arrays.asList(new FrontlineMultimediaMessagePart[]{
+					FrontlineMessage.Type.RECEIVED, "Subject 1", "summary here", Arrays.asList(new FrontlineMultimediaMessagePart[]{
 							FrontlineMultimediaMessagePart.createTextPart("Hullo")
 					}));
 			this.dao.saveMessage(mms);
@@ -319,7 +319,7 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 		// Binary message
 		{
 			FrontlineMultimediaMessage mms = new FrontlineMultimediaMessage(
-					FrontlineMessage.Type.RECEIVED, "summary here", Arrays.asList(new FrontlineMultimediaMessagePart[]{
+					FrontlineMessage.Type.RECEIVED, "Subject 1", "summary here", Arrays.asList(new FrontlineMultimediaMessagePart[]{
 							FrontlineMultimediaMessagePart.createBinaryPart("/somewhere/something.wot")
 					}));
 			this.dao.saveMessage(mms);
@@ -335,7 +335,7 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 		// Mixed message
 		{
 			FrontlineMultimediaMessage mms = new FrontlineMultimediaMessage(
-					FrontlineMessage.Type.RECEIVED, "summary here", Arrays.asList(new FrontlineMultimediaMessagePart[]{
+					FrontlineMessage.Type.RECEIVED, "Subject 1", "summary here", Arrays.asList(new FrontlineMultimediaMessagePart[]{
 							FrontlineMultimediaMessagePart.createTextPart("another message"),
 							FrontlineMultimediaMessagePart.createBinaryPart("/somewhereElse/somethingElse.who"),
 							FrontlineMultimediaMessagePart.createTextPart("The End."),

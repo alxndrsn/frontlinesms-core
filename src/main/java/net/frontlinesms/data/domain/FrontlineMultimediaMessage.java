@@ -16,12 +16,16 @@ import javax.persistence.OneToMany;
  */
 @Entity
 public class FrontlineMultimediaMessage extends FrontlineMessage {
+	private String subject;
+	
 	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
 	private List<FrontlineMultimediaMessagePart> multimediaParts;
 	
 	FrontlineMultimediaMessage() {}
-	public FrontlineMultimediaMessage(Type type, String textContent, List<FrontlineMultimediaMessagePart> multimediaParts) {
+	public FrontlineMultimediaMessage(Type type, String subject, String textContent, List<FrontlineMultimediaMessagePart> multimediaParts) {
 		super(type, textContent);
+		
+		this.subject = subject;
 		this.multimediaParts = multimediaParts;
 	}
 	
@@ -36,5 +40,12 @@ public class FrontlineMultimediaMessage extends FrontlineMessage {
 		}
 		
 		return false;
+	}
+	
+	public void setSubject(String subject) {
+		this.subject = subject;
+	}
+	public String getSubject() {
+		return subject;
 	}
 }
