@@ -44,6 +44,7 @@
 	            <table delete="showConfirmationDialog('messagesTab_removeMessages')" perform="showMessageDetails" colspan="2" name="messageList" selection="multiple" weightx="2" weighty="2">
 	                <header action="updateMessageList">
 	                    <column width="18"/>
+	                    <column width="18"/>
 	                    <column icon="/icons/status.png" text="i18n.common.status"/>
 	                    <column icon="/icons/time.png" sort="descent" text="i18n.common.date" width="120"/>
 	                    <column icon="/icons/user_sender.png" text="i18n.common.sender" width="120"/>

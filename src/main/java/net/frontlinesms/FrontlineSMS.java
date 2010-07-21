@@ -26,16 +26,27 @@ import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
+import net.frontlinesms.data.events.DatabaseEntityNotification;
+import net.frontlinesms.data.events.EntityDeletedNotification;
+import net.frontlinesms.data.events.EntitySavedNotification;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.events.EventBus;
+import net.frontlinesms.events.EventObserver;
+import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.listener.*;
+import net.frontlinesms.messaging.FrontlineMessagingServiceEventListener;
+import net.frontlinesms.messaging.mms.MmsServiceManager;
+import net.frontlinesms.messaging.mms.events.MmsReceivedNotification;
+import net.frontlinesms.messaging.sms.DummySmsService;
+import net.frontlinesms.messaging.sms.IncomingSmsProcessor;
+import net.frontlinesms.messaging.sms.SmsService;
+import net.frontlinesms.messaging.sms.SmsServiceManager;
+import net.frontlinesms.messaging.sms.SmsServiceStatus;
+import net.frontlinesms.messaging.sms.internet.SmsInternetService;
 import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginControllerProperties;
 import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
-import net.frontlinesms.smsdevice.*;
-import net.frontlinesms.smsdevice.internet.SmsInternetService;
-
 import org.apache.log4j.Logger;
 import org.smslib.CIncomingMessage;
 import org.springframework.beans.MutablePropertyValues;
@@ -79,11 +90,11 @@ import org.springframework.dao.DataAccessResourceFailureException;
  * @author Ben Whitaker ben(at)masabi(dot)com
  * @author Alex Anderson alex(at)masabi(dot)com
  */
-public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
+public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, EventObserver  {
 	/** Logging object */
 	private static Logger LOG = FrontlineUtils.getLogger(FrontlineSMS.class);
 	/** SMS device emulator */
-	public static final SmsDevice EMULATOR = new DummySmsDevice(FrontlineSMSConstants.EMULATOR_MSISDN);
+	public static final SmsService EMULATOR = new DummySmsService(FrontlineSMSConstants.EMULATOR_MSISDN);
 	
 //> INSTANCE VARIABLES
 
@@ -112,10 +123,12 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 //> SERVICE MANAGERS
 	/** Class that handles sending of email messages */
 	private EmailServerHandler emailServerManager;
-	/** Manager of SMS devices */
-	private SmsDeviceManager smsDeviceManager;
-	/** Asynchronous processor of received messages. */
-	private IncomingMessageProcessor incomingMessageProcessor;
+	/** Manager of SMS services */
+	private SmsServiceManager smsServiceManager;
+	/** Manager of ?MS services */
+	private MmsServiceManager mmsServiceManager;
+	/** Asynchronous processor of received SMS. */
+	private IncomingSmsProcessor incomingSmsProcessor;
 	private PluginManager pluginManager;
 
 	//> EVENT LISTENERS
@@ -123,8 +136,8 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	private EmailListener emailListener;
 	/** Listener for UI-related events */
 	private UIListener uiListener;
-	/** Listener for {@link SmsDevice} events. */
-	private SmsDeviceEventListener smsDeviceEventListener;
+	/** Listener for {@link SmsService} events. */
+	private FrontlineMessagingServiceEventListener smsDeviceEventListener;
 	/** Main {@link EventBus} through which all core events should be channelled. */
 	private EventBus eventBus;
 	
@@ -197,23 +210,33 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 			LOG.debug("Blank keyword creation failed - already exists.");
 		}
 		
+		if (this.eventBus != null) {
+			this.eventBus.registerObserver(this);
+		}
+		
 		LOG.debug("Initialising email server handler...");
 		emailServerManager = new EmailServerHandler();
 		emailServerManager.setEmailListener(this);
 
 		LOG.debug("Initialising incoming message processor...");
 		// Initialise the incoming message processor
-		incomingMessageProcessor = new IncomingMessageProcessor(this);
-		incomingMessageProcessor.start();
+		incomingSmsProcessor = new IncomingSmsProcessor(this);
+		incomingSmsProcessor.start();
 		
 		LOG.debug("Starting Phone Manager...");
-		smsDeviceManager = new SmsDeviceManager();
-		smsDeviceManager.setSmsListener(this);
-		smsDeviceManager.setEventBus(getEventBus());
-		smsDeviceManager.listComPortsAndOwners(false);
-		smsDeviceManager.start();
+		smsServiceManager = new SmsServiceManager();
+		smsServiceManager.setSmsListener(this);
+		smsServiceManager.setEventBus(getEventBus());
+		smsServiceManager.listComPortsAndOwners(false);
+		smsServiceManager.start();
+		
+		mmsServiceManager = new MmsServiceManager();
+		mmsServiceManager.setEventBus(getEventBus());
+		mmsServiceManager.setEmailAccountDao(this.emailAccountDao);
+		mmsServiceManager.start();
 
 		initSmsInternetServices();
+		initMmsEmailServices();
 		
 		this.pluginManager.initPluginControllers();
 
@@ -223,7 +246,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		LOG.debug("Re-Loading messages to outbox.");
 		//We need to reload all messages, which status is OUTBOX, to the outbox.
 		for (FrontlineMessage m : messageDao.getMessages(Type.OUTBOUND, Status.OUTBOX, Status.PENDING)) {
-			smsDeviceManager.sendSMS(m);
+			smsServiceManager.sendSMS(m);
 		}
 
 		LOG.debug("Re-Loading e-mails to outbox.");
@@ -232,7 +255,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 			emailServerManager.sendEmail(m);
 		}
 	}
-	
+
 	private void stopServices() {
 		// de-initialise plugin controllers
 		if(this.pluginManager != null) {
@@ -241,17 +264,21 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 			}
 		}
 		
-		if (smsDeviceManager != null) {
+		if (smsServiceManager != null) {
 			LOG.debug("Stopping Phone Manager...");
-			smsDeviceManager.stopRunning();
+			smsServiceManager.stopRunning();
+		}
+		if (mmsServiceManager != null) {
+			LOG.debug("Stopping MMS Manager...");
+			mmsServiceManager.stopRunning();
 		}
 		if (emailServerManager != null) {
 			LOG.debug("Stopping E-mail Manager...");
 			emailServerManager.stopRunning();
 		}
-		if(this.incomingMessageProcessor != null) {
+		if(this.incomingSmsProcessor != null) {
 			LOG.debug("Stopping the incoming message processor...");
-			this.incomingMessageProcessor.die();
+			this.incomingSmsProcessor.die();
 		}
 	}
 	
@@ -274,10 +301,21 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 			try {
 				SmsInternetService service = (SmsInternetService) Class.forName(className).newInstance();
 				service.setSettings(settings);
-				this.smsDeviceManager.addSmsInternetService(service);
+				this.smsServiceManager.addSmsInternetService(service);
 			} catch (Throwable t) {
 				LOG.warn("Unable to initialize SmsInternetService of class: " + className, t);
 			}
+		}
+	}
+	
+	/**
+	 * Gives all receiving e-mail accounts to the {@link MmsServiceManager} so it can use them as {@link PopImapEmailMmsReceiver}s
+	 */
+	private void initMmsEmailServices() {
+		this.mmsServiceManager.clearMmsEmailReceivers();
+		
+		for (EmailAccount mmsEmailAccount : this.emailAccountDao.getReceivingEmailAccounts()) {
+			this.mmsServiceManager.addMmsEmailReceiver(mmsEmailAccount);
 		}
 	}
 	
@@ -356,13 +394,22 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	}
 	
 //> EVENT HANDLER METHODS
+//	/** Called by the SmsHandler when an SMS message is received. */
+//	public synchronized void incomingMessageEvent(FrontlineMessagingService receiver, CIncomingMessage incomingMessage) {
+//		if (receiver instanceof MmsService) {
+//			this.incomingMmsProcessor.queue((MmsService)receiver, incomingMessage);
+//		} else {
+//			this.incomingSmsProcessor.queue((SmsService)receiver, incomingMessage);
+//		}
+//	}
+	
 	/** Called by the SmsHandler when an SMS message is received. */
-	public synchronized void incomingMessageEvent(SmsDevice receiver, CIncomingMessage incomingMessage) {
-		this.incomingMessageProcessor.queue(receiver, incomingMessage);
+	public synchronized void incomingMessageEvent(SmsService receiver, CIncomingMessage incomingMessage) {
+		this.incomingSmsProcessor.queue((SmsService)receiver, incomingMessage);
 	}
 
 	/** Passes an outgoing message event to the SMS Listener if one is specified. */
-	public synchronized void outgoingMessageEvent(SmsDevice sender, FrontlineMessage outgoingMessage) {
+	public synchronized void outgoingMessageEvent(SmsService sender, FrontlineMessage outgoingMessage) {
 		// The message status will have changed, so save it here
 		this.messageDao.updateMessage(outgoingMessage);
 		
@@ -373,11 +420,11 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	}
 
 	/** Passes a device event to the SMS Listener if one is specified. */
-	public void smsDeviceEvent(SmsDevice activeDevice, SmsDeviceStatus status) {
+	public void smsDeviceEvent(SmsService activeService, SmsServiceStatus status) {
 		// FIXME these events MUST be queued and processed on a separate thread
 		// FIXME should log this message here
 		if (this.smsDeviceEventListener != null) {
-			this.smsDeviceEventListener.smsDeviceEvent(activeDevice, status);
+			this.smsDeviceEventListener.messagingServiceEvent(activeService, status);
 		}
 	}
 
@@ -395,7 +442,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	/** Persists and sends an SMS message. */
 	public void sendMessage(FrontlineMessage message) {
 		messageDao.saveMessage(message);
-		smsDeviceManager.sendSMS(message);
+		smsServiceManager.sendSMS(message);
 		if (uiListener != null) { 
 			uiListener.outgoingMessageEvent(message);
 		}
@@ -488,17 +535,22 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	/** @param uiListener new value for {@link #uiListener} */
 	public void setUiListener(UIListener uiListener) {
 		this.uiListener = uiListener;
-		this.incomingMessageProcessor.setUiListener(uiListener);
+		this.incomingSmsProcessor.setUiListener(uiListener);
 	}
 	
-	/** @param smsDeviceEventListener new value for {@link #smsDeviceEvent(SmsDevice, SmsDeviceStatus)} */
-	public void setSmsDeviceEventListener(SmsDeviceEventListener smsDeviceEventListener) {
-		this.smsDeviceEventListener = smsDeviceEventListener;
+	/** @param serviceEventListener new value for {@link #smsDeviceEvent(SmsService, SmsServiceStatus)} */
+	public void setSmsDeviceEventListener(FrontlineMessagingServiceEventListener serviceEventListener) {
+		this.smsDeviceEventListener = serviceEventListener;
 	}
 	
-	/** @return {@link #smsDeviceManager} */
-	public SmsDeviceManager getSmsDeviceManager() {
-		return this.smsDeviceManager;
+	/** @return {@link #smsServiceManager} */
+	public SmsServiceManager getSmsServiceManager() {
+		return this.smsServiceManager;
+	}
+	
+	/** @return {@link #smsServiceManager} */
+	public MmsServiceManager getMmsServiceManager() {
+		return this.mmsServiceManager;
 	}
 
 	/** @param emailListener new value for {@link #emailListener} */
@@ -507,21 +559,21 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 	}
 	
 	/**
-	 * Adds another {@link IncomingMessageListener} to {@link IncomingMessageProcessor}.
+	 * Adds another {@link IncomingMessageListener} to {@link IncomingSmsProcessor}.
 	 * @param incomingMessageListener new {@link IncomingMessageListener}
-	 * @see IncomingMessageProcessor#addIncomingMessageListener(IncomingMessageListener)
+	 * @see IncomingSmsProcessor#addIncomingMessageListener(IncomingMessageListener)
 	 */
 	public void addIncomingMessageListener(IncomingMessageListener incomingMessageListener) {
-		this.incomingMessageProcessor.addIncomingMessageListener(incomingMessageListener);
+		this.incomingSmsProcessor.addIncomingMessageListener(incomingMessageListener);
 	}
 	
 	/**
-	 * Removes a {@link IncomingMessageListener} from {@link IncomingMessageProcessor}.
+	 * Removes a {@link IncomingMessageListener} from {@link IncomingSmsProcessor}.
 	 * @param incomingMessageListener {@link IncomingMessageListener} to be removed
-	 * @see IncomingMessageProcessor#removeIncomingMessageListener(IncomingMessageListener)
+	 * @see IncomingSmsProcessor#removeIncomingMessageListener(IncomingMessageListener)
 	 */
 	public void removeIncomingMessageListener(IncomingMessageListener incomingMessageListener) {
-		this.incomingMessageProcessor.removeIncomingMessageListener(incomingMessageListener);
+		this.incomingSmsProcessor.removeIncomingMessageListener(incomingMessageListener);
 	}
 
 	/** @return {@link #smsInternetServiceSettingsDao} */
@@ -529,9 +581,9 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		return this.smsInternetServiceSettingsDao;
 	}
 
-	/** @return {@link #smsDeviceManager}'s {@link SmsInternetService}s */
+	/** @return {@link #smsServiceManager}'s {@link SmsInternetService}s */
 	public Collection<SmsInternetService> getSmsInternetServices() {
-		return this.smsDeviceManager.getSmsInternetServices();
+		return this.smsServiceManager.getSmsInternetServices();
 	}
 
 	public boolean shouldLaunchStatsCollection() {
@@ -545,6 +597,26 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener {
 		} else {
 			long dateNextPrompt = dateLastPrompt + (FrontlineSMSConstants.MILLIS_PER_DAY * FrontlineSMSConstants.STATISTICS_DAYS_BEFORE_RELAUNCH);
 			return System.currentTimeMillis() >= dateNextPrompt;
+		}
+	}
+
+	public void notify(FrontlineEventNotification notification) {
+		if (notification instanceof MmsReceivedNotification) {
+			FrontlineMultimediaMessage frontlineMultimediaMessage = ((MmsReceivedNotification) notification).getFrontlineMultimediaMessage();
+			this.messageDao.saveMessage(frontlineMultimediaMessage);
+		} else if (notification instanceof DatabaseEntityNotification<?>) {
+			// Database notification
+			Object entity = ((DatabaseEntityNotification<?>) notification).getDatabaseEntity();
+			if (entity instanceof EmailAccount) {
+				// If there is any change in the E-Mail accounts, we refresh the list of MmsEmailServices
+				if (notification instanceof EntityDeletedNotification<?>) {
+					this.mmsServiceManager.removeMmsEmailReceiver((EmailAccount) entity);
+				} else if (notification instanceof EntitySavedNotification<?>) {
+					this.mmsServiceManager.addMmsEmailReceiver((EmailAccount) entity);
+				} else {
+					this.mmsServiceManager.updateMmsEmailService((EmailAccount) entity);	
+				}
+			}
 		}
 	}
 }

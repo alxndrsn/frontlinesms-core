@@ -6,11 +6,14 @@ import java.util.*;
 import net.frontlinesms.*;
 import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
+import net.frontlinesms.messaging.Provider;
+import net.frontlinesms.messaging.sms.internet.SmsInternetService;
+import net.frontlinesms.messaging.sms.properties.OptionalRadioSection;
+import net.frontlinesms.messaging.sms.properties.OptionalSection;
+import net.frontlinesms.messaging.sms.properties.PasswordString;
+import net.frontlinesms.messaging.sms.properties.PhoneSection;
 import net.frontlinesms.resources.UserHomeFilePropertySet;
 import net.frontlinesms.resources.ResourceUtils;
-import net.frontlinesms.smsdevice.Provider;
-import net.frontlinesms.smsdevice.internet.SmsInternetService;
-import net.frontlinesms.smsdevice.properties.*;
 import net.frontlinesms.ui.handler.contacts.ContactSelecter;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 

@@ -19,12 +19,8 @@ import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordActionDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.events.EventBus;
-import net.frontlinesms.events.FrontlineEventNotification;
-
 import static org.mockito.Mockito.*;
 
-import org.mockito.internal.verification.Times;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 
 /**
@@ -108,8 +104,7 @@ public class HibernateGroupDaoTest extends HibernateTestCase {
 		Group fetchedChild = groupDao.getGroupByPath("/parent/child");
 		assertEquals(child, fetchedChild);
 		
-		EventBus mockEventBus = mock(EventBus.class);
-		//((HibernateGroupDao)groupDao).setEventBus(mockEventBus);
+		mock(EventBus.class);
 		
 		// Delete the parent group
 		groupDao.deleteGroup(parent, false);

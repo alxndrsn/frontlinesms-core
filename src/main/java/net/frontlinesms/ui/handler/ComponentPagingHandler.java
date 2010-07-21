@@ -24,11 +24,6 @@ public class ComponentPagingHandler implements ThinletUiEventHandler {
 	private static final String COMPONENT_BT_NEXT_PAGE = "btNextPage";
 	/** UI Component name for  */
 	private static final String COMPONENT_BT_PREVIOUS_PAGE = "btPreviousPage";
-	/** UI Component name for  */
-	private static final String COMPONENT_LB_PAGE_NUMBER = "lbPageNumber";
-	/** UI Component name for  */
-	private static final String COMPONENT_LB_NUMBER_OF_PAGES = "lbNumberOfPages";
-	
 	/** The default value for the number of items per page. */
 	private static final int ITEMS_PER_PAGE_DEFAULT = 100;
 

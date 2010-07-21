@@ -1,6 +1,5 @@
 package IntelliSoftware.SMSGateway.SDK.IntelliSMSJavaSDK;
 
-import java.io.*;
 import IntelliSoftware.Common.*;
 import IntelliSoftware.SMSGateway.SDK.IntelliSMSJavaSDK.Internal.*;
 
@@ -14,8 +13,7 @@ public class IntelliSMS
 
 		objSMSGatewayProxy.Connect ( PrimaryGateway, BackupGateway, ProxyAddress, ProxyUsername, ProxyPassword );
 
-		StringUtils objStringUtils = new StringUtils();
-		String To = objStringUtils.StringArrayToCSV ( ToList );
+		String To = StringUtils.StringArrayToCSV ( ToList );
 
 		SendStatusCollection SendStatusList = objSMSGatewayProxy.SendMessageToMultipleRecipients ( Username, Password, To, From, Message, "", RequestDeliveryRpt, MaxConCatMsgs );
 
@@ -34,8 +32,7 @@ public class IntelliSMS
 
 		objSMSGatewayProxy.Connect ( PrimaryGateway, BackupGateway, ProxyAddress, ProxyUsername, ProxyPassword );
 
-		StringUtils objStringUtils = new StringUtils();
-		String To = objStringUtils.StringArrayToCSV ( ToList );
+		String To = StringUtils.StringArrayToCSV ( ToList );
 
 		SendStatusCollection SendStatusList = objSMSGatewayProxy.SendMessageToMultipleRecipients ( Username, Password, To, From, Message, UserContext, RequestDeliveryRpt, MaxConCatMsgs );
 
@@ -54,8 +51,7 @@ public class IntelliSMS
 
 		objSMSGatewayProxy.Connect ( PrimaryGateway, BackupGateway, ProxyAddress, ProxyUsername, ProxyPassword );
 
-		StringUtils objStringUtils = new StringUtils();
-		String To = objStringUtils.StringArrayToCSV ( ToList );
+		String To = StringUtils.StringArrayToCSV ( ToList );
 
 		String MessageHex = HexEncoder.EncodeFromUnicode ( Message );
 
@@ -76,8 +72,7 @@ public class IntelliSMS
 
 		objSMSGatewayProxy.Connect ( PrimaryGateway, BackupGateway, ProxyAddress, ProxyUsername, ProxyPassword );
 
-		StringUtils objStringUtils = new StringUtils();
-		String To = objStringUtils.StringArrayToCSV ( ToList );
+		String To = StringUtils.StringArrayToCSV ( ToList );
 
 		SendStatusCollection SendStatusList = objSMSGatewayProxy.SendUnicodeMessageHex ( Username, Password, To, From, MessageHex, RequestDeliveryRpt );
 
@@ -96,8 +91,7 @@ public class IntelliSMS
 
 		objSMSGatewayProxy.Connect ( PrimaryGateway, BackupGateway, ProxyAddress, ProxyUsername, ProxyPassword );
 
-		StringUtils objStringUtils = new StringUtils();
-		String To = objStringUtils.StringArrayToCSV ( ToList );
+		String To = StringUtils.StringArrayToCSV ( ToList );
 
 		SendStatusCollection SendStatusList = objSMSGatewayProxy.SendBinaryMessage ( Username, Password, To, From, UserDataHexHeader, UserDataHex, RequestDeliveryRpt );
 
@@ -116,8 +110,7 @@ public class IntelliSMS
 
 		objSMSGatewayProxy.Connect ( PrimaryGateway, BackupGateway, ProxyAddress, ProxyUsername, ProxyPassword );
 
-		StringUtils objStringUtils = new StringUtils();
-		String To = objStringUtils.StringArrayToCSV ( ToList );
+		String To = StringUtils.StringArrayToCSV ( ToList );
 
 		SendStatusCollection SendStatusList = objSMSGatewayProxy.SendWapPushMessage ( Username, Password, To, From, Title, HRef, RequestDeliveryRpt );
 

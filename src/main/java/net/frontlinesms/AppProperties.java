@@ -29,6 +29,8 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	private static final String KEY_LAST_STATS_SUBMISSION = "stats.submit.lastdate";
 	/** Property key (String): Date of last prompt */
 	private static final String KEY_LAST_STATS_PROMPT = "stats.prompt.lastdate";
+	/** Property key (String): Mms Polling Frequency */
+	private static final String KEY_MMS_POLLING_FREQUENCY = "mms.polling.frequency";
 	/** Property key (String): Whether or not the device connection dialog is shown when a connection problem occurs*/
 	private static final String KEY_SHOW_DEVICE_CONNECTION_DIALOG = "smsdevice.connection.problem.dialog.show";
 	
@@ -117,6 +119,21 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	/** Sets last stat submission prompt date to NOW */
 	public void setLastStatisticsPromptDate() {
 		super.setProperty(KEY_LAST_STATS_PROMPT, Long.toString(System.currentTimeMillis()));
+	}
+	
+	/** @return the MMS E-Mail polling frequency */
+	public int getMmsPollingFrequency() {
+		String pollFrequency = super.getProperty(KEY_MMS_POLLING_FREQUENCY);
+		try {
+			return pollFrequency == null ? FrontlineSMSConstants.DEFAULT_MMS_POLLING_FREQUENCY : Integer.parseInt(pollFrequency);
+		} catch (NumberFormatException e) {
+			return FrontlineSMSConstants.DEFAULT_MMS_POLLING_FREQUENCY;
+		}
+	}
+	
+	/** Sets the MMS E-Mail polling frequency */
+	public void setMmsPollingFrequency(int pollFrequency) {
+		super.setProperty(KEY_MMS_POLLING_FREQUENCY, String.valueOf(pollFrequency));
 	}
 	
 	/** @return <code>true</code> if the device connection dialog must be shown when a connection problem occurs, <code>false</code> otherwise */

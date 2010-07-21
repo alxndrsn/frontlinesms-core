@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dialog closable="true" modal="true" close="removeDialog(this)" bottom="5" columns="1" gap="8" icon="/icons/about.png" left="5" name="connectionWarningError" right="5" text="i18n.common.message.details" top="5">
+	<textarea name="taErrorMessage" editable="false" columns="40"/>
+	<panel halign="center">
+		<button type="cancel" action="removeDialog(connectionWarningError)" icon="/icons/tick.png" text="i18n.action.ok"/>
+	</panel>
+</dialog>

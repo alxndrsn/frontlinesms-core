@@ -3,7 +3,7 @@ package net.frontlinesms.smsdevice;
 import org.smslib.CService;
 
 import junit.framework.TestCase;
-import net.frontlinesms.smsdevice.CatHandlerAliasMatcher;
+import net.frontlinesms.messaging.CatHandlerAliasMatcher;
 
 /**
  * @author @author Morgan Belkadi <morgan@frontlinesms.com>

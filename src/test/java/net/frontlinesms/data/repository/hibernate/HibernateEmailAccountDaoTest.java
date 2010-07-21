@@ -8,6 +8,7 @@ import net.frontlinesms.junit.HibernateTestCase;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.repository.EmailAccountDao;
+import net.frontlinesms.email.EmailUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,7 +37,7 @@ public class HibernateEmailAccountDaoTest extends HibernateTestCase {
 		String accountServer = "FrontlineSMS Test";
 		int accountServerPort = 123;
 		String accountPassword = "secretpassword";
-		EmailAccount account = new EmailAccount(accountName, accountServer, accountServerPort, accountPassword, useSsl);
+		EmailAccount account = new EmailAccount(accountName, accountServer, accountServerPort, accountPassword, useSsl, false, EmailUtils.SMTP);
 		emailAccountDao.saveEmailAccount(account);
 		assertEquals(1, emailAccountDao.getAllEmailAccounts().size());
 		
@@ -65,9 +66,9 @@ public class HibernateEmailAccountDaoTest extends HibernateTestCase {
 		String accountServer = "FrontlineSMS Test";
 		int accountServerPort = 123;
 		String accountPassword = "secretpassword";
-		EmailAccount account = new EmailAccount(accountName, accountServer, accountServerPort, accountPassword, useSsl);
+		EmailAccount account = new EmailAccount(accountName, accountServer, accountServerPort, accountPassword, useSsl, false, EmailUtils.SMTP);
 		emailAccountDao.saveEmailAccount(account);
-		EmailAccount duplicateAccount = new EmailAccount(accountName, accountServer, accountServerPort, accountPassword, useSsl);
+		EmailAccount duplicateAccount = new EmailAccount(accountName, accountServer, accountServerPort, accountPassword, useSsl, false, EmailUtils.SMTP);
 		try {
 			System.out.println("Preparing to save...");
 			emailAccountDao.saveEmailAccount(duplicateAccount);

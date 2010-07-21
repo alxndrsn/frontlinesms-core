@@ -6,14 +6,13 @@
 		<table name="phoneManager_modemList" colspan="3" weightx="2" weighty="2" perform="showPhoneSettingsDialog(this)">
 			<header>
 				<column text="" width="18"/>
-				<column icon="/icons/port_open.png" text="i18n.common.port"/>
-				<column icon="/icons/baudrate.png" text="i18n.common.baud.rate"/>
-				<column icon="/icons/phone_number.png" text="i18n.common.phone.number" width="120"/>
-				<column icon="/icons/phone_make_model.png" text="i18n.common.make.model" width="150"/>
-				<column icon="/icons/serial.png" text="i18n.common.serial"/>
+				<column text="" width="18"/>
+				<column text="i18n.common.port" icon="/icons/port_open.png"/>
+				<column text="i18n.services.header.name" width="200" icon="/icons/about.png"/>
+				<column text="i18n.services.header.id" width="150" icon="/icons/serial.png"/>
 				<column text="" width="19" icon="/icons/sms_send.png"/>
 				<column text="" width="19" icon="/icons/sms_receive.png"/>
-				<column icon="/icons/status.png" text="i18n.common.status"/>
+				<column text="i18n.common.status" icon="/icons/status.png"/>
 			</header>
 			<popupmenu menushown="editPhoneEnabled(phoneManager_modemList, this)" name="popMenu">
 				<menuitem name="miDisconnect" text="i18n.action.disconnect" icon="/icons/phone_disconnect.png" action="disconnectFromSelected(phoneManager_modemList)"/>
@@ -21,15 +20,14 @@
 			</popupmenu>
 		</table>
 		<label icon="/icons/phone_notWorking.png" text="i18n.common.non.working.devices" colspan="3"/>
-		<table name="phoneManager_modemListError" colspan="3" weightx="2" weighty="2">
+		<table name="phoneManager_modemListError" colspan="3" weightx="2" weighty="2" perform="showPhoneSettingsDialog(this)">
 			<header>
 				<column text="" width="18"/>
-				<column icon="/icons/port_open.png" text="i18n.common.port"/>
-				<column icon="/icons/baudrate.png" text="i18n.common.baud.rate"/>
-				<column icon="/icons/phone_number.png" text="i18n.common.phone.number" width="120"/>
-				<column icon="/icons/phone_make_model.png" text="i18n.common.make.model" width="150"/>
-				<column icon="/icons/serial.png" text="i18n.common.serial"/>
-				<column icon="/icons/status.png" text="i18n.common.status"/>
+				<column text="" width="18"/>
+				<column text="i18n.common.port" icon="/icons/port_open.png"/>
+				<column text="i18n.services.header.name" width="200" icon="/icons/about.png"/>
+				<column text="i18n.services.header.id" width="150" icon="/icons/serial.png"/>
+				<column text="i18n.common.status" icon="/icons/status.png"/>
 			</header>
 			<popupmenu menushown="phoneManager_enabledFields(this, phoneManager_modemListError)">
 				<menuitem name="miAutoConnect" text="i18n.action.auto.connect" icon="/icons/phone_autoDetect.png" action="connectToSelectedPhoneHandler"/>

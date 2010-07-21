@@ -1,8 +1,5 @@
 package IntelliSoftware.SMSGateway.SDK.IntelliSMSJavaSDK;
 
-import java.io.*;
-import IntelliSoftware.Common.*;
-
 /// <summary>
 /// Status of the message sent through the IntelliSoftware SMS Gateway
 /// </summary>

@@ -148,6 +148,15 @@ public class ExtendedThinlet extends Thinlet {
 	public void setColumns(Object component, int columns) {
 		setInteger(component, ATTRIBUTE_COLUMNS, columns);
 	}
+	
+	/**
+	 * Sets the number of rows of a thinlet component.
+	 * @param component
+	 * @param columns
+	 */
+	public void setRows(Object component, int rows) {
+		setInteger(component, ROWS, rows);
+	}
 
 	/**
 	 * Sets the colspan attribute of a thinlet component.
@@ -502,6 +511,21 @@ public class ExtendedThinlet extends Thinlet {
 	}
 	
 	/**
+	 * Create's a Thinlet UI Component of type BUTTON and set's the button's
+	 * action and text label.
+	 * @param text
+	 * @param action
+	 * @param root
+	 * @return
+	 */
+	public final Object createButton(String text, String action, Object root, ThinletUiEventHandler handler) {
+		Object button = Thinlet.create(BUTTON);
+		setString(button, TEXT, text);
+		setMethod(button, ATTRIBUTE_ACTION, action, root, handler);
+		return button;
+	}
+	
+	/**
 	 * Create's a Thinlet UI Component of type BUTTON with type LINK.  The button's
 	 * action and text label are also set.
 	 * @param text
@@ -511,6 +535,20 @@ public class ExtendedThinlet extends Thinlet {
 	 */
 	public final Object createLink(String text, String action, Object root) {
 		Object button = createButton(text, action, root);
+		setChoice(button, "type", "link");
+		return button;
+	}
+	
+	/**
+	 * Create's a Thinlet UI Component of type BUTTON with type LINK.  The button's
+	 * action and text label are also set.
+	 * @param text
+	 * @param action
+	 * @param root
+	 * @return
+	 */
+	public final Object createLink(String text, String action, Object root, ThinletUiEventHandler handler) {
+		Object button = createButton(text, action, root, handler);
 		setChoice(button, "type", "link");
 		return button;
 	}
@@ -594,6 +632,20 @@ public class ExtendedThinlet extends Thinlet {
 	}
 	
 	/**
+	 * Creates a textfield with the supplied object name and initial text.
+	 * @param name
+	 * @param initialText
+	 * @return a Thinlet textfield component
+	 */
+	public final Object createTextarea(String name, String initialText, int rows) {
+		Object item = Thinlet.create(TEXTAREA);
+		setText(item, initialText);
+		setName(item, name);
+		setRows(item, rows);
+		return item;
+	}
+	
+	/**
 	 * Creates a passwordfield with the supplied object name and initial text.
 	 * @param name
 	 * @param initialText
@@ -604,6 +656,17 @@ public class ExtendedThinlet extends Thinlet {
 		setText(item, initialText);
 		setName(item, name);
 		return item;
+	}
+	
+	/**
+	 * @param name
+	 * @return A Thinlet Popup Menu
+	 */
+	public final Object createPopupMenu(String name) {
+		Object popupMenu = Thinlet.create(POPUPMENU);
+		setName(popupMenu, name);
+		
+		return popupMenu;
 	}
 	
 	/**

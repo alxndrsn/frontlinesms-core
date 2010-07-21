@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<panel name="pnAccountsList" columns="1" gap="20" left="10" right="10" bottom="5" top="5">
+	<table action="enableBottomButtons(this)" perform="editEmailAccountSettings(accountsList)" delete="showConfirmationDialog('removeSelectedFromAccountList')" width="450" height="200" name="accountsList" weightx="1" weighty="1">
+		<header>
+		    <column/>
+		    <column icon="/icons/emailAccount_server.png" text="i18n.common.email.account.server" width="175"/>
+		    <column icon="/icons/emailAccount.png" text="i18n.common.email.account" width="175"/>
+		</header>
+		<popupmenu menushown="enableOptions(accountsList, this, this)" name="emailServerListPopup">
+		    <menuitem action="editEmailAccountSettings(accountsList)" icon="/icons/emailAccount_edit.png" text="i18n.action.edit"/>
+		    <menuitem action="showConfirmationDialog('removeSelectedFromAccountList')" icon="/icons/emailAccount_delete.png" text="i18n.action.delete.selected"/>
+		</popupmenu>
+	</table>
+	<panel bottom="4" columns="3" gap="15" left="4" right="4" top="4">
+	    <button action="newEmailAccountSettings" icon="/icons/big_email_add.png" text="i18n.action.new" weightx="1" weighty="1"/>
+	    <button action="editEmailAccountSettings(accountsList)" icon="/icons/big_email_edit.png" name="btEditAccount" text="i18n.action.edit" weightx="1" weighty="1" enabled="false"/>
+	    <button action="showConfirmationDialog('removeSelectedFromAccountList')" icon="/icons/big_email_delete.png" name="btDeleteAccount" text="i18n.action.delete" weightx="1" weighty="1" enabled="false"/>
+	</panel>
+</panel> 

@@ -10,8 +10,11 @@ import java.util.Map;
 import javax.persistence.*;
 
 import net.frontlinesms.FrontlineUtils;
-import net.frontlinesms.smsdevice.internet.SmsInternetService;
-import net.frontlinesms.smsdevice.properties.*;
+import net.frontlinesms.messaging.sms.internet.SmsInternetService;
+import net.frontlinesms.messaging.sms.properties.OptionalRadioSection;
+import net.frontlinesms.messaging.sms.properties.OptionalSection;
+import net.frontlinesms.messaging.sms.properties.PasswordString;
+import net.frontlinesms.messaging.sms.properties.PhoneSection;
 
 /**
  * Class encapsulating settings of a {@link SmsInternetService}.
