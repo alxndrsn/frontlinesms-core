@@ -29,14 +29,13 @@ public class MmsEmailService implements MmsService {
 		this.status = (emailAccount.isEnabled() ? MmsEmailServiceStatus.READY : MmsEmailServiceStatus.DISCONNECTED);
 		
 		mmsEmailReceiver = new EmailMmsReceiver();
-		receiver = new EmailReceiver(mmsEmailReceiver);
 		populateReceiver(emailAccount);
-		
 		mmsEmailReceiver.addParsers(MmsUtils.getAllEmailMmsParsers());
-		mmsEmailReceiver.setReceiver(receiver);
 	}
 	
+	/** Update the email receiver with hte settings from an {@link EmailAccount} */
 	public void populateReceiver(EmailAccount emailAccount) {
+		EmailReceiver receiver = new EmailReceiver(this.mmsEmailReceiver);
 		receiver.setHostAddress(emailAccount.getAccountServer());
 		receiver.setHostPassword(emailAccount.getAccountPassword());
 		receiver.setHostPort(emailAccount.getAccountServerPort());
@@ -44,6 +43,7 @@ public class MmsEmailService implements MmsService {
 		receiver.setUseSsl(emailAccount.useSsl());
 		receiver.setLastCheck(emailAccount.getLastCheck());
 		receiver.setProtocol(EmailReceiveProtocol.valueOf(emailAccount.getProtocol()));
+		this.mmsEmailReceiver.setReceiver(receiver);
 	}
 
 	public Collection<MmsMessage> receive () throws MmsReceiveException {
