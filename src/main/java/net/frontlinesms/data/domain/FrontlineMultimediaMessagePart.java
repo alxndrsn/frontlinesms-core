@@ -50,7 +50,6 @@ public class FrontlineMultimediaMessagePart {
 		return new FrontlineMultimediaMessagePart(false, textContent);
 	}
 	public static FrontlineMultimediaMessagePart createBinaryPart(String filename) {
-		FrontlineMultimediaMessagePart part = new FrontlineMultimediaMessagePart(true, filename);
-		return part;
+		return new FrontlineMultimediaMessagePart(true, filename);
 	}
 }

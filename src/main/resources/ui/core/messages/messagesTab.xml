@@ -48,7 +48,7 @@
 	                    <column icon="/icons/status.png" text="i18n.common.status"/>
 	                    <column icon="/icons/time.png" sort="descent" text="i18n.common.date" width="120"/>
 	                    <column icon="/icons/user_sender.png" text="i18n.common.sender" width="120"/>
-	                    <column icon="/icons/user_receiver.png" text="i18n.common.recipient" width="180"/>
+	                    <column icon="/icons/user_receiver.png" text="i18n.common.recipient" width="200"/>
 	                    <column icon="/icons/message.png" text="i18n.common.message"/>
 	                </header>
 	                <popupmenu menushown="enableOptions(messageList, this)" name="menu">

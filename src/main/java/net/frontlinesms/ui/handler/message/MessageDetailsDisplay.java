@@ -15,6 +15,7 @@ import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
 import net.frontlinesms.messaging.mms.MmsUtils;
 import net.frontlinesms.ui.FrontlineUiUtils;
+import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -39,6 +40,8 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 	private static final String UI_COMPONENT_TF_SUBJECT = "tfSubject";
 
 	private final UiGeneratorController ui;
+
+	private final String[] messageFileExtensions = { ".txt", ".htm", ".html" };
 	
 	public MessageDetailsDisplay(UiGeneratorController ui) {
 		this.ui = ui;
@@ -116,13 +119,27 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 				ui.add(panel, thumbComponent);
 			}
 			
-			ui.add(panel, ui.createLink("[ " + part.getFilename() + " ]", openAction, panel, this));
+			Object fileLink = ui.createLink("[ " + part.getFilename() + " ]", openAction, panel, this);
+			if (isTextFile(part.getFilename())) {
+				this.ui.setIcon(fileLink, Icon.SMS);
+			}
+			ui.add(panel, fileLink);
 			component = panel;
 		}
 		ui.setWeight(component, 1, 1);
 		return component;
 	}
 	
+	private boolean isTextFile(String filename) {
+		for (String textFileExtension : messageFileExtensions ) {
+			if (filename.endsWith(textFileExtension)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
 	public void openMultimediaPart(String filename) {
 		FrontlineUtils.openExternalBrowser(filename);
 	}

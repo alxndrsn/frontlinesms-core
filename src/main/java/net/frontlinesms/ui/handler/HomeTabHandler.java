@@ -289,6 +289,9 @@ public class HomeTabHandler extends BaseTabHandler {
 		case Event.TYPE_OUTGOING_MESSAGE:
 			icon = Icon.SMS_SEND;
 			break;
+		case Event.TYPE_INCOMING_MMS:
+			icon = Icon.MMS_RECEIVE;
+			break;
 		case Event.TYPE_OUTGOING_MESSAGE_FAILED:
 			icon = Icon.SMS_SEND_FAILURE;
 			break;
