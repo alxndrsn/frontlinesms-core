@@ -16,11 +16,11 @@ import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
 import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
-import net.frontlinesms.mms.ImageMmsMessagePart;
+import net.frontlinesms.mms.BinaryMmsMessagePart;
 import net.frontlinesms.mms.MmsMessage;
 import net.frontlinesms.mms.MmsMessagePart;
 import net.frontlinesms.mms.TextMmsMessagePart;
-import net.frontlinesms.mms.email.receive.EmailMmsParser;
+import net.frontlinesms.mms.email.receive.parser.EmailMmsParser;
 import net.frontlinesms.mms.email.receive.parser.uk.*;
 import net.frontlinesms.mms.email.receive.parser.us.AttUsMmsParser;
 import net.frontlinesms.resources.ResourceUtils;
@@ -41,8 +41,8 @@ public class MmsUtils {
 				TextMmsMessagePart textPart = (TextMmsMessagePart) part;
 				text = textPart.toString();
 				mmPart = FrontlineMultimediaMessagePart.createTextPart(textPart.getContent());
-			} else if(part instanceof ImageMmsMessagePart) {
-				ImageMmsMessagePart imagePart = (ImageMmsMessagePart) part;
+			} else if(part instanceof BinaryMmsMessagePart) {
+				BinaryMmsMessagePart imagePart = (BinaryMmsMessagePart) part;
 				text = "Image: " + imagePart.getFilename();
 				mmPart = createBinaryPart(imagePart);
 			} else {
@@ -65,7 +65,7 @@ public class MmsUtils {
 	}
 
 	private static FrontlineMultimediaMessagePart createBinaryPart(
-			ImageMmsMessagePart imagePart) {
+			BinaryMmsMessagePart imagePart) {
 		// save the binary data to file
 		FrontlineMultimediaMessagePart fmmPart = FrontlineMultimediaMessagePart.createBinaryPart(imagePart.getFilename()/*, getThumbnail(imagePart)*/);
 
@@ -107,8 +107,6 @@ public class MmsUtils {
 	
 	public static List<EmailMmsParser> getAllEmailMmsParsers () {
 		return Arrays.asList(new EmailMmsParser[]{
-				new O2UkMmsParser(),
-				new OrangeUkMmsParser(),
 				new ThreeUkMmsParser(),
 				new TmobileUkMmsParser(),
 				new VodafoneUkMmsParser(),

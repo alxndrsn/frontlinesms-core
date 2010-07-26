@@ -18,7 +18,7 @@ import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
 import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
-import net.frontlinesms.mms.ImageMmsMessagePart;
+import net.frontlinesms.mms.BinaryMmsMessagePart;
 import net.frontlinesms.mms.MmsMessage;
 import net.frontlinesms.mms.MmsMessagePart;
 import net.frontlinesms.mms.TextMmsMessagePart;
@@ -43,8 +43,8 @@ public class MmsDeviceUtils {
 				TextMmsMessagePart textPart = (TextMmsMessagePart) part;
 				text = textPart.toString();
 				mmPart = FrontlineMultimediaMessagePart.createTextPart(textPart.getContent());
-			} else if(part instanceof ImageMmsMessagePart) {
-				ImageMmsMessagePart imagePart = (ImageMmsMessagePart) part;
+			} else if(part instanceof BinaryMmsMessagePart) {
+				BinaryMmsMessagePart imagePart = (BinaryMmsMessagePart) part;
 				text = "Image: " + imagePart.getFilename();
 				mmPart = createBinaryPart(imagePart);
 			} else {
@@ -62,7 +62,7 @@ public class MmsDeviceUtils {
 		return message;
 	}
 
-	private static FrontlineMultimediaMessagePart createBinaryPart(ImageMmsMessagePart imagePart) {
+	private static FrontlineMultimediaMessagePart createBinaryPart(BinaryMmsMessagePart imagePart) {
 		// save the binary data to file
 		FrontlineMultimediaMessagePart fmmPart = FrontlineMultimediaMessagePart.createBinaryPart(imagePart.getFilename()/*, getThumbnail(imagePart)*/);
 
