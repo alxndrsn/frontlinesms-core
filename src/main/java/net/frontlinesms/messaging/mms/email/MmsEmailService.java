@@ -20,7 +20,6 @@ import net.frontlinesms.mms.email.receive.EmailMmsReceiver;
 
 public class MmsEmailService implements MmsService {
 	private EmailMmsReceiver mmsEmailReceiver;
-	private EmailReceiver receiver;
 	private EmailAccount emailAccount;
 	private MmsServiceStatus status = MmsEmailServiceStatus.READY;
 
@@ -84,15 +83,15 @@ public class MmsEmailService implements MmsService {
 	}
 	
 	public String getServiceName () {
-		return this.receiver.getHostAddress();
+		return this.mmsEmailReceiver.getReceiver().getHostAddress();
 	}
 	
 	public String getUsername() {
-		return this.receiver.getHostUsername();
+		return this.mmsEmailReceiver.getReceiver().getHostUsername();
 	}
 	
 	public String getProtocol () {
-		return this.receiver.getProtocol().toString();
+		return this.mmsEmailReceiver.getReceiver().getProtocol().toString();
 	}
 
 	public void setStatus(MmsServiceStatus status, EventBus eventBus) {
