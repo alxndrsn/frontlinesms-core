@@ -131,7 +131,6 @@ public class MmsServiceManager extends Thread  {
 				try {
 					mmsEmailService.setStatus(MmsEmailServiceStatus.FETCHING, this.eventBus);
 					Collection<MmsMessage> mmsMessages = mmsEmailService.receive();
-					mmsEmailService.updateLastCheck(this.emailAccountDao);
 					
 					for (MmsMessage mmsMessage : mmsMessages) {
 						if (this.eventBus != null) {
@@ -140,6 +139,12 @@ public class MmsServiceManager extends Thread  {
 						}
 					}
 					mmsEmailService.setStatus(MmsEmailServiceStatus.READY, this.eventBus);
+					
+					/** Last check update */
+					// First, check if the service has not been removed
+					if (this.mmsEmailServices.contains(mmsEmailService)) {
+						mmsEmailService.updateLastCheck(this.emailAccountDao);
+					}
 				} catch (MmsReceiveException e) {
 					mmsEmailService.setStatus(MmsEmailServiceStatus.FAILED_TO_CONNECT, this.eventBus);
 				}

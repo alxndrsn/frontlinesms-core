@@ -102,7 +102,7 @@ public class MmsEmailService implements MmsService {
 		}
 	}
 
-	public void updateLastCheck(EmailAccountDao emailAccountDao) {
+	public void updateLastCheck(EmailAccountDao emailAccountDao) {		
 		long lastCheck = System.currentTimeMillis();
 		
 		this.mmsEmailReceiver.getReceiver().setLastCheck(lastCheck);
