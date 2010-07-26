@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
@@ -16,14 +17,24 @@ import javax.persistence.OneToMany;
  */
 @Entity
 public class FrontlineMultimediaMessage extends FrontlineMessage {
+	@Column(nullable=false)
 	private String subject;
 	
 	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
 	private List<FrontlineMultimediaMessagePart> multimediaParts;
 	
+	/** Empty constructor for Hibernate */
 	FrontlineMultimediaMessage() {}
+
+	/**
+	 * @param type
+	 * @param subject this must not be <code>null</code>
+	 * @param textContent
+	 * @param multimediaParts
+	 */
 	public FrontlineMultimediaMessage(Type type, String subject, String textContent, List<FrontlineMultimediaMessagePart> multimediaParts) {
 		super(type, textContent);
+		assert(subject != null) : "Should not have NULL subject for an MMS.";
 		
 		this.subject = subject;
 		this.multimediaParts = multimediaParts;
