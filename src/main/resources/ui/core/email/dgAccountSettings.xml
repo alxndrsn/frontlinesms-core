@@ -5,7 +5,7 @@
         	<checkbox icon="/icons/sms_deliveryReport.png" text="IMAP" name="rbImap" group="protocol"/>
         	<checkbox icon="/icons/sms.png" text="POP" name="rbPop" group="protocol"/>
     	</panel>
-    	<button type="link" name="lkHelp" colspan="3" icon="/icons/about.png" text="i18n.email.pop.help" halign="left" visible="false"/>
+    	<button type="link" name="lkHelp" colspan="3" icon="/icons/about.png" text="i18n.email.pop.help" halign="left" visible="false" action="showHelpPage('mms.htm')"/>
     	<label icon="/icons/emailAccount_server.png" name="lbMailServer" text="i18n.common.email.account.server"/>
         <textfield columns="25" name="tfMailServer"/>
         <label name="lbServerExample"/>

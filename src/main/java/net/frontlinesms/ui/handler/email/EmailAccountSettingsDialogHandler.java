@@ -11,6 +11,7 @@ import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.repository.EmailAccountDao;
 import net.frontlinesms.email.EmailUtils;
+import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -307,6 +308,14 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 		Object errorPanel = ui.loadComponentFromFile(UI_FILE_CONNECTION_WARNING_ERROR_MESSAGE, this);
 		ui.setText(this.ui.find(errorPanel, UI_COMPONENT_TA_ERROR_MESSAGE), this.connectionWarningMessage);
 		ui.add(errorPanel);
+	}
+	
+	/**
+	 * Opens a page of the help manual
+	 * @see FrontlineUI#showHelpPage(String)
+	 */
+	public void showHelpPage(String page) {
+		this.ui.showHelpPage(page);
 	}
 
 }
