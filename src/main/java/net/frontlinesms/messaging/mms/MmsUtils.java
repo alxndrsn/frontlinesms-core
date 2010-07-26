@@ -61,7 +61,10 @@ public class MmsUtils {
 			multimediaParts.add(mmPart);
 		}
 		
-		FrontlineMultimediaMessage message = new FrontlineMultimediaMessage(Type.RECEIVED, mms.getSubject(), textContent.toString(), multimediaParts);
+		String subject = mms.getSubject();
+		if(subject == null) subject = "";
+		FrontlineMultimediaMessage message = new FrontlineMultimediaMessage(Type.RECEIVED, subject, textContent.toString(), multimediaParts);
+		
 		message.setRecipientMsisdn(mms.getReceiver());
 		message.setSenderMsisdn(mms.getSender());
 		message.setStatus(Status.RECEIVED);
