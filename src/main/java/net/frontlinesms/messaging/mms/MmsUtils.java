@@ -14,18 +14,16 @@ import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
 import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
+import net.frontlinesms.mms.BinaryMmsMessagePart;
 import net.frontlinesms.mms.MmsMessage;
 import net.frontlinesms.mms.MmsMessagePart;
-import net.frontlinesms.mms.MmsMultimediaPart;
 import net.frontlinesms.mms.TextMmsMessagePart;
-import net.frontlinesms.mms.email.pop.EmailMmsParser;
-import net.frontlinesms.mms.email.pop.parser.GenericMmsParser;
-import net.frontlinesms.mms.email.pop.parser.ke.SafaricomKeMmsParser;
-import net.frontlinesms.mms.email.pop.parser.ru.MtsRuMmsParser;
-import net.frontlinesms.mms.email.pop.parser.uk.ThreeUkMmsParser;
-import net.frontlinesms.mms.email.pop.parser.uk.TmobileUkMmsParser;
-import net.frontlinesms.mms.email.pop.parser.uk.VodafoneUkMmsParser;
-import net.frontlinesms.mms.email.pop.parser.us.AttUsMmsParser;
+import net.frontlinesms.mms.email.receive.parser.EmailMmsParser;
+import net.frontlinesms.mms.email.receive.parser.GenericMmsParser;
+import net.frontlinesms.mms.email.receive.parser.ke.SafaricomKeMmsParser;
+import net.frontlinesms.mms.email.receive.parser.ru.MtsRuMmsParser;
+import net.frontlinesms.mms.email.receive.parser.uk.*;
+import net.frontlinesms.mms.email.receive.parser.us.AttUsMmsParser;
 import net.frontlinesms.resources.ResourceUtils;
 
 import org.apache.log4j.Logger;
@@ -51,10 +49,10 @@ public class MmsUtils {
 				TextMmsMessagePart textPart = (TextMmsMessagePart) part;
 				text = textPart.toString();
 				mmPart = FrontlineMultimediaMessagePart.createTextPart(textPart.getContent());
-			} else if (part instanceof MmsMultimediaPart) {
-				MmsMultimediaPart multimediaPart = (MmsMultimediaPart) part;
-				text = "File: " + multimediaPart.getFilename();
-				mmPart = createBinaryPart(multimediaPart);
+			} else if (part instanceof BinaryMmsMessagePart) {
+				BinaryMmsMessagePart binaryPart = (BinaryMmsMessagePart) part;
+				text = "File: " + binaryPart.getFilename();
+				mmPart = createBinaryPart(binaryPart);
 			} else {
 				text = "Unhandled: " + part.toString();
 				mmPart = FrontlineMultimediaMessagePart.createTextPart("Unhandled part!");
@@ -63,7 +61,10 @@ public class MmsUtils {
 			multimediaParts.add(mmPart);
 		}
 		
-		FrontlineMultimediaMessage message = new FrontlineMultimediaMessage(Type.RECEIVED, mms.getSubject(), textContent.toString(), multimediaParts);
+		String subject = mms.getSubject();
+		if(subject == null) subject = "";
+		FrontlineMultimediaMessage message = new FrontlineMultimediaMessage(Type.RECEIVED, subject, textContent.toString(), multimediaParts);
+		
 		message.setRecipientMsisdn(mms.getReceiver());
 		message.setSenderMsisdn(mms.getSender());
 		message.setStatus(Status.RECEIVED);
@@ -75,7 +76,7 @@ public class MmsUtils {
 	}
 
 	/** Binary files utils */
-	private static FrontlineMultimediaMessagePart createBinaryPart(MmsMultimediaPart imagePart) {
+	private static FrontlineMultimediaMessagePart createBinaryPart(BinaryMmsMessagePart imagePart) {
 		// save the binary data to file
 		FrontlineMultimediaMessagePart fmmPart = FrontlineMultimediaMessagePart.createBinaryPart(imagePart.getFilename()/*, getThumbnail(imagePart)*/);
 		File localFile = getUniqueFile(fmmPart);

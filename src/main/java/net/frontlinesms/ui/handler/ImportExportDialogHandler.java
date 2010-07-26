@@ -140,6 +140,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private static final String COMPONENT_PN_CHECKBOXES = "pnContactInfo"; // TODO: get this changed
 	private static final String COMPONENT_PN_VALUES_TABLE = "pnValuesTable";
 	private static final String COMPONENT_PN_DETAILS = "pnDetails";
+	
 //> STATIC CONSTANTS
 	public enum EntityType {
 		/** Export entity type: {@link Contact} */
@@ -624,7 +625,6 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	
 	/** @param textFieldToBeSet Thinlet textfield whose value will be set with the selected file
 	 * @see FrontlineUI#showOpenModeFileChooser(Object) */
-
 	public void showOpenModeFileChooser() {
 		FileChooser fc = FileChooser.createFileChooser(this.uiController, this, "openChooseComplete");
 		fc.setFileFilter(new FileNameExtensionFilter("FrontlineSMS Exported Contacts (" + CsvExporter.CSV_EXTENSION + ")", CsvExporter.CSV_FORMAT));

@@ -512,36 +512,6 @@ public class FrontlineUtils {
 		if(dotIndex > -1) filename = filename.substring(0, dotIndex);
 		return filename;
 	}
-	
-	/**
-	 * Send an E-Mail to the FrontlineSMS Support email account.
-	 * TODO smtp sending should be refactored into email.smtp.SmtpMessageSender
-	 * @param fromName
-	 * @param fromEmailAddress
-	 * @param attachment
-	 * @throws MessagingException
-	 */
-	public static void sendToFrontlineSupport(String fromName, String fromEmailAddress, String subject, String textContent, String attachment) throws EmailException {
-		sendEmail(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL, fromName, fromEmailAddress, subject, textContent, attachment);
-	}
-	
-	/**
-	 * Send an E-Mail to the given e-mail address.
-	 * TODO smtp sending should be refactored into email.smtp.SmtpMessageSender
-	 * @param fromName
-	 * @param fromEmailAddress
-	 * @param attachment
-	 * @throws MessagingException
-	 */
-	public static void sendEmail(String recipientEmailAddress, String fromName, String fromEmailAddress, String subject, String textContent, String attachment) throws EmailException {
-		SmtpEmailSender emailSender = new SmtpEmailSender(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL_SERVER);
-	
-	    emailSender.sendEmail(recipientEmailAddress,
-							  emailSender.getLocalEmailAddress(fromEmailAddress, fromName),
-							  subject,
-							  textContent,
-							  new File(attachment));
-	}
 
 	/**
 	 * Gets the name of the supplied file without any extension.
@@ -574,5 +544,35 @@ public class FrontlineUtils {
 		int dotIndex = filename.indexOf('.');
 		if(dotIndex == -1) return "";
 		else return filename.substring(dotIndex+1);
+	}
+	
+	/**
+	 * Send an E-Mail to the FrontlineSMS Support email account.
+	 * TODO smtp sending should be refactored into email.smtp.SmtpMessageSender
+	 * @param fromName
+	 * @param fromEmailAddress
+	 * @param attachment
+	 * @throws MessagingException
+	 */
+	public static void sendToFrontlineSupport(String fromName, String fromEmailAddress, String subject, String textContent, String attachment) throws EmailException {
+		sendEmail(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL, fromName, fromEmailAddress, subject, textContent, attachment);
+	}
+	
+	/**
+	 * Send an E-Mail to the given e-mail address.
+	 * TODO smtp sending should be refactored into email.smtp.SmtpMessageSender
+	 * @param fromName
+	 * @param fromEmailAddress
+	 * @param attachment
+	 * @throws MessagingException
+	 */
+	public static void sendEmail(String recipientEmailAddress, String fromName, String fromEmailAddress, String subject, String textContent, String attachment) throws EmailException {
+		SmtpEmailSender emailSender = new SmtpEmailSender(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL_SERVER);
+	
+	    emailSender.sendEmail(recipientEmailAddress,
+							  emailSender.getLocalEmailAddress(fromEmailAddress, fromName),
+							  subject,
+							  textContent,
+							  new File(attachment));
 	}
 }

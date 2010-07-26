@@ -25,7 +25,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_MESSAGE_HIS
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,12 +37,14 @@ import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
+import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMessage.Field;
 import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
+import net.frontlinesms.data.events.EntitySavedNotification;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordDao;
@@ -152,6 +153,28 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	/** Refresh the view. */
 	public void refresh() {
 		resetMessageHistoryFilter();
+	}
+
+	/**
+	 * UI event called when the user changes tab
+	 */
+	public void notify(FrontlineEventNotification notification) {
+		if(notification instanceof EntitySavedNotification<?>) {
+			Object entity = ((EntitySavedNotification<?>) notification).getDatabaseEntity();
+			if(entity instanceof FrontlineMessage) {
+				if(entity instanceof FrontlineMultimediaMessage) {
+					// TODO check if the list is visible before refreshing
+					refresh();
+				}
+			}
+		} else if(notification instanceof TabChangedNotification) {
+			// This object is registered to the UIGeneratorController and get notified when the users changes tab
+			String newTabName = ((TabChangedNotification) notification).getNewTabName();
+			if (newTabName.equals(TAB_MESSAGE_HISTORY)) {
+				this.refresh();
+				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGES_LOADED));
+			}
+		}
 	}
 	
 	/**
@@ -840,15 +863,6 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		this.ui.showDateSelecter(textField);
 	}
 	
-
-	
-//	public void dbgGenerateMms() {
-//		Collection<FrontlineMultimediaMessage> mms = new MmsPollingEmailReceiver().dbgCreateMessagesFromClasspath();
-//		for(FrontlineMultimediaMessage mm : mms) {
-//			this.ui.getFrontlineController().getMessageDao().saveMessage(mm);
-//		}
-//	}
-	
 //> HELPER METHODS
 	public List<String> getPhoneNumbers(Group group) {
 		return getPhoneNumbers(this.groupMembershipDao.getMembers(group));
@@ -860,19 +874,5 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			phoneNumbers.add(c.getPhoneNumber());
 		}
 		return phoneNumbers;
-	}
-	
-	/**
-	 * UI event called when the user changes tab
-	 */
-	public void notify(FrontlineEventNotification notification) {
-		// This object is registered to the UIGeneratorController and get notified when the users changes tab
-		if(notification instanceof TabChangedNotification) {
-			String newTabName = ((TabChangedNotification) notification).getNewTabName();
-			if (newTabName.equals(TAB_MESSAGE_HISTORY)) {
-				this.refresh();
-				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGES_LOADED));
-			}
-		}
 	}
 }

@@ -29,7 +29,8 @@ import javax.mail.Transport;
 
 import net.frontlinesms.EmailSender;
 import net.frontlinesms.FrontlineUtils;
-import net.frontlinesms.email.pop.PopImapUtils;
+import net.frontlinesms.email.receive.EmailReceiveProtocol;
+import net.frontlinesms.email.receive.EmailReceiveUtils;
 
 import org.apache.log4j.Logger;
 
@@ -139,7 +140,7 @@ public class EmailUtils {
 		boolean connectionOk = false;
 		
 		if (isForReceiving) {
-			Store store = PopImapUtils.getStore(host, username, hostPort, password, useSSL, protocol);
+			Store store = EmailReceiveUtils.getStore(host, username, hostPort, password, useSSL, EmailReceiveProtocol.valueOf(protocol));
 			
 			try {
 				LOG.trace("Connecting to email store: " + host + ":" + hostPort);

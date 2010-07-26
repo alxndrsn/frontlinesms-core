@@ -6,7 +6,8 @@ import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.EmailAccount;
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.repository.EmailAccountDao;
-import net.frontlinesms.email.pop.PopImapMessageReceiver;
+import net.frontlinesms.email.receive.EmailReceiveProtocol;
+import net.frontlinesms.email.receive.EmailReceiver;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.messaging.mms.MmsService;
@@ -15,11 +16,10 @@ import net.frontlinesms.messaging.mms.MmsUtils;
 import net.frontlinesms.messaging.mms.events.MmsServiceStatusNotification;
 import net.frontlinesms.mms.MmsMessage;
 import net.frontlinesms.mms.MmsReceiveException;
-import net.frontlinesms.mms.email.pop.PopImapEmailMmsReceiver;
+import net.frontlinesms.mms.email.receive.EmailMmsReceiver;
 
 public class MmsEmailService implements MmsService {
-	private PopImapEmailMmsReceiver mmsEmailReceiver;
-	private PopImapMessageReceiver receiver;
+	private EmailMmsReceiver mmsEmailReceiver;
 	private EmailAccount emailAccount;
 	private MmsServiceStatus status = MmsEmailServiceStatus.READY;
 
@@ -27,22 +27,22 @@ public class MmsEmailService implements MmsService {
 		this.setEmailAccount(emailAccount);
 		this.status = (emailAccount.isEnabled() ? MmsEmailServiceStatus.READY : MmsEmailServiceStatus.DISCONNECTED);
 		
-		mmsEmailReceiver = new PopImapEmailMmsReceiver();
-		receiver = new PopImapMessageReceiver(mmsEmailReceiver);
+		mmsEmailReceiver = new EmailMmsReceiver();
 		populateReceiver(emailAccount);
-		
 		mmsEmailReceiver.addParsers(MmsUtils.getAllEmailMmsParsers());
-		mmsEmailReceiver.setReceiver(receiver);
 	}
 	
+	/** Update the email receiver with hte settings from an {@link EmailAccount} */
 	public void populateReceiver(EmailAccount emailAccount) {
+		EmailReceiver receiver = new EmailReceiver(this.mmsEmailReceiver);
 		receiver.setHostAddress(emailAccount.getAccountServer());
 		receiver.setHostPassword(emailAccount.getAccountPassword());
 		receiver.setHostPort(emailAccount.getAccountServerPort());
 		receiver.setHostUsername(emailAccount.getAccountName());
 		receiver.setUseSsl(emailAccount.useSsl());
 		receiver.setLastCheck(emailAccount.getLastCheck());
-		receiver.setProtocol(emailAccount.getProtocol());
+		receiver.setProtocol(EmailReceiveProtocol.valueOf(emailAccount.getProtocol()));
+		this.mmsEmailReceiver.setReceiver(receiver);
 	}
 
 	public Collection<MmsMessage> receive () throws MmsReceiveException {
@@ -83,15 +83,15 @@ public class MmsEmailService implements MmsService {
 	}
 	
 	public String getServiceName () {
-		return this.receiver.getHostAddress();
+		return this.mmsEmailReceiver.getReceiver().getHostAddress();
 	}
 	
 	public String getUsername() {
-		return this.receiver.getHostUsername();
+		return this.mmsEmailReceiver.getReceiver().getHostUsername();
 	}
 	
 	public String getProtocol () {
-		return this.receiver.getProtocol();
+		return this.mmsEmailReceiver.getReceiver().getProtocol().toString();
 	}
 
 	public void setStatus(MmsServiceStatus status, EventBus eventBus) {

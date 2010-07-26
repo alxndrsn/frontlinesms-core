@@ -6,6 +6,7 @@ package net.frontlinesms.logging.logreader.email;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.Date;
 
 import javax.mail.BodyPart;
 import javax.mail.Message;
@@ -15,21 +16,21 @@ import javax.mail.internet.MimeMultipart;
 
 import com.sun.mail.util.BASE64DecoderStream;
 
-import net.frontlinesms.email.pop.PopMessageProcessor;
-import net.frontlinesms.email.pop.PopMessageReceiver;
-import net.frontlinesms.email.pop.PopReceiveException;
+import net.frontlinesms.email.receive.EmailReceiveException;
+import net.frontlinesms.email.receive.EmailReceiveProcessor;
+import net.frontlinesms.email.receive.EmailReceiver;
 import net.frontlinesms.resources.ResourceUtils;
 
 /**
  * Class for reading FrontlineSMS logs emailed to the support email address.
- * @author Alex
+ * @author Alex Anderson <alex@frontlinesms.com>
  */
-public class RemoteLogFetcher implements PopMessageProcessor {	
+public class RemoteLogFetcher implements EmailReceiveProcessor {	
 //> STATIC CONSTANTS
 
 //> INSTANCE PROPERTIES
 	/** The {@link PopMessageReceiver} used to connect to the email account. */
-	private final PopMessageReceiver receiver;
+	private final EmailReceiver receiver;
 
 //> CONSTRUCTORS
 	/**
@@ -41,7 +42,7 @@ public class RemoteLogFetcher implements PopMessageProcessor {
 	 * @param useSsl 
 	 */
 	RemoteLogFetcher(String hostAddress, int hostPort, String hostUsername, String hostPassword, boolean useSsl) {
-		this.receiver = new PopMessageReceiver(this);
+		this.receiver = new EmailReceiver(this);
 		receiver.setHostAddress(hostAddress);
 		receiver.setHostPort(hostPort);
 		receiver.setHostUsername(hostUsername);
@@ -54,7 +55,7 @@ public class RemoteLogFetcher implements PopMessageProcessor {
 	 * Retrieve all logs from the inbox.
 	 * @throws PopReceiveException if there was a problem receiving messages from the email account.
 	 */
-	private void processLogs() throws PopReceiveException {
+	private void processLogs() throws EmailReceiveException {
 		this.receiver.receive("INBOX");
 	}
 	
@@ -62,7 +63,7 @@ public class RemoteLogFetcher implements PopMessageProcessor {
 	/**
 	 * Process pop messages and extract log files that they contain. 
 	 */
-	public void processPopMessage(Message message) {
+	public void processMessage(Message message, Date date) {
 		System.out.println("RemoteLogReader.processPopMessage()");
 
 		try {
