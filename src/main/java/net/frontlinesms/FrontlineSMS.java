@@ -44,6 +44,8 @@ import net.frontlinesms.messaging.sms.SmsService;
 import net.frontlinesms.messaging.sms.SmsServiceManager;
 import net.frontlinesms.messaging.sms.SmsServiceStatus;
 import net.frontlinesms.messaging.sms.internet.SmsInternetService;
+import net.frontlinesms.mms.MmsMessage;
+import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginControllerProperties;
 import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
