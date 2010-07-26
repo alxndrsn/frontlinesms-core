@@ -9,8 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.log4j.Logger;
-
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
@@ -21,39 +19,49 @@ import net.frontlinesms.mms.MmsMessage;
 import net.frontlinesms.mms.MmsMessagePart;
 import net.frontlinesms.mms.TextMmsMessagePart;
 import net.frontlinesms.mms.email.receive.parser.EmailMmsParser;
+import net.frontlinesms.mms.email.receive.parser.GenericMmsParser;
+import net.frontlinesms.mms.email.receive.parser.ke.SafaricomKeMmsParser;
+import net.frontlinesms.mms.email.receive.parser.ru.MtsRuMmsParser;
 import net.frontlinesms.mms.email.receive.parser.uk.*;
 import net.frontlinesms.mms.email.receive.parser.us.AttUsMmsParser;
 import net.frontlinesms.resources.ResourceUtils;
 
+import org.apache.log4j.Logger;
+
 public class MmsUtils {
+	
 	private static final Logger log = FrontlineUtils.getLogger(MmsUtils.class);
+	
 	
 	/** Create a new {@link FrontlineMultimediaMessage} from a {@link MmsMessage} */
 	public static FrontlineMultimediaMessage create(MmsMessage mms) {
 		StringBuilder textContent = new StringBuilder();
 		List<FrontlineMultimediaMessagePart> multimediaParts = new ArrayList<FrontlineMultimediaMessagePart>();
-		for(MmsMessagePart part : mms.getParts()) {
+		
+		List<MmsMessagePart> mmsParts = mms.getParts();
+		
+		for(MmsMessagePart part : mmsParts) {
 			if(textContent.length() > 0) textContent.append("; ");
 			
 			String text;
 			FrontlineMultimediaMessagePart mmPart;
-			if(part instanceof TextMmsMessagePart) {
+			if (part instanceof TextMmsMessagePart) {
 				TextMmsMessagePart textPart = (TextMmsMessagePart) part;
 				text = textPart.toString();
 				mmPart = FrontlineMultimediaMessagePart.createTextPart(textPart.getContent());
-			} else if(part instanceof BinaryMmsMessagePart) {
-				BinaryMmsMessagePart imagePart = (BinaryMmsMessagePart) part;
-				text = "Image: " + imagePart.getFilename();
-				mmPart = createBinaryPart(imagePart);
+			} else if (part instanceof BinaryMmsMessagePart) {
+				BinaryMmsMessagePart binaryPart = (BinaryMmsMessagePart) part;
+				text = "File: " + binaryPart.getFilename();
+				mmPart = createBinaryPart(binaryPart);
 			} else {
 				text = "Unhandled: " + part.toString();
-				mmPart = FrontlineMultimediaMessagePart.createTextPart("Unhandled: TODO handle this!");
+				mmPart = FrontlineMultimediaMessagePart.createTextPart("Unhandled part!");
 			}
 			textContent.append(text);
 			multimediaParts.add(mmPart);
 		}
 		
-		FrontlineMultimediaMessage message = new FrontlineMultimediaMessage(Type.RECEIVED, textContent.toString(), multimediaParts);
+		FrontlineMultimediaMessage message = new FrontlineMultimediaMessage(Type.RECEIVED, mms.getSubject(), textContent.toString(), multimediaParts);
 		message.setRecipientMsisdn(mms.getReceiver());
 		message.setSenderMsisdn(mms.getSender());
 		message.setStatus(Status.RECEIVED);
@@ -64,28 +72,17 @@ public class MmsUtils {
 		return message;
 	}
 
-	private static FrontlineMultimediaMessagePart createBinaryPart(
-			BinaryMmsMessagePart imagePart) {
+	/** Binary files utils */
+	private static FrontlineMultimediaMessagePart createBinaryPart(BinaryMmsMessagePart imagePart) {
 		// save the binary data to file
 		FrontlineMultimediaMessagePart fmmPart = FrontlineMultimediaMessagePart.createBinaryPart(imagePart.getFilename()/*, getThumbnail(imagePart)*/);
-
-		File localFile = getFile(fmmPart);
-		while(localFile.exists()) {
-			// need to handle file collisions here - e.g. rename the file
-			fmmPart.setFilename(getAlternateFilename(fmmPart.getFilename()));
-			localFile = getFile(fmmPart);
-		}
-		writeFile(localFile, imagePart.getData());
+		File localFile = getUniqueFile(fmmPart);
+		
+		writeBinaryFile(localFile, imagePart.getData());
 		return fmmPart; 
 	}
 	
-	private static String getAlternateFilename(String filename) {
-		String namePart = FrontlineUtils.getFilenameWithoutAnyExtension(filename);
-		String extension = FrontlineUtils.getWholeFileExtension(filename);
-		return namePart + '_' + new Random().nextInt(99) + '.' + extension;
-	}
-
-	private static void writeFile(File file, byte[] data) {
+	private static void writeBinaryFile(File file, byte[] data) {
 		FileOutputStream fos = null;
 		BufferedOutputStream out = null;
 		try {
@@ -101,6 +98,23 @@ public class MmsUtils {
 		}
 	}
 	
+	private static File getUniqueFile(FrontlineMultimediaMessagePart fmmPart) {
+		File localFile = getFile(fmmPart);
+		while(localFile.exists()) {
+			// need to handle file collisions here - e.g. rename the file
+			fmmPart.setFilename(getAlternateFilename(fmmPart.getFilename()));
+			localFile = getFile(fmmPart);
+		}
+		
+		return localFile;
+	}
+
+	private static String getAlternateFilename(String filename) {
+		String namePart = FrontlineUtils.getFilenameWithoutAnyExtension(filename);
+		String extension = FrontlineUtils.getWholeFileExtension(filename);
+		return namePart + '_' + new Random().nextInt(99) + '.' + extension;
+	}
+	
 	public static File getFile(FrontlineMultimediaMessagePart part) {
 		return new File(new File(ResourceUtils.getConfigDirectoryPath(), "data/mms"), part.getFilename());
 	}
@@ -111,6 +125,10 @@ public class MmsUtils {
 				new TmobileUkMmsParser(),
 				new VodafoneUkMmsParser(),
 				new AttUsMmsParser(),
+				new MtsRuMmsParser(),
+				new SafaricomKeMmsParser(),
+				
+				new GenericMmsParser(),
 				});
 	}
 }

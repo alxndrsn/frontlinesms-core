@@ -34,6 +34,7 @@ public class Event {
 	public static final int TYPE_PHONE_CONNECTED = 4; 
 	public static final int TYPE_SMS_INTERNET_SERVICE_CONNECTED = 8;
 	public static final int TYPE_SMS_INTERNET_SERVICE_RECEIVING_FAILED = 9;
+	public static final int TYPE_INCOMING_MMS = 10;
 	
 	private int type;
 	private String description;

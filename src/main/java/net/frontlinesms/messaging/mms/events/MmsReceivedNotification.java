@@ -1,21 +1,20 @@
 package net.frontlinesms.messaging.mms.events;
 
-import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.events.FrontlineEventNotification;
+import net.frontlinesms.mms.MmsMessage;
 
 public class MmsReceivedNotification implements FrontlineEventNotification {
-	private FrontlineMultimediaMessage frontlineMultimediaMessage;
+	private MmsMessage mmsMessage;
 	
-	public MmsReceivedNotification (FrontlineMultimediaMessage frontlineMultimediaMessage) {
-		this.frontlineMultimediaMessage = frontlineMultimediaMessage;
+	public MmsReceivedNotification (MmsMessage mmsMessage) {
+		this.mmsMessage = mmsMessage;
 	}
 
-	public FrontlineMultimediaMessage getFrontlineMultimediaMessage() {
-		return frontlineMultimediaMessage;
+	public MmsMessage getMessage() {
+		return mmsMessage;
 	}
 
-	public void setFrontlineMultimediaMessage(
-			FrontlineMultimediaMessage frontlineMultimediaMessage) {
-		this.frontlineMultimediaMessage = frontlineMultimediaMessage;
+	public void setFrontlineMultimediaMessage(MmsMessage mmsMessage) {
+		this.mmsMessage = mmsMessage;
 	}
 }

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with FrontlineSMS. If not, see <http://www.gnu.org/licenses/>.
  */
-package net.frontlinesms.messaging.mms;
+package net.frontlinesms.messaging;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,6 +29,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import net.frontlinesms.EmailServerHandler;
 import net.frontlinesms.FrontlineSMS;
+import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.XMLReader;
 import net.frontlinesms.data.domain.*;
@@ -39,6 +40,9 @@ import net.frontlinesms.data.repository.*;
 import net.frontlinesms.data.*;
 import net.frontlinesms.listener.IncomingMessageListener;
 import net.frontlinesms.listener.UIListener;
+import net.frontlinesms.messaging.mms.MmsUtils;
+import net.frontlinesms.messaging.sms.SmsService;
+import net.frontlinesms.mms.MmsMessage;
 
 import org.apache.log4j.Logger;
 import org.jdom.JDOMException;
@@ -51,11 +55,11 @@ import org.smslib.sms.SmsMessageEncoding;
  * Processor of incoming messages for {@link FrontlineSMS}.
  * @author Alex
  */
-public class IncomingMmsProcessor extends Thread {
+public class IncomingMessageProcessor extends Thread {
 	/** Time, in millis, thread should sleep for after message processing failed. */
 	private static final int THREAD_SLEEP_AFTER_PROCESSING_FAILED = 5000;
 
-	private static final Logger LOG = FrontlineUtils.getLogger(IncomingMmsProcessor.class);
+	private static final Logger LOG = FrontlineUtils.getLogger(IncomingMessageProcessor.class);
 	
 	/** Set hi when the thread should terminate. */
 	private boolean keepAlive;
@@ -78,8 +82,8 @@ public class IncomingMmsProcessor extends Thread {
 	
 	private final EmailServerHandler emailServerHandler;
 
-	/** Create a new {@link IncomingMmsProcessor}, and initialise properties. */
-	public IncomingMmsProcessor(FrontlineSMS frontline) {
+	/** Create a new {@link IncomingMessageProcessor}, and initialise properties. */
+	public IncomingMessageProcessor(FrontlineSMS frontline) {
 		super("Incoming message processor");
 		this.frontline = frontline;
 		this.contactDao = frontline.getContactDao();
@@ -96,9 +100,15 @@ public class IncomingMmsProcessor extends Thread {
 		this.uiListener = uiListener;
 	}
 
-	public void queue(MmsService receiver, CIncomingMessage incomingMessage) {
+	
+	public void queue(SmsService receiver, CIncomingMessage incomingMessage) {
 		LOG.trace("Adding message to queue: " + receiver.hashCode() + ":" + incomingMessage.hashCode());
 		incomingMessageQueue.add(new IncomingMessageDetails(receiver, incomingMessage));
+	}
+	
+	public void queue(MmsMessage mms) {
+		LOG.trace("Adding MMS to queue:" + mms.hashCode());
+		incomingMessageQueue.add(new IncomingMms(mms));
 	}
 	
 	public void die() {
@@ -125,11 +135,10 @@ public class IncomingMmsProcessor extends Thread {
 				if(queueItem instanceof IncomingMessageProcessorQueueKiller) {
 					// We have been given a "poisoned" item so must terminate this thread
 					keepAlive = false;
-				} else if(queueItem instanceof IncomingMessageDetails) {
+				} else {
 					try {
 						// We've got a new message, so process it.
-						IncomingMessageDetails incomingMessageDetails = (IncomingMessageDetails) queueItem;
-						processIncomingMessageDetails(incomingMessageDetails);
+						processIncomingMessageDetails(queueItem);
 					} catch(Throwable t) {
 						// There was a problem processing the message.  At this stage, any issue should be a database
 						// connectivity issue.  Stop processing messages for a while, and re-queue this one.
@@ -137,48 +146,56 @@ public class IncomingMmsProcessor extends Thread {
 						incomingMessageQueue.add(queueItem);
 						FrontlineUtils.sleep_ignoreInterrupts(THREAD_SLEEP_AFTER_PROCESSING_FAILED);
 					}
-				} else {
-					LOG.error("Unknown queue item type: " + queueItem.getClass());
-				}
+				} 
 			}
 		}
 		LOG.trace("EXIT");
 	}
 	
-	private void processIncomingMessageDetails(IncomingMessageDetails incomingMessageDetails) {
-//		CIncomingMessage incomingMessage = incomingMessageDetails.getMessage();
-//		MmsService receiver = incomingMessageDetails.getReceiver();
-//		LOG.trace("Got message from queue: " + receiver.hashCode() + ":" + incomingMessage.hashCode());
-//		
-//		// Check the incoming message details with the KeywordFactory to make sure there are no details
-//		// that should be hidden before creating the message object...
-//		String incomingSenderMsisdn = incomingMessage.getOriginator();
-//		LOG.debug("Sender [" + incomingSenderMsisdn + "]");
-//		if (incomingMessage.getType() == CIncomingMessage.MessageType.StatusReport) {
-//			handleStatusReport(incomingMessage);
-//		} else {
-//			// This is an incoming message, so process accordingly
-//			FrontlineMessage incoming;
-//			if (incomingMessage.getMessageEncoding() == SmsMessageEncoding.GSM_7BIT || incomingMessage.getMessageEncoding() == SmsMessageEncoding.UCS2) {
-//				if(LOG.isDebugEnabled()) LOG.debug("Incoming text message [" + incomingMessage.getText() + "]");
-//				incoming = FrontlineMessage.createIncomingMessage(incomingMessage.getDate(), incomingSenderMsisdn, receiver.getMsisdn(), incomingMessage.getText());
-//				messageDao.saveMessage(incoming);
-//				handleTextMessage(incoming);
-//			} else {
-//				if(LOG.isDebugEnabled()) LOG.debug("Incoming binary message: " + incomingMessage.getBinary().length + "b");
-//				
-//				// Save the binary message
-//				incoming = FrontlineMessage.createBinaryIncomingMessage(incomingMessage.getDate(), incomingSenderMsisdn, receiver.getMsisdn(), -1, incomingMessage.getBinary());
-//				messageDao.saveMessage(incoming);
-//			}
-//
-//			for(IncomingMessageListener listener : this.incomingMessageListeners) {
-//				listener.incomingMessageEvent(incoming);
-//			}
-//			if (uiListener != null) {
-//				uiListener.incomingMessageEvent(incoming);
-//			}
-//		}
+	private void processIncomingMessageDetails(IncomingMessageProcessorQueueItem queueItem) {
+		if (queueItem instanceof IncomingMms) {
+			// Creates the FrontlineMultimediaMessage
+			FrontlineMultimediaMessage mms = MmsUtils.create(((IncomingMms) queueItem).getMessage());
+			this.messageDao.saveMessage(mms);
+			handleMessage(mms);
+		} else if (queueItem instanceof IncomingMessageDetails) {
+			IncomingMessageDetails incomingMessageDetails = (IncomingMessageDetails) queueItem;
+			CIncomingMessage incomingMessage = incomingMessageDetails.getMessage();
+			SmsService receiver = incomingMessageDetails.getReceiver();
+			LOG.trace("Got message from queue: " + receiver.hashCode() + ":" + incomingMessage.hashCode());
+			
+			// Check the incoming message details with the KeywordFactory to make sure there are no details
+			// that should be hidden before creating the message object...
+			String incomingSenderMsisdn = incomingMessage.getOriginator();
+			LOG.debug("Sender [" + incomingSenderMsisdn + "]");
+			if (incomingMessage.getType() == CIncomingMessage.MessageType.StatusReport) {
+				handleStatusReport(incomingMessage);
+			} else {
+				// This is an incoming message, so process accordingly
+				FrontlineMessage incoming;
+				if (incomingMessage.getMessageEncoding() == SmsMessageEncoding.GSM_7BIT || incomingMessage.getMessageEncoding() == SmsMessageEncoding.UCS2) {
+					if(LOG.isDebugEnabled()) LOG.debug("Incoming text message [" + incomingMessage.getText() + "]");
+					incoming = FrontlineMessage.createIncomingMessage(incomingMessage.getDate(), incomingSenderMsisdn, receiver.getMsisdn(), incomingMessage.getText());
+					messageDao.saveMessage(incoming);
+					handleMessage(incoming);
+				} else {
+					if(LOG.isDebugEnabled()) LOG.debug("Incoming binary message: " + incomingMessage.getBinary().length + "b");
+					
+					// Save the binary message
+					incoming = FrontlineMessage.createBinaryIncomingMessage(incomingMessage.getDate(), incomingSenderMsisdn, receiver.getMsisdn(), -1, incomingMessage.getBinary());
+					messageDao.saveMessage(incoming);
+				}
+	
+				for(IncomingMessageListener listener : this.incomingMessageListeners) {
+					listener.incomingMessageEvent(incoming);
+				}
+				if (uiListener != null) {
+					uiListener.incomingMessageEvent(incoming);
+				}
+			}
+		}  else {
+			LOG.error("Unknown queue item type: " + queueItem.getClass());
+		}
 	}
 
 	/**
@@ -213,11 +230,17 @@ public class IncomingMmsProcessor extends Thread {
 
 	/**
 	 * Processes keyword actions for a text message.
-	 * @param incoming
+	 * @param message
 	 */
 	/* not private to allow unit testing */
-	void handleTextMessage(final FrontlineMessage incoming) {
-		Keyword keyword = keywordDao.getFromMessageText(incoming.getTextContent());
+	void handleMessage(final FrontlineMessage message) {
+		Keyword keyword;
+		
+		if (message instanceof FrontlineMultimediaMessage) {
+			keyword = keywordDao.getKeyword(FrontlineSMSConstants.MMS_KEYWORD);
+		} else {
+			keyword = keywordDao.getFromMessageText(message.getTextContent());
+		}
 		
 		if (keyword != null) {
 			LOG.debug("The message contains keyword [" + keyword.getKeyword() + "]");
@@ -226,15 +249,15 @@ public class IncomingMmsProcessor extends Thread {
 
 			if(actions.size() > 0) {
 				LOG.debug("Executing actions for keyword, if the contact is allowed!");
-				Contact contact = contactDao.getFromMsisdn(incoming.getSenderMsisdn());
+				Contact contact = contactDao.getFromMsisdn(message.getSenderMsisdn());
 				//If we could not find this contact, we execute the action.
 				//If we found a contact, he/she needs to be allowed to execute the action.
 				if (contact == null || contact.isActive()) {
-					final long triggerTime = incoming.getDate();
+					final long triggerTime = message.getDate();
 					for (KeywordAction action : actions) {
 						if (action.isAlive(triggerTime)) {
 							try {
-								handleIncomingMessageAction_post(action, incoming);
+								handleIncomingMessageAction_post(action, message);
 							} catch(Exception ex) {
 								LOG.warn("Exception thrown while executing action.", ex);
 							}
@@ -244,7 +267,6 @@ public class IncomingMmsProcessor extends Thread {
 			}
 		}
 	}
-	
 
 	/**
 	 * Handle relevant incoming message actions AFTER the message has been created with the messageFactory.
@@ -492,7 +514,7 @@ public class IncomingMmsProcessor extends Thread {
 	 * Adds another {@link IncomingMessageListener} to {@link #incomingMessageListeners}.
 	 * @param incomingMessageListener new {@link IncomingMessageListener}
 	 */
-	void addIncomingMessageListener(IncomingMessageListener incomingMessageListener) {
+	public void addIncomingMessageListener(IncomingMessageListener incomingMessageListener) {
 		this.incomingMessageListeners.add(incomingMessageListener);
 	}
 	
@@ -500,12 +522,12 @@ public class IncomingMmsProcessor extends Thread {
 	 * Removes a {@link IncomingMessageListener} from {@link #incomingMessageListeners}.
 	 * @param incomingMessageListener {@link IncomingMessageListener} to be removed
 	 */
-	void removeIncomingMessageListener(IncomingMessageListener incomingMessageListener) {
+	public void removeIncomingMessageListener(IncomingMessageListener incomingMessageListener) {
 		this.incomingMessageListeners.remove(incomingMessageListener);
 	}
 }
 
-/** Empty interface implemented by items which are put in the {@link IncomingMmsProcessor}'s queue. */
+/** Empty interface implemented by items which are put in the {@link IncomingMessageProcessor}'s queue. */
 interface IncomingMessageProcessorQueueItem {}
 
 /**
@@ -516,13 +538,13 @@ class IncomingMessageDetails implements IncomingMessageProcessorQueueItem {
 	/** the message received */
 	private final CIncomingMessage message;
 	/** the device the message was received on */
-	private final MmsService receiver;
+	private final SmsService receiver;
 //> CONSTRUCTOR
 	/**
 	 * @param receiver The device which this message was received on. 
 	 * @param message The message
 	 */
-	public IncomingMessageDetails(MmsService receiver, CIncomingMessage message) {
+	public IncomingMessageDetails(SmsService receiver, CIncomingMessage message) {
 		this.receiver = receiver;
 		this.message = message;
 	}
@@ -532,13 +554,35 @@ class IncomingMessageDetails implements IncomingMessageProcessorQueueItem {
 		return message;
 	}
 	/** @return the device the message was received on */
-	public MmsService getReceiver() {
+	public SmsService getReceiver() {
 		return receiver;
 	}
 }
 
 /**
- * Queuing an instance of this class will kill the {@link IncomingMmsProcessor}.
+ * Queue item which contains an MMS
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
+ */
+class IncomingMms implements IncomingMessageProcessorQueueItem {
+	/** the message received */
+	private final MmsMessage message;
+//> CONSTRUCTOR
+	/**
+	 * @param receiver The device which this message was received on. 
+	 * @param message The message
+	 */
+	public IncomingMms(MmsMessage message) {
+		this.message = message;
+	}
+//> ACCESSORS
+	/** @return the message received */
+	public MmsMessage getMessage() {
+		return message;
+	}
+}
+
+/**
+ * Queuing an instance of this class will kill the {@link IncomingMessageProcessor}.
  * @author Alex
  */
 class IncomingMessageProcessorQueueKiller implements IncomingMessageProcessorQueueItem {}

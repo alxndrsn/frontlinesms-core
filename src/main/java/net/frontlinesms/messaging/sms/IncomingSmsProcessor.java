@@ -244,7 +244,6 @@ public class IncomingSmsProcessor extends Thread {
 			}
 		}
 	}
-	
 
 	/**
 	 * Handle relevant incoming message actions AFTER the message has been created with the messageFactory.

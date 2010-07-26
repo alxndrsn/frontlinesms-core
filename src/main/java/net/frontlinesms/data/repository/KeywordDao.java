@@ -30,6 +30,13 @@ import net.frontlinesms.data.domain.*;
  *
  */
 public interface KeywordDao {
+	/**
+	 * @param name The name of the keyword
+	 * @return
+	 */
+	public Keyword getKeyword(String name);
+	
+	
 	/** @return an alphabetically-sorted list of all keywords. */
 	public List<Keyword> getAllKeywords();
 	

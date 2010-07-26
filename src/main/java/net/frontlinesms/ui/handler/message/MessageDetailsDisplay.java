@@ -16,6 +16,7 @@ import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
 import net.frontlinesms.messaging.mms.MmsUtils;
 import net.frontlinesms.ui.FrontlineUiUtils;
+import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -27,7 +28,20 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 	/** Path to the Thinlet XML layout file for the message details form */
 	public static final String UI_FILE_MSG_DETAILS_FORM = "/ui/core/messages/dgMessageDetails.xml";
 
+	private static final String I18N_MESSAGE_NO_CONTENT = "message.no.content";
+
+	private static final String UI_COMPONENT_PN_CONTENT = "pnContent";
+	private static final String UI_COMPONENT_PN_SUBJECT = "pnSubject";
+	private static final String UI_COMPONENT_TF_CONTENT = "tfContent";
+	private static final String UI_COMPONENT_TF_DATE = "tfDate";
+	private static final String UI_COMPONENT_TF_SENDER = "tfSender";
+	private static final String UI_COMPONENT_TF_RECIPIENT = "tfRecipient";
+	private static final String UI_COMPONENT_TF_STATUS = "tfStatus";
+	private static final String UI_COMPONENT_TF_SUBJECT = "tfSubject";
+
 	private final UiGeneratorController ui;
+
+	private final String[] messageFileExtensions = { ".txt", ".htm", ".html" };
 	
 	public MessageDetailsDisplay(UiGeneratorController ui) {
 		this.ui = ui;
@@ -40,13 +54,17 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 		String status = UiGeneratorController.getMessageStatusAsString(message);
 		String date = InternationalisationUtils.getDatetimeFormat().format(message.getDate());
 		
-		ui.setText(ui.find(details, "tfStatus"), status);
-		ui.setText(ui.find(details, "tfSender"), senderDisplayName);
-		ui.setText(ui.find(details, "tfRecipient"), recipientDisplayName);
-		ui.setText(ui.find(details, "tfDate"), date);
+		ui.setText(ui.find(details, UI_COMPONENT_TF_STATUS), status);
+		ui.setText(ui.find(details, UI_COMPONENT_TF_SENDER), senderDisplayName);
+		ui.setText(ui.find(details, UI_COMPONENT_TF_RECIPIENT), recipientDisplayName);
+		ui.setText(ui.find(details, UI_COMPONENT_TF_DATE), date);
 		
+		if (message instanceof FrontlineMultimediaMessage && ((FrontlineMultimediaMessage) message).getSubject().length() > 0) {
+			ui.setText(ui.find(details, UI_COMPONENT_TF_SUBJECT), ((FrontlineMultimediaMessage) message).getSubject());
+			ui.setVisible(ui.find(details, UI_COMPONENT_PN_SUBJECT), true);
+		}
 		
-		Object contentPanel = ui.find(details, "pnContent");
+		Object contentPanel = ui.find(details, UI_COMPONENT_PN_CONTENT);
 		for(Object contentComponent : getContentComponents(message)) {
 			ui.add(contentPanel, contentComponent);
 		}
@@ -60,13 +78,13 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 			List<FrontlineMultimediaMessagePart> parts = mm.getMultimediaParts();
 			
 			if(parts.size() == 0) {
-				return new Object[]{ui.createLabel("[i18n] No content.")}; // FIXME i18n
+				return new Object[]{ ui.createLabel(InternationalisationUtils.getI18NString(I18N_MESSAGE_NO_CONTENT)) }; // FIXME i18n
 			} else {
 				return getContentComponents(parts);
 			}
 		} else {
 			// It's a standard text message
-			Object textContent = ui.createTextarea("tfContent", message.getTextContent(), 8);
+			Object textContent = ui.createTextarea(UI_COMPONENT_TF_CONTENT, message.getTextContent(), 8);
 			ui.setWeight(textContent, 1, 1);
 			return new Object[]{textContent}; 
 		}
@@ -84,6 +102,7 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 		Object component;
 		if(!part.isBinary()) {
 			component = ui.createTextarea("", part.getTextContent(), (part.toString().length() + 44) / 45);
+			this.ui.setEditable(component, false);
 		} else {
 			Object panel = ui.createPanel("");
 			ui.setColumns(panel, 1);
@@ -101,13 +120,27 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 				ui.add(panel, thumbComponent);
 			}
 			
-			ui.add(panel, ui.createLink("[ " + part.getFilename() + " ]", openAction, panel, this));
+			Object fileLink = ui.createLink("[ " + part.getFilename() + " ]", openAction, panel, this);
+			if (isTextFile(part.getFilename())) {
+				this.ui.setIcon(fileLink, Icon.SMS);
+			}
+			ui.add(panel, fileLink);
 			component = panel;
 		}
 		ui.setWeight(component, 1, 1);
 		return component;
 	}
 	
+	private boolean isTextFile(String filename) {
+		for (String textFileExtension : messageFileExtensions ) {
+			if (filename.endsWith(textFileExtension)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
 	public void openMultimediaPart(String filename) {
 		FrontlineUtils.openExternalBrowser(filename);
 	}

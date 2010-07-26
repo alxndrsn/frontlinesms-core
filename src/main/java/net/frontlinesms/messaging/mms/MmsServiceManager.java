@@ -72,7 +72,7 @@ public class MmsServiceManager extends Thread  {
 	 * Adds a new {@link EmailAccount} which will be used to receive Multimedia Messages
 	 * @param emailAccount
 	 */
-	public void addMmsEmailReceiver(EmailAccount emailAccount) {
+	public synchronized void addMmsEmailReceiver(EmailAccount emailAccount) {
 		MmsEmailService mmsEmailService = new MmsEmailService(emailAccount);
 		
 		mmsEmailServices.add(mmsEmailService);
@@ -82,7 +82,7 @@ public class MmsServiceManager extends Thread  {
 	 * Remove the {@link EmailAccount} from the list
 	 * @param emailAccount
 	 */
-	public void removeMmsEmailReceiver(EmailAccount emailAccount) {
+	public synchronized void removeMmsEmailReceiver(EmailAccount emailAccount) {
 		for (MmsService mmsEmailService : this.mmsEmailServices) {
 			if (((MmsEmailService)mmsEmailService).getEmailAccount().equals(emailAccount)) {
 				this.mmsEmailServices.remove(mmsEmailService);
@@ -134,10 +134,9 @@ public class MmsServiceManager extends Thread  {
 					mmsEmailService.updateLastCheck(this.emailAccountDao);
 					
 					for (MmsMessage mmsMessage : mmsMessages) {
-						FrontlineMultimediaMessage frontlineMultimediaMessage = MmsUtils.create(mmsMessage);
 						if (this.eventBus != null) {
 							// Let's notify the observers that a new MMS has arrived
-							this.eventBus.notifyObservers(new MmsReceivedNotification(frontlineMultimediaMessage));
+							this.eventBus.notifyObservers(new MmsReceivedNotification(mmsMessage));
 						}
 					}
 					mmsEmailService.setStatus(MmsEmailServiceStatus.READY, this.eventBus);
@@ -173,7 +172,7 @@ public class MmsServiceManager extends Thread  {
 	/**
 	 * Update the {@link MmsEmailService}s
 	 */
-	public void updateMmsEmailService(EmailAccount emailAccount) {
+	public synchronized void updateMmsEmailService(EmailAccount emailAccount) {
 		for (MmsService mmsService : this.mmsEmailServices) {
 			MmsEmailService mmsEmailService = (MmsEmailService) mmsService;
 			if (mmsEmailService.getEmailAccount().isSameDatabaseEntity(emailAccount)) {

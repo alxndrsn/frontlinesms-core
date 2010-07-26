@@ -37,6 +37,7 @@ import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
+import net.frontlinesms.data.events.EntitySavedNotification;
 import net.frontlinesms.data.repository.*;
 import net.frontlinesms.debug.RandomDataGenerator;
 import net.frontlinesms.email.EmailException;
@@ -44,11 +45,13 @@ import net.frontlinesms.events.*;
 import net.frontlinesms.listener.EmailListener;
 import net.frontlinesms.listener.UIListener;
 import net.frontlinesms.messaging.mms.email.MmsEmailServiceStatus;
+import net.frontlinesms.messaging.mms.events.MmsReceivedNotification;
 import net.frontlinesms.messaging.mms.events.MmsServiceStatusNotification;
 import net.frontlinesms.messaging.sms.SmsService;
 import net.frontlinesms.messaging.sms.SmsServiceManager;
 import net.frontlinesms.messaging.sms.events.NoSmsServicesConnectedNotification;
 import net.frontlinesms.messaging.sms.internet.SmsInternetService;
+import net.frontlinesms.mms.MmsMessage;
 import net.frontlinesms.plugins.*;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.ui.events.TabChangedNotification;
@@ -1348,7 +1351,13 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		add(row, createTableCell(InternationalisationUtils.getDatetimeFormat().format(message.getDate())));
 		add(row, createTableCell(message.getSenderMsisdn()));
 		add(row, createTableCell(message.getRecipientMsisdn()));
-		add(row, createTableCell(message.getTextContent()));
+		
+		if (message instanceof FrontlineMultimediaMessage && ((FrontlineMultimediaMessage) message).getSubject().length() > 0) {
+			add(row, createTableCell(((FrontlineMultimediaMessage) message).getSubject()));
+		} else {
+			add(row, createTableCell(message.getTextContent()));
+		}
+		
 		return row;
 	}
 
@@ -1504,7 +1513,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		Contact sender = contactDao.getFromMsisdn(message.getSenderMsisdn());
 		String strSender = (sender == null ? message.getSenderMsisdn() : sender.getName());
 		
-		newEvent(new Event(Event.TYPE_INCOMING_MESSAGE, InternationalisationUtils.getI18NString(EVENT_DESCRIPTION, strSender, message.getTextContent())));
+		int eventType = (message instanceof FrontlineMultimediaMessage ? Event.TYPE_INCOMING_MMS : Event.TYPE_INCOMING_MESSAGE);
+		newEvent(new Event(eventType, InternationalisationUtils.getI18NString(EVENT_DESCRIPTION, strSender, message.getTextContent())));
 		setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGE_RECEIVED));
 		LOG.trace("EXIT");
 	}
@@ -1816,6 +1826,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			if (mmsServiceStatusNotification.getStatus().equals(MmsEmailServiceStatus.FAILED_TO_CONNECT)) {
 				this.newEvent(new Event(Event.TYPE_SMS_INTERNET_SERVICE_RECEIVING_FAILED, 
 											mmsServiceStatusNotification.getMmsService().getServiceName() + " - " + InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED)));
+			}
+		} else if (notification instanceof EntitySavedNotification<?>) {
+			Object entity = ((EntitySavedNotification<?>) notification).getDatabaseEntity();
+			if (entity instanceof FrontlineMultimediaMessage) {
+				this.incomingMessageEvent((FrontlineMultimediaMessage) entity);
 			}
 		}
 	}
