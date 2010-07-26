@@ -10,8 +10,7 @@ import net.frontlinesms.FrontlineUtils;
 import org.apache.log4j.Logger;
 
 /**
- * @author Alex
- *
+ * @author Alex Anderson <alex@frontlinesms.com>
  */
 public class ClasspathPropertySet extends BasePropertySet {
 //> STATIC CONSTANTS
