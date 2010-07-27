@@ -9,6 +9,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import javax.mail.internet.ContentType;
+import javax.mail.internet.MimeUtility;
+import javax.mail.internet.ParseException;
+
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
@@ -24,6 +28,7 @@ import net.frontlinesms.mms.email.receive.parser.ke.SafaricomKeMmsParser;
 import net.frontlinesms.mms.email.receive.parser.ru.MtsRuMmsParser;
 import net.frontlinesms.mms.email.receive.parser.uk.*;
 import net.frontlinesms.mms.email.receive.parser.us.AttUsMmsParser;
+import net.frontlinesms.mms.email.receive.parser.us.VerizonUsMmsParser;
 import net.frontlinesms.resources.ResourceUtils;
 
 import org.apache.log4j.Logger;
@@ -78,13 +83,29 @@ public class MmsUtils {
 	/** Binary files utils */
 	private static FrontlineMultimediaMessagePart createBinaryPart(BinaryMmsMessagePart imagePart) {
 		// save the binary data to file
-		FrontlineMultimediaMessagePart fmmPart = FrontlineMultimediaMessagePart.createBinaryPart(imagePart.getFilename()/*, getThumbnail(imagePart)*/);
-		File localFile = getUniqueFile(fmmPart);
+		FrontlineMultimediaMessagePart fmmPart = FrontlineMultimediaMessagePart.createBinaryPart(imagePart.getFilename());
+		File localFile = getUniqueFilename(appendFileExtensionIfNeeded(fmmPart, imagePart.getMimeType()));
 		
 		writeBinaryFile(localFile, imagePart.getData());
 		return fmmPart; 
 	}
 	
+	private static FrontlineMultimediaMessagePart appendFileExtensionIfNeeded(FrontlineMultimediaMessagePart fmmPart, String mimeType) {
+		if (mimeType != null && (fmmPart.getFilename().indexOf('.') < 0 || fmmPart.getFilename().endsWith("."))) { 
+			fmmPart.setFilename(fmmPart.getFilename() + getExtensionFromImageMimeType(mimeType));
+		}
+		
+		return fmmPart;
+	}
+
+	private static String getExtensionFromImageMimeType(String mimeType) {
+		try {
+			return "." + new ContentType(mimeType).getSubType();
+		} catch (ParseException e) {
+			return "";
+		}
+	}
+
 	private static void writeBinaryFile(File file, byte[] data) {
 		FileOutputStream fos = null;
 		BufferedOutputStream out = null;
@@ -101,7 +122,7 @@ public class MmsUtils {
 		}
 	}
 	
-	private static File getUniqueFile(FrontlineMultimediaMessagePart fmmPart) {
+	private static File getUniqueFilename(FrontlineMultimediaMessagePart fmmPart) {
 		File localFile = getFile(fmmPart);
 		while(localFile.exists()) {
 			// need to handle file collisions here - e.g. rename the file
@@ -124,12 +145,15 @@ public class MmsUtils {
 	
 	public static List<EmailMmsParser> getAllEmailMmsParsers () {
 		return Arrays.asList(new EmailMmsParser[]{
+				new O2UkMmsParser(),
+				new OrangeUkMmsParser(),
 				new ThreeUkMmsParser(),
 				new TmobileUkMmsParser(),
 				new VodafoneUkMmsParser(),
 				new AttUsMmsParser(),
 				new MtsRuMmsParser(),
 				new SafaricomKeMmsParser(),
+				new VerizonUsMmsParser(),
 				
 				new GenericMmsParser(),
 				});
