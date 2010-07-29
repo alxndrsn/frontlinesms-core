@@ -6,7 +6,6 @@ package net.frontlinesms.ui.handler.phones;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_MODEM_LIST_UPDATED;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_ADVANCED_PHONE_MANAGER;
 
-import java.security.Provider.Service;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;

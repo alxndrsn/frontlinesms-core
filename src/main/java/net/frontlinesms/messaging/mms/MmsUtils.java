@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Random;
 
 import javax.mail.internet.ContentType;
-import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
 
 import net.frontlinesms.FrontlineUtils;
@@ -24,6 +23,7 @@ import net.frontlinesms.mms.MmsMessagePart;
 import net.frontlinesms.mms.TextMmsMessagePart;
 import net.frontlinesms.mms.email.receive.parser.EmailMmsParser;
 import net.frontlinesms.mms.email.receive.parser.GenericMmsParser;
+import net.frontlinesms.mms.email.receive.parser.fr.VirginMobileFrMmsParser;
 import net.frontlinesms.mms.email.receive.parser.ke.SafaricomKeMmsParser;
 import net.frontlinesms.mms.email.receive.parser.ru.MtsRuMmsParser;
 import net.frontlinesms.mms.email.receive.parser.uk.*;
@@ -154,6 +154,7 @@ public class MmsUtils {
 				new MtsRuMmsParser(),
 				new SafaricomKeMmsParser(),
 				new VerizonUsMmsParser(),
+				new VirginMobileFrMmsParser(),
 				
 				new GenericMmsParser(),
 				});
