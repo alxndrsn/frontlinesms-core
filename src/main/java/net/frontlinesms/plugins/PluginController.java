@@ -13,14 +13,18 @@ import net.frontlinesms.ui.UiGeneratorController;
 
 /**
  * Basic interface that all FrontlineSMS plugins must implement.
+ * Implementers must also have an empty no-arg constructor.  This may be called at any time, and
+ * should not initialise variables. 
  * @author Alex
  */
 public interface PluginController {
 	/**
-	 * Gets the name for this plugin.  This should be internationalised if that is suitable.
+	 * Gets the name for this plugin from the key given in the annotation.
+	 * Please note that this function may perform some intensive resources loading.
+	 * @param locale 
 	 * @return The name of this plugin.
 	 */
-	public String getName();
+	public String getName(Locale locale);
 	
 	/**
 	 * Initialise the plugin from the {@link FrontlineSMS} controller instance. 

@@ -37,9 +37,9 @@
 			</popupmenu>
 		</table>
 		<button tooltip="i18n.tooltip.click.for.help" valign="bottom" action="showHelpPage('phones.htm')" icon="/icons/big_help.png" type="link"/>
-		<panel columns="1" gap="8">
-			<button type="link" text="i18n.phones.help.moreinfo" action="showHelpPage('phones.htm')"/>
-			<button type="link" text="i18n.phones.help.trouble" action="showHelpPage('troubleshooting.htm')"/>
+		<panel columns="1" gap="8" halign="left">
+			<button type="link" text="i18n.phones.help.moreinfo" action="showHelpPage('phones.htm')" halign="left"/>
+			<button type="link" text="i18n.phones.help.trouble" action="showHelpPage('troubleshooting.htm')" halign="left"/>
 		</panel>
 		<button icon="/icons/big_phone_manualConfigure.png" name="ManualConfig" text="i18n.action.manually.connect" halign="right" action="showPhoneConfigDialog(phoneManager_modemListError)" weightx="1"/>
 		<button icon="/icons/big_phone_autoDetect.png" name="AutoDetect" tooltip="i18n.tooltip.detect.phones" text="i18n.action.detect.phones" action="phoneManager_detectModems" halign="right"/>

@@ -18,7 +18,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
 /**
  * Base implementation of the {@link PluginController} annotation.
  * 
- * Implementers of this class *must* implement the {@link PluginControllerProperties} class.
+ * Implementers of this class *must* carry the {@link PluginControllerProperties} annotation.
  * 
  * This class includes default implementation of the text resource loading methods.  These attempt to load text resources
  * in the following way:
@@ -66,10 +66,19 @@ public abstract class BasePluginController implements PluginController {
 	 */
 	protected abstract Object initThinletTab(UiGeneratorController uiController);
 	
-	/** @see PluginController#getName() */
-	public String getName() {
-		assert(this.getClass().isAnnotationPresent(PluginControllerProperties.class)): "Implementers of this class *must* implement the PluginControllerProperties annotation.";
-		return this.getClass().getAnnotation(PluginControllerProperties.class).name();
+	/**
+	 * @see PluginController#getName(Locale locale)
+	 * This actually loads the whole property file for this plugin and takes the plugin name.
+	 * Try to avoid calling this function frequently.
+	 **/
+	public String getName(Locale locale) {
+		assert(this.getClass().isAnnotationPresent(PluginControllerProperties.class)): "Implementers of this class *must* implement the PluginControllerProperties annotation and specify the i18nKey attribute.";
+		String pluginName = getTextResource(locale).get(this.getClass().getAnnotation(PluginControllerProperties.class).i18nKey());
+		if (pluginName == null) {
+			return this.getClass().getAnnotation(PluginControllerProperties.class).name();
+		} else {
+			return pluginName;
+		}
 	}
 	
 	/** @see net.frontlinesms.plugins.PluginController#getDefaultTextResource() */

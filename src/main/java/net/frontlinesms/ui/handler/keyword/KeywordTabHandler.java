@@ -822,7 +822,11 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	public static String getDisplayableDescription(Keyword keyword) {
 		boolean hasDescription = (keyword.getDescription() != null && keyword.getDescription().length() > 0); 
 		if (keyword.getKeyword().length() == 0 && !hasDescription) return InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_BLANK_KEYWORD_DESCRIPTION);
-		else return keyword.getDescription();		
+		else if (keyword.getKeyword().equals(FrontlineSMSConstants.MMS_KEYWORD)){
+			return InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_MMS_KEYWORD_DESCRIPTION);
+		} else {
+			return keyword.getDescription();
+		}
 	}
 	
 	/**
