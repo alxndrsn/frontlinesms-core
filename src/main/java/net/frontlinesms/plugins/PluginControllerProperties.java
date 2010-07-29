@@ -18,6 +18,8 @@ public @interface PluginControllerProperties {
 	public final String NO_VALUE = "_____*****-----surely there is a convention for this?";
 	
 	/** The human-readable name for this plugin, to be displayed in menus etc. */
+	String i18nKey();
+	/** The default name for this plugin */
 	String name();
 	/** The path to the icon for this plugin, on the classpath.  The icon is loaded with {@link Thinlet#getIcon(String)} */
 	String iconPath();

@@ -271,14 +271,14 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			Object pluginMenu = find("menu_tabs");
 			for(Class<PluginController> pluginClass : PluginProperties.getInstance().getPluginClasses()) {
 				// Try to get an icon from the classpath
-				String pluginName;
+				String pluginName = pluginClass.newInstance().getName(currentResourceBundle.getLocale());
 				String iconPath;
 				if(pluginClass.isAnnotationPresent(PluginControllerProperties.class)) {
 					PluginControllerProperties properties = pluginClass.getAnnotation(PluginControllerProperties.class);
-					pluginName = properties.name();
+					//pluginName = properties.name();
 					iconPath = properties.iconPath();
 				} else {
-					pluginName = pluginClass.getSimpleName();
+					//pluginName = pluginClass.getSimpleName();
 					iconPath = '/' + pluginClass.getPackage().getName().replace('.', '/') + '/' + pluginClass.getSimpleName() + ".png";
 				}
 				Object menuItem = createCheckboxMenuitem(iconPath, pluginName, PluginProperties.getInstance().isPluginEnabled(pluginClass));
