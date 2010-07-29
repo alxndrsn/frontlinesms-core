@@ -17,7 +17,7 @@
     	<list name="accountsList" rowspan="4" weightx="1" weighty="1"/>
     	<button type="link" halign="right" action="showEmailAccountsSettings" icon="/icons/emailAccount_edit.png" text="i18n.common.email.account.settings"/>
     </panel>
-    <label icon="/icons/email_receive.png" text="i18n.common.to"/>
+    <label icon="/icons/email_receive.png" text="i18n.common.recipient.to"/>
     <textfield weightx="1" name="tfRecipient"/>
     <button action="selectMailRecipient" halign="left" icon="/icons/user_receiver.png"/>
     <separator colspan="3"/>

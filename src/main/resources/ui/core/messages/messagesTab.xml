@@ -34,7 +34,7 @@
 		                    <textfield action="messageHistoryDateChanged" columns="10" name="tfStartDate"/>
 		                    <button action="showDateSelecter(tfStartDate)" icon="/icons/date.png"/>
 		                </panel>
-		                <label icon="/icons/date_end.png" text="i18n.common.to"/>
+		                <label icon="/icons/date_end.png" text="i18n.common.until"/>
 		                <panel>
 		                    <textfield action="messageHistoryDateChanged" columns="10" name="tfEndDate"/>
 		                    <button action="showDateSelecter(tfEndDate)" icon="/icons/date.png"/>
