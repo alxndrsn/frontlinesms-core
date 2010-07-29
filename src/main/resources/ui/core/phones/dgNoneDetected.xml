@@ -24,9 +24,9 @@
     </panel>
     
     <panel halign="left" bottom="4" columns="1" gap="15" left="4" right="4" top="4">
-    	<button type="link" text="i18n.phones.help.moreinfo" action="showHelpPage('phones.htm')"/>
-			<button type="link" text="i18n.phones.help.trouble" action="showHelpPage('troubleshooting.htm')"/>
-    	<checkbox colspan="2" name="cbAlwaysShow" action="manageAlwaysShow(cbAlwaysShow.selected)" selected="true" text="i18n.device.connection.always.show"/>
+    	<button type="link" text="i18n.phones.help.moreinfo" action="showHelpPage('phones.htm')" halign="left"/>
+		<button type="link" text="i18n.phones.help.trouble" action="showHelpPage('troubleshooting.htm')" halign="left"/>
+    	<checkbox colspan="2" name="cbAlwaysShow" action="manageAlwaysShow(cbAlwaysShow.selected)" selected="true" text="i18n.device.connection.always.show" halign="left"/>
     </panel>
     <panel columns="2" gap="7" halign="center">
 	    <button type="default" action="retryDeviceConnection" text="i18n.common.db.retry" icon="/icons/refresh.png"/>
