@@ -10,13 +10,13 @@
         
         <label icon="/icons/group_join.png" text="i18n.sentence.add.sender.to.group"/>
         <label name="lbJoinGroup"/>
-       	<button name="btJoinGroupSelect" text="Select" type="link" action="selectJoinGroup" halign="left"/>
-        <button name="btJoinGroupRemove" text="Remove" type="link" action="removeJoinGroup" halign="left" visible="false"/>
+       	<button name="btJoinGroupSelect" text="i18n.common.group.select" type="link" action="selectJoinGroup" halign="left"/>
+        <button name="btJoinGroupRemove" text="i18n.action.remove" type="link" action="removeJoinGroup" halign="left" visible="false"/>
         
         <label icon="/icons/group_leave.png" text="i18n.sentence.remove.sender.from.group"/>
         <label name="lbLeaveGroup"/>
-        <button name="btLeaveGroupSelect" text="Select" type="link" action="selectLeaveGroup" halign="left"/>
-        <button name="btLeaveGroupRemove" text="Remove" type="link" action="removeLeaveGroup" halign="left" visible="false"/>
+        <button name="btLeaveGroupSelect" text="i18n.common.group.select" type="link" action="selectLeaveGroup" halign="left"/>
+        <button name="btLeaveGroupRemove" text="i18n.action.remove" type="link" action="removeLeaveGroup" halign="left" visible="false"/>
         
         <panel colspan="3" gap="5" halign="right">
             <button action="keywordTab_doSave(pnKeywordActionsSimple)" icon="/icons/tick.png" name="btSave" text="i18n.action.save"/>
