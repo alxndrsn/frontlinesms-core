@@ -88,8 +88,9 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.*;
  * We're now in the process of separating this class into smaller classes which control separate,
  * modular parts of the UI, e.g. the {@link HomeTabHandler}.
  * 
- * @author Alex Anderson  alex(at)masabi(dot)com
+ * @author Alex Anderson  <alex@frontlinesms.com>
  * @author Carlos Eduardo Genz kadu(at)masabi(dot)com
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 @SuppressWarnings("serial")
 public class UiGeneratorController extends FrontlineUI implements EmailListener, UIListener, SingleGroupSelecterPanelOwner, EventObserver {
@@ -275,10 +276,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				String iconPath;
 				if(pluginClass.isAnnotationPresent(PluginControllerProperties.class)) {
 					PluginControllerProperties properties = pluginClass.getAnnotation(PluginControllerProperties.class);
-					//pluginName = properties.name();
 					iconPath = properties.iconPath();
 				} else {
-					//pluginName = pluginClass.getSimpleName();
 					iconPath = '/' + pluginClass.getPackage().getName().replace('.', '/') + '/' + pluginClass.getSimpleName() + ".png";
 				}
 				Object menuItem = createCheckboxMenuitem(iconPath, pluginName, PluginProperties.getInstance().isPluginEnabled(pluginClass));
