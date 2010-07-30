@@ -130,6 +130,6 @@ public class MmsEmailService implements MmsService {
 	}
 
 	public String getDisplayPort() {
-		return null;
+		return String.valueOf(this.getEmailAccount().getAccountServerPort());
 	}
 }
