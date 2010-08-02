@@ -4,13 +4,25 @@
 package net.frontlinesms.data;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import javax.jms.Message;
+
+import org.hibernate.impl.SessionFactoryImpl;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
+import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.junit.BaseTestCase;
 
@@ -18,14 +30,15 @@ import net.frontlinesms.junit.BaseTestCase;
  * @author Alex Anderson <alex@frontlinesms.com>
  */
 public class DatabaseMigrationTest extends BaseTestCase {
-	private static final FrontlineMessage STANDARD_MESSAGE = null;
-	private static final FrontlineMessage MM_MESSAGE = null;
+	private static final FrontlineMessage STANDARD_MESSAGE = FrontlineMessage.createOutgoingMessage(System.currentTimeMillis(), "+123456789", "+987654321", "hi.");
+	@SuppressWarnings("unchecked")
+	private static final FrontlineMultimediaMessage MM_MESSAGE = new FrontlineMultimediaMessage(Type.OUTBOUND, "hi", "sup", Collections.EMPTY_LIST);
 	
 	private MessageDao dao;
 	
 	public void testAddingMultimediaMessages() {
 		// Initialise the database WITHOUT multimedia messages
-		initSpringHibernate(FrontlineMessage.class);
+		initSpringHibernate("testAddingMultimediaMessages.1");
 		
 		// persist some non-multimedia messages
 		dao.saveMessage(STANDARD_MESSAGE);
@@ -39,9 +52,7 @@ public class DatabaseMigrationTest extends BaseTestCase {
 		deinitSpringHibernate();
 		
 		// Initiliase the database WITH multimedia messages
-		initSpringHibernate(FrontlineMessage.class,
-				FrontlineMultimediaMessage.class,
-				FrontlineMultimediaMessagePart.class);
+		initSpringHibernate("testAddingMultimediaMessages.2");
 		
 		// persist some multimedia messages
 		dao.saveMessage(MM_MESSAGE);
@@ -59,14 +70,10 @@ public class DatabaseMigrationTest extends BaseTestCase {
 	 * Initialise the application context.
 	 * @param entityClasses the classes to initialise as JPA entities for persistence and retrieval
 	 */
-	private void initSpringHibernate(Class<?>... entityClasses) {
+	private void initSpringHibernate(String resourceName, Class<?>... entityClasses) {
 		// load application context
-		ClassPathXmlApplicationContext app = new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-spring.xml");
-		
-		// TODO inject database entity list into application context
-		
-		// refresh application context
-		app.refresh();
+		ClassPathXmlApplicationContext app = new ClassPathXmlApplicationContext(
+				getClass().getSimpleName() + "-" + resourceName + ".xml", this.getClass());
 		
 		// update class properties from application context
 		this.dao = (MessageDao) app.getBean("messageDao");
