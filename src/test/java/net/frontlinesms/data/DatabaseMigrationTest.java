@@ -6,14 +6,13 @@ package net.frontlinesms.data;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.junit.BaseTestCase;
-import net.frontlinesms.junit.HibernateTestCase;
 
 /**
  * @author Alex Anderson <alex@frontlinesms.com>
@@ -22,7 +21,7 @@ public class DatabaseMigrationTest extends BaseTestCase {
 	private static final FrontlineMessage STANDARD_MESSAGE = null;
 	private static final FrontlineMessage MM_MESSAGE = null;
 	
-	MessageDao dao;
+	private MessageDao dao;
 	
 	public void testAddingMultimediaMessages() {
 		// Initialise the database WITHOUT multimedia messages
@@ -56,16 +55,26 @@ public class DatabaseMigrationTest extends BaseTestCase {
 		deinitSpringHibernate();
 	}
 
-	private void deinitSpringHibernate() {
-		// TODO Auto-generated method stub
-		
-	}
-
 	/**
 	 * Initialise the application context.
 	 * @param entityClasses the classes to initialise as JPA entities for persistence and retrieval
 	 */
 	private void initSpringHibernate(Class<?>... entityClasses) {
-		// TODO Auto-generated method stub
+		// load application context
+		ClassPathXmlApplicationContext app = new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-spring.xml");
+		
+		// TODO inject database entity list into application context
+		
+		// refresh application context
+		app.refresh();
+		
+		// update class properties from application context
+		this.dao = (MessageDao) app.getBean("messageDao");
+	}
+
+	/** Undoes the configuration from {@link #initSpringHibernate(Class...)} */
+	private void deinitSpringHibernate() {
+		// unset class properties loaded from application context
+		this.dao = null;
 	}
 }
