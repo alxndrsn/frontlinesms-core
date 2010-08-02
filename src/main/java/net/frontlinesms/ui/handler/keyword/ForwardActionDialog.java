@@ -14,7 +14,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_FORWA
 
 import java.util.List;
 
-import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
@@ -101,38 +100,6 @@ public class ForwardActionDialog extends BaseActionDialog {
 	}
 
 //> UI EVENT METHODS
-	/**
-	 * Adds the $sender to the text, allowing the user to forward the sender.
-	 */
-	public void addKeywordToForwardMessage(String currentText, Object textArea) {
-		ui.setText(textArea, currentText + ' ' + CsvUtils.MARKER_KEYWORD_KEY);
-		this.forwardTextChanged();
-	}
-	
-	/**
-	 * Adds the $sender to the text, allowing the user to forward the sender.
-	 */
-	public void addSenderNumberToForwardMessage(String currentText, Object textArea) {
-		ui.setText(textArea, currentText + ' ' + CsvUtils.MARKER_SENDER_NUMBER);
-		this.forwardTextChanged();
-	}
-	
-	/**
-	 * Adds the $sender to the text, allowing the user to forward the sender.
-	 */
-	public void addSenderToForwardMessage(String currentText, Object textArea) {
-		ui.setText(textArea, currentText + ' ' + CsvUtils.MARKER_SENDER_NAME);
-		this.forwardTextChanged();
-	}
-
-	/**
-	 * Adds the $content to the text, allowing the user to forward the message content.
-	 */
-	public void addMsgContentToForwardMessage(String currentText, Object textArea) {
-		ui.setText(textArea, currentText + ' ' + CsvUtils.MARKER_MESSAGE_CONTENT);
-		this.forwardTextChanged();
-	}
-	
 	/**
 	 * Creates a new forward message action.
 	 */

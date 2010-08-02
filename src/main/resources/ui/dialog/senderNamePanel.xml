@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <panel gap="5">
     <label text="i18n.sentence.you.can.include"/>
-    <button icon="/icons/user_sender.png" name="btSenderName" text="i18n.common.sender.name"/>
-    <button icon="/icons/phone_number.png" name="btSenderNumber" text="i18n.common.message.sender.number"/>
+    	<button name="btSenderName" icon="/icons/user.png" text="i18n.common.sender.name"/>
+	    <button name="btSenderNumber" icon="/icons/phone_number.png" text="i18n.common.message.sender.number" weightx="1"/>
+        <button name="btKeyword" icon="/icons/keyword.png" text="i18n.common.keyword" weightx="1"/>
+	    <button name="btMessageContent" icon="/icons/message.png" text="i18n.common.message.content"/>
 </panel>

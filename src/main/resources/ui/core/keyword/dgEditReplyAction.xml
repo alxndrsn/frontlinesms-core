@@ -5,7 +5,7 @@
 	<separator/>
 	<separator/>
     <panel gap="5" halign="center">
-        <button icon="/icons/tick.png" text="i18n.action.save" action="save"/>
-		<button action="removeDialog" halign="left" icon="/icons/cross.png" text="i18n.action.cancel" />
+        <button type="default" icon="/icons/tick.png" text="i18n.action.save" action="save"/>
+		<button type="cancel" action="removeDialog" halign="left" icon="/icons/cross.png" text="i18n.action.cancel" />
     </panel>
 </dialog>

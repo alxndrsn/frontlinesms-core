@@ -7,15 +7,15 @@
     <textarea colspan="3" name="forward" weighty="1" action="forwardTextChanged(this.text)"/>
     <label halign="left" text="i18n.sentence.you.can.include"/>
     <panel colspan="2" gap="8">
-	    <button action="addSenderToForwardMessage(forward.text, forward)" icon="/icons/user.png" text="i18n.common.sender.name"/>
-	    <button action="addSenderNumberToForwardMessage(forward.text, forward)" icon="/icons/phone_number.png" name="btSenderNumber" text="i18n.common.message.sender.number" weightx="1"/>
-        <button action="addKeywordToForwardMessage(forward.text, forward)" icon="/icons/keyword.png" name="btKeyword" text="i18n.common.keyword" weightx="1"/>
-	    <button action="addMsgContentToForwardMessage(forward.text, forward)" icon="/icons/message.png" text="i18n.common.message.content"/>
+	    <button action="addConstantToCommand(forward.text, forward, 0)" icon="/icons/user.png" text="i18n.common.sender.name"/>
+	    <button action="addConstantToCommand(forward.text, forward, 1)" icon="/icons/phone_number.png" name="btSenderNumber" text="i18n.common.message.sender.number" weightx="1"/>
+        <button action="addConstantToCommand(forward.text, forward, 3)" icon="/icons/keyword.png" name="btKeyword" text="i18n.common.keyword" weightx="1"/>
+	    <button action="addConstantToCommand(forward.text, forward, 2)" icon="/icons/message.png" text="i18n.common.message.content"/>
     </panel>
     <separator colspan="3"/>
     <separator colspan="3"/>
     <panel colspan="3" gap="5" halign="center" weightx="1">
-        <button action="do_newKActionForward(forwardForm_groupList, forward.text)" name="btSave" icon="/icons/tick.png" text="i18n.action.save"/>
-    	<button action="removeDialog" icon="/icons/cross.png" text="i18n.action.cancel"/>
+        <button type="default" action="do_newKActionForward(forwardForm_groupList, forward.text)" name="btSave" icon="/icons/tick.png" text="i18n.action.save"/>
+    	<button type="cancel" action="removeDialog" icon="/icons/cross.png" text="i18n.action.cancel"/>
     </panel>
 </dialog>
