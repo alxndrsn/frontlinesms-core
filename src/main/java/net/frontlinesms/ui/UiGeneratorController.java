@@ -66,6 +66,7 @@ import net.frontlinesms.ui.i18n.*;
 
 import org.apache.log4j.Logger;
 import org.smslib.CIncomingMessage;
+import org.springframework.dao.DataAccessException;
 
 import thinlet.FrameLauncher;
 import thinlet.Thinlet;
@@ -100,6 +101,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public static final int DEFAULT_HEIGHT = 768;
 	/** Default width of the Thinlet frame launcher */
 	public static final int DEFAULT_WIDTH = 1024;
+	private static final String I18N_DATABASE_ACCESS_ERROR = "message.database.access.error";
 
 //> INSTANCE PROPERTIES
 	/** Logging object */
@@ -1872,6 +1874,17 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void refreshContactsTab() {
 		if (this.currentTab.equals(TAB_CONTACT_MANAGER)) {
 			this.contactsTabController.refresh();
+		}
+	}
+	
+	@Override
+	protected void handleException(Throwable throwable) {
+		if (throwable instanceof DataAccessException) {
+			// If the database couldn't be reached, display a message for the user
+			this.alert(InternationalisationUtils.getI18NString(I18N_DATABASE_ACCESS_ERROR));
+		} else {
+			// Else throw a normal error dialog
+			super.handleException(throwable);
 		}
 	}
 }
