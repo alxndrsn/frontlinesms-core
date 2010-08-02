@@ -77,25 +77,28 @@ public class CsvImporter {
 					String otherPhoneNumber = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE);
 					boolean active = Boolean.valueOf(getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_STATUS));
 					String groups = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_GROUPS);
+					
+					Contact c = new Contact(name, number, otherPhoneNumber, email, notes, active);						
 					try {
-						Contact c = new Contact(name, number, otherPhoneNumber, email, notes, active);
 						contactDao.saveContact(c);
-						
-						// We make the contact join its groups
-						String[] pathList = groups.split(GROUPS_DELIMITER);
-						for (String path : pathList) {
-							if (path.length() == 0) continue;
-							
-							if (!path.startsWith(String.valueOf(Group.PATH_SEPARATOR))) {
-								path = Group.PATH_SEPARATOR + path;
-							}
-							
-							Group group = createGroups(groupDao, path);
-							groupMembershipDao.addMember(group, c);
-						}
 					} catch (DuplicateKeyException e) {
 						// FIXME should actually pass details of this back to the user.
 						LOG.debug("Contact already exist with this number [" + number + "]", e);
+						// If the contact already existed, let's reach the existing one to fill the groupMembership
+						c = contactDao.getFromMsisdn(number);
+					}
+					
+					// We make the contact join its groups
+					String[] pathList = groups.split(GROUPS_DELIMITER);
+					for (String path : pathList) {
+						if (path.length() == 0) continue;
+						
+						if (!path.startsWith(String.valueOf(Group.PATH_SEPARATOR))) {
+							path = Group.PATH_SEPARATOR + path;
+						}
+						
+						Group group = createGroups(groupDao, path);
+						groupMembershipDao.addMember(group, c);
 					}
 				}
 			}

@@ -1787,6 +1787,24 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		randy.generate(200);
 	}
 	
+	/** UI Event method (debug): Delete all contacts and groups
+	 * @throws IOException */
+	public void deleteAllGroupsAndContacts() {
+		// Delete all groups and their contacts
+		for (Group group : this.groupDao.getAllGroups()) {
+			this.groupDao.deleteGroup(group, true);
+		}
+		
+		// And then the remaining contacts
+		for (Contact contact : this.contactDao.getAllContacts()) {
+			this.contactDao.deleteContact(contact);
+		}
+		
+		removeConfirmationDialog();
+		contactsTabController.refresh();
+		infoMessage(InternationalisationUtils.getI18NString(MESSAGE_GROUPS_AND_CONTACTS_DELETED));
+	}
+	
 	public void showGroupSelecter() {
 		Object dialog = super.createDialog("Group Selecter Test");
 		GroupSelecterPanel selecter = new GroupSelecterPanel(this, this);
