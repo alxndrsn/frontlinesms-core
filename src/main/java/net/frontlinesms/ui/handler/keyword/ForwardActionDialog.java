@@ -104,6 +104,22 @@ public class ForwardActionDialog extends BaseActionDialog {
 	/**
 	 * Adds the $sender to the text, allowing the user to forward the sender.
 	 */
+	public void addKeywordToForwardMessage(String currentText, Object textArea) {
+		ui.setText(textArea, currentText + ' ' + CsvUtils.MARKER_KEYWORD_KEY);
+		this.forwardTextChanged();
+	}
+	
+	/**
+	 * Adds the $sender to the text, allowing the user to forward the sender.
+	 */
+	public void addSenderNumberToForwardMessage(String currentText, Object textArea) {
+		ui.setText(textArea, currentText + ' ' + CsvUtils.MARKER_SENDER_NUMBER);
+		this.forwardTextChanged();
+	}
+	
+	/**
+	 * Adds the $sender to the text, allowing the user to forward the sender.
+	 */
 	public void addSenderToForwardMessage(String currentText, Object textArea) {
 		ui.setText(textArea, currentText + ' ' + CsvUtils.MARKER_SENDER_NAME);
 		this.forwardTextChanged();

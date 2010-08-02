@@ -8,6 +8,8 @@
     <label halign="left" text="i18n.sentence.you.can.include"/>
     <panel colspan="2" gap="8">
 	    <button action="addSenderToForwardMessage(forward.text, forward)" icon="/icons/user.png" text="i18n.common.sender.name"/>
+	    <button action="addSenderNumberToForwardMessage(forward.text, forward)" icon="/icons/phone_number.png" name="btSenderNumber" text="i18n.common.message.sender.number" weightx="1"/>
+        <button action="addKeywordToForwardMessage(forward.text, forward)" icon="/icons/keyword.png" name="btKeyword" text="i18n.common.keyword" weightx="1"/>
 	    <button action="addMsgContentToForwardMessage(forward.text, forward)" icon="/icons/message.png" text="i18n.common.message.content"/>
     </panel>
     <separator colspan="3"/>
