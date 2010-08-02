@@ -7,26 +7,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import javax.jms.Message;
-
-import org.hibernate.impl.SessionFactoryImpl;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
-import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.junit.BaseTestCase;
 
 /**
+ * Check that database changes do not break persistence.
  * @author Alex Anderson <alex@frontlinesms.com>
  */
 public class DatabaseMigrationTest extends BaseTestCase {
