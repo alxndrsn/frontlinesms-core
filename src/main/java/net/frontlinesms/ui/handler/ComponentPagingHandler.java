@@ -7,7 +7,7 @@ import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
 /**
  * Thinlet UI event handler for paging lists and tables.
- * @author Alex alex@frontlinesms.com
+ * @author Alex Anderson <alex@frontlinesms.com>
  */
 @TextResourceKeyOwner
 public class ComponentPagingHandler implements ThinletUiEventHandler {
@@ -24,8 +24,6 @@ public class ComponentPagingHandler implements ThinletUiEventHandler {
 	private static final String COMPONENT_BT_NEXT_PAGE = "btNextPage";
 	/** UI Component name for  */
 	private static final String COMPONENT_BT_PREVIOUS_PAGE = "btPreviousPage";
-	/** The default value for the number of items per page. */
-	private static final int ITEMS_PER_PAGE_DEFAULT = 100;
 
 //> INSTANCE VARIABLES
 	/** {@link UiGeneratorController} that the paging and list components are attached to */
@@ -45,7 +43,7 @@ public class ComponentPagingHandler implements ThinletUiEventHandler {
 	/** The total number of items this list contains, across all pages. */
 	private int totalListItems;
 	/** The maximum items to display per page. */
-	private int maxItemsPerPage = ITEMS_PER_PAGE_DEFAULT;
+	private final int maxItemsPerPage;
 	
 //> CONSTRUCTORS
 	/**
@@ -61,6 +59,7 @@ public class ComponentPagingHandler implements ThinletUiEventHandler {
 		this.ui = ui;
 		this.itemProvider = itemProvider;
 		this.list = list;
+		this.maxItemsPerPage = ui.getProperties().getItemsPerPage();
 	}
 
 //> ACCESSORS

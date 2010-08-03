@@ -37,6 +37,8 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	private static final String KEY_HOMETABLOGO_KEEP_ORIGINAL_SIZE = "hometab.logo.keeporiginalsize";
 	/** Property key (double) the price per SMS */
 	private static final String KEY_SMS_COST = "sms.cost";
+	/** Property key (int) the number of items to display per page */
+	private static final String KEY_ITEMS_PER_PAGE = "paging.itemcount";
 	
 	/** Singleton instance of this class. */
 	private static UiProperties instance;
@@ -172,6 +174,11 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	/** @param costPerSms the price of one sms */
 	public void setCostPerSms(double costPerSms) {
 		super.setProperty(KEY_SMS_COST, Double.toString(costPerSms));
+	}
+
+	/** @return number of items to display per page */
+	public int getItemsPerPage() {
+		return super.getPropertyAsInt(KEY_ITEMS_PER_PAGE, 100);
 	}
 	
 //> INSTANCE HELPER METHODS
