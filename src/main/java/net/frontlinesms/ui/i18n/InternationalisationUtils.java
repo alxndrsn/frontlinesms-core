@@ -120,7 +120,18 @@ public class InternationalisationUtils {
 	 */
 	public static String getI18NString(String key, String... argValues) {
 		String string = getI18NString(key);
-		
+		return formatString(string, argValues);
+	}
+
+	/**
+	 * Return an internationalised message for this key.  This calls {@link #getI18NString(String)}
+	 * and then replaces any instance of {@link FrontlineSMSConstants#ARG_VALUE} with @param argValues
+	 * 
+	 * @param key
+	 * @param argValues
+	 * @return an internationalised string with any substitution variables converted
+	 */
+	public static String formatString(String string, String... argValues) {
 		if(argValues != null) {
 			// Iterate backwards through the replacements and replace the arguments with the new values.  Need
 			// to iterate backwards so e.g. %10 is replaced before %1
