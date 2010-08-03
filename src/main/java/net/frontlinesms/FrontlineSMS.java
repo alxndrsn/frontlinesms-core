@@ -619,7 +619,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 		} else if (notification instanceof DatabaseEntityNotification<?>) {
 			// Database notification
 			Object entity = ((DatabaseEntityNotification<?>) notification).getDatabaseEntity();
-			if (entity instanceof EmailAccount) {
+			if (entity instanceof EmailAccount && ((EmailAccount) entity).isForReceiving()) {
 				// If there is any change in the E-Mail accounts, we refresh the list of MmsEmailServices
 				if (notification instanceof EntityDeletedNotification<?>) {
 					this.mmsServiceManager.removeMmsEmailReceiver((EmailAccount) entity);

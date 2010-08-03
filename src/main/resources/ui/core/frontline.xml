@@ -16,6 +16,7 @@
 		<menu text="i18n.menubar.settings">
 			<menuitem icon="/icons/database_edit.png" text="i18n.menuitem.edit.db.settings" name="menu_editDatabase" action="showDatabaseConfigDialog"/>
 			<menuitem icon="/icons/frontline_icon.png" text="i18n.hometab.logo.settings" name="menu_showHometabSettings" action="showHomeTabSettings"/>
+			<menuitem icon="/icons/emailAccount_edit.png" text="i18n.menuitem.email.settings" name="menu_emailSettings" action="showEmailAccountsSettings"/>
 			<separator />
 			<menuitem icon="/icons/mms.png" text="i18n.menuitem.mms.settings" name="menu_mmsEmailSettings" action="showMmsEmailAccountsSettings"/>
 			<menuitem icon="/icons/sms_http_edit.png" text="i18n.smsdevice.internet.settings" action="showSmsInternetServiceSettings"/>
@@ -34,7 +35,7 @@
 			<!-- Item labels in this menu should be hardcoded as English - this menu does not appear 
 				in production builds of FrontlineSMS, so translations are unnecessary -->
 			<menuitem icon="/icons/database_execute.png" text="Generate debug data" action="generateTestData"/>
-			
+			<menuitem icon="/icons/user_delete.png" text="Delete all groups/contacts" action="showConfirmationDialog('deleteAllGroupsAndContacts')"/>
 		<separator />
 			<menuitem icon="/icons/group.png" text="Show group selecter" action="showGroupSelecter"/>
 			

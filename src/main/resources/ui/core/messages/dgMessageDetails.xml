@@ -18,6 +18,8 @@
 		    <label icon="/icons/message.png" text="i18n.common.subject" weightx="1"/>
 		    <textfield editable="false" name="tfSubject" columns="40"/>
 	    </panel>
+	    
+	    
 	    <label icon="/icons/message.png" text="i18n.common.message" valign="top"/>
 	    <panel name="pnContent" gap="10" weightx="1" weighty="1" columns="1"/>
 	    

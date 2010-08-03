@@ -66,6 +66,7 @@ import net.frontlinesms.ui.i18n.*;
 
 import org.apache.log4j.Logger;
 import org.smslib.CIncomingMessage;
+import org.springframework.dao.DataAccessException;
 
 import thinlet.FrameLauncher;
 import thinlet.Thinlet;
@@ -100,6 +101,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public static final int DEFAULT_HEIGHT = 768;
 	/** Default width of the Thinlet frame launcher */
 	public static final int DEFAULT_WIDTH = 1024;
+	private static final String I18N_DATABASE_ACCESS_ERROR = "message.database.access.error";
 
 //> INSTANCE PROPERTIES
 	/** Logging object */
@@ -435,6 +437,14 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/** Pass through to method in the {@link HomeTabHandler}. */
 	public void showHomeTabSettings() {
 		this.homeTabController.showHomeTabSettings();
+	}
+	
+	/**
+	 * Shows the email accounts settings dialog.
+	 */
+	public void showEmailAccountsSettings() {
+		EmailAccountDialogHandler emailAccountDialogHandler = new EmailAccountDialogHandler(this, false);
+		add(emailAccountDialogHandler.getDialog());
 	}
 	
 	/**
@@ -1779,6 +1789,24 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		randy.generate(200);
 	}
 	
+	/** UI Event method (debug): Delete all contacts and groups
+	 * @throws IOException */
+	public void deleteAllGroupsAndContacts() {
+		// Delete all groups and their contacts
+		for (Group group : this.groupDao.getAllGroups()) {
+			this.groupDao.deleteGroup(group, true);
+		}
+		
+		// And then the remaining contacts
+		for (Contact contact : this.contactDao.getAllContacts()) {
+			this.contactDao.deleteContact(contact);
+		}
+		
+		removeConfirmationDialog();
+		contactsTabController.refresh();
+		infoMessage(InternationalisationUtils.getI18NString(MESSAGE_GROUPS_AND_CONTACTS_DELETED));
+	}
+	
 	public void showGroupSelecter() {
 		Object dialog = super.createDialog("Group Selecter Test");
 		GroupSelecterPanel selecter = new GroupSelecterPanel(this, this);
@@ -1846,6 +1874,17 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void refreshContactsTab() {
 		if (this.currentTab.equals(TAB_CONTACT_MANAGER)) {
 			this.contactsTabController.refresh();
+		}
+	}
+	
+	@Override
+	protected void handleException(Throwable throwable) {
+		if (throwable instanceof DataAccessException) {
+			// If the database couldn't be reached, display a message for the user
+			this.alert(InternationalisationUtils.getI18NString(I18N_DATABASE_ACCESS_ERROR));
+		} else {
+			// Else throw a normal error dialog
+			super.handleException(throwable);
 		}
 	}
 }
