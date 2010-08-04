@@ -23,6 +23,7 @@ import java.util.Arrays;
 
 import javax.persistence.*;
 
+import org.hibernate.annotations.DiscriminatorFormula;
 import org.smslib.util.HexUtils;
 import org.smslib.util.TpduUtils;
 
@@ -35,8 +36,13 @@ import net.frontlinesms.data.EntityField;
 @Entity
 // This class is mapped to the database table called "message", as this class used to be called "Message"
 @Table(name="message")
+@DiscriminatorFormula("(CASE WHEN dtype IS NULL THEN 'FrontlineMessage' ELSE dtype END)")
 public class FrontlineMessage {
-
+	/** Discriminator column for this class.  This was only implemented when {@link FrontlineMultimediaMessage} was
+	 * added.  Setting it to null will result in a plain {@link FrontlineMessage} being instantiated, as per the
+	 * {@link DiscriminatorFormula} annotation on this class. */
+	private String dtype = this.getClass().getSimpleName();
+	
 //> DATABASE COLUMN NAMES
 	/** Database column name for field {@link #textMessageContent} */
 	private static final String COLUMN_TEXT_CONTENT = "textContent";

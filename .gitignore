@@ -28,3 +28,6 @@ test_temp/
 /.classpath
 /.project
 /.classpath
+
+# FrontlineSMS ini file for applying local settings
+frontlinesms.ini
