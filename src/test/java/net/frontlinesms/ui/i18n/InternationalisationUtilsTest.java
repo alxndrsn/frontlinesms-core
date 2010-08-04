@@ -7,13 +7,18 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -131,6 +136,72 @@ public class InternationalisationUtilsTest extends BaseTestCase {
 		assertEquals(destination.get("i will be there at the end"), "still here");
 		assertEquals(destination.get("i have come from 2"), "new arrival");
 		assertEquals(destination.get("do not replace me"), "original");
+	}
+	
+	public void testCurrencyParsing() {
+		List<Locale> unparsableCurrencies = Arrays.asList(new Locale[] { new Locale("hi", "in") });
+
+		for (FileLanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
+			Locale locale = languageBundle.getLocale();
+			NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(locale);
+			String currencySymbol = ((DecimalFormat) currencyFormat).getDecimalFormatSymbols().getCurrencySymbol();
+			if (!unparsableCurrencies.contains(locale)) {
+				try {
+					System.err.println("Parsing currency strings for Locale: " + locale.toString());
+					assertEquals(1.4, InternationalisationUtils.parseCurrency(currencyFormat, currencySymbol, "1.4"));
+					assertEquals(1.4, InternationalisationUtils.parseCurrency(currencyFormat, currencySymbol, "1,4"));
+					assertEquals(0.0, InternationalisationUtils.parseCurrency(currencyFormat, currencySymbol, "0"));
+					assertEquals(0.5, InternationalisationUtils.parseCurrency(currencyFormat, currencySymbol, "0.5"));
+					assertEquals(0.5, InternationalisationUtils.parseCurrency(currencyFormat, currencySymbol, "0,5"));
+					
+					assertNotSame(1.4, InternationalisationUtils.parseCurrency(currencyFormat, currencySymbol, "1.6"));
+					assertNotSame(1.4, InternationalisationUtils.parseCurrency(currencyFormat, currencySymbol, "1,2"));
+					assertNotSame(0.1, InternationalisationUtils.parseCurrency(currencyFormat, currencySymbol, "0"));
+					assertNotSame(0.5, InternationalisationUtils.parseCurrency(currencyFormat, currencySymbol, "0.6"));
+					assertNotSame(0.5, InternationalisationUtils.parseCurrency(currencyFormat, currencySymbol, "0,495"));
+				} catch (ParseException e) {
+					fail(e.getMessage());
+				}
+			}
+		}
+		
+		System.err.println("Now testing special currencies...");
+	
+		Locale locale = new Locale("hi", "in");
+		System.err.println("Parsing currency strings for Locale: " + locale.toString());
+		NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(locale);
+		String currencySymbol = ((DecimalFormat) currencyFormat).getDecimalFormatSymbols().getCurrencySymbol();
+		
+		try {			
+			assertEquals(1.3, InternationalisationUtils.parseCurrency(currencyFormat, currencySymbol, "\u0967.\u0969\u0966"));
+			assertEquals(1.4, InternationalisationUtils.parseCurrency(currencyFormat, currencySymbol, "\u0967.\u096a\u0966"));
+			assertEquals(0.5, InternationalisationUtils.parseCurrency(currencyFormat, currencySymbol, "\u0966.\u096b\u0966"));
+			assertEquals(1.0, InternationalisationUtils.parseCurrency(currencyFormat, currencySymbol, "\u0967.\u0966\u0966"));
+			assertEquals(1.0, InternationalisationUtils.parseCurrency(currencyFormat, currencySymbol, "\u0967"));
+		} catch (ParseException e) {
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testGetCurrencyStringWithSymbol () {
+			NumberFormat currencyFormat;
+			String currencySymbol;
+			
+			try {
+				currencyFormat = NumberFormat.getCurrencyInstance(new Locale("en", "gb"));
+				currencySymbol = ((DecimalFormat) currencyFormat).getDecimalFormatSymbols().getCurrencySymbol();
+				assertEquals("£1.4", InternationalisationUtils.getCurrencyStringWithSymbol(currencyFormat, currencySymbol, "1.4"));
+				
+				currencyFormat = NumberFormat.getCurrencyInstance(new Locale("fr", "fr"));
+				currencySymbol = ((DecimalFormat) currencyFormat).getDecimalFormatSymbols().getCurrencySymbol();
+				assertEquals("1,4 €", InternationalisationUtils.getCurrencyStringWithSymbol(currencyFormat, currencySymbol, "1.4"));
+				
+				currencyFormat = NumberFormat.getCurrencyInstance(new Locale("ru", "ru"));
+				currencySymbol = ((DecimalFormat) currencyFormat).getDecimalFormatSymbols().getCurrencySymbol();
+				assertEquals("1,4 руб.", InternationalisationUtils.getCurrencyStringWithSymbol(currencyFormat, currencySymbol, "1.4"));
+			} catch (ParseException e) {
+				fail(e.getMessage());
+			}
 	}
 	
 //> INSTANCE HELPER METHODS
