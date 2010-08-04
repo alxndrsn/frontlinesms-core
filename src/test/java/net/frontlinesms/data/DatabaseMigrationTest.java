@@ -39,7 +39,7 @@ public class DatabaseMigrationTest extends BaseTestCase {
 		assertEquals(STANDARD_MESSAGE, allMessages1.get(0));
 		
 		// deinitialise the database
-		deinitSpringHibernate();
+		deinitSpringHibernate(false);
 		
 		// Initiliase the database WITH multimedia messages
 		initSpringHibernate("testAddingMultimediaMessages.2");
@@ -53,7 +53,7 @@ public class DatabaseMigrationTest extends BaseTestCase {
 		assertEquals(Arrays.asList(STANDARD_MESSAGE, MM_MESSAGE), allMessages2);
 
 		// deinitialise the database
-		deinitSpringHibernate();
+		deinitSpringHibernate(true);
 	}
 
 	/**
@@ -69,8 +69,16 @@ public class DatabaseMigrationTest extends BaseTestCase {
 		this.dao = (MessageDao) app.getBean("messageDao");
 	}
 
-	/** Undoes the configuration from {@link #initSpringHibernate(Class...)} */
-	private void deinitSpringHibernate() {
+	/** Undoes the configuration from {@link #initSpringHibernate(Class...)} 
+	 * @param clearDatabase */
+	private void deinitSpringHibernate(boolean clearDatabase) {
+		// delete messages from db
+		if(clearDatabase) {
+			for(FrontlineMessage m : this.dao.getAllMessages()) {
+				this.dao.deleteMessage(m);
+			}
+		}
+		
 		// unset class properties loaded from application context
 		this.dao = null;
 	}

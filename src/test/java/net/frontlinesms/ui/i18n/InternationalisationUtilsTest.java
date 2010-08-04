@@ -190,15 +190,15 @@ public class InternationalisationUtilsTest extends BaseTestCase {
 			try {
 				currencyFormat = NumberFormat.getCurrencyInstance(new Locale("en", "gb"));
 				currencySymbol = ((DecimalFormat) currencyFormat).getDecimalFormatSymbols().getCurrencySymbol();
-				assertEquals("£1.4", InternationalisationUtils.getCurrencyStringWithSymbol(currencyFormat, currencySymbol, "1.4"));
+				assertEquals("\u00a31.4", InternationalisationUtils.getCurrencyStringWithSymbol(currencyFormat, currencySymbol, "1.4"));
 				
 				currencyFormat = NumberFormat.getCurrencyInstance(new Locale("fr", "fr"));
 				currencySymbol = ((DecimalFormat) currencyFormat).getDecimalFormatSymbols().getCurrencySymbol();
-				assertEquals("1,4 €", InternationalisationUtils.getCurrencyStringWithSymbol(currencyFormat, currencySymbol, "1.4"));
+				assertEquals("1,4 \u20ac", InternationalisationUtils.getCurrencyStringWithSymbol(currencyFormat, currencySymbol, "1.4"));
 				
 				currencyFormat = NumberFormat.getCurrencyInstance(new Locale("ru", "ru"));
 				currencySymbol = ((DecimalFormat) currencyFormat).getDecimalFormatSymbols().getCurrencySymbol();
-				assertEquals("1,4 руб.", InternationalisationUtils.getCurrencyStringWithSymbol(currencyFormat, currencySymbol, "1.4"));
+				assertEquals("1,4 \u0440\u0443\u0431.", InternationalisationUtils.getCurrencyStringWithSymbol(currencyFormat, currencySymbol, "1.4"));
 			} catch (ParseException e) {
 				fail(e.getMessage());
 			}

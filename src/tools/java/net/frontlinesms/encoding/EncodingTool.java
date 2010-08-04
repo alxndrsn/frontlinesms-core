@@ -17,17 +17,15 @@ public class EncodingTool {
 
 //> INSTANCE HELPER METHODS
 
-	public static void convertToUnicode(String[] sources) {
-		for (String source : sources) { 
-			for (char c : source.toCharArray()) {
-				System.err.println("'" + c + "' --> \\u" + Integer.toString(c, 16));
-			}
+	public static void convertToUnicode(String source) {
+		for (char c : source.toCharArray()) {
+			System.err.println("'" + c + "' --> \\u" + Integer.toString(c, 16));
 		}
 	}
 //> STATIC FACTORIES
 
 //> STATIC HELPER METHODS
 	public static void main (String[] args) {
-		EncodingTool.convertToUnicode(args);
+		EncodingTool.convertToUnicode("руб.");
 	}
 }
