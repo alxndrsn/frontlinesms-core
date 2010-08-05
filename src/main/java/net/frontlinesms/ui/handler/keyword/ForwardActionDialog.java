@@ -156,13 +156,4 @@ public class ForwardActionDialog extends BaseActionDialog {
 		updateKeywordActionList(action, isNew);
 		super.removeDialog();
 	}
-	
-	public void forwardTextChanged (String forwardString) {
-		boolean enableSaveButton = (forwardString != null && !forwardString.equals(""));
-		this.ui.setEnabled(this.find(COMPONENT_BT_SAVE), enableSaveButton);
-	}
-	
-	public void forwardTextChanged () {
-		forwardTextChanged(this.ui.getText(this.ui.find(COMPONENT_FORWARD_FORM_TEXTAREA)));
-	}
 }

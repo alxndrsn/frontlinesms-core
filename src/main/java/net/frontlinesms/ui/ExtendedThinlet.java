@@ -15,6 +15,10 @@ import thinlet.ThinletText;
  */
 @SuppressWarnings("serial")
 public class ExtendedThinlet extends Thinlet {
+	
+private static final String END = "end";
+private static final String START = "start";
+
 //> STATIC CONSTANTS
 
 //> INSTANCE PROPERTIES
@@ -46,6 +50,19 @@ public class ExtendedThinlet extends Thinlet {
 		for(Object component : getItems(parent)) {
 			if(!getClass(parent).equals(TABLE)) setEditableRecursively(component, value);
 		}
+	}
+	
+	/**
+	 * @param component
+	 * @return The current position on an editable component
+	 */
+	public final int getCaretPosition(Object component) {
+		return getInteger(component, END);
+	}
+	
+	public final void setCaretPosition(Object component, int caretPosition) {
+		setInteger(component, START, caretPosition);
+		setInteger(component, END, caretPosition);
 	}
 	
 	/**
