@@ -102,6 +102,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/** Default width of the Thinlet frame launcher */
 	public static final int DEFAULT_WIDTH = 1024;
 	private static final String I18N_DATABASE_ACCESS_ERROR = "message.database.access.error";
+	private static final String I18N_CONFIRM_EXIT = "common.confirm.exit";
 
 //> INSTANCE PROPERTIES
 	/** Logging object */
@@ -949,7 +950,13 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	public void close() {
-		LOG.trace("ENTER");
+		this.showConfirmationDialog("doClose", I18N_CONFIRM_EXIT);
+	}
+	
+	public void doClose() {
+		LOG.trace("ENTER DOCLOSE");
+		
+		
 		Collection<FrontlineMessage> pending = messageFactory.getMessages(Type.OUTBOUND, Status.PENDING);
 		LOG.debug("Pending Messages size [" + pending.size() + "]");
 		if (pending.size() > 0) {
