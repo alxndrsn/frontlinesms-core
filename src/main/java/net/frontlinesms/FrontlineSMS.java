@@ -36,10 +36,10 @@ import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.listener.*;
 import net.frontlinesms.messaging.FrontlineMessagingServiceEventListener;
 import net.frontlinesms.messaging.IncomingMessageProcessor;
+import net.frontlinesms.messaging.MessageFormatter;
 import net.frontlinesms.messaging.mms.MmsServiceManager;
 import net.frontlinesms.messaging.mms.events.MmsReceivedNotification;
 import net.frontlinesms.messaging.sms.DummySmsService;
-import net.frontlinesms.messaging.sms.IncomingSmsProcessor;
 import net.frontlinesms.messaging.sms.SmsService;
 import net.frontlinesms.messaging.sms.SmsServiceManager;
 import net.frontlinesms.messaging.sms.SmsServiceStatus;
@@ -406,14 +406,6 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 	}
 	
 //> EVENT HANDLER METHODS
-//	/** Called by the SmsHandler when an SMS message is received. */
-//	public synchronized void incomingMessageEvent(FrontlineMessagingService receiver, CIncomingMessage incomingMessage) {
-//		if (receiver instanceof MmsService) {
-//			this.incomingMmsProcessor.queue((MmsService)receiver, incomingMessage);
-//		} else {
-//			this.incomingSmsProcessor.queue((SmsService)receiver, incomingMessage);
-//		}
-//	}
 	
 	/** Called by the SmsHandler when an SMS message is received. */
 	public synchronized void incomingMessageEvent(SmsService receiver, CIncomingMessage incomingMessage) {
@@ -471,6 +463,21 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 	 */
 	public FrontlineMessage sendTextMessage(String targetNumber, String textContent) {
 		LOG.trace("ENTER");
+		
+		// By default, currently replaces the name by the phone number if it's not in the contacts
+		// TODO: have a setting for this
+		String recipientName = targetNumber;
+		
+		Contact c = this.contactDao.getFromMsisdn(targetNumber);
+		if (c != null) {
+			recipientName = c.getDisplayName();
+		}
+		
+		// Replace the content of the message by substituting variables
+		textContent = MessageFormatter.formatMessage(textContent, 
+								MessageFormatter.MARKER_RECIPIENT_NAME, recipientName,
+								MessageFormatter.MARKER_RECIPIENT_NUMBER, targetNumber);
+		
 		FrontlineMessage m;
 		if (targetNumber.equals(FrontlineSMSConstants.EMULATOR_MSISDN)) {
 			m = FrontlineMessage.createOutgoingMessage(System.currentTimeMillis(), FrontlineSMSConstants.EMULATOR_MSISDN, FrontlineSMSConstants.EMULATOR_MSISDN, textContent.trim());
@@ -571,18 +578,18 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 	}
 	
 	/**
-	 * Adds another {@link IncomingMessageListener} to {@link IncomingSmsProcessor}.
+	 * Adds another {@link IncomingMessageListener} to {@link IncomingMessageProcessor}.
 	 * @param incomingMessageListener new {@link IncomingMessageListener}
-	 * @see IncomingSmsProcessor#addIncomingMessageListener(IncomingMessageListener)
+	 * @see IncomingMessageProcessor#addIncomingMessageListener(IncomingMessageListener)
 	 */
 	public void addIncomingMessageListener(IncomingMessageListener incomingMessageListener) {
 		this.incomingMessageProcessor.addIncomingMessageListener(incomingMessageListener);
 	}
 	
 	/**
-	 * Removes a {@link IncomingMessageListener} from {@link IncomingSmsProcessor}.
+	 * Removes a {@link IncomingMessageListener} from {@link IncomingMessageProcessor}.
 	 * @param incomingMessageListener {@link IncomingMessageListener} to be removed
-	 * @see IncomingSmsProcessor#removeIncomingMessageListener(IncomingMessageListener)
+	 * @see IncomingMessageProcessor#removeIncomingMessageListener(IncomingMessageListener)
 	 */
 	public void removeIncomingMessageListener(IncomingMessageListener incomingMessageListener) {
 		this.incomingMessageProcessor.removeIncomingMessageListener(incomingMessageListener);

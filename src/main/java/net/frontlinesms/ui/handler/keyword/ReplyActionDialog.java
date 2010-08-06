@@ -5,6 +5,8 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_KE
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_MESSAGE_CONTENT;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_SENDER_NAME;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_SENDER_NUMBER;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_RECIPIENT_NAME;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_RECIPIENT_NUMBER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_BOTTOM;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.UI_FILE_SENDER_NAME_PANEL;
@@ -67,6 +69,8 @@ public class ReplyActionDialog extends BaseActionDialog {
 		ui.add(this.getDialogComponent(), pnMessage, ui.getItems(this.getDialogComponent()).length - 3);
 		ui.setAction(ui.find(senderPanel, COMPONENT_BT_SENDER_NAME), "addConstantToCommand(tfMessage.text, tfMessage, 0)", this.getDialogComponent(), this);
 		ui.setAction(ui.find(senderPanel, COMPONENT_BT_SENDER_NUMBER), "addConstantToCommand(tfMessage.text, tfMessage, 1)", this.getDialogComponent(), this);
+		ui.setAction(ui.find(senderPanel, COMPONENT_BT_RECIPIENT_NAME), "addConstantToCommand(tfMessage.text, tfMessage, 5)", this.getDialogComponent(), this);
+		ui.setAction(ui.find(senderPanel, COMPONENT_BT_RECIPIENT_NUMBER), "addConstantToCommand(tfMessage.text, tfMessage, 6)", this.getDialogComponent(), this);
 		ui.setAction(ui.find(senderPanel, COMPONENT_BT_MESSAGE_CONTENT), "addConstantToCommand(tfMessage.text, tfMessage, 2)", this.getDialogComponent(), this);
 		ui.setAction(ui.find(senderPanel, COMPONENT_BT_KEYWORD), "addConstantToCommand(tfMessage.text, tfMessage, 3)", this.getDialogComponent(), this);
 		// FIX 0000542

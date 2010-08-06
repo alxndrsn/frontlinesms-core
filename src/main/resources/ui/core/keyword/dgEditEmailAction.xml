@@ -23,7 +23,7 @@
     <separator colspan="3"/>
     <separator colspan="3"/>
     <panel colspan="3" gap="5" halign="center">
-        <button action="save" icon="/icons/tick.png" name="btSave" text="i18n.action.save"/>
-        <button action="removeDialog" icon="/icons/cross.png" name="btCancel" text="i18n.action.cancel"/>
+        <button type="default" action="save" icon="/icons/tick.png" name="btSave" text="i18n.action.save"/>
+        <button type="cancel" action="removeDialog" icon="/icons/cross.png" name="btCancel" text="i18n.action.cancel"/>
     </panel>
 </dialog>

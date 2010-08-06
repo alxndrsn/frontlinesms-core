@@ -114,7 +114,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		String recipient = uiController.getText(find(COMPONENT_TF_RECIPIENT));
 		String message = uiController.getText(find(COMPONENT_TF_MESSAGE));
 		
-		if (recipient.equals("")) {
+		if (recipient.length() == 0) {
 			uiController.alert(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_BLANK_PHONE_NUMBER));
 			return;
 		} 

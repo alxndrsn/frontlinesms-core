@@ -449,26 +449,6 @@ public class FrontlineUtils {
 	}
 
 	/**
-	 * Parses a string, and substitutes markers for replacements.  The replacement is fairly
-	 * simplistic, so it is recommended that markers are provided in the form ${marker_name}
-	 * so that they are unlikely to overlap.  If a marker's replacement is <code>null</code>,
-	 * then this method will not attempt to replace that marker.
-	 * @param initialString 
-	 * @param markersAndReplacements List of markers and their replacements.  Each marker should be followed directly by its replacement in this list.
-	 * @return string with markers replaced with their respective values
-	 */
-	public static String replace(String initialString, String... markersAndReplacements) {
-		if((markersAndReplacements.length&1) == 1) throw new IllegalArgumentException("Each marker must have a replacement!  Odd number of markers+replacements provided: " + markersAndReplacements.length);
-		for (int i = 0; i < markersAndReplacements.length; i+=2) {
-			String replacement = markersAndReplacements[i+1];
-			if(replacement != null) {
-				initialString = initialString.replace(markersAndReplacements[i], replacement);
-			}
-		}
-		return initialString;
-	}
-
-	/**
 	 * Calls {@link URLEncoder#encode(String, String)} using UTF-8 as the encoding.  If somehow
 	 * an {@link UnsupportedEncodingException} is thrown, this method will just return the original
 	 * {@link String} supplied.  This method will also ignore <code>null</code> inputs, rather than

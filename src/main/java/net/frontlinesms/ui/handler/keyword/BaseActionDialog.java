@@ -15,6 +15,7 @@ import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
 import net.frontlinesms.data.repository.KeywordActionDao;
+import net.frontlinesms.messaging.MessageFormatter;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -221,25 +222,33 @@ public abstract class BaseActionDialog implements ThinletUiEventHandler {
 	 * <li> 2 for Message Content
 	 * <li> 3 for Keyword
 	 * <li> 4 for Command Response
+	 * <li> 5 for Recipient name
+	 * <li> 6 for Recipient number
 	 */
 	public void addConstantToCommand(String currentText, Object textArea, int type) {
 		log.trace("ENTER");
 		String toAdd = "";
 		switch (type) {
 			case 0:
-				toAdd = CsvUtils.MARKER_SENDER_NAME;
+				toAdd = MessageFormatter.MARKER_SENDER_NAME;
 				break;
 			case 1:
-				toAdd = CsvUtils.MARKER_SENDER_NUMBER;
+				toAdd = MessageFormatter.MARKER_SENDER_NUMBER;
 				break;
 			case 2:
-				toAdd = CsvUtils.MARKER_MESSAGE_CONTENT;
+				toAdd = MessageFormatter.MARKER_MESSAGE_CONTENT;
 				break;
 			case 3:
-				toAdd = CsvUtils.MARKER_KEYWORD_KEY;
+				toAdd = MessageFormatter.MARKER_KEYWORD_KEY;
 				break;
 			case 4:
-				toAdd = CsvUtils.MARKER_COMMAND_RESPONSE;
+				toAdd = MessageFormatter.MARKER_COMMAND_RESPONSE;
+				break;
+			case 5:
+				toAdd = MessageFormatter.MARKER_RECIPIENT_NAME;
+				break;
+			case 6:
+				toAdd = MessageFormatter.MARKER_RECIPIENT_NUMBER;
 				break;
 		}
 		log.debug("Setting [" + currentText + toAdd + "] to component [" + textArea + "]");
