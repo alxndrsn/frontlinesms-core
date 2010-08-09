@@ -16,8 +16,10 @@ public abstract class DatabaseEntityNotification<E> implements FrontlineEventNot
 	protected E databaseEntity;
 	
 	public DatabaseEntityNotification(E databaseEntity){
-		assert(databaseEntity.getClass().getAnnotation(javax.persistence.Entity.class) != null):
-			   "Object is not a database entity";
+		if (databaseEntity != null) {
+			assert(databaseEntity.getClass().getAnnotation(javax.persistence.Entity.class) != null):
+				   "Object is not a database entity";
+		}
 		this.databaseEntity = databaseEntity;
 	}
 	

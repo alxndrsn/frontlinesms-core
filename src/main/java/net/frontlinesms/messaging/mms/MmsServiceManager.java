@@ -182,6 +182,7 @@ public class MmsServiceManager extends Thread  {
 			MmsEmailService mmsEmailService = (MmsEmailService) mmsService;
 			if (mmsEmailService.getEmailAccount().isSameDatabaseEntity(emailAccount)) {
 				mmsEmailService.populateReceiver(emailAccount);
+				mmsEmailService.setEmailAccount(emailAccount);
 				mmsEmailService.setStatus((emailAccount.isEnabled() ? MmsEmailServiceStatus.READY : MmsEmailServiceStatus.DISCONNECTED), this.eventBus);
 			}
 		}

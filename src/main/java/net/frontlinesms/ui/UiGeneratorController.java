@@ -1476,6 +1476,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			Object pnKeywordActionsAdvanced = find(keyTab, COMPONENT_PN_KEYWORD_ACTIONS_ADVANCED);
 			if (pnKeywordActionsAdvanced != null) {
 				Object actionsList = find(pnKeywordActionsAdvanced, COMPONENT_ACTION_LIST);
+				int selected = getSelectedIndex(actionsList);
 				int index = -1;
 				for (Object act : getItems(actionsList)) {
 					KeywordAction a = getKeywordAction(act);
@@ -1487,6 +1488,9 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				}
 				if (index != -1) {
 					add(actionsList, getRow(action), index);
+				}
+				if (selected >= 0) {
+					setSelectedIndex(actionsList, selected);
 				}
 			}
 		}

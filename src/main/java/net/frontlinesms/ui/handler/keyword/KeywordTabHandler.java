@@ -395,10 +395,12 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		ui.removeConfirmationDialog();
 		Object list = find(COMPONENT_ACTION_LIST);
 		Object selected = ui.getSelectedItem(list);
-		KeywordAction keyAction = ui.getAttachedObject(selected, KeywordAction.class);
-		this.keywordActionDao.deleteKeywordAction(keyAction);
-		ui.remove(selected);
-		enableKeywordActionFields(list, find(COMPONENT_KEY_ACT_PANEL));
+		if (selected != null) {
+			KeywordAction keyAction = ui.getAttachedObject(selected, KeywordAction.class);
+			this.keywordActionDao.deleteKeywordAction(keyAction);
+			ui.remove(selected);
+			enableKeywordActionFields(list, find(COMPONENT_KEY_ACT_PANEL));
+		}
 	}
 
 	/**
@@ -451,8 +453,10 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		} else {
 			Keyword keyword = ui.getKeyword(selectedObj);
 			//KEYWORD EDITION
-			log.debug("Editing keyword [" + keyword.getKeyword() + "]");
-			showKeywordDialogForEdition(keyword);
+			if (keyword != null) {
+				log.debug("Editing keyword [" + keyword.getKeyword() + "]");
+				showKeywordDialogForEdition(keyword);
+			}
 		} 
 		log.trace("EXIT");
 	}
