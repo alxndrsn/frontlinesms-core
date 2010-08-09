@@ -954,7 +954,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	public void doClose() {
-		LOG.trace("ENTER DOCLOSE");
+		LOG.trace("ENTER doClose");
 		
 		
 		Collection<FrontlineMessage> pending = messageFactory.getMessages(Type.OUTBOUND, Status.PENDING);

@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dialog closable="true" close="removeDialog(this)" bottom="10" columns="1" gap="10" icon="/icons/emailAccount_edit.png" left="10" modal="true" name="emailConfigDialog" right="10" top="10" text="i18n.menuitem.mms.settings">
+	<!-- Here comes the pnAccountsList panel -->
 	<panel columns="2" left="10" right="10" bottom="5" top="5" gap="10" text="i18n.common.general.settings" border="true">
 		<label text="i18n.mms.email.polling.frequency" weightx="1"/>
 		<textfield action="checkSettingsFields" name="tfPollFrequency" columns="5"/>
 		<panel halign="center" colspan="2" gap="5">
 			<button type="default" name="btSaveSettings" action="saveSettings" icon="/icons/tick.png" text="i18n.action.save"/>
-			<button type="cancel" action="removeDialog(emailConfigDialog)" icon="/icons/cross.png" text="i18n.action.close"/>
 		</panel>
 	</panel>
-	<!-- Here comes the pnAccountsList panel -->
 </dialog>

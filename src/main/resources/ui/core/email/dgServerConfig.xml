@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<dialog closable="true" bottom="10" columns="1" gap="10" icon="/icons/emailAccount_edit.png" left="10" modal="true" name="emailConfigDialog" right="10" top="10">
+<dialog closable="true" close="removeDialog(this)" bottom="10" columns="1" gap="10" icon="/icons/emailAccount_edit.png" left="10" modal="true" name="emailConfigDialog" right="10" top="10">
 	<!-- Here comes the pnAccountsList panel -->
-    <panel gap="5" halign="center">
-        <button type="cancel" action="removeDialog(emailConfigDialog)" icon="/icons/tick.png" text="i18n.action.done"/>
-    </panel>
 </dialog>
