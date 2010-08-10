@@ -1799,8 +1799,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		randy.generate(200);
 	}
 	
-	/** UI Event method (debug): Delete all contacts and groups
-	 * @throws IOException */
+	/** UI Event method (debug): Delete all contacts and groups */
 	public void deleteAllGroupsAndContacts() {
 		// Delete all groups and their contacts
 		for (Group group : this.groupDao.getAllGroups()) {
@@ -1884,17 +1883,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void refreshContactsTab() {
 		if (this.currentTab.equals(TAB_CONTACT_MANAGER)) {
 			this.contactsTabController.refresh();
-		}
-	}
-	
-	@Override
-	protected void handleException(Throwable throwable) {
-		if (throwable instanceof DataAccessException) {
-			// If the database couldn't be reached, display a message for the user
-			this.alert(InternationalisationUtils.getI18NString(I18N_DATABASE_ACCESS_ERROR));
-		} else {
-			// Else throw a normal error dialog
-			super.handleException(throwable);
 		}
 	}
 }
