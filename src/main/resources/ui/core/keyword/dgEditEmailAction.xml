@@ -6,10 +6,10 @@
     <textarea focusgained="setEmailFocusOwner(this)" colspan="2" name="tfMessage" rowspan="3" weightx="1" weighty="1"/>
     <label text="i18n.sentence.you.can.include"/>
     <panel colspan="2" gap="5">
-        <button action="addConstantToEmailDialog(0)" icon="/icons/user_sender.png" name="btSenderName" text="i18n.common.sender.name" weightx="1"/>
-        <button action="addConstantToEmailDialog(1)" icon="/icons/phone_number.png" name="btSenderNumber" text="i18n.common.message.sender.number" weightx="1"/>
-        <button action="addConstantToEmailDialog(3)" icon="/icons/keyword.png" name="btKeyword" text="i18n.common.keyword" weightx="1"/>
-        <button action="addConstantToEmailDialog(2)" icon="/icons/message.png" name="btMsgContent" text="i18n.common.message.content" weightx="1"/>
+        <button action="addConstantToEmailDialog('SENDER_NAME')" icon="/icons/sender.png" name="btSenderName" text="i18n.common.sender.name" weightx="1"/>
+        <button action="addConstantToEmailDialog('SENDER_NUMBER')" icon="/icons/sender_number.png" name="btSenderNumber" text="i18n.common.message.sender.number" weightx="1"/>
+        <button action="addConstantToEmailDialog('KEYWORD_KEY')" icon="/icons/keyword.png" name="btKeyword" text="i18n.common.keyword" weightx="1"/>
+        <button action="addConstantToEmailDialog('MESSAGE_CONTENT')" icon="/icons/message.png" name="btMsgContent" text="i18n.common.message.content" weightx="1"/>
     </panel>
     <separator colspan="3"/>
     <label icon="/icons/email_send.png" text="i18n.common.from"/>

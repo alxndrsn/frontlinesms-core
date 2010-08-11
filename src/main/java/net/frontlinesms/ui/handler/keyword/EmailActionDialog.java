@@ -78,9 +78,18 @@ public class EmailActionDialog extends BaseActionDialog implements EventObserver
 		if(isEditing()) {
 			KeywordAction action = super.getTargetObject(KeywordAction.class);
 			
-			ui.setText(find(COMPONENT_TF_SUBJECT), action.getEmailSubject());
-			ui.setText(find(COMPONENT_TF_MESSAGE), action.getUnformattedReplyText());
+			Object tfSubject = find(COMPONENT_TF_SUBJECT);
+			Object tfMessage = find(COMPONENT_TF_MESSAGE);
+			
+			ui.setText(tfSubject, action.getEmailSubject());
+			ui.setText(tfMessage, action.getUnformattedReplyText());
+			
 			ui.setText(find(COMPONENT_TF_RECIPIENT), action.getEmailRecipients());
+			
+			// Put the cursor (caret) at the end of the text field & text area,
+			// so the click on a constant button inserts it at the end by default
+			ui.setCaretPosition(tfSubject, ui.getText(tfSubject).length());
+			ui.setCaretPosition(tfMessage, ui.getText(tfMessage).length());
 			
 			initDateFields();
 		}
@@ -224,10 +233,10 @@ public class EmailActionDialog extends BaseActionDialog implements EventObserver
 	
 	/**
 	 * Append a variable key to the text of {@link #emailTabFocusOwner}. 
-	 * @param type the type of variable key to append
+	 * @param type the type of variable {@link FormatterMarkerType} key to append
 	 * @see #addConstantToCommand(String, Object, int)
 	 */
-	public void addConstantToEmailDialog(int type) {
+	public void addConstantToEmailDialog(String type) {
 		addConstantToCommand(ui.getText(this.emailTabFocusOwner), this.emailTabFocusOwner, type);
 	}
 

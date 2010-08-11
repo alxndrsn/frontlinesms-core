@@ -80,7 +80,11 @@ public class ForwardActionDialog extends BaseActionDialog {
 		if (action != null) {
 			String unformatedForwardText = action.getUnformattedForwardText();
 			if (unformatedForwardText != null && !unformatedForwardText.equals("")) {
-				ui.setText(find(COMPONENT_FORWARD_FORM_TEXTAREA), action.getUnformattedForwardText());
+				Object tfMessage = find(COMPONENT_FORWARD_FORM_TEXTAREA);
+				ui.setText(tfMessage, action.getUnformattedForwardText());
+				// Put the cursor (caret) at the end of the text area, so the click on a constant
+				// button inserts it at the end by default
+				ui.setCaretPosition(tfMessage, ui.getText(tfMessage).length());
 				enableSaveButton = true;
 			}
 		}

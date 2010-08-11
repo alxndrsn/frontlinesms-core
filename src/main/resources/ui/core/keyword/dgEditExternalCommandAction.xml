@@ -10,10 +10,10 @@
         <textfield columns="60" name="tfCommand" text="http://" weightx="1"/>
         <label text="i18n.sentence.you.can.include"/>
         <panel gap="10">
-            <button action="addConstantToCommand(tfCommand.text, tfCommand, 0)" icon="/icons/user_sender.png" name="btSenderName" text="i18n.common.sender.name" weightx="1"/>
-            <button action="addConstantToCommand(tfCommand.text, tfCommand, 1)" icon="/icons/phone_number.png" name="btSenderNumber" text="i18n.common.message.sender.number" weightx="1"/>
-            <button action="addConstantToCommand(tfCommand.text, tfCommand, 3)" icon="/icons/keyword.png" name="btKeyword" text="i18n.common.keyword" weightx="1"/>
-            <button action="addConstantToCommand(tfCommand.text, tfCommand, 2)" icon="/icons/message.png" name="btMsgContent" text="i18n.common.message.content" weightx="1"/>
+            <button action="addConstantToCommand(tfCommand.text, tfCommand, 'SENDER_NAME')" icon="/icons/sender.png" name="btSenderName" text="i18n.common.sender.name" weightx="1"/>
+            <button action="addConstantToCommand(tfCommand.text, tfCommand, 'SENDER_NUMBER')" icon="/icons/sender_number.png" name="btSenderNumber" text="i18n.common.message.sender.number" weightx="1"/>
+            <button action="addConstantToCommand(tfCommand.text, tfCommand, 'KEYWORD_KEY')" icon="/icons/keyword.png" name="btKeyword" text="i18n.common.keyword" weightx="1"/>
+            <button action="addConstantToCommand(tfCommand.text, tfCommand, 'MESSAGE_CONTENT')" icon="/icons/message.png" name="btMsgContent" text="i18n.common.message.content" weightx="1"/>
         </panel>
         <separator colspan="2"/>
         <label text="i18n.common.response.type"/>
@@ -27,13 +27,13 @@
                 <textarea colspan="2" name="tfMessage" weightx="1" weighty="1"/>
             <panel gap="5">
             <label halign="left" text="i18n.sentence.you.can.include"/>
-                <button action="addConstantToCommand(tfMessage.text,tfMessage, 4)" icon="/icons/externalCommand_response.png" name="btIncludeResponse" tooltip="i18n.action.include.response" valign="center" weightx="1"/>
-			    <button action="addConstantToCommand(tfMessage.text, tfMessage, 0)" name="btSenderName" icon="/icons/recipient.png" tooltip="i18n.common.sender.name" weightx="1"/>
-			    <button action="addConstantToCommand(tfMessage.text, tfMessage, 1)" name="btSenderNumber" icon="/icons/recipient_number.png" tooltip="i18n.common.message.sender.number" weightx="1"/>
-		        <button action="addConstantToCommand(tfMessage.text, tfMessage, 5)" name="btRecipientName" icon="/icons/sender.png" tooltip="i18n.common.recipient.name" weightx="1"/>
-			    <button action="addConstantToCommand(tfMessage.text, tfMessage, 6)" name="btRecipientNumber" icon="/icons/sender_number.png" tooltip="i18n.common.message.recipient.number" weightx="1"/>
-			    <button action="addConstantToCommand(tfMessage.text, tfMessage, 3)" name="btKeyword" icon="/icons/keyword.png" tooltip="i18n.common.keyword" weightx="1"/>
-			    <button action="addConstantToCommand(tfMessage.text, tfMessage, 2)" name="btMessageContent" icon="/icons/message.png" tooltip="i18n.common.message.content" weightx="1"/>
+                <button action="addConstantToCommand(tfMessage.text,tfMessage, 'COMMAND_RESPONSE')" icon="/icons/externalCommand_response.png" name="btIncludeResponse" tooltip="i18n.action.include.response" valign="center" weightx="1"/>
+			    <button action="addConstantToCommand(tfMessage.text, tfMessage, 'SENDER_NAME')" name="btSenderName" icon="/icons/sender.png" tooltip="i18n.common.sender.name" weightx="1"/>
+			    <button action="addConstantToCommand(tfMessage.text, tfMessage, 'SENDER_NUMBER')" name="btSenderNumber" icon="/icons/sender_number.png" tooltip="i18n.common.message.sender.number" weightx="1"/>
+		        <button action="addConstantToCommand(tfMessage.text, tfMessage, 'RECIPIENT_NAME')" name="btRecipientName" icon="/icons/recipient.png" tooltip="i18n.common.recipient" weightx="1"/>
+			    <button action="addConstantToCommand(tfMessage.text, tfMessage, 'RECIPIENT_NUMBER')" name="btRecipientNumber" icon="/icons/recipient_number.png" tooltip="i18n.common.message.recipient.number" weightx="1"/>
+			    <button action="addConstantToCommand(tfMessage.text, tfMessage, 'KEYWORD_KEY')" name="btKeyword" icon="/icons/keyword.png" tooltip="i18n.common.keyword" weightx="1"/>
+			    <button action="addConstantToCommand(tfMessage.text, tfMessage, 'MESSAGE_CONTENT')" name="btMessageContent" icon="/icons/message.png" tooltip="i18n.common.message.content" weightx="1"/>
 		   </panel>
             <checkbox icon="/icons/sms_autoReply.png" name="cbAutoReply" selected="true" text="i18n.common.send.auto.reply"/>
             <checkbox action="handleForwardChanged(this.selected)" icon="/icons/sms_autoForward.png" name="cbForward" text="i18n.common.forward.to.group" weightx="1"/>

@@ -11,7 +11,6 @@ import java.text.ParseException;
 import org.apache.log4j.Logger;
 
 import net.frontlinesms.FrontlineUtils;
-import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
 import net.frontlinesms.data.repository.KeywordActionDao;
@@ -225,29 +224,29 @@ public abstract class BaseActionDialog implements ThinletUiEventHandler {
 	 * <li> 5 for Recipient name
 	 * <li> 6 for Recipient number
 	 */
-	public void addConstantToCommand(String currentText, Object textArea, int type) {
+	public void addConstantToCommand(String currentText, Object textArea, String type) {
 		log.trace("ENTER");
 		String toAdd = "";
-		switch (type) {
-			case 0:
+		switch (FormatterMarkerType.valueOf(type)) {
+			case SENDER_NAME:
 				toAdd = MessageFormatter.MARKER_SENDER_NAME;
 				break;
-			case 1:
+			case SENDER_NUMBER:
 				toAdd = MessageFormatter.MARKER_SENDER_NUMBER;
 				break;
-			case 2:
+			case MESSAGE_CONTENT:
 				toAdd = MessageFormatter.MARKER_MESSAGE_CONTENT;
 				break;
-			case 3:
+			case KEYWORD_KEY:
 				toAdd = MessageFormatter.MARKER_KEYWORD_KEY;
 				break;
-			case 4:
+			case COMMAND_RESPONSE:
 				toAdd = MessageFormatter.MARKER_COMMAND_RESPONSE;
 				break;
-			case 5:
+			case RECIPIENT_NAME:
 				toAdd = MessageFormatter.MARKER_RECIPIENT_NAME;
 				break;
-			case 6:
+			case RECIPIENT_NUMBER:
 				toAdd = MessageFormatter.MARKER_RECIPIENT_NUMBER;
 				break;
 		}

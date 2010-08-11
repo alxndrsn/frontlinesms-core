@@ -67,13 +67,12 @@ public class ReplyActionDialog extends BaseActionDialog {
 		ui.add(pnBottom, senderPanel, 0);
 		
 		ui.add(this.getDialogComponent(), pnMessage, ui.getItems(this.getDialogComponent()).length - 3);
-		ui.setAction(ui.find(senderPanel, COMPONENT_BT_SENDER_NAME), "addConstantToCommand(tfMessage.text, tfMessage, 0)", this.getDialogComponent(), this);
-		ui.setAction(ui.find(senderPanel, COMPONENT_BT_SENDER_NUMBER), "addConstantToCommand(tfMessage.text, tfMessage, 1)", this.getDialogComponent(), this);
-		ui.setAction(ui.find(senderPanel, COMPONENT_BT_RECIPIENT_NAME), "addConstantToCommand(tfMessage.text, tfMessage, 5)", this.getDialogComponent(), this);
-		ui.setAction(ui.find(senderPanel, COMPONENT_BT_RECIPIENT_NUMBER), "addConstantToCommand(tfMessage.text, tfMessage, 6)", this.getDialogComponent(), this);
-		ui.setAction(ui.find(senderPanel, COMPONENT_BT_MESSAGE_CONTENT), "addConstantToCommand(tfMessage.text, tfMessage, 2)", this.getDialogComponent(), this);
-		ui.setAction(ui.find(senderPanel, COMPONENT_BT_KEYWORD), "addConstantToCommand(tfMessage.text, tfMessage, 3)", this.getDialogComponent(), this);
-		// FIX 0000542
+		this.setIncludeAction(ui.find(senderPanel, COMPONENT_BT_SENDER_NAME), FormatterMarkerType.SENDER_NAME);
+		this.setIncludeAction(ui.find(senderPanel, COMPONENT_BT_SENDER_NUMBER), FormatterMarkerType.SENDER_NUMBER);
+		this.setIncludeAction(ui.find(senderPanel, COMPONENT_BT_MESSAGE_CONTENT), FormatterMarkerType.MESSAGE_CONTENT);
+		this.setIncludeAction(ui.find(senderPanel, COMPONENT_BT_KEYWORD), FormatterMarkerType.KEYWORD_KEY);
+		this.setIncludeAction(ui.find(senderPanel, COMPONENT_BT_RECIPIENT_NAME), FormatterMarkerType.RECIPIENT_NAME);
+		this.setIncludeAction(ui.find(senderPanel, COMPONENT_BT_RECIPIENT_NUMBER), FormatterMarkerType.RECIPIENT_NUMBER);
 		
 		//Adds the date panel to it
 		addDatePanel(this.getDialogComponent());
@@ -81,12 +80,25 @@ public class ReplyActionDialog extends BaseActionDialog {
 		if(isEditing()) {
 			KeywordAction action = getTargetObject(KeywordAction.class);
 			
+			Object tfMessage = find(COMPONENT_TF_MESSAGE);
 			// Set the initial value of the reply text
-			ui.setText(find(COMPONENT_TF_MESSAGE), action.getUnformattedReplyText());
+			ui.setText(tfMessage, action.getUnformattedReplyText());
 			messagePanelController.messageChanged("", action.getUnformattedReplyText());
+			// Put the cursor (caret) at the end of the text area, so the click on a constant
+			// button inserts it at the end by default
+			ui.setCaretPosition(tfMessage, ui.getText(tfMessage).length());
 			
 			initDateFields();
 		}
+	}
+
+	/**
+	 * Sets the proper action for the 'include' buttons
+	 * @param include
+	 * @param markerType
+	 */
+	private void setIncludeAction(Object include, FormatterMarkerType markerType) {
+		ui.setAction(include, "addConstantToCommand(tfMessage.text, tfMessage, '" + markerType.toString() + "')", this.getDialogComponent(), this);
 	}
 
 	@Override

@@ -67,6 +67,7 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 			ui.add(list, item);
 		}
 		
+		Object tfCommand = find(COMPONENT_TF_COMMAND);
 		if(isEditing()) {
 			KeywordAction action = super.getTargetObject(KeywordAction.class);
 			
@@ -75,7 +76,7 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 			ui.setSelected(find(COMPONENT_RB_TYPE_COMMAND_LINE), action.getExternalCommandType() == KeywordAction.ExternalCommandType.COMMAND_LINE);
 			
 			//COMMAND
-			ui.setText(find(COMPONENT_TF_COMMAND), action.getUnformattedCommand());
+			ui.setText(tfCommand, action.getUnformattedCommand());
 			
 			Object pnResponse = find(COMPONENT_PN_RESPONSE);
 			//RESPONSE TYPE
@@ -123,6 +124,10 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 			
 			initDateFields();
 		}
+		
+		// Put the cursor (caret) at the end of the text field, so the click on a constant
+		// button inserts it at the end by default
+		ui.setCaretPosition(tfCommand, ui.getText(tfCommand).length());
 	}
 	
 	/** @see net.frontlinesms.ui.handler.keyword.BaseActionDialog#getLayoutFilePath() */
