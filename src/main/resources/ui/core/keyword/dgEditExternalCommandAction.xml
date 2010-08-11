@@ -24,18 +24,25 @@
         </panel>
         <panel border="true" bottom="5" colspan="2" columns="1" gap="10" left="5" name="pnResponse" right="5" text="i18n.common.what.to.do.response" top="5" weighty="1">
             <label icon="/icons/message.png" text="i18n.common.message"/>
-            <panel gap="7" name="pnReply" weighty="1">
                 <textarea colspan="2" name="tfMessage" weightx="1" weighty="1"/>
-                <button action="addConstantToCommand(tfMessage.text,tfMessage, 4)" icon="/icons/externalCommand_response.png" name="btIncludeResponse" text="i18n.action.include.response" valign="center"/>
-            </panel>
-            <checkbox icon="/icons/sms_autoReply.png" name="cbAutoReply" selected="true" text="i18n.common.send.auto.reply" weightx="1"/>
+            <panel gap="5">
+            <label halign="left" text="i18n.sentence.you.can.include"/>
+                <button action="addConstantToCommand(tfMessage.text,tfMessage, 4)" icon="/icons/externalCommand_response.png" name="btIncludeResponse" tooltip="i18n.action.include.response" valign="center" weightx="1"/>
+			    <button action="addConstantToCommand(tfMessage.text, tfMessage, 0)" name="btSenderName" icon="/icons/recipient.png" tooltip="i18n.common.sender.name" weightx="1"/>
+			    <button action="addConstantToCommand(tfMessage.text, tfMessage, 1)" name="btSenderNumber" icon="/icons/recipient_number.png" tooltip="i18n.common.message.sender.number" weightx="1"/>
+		        <button action="addConstantToCommand(tfMessage.text, tfMessage, 5)" name="btRecipientName" icon="/icons/sender.png" tooltip="i18n.common.recipient.name" weightx="1"/>
+			    <button action="addConstantToCommand(tfMessage.text, tfMessage, 6)" name="btRecipientNumber" icon="/icons/sender_number.png" tooltip="i18n.common.message.recipient.number" weightx="1"/>
+			    <button action="addConstantToCommand(tfMessage.text, tfMessage, 3)" name="btKeyword" icon="/icons/keyword.png" tooltip="i18n.common.keyword" weightx="1"/>
+			    <button action="addConstantToCommand(tfMessage.text, tfMessage, 2)" name="btMessageContent" icon="/icons/message.png" tooltip="i18n.common.message.content" weightx="1"/>
+		   </panel>
+            <checkbox icon="/icons/sms_autoReply.png" name="cbAutoReply" selected="true" text="i18n.common.send.auto.reply"/>
             <checkbox action="handleForwardChanged(this.selected)" icon="/icons/sms_autoForward.png" name="cbForward" text="i18n.common.forward.to.group" weightx="1"/>
             <list enabled="false" name="groupList" weightx="1"/>
         </panel>
     </panel>
     <separator colspan="3"/>
     <panel colspan="3" gap="20" halign="center" left="5" right="5">
-        <button icon="/icons/tick.png" text="i18n.action.done" action="save"/>
-        <button action="removeDialog" icon="/icons/cross.png" text="i18n.action.cancel"/>
+        <button type="default" icon="/icons/tick.png" text="i18n.action.done" action="save" name="btSave"/>
+        <button type="cancel" action="removeDialog" icon="/icons/cross.png" text="i18n.action.cancel"/>
     </panel>
 </dialog>
