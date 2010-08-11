@@ -214,18 +214,14 @@ public abstract class BaseActionDialog implements ThinletUiEventHandler {
 	 * Adds a constant substitution marker to the text of an email action's text area (a thinlet component).
 	 * @param currentText 
 	 * @param textArea 
-	 * 
-	 * @param type The index of the constant that should be inserted
-	 * <li> 0 for Sender name
-	 * <li> 1 for Sender number
-	 * <li> 2 for Message Content
-	 * <li> 3 for Keyword
-	 * <li> 4 for Command Response
-	 * <li> 5 for Recipient name
-	 * <li> 6 for Recipient number
+	 * @param type The constant that should be inserted
 	 */
 	public void addConstantToCommand(String currentText, Object textArea, String type) {
-		log.trace("ENTER");
+		addConstantToCommand(ui, currentText, textArea, type);
+		textChanged(ui.getText(textArea));
+	}
+	
+	public static void addConstantToCommand(UiGeneratorController ui, String currentText, Object textArea, String type) {
 		String toAdd = "";
 		switch (FormatterMarkerType.valueOf(type)) {
 			case SENDER_NAME:
@@ -250,22 +246,15 @@ public abstract class BaseActionDialog implements ThinletUiEventHandler {
 				toAdd = MessageFormatter.MARKER_RECIPIENT_NUMBER;
 				break;
 		}
-		log.debug("Setting [" + currentText + toAdd + "] to component [" + textArea + "]");
 		
 		StringBuilder sb = new StringBuilder(currentText);
-		int caretPosition = this.ui.getCaretPosition(textArea);
+		int caretPosition = ui.getCaretPosition(textArea);
 		sb.insert(caretPosition, toAdd);
 		String newText = sb.toString();
+		
 		ui.setText(textArea, newText);
-		
 		ui.setCaretPosition(textArea, caretPosition + toAdd.length());
-		
-		this.textChanged(newText);
-		
 		ui.setFocus(textArea);
-
-		
-		log.trace("EXIT");
 	}
 	
 	public void textChanged (String text) {

@@ -36,8 +36,10 @@ public class Icon {
 	/** Icon for a file */
 	public static final String FILE = "/icons/file.png";
 	public static final String ATTACH = "/icons/attach.png";
+	public static final String ABOUT = "/icons/about.png";
 	public static final String SURVEY = "/icons/survey.png";
 	public static final String GROUP_LEAVE = "/icons/group_leave.png";
+	public static final String HELP = "/icons/help.png";
 	public static final String EMAIL = "/icons/email.png";
 	public static final String GROUP_JOIN = "/icons/group_join.png";
 	public static final String AUTOFORWARD = "/icons/sms_autoForward.png";

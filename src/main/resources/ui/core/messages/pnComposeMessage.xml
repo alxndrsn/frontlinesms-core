@@ -10,6 +10,7 @@
     <panel gap="5" weightx="1">
         <label text="i18n.sentence.remaining.characters"/>
         <label font="bold" name="lbRemainingChars" text="160"/>
+        <label icon="/icons/help.png" name="lbHelp" visible="false" tooltip="i18n.tooltip.approximative.count"/>
         <panel gap="2" halign="right" weightx="1">
             <label font="11 bold" name="lbMsgNumber" text="0"/>
             <label icon="/icons/sms_disabled.png" name="lbFirst"/>
@@ -18,15 +19,20 @@
         </panel>
     </panel>
     <textarea action="messageChanged(tfRecipient.text, this.text)" rows="8" columns="40" name="tfMessage"/>
-    <panel name="pnBottom" gap="13" weightx="1">
+    <panel name="pnBottom" gap="13" weightx="1" columns="2">
         <panel gap="8" halign="left" weightx="1">
-            <button icon="/icons/sms_send.png" name="btSend" text="i18n.common.send" enabled="false"
-            		action="send"/>
-        	<label font="bold" name="lbTooManyMessages" text="i18n.sentence.too.many.messages"/>
+            <label halign="left" text="i18n.sentence.you.can.include"/>
+    		<button action="addConstantToCommand(tfMessage.text, tfMessage, 'RECIPIENT_NAME')" name="btRecipientName" icon="/icons/recipient.png" tooltip="i18n.common.recipient" weightx="1"/>
+		    <button action="addConstantToCommand(tfMessage.text, tfMessage, 'RECIPIENT_NUMBER')" name="btRecipientNumber" icon="/icons/recipient_number.png" tooltip="i18n.common.message.recipient.number" weightx="1"/>
+		    <label font="bold" name="lbTooManyMessages" text="i18n.sentence.too.many.messages"/>
         </panel>
         <panel gap="8" halign="right" top="3" weightx="1">
             <label icon="/icons/money.png" text="i18n.common.estimated.cost"/>
             <label font="bold" name="lbEstimatedMoney"/>
+            <label icon="/icons/help.png" name="lbHelp" visible="false" tooltip="i18n.tooltip.approximative.count"/>
+        </panel>
+        <panel colspan="2" gap="8" halign="center"> 
+        	<button icon="/icons/sms_send.png" name="btSend" text="i18n.common.send" enabled="false" action="send"/>
         </panel>
     </panel>
 </panel>

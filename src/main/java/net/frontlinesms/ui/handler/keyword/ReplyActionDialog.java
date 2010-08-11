@@ -61,6 +61,7 @@ public class ReplyActionDialog extends BaseActionDialog {
 		Object pnMessage = messagePanelController.getPanel();
 		// FIX 0000542
 		Object pnBottom = ui.find(pnMessage, COMPONENT_PN_BOTTOM);
+		ui.remove(ui.getItem(pnBottom, 2));
 		ui.remove(ui.getItem(pnBottom, 0));
 		
 		Object senderPanel = ui.loadComponentFromFile(UI_FILE_SENDER_NAME_PANEL, this);

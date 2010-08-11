@@ -7,6 +7,7 @@ package net.frontlinesms.ui.handler.message;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_CONTACT_SELECTED;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_ESTIMATED_MONEY;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_FIRST;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_HELP;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_MSG_NUMBER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_REMAINING_CHARS;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_SECOND;
@@ -16,6 +17,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_ME
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_RECIPIENT;
 
 import java.awt.Color;
+import java.util.regex.Pattern;
 
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.FrontlineUtils;
@@ -27,6 +29,7 @@ import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.UiProperties;
 import net.frontlinesms.ui.handler.contacts.ContactSelecter;
+import net.frontlinesms.ui.handler.keyword.BaseActionDialog;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 import org.apache.log4j.Logger;
@@ -98,6 +101,19 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	
 	private double getCostPerSms() {
 		return UiProperties.getInstance().getCostPerSms();
+	}
+	
+	/**
+	 * Adds a constant substitution marker to the SMS text.
+	 * @param currentText 
+	 * @param textArea 
+	 * @param type The constant that should be inserted
+	 */
+	public void addConstantToCommand(String currentText, Object tfMessage, String type) {
+		BaseActionDialog.addConstantToCommand(uiController, currentText, tfMessage, type);
+		
+		String recipient = uiController.getText(find(COMPONENT_TF_RECIPIENT));
+		messageChanged(recipient, uiController.getText(tfMessage));
 	}
 	
 //> THINLET UI METHODS
@@ -229,7 +245,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		
 		Object 	tfMessage = find(COMPONENT_TF_MESSAGE),
 				lbTooManyMessages = find(COMPONENT_LB_TOO_MANY_MESSAGES);
-		
+
 		int numberOfMsgs, remaining;
 		double costEstimate;
 		
@@ -264,16 +280,23 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		costEstimate *= numberOfRecipients;
 		
 		uiController.setText(find(COMPONENT_LB_REMAINING_CHARS), String.valueOf(remaining));
+		uiController.setText(find(COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(costEstimate));
+		uiController.setVisible(find(COMPONENT_LB_HELP), false);
+		
 		uiController.setText(find(COMPONENT_LB_MSG_NUMBER), String.valueOf(numberOfMsgs));
 		uiController.setIcon(find(COMPONENT_LB_FIRST), Icon.SMS_DISABLED);
 		uiController.setIcon(find(COMPONENT_LB_SECOND), Icon.SMS_DISABLED);
 		uiController.setIcon(find(COMPONENT_LB_THIRD), Icon.SMS_DISABLED);
+		
 		if (numberOfMsgs >= 1) uiController.setIcon(find(COMPONENT_LB_FIRST), Icon.SMS);
 		if (numberOfMsgs >= 2) uiController.setIcon(find(COMPONENT_LB_SECOND), Icon.SMS);
 		if (numberOfMsgs == 3) uiController.setIcon(find(COMPONENT_LB_THIRD), Icon.SMS);
 		if (numberOfMsgs > 3) uiController.setIcon(find(COMPONENT_LB_THIRD), Icon.SMS_ADD);
 		
-		uiController.setText(find(COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(costEstimate));
+
+		if (Pattern.matches(".*\\$[^ ]*\\}.*", message)) {
+			uiController.setVisible(find(COMPONENT_LB_HELP), true);
+		}
 	}
 	
 	/**
