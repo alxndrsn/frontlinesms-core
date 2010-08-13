@@ -21,8 +21,6 @@ package net.frontlinesms.ui;
 
 import java.awt.Font;
 import java.awt.Frame;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
@@ -66,7 +64,6 @@ import net.frontlinesms.ui.i18n.*;
 
 import org.apache.log4j.Logger;
 import org.smslib.CIncomingMessage;
-import org.springframework.dao.DataAccessException;
 
 import thinlet.FrameLauncher;
 import thinlet.Thinlet;
@@ -101,7 +98,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public static final int DEFAULT_HEIGHT = 768;
 	/** Default width of the Thinlet frame launcher */
 	public static final int DEFAULT_WIDTH = 1024;
-	private static final String I18N_DATABASE_ACCESS_ERROR = "message.database.access.error";
 	private static final String I18N_CONFIRM_EXIT = "common.confirm.exit";
 
 //> INSTANCE PROPERTIES
@@ -322,15 +318,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			}
 			
 			// Set up the close event on the framelauncher
-			frameLauncher.addWindowListener(new WindowAdapter() {
-				@Override
-				public void windowClosing(WindowEvent e) {
-					super.windowClosing(e);
-					// Make sure the exit() method is called so that we shut down cleanly
-					LOG.trace(".windowClosing()");
-					exit();
-				}
-			});
+//			frameLauncher.removeWindowListener(frameLauncher);
+//			frameLauncher.addWindowListener(this);
 			
 			frontlineController.setEmailListener(this);
 			frontlineController.setUiListener(this);
@@ -937,40 +926,36 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public boolean hasSomethingToDoBeforeExit() {
 		LOG.trace("ENTER");
 		saveWindowSize();
-		boolean somethingToDo = false;
 		
 		Collection<FrontlineMessage> pending = messageFactory.getMessages(Type.OUTBOUND, Status.PENDING);
 		if(LOG.isDebugEnabled()) LOG.debug("Pending Messages size [" + pending.size() + "]");
 		if (pending.size() > 0) {
 			showPendingMessages(pending);
-			somethingToDo = true;
+		} else {
+			this.showConfirmationDialog("doClose", I18N_CONFIRM_EXIT);
 		}
-		if(LOG.isTraceEnabled()) LOG.trace("EXIT : " + somethingToDo);
-		return somethingToDo;
+		
+		return true;
 	}
 	
 	public void close() {
 		this.showConfirmationDialog("doClose", I18N_CONFIRM_EXIT);
 	}
 	
+	public boolean destroy () {
+		return super.destroy();
+	}
+	
 	public void doClose() {
 		LOG.trace("ENTER doClose");
 		
-		
-		Collection<FrontlineMessage> pending = messageFactory.getMessages(Type.OUTBOUND, Status.PENDING);
-		LOG.debug("Pending Messages size [" + pending.size() + "]");
-		if (pending.size() > 0) {
-			showPendingMessages(pending);
-		} else {
+		if (destroy()) {
 			exit();
+		} else {
+			setVisible(false);
 		}
-		LOG.trace("EXIT");
-	}
 	
-	@Override
-	public boolean destroy() {
-		super.destroy();
-		return false;
+		LOG.trace("EXIT");
 	}
 	
 	/**
@@ -981,8 +966,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			m.setStatus(Status.OUTBOX);
 		}
 		saveWindowSize();
+		
 		frameLauncher.dispose();
 		this.frontlineController.destroy();
+		System.exit(0);
 	}
 
 	/**
