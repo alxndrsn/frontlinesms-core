@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.messaging.sms;
+package net.frontlinesms.messaging;
 
 import static org.mockito.Mockito.*;
 
@@ -23,10 +23,11 @@ import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.junit.BaseTestCase;
 import net.frontlinesms.listener.UIListener;
+import net.frontlinesms.messaging.IncomingMessageProcessor;
 import net.frontlinesms.messaging.sms.SmsService;
 
 /**
- * Tests for the {@link IncomingSmsProcessor} class.
+ * Tests for the {@link IncomingMessageProcessor} class.
  * @author Alex Anderson <alex@frontlinesms.com>
  */
 public class IncomingMessageProcessorTest extends BaseTestCase {
@@ -38,7 +39,7 @@ public class IncomingMessageProcessorTest extends BaseTestCase {
 	private KeywordDao keywordDao;
 	private KeywordActionDao keywordActionDao;
 	
-	private IncomingSmsProcessor imp;
+	private IncomingMessageProcessor imp;
 	private BlockingIncomingMessageEventListener bimel;
 	
 //> TEST META METHODS
@@ -58,7 +59,7 @@ public class IncomingMessageProcessorTest extends BaseTestCase {
 		keywordActionDao = mock(KeywordActionDao.class);
 		when(frontline.getKeywordActionDao()).thenReturn(keywordActionDao);
 		
-		imp = new IncomingSmsProcessor(frontline);
+		imp = new IncomingMessageProcessor(frontline);
 		bimel = new BlockingIncomingMessageEventListener();
 		imp.setUiListener(bimel);
 		imp.start();
@@ -92,7 +93,7 @@ public class IncomingMessageProcessorTest extends BaseTestCase {
 		
 		when(keywordActionDao.getActions(mockKeyword)).thenReturn(Arrays.asList(goodAction1, deadAction, badAction, goodAction2));
 		
-		imp.handleTextMessage(mockMessage);
+		imp.handleMessage(mockMessage);
 
 		verify(goodAction1).incrementCounter();
 		verify(uiListener).keywordActionExecuted(goodAction1);
@@ -188,9 +189,9 @@ public class IncomingMessageProcessorTest extends BaseTestCase {
 }
 
 /**
- * This class is used as the {@link UIListener} for the {@link IncomingSmsProcessor} that we are testing.
+ * This class is used as the {@link UIListener} for the {@link IncomingMessageProcessor} that we are testing.
  * Using the method {@link BlockingIncomingMessageEventListener#getIncomingMessage()} we can wait until the
- * {@link IncomingSmsProcessor} has finished processing a message before checking the state of the test
+ * {@link IncomingMessageProcessor} has finished processing a message before checking the state of the test
  * objects.
  * @author aga
  */

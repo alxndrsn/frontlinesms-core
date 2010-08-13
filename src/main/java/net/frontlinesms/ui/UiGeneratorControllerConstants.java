@@ -59,6 +59,8 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_BT_MESSAGE_CONTENT = "btMessageContent";
 	public static final String COMPONENT_BT_SENDER_NAME = "btSenderName";
 	public static final String COMPONENT_BT_SENDER_NUMBER = "btSenderNumber";
+	public static final String COMPONENT_BT_RECIPIENT_NAME = "btRecipientName";
+	public static final String COMPONENT_BT_RECIPIENT_NUMBER = "btRecipientNumber";
 	public static final String COMPONENT_LB_COST = "lbCost";
 	public static final String COMPONENT_LB_MSGS_NUMBER = "lbMsgsNumber";
 	public static final String COMPONENT_CB_CONTACTS = "cbContacts";

@@ -25,6 +25,7 @@ import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.EntityField;
+import net.frontlinesms.messaging.MessageFormatter;
 
 /**
  * @author Alex Anderson alex(at)masabi(dot)com
@@ -513,12 +514,12 @@ public class KeywordAction {
 			}
 			
 			// TODO perhaps all variables should be subbed?
-			return FrontlineUtils.replace(unformattedText,
-					CsvUtils.MARKER_SENDER_NUMBER,		/*->*/ senderMsisdn,
-					CsvUtils.MARKER_KEYWORD_KEY,		/*->*/ keywordInMessage,
-					CsvUtils.MARKER_SENDER_NAME,		/*->*/ senderDisplayName,
+			return MessageFormatter.formatMessage(unformattedText,
+					MessageFormatter.MARKER_SENDER_NUMBER,		/*->*/ senderMsisdn,
+					MessageFormatter.MARKER_KEYWORD_KEY,		/*->*/ keywordInMessage,
+					MessageFormatter.MARKER_SENDER_NAME,		/*->*/ senderDisplayName,
 					// N.B. message content should always be substituted last to prevent injection attacks
-					CsvUtils.MARKER_MESSAGE_CONTENT,	/*->*/ messageWithoutKeyword 
+					MessageFormatter.MARKER_MESSAGE_CONTENT,	/*->*/ messageWithoutKeyword 
 					);
 		}
 	}

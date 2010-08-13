@@ -31,6 +31,7 @@ import java.util.Iterator;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.FrontlineMessage;
+import net.frontlinesms.messaging.MessageFormatter;
 
 /**
  * Utilities for reading and writing Comma Seperated Value (CSV) files.
@@ -42,16 +43,14 @@ import net.frontlinesms.data.domain.FrontlineMessage;
 public class CsvUtils {
 	
 //> SUBSTITUTION MARKERS
-	/** [Substitution marker] {@link FrontlineMessage#getSenderMsisdn()} */
-	public static final String MARKER_SENDER_NUMBER = "${sender_number}";
-	/** [Substitution marker] {@link FrontlineMessage#getSenderMsisdn()} converted into a {@link Contact#getName()} if possible */
-	public static final String MARKER_SENDER_NAME = "${sender_name}";
-	/** [Substitution marker] {@link FrontlineMessage#getRecipientMsisdn()} */
-	public static final String MARKER_RECIPIENT_NUMBER = "${recipient_number}";
-	/** [Substitution marker] {@link FrontlineMessage#getRecipientMsisdn()} converted into a {@link Contact#getName()} if possible */
-	public static final String MARKER_RECIPIENT_NAME = "${recipient_name}";
-	/** [Substitution marker] {@link FrontlineMessage#getTextContent()} */
-	public static final String MARKER_MESSAGE_CONTENT = "${message_content}";
+	public static final String MARKER_SENDER_NUMBER = MessageFormatter.MARKER_SENDER_NUMBER;
+	public static final String MARKER_SENDER_NAME = MessageFormatter.MARKER_SENDER_NAME;
+	public static final String MARKER_RECIPIENT_NUMBER = MessageFormatter.MARKER_RECIPIENT_NUMBER;
+	public static final String MARKER_RECIPIENT_NAME = MessageFormatter.MARKER_RECIPIENT_NAME;
+	public static final String MARKER_MESSAGE_CONTENT = MessageFormatter.MARKER_MESSAGE_CONTENT;
+	public static final String MARKER_KEYWORD_KEY = MessageFormatter.MARKER_KEYWORD_KEY;
+	public static final String MARKER_COMMAND_RESPONSE = MessageFormatter.MARKER_COMMAND_RESPONSE;
+	
 	/** [Substitution marker] {@link FrontlineMessage#getDate()} */
 	public static final String MARKER_MESSAGE_DATE = "${message_date}";
 	/** [Substitution marker] {@link Contact#getName()} */
@@ -66,18 +65,14 @@ public class CsvUtils {
 	public static final String MARKER_CONTACT_STATUS = "${contact_status}";
 	/** [Substitution marker] {@link Contact#getNotes()} */
 	public static final String MARKER_CONTACT_NOTES = "${contact_notes}";
-	/** [Substitution marker] {@link Contact#getGroups()} covnerted to a {@link String} TODO define how it's converted to a string */
+	/** [Substitution marker] {@link Contact#getGroups()} converted to a {@link String} TODO define how it's converted to a string */
 	public static final String MARKER_CONTACT_GROUPS = "${contact_groups}";
 	/** [Substitution marker] {@link FrontlineMessage#getType()} */
 	public static final String MARKER_MESSAGE_TYPE = "${message_type}";
 	/** [Substitution marker] {@link FrontlineMessage#getStatus()} */
 	public static final String MARKER_MESSAGE_STATUS = "${message_status}";
-	/** [Substitution marker] {@link Keyword#getKeyword()} */
-	public static final String MARKER_KEYWORD_KEY = "${keyword}";
 	/** [Substitution marker] {@link Keyword#getDescription()} */
 	public static final String MARKER_KEYWORD_DESCRIPTION = "${keyword_description}";
-	/** [Substitution marker] TODO document what this is */
-	public static final String MARKER_COMMAND_RESPONSE = "${command_response}";
 	
 //> STATIC CONSTANTS
 	/** Character encoding String for UTF-8 */

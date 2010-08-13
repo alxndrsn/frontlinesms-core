@@ -7,10 +7,12 @@
     <textarea colspan="3" name="forward" weighty="1" action="textChanged(this.text)"/>
     <label halign="left" text="i18n.sentence.you.can.include"/>
     <panel colspan="2" gap="8">
-	    <button action="addConstantToCommand(forward.text, forward, 0)" icon="/icons/user.png" text="i18n.common.sender.name"/>
-	    <button action="addConstantToCommand(forward.text, forward, 1)" icon="/icons/phone_number.png" name="btSenderNumber" text="i18n.common.message.sender.number" weightx="1"/>
-        <button action="addConstantToCommand(forward.text, forward, 3)" icon="/icons/keyword.png" name="btKeyword" text="i18n.common.keyword" weightx="1"/>
-	    <button action="addConstantToCommand(forward.text, forward, 2)" icon="/icons/message.png" text="i18n.common.message.content"/>
+	    <button action="addConstantToCommand(forward.text, forward, 'SENDER_NAME')" name="btSenderName" icon="/icons/sender.png" tooltip="i18n.common.sender.name" weightx="1"/>
+	    <button action="addConstantToCommand(forward.text, forward, 'SENDER_NUMBER')" name="btSenderNumber" icon="/icons/sender_number.png" tooltip="i18n.common.message.sender.number" weightx="1"/>
+        <button action="addConstantToCommand(forward.text, forward, 'RECIPIENT_NAME')" name="btRecipientName" icon="/icons/recipient.png" tooltip="i18n.common.recipient" weightx="1"/>
+	    <button action="addConstantToCommand(forward.text, forward, 'RECIPIENT_NUMBER')" name="btRecipientNumber" icon="/icons/recipient_number.png" tooltip="i18n.common.message.recipient.number" weightx="1"/>
+	    <button action="addConstantToCommand(forward.text, forward, 'KEYWORD_KEY')" name="btKeyword" icon="/icons/keyword.png" tooltip="i18n.common.keyword" weightx="1"/>
+	    <button action="addConstantToCommand(forward.text, forward, 'MESSAGE_CONTENT')" name="btMessageContent" icon="/icons/message.png" tooltip="i18n.common.message.content" weightx="1"/>
     </panel>
     <separator colspan="3"/>
     <separator colspan="3"/>
