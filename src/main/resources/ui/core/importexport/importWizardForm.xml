@@ -9,7 +9,7 @@
 	<panel colspan="2" columns="1" name="pnDetails" bottom="3" gap="5" top="3" halign="center">
 		<label alignment="center" font="bold" i18n="true" text="i18n.importexport.details.choose"/>
     </panel>
-	<panel name="pnValuesTable" gap="8" colspan="2" text="Preview" border="true" left="4" right="4" bottom="4">
+	<panel name="pnValuesTable" gap="8" colspan="2" text="i18n.importexport.preview" border="true" left="4" right="4" bottom="4">
 		 <table name="tbValues" weightx="1" weighty="1" height="140" width="600">
 			<!-- This will be populated at runtime with the list of values inside the CSV file -->
 		</table>    

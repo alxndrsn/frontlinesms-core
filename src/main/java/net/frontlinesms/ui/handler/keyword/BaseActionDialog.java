@@ -3,6 +3,7 @@ package net.frontlinesms.ui.handler.keyword;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_UNDEFINED;
 import static net.frontlinesms.FrontlineSMSConstants.DEFAULT_END_DATE;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_WRONG_FORMAT_DATE;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_SAVE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_END_DATE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_START_DATE;
 
@@ -220,7 +221,6 @@ public abstract class BaseActionDialog implements ThinletUiEventHandler {
 	 * <li> 2 for Message Content
 	 * <li> 3 for Keyword
 	 * <li> 4 for Command Response
-	 * <li> 5 for SMS id
 	 */
 	public void addConstantToCommand(String currentText, Object textArea, int type) {
 		log.trace("ENTER");
@@ -243,9 +243,26 @@ public abstract class BaseActionDialog implements ThinletUiEventHandler {
 				break;
 		}
 		log.debug("Setting [" + currentText + toAdd + "] to component [" + textArea + "]");
-		ui.setText(textArea, currentText + toAdd);
+		
+		StringBuilder sb = new StringBuilder(currentText);
+		int caretPosition = this.ui.getCaretPosition(textArea);
+		sb.insert(caretPosition, toAdd);
+		String newText = sb.toString();
+		ui.setText(textArea, newText);
+		
+		ui.setCaretPosition(textArea, caretPosition + toAdd.length());
+		
+		this.textChanged(newText);
+		
 		ui.setFocus(textArea);
+
+		
 		log.trace("EXIT");
+	}
+	
+	public void textChanged (String text) {
+		boolean enableSaveButton = (text != null && !text.equals(""));
+		this.ui.setEnabled(this.find(COMPONENT_BT_SAVE), enableSaveButton);
 	}
 	
 	/**

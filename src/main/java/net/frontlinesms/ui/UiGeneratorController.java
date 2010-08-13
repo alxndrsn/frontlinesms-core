@@ -102,6 +102,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/** Default width of the Thinlet frame launcher */
 	public static final int DEFAULT_WIDTH = 1024;
 	private static final String I18N_DATABASE_ACCESS_ERROR = "message.database.access.error";
+	private static final String I18N_CONFIRM_EXIT = "common.confirm.exit";
 
 //> INSTANCE PROPERTIES
 	/** Logging object */
@@ -894,7 +895,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		if (cost.length() == 0) this.setCostPerSms(0);
 		else {
 			try {
-				cost = cost.replace(',', '.').replace(';', '.');
 				double costPerSMS = (InternationalisationUtils.parseCurrency(cost))/* * Utils.TIMES_TO_INT*/;//FIXME this will likely give some very odd costs - needs adjusting for moving decimal point.
 				this.setCostPerSms(costPerSMS);
 			} catch (ParseException e) {
@@ -950,7 +950,13 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	public void close() {
-		LOG.trace("ENTER");
+		this.showConfirmationDialog("doClose", I18N_CONFIRM_EXIT);
+	}
+	
+	public void doClose() {
+		LOG.trace("ENTER doClose");
+		
+		
 		Collection<FrontlineMessage> pending = messageFactory.getMessages(Type.OUTBOUND, Status.PENDING);
 		LOG.debug("Pending Messages size [" + pending.size() + "]");
 		if (pending.size() > 0) {
@@ -1470,6 +1476,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			Object pnKeywordActionsAdvanced = find(keyTab, COMPONENT_PN_KEYWORD_ACTIONS_ADVANCED);
 			if (pnKeywordActionsAdvanced != null) {
 				Object actionsList = find(pnKeywordActionsAdvanced, COMPONENT_ACTION_LIST);
+				int selected = getSelectedIndex(actionsList);
 				int index = -1;
 				for (Object act : getItems(actionsList)) {
 					KeywordAction a = getKeywordAction(act);
@@ -1481,6 +1488,9 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				}
 				if (index != -1) {
 					add(actionsList, getRow(action), index);
+				}
+				if (selected >= 0) {
+					setSelectedIndex(actionsList, selected);
 				}
 			}
 		}
@@ -1793,8 +1803,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		randy.generate(200);
 	}
 	
-	/** UI Event method (debug): Delete all contacts and groups
-	 * @throws IOException */
+	/** UI Event method (debug): Delete all contacts and groups */
 	public void deleteAllGroupsAndContacts() {
 		// Delete all groups and their contacts
 		for (Group group : this.groupDao.getAllGroups()) {
@@ -1878,17 +1887,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void refreshContactsTab() {
 		if (this.currentTab.equals(TAB_CONTACT_MANAGER)) {
 			this.contactsTabController.refresh();
-		}
-	}
-	
-	@Override
-	protected void handleException(Throwable throwable) {
-		if (throwable instanceof DataAccessException) {
-			// If the database couldn't be reached, display a message for the user
-			this.alert(InternationalisationUtils.getI18NString(I18N_DATABASE_ACCESS_ERROR));
-		} else {
-			// Else throw a normal error dialog
-			super.handleException(throwable);
 		}
 	}
 }

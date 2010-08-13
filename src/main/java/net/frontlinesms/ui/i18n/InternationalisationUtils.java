@@ -44,6 +44,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.FrontlineUtils;
@@ -76,6 +78,9 @@ public class InternationalisationUtils {
 //> GENERAL i18n HELP METHODS
 	/** The default characterset, UTF-8.  This must be available for every JVM. */
 	public static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
+	private static final double TEST_CURRENCY_STRING = 1.5;
+	private static final String COMA = ",";
+	private static final String DOT = ".";
 	
 //>
 	/**
@@ -167,33 +172,87 @@ public class InternationalisationUtils {
 	public static final double parseCurrency(String currencyString) throws ParseException {
 		NumberFormat currencyFormat = InternationalisationUtils.getCurrencyFormat();
 		String currencySymbol = InternationalisationUtils.getCurrencySymbol();
-		if(!currencyString.contains(currencySymbol)) {
-			if(InternationalisationUtils.isCurrencySymbolPrefix()) currencyString = currencySymbol + currencyString;
-			else if(InternationalisationUtils.isCurrencySymbolSuffix()) currencyString += currencySymbol;
-			/* else allow the parse exception to be thrown! */ 
-		}
+		
+		return parseCurrency(currencyFormat, currencySymbol, currencyString);
+	}
+	
+	static final double parseCurrency(NumberFormat currencyFormat, String currencySymbol, String currencyString) throws ParseException {
+		currencyString = getCurrencyStringWithSymbol(currencyFormat, currencySymbol, currencyString.trim());
+		
 		return currencyFormat.parse(currencyString).doubleValue();
+	}
+
+	public static String getCurrencyStringWithSymbol(NumberFormat currencyFormat, String currencySymbol, String currencyString) throws ParseException {
+		String testString = InternationalisationUtils.formatCurrency(currencyFormat, currencySymbol, TEST_CURRENCY_STRING);
+		String testCurrencyString = currencyFormat.format(TEST_CURRENCY_STRING).replace(currencySymbol, "").replace(" ", "");
+		String currencySymbolWithFormat = testString.replace(testCurrencyString, ""); // This can include a space, for example
+		
+		Pattern pattern = Pattern.compile("(.*([\\.,]).)(0)?(.*)", Pattern.DOTALL);
+		Matcher matcher = pattern.matcher(testString);
+		
+		if (matcher.find()) {
+			testString = matcher.group(1) + emptyForNullString(matcher.group(4));
+			if (matcher.group(2).equals(COMA)) {
+				currencyString = currencyString.replace(DOT, COMA);
+				testCurrencyString = testCurrencyString.replace(DOT, COMA);
+			} else {
+				currencyString = currencyString.replace(COMA, DOT);
+				testCurrencyString = testCurrencyString.replace(COMA, DOT);
+			}
+			
+			int symbolPosition = testString.indexOf(currencySymbol);
+			
+			boolean isCurrencySymbolPrefix = (symbolPosition == 0);
+			boolean isCurrencySymbolSuffix = (symbolPosition == testString.length() - currencySymbol.length());
+			
+			if (isCurrencySymbolPrefix) {
+				currencyString = currencySymbolWithFormat + currencyString;
+			} else if (isCurrencySymbolSuffix) {
+				currencyString += currencySymbolWithFormat;
+			}
+			
+			return currencyString;
+		} else {
+			throw new ParseException("Unparseable number: \"" + currencyString + "\"", 0);
+		}
+	}
+
+	private static String emptyForNullString(String group) {
+		return (group == null ? "" : group);
 	}
 
 	/**
 	 * Checks if the currency currency symbol is a suffix to the formatted currency value string.
 	 * @return <code>true</code> if the currency symbol should be placed after the value; <code>false</code> otherwise.
 	 */
-	public static boolean isCurrencySymbolSuffix() {
-		String testString = InternationalisationUtils.formatCurrency(12.34);
-		String currencySymbol = InternationalisationUtils.getCurrencySymbol();
+	public static boolean isCurrencySymbolSuffix(NumberFormat currencyFormat, String currencySymbol) {
+		String testString = InternationalisationUtils.formatCurrency(currencyFormat, currencySymbol, TEST_CURRENCY_STRING);
 		int symbolPosition = testString.indexOf(currencySymbol);
 		return symbolPosition == testString.length()-currencySymbol.length();
+	}
+	
+	public static boolean isCurrencySymbolSuffix() {
+		NumberFormat currencyFormat = InternationalisationUtils.getCurrencyFormat();
+		String currencySymbol = InternationalisationUtils.getCurrencySymbol();
+		
+		return isCurrencySymbolSuffix(currencyFormat, currencySymbol);
 	}
 
 	/**
 	 * Checks if the currency currency symbol is a prefix to the formatted currency value string.
 	 * @return <code>true</code> if the currency symbol should be placed before the currency value; <code>false</code> otherwise.
 	 */
-	public static boolean isCurrencySymbolPrefix() {
-		String testString = InternationalisationUtils.formatCurrency(12.34);
-		int symbolPosition = testString.indexOf(InternationalisationUtils.getCurrencySymbol());
+	public static boolean isCurrencySymbolPrefix(NumberFormat currencyFormat, String currencySymbol) {
+		String testString = InternationalisationUtils.formatCurrency(currencyFormat, currencySymbol, TEST_CURRENCY_STRING);
+		int symbolPosition = testString.indexOf(currencySymbol);
 		return symbolPosition == 0;
+	}
+	
+	public static boolean isCurrencySymbolPrefix() {
+		NumberFormat currencyFormat = InternationalisationUtils.getCurrencyFormat();
+		String currencySymbol = InternationalisationUtils.getCurrencySymbol();
+		
+		return isCurrencySymbolPrefix(currencyFormat, currencySymbol);
 	}
 
 	/**
@@ -201,8 +260,15 @@ public class InternationalisationUtils {
 	 * @return a formatted currency string
 	 * @see #formatCurrency(double, boolean)
 	 */
+	public static final String formatCurrency(NumberFormat currencyFormat, String currencySymbol, double value) {
+		return InternationalisationUtils.formatCurrency(currencyFormat, currencySymbol, value, true);
+	}
+	
 	public static final String formatCurrency(double value) {
-		return InternationalisationUtils.formatCurrency(value, true);
+		NumberFormat currencyFormat = InternationalisationUtils.getCurrencyFormat();
+		String currencySymbol = InternationalisationUtils.getCurrencySymbol();
+		
+		return formatCurrency(currencyFormat, currencySymbol, value);
 	}
 
 	/**
@@ -211,12 +277,19 @@ public class InternationalisationUtils {
 	 * @param showSymbol 
 	 * @return a formatted currency string
 	 */
-	public static final String formatCurrency(double value, boolean showSymbol) {
-		String formatted = InternationalisationUtils.getCurrencyFormat().format(value);
+	public static final String formatCurrency(NumberFormat currencyFormat, String currencySymbol, double value, boolean showSymbol) {
+		String formatted = currencyFormat.format(value);
 		if(!showSymbol) {
-			formatted = formatted.replace(InternationalisationUtils.getCurrencySymbol(), "");
+			formatted = formatted.replace(currencySymbol, "");
 		}
 		return formatted;
+	}
+	
+	public static final String formatCurrency(double value, boolean showSymbol) {
+		NumberFormat currencyFormat = InternationalisationUtils.getCurrencyFormat();
+		String currencySymbol = InternationalisationUtils.getCurrencySymbol();
+		
+		return formatCurrency(currencyFormat, currencySymbol, value, showSymbol);
 	}
 
 	/** @return decimal separator to be used with the currect currency */
@@ -231,7 +304,14 @@ public class InternationalisationUtils {
 
 	/** @return the localised currency format specified in the language bundle */
 	private static final NumberFormat getCurrencyFormat() {
-		NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+		NumberFormat currencyFormat;
+		
+		if (FrontlineUI.currentResourceBundle != null) {
+			currencyFormat = NumberFormat.getCurrencyInstance(FrontlineUI.currentResourceBundle.getLocale());
+		} else {
+			currencyFormat = NumberFormat.getCurrencyInstance();
+		}
+		
 		try {
 			currencyFormat.setCurrency(Currency.getInstance(getI18NString(FrontlineSMSConstants.COMMON_CURRENCY)));
 		} catch(IllegalArgumentException ex) {
