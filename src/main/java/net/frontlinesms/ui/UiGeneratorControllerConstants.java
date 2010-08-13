@@ -20,7 +20,6 @@ public class UiGeneratorControllerConstants {
 	public static final String UI_FILE_SMS_HTTP_SERVICE_SETTINGS_FORM = "/ui/dialog/smsHttpServiceSettings.xml";
 	public static final String UI_FILE_CONFIRMATION_DIALOG_FORM = "/ui/core/util/dgConfirm.xml";
 	// FIXME this should probably be abstracted via a getter in UIGC or similar
-	public static final String UI_FILE_PAGE_PANEL = "/ui/dialog/pagePanel.xml";
 	public static final String UI_FILE_ABOUT_PANEL = "/ui/core/dgAbout.xml";
 	public static final String UI_FILE_SENDER_NAME_PANEL = "/ui/dialog/senderNamePanel.xml";
 	public static final String UI_FILE_INCOMING_NUMBER_SETTINGS_FORM = "/ui/dialog/incomingNumberSettingsDialog.xml";

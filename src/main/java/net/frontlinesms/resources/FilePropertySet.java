@@ -83,12 +83,12 @@ public class FilePropertySet extends BasePropertySet {
 	}
 	
 	/**
-	 * Gets the {@link Boolean} value of a property.
+	 * Gets the <code>boolean</code> value of a property.
 	 * @param propertyName the name of the property
 	 * @param defaultValue the default value for the property, returned if the property is not set
-	 * @return The value of the property as a {@link Boolean} or <code>defaultValue</code> if it is not set.
+	 * @return The value of the property or <code>defaultValue</code> if it is not set.
 	 */
-	protected Boolean getPropertyAsBoolean(String propertyName, boolean defaultValue) {
+	protected boolean getPropertyAsBoolean(String propertyName, boolean defaultValue) {
 		String value = getProperty(propertyName);
 		if (value == null) return defaultValue;
 		else return Boolean.parseBoolean(value);
@@ -102,6 +102,27 @@ public class FilePropertySet extends BasePropertySet {
 	protected void setPropertyAsBoolean(String propertyName, Boolean value) {
 		if(value == null) setProperty(propertyName, null);
 		else setProperty(propertyName, Boolean.toString(value));
+	}
+	
+	/**
+	 * Gets the <code>int</code> value of a property.
+	 * @param propertyName the name of the property
+	 * @param defaultValue the default value for the property
+	 * @return The value of the property, or <code>defaultValue</code> if it is not set.
+	 */
+	protected int getPropertyAsInt(String propertyName, int defaultValue) {
+		String value = getProperty(propertyName);
+		try {
+			return Integer.parseInt(value);
+		} catch(NumberFormatException ex) {
+			return defaultValue;
+		}
+	}
+	
+	/** Sets the {@link Integer} value of a property. */
+	protected void setPropertyAsInteger(String propertyName, Integer value) {
+		if(value == null) setProperty(propertyName, null);
+		else setProperty(propertyName, Integer.toString(value));
 	}
 	
 	/** @return the property keys in {@link #properties} */

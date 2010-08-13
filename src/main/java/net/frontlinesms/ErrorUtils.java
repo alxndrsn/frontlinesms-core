@@ -62,13 +62,14 @@ import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.ui.SimpleConstraints;
 import net.frontlinesms.ui.SimpleLayout;
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
  * Utilities for handling errors.
- * @author Alex
+ * @author Carlos Eduardo Genz <kadu@masabi.com>
+ * @author Alex Anderson <alex@frontlinesms.com>
  */
 public class ErrorUtils {
-
 //> CONSTANTS
 	/** Left ndentation in pixels used for swing components in {@link #showErrorDialog(String, String, Throwable, boolean)} */
 	private static final int EM__LEFT_INDENT = 10;
@@ -76,6 +77,32 @@ public class ErrorUtils {
 	private static final int EM__TOP_INDENT = 10;
 	/** Linespacing in pixels used for swing components in {@link #showErrorDialog(String, String, Throwable, boolean)} */
 	private static final int EM__LINESPACING = 10;
+	
+//> I18N KEYS
+	private static final I18nString I18N_LOGS_COMPRESSED_SAVE_LOCATION = new I18nString("error.logs.compressed.save.location",
+			"E-mail report failure. Where do you want to save your compressed logs?");
+	private static final I18nString I18N_LOGS_SENT_SUCCESSFULLY = new I18nString("error.logs.sent",
+			"Log files were successfully sent to frontline support team.");
+	private static final I18nString I18N_LOGS_SAVED_SUCCESSFULLY = new I18nString("error.logs.saved",
+			"Logs were saved successfully. Please e-mail them to %0.");
+	private static final I18nString I18N_UNABLE_TO_SEND_LOGS = new I18nString("error.logs.send.failed",
+			"Unable to send logs at this time.");
+	private static final I18nString I18N_COPY_FAILED = new I18nString("error.logs.copy.failed",
+			"Failed to copy [%0]. Your logs are located in [%1].");
+	private static final I18nString I18N_GO_TO_FORUM = new I18nString("error.logs.navigate.forum", "Go to forum");
+	private static final I18nString I18N_CLOSE = new I18nString("action.close", "Close");
+	private static final I18nString I18N_COMMUNITY_DIALOG_TITLE = new I18nString("error.logs.community.dialog.title", 
+			"Visit FrontlineSMS Community website?");
+	private static final I18nString I18N_DETAILS_PROMPT = new I18nString("error.logs.details.prompt", 
+			"Please enter your details below.");
+	private static final I18nString I18N_EMAIL_PROMPT = new I18nString("error.logs.email.prompt", 
+			"You can e-mail FrontlineSMS support team for troubleshooting.");
+	private static final I18nString I18N_SEND_LOGS = new I18nString("error.logs.action.logs.send", "Send Logs");
+	private static final I18nString I18N_YOUR_EMAIL = new I18nString("error.logs.field.email", "Your email:");
+	private static final I18nString I18N_YOUR_NAME = new I18nString("error.logs.field.name", "Your name:");
+	private static final I18nString I18N_VISIT_COMMUNITY_BODY = new I18nString("error.logs.community.dialog.body",
+			"Please also report this error on the FrontlineSMS community forum at %0" +
+			"\n\nWould you like to go there now?");
 	
 //> STATIC METHODS
 	/**
@@ -90,7 +117,7 @@ public class ErrorUtils {
 	public static boolean reportError(String userName, String userEmail) {
 		try {
 			sendLogs(userName, userEmail, false);
-			JOptionPane.showMessageDialog(null, "Log files were successfully sent to frontline support team.");
+			showMessageDialog(I18N_LOGS_SENT_SUCCESSFULLY.toString());
 			return true;
 		} catch (EmailException e) {
 			// Show user the option to save the logs.zip to a place they know!
@@ -99,17 +126,19 @@ public class ErrorUtils {
 				try {
 					copyLogsZippedToDir(dir);
 				} catch (IOException e1) {
-					JOptionPane.showMessageDialog(null, "Failed to copy [" + FrontlineSMSConstants.ZIPPED_LOGS_FILENAME + "]. Your logs are located in [" + ResourceUtils.getConfigDirectoryPath() + "logs].");
+					showMessageDialog(I18N_COPY_FAILED.toString(FrontlineSMSConstants.ZIPPED_LOGS_FILENAME,
+									ResourceUtils.getConfigDirectoryPath() + "logs")); // FIXME this config path will not be correct when log config is changed from default
+							
 				}
-				JOptionPane.showMessageDialog(null, "Logs were saved successfully. Please e-mail them to " + FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL + ".");
+				showMessageDialog(I18N_LOGS_SAVED_SUCCESSFULLY.toString(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL));
 				return true;
 			} else {
-				JOptionPane.showMessageDialog(null, "Unable to send logs at this time.");
+				showMessageDialog(I18N_UNABLE_TO_SEND_LOGS.toString());
 				return false; // Slightly unclear how this would happen
 			}
 		} catch (IOException e) {
 			// Problem writing logs.zip
-			JOptionPane.showMessageDialog(null, "Unable to send logs at this time.");
+			showMessageDialog(I18N_UNABLE_TO_SEND_LOGS.toString());
 			try {
 				sendLogsToFrontlineSupport(userName, userEmail, null);
 				return true;
@@ -128,6 +157,19 @@ public class ErrorUtils {
 			}
 		}
 	}
+	
+	private static final void showMessageDialog(String message) {
+		Object[] options = new Object[]{I18N_GO_TO_FORUM, I18N_CLOSE};
+		String forumMessage = I18N_VISIT_COMMUNITY_BODY.toString(FrontlineSMSConstants.URL_FRONTLINESMS_COMMUNITY);
+		int option = JOptionPane.showOptionDialog(null, message + "\n\n" + forumMessage,
+				I18N_COMMUNITY_DIALOG_TITLE.toString(), JOptionPane.YES_NO_OPTION,
+				JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+		if(option == 0) {
+			// Open community forum link.
+			FrontlineUtils.openExternalBrowser(FrontlineSMSConstants.URL_FRONTLINESMS_COMMUNITY);
+		}
+	}
+	                                                             
 
 	/**
 	 * Put the exception stack trace into a StringBuilder, just to show it
@@ -160,7 +202,7 @@ public class ErrorUtils {
 		final JPanel emailPanel = new JPanel(new SimpleLayout());
 		int cumulativeY = EM__LINESPACING;
 		
-		final JLabel emailInstructions = new JLabel("You can e-mail FrontlineSMS support team for troubleshooting.");
+		final JLabel emailInstructions = new JLabel(I18N_EMAIL_PROMPT.toString());
 		ImageIcon emailInstructionsIcon = getImageIcon("/icons/tip.png");
 		int emailInstructionsIconWidth = 0;
 		if(emailInstructionsIcon != null) {
@@ -172,12 +214,12 @@ public class ErrorUtils {
 		final int FONT_HEIGHT = emailInstructions.getFontMetrics(emailInstructions.getFont()).getHeight();
 		cumulativeY += FONT_HEIGHT + EM__LINESPACING;
 		
-		final JLabel detailsInstructions = new JLabel("Please enter your details below.");
+		final JLabel detailsInstructions = new JLabel(I18N_DETAILS_PROMPT.toString());
 		emailPanel.add(detailsInstructions, new SimpleConstraints(emailInstructionsIconWidth, cumulativeY));
 		cumulativeY += FONT_HEIGHT + EM__LINESPACING;
 		
 
-		final JLabel nameLabel = new JLabel("Your name:");
+		final JLabel nameLabel = new JLabel(I18N_YOUR_NAME.toString());
 		emailPanel.add(nameLabel, new SimpleConstraints(5, cumulativeY));
 		final JTextField nameTextfield = new JTextField(20);
 		final int TF_NAME_X = nameLabel.getFontMetrics(nameLabel.getFont()).stringWidth(nameLabel.getText()) + EM__LEFT_INDENT;
@@ -185,12 +227,12 @@ public class ErrorUtils {
 
 		cumulativeY += FONT_HEIGHT + EM__LINESPACING;
 		
-		final JLabel emailLabel = new JLabel("Your email:");
+		final JLabel emailLabel = new JLabel(I18N_YOUR_EMAIL.toString());
 		emailPanel.add(emailLabel, new SimpleConstraints(5, cumulativeY));
 		final JTextField emailTextfield = new JTextField(20);
 		emailPanel.add(emailTextfield, new SimpleConstraints(TF_NAME_X, cumulativeY));
 		
-		final JButton btSend = new JButton("Send Logs");
+		final JButton btSend = new JButton(I18N_SEND_LOGS.toString());
 		ImageIcon sendIcon = getImageIcon("/icons/email_send.png");
 		if(sendIcon != null) {
 			btSend.setIcon(sendIcon);
@@ -353,6 +395,7 @@ public class ErrorUtils {
 	public static void sendLogs(String name, String emailAddress, boolean resetConfiguration) throws IOException, EmailException {
 		LogManager.shutdown();
 		try {
+			// FIXME this will not actually work if the log directory has been configured to be different to the default
 			ResourceUtils.zip(ResourceUtils.getConfigDirectoryPath() + "logs",
 					new File(ResourceUtils.getConfigDirectoryPath() + FrontlineSMSConstants.ZIPPED_LOGS_FILENAME));
 			sendLogsToFrontlineSupport(name, emailAddress, ResourceUtils.getConfigDirectoryPath() + FrontlineSMSConstants.ZIPPED_LOGS_FILENAME);
@@ -539,7 +582,7 @@ public class ErrorUtils {
 	public static String showFileChooserForSavingZippedLogs() {
 		JFileChooser chooser = new JFileChooser(new File("."));
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		chooser.setDialogTitle("E-mail report failure. Where do you want to save your compressed logs?");
+		chooser.setDialogTitle(I18N_LOGS_COMPRESSED_SAVE_LOCATION.toString());
 		chooser.setFileFilter(new FileFilter() {
 			@Override
 			public boolean accept(File f) {
@@ -569,6 +612,42 @@ public class ErrorUtils {
 		} else {
 			return new ImageIcon(image);
 		}
+	}
+}
+
+class I18nString {
+	final String key;
+	final String defaultValue;
+	
+	I18nString(String key, String defaultValue) {
+		this.key = key;
+		this.defaultValue = defaultValue;
+	}
+	
+	public String getKey() {
+		return key;
+	}
+	
+	public String getDefaultValue() {
+		return defaultValue;
+	}
+	
+	@Override
+	public String toString() {
+		String text = null;
+		try {
+			text = InternationalisationUtils.getI18NString(getKey());
+		} catch(Throwable t) { /* Something went wrong.  We'll return the default value later. */ }
+		
+		if(text != null) {
+			return text;
+		} else {
+			return getDefaultValue();
+		}
+	}
+	
+	public String toString(String... argValues) {
+		return InternationalisationUtils.formatString(this.toString(), argValues);
 	}
 }
 

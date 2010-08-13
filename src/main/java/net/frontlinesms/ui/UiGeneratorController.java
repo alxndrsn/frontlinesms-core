@@ -1700,6 +1700,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 
 //> ACCESSORS
+	/** @return {@link UiProperties} associated with this class */
+	public UiProperties getProperties() {
+		return UiProperties.getInstance();
+	}
 	/** @return {@link #frontlineController} */
 	public FrontlineSMS getFrontlineController() {
 		return this.frontlineController;
