@@ -65,8 +65,6 @@ public class SmsModem extends Thread implements SmsService {
 		57600,
 		115200
 	};
-	private static final String UI_DISPLAY_PORT_SEPARATOR = "@";
-	private static final String UI_BPS_SUFFIX = "Bps";
 
 	/** Logging object */
 	private static Logger LOG = FrontlineUtils.getLogger(SmsModem.class);

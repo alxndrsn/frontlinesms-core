@@ -317,7 +317,6 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 			controller.getSmsInternetServiceSettingsDao().deleteSmsInternetServiceSettings(service.getSettings());
 			controller.remove(object);
 		}
-		controller.refreshPhonesViews();
 		selectionChanged(lsProviders, controller.find(settingsDialog, "pnButtons"));
 	}
 

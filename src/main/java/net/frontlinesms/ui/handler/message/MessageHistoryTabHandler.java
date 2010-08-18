@@ -23,6 +23,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_EN
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_START_DATE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_MESSAGE_HISTORY;
 
+import java.awt.EventQueue;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,6 +55,7 @@ import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiProperties;
+import net.frontlinesms.ui.events.FrontlineUiUpateJob;
 import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.handler.ComponentPagingHandler;
@@ -586,15 +588,25 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	 * Event triggered when an outgoing message is created or updated.
 	 * @param message The message involved in the event
 	 */
-	public synchronized void outgoingMessageEvent(FrontlineMessage message) {
+	public synchronized void outgoingMessageEvent(final FrontlineMessage message) {
 		LOG.debug("Refreshing message list");
+		
+		
 		
 		// If the message is already in the list, we just need to update its row
 		for (int i = 0; i < ui.getItems(messageListComponent).length; i++) {
 			FrontlineMessage e = ui.getMessage(ui.getItem(messageListComponent, i));
 			if (e.equals(message)) {
-				ui.remove(ui.getItem(messageListComponent, i));
-				ui.add(messageListComponent, ui.getRow(message), i);
+				final int index = i;
+				FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
+					
+					public void run() {
+						ui.remove(ui.getItem(messageListComponent, index));
+						ui.add(messageListComponent, ui.getRow(message), index);
+					}
+				};
+				
+				EventQueue.invokeLater(updateJob);
 				return;
 			}
 		}
@@ -748,7 +760,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	 * We just add the message to the top of the list, as things will get rather complicated otherwise
 	 * @param message the message to add
 	 */
-	private void addMessageToList(FrontlineMessage message) {
+	private void addMessageToList(final FrontlineMessage message) {
 		LOG.trace("ENTER");
 		LOG.debug("Message [" + message + "]");
 		Object sel = ui.getSelectedItem(contactListComponent); // TODO doesn't seem to do anything for keyword list
@@ -793,38 +805,50 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			}
 			if (toAdd) {
 				LOG.debug("Time to try to add this message to list...");
-				
-				// if this message is already in the list, perhaps with a different status, we should just
-				// update the current row rather than adding a new one
-				Object[] messageItems = ui.getItems(messageListComponent);
-				boolean replaced = false;
-				for (int rowIndex = 0; rowIndex < messageItems.length; rowIndex++) {
-					Object currentRowComponent = messageItems[rowIndex];
-					if(message.equals(ui.getAttachedObject(currentRowComponent))) {
-						// replace or update the row in the message table
-						ui.add(messageListComponent, ui.getRow(message), rowIndex);
-						ui.remove(currentRowComponent);
-						replaced = true;
-						break;
+				FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
+					
+					public void run() {
+						addMessage(message);
 					}
-				}
+				};
 				
-				if(!replaced) {
-					if (ui.getItems(messageListComponent).length < this.messagePagingHandler.getMaxItemsPerPage()) {
-						LOG.debug("There's space! Adding...");
-						ui.add(messageListComponent, ui.getRow(message));
-						ui.setEnabled(messageListComponent, true);
-						if (message.getType() == Type.OUTBOUND) {
-							numberToSend += message.getNumberOfSMS();
-							updateMessageHistoryCost();
-						}
-					}
-				}
+				EventQueue.invokeLater(updateJob);
+				
+				
 			}
 		}
 		LOG.trace("EXIT");
 	}
 	
+	private void addMessage(FrontlineMessage message) {
+		// if this message is already in the list, perhaps with a different status, we should just
+		// update the current row rather than adding a new one
+		Object[] messageItems = ui.getItems(messageListComponent);
+		boolean replaced = false;
+		for (int rowIndex = 0; rowIndex < messageItems.length; rowIndex++) {
+			Object currentRowComponent = messageItems[rowIndex];
+			if(message.equals(ui.getAttachedObject(currentRowComponent))) {
+				// replace or update the row in the message table
+				ui.add(messageListComponent, ui.getRow(message), rowIndex);
+				ui.remove(currentRowComponent);
+				replaced = true;
+				break;
+			}
+		}
+		
+		if(!replaced) {
+			if (ui.getItems(messageListComponent).length < this.messagePagingHandler.getMaxItemsPerPage()) {
+				LOG.debug("There's space! Adding...");
+				ui.add(messageListComponent, ui.getRow(message));
+				ui.setEnabled(messageListComponent, true);
+				if (message.getType() == Type.OUTBOUND) {
+					numberToSend += message.getNumberOfSMS();
+					updateMessageHistoryCost();
+				}
+			}
+		}
+	}
+
 	/**
 	 * Gets the selected filter type for the message history, i.e. Contact, Group or Keyword.
 	 * @return {@link Contact}, {@link Group} or {@link Keyword}, depending which is set for the message filter.

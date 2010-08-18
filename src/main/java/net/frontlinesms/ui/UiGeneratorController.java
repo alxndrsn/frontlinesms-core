@@ -19,6 +19,7 @@
  */
 package net.frontlinesms.ui;
 
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Frame;
 import java.io.File;
@@ -28,6 +29,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.swing.SwingUtilities;
 
 
 import net.frontlinesms.*;
@@ -50,6 +53,7 @@ import net.frontlinesms.messaging.sms.events.NoSmsServicesConnectedNotification;
 import net.frontlinesms.messaging.sms.internet.SmsInternetService;
 import net.frontlinesms.plugins.*;
 import net.frontlinesms.resources.ResourceUtils;
+import net.frontlinesms.ui.events.FrontlineUiUpateJob;
 import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.*;
 import net.frontlinesms.ui.handler.contacts.*;
@@ -441,8 +445,16 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Shows the statistics dialog.
 	 */
 	public void showStatsDialog() {
-		StatisticsDialogHandler statisticsDialogHandler = new StatisticsDialogHandler(this);
-		add(statisticsDialogHandler.getDialog());
+		final StatisticsDialogHandler statisticsDialogHandler = new StatisticsDialogHandler(this);
+		
+		FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
+			
+			public void run() {
+				add(statisticsDialogHandler.getDialog());
+			}
+		};
+		
+		EventQueue.invokeLater(updateJob);
 	}
 
 	/**
@@ -753,17 +765,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 
 	/**
-	 * Refresh the list of phones on {@link UiGeneratorControllerConstants#TAB_ADVANCED_PHONE_MANAGER} .
-	 */
-	void refreshPhonesViews() {
-		// Looks like we don't bother refreshing if the phone list isn't in view
-		if (currentTab.equals(TAB_ADVANCED_PHONE_MANAGER)) {
-			LOG.debug("Refreshing phones tab");
-			this.phoneTabController.refresh();
-		}
-	}
-
-	/**
 	 * Method called when the user first click on the end date textfield and the value is set to undefined.
 	 * 
 	 * @param o
@@ -778,9 +779,16 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Updates the status bar with the supplied string.
 	 * @param status the new status to display
 	 */
-	public synchronized void setStatus(String status) {
+	public void setStatus(final String status) {
+		FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
+			
+			public void run() {
+				setString(statusBarComponent, TEXT, status);		
+			}
+		};
+
+		EventQueue.invokeLater(updateJob);
 		LOG.debug("Status Text [" + status + "]");
-		setString(statusBarComponent, TEXT, status);
 	}
 	
 	/**
@@ -1834,15 +1842,21 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	/** Handle notifications from the {@link EventBus} */
-	public void notify(FrontlineEventNotification notification) {
+	public void notify(final FrontlineEventNotification notification) {
 		if(notification instanceof NoSmsServicesConnectedNotification) {
 			// Unable to connect to SMS devices.  If enabled, show the help dialog to prompt connection 
 			if (AppProperties.getInstance().isDeviceConnectionDialogEnabled()) {
 				synchronized (deviceConnectionDialogHandlerLock) {
+					// If the dialog is not already created AND not already displayed, create a new one and show it now
 					if (deviceConnectionDialogHandler == null) {
 						deviceConnectionDialogHandler = new NoPhonesDetectedDialogHandler(this);
-						deviceConnectionDialogHandler.initDialog((NoSmsServicesConnectedNotification) notification);
-						add(deviceConnectionDialogHandler.getDialog());
+						FrontlineUiUpateJob job = new FrontlineUiUpateJob() {
+							public void run() {
+								deviceConnectionDialogHandler.initDialog((NoSmsServicesConnectedNotification) notification);
+								add(deviceConnectionDialogHandler.getDialog());
+							}
+						};
+						EventQueue.invokeLater(job);
 					}
 				}
 			}

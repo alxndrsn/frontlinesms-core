@@ -5,6 +5,7 @@ package net.frontlinesms.ui.handler;
 
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_EVENTS_LIST;
 
+import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -21,6 +22,7 @@ import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.UiProperties;
+import net.frontlinesms.ui.events.FrontlineUiUpateJob;
 import net.frontlinesms.ui.handler.message.MessagePanelHandler;
 import net.frontlinesms.ui.i18n.FileLanguageBundle;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -318,14 +320,21 @@ public class HomeTabHandler extends BaseTabHandler {
 	}
 
 //> LISTENER EVENT METHODS
-	public void newEvent(Event newEvent) {
-		Object eventListComponent = find(COMPONENT_EVENTS_LIST);
-		if(eventListComponent != null) {
-			if (ui.getItems(eventListComponent).length >= HomeTabHandler.EVENTS_LIMIT) {
-				ui.remove(ui.getItem(eventListComponent, 0));
+	public void newEvent(final Event newEvent) {
+		FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
+			
+			public void run() {
+				Object eventListComponent = find(COMPONENT_EVENTS_LIST);
+				if(eventListComponent != null) {
+					if (ui.getItems(eventListComponent).length >= HomeTabHandler.EVENTS_LIMIT) {
+						ui.remove(ui.getItem(eventListComponent, 0));
+					}
+					ui.add(eventListComponent, getRow(newEvent));
+				}		
 			}
-			ui.add(eventListComponent, getRow(newEvent));
-		}
+		};
+		
+		EventQueue.invokeLater(updateJob);
 	}
 
 //> STATIC FACTORIES

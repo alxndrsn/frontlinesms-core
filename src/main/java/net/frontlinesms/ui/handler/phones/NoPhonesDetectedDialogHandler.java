@@ -6,7 +6,6 @@ package net.frontlinesms.ui.handler.phones;
 import java.awt.Image;
 
 import net.frontlinesms.AppProperties;
-import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.messaging.sms.events.NoSmsServicesConnectedNotification;
 import net.frontlinesms.ui.DatabaseSettings;
 import net.frontlinesms.ui.FrontlineUI;
@@ -14,8 +13,6 @@ import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
-
-import org.apache.log4j.Logger;
 
 /**
  * Dialog handler for helping a user when no SMS devices could be detected
@@ -52,7 +49,6 @@ public class NoPhonesDetectedDialogHandler implements ThinletUiEventHandler {
 	
 //> INSTANCE PROPERTIES
 	/** Logging object */
-	private final Logger log = FrontlineUtils.getLogger(this.getClass());
 	/** The {@link UiGeneratorController} that shows the tab. */
 	private final UiGeneratorController uiController;
 	
@@ -112,7 +108,7 @@ public class NoPhonesDetectedDialogHandler implements ThinletUiEventHandler {
 		if(visible) {
 			for (int i = 0; i < panelNamesAndI18nKeysAndIcons.length; i+=3) {
 				String panelName = panelNamesAndI18nKeysAndIcons[i];
-				Object panel = find(panelName);
+				final Object panel = find(panelName);
 				
 				String i18nKey = panelNamesAndI18nKeysAndIcons[i+1];
 				
@@ -120,13 +116,14 @@ public class NoPhonesDetectedDialogHandler implements ThinletUiEventHandler {
 				Image icon = uiController.getIcon(iconPath);
 				
 				for(String i18nText : InternationalisationUtils.getI18nStrings(i18nKey)) {
-					Object label = uiController.createLabel(i18nText);
+					final Object label = uiController.createLabel(i18nText);
 					if(icon != null) {
 						// If an icon is available, add it to the first label 
 						uiController.setIcon(label, icon);
 						icon = null;
 					}
-					uiController.add(panel, label);
+					
+					uiController.add(panel, label);						
 				}
 			}
 		}

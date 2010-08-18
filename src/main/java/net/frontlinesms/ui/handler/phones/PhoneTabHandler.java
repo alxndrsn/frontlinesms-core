@@ -6,16 +6,16 @@ package net.frontlinesms.ui.handler.phones;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_MODEM_LIST_UPDATED;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_ADVANCED_PHONE_MANAGER;
 
+import java.awt.EventQueue;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import net.frontlinesms.CommUtils;
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.data.domain.EmailAccount;
+import net.frontlinesms.data.domain.SmsInternetServiceSettings;
 import net.frontlinesms.data.domain.SmsModemSettings;
 import net.frontlinesms.data.events.DatabaseEntityNotification;
 import net.frontlinesms.data.repository.SmsModemSettingsDao;
@@ -39,16 +39,13 @@ import net.frontlinesms.ui.Event;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.events.FrontlineUiUpateJob;
 import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.handler.email.EmailAccountSettingsDialogHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
-import org.smslib.AbstractATHandler;
-import org.smslib.handler.CATHandler;
-
-import serial.CommPortIdentifier;
 import serial.NoSuchPortException;
 
 /**
@@ -58,8 +55,6 @@ import serial.NoSuchPortException;
 @TextResourceKeyOwner(prefix={"COMMON_", "I18N_", "MESSAGE_"})
 public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagingServiceEventListener, EventObserver {
 //> STATIC CONSTANTS
-	/** The fully-qualified name of the default {@link CATHandler} class. */
-	private static final String DEFAULT_CAT_HANDLER_CLASS_NAME = CATHandler.class.getName();
 	/** {@link Comparator} used for sorting {@link FrontlineMessagingService}s into a friendly order. */
 	private static final Comparator<? super FrontlineMessagingService> MESSAGING_SERVICE_COMPARATOR = new Comparator<FrontlineMessagingService>() {
 			public int compare(FrontlineMessagingService one, FrontlineMessagingService tother) {
@@ -84,16 +79,10 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 //> THINLET UI LAYOUT FILES
 	/** UI XML File Path: the Phones Tab itself */
 	private static final String UI_FILE_PHONES_TAB = "/ui/core/phones/phonesTab.xml";
-	/** UI XML File Path: phone settings dialog TODO what is this dialog for? */
-	private static final String UI_FILE_MODEM_SETTINGS_DIALOG = "/ui/core/phones/dgModemSettings.xml";
-	/** UI XML File Path: phone config dialog TODO what is this dialog for? */
-	private static final String UI_FILE_MODEM_MANUAL_CONFIG_DIALOG = "/ui/core/phones/dgModemManualConfig.xml";
 	
 //> I18n TEXT KEYS
 	/** I18n Text Key: TODO */
 	private static final String COMMON_PHONE_CONNECTED = "common.phone.connected";
-	/** I18n Text Key: TODO */
-	private static final String COMMON_SETTINGS_FOR_PHONE = "common.settings.for.phone";
 	/** I18n Text Key: TODO */
 	private static final String COMMON_SMS_INTERNET_SERVICE_CONNECTED = "common.sms.internet.service.connected";
 	/** I18n Text Key: TODO */
@@ -108,26 +97,24 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	private static final String I18N_EMAIL_LAST_CHECKED = "email.last.checked";
 	
 //> THINLET UI COMPONENT NAMES	
-	/** UI Compoenent name: TODO */
+	/** UI Component name: TODO */
 	private static final String COMPONENT_RB_PHONE_DETAILS_ENABLE = "rbPhoneDetailsEnable";
-	/** UI Compoenent name: TODO */
+	/** UI Component name: TODO */
 	private static final String COMPONENT_PHONE_SENDING = "cbSending";
-	/** UI Compoenent name: TODO */
+	/** UI Component name: TODO */
 	private static final String COMPONENT_PHONE_RECEIVING = "cbReceiving";
-	/** UI Compoenent name: TODO */
+	/** UI Component name: TODO */
 	private static final String COMPONENT_PHONE_DELETE = "cbDeleteMsgs";
-	/** UI Compoenent name: TODO */
+	/** UI Component name: TODO */
 	private static final String COMPONENT_PHONE_DELIVERY_REPORTS = "cbUseDeliveryReports";
-	/** UI Compoenent name: TODO */
+	/** UI Component name: TODO */
 	private static final String COMPONENT_PN_PHONE_SETTINGS = "pnPhoneSettings";
-	/** UI Compoenent name: TODO */
+	/** UI Component name: TODO */
 	private static final String COMPONENT_PHONE_MANAGER_MODEM_LIST = "phoneManager_modemList";
-	/** UI Compoenent name: TODO */
+	/** UI Component name: TODO */
 	private static final String COMPONENT_PHONE_MANAGER_MODEM_LIST_ERROR = "phoneManager_modemListError";
 
 //> INSTANCE PROPERTIES
-	/** Object to synchronize on before updating the phones list.  This is to prevent the list being rewritten by two different sources at the same time. */
-	private final Object PHONES_LIST_SYNCH_OBJECT = new Object();
 	/** The manager of {@link FrontlineMessagingService}s */
 	private final SmsServiceManager phoneManager;
 	/** Data Access Object for {@link SmsModemSettings}s */
@@ -186,45 +173,20 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	
 	/**
 	 * Event fired when the view phone details action is chosen.
-	 * @param phone The phone we are showing settings for
+	 * @param device The device we are showing settings for
 	 * @param isNewPhone <code>true</code> TODO <if this phone has previously connected (i.e. not first time it has connected)> OR <if this phone has just connected (e.g. may have connected before, but not today)> 
 	 */
-	public void showPhoneSettingsDialog(SmsModem phone, boolean isNewPhone) {
-		Object phoneSettingsDialog = this.ui.loadComponentFromFile(UI_FILE_MODEM_SETTINGS_DIALOG, this);
-		this.ui.setText(phoneSettingsDialog, InternationalisationUtils.getI18NString(COMMON_SETTINGS_FOR_PHONE) + " '" + phone.getModel() + "'");
+	public void showPhoneSettingsDialog(SmsModem device, boolean isNewPhone) {
+		final DeviceSettingsDialogHandler deviceSettingsDialog = new DeviceSettingsDialogHandler(ui, this, device, isNewPhone);
 		
-		if(!isNewPhone) {
-			boolean useForSending = phone.isUseForSending();
-			boolean useForReceiving = phone.isUseForReceiving();
+		FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
 			
-			if(useForSending || useForReceiving) {
-				this.ui.setSelected(this.ui.find(phoneSettingsDialog, COMPONENT_PHONE_SENDING), useForSending);
-				Object cbDeliveryReports = this.ui.find(phoneSettingsDialog, COMPONENT_PHONE_DELIVERY_REPORTS);
-				ui.setEnabled(cbDeliveryReports, useForSending);
-				ui.setSelected(cbDeliveryReports, phone.isUseDeliveryReports());
-				ui.setSelected(this.ui.find(phoneSettingsDialog, COMPONENT_PHONE_RECEIVING), useForReceiving);
-				Object cbDeleteMessages = this.ui.find(phoneSettingsDialog, COMPONENT_PHONE_DELETE);
-				this.ui.setEnabled(cbDeleteMessages, useForReceiving);
-				this.ui.setSelected(cbDeleteMessages, phone.isDeleteMessagesAfterReceiving());
-			} else {
-				ui.setSelected(ui.find(phoneSettingsDialog, "rbPhoneDetailsDisable"), true);
-				ui.setSelected(ui.find(phoneSettingsDialog, COMPONENT_RB_PHONE_DETAILS_ENABLE), false);
-				ui.deactivate(ui.find(phoneSettingsDialog, COMPONENT_PN_PHONE_SETTINGS));
+			public void run() {
+				ui.add(deviceSettingsDialog.getDialog());
 			}
-		}
+		};
 		
-		if(!phone.supportsReceive()) {
-			// If this phone does not support SMS receiving, we need to pass this info onto
-			// the user.  We also want to gray out the options for receiving.
-			ui.setEnabled(ui.find(phoneSettingsDialog, COMPONENT_PHONE_RECEIVING), false);
-			ui.setEnabled(ui.find(phoneSettingsDialog, COMPONENT_PHONE_DELETE), false);
-		} else {
-			// No error, so remove the error message.
-			ui.remove(ui.find(phoneSettingsDialog, "lbReceiveNotSupported"));
-		}
-		
-		ui.setAttachedObject(phoneSettingsDialog, phone);
-		ui.add(phoneSettingsDialog);
+		EventQueue.invokeLater(updateJob);
 	}
 	
 	/**
@@ -329,34 +291,20 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	 * @param list TODO what is this list, and why is it necessary?  Could surely just find it
 	 */
 	public void showPhoneConfigDialog(Object list) {
-		Object configDialog = ui.loadComponentFromFile(UI_FILE_MODEM_MANUAL_CONFIG_DIALOG, this);
-		
-		Object portList = ui.find(configDialog, "lbPortName");
-		Enumeration<CommPortIdentifier> commPortEnumeration = CommUtils.getPortIdentifiers();
-		while (commPortEnumeration.hasMoreElements()) {
-			CommPortIdentifier commPortIdentifier = commPortEnumeration.nextElement();
-			ui.add(portList, ui.createComboboxChoice(commPortIdentifier.getName(), null));
-		}
-		
-		Object handlerList = ui.find(configDialog, "lbCATHandlers");
-		int trimLength = DEFAULT_CAT_HANDLER_CLASS_NAME.length() + 1;
-		
-		for (Class<? extends AbstractATHandler> handler : AbstractATHandler.getHandlers()) {
-			String handlerName = handler.getName();
-			if(handlerName.equals(DEFAULT_CAT_HANDLER_CLASS_NAME)) handlerName = "<default>";
-			else handlerName = handlerName.substring(trimLength);
-			ui.add(handlerList, ui.createComboboxChoice(handlerName, handler));
-		}
-		
 		Object selected = ui.getSelectedItem(list);
-		FrontlineMessagingService selectedPhone = ui.getAttachedObject(selected, FrontlineMessagingService.class);
-		if (selectedPhone instanceof SmsModem) {
-			SmsModem modem = (SmsModem) selectedPhone;
-			ui.setText(ui.find(configDialog,"lbPortName"), modem.getPort());
-			ui.setText(ui.find(configDialog,"lbBaudRate"), String.valueOf(modem.getBaudRate()));
-		}
+		final FrontlineMessagingService selectedDevice = ui.getAttachedObject(selected, FrontlineMessagingService.class);
 		
-		ui.add(configDialog);
+		// We create the manual config dialog and put the display job in the AWT event queue
+		final DeviceManualConfigDialogHandler configDialog = new DeviceManualConfigDialogHandler(ui, this, selectedDevice);
+		
+		FrontlineUiUpateJob upateJob = new FrontlineUiUpateJob() {
+			
+			public void run() {
+				ui.add(configDialog.getDialog());
+			}
+		};
+		
+		EventQueue.invokeLater(upateJob);
 	}
 	
 	/**
@@ -521,10 +469,6 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 			this.smsModelSettingsDao.saveSmsModemSettings(settings);
 		}
 		
-		// Phone settings may have changed.  As we're now displaying these on the table, we
-		// need to update the table.
-		refresh();
-		
 		removeDialog(dialog);
 	}
 
@@ -533,34 +477,37 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	 * Refreshes the list of PhoneHandlers displayed on the PhoneManager tab.
 	 */
 	public void refresh() {
-		synchronized (PHONES_LIST_SYNCH_OBJECT) {
-			Object modemListError = ui.find(COMPONENT_PHONE_MANAGER_MODEM_LIST_ERROR);
-			// cache the selected item so we can reselect it when we've finished!
-			int index = ui.getSelectedIndex(modemListError);
-			
-			int indexTop = ui.getSelectedIndex(getModemListComponent());
-			
-			ui.removeAll(getModemListComponent());
-			ui.removeAll(modemListError);
-
-			Collection<FrontlineMessagingService> messagingServices = new CopyOnWriteArraySet<FrontlineMessagingService>(); 
-			messagingServices.addAll(this.phoneManager.getAll());
-			messagingServices.addAll(this.mmsServiceManager.getAll());
-			
-			FrontlineMessagingService[] messagingServicesArray = messagingServices.toArray(new FrontlineMessagingService[0]);
-			Arrays.sort(messagingServicesArray, MESSAGING_SERVICE_COMPARATOR);
-			
-			for (FrontlineMessagingService messagingService : messagingServicesArray) {
-				if (messagingService.isConnected()) {
-					ui.add(getModemListComponent(), getTableRow(messagingService, true));
-				} else {
-					ui.add(modemListError, getTableRow(messagingService, false));
+		FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
+			public void run() {
+				Object modemListError = ui.find(COMPONENT_PHONE_MANAGER_MODEM_LIST_ERROR);
+				// cache the selected item so we can reselect it when we've finished!
+				int index = ui.getSelectedIndex(modemListError);
+				
+				int indexTop = ui.getSelectedIndex(getModemListComponent());
+				
+				ui.removeAll(getModemListComponent());
+				ui.removeAll(modemListError);
+	
+				Collection<FrontlineMessagingService> messagingServices = new CopyOnWriteArraySet<FrontlineMessagingService>(); 
+				messagingServices.addAll(phoneManager.getAll());
+				messagingServices.addAll(mmsServiceManager.getAll());
+				
+				FrontlineMessagingService[] messagingServicesArray = messagingServices.toArray(new FrontlineMessagingService[0]);
+				Arrays.sort(messagingServicesArray, MESSAGING_SERVICE_COMPARATOR);
+				
+				for (FrontlineMessagingService messagingService : messagingServicesArray) {
+					if (messagingService.isConnected()) {
+						ui.add(getModemListComponent(), getTableRow(messagingService, true));
+					} else {
+						ui.add(modemListError, getTableRow(messagingService, false));
+					}
 				}
-			}			
-
-			ui.setSelectedIndex(getModemListComponent(), indexTop);
-			ui.setSelectedIndex(modemListError, index);
-		}
+	
+				ui.setSelectedIndex(getModemListComponent(), indexTop);
+				ui.setSelectedIndex(modemListError, index);		}
+			};
+	
+			EventQueue.invokeLater(updateJob);
 	}
 	
 	private Object getTableRow(FrontlineMessagingService service, boolean isConnected) {
@@ -671,7 +618,10 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 			this.refresh();
 		} else if (notification instanceof DatabaseEntityNotification<?>) {
 			// Database notification
-			if (((DatabaseEntityNotification<?>) notification).getDatabaseEntity() instanceof EmailAccount) {
+			Object entity = ((DatabaseEntityNotification<?>) notification).getDatabaseEntity();
+			if (entity instanceof EmailAccount
+					|| entity instanceof SmsModemSettings
+					|| entity instanceof SmsInternetServiceSettings) {
 				// If there is any change in the E-Mail accounts, we refresh the list of Messaging Services
 				this.refresh();
 			}
