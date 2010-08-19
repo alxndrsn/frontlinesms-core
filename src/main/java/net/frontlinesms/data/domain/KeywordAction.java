@@ -32,13 +32,17 @@ import net.frontlinesms.messaging.MessageFormatter;
  */
 @Entity
 public class KeywordAction {
+	/** Table name */
+	public static final String TABLE_NAME = "KeywordAction";
 //> ENTITY FIELDS
 	/** Details of the fields that this class has. */
 	public enum Field implements EntityField<KeywordAction> {
 		/** Field name for {@link KeywordAction#type} */
 		TYPE("type"),
 		/** File name for {@link KeywordAction#keyword} */
-		KEYWORD("keyword");
+		KEYWORD("keyword"),
+		/** Counter */
+		COUNTER("counter");
 		/** name of a field */
 		private final String fieldName;
 		/**

@@ -73,6 +73,28 @@ public class HibernateKeywordActionDaoTest extends HibernateTestCase {
 		assertEquals(1, this.keywordActionDao.getCount());
 	}
 	
+	public void testKeywordActionsIncrementCount() {
+		final long startDate = 14343274L;
+		final long endDate = 21340345L;
+		KeywordAction action = KeywordAction.createReplyAction(this.testKeyword, "some reply text", startDate, endDate);
+		
+		this.keywordActionDao.saveKeywordAction(action);
+		assertEquals(0, action.getCounter());
+		assertEquals(0, this.keywordActionDao.getActions(this.testKeyword).get(0).getCounter());
+		
+		this.keywordActionDao.incrementCounter(action);
+		assertEquals(1, action.getCounter());
+		assertEquals(1, this.keywordActionDao.getActions(this.testKeyword).get(0).getCounter());
+		
+		int randomIncrements = (int)(Math.random() * 10);
+		for (int i = 0 ; i < randomIncrements ; ++i) {
+			this.keywordActionDao.incrementCounter(action);
+		}
+		
+		assertEquals(randomIncrements + 1, action.getCounter());
+		assertEquals(randomIncrements + 1, this.keywordActionDao.getActions(this.testKeyword).get(0).getCounter());
+	}
+	
 //> INIT METHODS
 	@Override
 	protected void onSetUp() throws Exception {

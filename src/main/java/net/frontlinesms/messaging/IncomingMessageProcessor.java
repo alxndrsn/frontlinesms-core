@@ -368,8 +368,7 @@ public class IncomingMessageProcessor extends Thread {
 				break;
 		}
 				
-		action.incrementCounter();
-		this.keywordActionDao.updateKeywordAction(action);
+		this.keywordActionDao.incrementCounter(action);
 		
 		if (uiListener != null) {
 			uiListener.keywordActionExecuted(action);

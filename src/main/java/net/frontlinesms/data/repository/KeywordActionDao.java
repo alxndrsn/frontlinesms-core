@@ -74,4 +74,10 @@ public interface KeywordActionDao {
 	 * @return The action of the specified type, or <code>null</code> if there is none available
 	 */
 	public KeywordAction getAction(Keyword keyword, KeywordAction.Type actionType);
+	
+	/**
+	 * Increments the counter for this action
+	 * @param action
+	 */
+	public void incrementCounter(KeywordAction action);
 }

@@ -94,17 +94,16 @@ public class IncomingMessageProcessorTest extends BaseTestCase {
 		when(keywordActionDao.getActions(mockKeyword)).thenReturn(Arrays.asList(goodAction1, deadAction, badAction, goodAction2));
 		
 		imp.handleMessage(mockMessage);
-
-		verify(goodAction1).incrementCounter();
+		verify(keywordActionDao).incrementCounter(goodAction1);
 		verify(uiListener).keywordActionExecuted(goodAction1);
 		
-		verify(goodAction2).incrementCounter();
+		verify(keywordActionDao).incrementCounter(goodAction2);
 		verify(uiListener).keywordActionExecuted(goodAction2);
 		
-		verify(deadAction, never()).incrementCounter();
+		verify(keywordActionDao, never()).incrementCounter(deadAction);
 		verify(uiListener, never()).keywordActionExecuted(deadAction);
 		
-		verify(badAction, never()).incrementCounter();
+		verify(keywordActionDao, never()).incrementCounter(badAction);
 		verify(uiListener, never()).keywordActionExecuted(badAction);
 	}
 	

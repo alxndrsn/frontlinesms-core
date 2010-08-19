@@ -6,6 +6,7 @@ package net.frontlinesms.data.repository.hibernate;
 import java.util.Collection;
 import java.util.List;
 
+import org.hibernate.Query;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 
@@ -42,7 +43,7 @@ public class HibernateKeywordActionDao extends BaseHibernateDao<KeywordAction> i
 	}
 
 	/** @see KeywordActionDao#updateKeywordAction(KeywordAction) */
-	public void updateKeywordAction(KeywordAction action) {
+	public synchronized void updateKeywordAction(KeywordAction action) {
 		super.updateWithoutDuplicateHandling(action);
 	}
 
@@ -65,4 +66,12 @@ public class HibernateKeywordActionDao extends BaseHibernateDao<KeywordAction> i
 	public int getCount() {
 		return super.countAll();
 	}
+	
+	/** @see net.frontlinesms.data.repository.KeywordActionDao#incrementCounter(KeywordAction)*/
+	public void incrementCounter(KeywordAction action) {
+		String incrementCounterQuery = "UPDATE " + KeywordAction.TABLE_NAME + " SET " + KeywordAction.Field.COUNTER + "=" + KeywordAction.Field.COUNTER + "+1";
+		super.getHibernateTemplate().bulkUpdate(incrementCounterQuery);
+		action.incrementCounter();
+	}
+
 }

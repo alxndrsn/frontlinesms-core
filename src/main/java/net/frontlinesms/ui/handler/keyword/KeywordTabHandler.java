@@ -707,23 +707,32 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	}
 	
 	private void updateKeywordActionList(KeywordAction action, boolean isNew) {
+		Object selected = ui.getSelectedItem(keywordListComponent);
+		Keyword keyword = ui.getAttachedObject(selected, Keyword.class);
+		
 		Object table = find(COMPONENT_ACTION_LIST);
-		if (isNew) {
-			ui.add(table, ui.getRow(action));
-		} else {
-			int index = -1;
-			for (Object o : ui.getItems(table)) {
-				KeywordAction a = ui.getKeywordAction(o);
-				if (a.equals(action)) {
-					index = ui.getIndex(table, o);
-					ui.remove(o);
-				}
-			}
-			ui.add(table, ui.getRow(action), index);
+		
+		this.ui.removeAll(table);
+		for (KeywordAction keywordAction : this.keywordActionDao.getActions(keyword)) {
+			ui.add(table, ui.getRow(keywordAction));
 		}
-		// We make the buttons visible or not depending on the selected item
-		Object list = find(COMPONENT_ACTION_LIST);
-		enableKeywordActionFields(list, find(COMPONENT_KEY_ACT_PANEL));
+//		Object table = find(COMPONENT_ACTION_LIST);
+//		if (isNew) {
+//			ui.add(table, ui.getRow(action));
+//		} else {
+//			int index = -1;
+//			for (Object o : ui.getItems(table)) {
+//				KeywordAction a = ui.getKeywordAction(o);
+//				if (a.equals(action)) {
+//					index = ui.getIndex(table, o);
+//					ui.remove(o);
+//				}
+//			}
+//			ui.add(table, ui.getRow(action), index);
+//		}
+//		// We make the buttons visible or not depending on the selected item
+//		Object list = find(COMPONENT_ACTION_LIST);
+//		enableKeywordActionFields(list, find(COMPONENT_KEY_ACT_PANEL));
 	}
 
 	private void setJoinGroupDisplay(Group group) {
