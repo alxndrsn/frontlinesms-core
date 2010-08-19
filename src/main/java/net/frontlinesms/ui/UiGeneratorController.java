@@ -318,10 +318,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				frameLauncher.setExtendedState(Frame.MAXIMIZED_BOTH);
 			}
 			
-			// Set up the close event on the framelauncher
-//			frameLauncher.removeWindowListener(frameLauncher);
-//			frameLauncher.addWindowListener(this);
-			
 			frontlineController.setEmailListener(this);
 			frontlineController.setUiListener(this);
 			frontlineController.setSmsDeviceEventListener(this.phoneTabController);
@@ -928,6 +924,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 	}
 
+	/**
+	 * Perform actions before exiting.
+	 * TODO this method should be renamed to reflect it's behaviour.
+	 * @return <code>true</code> if the exit should be proceeded with; <code>false</code> otherwise.
+	 */
 	public boolean hasSomethingToDoBeforeExit() {
 		LOG.trace("ENTER");
 		saveWindowSize();
@@ -945,10 +946,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	public void close() {
 		this.showConfirmationDialog("doClose", I18N_CONFIRM_EXIT);
-	}
-	
-	public boolean destroy () {
-		return super.destroy();
 	}
 	
 	public void doClose() {
