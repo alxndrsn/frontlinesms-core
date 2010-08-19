@@ -949,15 +949,17 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	public void doClose() {
-		LOG.trace("ENTER doClose");
+		LOG.trace("ENTER");
 		
-		if (destroy()) {
-			exit();
-		} else {
-			setVisible(false);
-		}
-	
+		saveWindowSize();
+		
+		frameLauncher.dispose();
+		this.frontlineController.destroy();
+		this.destroy();
+		
 		LOG.trace("EXIT");
+
+//		throw new AppShutdownException();
 	}
 	
 	/**
@@ -967,11 +969,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		for (FrontlineMessage m : messageFactory.getMessages(Type.OUTBOUND, Status.PENDING)) {
 			m.setStatus(Status.OUTBOX);
 		}
-		saveWindowSize();
-		
-		frameLauncher.dispose();
-		this.frontlineController.destroy();
-		System.exit(0);
+		doClose();
 	}
 
 	/**
