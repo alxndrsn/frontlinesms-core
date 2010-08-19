@@ -304,7 +304,12 @@ public class KeywordAction {
 		return this.counter;
 	}
 	
-	/** Increments how many times this action was executed. */
+	/** 
+	 * Increments how many times this action was executed. 
+	 * This method should ONLY be called from the {@link KeywordActionDao}, due to consistency
+	 * issues.  Avoid calling {@link KeywordActionDao#update(KeywordAction)} after incrementing
+	 * for related reasons.
+	 */
 	public void incrementCounter() {
 		++counter;
 	}
