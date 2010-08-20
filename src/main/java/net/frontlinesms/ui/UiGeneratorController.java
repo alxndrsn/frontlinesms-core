@@ -950,12 +950,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	public void close() {
-		this.showConfirmationDialog("doClose", I18N_CONFIRM_EXIT);
-	}
-	
-	public void doClose() {
-		LOG.trace("ENTER doClose");
-		
+		LOG.trace("ENTER close");
 		
 		Collection<FrontlineMessage> pending = messageFactory.getMessages(Type.OUTBOUND, Status.PENDING);
 		LOG.debug("Pending Messages size [" + pending.size() + "]");
