@@ -3,7 +3,7 @@
 	<groupId>net.frontlinesms.core</groupId>
 	<artifactId>frontlinesms</artifactId>
 	<name>frontlinesms</name>
-	<version>1.6.16-SNAPSHOT</version>
+	<version>1.6.15-SNAPSHOT</version>
 	<description>FrontlineSMS core application</description>
 	<licenses>
 		<license>
