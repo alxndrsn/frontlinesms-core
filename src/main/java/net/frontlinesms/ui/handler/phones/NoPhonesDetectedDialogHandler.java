@@ -16,6 +16,7 @@ import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
 /**
  * Dialog handler for helping a user when no SMS devices could be detected
+ * TODO please comment methods which are usually called OFF the AWT Event Queue but expect to be wrapped by the calling method in an AWT Event Queuse job so we know they don't need wrapping themselves.
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  * @author Alex Anderson <alex@frontlinesms.com>
  */

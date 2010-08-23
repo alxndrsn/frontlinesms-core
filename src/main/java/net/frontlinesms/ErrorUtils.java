@@ -366,6 +366,7 @@ public class ErrorUtils {
 		errorFrame.setVisible(true);
 		errorFrame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
+				errorFrame.dispose();
 				if(fatal) System.exit(0);
 			}
 		});

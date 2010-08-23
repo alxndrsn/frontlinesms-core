@@ -30,9 +30,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.SwingUtilities;
-
-
 import net.frontlinesms.*;
 import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
@@ -320,10 +317,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				//Is maximised
 				frameLauncher.setExtendedState(Frame.MAXIMIZED_BOTH);
 			}
-			
-			// Set up the close event on the framelauncher
-//			frameLauncher.removeWindowListener(frameLauncher);
-//			frameLauncher.addWindowListener(this);
 			
 			frontlineController.setEmailListener(this);
 			frontlineController.setUiListener(this);
@@ -931,6 +924,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 	}
 
+	/**
+	 * Perform actions before exiting.
+	 * TODO this method should be renamed to reflect it's behaviour.
+	 * @return <code>true</code> if the exit should be proceeded with; <code>false</code> otherwise.
+	 */
 	public boolean hasSomethingToDoBeforeExit() {
 		LOG.trace("ENTER");
 		saveWindowSize();
@@ -950,20 +948,18 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		this.showConfirmationDialog("doClose", I18N_CONFIRM_EXIT);
 	}
 	
-	public boolean destroy () {
-		return super.destroy();
-	}
-	
 	public void doClose() {
-		LOG.trace("ENTER doClose");
+		LOG.trace("ENTER");
 		
-		if (destroy()) {
-			exit();
-		} else {
-			setVisible(false);
-		}
-	
+		saveWindowSize();
+		
+		frameLauncher.dispose();
+		this.frontlineController.destroy();
+		this.destroy();
+		
 		LOG.trace("EXIT");
+
+//		throw new AppShutdownException();
 	}
 	
 	/**
@@ -973,11 +969,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		for (FrontlineMessage m : messageFactory.getMessages(Type.OUTBOUND, Status.PENDING)) {
 			m.setStatus(Status.OUTBOX);
 		}
-		saveWindowSize();
-		
-		frameLauncher.dispose();
-		this.frontlineController.destroy();
-		System.exit(0);
+		doClose();
 	}
 
 	/**
