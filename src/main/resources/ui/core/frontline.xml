@@ -29,6 +29,7 @@
 				<checkboxmenuitem action="tabsChanged(this)" name="miHome" icon="/icons/frontline_icon.png" text="i18n.tab.home"/>
 				<checkboxmenuitem action="tabsChanged(this)" name="miKeyword" icon="/icons/keyword.png" text="i18n.tab.keyword.manager"/>
 				<checkboxmenuitem action="tabsChanged(this)" name="miEmail" icon="/icons/email.png" text="i18n.tab.email"/>
+				<separator />
 		</menu>
 		<!-- Menu below is for dev and will only appear in SNAPSHOT versions -->
 		<menu text="i18n.menubar.debug" name="mnDebug">
