@@ -193,7 +193,7 @@
 		<dependency>
 			<groupId>net.frontlinesms.core.mms</groupId>
   			<artifactId>mmsgateway</artifactId>
-  			<version>0.00.07</version>
+  			<version>0.00.08</version>
   		</dependency>
 		<dependency>
 			<groupId>javax.activation</groupId>
