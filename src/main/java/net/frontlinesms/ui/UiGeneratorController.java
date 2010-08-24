@@ -949,7 +949,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	public void doClose() {
-		LOG.trace("ENTER");
+		LOG.trace("ENTER doClose");
 		
 		saveWindowSize();
 		
