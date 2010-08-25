@@ -99,7 +99,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public static final int DEFAULT_HEIGHT = 768;
 	/** Default width of the Thinlet frame launcher */
 	public static final int DEFAULT_WIDTH = 1024;
-	private static final String I18N_CONFIRM_EXIT = "common.confirm.exit";
+	private static final String I18N_CONFIRM_EXIT = "message.confirm.exit";
 
 //> INSTANCE PROPERTIES
 	/** Logging object */

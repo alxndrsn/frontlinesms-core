@@ -69,8 +69,10 @@ public class HibernateKeywordActionDao extends BaseHibernateDao<KeywordAction> i
 	
 	/** @see net.frontlinesms.data.repository.KeywordActionDao#incrementCounter(KeywordAction)*/
 	public void incrementCounter(KeywordAction action) {
-		String incrementCounterQuery = "UPDATE " + KeywordAction.TABLE_NAME + " SET " + KeywordAction.Field.COUNTER + "=" + KeywordAction.Field.COUNTER + "+1";
-		super.getHibernateTemplate().bulkUpdate(incrementCounterQuery);
+		String incrementCounterQuery = "UPDATE " + KeywordAction.TABLE_NAME + " as action" +
+										" SET " + KeywordAction.Field.COUNTER + "=" + KeywordAction.Field.COUNTER + "+1" +
+										" WHERE action=?";
+		super.getHibernateTemplate().bulkUpdate(incrementCounterQuery, action);
 		action.incrementCounter();
 	}
 
