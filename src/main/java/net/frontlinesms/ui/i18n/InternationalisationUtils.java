@@ -42,6 +42,7 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.regex.Matcher;
@@ -500,5 +501,12 @@ public class InternationalisationUtils {
 		default:
 			return "(unknown)";
 		}
+	}
+
+	/** @return the current locale, specified by which language is currently selected */
+	public static Locale getCurrentLocale() {
+		return FrontlineUI.currentResourceBundle != null
+				? FrontlineUI.currentResourceBundle.getLocale()
+				: new Locale("en", "gb");
 	}
 }
