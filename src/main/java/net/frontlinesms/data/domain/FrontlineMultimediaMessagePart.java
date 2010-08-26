@@ -17,7 +17,11 @@ public class FrontlineMultimediaMessagePart {
 	/** The content of the part, if text, or the name of the file where the data is stored. */
 	@Column(length=4096) // arbitrary size that is bigger than people are likely to type on a handset
 	private String content;
-	/** <code>true</code> if {@link #content} links to the binary file name; <code>false</code> if {@link #content} contains the text content of this part */
+	/** 
+	 * <code>true</code> if {@link #content} links to the binary file name; <code>false</code> if {@link #content} contains the text content of this part 
+	 * NB: On MySQL, "binary" is a restricted keyword and can't be used.
+	 * */
+	@Column(name="binaryData")
 	private boolean binary;
 	
 	FrontlineMultimediaMessagePart() {}
