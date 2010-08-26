@@ -50,7 +50,7 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 //> INSTANCE PROPERTIES
 	/** Logging object */
 	protected final Logger log = FrontlineUtils.getLogger(this.getClass());
-	/** The language bundle currently in use */
+	/** The language bundle currently in use.  N.B. THIS CAN BE NULL, IN WHICH CASE THE DEFAULT BUNDLE SHOULD BE USED TODO handle and document this better */
 	public static LanguageBundle currentResourceBundle;
 	/** Frame launcher that this UI instance is displayed within.  We need to keep a handle on it so that we can dispose of it when we quit or change UI modes. */
 	protected FrameLauncher frameLauncher;

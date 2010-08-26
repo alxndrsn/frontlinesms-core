@@ -28,6 +28,7 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import net.frontlinesms.*;
@@ -270,9 +271,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			
 			// Initialise the plugins menu
 			Object pluginMenu = find("menu_tabs");
+
+			Locale locale = InternationalisationUtils.getCurrentLocale();
 			for(Class<PluginController> pluginClass : PluginProperties.getInstance().getPluginClasses()) {
 				// Try to get an icon from the classpath
-				String pluginName = pluginClass.newInstance().getName(currentResourceBundle.getLocale());
+				String pluginName = pluginClass.newInstance().getName(locale);
 				String iconPath;
 				if(pluginClass.isAnnotationPresent(PluginControllerProperties.class)) {
 					PluginControllerProperties properties = pluginClass.getAnnotation(PluginControllerProperties.class);
