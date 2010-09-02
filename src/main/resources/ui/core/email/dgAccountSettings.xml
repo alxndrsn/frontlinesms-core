@@ -17,7 +17,7 @@
         <label text="i18n.email.account.example.account"/>
         <label icon="/icons/emailAccount_password.png" name="lbAccountPass" text="i18n.common.email.account.password"/>
         <passwordfield colspan="1" name="tfAccountPass"/>
-        <checkbox icon="/icons/lock.png" name="cbUseSSL" selected="true" text="i18n.common.use.ssl"/>
+        <checkbox icon="/icons/lock.png" name="cbUseSSL" selected="false" text="i18n.common.use.ssl"/>
     </panel>
     <separator/>
     <panel columns="2" gap="7" halign="center">
