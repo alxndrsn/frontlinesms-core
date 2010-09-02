@@ -31,3 +31,4 @@ test_temp/
 
 # FrontlineSMS ini file for applying local settings
 frontlinesms.ini
+.settings.bak/
