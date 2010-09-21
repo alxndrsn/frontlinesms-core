@@ -171,14 +171,18 @@ public abstract class BaseHibernateDao<E> extends HibernateDaoSupport {
 	/**
 	 * Gets a list of E matching the supplied HQL query.
 	 * @param hqlQuery HQL query
-	 * @param startIndex
-	 * @param limit
+	 * @param startIndex the index of the first result object to be retrieved (numbered from 0)
+	 * @param limit the maximum number of result objects to retrieve (or <=0 for no limit)
 	 * @param values values to insert into the HQL query
 	 * @return a list of Es matching the supplied query
 	 */
 	protected List<E> getList(String hqlQuery, int startIndex, int limit, Object... values) {
 		List<E> list = getList(hqlQuery, values);
-		return list.subList(startIndex, Math.min(list.size(), startIndex + limit));
+		if(limit <= 0) {
+			return list.subList(startIndex, Integer.MAX_VALUE);
+		} else {
+			return list.subList(startIndex, Math.min(list.size(), startIndex + limit));
+		}
 	}
 	
 	/**
