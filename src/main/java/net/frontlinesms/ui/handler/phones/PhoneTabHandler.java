@@ -113,6 +113,8 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	private static final String COMPONENT_PHONE_MANAGER_MODEM_LIST = "phoneManager_modemList";
 	/** UI Component name: TODO */
 	private static final String COMPONENT_PHONE_MANAGER_MODEM_LIST_ERROR = "phoneManager_modemListError";
+	/** UI COmponent name: TODO */
+	private static final String COMPONENT_SMSC_NUMBER = "tfSmscNumber";
 
 //> INSTANCE PROPERTIES
 	/** The manager of {@link FrontlineMessagingService}s */
@@ -428,8 +430,6 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	public void updatePhoneDetails(Object dialog) {
 		SmsModem phone = ui.getAttachedObject(dialog, SmsModem.class);
 		String serial = phone.getSerial();
-		String manufacturer = phone.getManufacturer();
-		String model = phone.getModel();
 
 		boolean useForSending;
 		boolean useDeliveryReports;
@@ -446,6 +446,7 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 			useForReceiving = false;
 			deleteMessagesAfterReceiving = false;
 		}
+		String smscNumber = ui.getText(ui.find(COMPONENT_SMSC_NUMBER));
 		
 		phone.setUseForSending(useForSending);
 		phone.setUseDeliveryReports(useDeliveryReports);
@@ -463,11 +464,26 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 			settings.setUseDeliveryReports(useDeliveryReports);
 			settings.setUseForReceiving(useForReceiving);
 			settings.setUseForSending(useForSending);
+			settings.setSmscNumber(smscNumber);
 			this.smsModelSettingsDao.updateSmsModemSettings(settings);
 		} else {
-			settings = new SmsModemSettings(serial, manufacturer, model, useForSending, useForReceiving, deleteMessagesAfterReceiving, useDeliveryReports);
+			settings = new SmsModemSettings(serial);
+
+			String manufacturer = phone.getManufacturer();
+			String model = phone.getModel();
+			
+			settings.setManufacturer(manufacturer);
+			settings.setModel(model);
+			settings.setUseForSending(useForSending);
+			settings.setUseForReceiving(useForReceiving);
+			settings.setDeleteMessagesAfterReceiving(deleteMessagesAfterReceiving);
+			settings.setUseDeliveryReports(useDeliveryReports);
+			settings.setSmscNumber(smscNumber);
+			
 			this.smsModelSettingsDao.saveSmsModemSettings(settings);
 		}
+		// TODO check if this value has changed
+		phone.setSmscNumber(smscNumber);
 		
 		removeDialog(dialog);
 	}
