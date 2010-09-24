@@ -12,8 +12,8 @@
 	    <checkbox colspan="2" icon="/icons/sms_delete.png" name="cbDeleteMsgs" selected="true" text="i18n.common.delete.from.phone"/>
 	</panel>
 		<separator colspan="2"/>
-	<panel columns="2">
-			<label name="smscnumber" text="SMSC No.:"  />
+	<panel colspan="2">
+			<label name="smscnumber" text="SMSC No."  />
 			<textfield name="tfSmscNumber" weightx="1" />
 	</panel>
 	<panel colspan="2" columns="2" gap="7" halign="center">
