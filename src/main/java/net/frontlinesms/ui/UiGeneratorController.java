@@ -1770,6 +1770,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		databaseSettings.showAsDialog(needToRestartApplication);
 	}
 	
+	public void showFrontlineSettings() {
+		FrontlineSettingsHandler settingsDialog = new FrontlineSettingsHandler(this);
+		add(settingsDialog.getDialog());
+	}
+	
 	/** Reloads the ui. */
 	public final void reloadUi() {
 		this.frameLauncher.dispose();

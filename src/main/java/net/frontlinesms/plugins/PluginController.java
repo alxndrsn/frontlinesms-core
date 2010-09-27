@@ -44,6 +44,8 @@ public interface PluginController {
 	 * @return the tab to display for this plugin
 	 */
 	public Object getTab(UiGeneratorController uiController);
+	
+	public PluginSettingsController getSettingsController(UiGeneratorController uiController);
 
 	/**
 	 * Gets the default language bundle for text strings used in the UI of this plugin.
