@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.log4j.Logger;
@@ -693,23 +692,25 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 			this.uiController.add(valuesTable, header);
 			
 			/** Lines */
-			for (String[] lineValues : this.importedContactsList) {
-				Object row = this.uiController.createTableRow();
-				for (int i = 0 ; i < columnsNumber && i < lineValues.length ; ++i) {
-					Object cell;
-					if (i == statusIndex) { // We're creating the status cell
-						cell = this.uiController.createTableCell("");
-						if (lineValues[i].toLowerCase().equals("true") || lineValues[i].toLowerCase().equals("active") ) {
-							this.uiController.setIcon(cell, Icon.TICK);
+			if (this.importedContactsList != null) {
+				for (String[] lineValues : this.importedContactsList) {
+					Object row = this.uiController.createTableRow();
+					for (int i = 0 ; i < columnsNumber && i < lineValues.length ; ++i) {
+						Object cell;
+						if (i == statusIndex) { // We're creating the status cell
+							cell = this.uiController.createTableCell("");
+							if (lineValues[i].toLowerCase().equals("true") || lineValues[i].toLowerCase().equals("active") ) {
+								this.uiController.setIcon(cell, Icon.TICK);
+							} else {
+								this.uiController.setIcon(cell, Icon.CANCEL);
+							}
 						} else {
-							this.uiController.setIcon(cell, Icon.CANCEL);
+							cell = this.uiController.createTableCell(lineValues[i].replace(CsvExporter.GROUPS_DELIMITER, ", "));
 						}
-					} else {
-						cell = this.uiController.createTableCell(lineValues[i].replace(CsvExporter.GROUPS_DELIMITER, ", "));
+						this.uiController.add(row, cell);
 					}
-					this.uiController.add(row, cell);
+					this.uiController.add(valuesTable, row);
 				}
-				this.uiController.add(valuesTable, row);
 			}
 		}
 	}
