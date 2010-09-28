@@ -20,7 +20,7 @@
 	            <panel gap="5">
 	                <button action="showNewGroupDialog" icon="/icons/big_group_add.png" text="i18n.action.new.group" weightx="1" weighty="1"/>
 	                <button action="showDeleteOptionDialog" icon="/icons/big_group_delete.png" name="deleteButton" text="i18n.action.delete" weightx="1" weighty="1" enabled="false"/>
-	                <button action="sendSmsToGroup" icon="/icons/big_sms_send.png" name="sendSMSButtonGroupSide" text="i18n.action.send.sms" weightx="1" weighty="1" enabled="false"/>
+	                <button action="sendSmsToGroup" icon="/icons/big_group_send.png" name="sendSMSButtonGroupSide" text="i18n.action.send.to.group" weightx="1" weighty="1" enabled="false"/>
 	            </panel>
 	        </panel>
 	        <button tooltip="i18n.tooltip.click.for.help" valign="bottom" action="showHelpPage('contacts.htm')" icon="/icons/big_help.png" type="link"/>
