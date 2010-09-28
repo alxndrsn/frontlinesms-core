@@ -236,6 +236,31 @@ public class HibernateMessageDao extends BaseHibernateDao<FrontlineMessage> impl
 		addPhoneNumberMatchCriteria(criteria, phoneNumber, true, true);
 		return super.getCount(criteria);
 	}
+	
+	public List<FrontlineMessage> getMessages(Type messageType, Long messageHistoryStart, Long messageHistoryEnd) {
+		DetachedCriteria criteria = super.getCriterion();
+		addTypeCriteria(criteria, messageType);
+		addDateCriteria(criteria, messageHistoryStart, messageHistoryEnd);
+		return super.getList(criteria);
+	}
+	
+	public List<FrontlineMessage> getMessagesForKeyword(FrontlineMessage.Type messageType, Keyword keyword, Long start, Long end) {
+		PartialQuery<FrontlineMessage> q = createQueryStringForKeyword(false, messageType, keyword);
+		
+		if (start != null) {
+			q.appendWhereOrAnd();
+			if (end != null) {
+				q.append("(message." + FrontlineMessage.Field.DATE.getFieldName() + ">=? AND message." + FrontlineMessage.Field.DATE.getFieldName() + "<=?)", start, end);
+			} else {
+				q.append("(message." + FrontlineMessage.Field.DATE.getFieldName() + ">=?)", start);	
+			}			
+		} else if (end != null) {
+			q.appendWhereOrAnd();
+			q.append("(message." + FrontlineMessage.Field.DATE.getFieldName() + "<=?)", end);
+		}
+		
+		return super.getList(q.getQueryString(), q.getInsertValues());
+	}
 
 	/** @see MessageDao#saveMessage(FrontlineMessage) */
 	public void saveMessage(FrontlineMessage message) {
