@@ -662,7 +662,13 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		this.refreshValuesTable();
 	}
 
-	public void refreshValuesTable() {
+	public void columnCheckboxChanged() {
+		if(this.importedContactsList != null) {
+			refreshValuesTable();
+		}
+	}
+	
+	private void refreshValuesTable() {
 		Object pnValuesTable = this.uiController.find(this.wizardDialog, COMPONENT_PN_VALUES_TABLE);
 		
 		if (pnValuesTable != null) {
