@@ -74,19 +74,23 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler {
 				e.printStackTrace();
 			}
 			
-			Object rootSettingsNode = pluginSettingsController.getRootSettingsNode();
-			if (rootSettingsNode != null) {
-				// Try to get an icon from the classpath
-				String iconPath;
-				if(pluginClass.isAnnotationPresent(PluginControllerProperties.class)) {
-					PluginControllerProperties properties = pluginClass.getAnnotation(PluginControllerProperties.class);
-					iconPath = properties.iconPath();
-				} else {
-					iconPath = '/' + pluginClass.getPackage().getName().replace('.', '/') + '/' + pluginClass.getSimpleName() + ".png";
-				}
-				this.uiController.setIcon(rootSettingsNode, iconPath);
-				
-				this.uiController.add(find(UI_COMPONENT_PLUGIN_TREE), rootSettingsNode);
+			if (pluginSettingsController != null) { // Then the Plugin has some settings
+				//Object rootSettingsNode = pluginSettingsController.getRootSettingsNode();
+				Object rootSettingsNode = this.uiController.createNode(pluginSettingsController.getTitle(), pluginClass.getName());
+				pluginSettingsController.addSubSettingsNodes(rootSettingsNode);
+				//if (rootSettingsNode != null) {
+					// Try to get an icon from the classpath
+					String iconPath;
+					if(pluginClass.isAnnotationPresent(PluginControllerProperties.class)) {
+						PluginControllerProperties properties = pluginClass.getAnnotation(PluginControllerProperties.class);
+						iconPath = properties.iconPath();
+					} else {
+						iconPath = '/' + pluginClass.getPackage().getName().replace('.', '/') + '/' + pluginClass.getSimpleName() + ".png";
+					}
+					this.uiController.setIcon(rootSettingsNode, iconPath);
+					
+					this.uiController.add(find(UI_COMPONENT_PLUGIN_TREE), rootSettingsNode);
+				//}
 			}
 		}
 	}
@@ -105,7 +109,13 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler {
 				}
 				try {
 					String className = this.uiController.getAttachedObject(parent, String.class);
-					Object settingsPanel = PluginProperties.getInstance().getPluginClass(className).newInstance().getSettingsController(this.uiController).getPanelForSection(section);
+					PluginSettingsController settingsController = PluginProperties.getInstance().getPluginClass(className).newInstance().getSettingsController(this.uiController);
+					Object settingsPanel;
+					if (section.equals(className)) {
+						settingsPanel = settingsController.getRootPanel();
+					} else {
+						settingsPanel = settingsController.getPanelForSection(section);
+					}
 					if (settingsPanel != null) {
 						this.uiController.add(pnDisplaySettings, settingsPanel);
 					}
