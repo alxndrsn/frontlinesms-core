@@ -231,11 +231,11 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 			break;
 		case GSM7BIT_TEXT:
 			gsm7bitOutbox.add(outgoingMessage);
-			LOG.debug("Message added to outbox. Size is [" + gsm7bitOutbox.size() + "]");
+			LOG.debug("Message added to gsm7bitOutbox. Size is [" + gsm7bitOutbox.size() + "]");
 			break;
 		case UCS2_TEXT:
 			ucs2Outbox.add(outgoingMessage);
-			LOG.debug("Message added to outbox. Size is [" + ucs2Outbox.size() + "]");
+			LOG.debug("Message added to ucs2Outbox. Size is [" + ucs2Outbox.size() + "]");
 			break;
 		default: throw new IllegalStateException();
 		}
@@ -250,13 +250,13 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 	 */
 	public void removeFromOutbox(FrontlineMessage deleted) {
 		if(gsm7bitOutbox.remove(deleted)) {
-			if(LOG.isDebugEnabled()) LOG.debug("Message [" + deleted + "] removed from outbox. Size is [" + gsm7bitOutbox.size() + "]");
+			if(LOG.isDebugEnabled()) LOG.debug("Message [" + deleted + "] removed from gsm7bitOutbox. Size is [" + gsm7bitOutbox.size() + "]");
 		} else if(ucs2Outbox.remove(deleted)) {
-			if(LOG.isDebugEnabled()) LOG.debug("Message [" + deleted + "] removed from outbox. Size is [" + ucs2Outbox.size() + "]");
+			if(LOG.isDebugEnabled()) LOG.debug("Message [" + deleted + "] removed from uc2Outbox. Size is [" + ucs2Outbox.size() + "]");
 		} else if(binOutbox.remove(deleted)) {
-			if(LOG.isDebugEnabled()) LOG.debug("Message [" + deleted + "] removed from outbox. Size is [" + binOutbox.size() + "]");
+			if(LOG.isDebugEnabled()) LOG.debug("Message [" + deleted + "] removed from binOutbox. Size is [" + binOutbox.size() + "]");
 		} else {
-			if(LOG.isInfoEnabled()) LOG.info("Attempt to delete message found in neither outbox nor binOutbox.");
+			if(LOG.isInfoEnabled()) LOG.info("Attempt to delete message found in no outbox.");
 		}
 	}
 
