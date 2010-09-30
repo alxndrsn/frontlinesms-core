@@ -24,8 +24,11 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_ST
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_MESSAGE_HISTORY;
 
 import java.awt.EventQueue;
+import java.awt.TrayIcon.MessageType;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -134,6 +137,8 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	private Long messageHistoryEnd;
 	/** The number of people the current SMS will be sent to */
 	private int numberToSend = 1;
+	/** The number of SMS parts */
+	private int numberOfMessageParts = 1;
 	/** The selected lines in the left panel  */
 	private Group selectedGroup;
 	private Contact selectedContact;
@@ -312,7 +317,6 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	/** @return {@link PagedListDetails} for {@link #messageListComponent} */
 	private PagedListDetails getMessageListPagingDetails(int startIndex, int limit) {
 		int messageCount = getMessageCount();
-		numberToSend = messageCount;
 		
 		List<FrontlineMessage> messages = getListMessages(startIndex, limit);
 		Object[] messageRows = new Object[messages.size()];
@@ -331,27 +335,41 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		Object selectedItem = ui.getSelectedItem(filterList);
 
 		if (selectedItem == null) {
-			return 0;
+			numberToSend = 0;
+			numberOfMessageParts = 0; 
 		} else {
 			final FrontlineMessage.Type messageType = getSelectedMessageType();
 			int selectedIndex = ui.getSelectedIndex(filterList);
+			
+			Collection<FrontlineMessage> messageList;
+			
 			if (selectedIndex == 0) {
-				return messageDao.getMessageCount(messageType, messageHistoryStart, messageHistoryEnd);
+				messageList = messageDao.getMessages(messageType, messageHistoryStart, messageHistoryEnd);
 			} else {
 				if(filterClass == Contact.class) {
 					Contact c = ui.getContact(selectedItem);
-					return messageDao.getMessageCountForMsisdn(messageType, c.getPhoneNumber(), messageHistoryStart, messageHistoryEnd);
+					messageList = messageDao.getMessages(messageType, Arrays.asList(new String[] { c.getPhoneNumber() }), messageHistoryStart, messageHistoryEnd);
 				} else if(filterClass == Group.class) {
 					// A Group was selected
 					Group selectedGroup = ui.getGroup(selectedItem);
-					return messageDao.getMessageCount(messageType, getPhoneNumbers(selectedGroup), messageHistoryStart, messageHistoryEnd);
+					messageList = messageDao.getMessages(messageType, getPhoneNumbers(selectedGroup), messageHistoryStart, messageHistoryEnd);
 				} else /* (filterClass == Keyword.class) */ {
 					// Keyword Selected
 					Keyword k = ui.getKeyword(selectedItem);
-					return messageDao.getMessageCount(messageType, k, messageHistoryStart, messageHistoryEnd);
+					messageList = messageDao.getMessagesForKeyword(messageType, k, messageHistoryStart, messageHistoryEnd);
+				}
+			}
+			
+			numberToSend = messageList.size();
+			numberOfMessageParts = 0;
+			for (FrontlineMessage message : messageList) {
+				if (message.getType().equals(Type.OUTBOUND)) {
+					numberOfMessageParts += FrontlineMessage.getNumberOfSMSParts(message.getTextContent());
 				}
 			}
 		}
+		
+		return numberToSend;
 	}
 	
 	/**
@@ -477,7 +495,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		LOG.trace("ENTRY");
 		
 		ui.setText(find(COMPONENT_LB_MSGS_NUMBER), String.valueOf(numberToSend));		
-		ui.setText(find(COMPONENT_LB_COST), InternationalisationUtils.formatCurrency(UiProperties.getInstance().getCostPerSms() * numberToSend));
+		ui.setText(find(COMPONENT_LB_COST), InternationalisationUtils.formatCurrency(UiProperties.getInstance().getCostPerSms() * numberOfMessageParts));
 		
 		LOG.trace("EXIT");
 	}

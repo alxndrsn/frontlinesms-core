@@ -24,6 +24,7 @@ import java.util.Arrays;
 import javax.persistence.*;
 
 import org.hibernate.annotations.DiscriminatorFormula;
+import org.smslib.util.GsmAlphabet;
 import org.smslib.util.HexUtils;
 import org.smslib.util.TpduUtils;
 
@@ -466,8 +467,45 @@ public class FrontlineMessage {
 			return false;
 		return true;
 	}
+	
+	public static int getNumberOfSMSParts (String message) {
+		int messageLength = message.length();
+		
+		boolean areAllCharactersValidGSM = GsmAlphabet.areAllCharactersValidGSM(message);
+		int singleMessageCharacterLimit, multipartMessageCharacterLimit;
+		
+		if(areAllCharactersValidGSM) {
+			singleMessageCharacterLimit = FrontlineMessage.SMS_LENGTH_LIMIT;
+			multipartMessageCharacterLimit = FrontlineMessage.SMS_MULTIPART_LENGTH_LIMIT;
+		} else {
+			// It appears there are some unicode-only characters here.  We should therefore
+			// treat this message as if it will be sent as unicode.
+			singleMessageCharacterLimit = FrontlineMessage.SMS_LENGTH_LIMIT_UCS2;
+			multipartMessageCharacterLimit = FrontlineMessage.SMS_MULTIPART_LENGTH_LIMIT_UCS2;
+		}
+
+		if (messageLength > getTotalLengthAllowed(message)) {
+			return (int)Math.ceil((double)messageLength / (double)multipartMessageCharacterLimit);
+		} else {
+			if (messageLength <= singleMessageCharacterLimit) {
+				return messageLength == 0 ? 0 : 1;
+			} else {
+				int charCount = messageLength - singleMessageCharacterLimit;
+				return (int)Math.ceil((double)charCount / (double)multipartMessageCharacterLimit) + 1;
+			}
+		}
+	}
 
 	public void setDate(long date) {
 		this.date = date;
+	}
+
+	public static int getTotalLengthAllowed(String message) {
+		boolean areAllCharactersValidGSM = GsmAlphabet.areAllCharactersValidGSM(message);
+		if (areAllCharactersValidGSM) {
+			return FrontlineMessage.SMS_LENGTH_LIMIT + FrontlineMessage.SMS_MULTIPART_LENGTH_LIMIT * (FrontlineMessage.SMS_LIMIT - 1);
+		} else {
+			return FrontlineMessage.SMS_LENGTH_LIMIT_UCS2 + FrontlineMessage.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * (FrontlineMessage.SMS_LIMIT - 1);
+		}
 	}
 }
