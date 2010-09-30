@@ -145,6 +145,7 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 	/**
 	 * Run the looped behaviour from {@link #run()} once.
 	 * This method is separated for simple, unthreaded unit testing.
+	 * THREAD: SmsDeviceManager 
 	 */
 	void doRun() {
 		if (refreshPhoneList) {
@@ -563,6 +564,7 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 	/**
 	 * Polls all {@link SmsModem}s that are set to receive messages, and processes any
 	 * messages they've received.
+	 * THREAD: SmsDeviceManager
 	 */
 	private void processModemReceiving() {
 		Collection<SmsModem> receiveModems = getSmsModemsForReceiving();
@@ -574,7 +576,8 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 		}
 	}
 	
-	/** @return all {@link SmsModem}s that are currently connected and receiving messages. */
+	/** @return all {@link SmsModem}s that are currently connected and receiving messages.
+	 * THREAD: SmsDeviceManager */
 	private Collection<SmsModem> getSmsModemsForReceiving() {
 		HashSet<SmsModem> receivers = new HashSet<SmsModem>();
 		for(SmsModem modem : this.phoneHandlers.values()) {
@@ -594,19 +597,28 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 
 //> SMS DISPATCH METHODS
 	
-	/** Dispatch all messages in {@link #gsm7bitOutbox} to suitable {@link SmsService}s */
+	/**
+	 * Dispatch all messages in {@link #gsm7bitOutbox} to suitable {@link SmsService}s
+	 * THREAD: SmsDeviceManager
+	 */
 	private void dispatchGsm7bitTextSms() {
 		List<FrontlineMessage> messages = removeAll(this.gsm7bitOutbox);
 		dispatchSms(messages, MessageType.GSM7BIT_TEXT);
 	}
 	
-	/** Dispatch all messages in {@link #outbox} to suitable {@link SmsService}s */
+	/**
+	 * Dispatch all messages in {@link #outbox} to suitable {@link SmsService}s
+	 * THREAD: SmsDeviceManager
+	 */
 	private void dispatchUcs2TextSms() {
 		List<FrontlineMessage> messages = removeAll(this.ucs2Outbox);
 		dispatchSms(messages, MessageType.UCS2_TEXT);
 	}
 	
-	/** Dispatch all messages in {@link #binOutbox} to suitable {@link SmsService}s */
+	/**
+	 * Dispatch all messages in {@link #binOutbox} to suitable {@link SmsService}s
+	 * THREAD: SmsDeviceManager
+	 */
 	private void dispatchBinarySms() {
 		List<FrontlineMessage> messages = removeAll(this.binOutbox);
 		dispatchSms(messages, MessageType.BINARY);
@@ -615,6 +627,7 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 	/**
 	 * @param messages messages to dispatch
 	 * @param binary <code>true</code> if the messages are binary, <code>false</code> if they are text
+	 * THREAD: SmsDeviceManager
 	 */
 	private void dispatchSms(List<FrontlineMessage> messages, MessageType messageType) {
 		if(messages.size() > 0) {
@@ -660,6 +673,7 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 	 * Dispatch some SMS {@link FrontlineMessage}s to some {@link SmsService}s. 
 	 * @param devices
 	 * @param messages
+	 * THREAD: SmsDeviceManager
 	 */
 	private void dispatchSms(List<? extends SmsService> devices, List<FrontlineMessage> messages) {
 		int deviceCount = devices.size();
