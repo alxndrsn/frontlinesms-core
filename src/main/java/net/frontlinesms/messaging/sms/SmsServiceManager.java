@@ -105,6 +105,7 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 	 */
 	private final HashSet<String> connectedSerials = new HashSet<String>();
 	private String[] portIgnoreList;
+	private int GLOBAL_DISPATCH_COUNTER = -1;
 
 	private static Logger LOG = FrontlineUtils.getLogger(SmsServiceManager.class);
 
@@ -154,9 +155,9 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 			listComPortsAndOwners(autoConnectToNewPhones);
 			refreshPhoneList = false;
 		} else {
-			dispatchGsm7bitTextSms();
-			dispatchUcs2TextSms();
-			dispatchBinarySms();
+			dispatchSms(MessageType.GSM7BIT_TEXT);
+			dispatchSms(MessageType.UCS2_TEXT);
+			dispatchSms(MessageType.BINARY);
 			processModemReceiving();
 		}
 	}
@@ -598,38 +599,13 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 //> SMS DISPATCH METHODS
 	
 	/**
-	 * Dispatch all messages in {@link #gsm7bitOutbox} to suitable {@link SmsService}s
-	 * THREAD: SmsDeviceManager
-	 */
-	private void dispatchGsm7bitTextSms() {
-		List<FrontlineMessage> messages = removeAll(this.gsm7bitOutbox);
-		dispatchSms(messages, MessageType.GSM7BIT_TEXT);
-	}
-	
-	/**
-	 * Dispatch all messages in {@link #outbox} to suitable {@link SmsService}s
-	 * THREAD: SmsDeviceManager
-	 */
-	private void dispatchUcs2TextSms() {
-		List<FrontlineMessage> messages = removeAll(this.ucs2Outbox);
-		dispatchSms(messages, MessageType.UCS2_TEXT);
-	}
-	
-	/**
-	 * Dispatch all messages in {@link #binOutbox} to suitable {@link SmsService}s
-	 * THREAD: SmsDeviceManager
-	 */
-	private void dispatchBinarySms() {
-		List<FrontlineMessage> messages = removeAll(this.binOutbox);
-		dispatchSms(messages, MessageType.BINARY);
-	}
-	
-	/**
 	 * @param messages messages to dispatch
 	 * @param binary <code>true</code> if the messages are binary, <code>false</code> if they are text
 	 * THREAD: SmsDeviceManager
 	 */
-	private void dispatchSms(List<FrontlineMessage> messages, MessageType messageType) {
+	private void dispatchSms(MessageType messageType) {
+		ConcurrentLinkedQueue<FrontlineMessage> outboxFromType = getOutboxFromType(messageType);
+		List<FrontlineMessage> messages = removeAll(outboxFromType);
 		if(messages.size() > 0) {
 			// Try dispatching to SmsInternetServices
 			List<SmsInternetService> internetServices = getSmsInternetServicesForSending(messageType);
@@ -646,7 +622,7 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 				} else {
 					// The messages cannot be sent
 					// We put them back in their outbox 
-					getOutboxFromType(messageType).addAll(messages);
+					outboxFromType.addAll(messages);
 				}
 			}		
 		}
@@ -677,9 +653,8 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 	 */
 	private void dispatchSms(List<? extends SmsService> devices, List<FrontlineMessage> messages) {
 		int deviceCount = devices.size();
-		int messageIndex = -1;
 		for(FrontlineMessage m : messages) {
-			SmsService device = devices.get(++messageIndex % deviceCount);
+			SmsService device = devices.get(++GLOBAL_DISPATCH_COUNTER  % deviceCount);
 			// Presumably the device will complain somehow if it is no longer connected
 			// etc.  TODO we should actually check what happens!
 			device.sendSMS(m);
@@ -733,16 +708,16 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 			} else if(modem.isConnected() && modem.isUseForSending()) {
 				boolean addModem;
 				switch(messageType) {
-				case BINARY:
-					addModem = modem.isBinarySendingSupported();
-					break;
-				case UCS2_TEXT:
-					addModem = modem.isUcs2SendingSupported();
-					break;
-				case GSM7BIT_TEXT:
-					addModem = true;
-					break;
-				default: throw new IllegalStateException();
+					case BINARY:
+						addModem = modem.isBinarySendingSupported();
+						break;
+					case UCS2_TEXT:
+						addModem = modem.isUcs2SendingSupported();
+						break;
+					case GSM7BIT_TEXT:
+						addModem = true;
+						break;
+					default: throw new IllegalStateException();
 				}
 				if(addModem) senders.add(modem);
 			}
