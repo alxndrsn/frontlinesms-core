@@ -309,7 +309,7 @@ public class FrontlineMessage {
 			if(octetCount <= SMS_LENGTH_LIMIT_BINARY) {
 				return 1;
 			} else {
-				return (int) Math.ceil(octetCount / SMS_MULTIPART_LENGTH_LIMIT_BINARY);
+				return (int) Math.ceil(octetCount / (double)SMS_MULTIPART_LENGTH_LIMIT_BINARY);
 			}
 		} else {
 			int expectedNumberOfSmsParts = FrontlineMessage.getExpectedNumberOfSmsParts(this.getTextContent());
