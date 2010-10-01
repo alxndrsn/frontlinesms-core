@@ -71,8 +71,8 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * Handler for the MessageHistory tab.
  * 
  * @author Alex Anderson alex@frontlinesms.com
- * @author Carlos Eduardo Genz
- * <li> kadu(at)masabi(dot)com
+ * @author Carlos Eduardo Genz kadu(at)masabi(dot)com
+ * @author Morgan Belkadi morgan@frontlinesms.com
  */
 public class MessageHistoryTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterPanelOwner, EventObserver {
 	
@@ -351,7 +351,12 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 				} else if(filterClass == Group.class) {
 					// A Group was selected
 					Group selectedGroup = ui.getGroup(selectedItem);
-					messageList = messageDao.getMessages(messageType, getPhoneNumbers(selectedGroup), messageHistoryStart, messageHistoryEnd);
+					List<String> phoneNumbers = getPhoneNumbers(selectedGroup);
+					if (phoneNumbers.size() != 0) {
+						messageList = messageDao.getMessages(messageType, phoneNumbers, messageHistoryStart, messageHistoryEnd);
+					} else {
+						messageList = new ArrayList<FrontlineMessage>();
+					}
 				} else /* (filterClass == Keyword.class) */ {
 					// Keyword Selected
 					Keyword k = ui.getKeyword(selectedItem);
@@ -401,7 +406,12 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 				} else if(filterClass == Group.class) {
 					// A Group was selected
 					Group selectedGroup = ui.getGroup(selectedItem);
-					return messageDao.getMessages(messageType, getPhoneNumbers(selectedGroup), messageHistoryStart, messageHistoryEnd);
+					List<String> phoneNumbers = getPhoneNumbers(selectedGroup);
+					if (phoneNumbers.size() != 0) {
+						return messageDao.getMessages(messageType, phoneNumbers, messageHistoryStart, messageHistoryEnd);
+					} else {
+						return new ArrayList<FrontlineMessage>();
+					}
 				} else if (filterClass == Keyword.class) {
 					// Keyword Selected
 					Keyword k = ui.getKeyword(selectedItem);
