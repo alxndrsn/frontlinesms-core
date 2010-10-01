@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<dialog closable="true" close="removeDialog(this)" width="700" height="500" bottom="4" gap="8" icon="/icons/about.png" left="4" modal="true" name="settingsDialog" right="4" text="Settings" top="4" columns="1">
+<dialog closable="true" close="closeDialog" width="700" height="500" bottom="4" gap="8" icon="/icons/about.png" left="4" modal="true" name="settingsDialog" right="4" text="Settings" top="4" columns="1">
 	<splitpane divider="200" weightx="1" weighty="1">
 		<panel columns="1" gap="10">
 			<tree name="generalTree" weightx="1" weighty="1">
@@ -13,5 +13,8 @@
 		</panel>
 	</splitpane>
 	
-	<button text="i18n.action.ok" halign="center" icon="/icons/tick.png" action="removeDialog(settingsDialog)"/>
+	<panel gap="5" halign="center">
+		<button text="i18n.action.save" halign="center" icon="/icons/tick.png" enabled="false"/>
+		<button text="i18n.action.cancel" halign="center" icon="/icons/cross.png" action="closeDialog"/>
+	</panel>
 </dialog>

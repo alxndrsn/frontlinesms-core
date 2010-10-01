@@ -28,6 +28,8 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler {
 
 	private static final String UI_COMPONENT_PN_DISPLAY_SETTINGS = "pnDisplaySettings";
 
+	private static final String I18N_MESSAGE_CONFIRM_CLOSE_SETTINGS = "message.confirm.close.settings";
+
 
 //> INSTANCE PROPERTIES
 	/** Thinlet instance that owns this handler */
@@ -75,59 +77,76 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler {
 			}
 			
 			if (pluginSettingsController != null) { // Then the Plugin has some settings
-				//Object rootSettingsNode = pluginSettingsController.getRootSettingsNode();
 				Object rootSettingsNode = this.uiController.createNode(pluginSettingsController.getTitle(), pluginClass.getName());
+				
+				// Some plugin may need submenus
 				pluginSettingsController.addSubSettingsNodes(rootSettingsNode);
-				//if (rootSettingsNode != null) {
-					// Try to get an icon from the classpath
-					String iconPath;
-					if(pluginClass.isAnnotationPresent(PluginControllerProperties.class)) {
-						PluginControllerProperties properties = pluginClass.getAnnotation(PluginControllerProperties.class);
-						iconPath = properties.iconPath();
-					} else {
-						iconPath = '/' + pluginClass.getPackage().getName().replace('.', '/') + '/' + pluginClass.getSimpleName() + ".png";
-					}
-					this.uiController.setIcon(rootSettingsNode, iconPath);
-					
-					this.uiController.add(find(UI_COMPONENT_PLUGIN_TREE), rootSettingsNode);
-				//}
+				
+				// Try to get an icon from the classpath
+				String iconPath;
+				if(pluginClass.isAnnotationPresent(PluginControllerProperties.class)) {
+					PluginControllerProperties properties = pluginClass.getAnnotation(PluginControllerProperties.class);
+					iconPath = properties.iconPath();
+				} else {
+					iconPath = '/' + pluginClass.getPackage().getName().replace('.', '/') + '/' + pluginClass.getSimpleName() + ".png";
+				}
+				this.uiController.setIcon(rootSettingsNode, iconPath);
+				
+				this.uiController.add(find(UI_COMPONENT_PLUGIN_TREE), rootSettingsNode);
 			}
 		}
 	}
 	
 	public void selectionChanged(Object tree) {
-		Object pnDisplaySettings = find(UI_COMPONENT_PN_DISPLAY_SETTINGS);
-		this.uiController.removeAll(pnDisplaySettings);
+		this.uiController.removeAll(find(UI_COMPONENT_PN_DISPLAY_SETTINGS));
 		
 		Object selected = this.uiController.getSelectedItem(tree);
 		if (selected != null) {
+			// The section String is the object attached to the item
 			String section = this.uiController.getAttachedObject(selected, String.class);
+			
 			if (tree.equals(find(UI_COMPONENT_PLUGIN_TREE))) {
-				Object parent = selected;
-				while (this.uiController.getParent(parent) != tree) {
-					parent = this.uiController.getParent(selected);
-				}
-				try {
-					String className = this.uiController.getAttachedObject(parent, String.class);
-					PluginSettingsController settingsController = PluginProperties.getInstance().getPluginClass(className).newInstance().getSettingsController(this.uiController);
-					Object settingsPanel;
-					if (section.equals(className)) {
-						settingsPanel = settingsController.getRootPanel();
-					} else {
-						settingsPanel = settingsController.getPanelForSection(section);
-					}
-					if (settingsPanel != null) {
-						this.uiController.add(pnDisplaySettings, settingsPanel);
-					}
-				} catch (InstantiationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				handlePluginSection(selected, section);
 			}
 		}
+	}
+
+	private void handlePluginSection(Object selected, String section) {
+		Object parent = selected;
+		
+		// We don't know exactly where we're located.
+		// Let's look for the root node to identify the plugin.
+		while (this.uiController.getParent(parent) != find(UI_COMPONENT_PLUGIN_TREE)) {
+			parent = this.uiController.getParent(selected);
+		}
+		
+		try {
+			// parent is now the root node of the currently selected plugin
+			// We can then extract the Plugin Name
+			String className = this.uiController.getAttachedObject(parent, String.class);
+			PluginSettingsController settingsController = PluginProperties.getInstance().getPluginClass(className).newInstance().getSettingsController(this.uiController);
+			
+			// We now know where we are, now looking for the UI Handler
+			UiSettingsSectionHandler settingsSectionHandler;
+			if (section.equals(className)) {
+				settingsSectionHandler = settingsController.getRootPanelHandler();
+			} else {
+				settingsSectionHandler = settingsController.getHandlerForSection(section);
+			}
+			
+			// We potentially have the UI Handler for the current section, let's take the panel
+			if (settingsSectionHandler != null) {
+				this.uiController.add(find(UI_COMPONENT_PN_DISPLAY_SETTINGS), settingsSectionHandler.getPanel());
+			}
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void closeDialog() {
+		this.uiController.showConfirmationDialog("removeDialog", this, I18N_MESSAGE_CONFIRM_CLOSE_SETTINGS);
 	}
 
 	/** Show this dialog to the user. */
@@ -137,10 +156,9 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler {
 
 	/**
 	 * Removes the provided component from the view.
-	 * @param component
 	 */
-	public void removeDialog(Object component) {
-		uiController.remove(component);
+	public void removeDialog() {
+		uiController.remove(this.settingsDialog);
 	}
 	
 	private Object find (String componentName) {
