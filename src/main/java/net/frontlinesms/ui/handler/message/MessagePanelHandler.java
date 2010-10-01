@@ -238,12 +238,12 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 			multipartMessageCharacterLimit = FrontlineMessage.SMS_MULTIPART_LENGTH_LIMIT_UCS2;
 		}
 		
-		Object 	tfMessage = find(COMPONENT_TF_MESSAGE),
-				lbTooManyMessages = find(COMPONENT_LB_TOO_MANY_MESSAGES);
-
-		int remaining, numberOfMsgs = FrontlineMessage.getNumberOfSMSParts(message);
-		double costEstimate;
+		Object tfMessage = find(COMPONENT_TF_MESSAGE);
+		Object lbTooManyMessages = find(COMPONENT_LB_TOO_MANY_MESSAGES);
+		final int numberOfMsgs = FrontlineMessage.getExpectedNumberOfSmsParts(message);
 		
+		double costEstimate;
+		int remaining;		
 		if (shouldCheckMaxMessageLength && messageLength > totalLengthAllowed) {
 			remaining = 0;
 			costEstimate = 0;

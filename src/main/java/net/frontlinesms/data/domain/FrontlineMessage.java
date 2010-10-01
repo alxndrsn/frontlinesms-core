@@ -99,6 +99,11 @@ public class FrontlineMessage {
 	public static final int SMS_LENGTH_LIMIT_UCS2 = 70;
 	/** Maximum number of characters that can be fit in one part of a multipart UCS-2 SMS message.  TODO this number is incorrect, I suspect.  The value should probably be fetched from {@link TpduUtils}. */
 	public static final int SMS_MULTIPART_LENGTH_LIMIT_UCS2 = 60;
+	/** Maximum number of characters that can be fit into a single binary SMS message. TODO this value should probably be fetched from {@link TpduUtils}. */
+	public static final int SMS_LENGTH_LIMIT_BINARY = 140;
+	/** Maximum number of characters that can be fit in one part of a binary SMS message.  TODO this number is incorrect, I suspect.  The value should probably be fetched from {@link TpduUtils}. */
+	public static final int SMS_MULTIPART_LENGTH_LIMIT_BINARY = 70;
+	
 	/** Maximum number of characters that can be fit into a 255-part GSM 7bit message */
 	public static final int SMS_MAX_CHARACTERS = 39015;
 	
@@ -296,6 +301,25 @@ public class FrontlineMessage {
 	public boolean isBinaryMessage() {
 		return this.binaryMessageContent != null;
 	}
+
+	/** @return the number of SMS parts that we'd expect this message to take */
+	public int getExpectedSmsCount() {
+		if(this.isBinaryMessage()) {
+			int octetCount = this.getBinaryContent().length;
+			if(octetCount <= SMS_LENGTH_LIMIT_BINARY) {
+				return 1;
+			} else {
+				return (int) Math.ceil(octetCount / SMS_MULTIPART_LENGTH_LIMIT_BINARY);
+			}
+		} else {
+			int expectedNumberOfSmsParts = FrontlineMessage.getExpectedNumberOfSmsParts(this.getTextContent());
+			if(expectedNumberOfSmsParts == 0) {
+				// the method used above can return 0 in some cases.  An empty message will still cost money.
+				expectedNumberOfSmsParts = 1;
+			}
+			return expectedNumberOfSmsParts;
+		}
+	}
 	
 //> STATIC FACTORY METHODS
 	/**
@@ -468,7 +492,13 @@ public class FrontlineMessage {
 		return true;
 	}
 	
-	public static int getNumberOfSMSParts (String message) {
+	/**
+	 * Calculate the expected number of SMS parts required to send a text message.
+	 * This method <strong>will not work</strong> for <em>binary</em> messages.
+	 * @param message the text content of the message
+	 * @return the number of SMS parts that we'd expect the supplied message to use, or <code>0</code> if no supplied message has zero length.
+	 */
+	public static int getExpectedNumberOfSmsParts(String message) {
 		int messageLength = message.length();
 		
 		boolean areAllCharactersValidGSM = GsmAlphabet.areAllCharactersValidGSM(message);

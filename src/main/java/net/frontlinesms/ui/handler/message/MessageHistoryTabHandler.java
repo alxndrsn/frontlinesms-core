@@ -24,7 +24,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_ST
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_MESSAGE_HISTORY;
 
 import java.awt.EventQueue;
-import java.awt.TrayIcon.MessageType;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -364,7 +363,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			numberOfMessageParts = 0;
 			for (FrontlineMessage message : messageList) {
 				if (message.getType().equals(Type.OUTBOUND)) {
-					numberOfMessageParts += FrontlineMessage.getNumberOfSMSParts(message.getTextContent());
+					numberOfMessageParts += message.getExpectedSmsCount();
 				}
 			}
 		}
