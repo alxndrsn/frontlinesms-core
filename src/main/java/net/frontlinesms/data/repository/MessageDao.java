@@ -217,6 +217,9 @@ public interface MessageDao {
 	/** @return the messages sent or received to/from the specified phone numbers within the specified dates */
 	public List<FrontlineMessage> getMessages(FrontlineMessage.Type messageType, List<String> phoneNumbers, Long messageHistoryStart, Long messageHistoryEnd);
 
+	/** @return the messages sent or received to/from the specified phone numbers within the specified dates */
+	public List<FrontlineMessage> getMessages(FrontlineMessage.Type messageType, List<String> phoneNumbers, Long messageHistoryStart, Long messageHistoryEnd, int startIndex, int limit);
+
 	/** @return all messages sent or received within the specified dates */
 	public List<FrontlineMessage> getMessages(FrontlineMessage.Type messageType, Long messageHistoryStart, Long messageHistoryEnd);
 
