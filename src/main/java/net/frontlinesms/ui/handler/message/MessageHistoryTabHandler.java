@@ -352,10 +352,10 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 					// A Group was selected
 					Group selectedGroup = ui.getGroup(selectedItem);
 					List<String> phoneNumbers = getPhoneNumbers(selectedGroup);
-					if (phoneNumbers.size() != 0) {
-						messageList = messageDao.getMessages(messageType, phoneNumbers, messageHistoryStart, messageHistoryEnd);
+					if (phoneNumbers.isEmpty()) {
+						messageList = Collections.emptyList();
 					} else {
-						messageList = new ArrayList<FrontlineMessage>();
+						messageList = messageDao.getMessages(messageType, phoneNumbers, messageHistoryStart, messageHistoryEnd);
 					}
 				} else /* (filterClass == Keyword.class) */ {
 					// Keyword Selected
