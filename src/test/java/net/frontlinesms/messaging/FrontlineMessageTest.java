@@ -28,6 +28,9 @@ public class FrontlineMessageTest extends BaseTestCase {
 		return FrontlineMessage.createBinaryOutgoingMessage(0, "asdf", "jkl;", 0, binaryContent);
 	}
 
+	/**
+	 * Unit test for {@link FrontlineMessage#getExpectedSmsCount()}
+	 */
 	public void testGetExpectedSmsCount() {
 		assertEquals(1, createMessage("").getExpectedSmsCount());
 		
@@ -58,6 +61,9 @@ public class FrontlineMessageTest extends BaseTestCase {
 		assertEquals(3, createMessage(THREE_PART_BINARY_MAX).getExpectedSmsCount());
 	}
 	
+	/**
+	 * Unit test for {@link FrontlineMessage#getExpectedNumberOfSmsParts(String)}
+	 */
 	public void testGetExpectedNumberOfSmsParts() {
 		assertEquals(0, FrontlineMessage.getExpectedNumberOfSmsParts(""));
 		assertEquals(1, FrontlineMessage.getExpectedNumberOfSmsParts(ONE_PART_MESSAGE));
