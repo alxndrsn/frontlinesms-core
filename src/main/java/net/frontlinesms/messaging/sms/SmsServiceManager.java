@@ -599,8 +599,8 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 //> SMS DISPATCH METHODS
 	
 	/**
-	 * @param messages messages to dispatch
-	 * @param binary <code>true</code> if the messages are binary, <code>false</code> if they are text
+	 * @param messageType The type of messages which should be dispatched.
+	 * The right list is taken using this type.
 	 * THREAD: SmsDeviceManager
 	 */
 	private void dispatchSms(MessageType messageType) {
