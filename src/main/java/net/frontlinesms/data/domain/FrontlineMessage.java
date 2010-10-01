@@ -102,10 +102,10 @@ public class FrontlineMessage {
 	/** Maximum number of characters that can be fit into a single binary SMS message. TODO this value should probably be fetched from {@link TpduUtils}. */
 	public static final int SMS_LENGTH_LIMIT_BINARY = 140;
 	/** Maximum number of characters that can be fit in one part of a binary SMS message.  TODO this number is incorrect, I suspect.  The value should probably be fetched from {@link TpduUtils}. */
-	public static final int SMS_MULTIPART_LENGTH_LIMIT_BINARY = 70;
+	public static final int SMS_MULTIPART_LENGTH_LIMIT_BINARY = 120;
 	
 	/** Maximum number of characters that can be fit into a 255-part GSM 7bit message */
-	public static final int SMS_MAX_CHARACTERS = 39015;
+	public static final int SMS_MAX_CHARACTERS = 255 * SMS_MULTIPART_LENGTH_LIMIT;
 	
 
 
@@ -520,8 +520,7 @@ public class FrontlineMessage {
 			if (messageLength <= singleMessageCharacterLimit) {
 				return messageLength == 0 ? 0 : 1;
 			} else {
-				int charCount = messageLength - singleMessageCharacterLimit;
-				return (int)Math.ceil((double)charCount / (double)multipartMessageCharacterLimit) + 1;
+				return (int)Math.ceil(messageLength / (double)multipartMessageCharacterLimit);
 			}
 		}
 	}
