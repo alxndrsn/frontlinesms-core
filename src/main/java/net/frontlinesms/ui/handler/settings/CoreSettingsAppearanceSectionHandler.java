@@ -55,6 +55,12 @@ public class CoreSettingsAppearanceSectionHandler implements UiSettingsSectionHa
 	}
 
 	public FrontlineValidationMessage validateFields() {
+		// Home tab logo
+		if (this.uiController.isSelected(find(COMPONENT_CB_HOME_TAB_USE_CUSTOM_LOGO))
+				&& this.uiController.getText(find(COMPONENT_TF_IMAGE_SOURCE)).length() == 0) {
+			return new FrontlineValidationMessage("XXX", null);
+		}
+		
 		return null;
 	}
 

@@ -1,5 +1,10 @@
 package net.frontlinesms.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.plaf.basic.BasicScrollPaneUI.VSBChangeListener;
+
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.SmsInternetServiceSettings;
 import net.frontlinesms.events.EventBus;
@@ -10,6 +15,7 @@ import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginControllerProperties;
 import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.plugins.PluginSettingsController;
+import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.ui.handler.settings.CoreSettingsAppearanceSectionHandler;
 import net.frontlinesms.ui.handler.settings.CoreSettingsGeneralSectionHandler;
 import net.frontlinesms.ui.settings.SettingsChangedEventNotification;
@@ -46,6 +52,8 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 
 	private EventBus eventBus;
 	
+	private List<UiSettingsSectionHandler> handlersList;
+	
 //> CONSTRUCTORS
 	/**
 	 * Creates a new instance of this UI.
@@ -54,6 +62,7 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	public FrontlineSettingsHandler(UiGeneratorController controller) {
 		this.uiController = controller;
 		this.eventBus = controller.getFrontlineController().getEventBus();
+		this.handlersList = new ArrayList<UiSettingsSectionHandler>();
 		
 		this.init();
 	}
@@ -76,9 +85,9 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	}
 
 	private void loadCoreSettings() {
-		this.createSectionRootNode("General", CoreSettingsSections.GENERAL.toString(), "");
-		this.createSectionRootNode("Appearance", CoreSettingsSections.APPEARANCE.toString(), "");
-		this.createSectionRootNode("Services", CoreSettingsSections.SERVICES.toString(), "");
+		this.createSectionRootNode("General", CoreSettingsSections.GENERAL.toString(), "/icons/cog.png");
+		this.createSectionRootNode("Appearance", CoreSettingsSections.APPEARANCE.toString(), "/icons/display.png");
+		this.createSectionRootNode("Services", CoreSettingsSections.SERVICES.toString(), "/icons/phone_manualConfigure.png");
 	}
 
 	private void createSectionRootNode(String title, String coreSection, String iconPath) {
@@ -163,6 +172,9 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		
 		// We potentially have the UI Handler for the current section, let's take the panel
 		if (settingsSectionHandler != null) {
+			if (!this.settingsSectionHandlerLoaded(settingsSectionHandler.getClass())) {
+				this.handlersList.add(settingsSectionHandler);
+			}
 			this.uiController.setAttachedObject(selected, settingsSectionHandler.getPanel());
 			this.displayPanel(settingsSectionHandler.getPanel());
 		}
@@ -184,6 +196,10 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 			}
 			
 			if (settingsSectionHandler != null) {
+				if (!this.settingsSectionHandlerLoaded(settingsSectionHandler.getClass())) {
+					this.handlersList.add(settingsSectionHandler);
+				}
+				
 				// We have the UI Handler for the current section, let's take the panel
 				this.displayPanel(settingsSectionHandler.getPanel());
 			}
@@ -192,6 +208,21 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Checks whether a {@link UiSettingsSectionHandler} has been loaded yet.
+	 * @param clazz
+	 * @return <code>true</code> if the handler has already been loaded, <code>false</code> otherwise.
+	 */
+	private boolean settingsSectionHandlerLoaded(Class<? extends UiSettingsSectionHandler> clazz) {
+		for (UiSettingsSectionHandler handler : handlersList) {
+			if (handler.getClass().equals(clazz)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	/**
@@ -251,6 +282,32 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	
 	private Object find (String componentName) {
 		return this.uiController.find(settingsDialog, componentName);
+	}
+	
+	public void save () {
+		String validationMessages = "";
+		
+		for (UiSettingsSectionHandler settingsSectionHandler : this.handlersList) {
+			FrontlineValidationMessage validation = settingsSectionHandler.validateFields();
+			if (validation != null) {
+				validationMessages += validation.getLocalisedMessage() + "\n";
+			}
+		}
+		
+		if (validationMessages.length() > 0) {
+			this.uiController.alert(validationMessages);
+		} else {
+			this.doSave();
+		}
+	}
+
+	private void doSave() {
+		for (UiSettingsSectionHandler settingsSectionHandler : this.handlersList) {
+			settingsSectionHandler.save();
+		}
+		
+		this.uiController.infoMessage("Saved!");
+		this.uiController.setEnabled(UiGeneratorControllerConstants.COMPONENT_BT_SAVE, false);
 	}
 
 //> INSTANCE HELPER METHODS
