@@ -3,8 +3,6 @@ package net.frontlinesms.ui;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.plaf.basic.BasicScrollPaneUI.VSBChangeListener;
-
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.SmsInternetServiceSettings;
 import net.frontlinesms.events.EventBus;
@@ -15,6 +13,7 @@ import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginControllerProperties;
 import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.plugins.PluginSettingsController;
+import net.frontlinesms.settings.CoreSettingsSections;
 import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.ui.handler.settings.CoreSettingsAppearanceSectionHandler;
 import net.frontlinesms.ui.handler.settings.CoreSettingsGeneralSectionHandler;
@@ -85,12 +84,20 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	}
 
 	private void loadCoreSettings() {
-		this.createSectionRootNode("General", CoreSettingsSections.GENERAL.toString(), "/icons/cog.png");
-		this.createSectionRootNode("Appearance", CoreSettingsSections.APPEARANCE.toString(), "/icons/display.png");
-		this.createSectionRootNode("Services", CoreSettingsSections.SERVICES.toString(), "/icons/phone_manualConfigure.png");
+		Object appearanceRootNode = this.createSectionRootNode("Appearance", CoreSettingsSections.APPEARANCE.toString(), "/icons/display.png");
+		
+		Object generalRootNode = this.createSectionRootNode("General", CoreSettingsSections.GENERAL.toString(), "/icons/cog.png");
+		this.uiController.add(generalRootNode, this.uiController.createNode("Database settings", CoreSettingsSections.GENERAL_DATABASE.toString()));
+		this.uiController.add(generalRootNode, this.uiController.createNode("E-mail settings", CoreSettingsSections.GENERAL_EMAIL.toString()));
+
+		Object servicesRootNode = this.createSectionRootNode("Services", CoreSettingsSections.SERVICES.toString(), "/icons/phone_manualConfigure.png");
+		
+		this.uiController.add(find(UI_COMPONENT_CORE_TREE), appearanceRootNode);
+		this.uiController.add(find(UI_COMPONENT_CORE_TREE), generalRootNode);
+		this.uiController.add(find(UI_COMPONENT_CORE_TREE), servicesRootNode);
 	}
 
-	private void createSectionRootNode(String title, String coreSection, String iconPath) {
+	private Object createSectionRootNode(String title, String coreSection, String iconPath) {
 		Object sectionRootNode = this.uiController.createNode(title, coreSection);
 		
 		// Try to get an icon from the classpath
@@ -99,9 +106,9 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		// Collapse root node by default
 		this.uiController.setExpanded(sectionRootNode, false);
 		
-		this.uiController.add(find(UI_COMPONENT_CORE_TREE), sectionRootNode);
+		return sectionRootNode;
 	}
-
+	
 	private void loadPluginSettings() {
 		for(Class<PluginController> pluginClass : PluginProperties.getInstance().getPluginClasses()) {
 			PluginSettingsController pluginSettingsController = null;
@@ -165,10 +172,8 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	}
 
 	private void coreSectionSelected(Object selected, String section) {
-		Object rootNode = this.getSelectedRootNode(selected, find(UI_COMPONENT_CORE_TREE));
-		
 		// Let's get the right handler for the selected section
-		UiSettingsSectionHandler settingsSectionHandler = this.getCoreHandlerForSection(this.uiController.getAttachedObject(rootNode, String.class));
+		UiSettingsSectionHandler settingsSectionHandler = this.getCoreHandlerForSection(section);
 		
 		// We potentially have the UI Handler for the current section, let's take the panel
 		if (settingsSectionHandler != null) {
@@ -230,13 +235,19 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	 * @param panel
 	 */
 	private void displayPanel(Object panel) {
-		this.uiController.add(find(UI_COMPONENT_PN_DISPLAY_SETTINGS), panel);
+		Object pnDisplaySettings = find(UI_COMPONENT_PN_DISPLAY_SETTINGS);
+		
+		this.uiController.removeAll(pnDisplaySettings);
+		this.uiController.add(pnDisplaySettings, panel);
 	}
 
 	private UiSettingsSectionHandler getCoreHandlerForSection(String coreSection) {
-		switch (CoreSettingsSections.valueOf(coreSection)) {
+		CoreSettingsSections section = CoreSettingsSections.valueOf(coreSection);
+		switch (section) {
 			case GENERAL:
-				return new CoreSettingsGeneralSectionHandler(uiController);
+			case GENERAL_DATABASE:
+			case GENERAL_EMAIL:
+				return new CoreSettingsGeneralSectionHandler(uiController, section);
 			case APPEARANCE:
 				return new CoreSettingsAppearanceSectionHandler(uiController);
 			default:
@@ -306,8 +317,9 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 			settingsSectionHandler.save();
 		}
 		
+		this.uiController.removeDialog(settingsDialog);
 		this.uiController.infoMessage("Saved!");
-		this.uiController.setEnabled(UiGeneratorControllerConstants.COMPONENT_BT_SAVE, false);
+		//this.uiController.setEnabled(find(UiGeneratorControllerConstants.COMPONENT_BT_SAVE), false);
 	}
 
 //> INSTANCE HELPER METHODS
@@ -315,12 +327,6 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 //> STATIC FACTORIES
 
 //> STATIC HELPER METHODS
-	
-	enum CoreSettingsSections {
-		GENERAL,
-		APPEARANCE,
-		SERVICES
-	}
 
 	public void notify(FrontlineEventNotification notification) {
 		if (notification instanceof SettingsChangedEventNotification) {

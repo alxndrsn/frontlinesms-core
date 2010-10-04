@@ -15,6 +15,9 @@ import javax.imageio.ImageIO;
 
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.data.domain.Contact;
+import net.frontlinesms.events.EventBus;
+import net.frontlinesms.events.EventObserver;
+import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.ui.Event;
 import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.FrontlineUiUtils;
@@ -26,13 +29,14 @@ import net.frontlinesms.ui.events.FrontlineUiUpateJob;
 import net.frontlinesms.ui.handler.message.MessagePanelHandler;
 import net.frontlinesms.ui.i18n.FileLanguageBundle;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
+import net.frontlinesms.ui.settings.HomeTabLogoChangedEventNotification;
 
 /**
  * Event handler for the Home tab and associated dialogs
  * @author Alex Anderson <alex@frontlinesms.com>
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
-public class HomeTabHandler extends BaseTabHandler {
+public class HomeTabHandler extends BaseTabHandler implements EventObserver {
 //> STATIC CONSTANTS
 	/** Limit of the number of events to be displayed on the home screen */
 	static final int EVENTS_LIMIT = 30;
@@ -65,6 +69,8 @@ public class HomeTabHandler extends BaseTabHandler {
 	/** Max FrontlineSMS home logo height */
 	private static final double FRONTLINE_LOGO_MAX_HEIGHT = 300.0;
 
+	private EventBus eventBus;
+
 
 //> INSTANCE PROPERTIES
 
@@ -75,6 +81,9 @@ public class HomeTabHandler extends BaseTabHandler {
 	 */
 	public HomeTabHandler(UiGeneratorController ui) {
 		super(ui);
+		this.eventBus = ui.getFrontlineController().getEventBus();
+		
+		this.eventBus.registerObserver(this);
 	}
 
 //> UI METHODS
@@ -336,6 +345,12 @@ public class HomeTabHandler extends BaseTabHandler {
 		};
 		
 		EventQueue.invokeLater(updateJob);
+	}
+
+	public void notify(FrontlineEventNotification notification) {
+		if (notification instanceof HomeTabLogoChangedEventNotification) {
+			this.refreshLogoVisibility(getTab());
+		}
 	}
 
 //> STATIC FACTORIES

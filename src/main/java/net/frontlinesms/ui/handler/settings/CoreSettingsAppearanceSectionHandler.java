@@ -3,9 +3,14 @@ package net.frontlinesms.ui.handler.settings;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.settings.FrontlineValidationMessage;
+import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiProperties;
+import net.frontlinesms.ui.i18n.FileLanguageBundle;
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
+import net.frontlinesms.ui.i18n.LanguageBundle;
+import net.frontlinesms.ui.settings.HomeTabLogoChangedEventNotification;
 import net.frontlinesms.ui.settings.SettingsChangedEventNotification;
 import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
 
@@ -14,7 +19,7 @@ import org.apache.log4j.Logger;
 public class CoreSettingsAppearanceSectionHandler implements UiSettingsSectionHandler, ThinletUiEventHandler {
 	protected final Logger log = FrontlineUtils.getLogger(this.getClass());
 
-	private static final String UI_SECTION_APPEARANCE = "/ui/core/settings/pnAppearanceSettings.xml";
+	private static final String UI_SECTION_APPEARANCE = "/ui/core/settings/appearance/pnAppearanceSettings.xml";
 
 	private Object panel;
 	private UiGeneratorController uiController;
@@ -33,6 +38,8 @@ public class CoreSettingsAppearanceSectionHandler implements UiSettingsSectionHa
 	private static final String COMPONENT_PN_CUSTOM_IMAGE = "pnCustomImage";
 	/** Thinlet Component Name: Settings dialog: textfield inidicating the path of the image file for the logo */
 	private static final String COMPONENT_TF_IMAGE_SOURCE = "tfImageSource";
+
+	private static final String COMPONENT_PN_LANGUAGES = "fastLanguageSwitch";
 	
 	public CoreSettingsAppearanceSectionHandler (UiGeneratorController uiController) {
 		this.uiController = uiController;
@@ -44,7 +51,22 @@ public class CoreSettingsAppearanceSectionHandler implements UiSettingsSectionHa
 	private void init() {
 		this.panel = uiController.loadComponentFromFile(UI_SECTION_APPEARANCE, this);
 		
+		initLanguageSettings();
 		initLogoSettings();
+	}
+
+	private void initLanguageSettings() {
+		Object fastLanguageSwitch = find(COMPONENT_PN_LANGUAGES);
+		for (FileLanguageBundle languageBundle : InternationalisationUtils.getLanguageBundles()) {
+			Object button = this.uiController.createRadioButton("", "", "rdGroupLanguage", languageBundle.equals(FrontlineUI.currentResourceBundle));
+			this.uiController.setIcon(button, this.uiController.getFlagIcon(languageBundle));
+			this.uiController.setString(button, "tooltip", languageBundle.getLanguageName());
+			this.uiController.setWeight(button, 1, 0);
+			this.uiController.setAttachedObject(button, languageBundle);
+			this.uiController.setAction(button, "settingChanged", null, this);
+			
+			this.uiController.add(fastLanguageSwitch, button);
+		}
 	}
 
 	public Object getPanel() {
@@ -52,6 +74,40 @@ public class CoreSettingsAppearanceSectionHandler implements UiSettingsSectionHa
 	}
 
 	public void save() {
+		log.trace("Saving appearance settings...");
+		
+		/**** LOGO ****/
+		boolean invisible 			= this.uiController.isSelected(this.uiController.find(panel, COMPONENT_CB_HOME_TAB_LOGO_INVISIBLE));
+		boolean isCustomLogo 		= this.uiController.isSelected(this.uiController.find(panel, COMPONENT_CB_HOME_TAB_USE_CUSTOM_LOGO));
+		boolean isOriginalSizeKept 	= this.uiController.isSelected(this.uiController.find(panel, COMPONENT_CB_HOME_TAB_LOGO_KEEP_ORIGINAL_SIZE));
+		
+		String imgSource = this.uiController.getText(this.uiController.find(panel, COMPONENT_TF_IMAGE_SOURCE));
+		log.debug("Hidden? " + invisible);
+		log.debug("Logo: " + (isCustomLogo ? "default" : "custom"));
+		log.debug("Image location [" + imgSource + "]");
+		UiProperties uiProperties = UiProperties.getInstance();
+		uiProperties.setHometabLogoVisible(!invisible);
+		uiProperties.setHometabCustomLogo(isCustomLogo);
+		uiProperties.setHometabLogoOriginalSizeKept(isOriginalSizeKept);
+		uiProperties.setHometabLogoPath(imgSource);
+		uiProperties.saveToDisk();
+
+		// Update visibility of logo
+		this.eventBus.notifyObservers(new HomeTabLogoChangedEventNotification());
+		
+		
+		/**** LANGUAGE ****/
+		for (Object radioButton : this.uiController.getItems(find(COMPONENT_PN_LANGUAGES))) {
+			if (this.uiController.isSelected(radioButton)) {
+				FileLanguageBundle languageBundle = this.uiController.getAttachedObject(radioButton, FileLanguageBundle.class);
+				if (languageBundle != null && !languageBundle.equals(FrontlineUI.currentResourceBundle)) {
+					this.uiController.setAttachedObject(radioButton, languageBundle.getFile().getAbsolutePath());
+					this.uiController.changeLanguage(radioButton);
+				}
+			}
+		}
+		
+		log.trace("EXIT");
 	}
 
 	public FrontlineValidationMessage validateFields() {
@@ -131,5 +187,10 @@ public class CoreSettingsAppearanceSectionHandler implements UiSettingsSectionHa
 
 	public void settingChanged() {
 		this.eventBus.notifyObservers(new SettingsChangedEventNotification());
+	}
+
+	public Object getPanel(String section) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<panel name="pnAppearance" gap="5" weightx="2">
+<panel name="pnAppearance" gap="5" weightx="2" columns="1">
+	<panel icon="/icons/language.png" text="i18n.menu.language" border="true" columns="1" gap="7" columns="2" top="5" left="5" bottom="5" right="5">
+        <panel gap="10" bottom="3" name="fastLanguageSwitch" columns="10">
+        	<!-- This should be populated at runtime -->
+        </panel>
+    </panel>
 	<panel icon="/icons/frontline_icon.png" gap="5" text="i18n.hometab.logo.settings" border="true" columns="1" weightx="1" top="5" left="5" bottom="5" right="5">
 		<checkbox action="logoRadioButtonChanged(pnCustomImage, cbHomeTabLogoCustom.selected)" icon="/icons/visible.png" group="logo_type" name="cbHomeTabLogoInvisible" text="i18n.hometab.logo.settings.invisible"/>
 	    <checkbox action="logoRadioButtonChanged(pnCustomImage, cbHomeTabLogoCustom.selected)" group="logo_type" name="cbHomeTabLogoDefault" text="i18n.hometab.logo.settings.usedefault"/>

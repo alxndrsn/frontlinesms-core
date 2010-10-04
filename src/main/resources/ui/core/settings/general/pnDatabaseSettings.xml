@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<panel bottom="10" columns="1" gap="10" left="10" right="10" top="10" halign="center" weightx="1">
+	<combobox name="cbConfigFile" action="configFileChanged" editable="false"/>
+	<separator colspan="1"/>
+	<panel columns="2" gap="6" name="pnSettings" weightx="1">
+		<!-- This panel will be populated with modifiable settings at runtime -->
+	</panel>
+</panel>

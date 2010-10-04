@@ -5,7 +5,8 @@ import net.frontlinesms.settings.FrontlineValidationMessage;
 public interface UiSettingsSectionHandler {
 	
 	  /** 
-	   * @return The Thinlet panel for a section 
+	   * @param section 
+	 * @return The Thinlet panel for a section 
 	   **/
 	  public Object getPanel();
 	

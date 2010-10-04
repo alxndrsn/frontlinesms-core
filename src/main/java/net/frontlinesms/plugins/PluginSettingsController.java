@@ -3,7 +3,6 @@
  */
 package net.frontlinesms.plugins;
 
-import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
 
 /**
