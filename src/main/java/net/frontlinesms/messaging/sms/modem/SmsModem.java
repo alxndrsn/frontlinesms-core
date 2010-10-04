@@ -242,9 +242,7 @@ public class SmsModem extends Thread implements SmsService {
 		if (smsLibConnected) return cService.getDeviceInfo().getBatteryLevel();
 		else return batteryPercent;
 	}
-	/**
-	 * @return the smscNumber
-	 */
+	/** @return the smscNumber */
 	public String getSmscNumber() {
 		if (smsLibConnected) {
 			this.smscNumber = cService.getSmscNumber();
@@ -252,9 +250,7 @@ public class SmsModem extends Thread implements SmsService {
 		return this.smscNumber;
 	}
 
-	/**
-	 * @param smscNumber the smscNumber to set
-	 */
+	/** @param smscNumber the smscNumber to set */
 	public void setSmscNumber(String smscNumber) {
 		if (smsLibConnected) cService.setSmscNumber(smscNumber);
 		this.smscNumber = smscNumber;
@@ -386,12 +382,8 @@ public class SmsModem extends Thread implements SmsService {
 			cService.setSimPin2("0000");
 
 			// Normally, you would want to set the SMSC number to blank. GSM
-			// devices get the SMSC number information from their SIM card.
-			if(this.smscNumber == null) {
-				cService.setSmscNumber("");
-			} else {
-				cService.setSmscNumber(this.smscNumber);
-			}
+			// devices normally get the SMSC number information from their SIM card.
+			cService.setSmscNumber(this.smscNumber == null ? "" : this.smscNumber);
 
 			FrontlineUtils.sleep_ignoreInterrupts(500);
 
