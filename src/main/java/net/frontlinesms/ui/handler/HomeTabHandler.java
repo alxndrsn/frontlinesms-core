@@ -195,6 +195,7 @@ public class HomeTabHandler extends BaseTabHandler {
 	public void removeAll(Object component) {
 		this.ui.removeAll(component);
 	}
+	
 	/**
 	 * @param component
 	 * @see UiGeneratorController#showOpenModeFileChooser(Object)

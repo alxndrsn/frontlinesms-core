@@ -222,6 +222,15 @@ private static final String START = "start";
 	}
 	
 	/**
+	 * Sets the display of a tree node, expanded or not.
+	 * @param node
+	 * @param expanded <code>true</code> if the node should be expanded, <code>false</code> otherwise.
+	 */
+	public void setExpanded(Object node, boolean expanded) {
+		setBoolean(node, EXPANDED, expanded);
+	}
+	
+	/**
 	 * Sets the icon of a component
 	 * @param component
 	 * @param icon

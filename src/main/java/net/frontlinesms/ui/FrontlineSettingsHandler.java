@@ -2,11 +2,18 @@ package net.frontlinesms.ui;
 
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.SmsInternetServiceSettings;
+import net.frontlinesms.events.EventBus;
+import net.frontlinesms.events.EventObserver;
+import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.messaging.sms.internet.SmsInternetService;
 import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginControllerProperties;
 import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.plugins.PluginSettingsController;
+import net.frontlinesms.ui.handler.settings.CoreSettingsAppearanceSectionHandler;
+import net.frontlinesms.ui.handler.settings.CoreSettingsGeneralSectionHandler;
+import net.frontlinesms.ui.settings.SettingsChangedEventNotification;
+import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
 
 import org.apache.log4j.Logger;
 
@@ -15,7 +22,7 @@ import org.apache.log4j.Logger;
  * 
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
-public class FrontlineSettingsHandler implements ThinletUiEventHandler {
+public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObserver {
 //> CONSTANTS
 	/** Path to XML for UI layout for settings screen, {@link #settingsDialog} */
 	private static final String UI_SETTINGS = "/ui/core/settings/dgFrontlineSettings.xml";
@@ -23,7 +30,7 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler {
 	/** Logging object */
 	private static final Logger LOG = FrontlineUtils.getLogger(FrontlineSettingsHandler.class);
 
-	private static final String UI_COMPONENT_GENERAL_TREE = "generalTree";
+	private static final String UI_COMPONENT_CORE_TREE = "generalTree";
 	private static final String UI_COMPONENT_PLUGIN_TREE = "pluginTree";
 
 	private static final String UI_COMPONENT_PN_DISPLAY_SETTINGS = "pnDisplaySettings";
@@ -36,6 +43,8 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler {
 	private final UiGeneratorController uiController;
 	/** dialog for editing {@link SmsInternetService} settings, {@link SmsInternetServiceSettings} instances */
 	private Object settingsDialog;
+
+	private EventBus eventBus;
 	
 //> CONSTRUCTORS
 	/**
@@ -44,6 +53,8 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler {
 	 */
 	public FrontlineSettingsHandler(UiGeneratorController controller) {
 		this.uiController = controller;
+		this.eventBus = controller.getFrontlineController().getEventBus();
+		
 		this.init();
 	}
 
@@ -57,9 +68,29 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler {
 
 	private void init() {
 		LOG.trace("Initializing Frontline Settings");
+		this.eventBus.registerObserver(this);
 		settingsDialog = uiController.loadComponentFromFile(UI_SETTINGS, this);
 		
+		this.loadCoreSettings();
 		this.loadPluginSettings();
+	}
+
+	private void loadCoreSettings() {
+		this.createSectionRootNode("General", CoreSettingsSections.GENERAL.toString(), "");
+		this.createSectionRootNode("Appearance", CoreSettingsSections.APPEARANCE.toString(), "");
+		this.createSectionRootNode("Services", CoreSettingsSections.SERVICES.toString(), "");
+	}
+
+	private void createSectionRootNode(String title, String coreSection, String iconPath) {
+		Object sectionRootNode = this.uiController.createNode(title, coreSection);
+		
+		// Try to get an icon from the classpath
+		this.uiController.setIcon(sectionRootNode, iconPath);
+		
+		// Collapse root node by default
+		this.uiController.setExpanded(sectionRootNode, false);
+		
+		this.uiController.add(find(UI_COMPONENT_CORE_TREE), sectionRootNode);
 	}
 
 	private void loadPluginSettings() {
@@ -92,6 +123,9 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler {
 				}
 				this.uiController.setIcon(rootSettingsNode, iconPath);
 				
+				// Collapse all root nodes by default
+				this.uiController.setExpanded(rootSettingsNode, false);
+				
 				this.uiController.add(find(UI_COMPONENT_PLUGIN_TREE), rootSettingsNode);
 			}
 		}
@@ -102,28 +136,43 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler {
 		
 		Object selected = this.uiController.getSelectedItem(tree);
 		if (selected != null) {
-			// The section String is the object attached to the item
-			String section = this.uiController.getAttachedObject(selected, String.class);
-			
-			if (tree.equals(find(UI_COMPONENT_PLUGIN_TREE))) {
-				handlePluginSection(selected, section);
+			Object attachedObject = this.uiController.getAttachedObject(selected);
+
+			if (attachedObject instanceof String) {
+				// Then this panel has not been loaded yet
+				
+				// The section String is the object attached to the item
+				String section = attachedObject.toString();
+				
+				if (tree.equals(find(UI_COMPONENT_PLUGIN_TREE))) {
+					pluginSectionSelected(selected, section);
+				} else {
+					coreSectionSelected(selected, section);
+				}
+			} else {
+				this.displayPanel(attachedObject);
 			}
 		}
 	}
 
-	private void handlePluginSection(Object selected, String section) {
-		Object parent = selected;
+	private void coreSectionSelected(Object selected, String section) {
+		Object rootNode = this.getSelectedRootNode(selected, find(UI_COMPONENT_CORE_TREE));
 		
-		// We don't know exactly where we're located.
-		// Let's look for the root node to identify the plugin.
-		while (this.uiController.getParent(parent) != find(UI_COMPONENT_PLUGIN_TREE)) {
-			parent = this.uiController.getParent(selected);
+		// Let's get the right handler for the selected section
+		UiSettingsSectionHandler settingsSectionHandler = this.getCoreHandlerForSection(this.uiController.getAttachedObject(rootNode, String.class));
+		
+		// We potentially have the UI Handler for the current section, let's take the panel
+		if (settingsSectionHandler != null) {
+			this.uiController.setAttachedObject(selected, settingsSectionHandler.getPanel());
+			this.displayPanel(settingsSectionHandler.getPanel());
 		}
-		
+	}
+
+	private void pluginSectionSelected(Object selected, String section) {
 		try {
-			// parent is now the root node of the currently selected plugin
-			// We can then extract the Plugin Name
-			String className = this.uiController.getAttachedObject(parent, String.class);
+			Object rootNode = this.getSelectedRootNode(selected, find(UI_COMPONENT_PLUGIN_TREE));
+
+			String className = this.uiController.getAttachedObject(rootNode, String.class);
 			PluginSettingsController settingsController = PluginProperties.getInstance().getPluginClass(className).newInstance().getSettingsController(this.uiController);
 			
 			// We now know where we are, now looking for the UI Handler
@@ -134,9 +183,9 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler {
 				settingsSectionHandler = settingsController.getHandlerForSection(section);
 			}
 			
-			// We potentially have the UI Handler for the current section, let's take the panel
 			if (settingsSectionHandler != null) {
-				this.uiController.add(find(UI_COMPONENT_PN_DISPLAY_SETTINGS), settingsSectionHandler.getPanel());
+				// We have the UI Handler for the current section, let's take the panel
+				this.displayPanel(settingsSectionHandler.getPanel());
 			}
 		} catch (InstantiationException e) {
 			e.printStackTrace();
@@ -144,12 +193,50 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler {
 			e.printStackTrace();
 		}
 	}
-	
-	public void closeDialog() {
-		this.uiController.showConfirmationDialog("removeDialog", this, I18N_MESSAGE_CONFIRM_CLOSE_SETTINGS);
+
+	/**
+	 * Handles the display in the dialog
+	 * @param panel
+	 */
+	private void displayPanel(Object panel) {
+		this.uiController.add(find(UI_COMPONENT_PN_DISPLAY_SETTINGS), panel);
 	}
 
-	/** Show this dialog to the user. */
+	private UiSettingsSectionHandler getCoreHandlerForSection(String coreSection) {
+		switch (CoreSettingsSections.valueOf(coreSection)) {
+			case GENERAL:
+				return new CoreSettingsGeneralSectionHandler(uiController);
+			case APPEARANCE:
+				return new CoreSettingsAppearanceSectionHandler(uiController);
+			default:
+				return null;
+		}
+	}
+	
+	/**
+	 * Gets the root node of the selected section, in order to load the right handler/panel.
+	 * @param selected
+	 * @param tree
+	 * @return The root node
+	 */
+	private Object getSelectedRootNode(Object selected, Object tree) {
+		Object parent = selected;
+		
+		// We don't know exactly where we're located.
+		// Let's look for the root node to identify the plugin.
+		while (this.uiController.getParent(parent) != tree) {
+			parent = this.uiController.getParent(selected);
+		}
+		
+		return parent;
+	}
+	
+	public void closeDialog() {
+		//this.uiController.showConfirmationDialog("removeDialog", this, I18N_MESSAGE_CONFIRM_CLOSE_SETTINGS);
+		this.removeDialog();
+	}
+
+	/** Shows this dialog to the user. */
 	public Object getDialog() {
 		return settingsDialog;
 	}
@@ -158,7 +245,8 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler {
 	 * Removes the provided component from the view.
 	 */
 	public void removeDialog() {
-		uiController.remove(this.settingsDialog);
+		this.uiController.remove(this.settingsDialog);
+		this.uiController.removeConfirmationDialog();
 	}
 	
 	private Object find (String componentName) {
@@ -170,4 +258,16 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler {
 //> STATIC FACTORIES
 
 //> STATIC HELPER METHODS
+	
+	enum CoreSettingsSections {
+		GENERAL,
+		APPEARANCE,
+		SERVICES
+	}
+
+	public void notify(FrontlineEventNotification notification) {
+		if (notification instanceof SettingsChangedEventNotification) {
+			this.uiController.setEnabled(find(UiGeneratorControllerConstants.COMPONENT_BT_SAVE), true);
+		}
+	}
 }

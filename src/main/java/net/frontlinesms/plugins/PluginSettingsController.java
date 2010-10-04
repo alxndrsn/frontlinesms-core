@@ -4,7 +4,7 @@
 package net.frontlinesms.plugins;
 
 import net.frontlinesms.settings.FrontlineValidationMessage;
-import net.frontlinesms.ui.UiSettingsSectionHandler;
+import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
 
 /**
  * Basic interface that all FrontlineSMS plugins having settings must implement.

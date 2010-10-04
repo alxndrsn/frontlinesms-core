@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.log4j.Logger;

@@ -3,16 +3,10 @@
  */
 package net.frontlinesms.plugins;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
 import java.util.Locale;
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 
 import net.frontlinesms.FrontlineUtils;
-import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**

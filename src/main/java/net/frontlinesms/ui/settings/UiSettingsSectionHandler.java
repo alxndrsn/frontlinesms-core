@@ -1,4 +1,4 @@
-package net.frontlinesms.ui;
+package net.frontlinesms.ui.settings;
 
 import net.frontlinesms.settings.FrontlineValidationMessage;
 
@@ -19,4 +19,9 @@ public interface UiSettingsSectionHandler {
 	   * otherwise an internationalized validation message.
 	   */
 	  public FrontlineValidationMessage validateFields();
+	  
+	  /**
+	   * Used to notify the main settings handler that a change has been made in its panel.
+	   */
+	  public void settingChanged();
 }

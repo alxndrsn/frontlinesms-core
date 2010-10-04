@@ -3,7 +3,6 @@
  */
 package net.frontlinesms.data.repository.hibernate;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.criterion.Criterion;
