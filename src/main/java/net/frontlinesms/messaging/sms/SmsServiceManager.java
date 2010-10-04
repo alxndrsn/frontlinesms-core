@@ -105,7 +105,10 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 	 */
 	private final HashSet<String> connectedSerials = new HashSet<String>();
 	private String[] portIgnoreList;
-	private int GLOBAL_DISPATCH_COUNTER = -1;
+	/** Counter used for choosing which SMS device to send messages with next.
+	 * TODO we should use different counters for different types of messages, and also
+	 * for SMS internet services vs. phones. */
+	private int globalDispatchCounter;
 
 	private static Logger LOG = FrontlineUtils.getLogger(SmsServiceManager.class);
 
@@ -654,7 +657,7 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 	private void dispatchSms(List<? extends SmsService> devices, List<FrontlineMessage> messages) {
 		int deviceCount = devices.size();
 		for(FrontlineMessage m : messages) {
-			SmsService device = devices.get(++GLOBAL_DISPATCH_COUNTER  % deviceCount);
+			SmsService device = devices.get(++globalDispatchCounter  % deviceCount);
 			// Presumably the device will complain somehow if it is no longer connected
 			// etc.  TODO we should actually check what happens!
 			device.sendSMS(m);
