@@ -44,6 +44,8 @@ import net.frontlinesms.messaging.sms.SmsService;
 import net.frontlinesms.messaging.sms.SmsServiceManager;
 import net.frontlinesms.messaging.sms.SmsServiceStatus;
 import net.frontlinesms.messaging.sms.internet.SmsInternetService;
+import net.frontlinesms.messaging.sms.modem.SmsModem;
+import net.frontlinesms.messaging.sms.modem.SmsModemStatus;
 import net.frontlinesms.mms.MmsMessage;
 import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginControllerProperties;
@@ -427,7 +429,21 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 	public void smsDeviceEvent(SmsService activeService, SmsServiceStatus status) {
 		// FIXME these events MUST be queued and processed on a separate thread
 		// FIXME should log this message here
+		
+		//JCTT
+		//check for modem connected status here
+		//get the setting for smsc number 
+		// set the smsc number 
+		// settings held in SmsModemStatus 
 		if (this.smsDeviceEventListener != null) {
+			if (status == SmsModemStatus.TRY_TO_CONNECT) {
+				SmsModem modem = (SmsModem) activeService;
+				String serial = modem.getSerial();
+				SmsModemSettings settings = this.smsModemSettingsDao.getSmsModemSettings(serial);
+				if(settings != null) {
+					modem.setSmscNumber(settings.getSmscNumber());
+				}
+			}
 			this.smsDeviceEventListener.messagingServiceEvent(activeService, status);
 		}
 	}

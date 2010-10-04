@@ -11,8 +11,14 @@
 	    <checkbox colspan="2" icon="/icons/sms_receive.png" name="cbReceiving" selected="true" text="i18n.common.use.for.receiving" action="phoneManagerDetailsCheckboxChanged(this)"/>
 	    <checkbox colspan="2" icon="/icons/sms_delete.png" name="cbDeleteMsgs" selected="true" text="i18n.common.delete.from.phone"/>
 	</panel>
+		<separator colspan="2"/>
+	<panel colspan="2">
+			<label name="smscnumber" text="SMSC No."  />
+			<textfield name="tfSmscNumber" weightx="1" />
+	</panel>
 	<panel colspan="2" columns="2" gap="7" halign="center">
 	    <button action="updatePhoneDetails(phoneSettingsDialog)" icon="/icons/tick.png" name="btSave" text="i18n.action.save"/>
 	    <button action="removeDialog(phoneSettingsDialog)" icon="/icons/cross.png" name="btCancel" text="i18n.action.cancel"/>
 	</panel>
+
 </dialog>
