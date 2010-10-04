@@ -603,7 +603,7 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 	
 	/**
 	 * @param messageType The type of messages which should be dispatched.
-	 * The right list is taken using this type.
+	 * The right list is chosen using this type.
 	 * THREAD: SmsDeviceManager
 	 */
 	private void dispatchSms(MessageType messageType) {
