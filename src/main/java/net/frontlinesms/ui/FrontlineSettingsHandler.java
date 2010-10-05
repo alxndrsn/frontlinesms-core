@@ -17,6 +17,7 @@ import net.frontlinesms.settings.CoreSettingsSections;
 import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.ui.handler.settings.CoreSettingsAppearanceSectionHandler;
 import net.frontlinesms.ui.handler.settings.CoreSettingsGeneralSectionHandler;
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.settings.SettingsChangedEventNotification;
 import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
 
@@ -41,6 +42,8 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	private static final String UI_COMPONENT_PN_DISPLAY_SETTINGS = "pnDisplaySettings";
 
 	private static final String I18N_MESSAGE_CONFIRM_CLOSE_SETTINGS = "message.confirm.close.settings";
+
+	private static final String I18N_MENU_DATABASE_SETTINGS = "menuitem.edit.db.settings";
 
 
 //> INSTANCE PROPERTIES
@@ -87,7 +90,7 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		Object appearanceRootNode = this.createSectionRootNode("Appearance", CoreSettingsSections.APPEARANCE.toString(), "/icons/display.png");
 		
 		Object generalRootNode = this.createSectionRootNode("General", CoreSettingsSections.GENERAL.toString(), "/icons/cog.png");
-		this.uiController.add(generalRootNode, this.uiController.createNode("Database settings", CoreSettingsSections.GENERAL_DATABASE.toString()));
+		this.uiController.add(generalRootNode, this.uiController.createNode(InternationalisationUtils.getI18NString(I18N_MENU_DATABASE_SETTINGS), CoreSettingsSections.GENERAL_DATABASE.toString()));
 		this.uiController.add(generalRootNode, this.uiController.createNode("E-mail settings", CoreSettingsSections.GENERAL_EMAIL.toString()));
 
 		Object servicesRootNode = this.createSectionRootNode("Services", CoreSettingsSections.SERVICES.toString(), "/icons/phone_manualConfigure.png");

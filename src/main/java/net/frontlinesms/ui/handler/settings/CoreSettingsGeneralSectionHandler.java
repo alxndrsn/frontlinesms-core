@@ -18,7 +18,7 @@ public class CoreSettingsGeneralSectionHandler implements UiSettingsSectionHandl
 	private static final String UI_SECTION_GENERAL = "/ui/core/settings/general/pnGeneralSettings.xml";
 	private static final String UI_SECTION_DATABASE = "/ui/core/settings/general/pnDatabaseSettings.xml";
 	private static final String UI_SECTION_EMAIL = "/ui/core/settings/general/pnEmailSettings.xml";
-
+	
 	private static final String COMPONENT_SETTINGS_SELECTION = "cbConfigFile";
 	/** The panel containing individual settings controls */
 	private static final String COMPONENT_SETTINGS_PANEL = "pnSettings";
@@ -58,7 +58,7 @@ public class CoreSettingsGeneralSectionHandler implements UiSettingsSectionHandl
 		// Populate combobox
 		String selectedDatabaseConfigPath = (selectedPath == null ? AppProperties.getInstance().getDatabaseConfigPath() : selectedPath);
 		List<DatabaseSettings> databaseSettings = DatabaseSettings.getSettings();
-		Object settingsSelection = getConfigFileSelecter();
+		Object settingsSelection = find(COMPONENT_SETTINGS_SELECTION);
 		for(int settingsIndex = 0; settingsIndex < databaseSettings.size(); ++settingsIndex) {
 			DatabaseSettings settings = databaseSettings.get(settingsIndex);
 			Object comboBox = createComboBox(settings);
@@ -72,7 +72,7 @@ public class CoreSettingsGeneralSectionHandler implements UiSettingsSectionHandl
 		}
 		
 		// populate settings panel
-		refreshSettingsPanel();
+		//refreshSettingsPanel();
 	}
 	
 	private Object createComboBox(DatabaseSettings settings) {
@@ -99,16 +99,12 @@ public class CoreSettingsGeneralSectionHandler implements UiSettingsSectionHandl
 	}
 	
 	public void configFileChanged() {
-		String selected = this.uiController.getText(this.uiController.getSelectedItem(getConfigFileSelecter()));
+		String selected = this.uiController.getText(this.uiController.getSelectedItem(find(COMPONENT_SETTINGS_SELECTION)));
 		
 		if (selected != null) {
 //			this.openNewDialog(selected);
 //			this.removeDialog();
 		}
-	}
-	
-	private Object getConfigFileSelecter() {
-		return find(COMPONENT_SETTINGS_SELECTION);
 	}
 
 	public Object getPanel() {
