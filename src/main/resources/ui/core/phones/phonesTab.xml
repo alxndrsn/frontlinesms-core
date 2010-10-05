@@ -2,7 +2,7 @@
 <tab text="i18n.tab.phone.manager" icon="/icons/big_phone.png" name=":advancedPhoneManager">
 	<panel columns="4" top="9" bottom="9" left="9" right="9" gap="9">
 		<label rowspan="4" valign="top" icon="/icons/header/phoneManager.png"/>
-		<label icon="/icons/phone_working.png" text="i18n.common.working.devices" colspan="3"/>
+		<label icon="/icons/phone.png" text="i18n.common.working.devices" colspan="3"/>
 		<table name="phoneManager_modemList" colspan="3" weightx="2" weighty="2" perform="showPhoneSettingsDialog(this)">
 			<header>
 				<column text="" width="18"/>

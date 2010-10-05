@@ -5,18 +5,6 @@
 	        <label icon="/icons/header/contactManager.png" valign="top"/>
 	        <panel name="pnGroupsContainer"
 	        		rowspan="2" border="true" bottom="4" columns="1" gap="8" icon="/icons/group.png" left="4" right="4" text="i18n.common.groups" top="4" weightx="1" weighty="1">
-	            <!--  <tree delete="showDeleteOptionDialog(contactManager_groupList)" action="selectionChanged(this, pnContacts)" collapse="groupList_expansionChanged(this)" expand="groupList_expansionChanged(this)" name="contactManager_groupList" perform="showContactDetails(this)" weightx="1" weighty="1">
-	                <popupmenu menushown="populateGroups(this, contactManager_groupList)" name="menu">
-	                    <menu icon="/icons/group_join.png" name="groupsMenu" text="i18n.action.add.to.group"/>
-	                    <menuitem action="showNewGroupDialog(contactManager_groupList)" icon="/icons/group_add.png" name="newGroup" text="i18n.action.new.group"/>
-	                    <separator name="sp1"/>
-	                    <menuitem action="show_composeMessageForm(contactManager_groupList)" icon="/icons/sms_send.png" name="miSendSMS" text="i18n.action.send.sms"/>
-	                    <menuitem action="showMessageHistory(contactManager_groupList)" icon="/icons/history.png" name="msg_history" text="i18n.action.message.history"/>
-	                    <separator name="sp2"/>
-	                    <menuitem text="i18n.action.new.contact" action="showNewContactDialog()" icon="/icons/user_add.png" name="miNewContact"/>
-	                    <menuitem action="showDeleteOptionDialog(contactManager_groupList)" icon="/icons/group_delete.png" name="miDelete" text="i18n.action.delete" tooltip="i18n.tooltip.remove.contacts.and.groups"/>
-	                </popupmenu>
-	            </tree>  -->
 	            <panel gap="5">
 	                <button action="showNewGroupDialog" icon="/icons/big_group_add.png" text="i18n.action.new.group" weightx="1" weighty="1"/>
 	                <button action="showDeleteOptionDialog" icon="/icons/big_group_delete.png" name="deleteButton" text="i18n.action.delete" weightx="1" weighty="1" enabled="false"/>
@@ -33,7 +21,7 @@
 	                <header>
 	                	<column icon="/icons/status.png" text="i18n.common.active" width="52"/>
 	                    <column icon="/icons/user.png" text="i18n.common.name" width="150"/>
-	                    <column icon="/icons/phone_number.png" text="i18n.common.phone.number" width="120"/>
+	                    <column icon="/icons/phone.png" text="i18n.common.phone.number" width="120"/>
 	                    <column icon="/icons/email.png" text="i18n.common.email.address" width="120"/>
 	                </header>
 	                <popupmenu menushown="populateGroups(this, contactManager_contactList)" name="menu">
