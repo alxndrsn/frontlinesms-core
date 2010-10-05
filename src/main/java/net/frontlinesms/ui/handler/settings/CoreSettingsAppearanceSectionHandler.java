@@ -3,29 +3,27 @@ package net.frontlinesms.ui.handler.settings;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.settings.FrontlineValidationMessage;
+import net.frontlinesms.settings.BaseSectionHandler;
 import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiProperties;
 import net.frontlinesms.ui.i18n.FileLanguageBundle;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
-import net.frontlinesms.ui.i18n.LanguageBundle;
 import net.frontlinesms.ui.settings.HomeTabLogoChangedEventNotification;
-import net.frontlinesms.ui.settings.SettingsChangedEventNotification;
 import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
 
 import org.apache.log4j.Logger;
 
-public class CoreSettingsAppearanceSectionHandler implements UiSettingsSectionHandler, ThinletUiEventHandler {
+/**
+ * UI Handler for the "Appearance" section of the Core Settings
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
+ */
+public class CoreSettingsAppearanceSectionHandler extends BaseSectionHandler implements UiSettingsSectionHandler, ThinletUiEventHandler {
 	protected final Logger log = FrontlineUtils.getLogger(this.getClass());
 
 	private static final String UI_SECTION_APPEARANCE = "/ui/core/settings/appearance/pnAppearanceSettings.xml";
 
-	private Object panel;
-	private UiGeneratorController uiController;
-
-	private EventBus eventBus;
-	
 	/** Thinlet Component Name: Settings dialog: radio indicating if the logo is visible */
 	private static final String COMPONENT_CB_HOME_TAB_LOGO_INVISIBLE = "cbHomeTabLogoInvisible";
 	/** Thinlet Component Name: Settings dialog: radio used to choose the default logo */
@@ -42,8 +40,8 @@ public class CoreSettingsAppearanceSectionHandler implements UiSettingsSectionHa
 	private static final String COMPONENT_PN_LANGUAGES = "fastLanguageSwitch";
 	
 	public CoreSettingsAppearanceSectionHandler (UiGeneratorController uiController) {
+		super(uiController);
 		this.uiController = uiController;
-		this.eventBus = uiController.getFrontlineController().getEventBus();
 		
 		this.init();
 	}
@@ -102,7 +100,9 @@ public class CoreSettingsAppearanceSectionHandler implements UiSettingsSectionHa
 				FileLanguageBundle languageBundle = this.uiController.getAttachedObject(radioButton, FileLanguageBundle.class);
 				if (languageBundle != null && !languageBundle.equals(FrontlineUI.currentResourceBundle)) {
 					this.uiController.setAttachedObject(radioButton, languageBundle.getFile().getAbsolutePath());
-					this.uiController.changeLanguage(radioButton);
+					if (this.uiController instanceof UiGeneratorController) {
+						((UiGeneratorController) this.uiController).changeLanguage(radioButton);
+					}
 				}
 			}
 		}
@@ -119,10 +119,6 @@ public class CoreSettingsAppearanceSectionHandler implements UiSettingsSectionHa
 		
 		return null;
 	}
-
-	private Object find (String component) {
-		return this.uiController.find(this.panel, component);
-	}
 	
 	/**
 	 * Enable or disable the bottom panel whether the logo is custom or not.
@@ -138,7 +134,7 @@ public class CoreSettingsAppearanceSectionHandler implements UiSettingsSectionHa
 	
 	public void logoRadioButtonChanged(Object panel, boolean isCustom) {
 		this.setHomeTabCustomLogo(panel, isCustom);
-		this.settingChanged();
+		super.settingChanged();
 	}
 	
 	/**
@@ -185,9 +181,9 @@ public class CoreSettingsAppearanceSectionHandler implements UiSettingsSectionHa
 		log.trace("EXIT");
 	}
 
-	public void settingChanged() {
-		this.eventBus.notifyObservers(new SettingsChangedEventNotification());
-	}
+//	public void settingChanged() {
+//		this.eventBus.notifyObservers(new SettingsChangedEventNotification());
+//	}
 
 	public Object getPanel(String section) {
 		// TODO Auto-generated method stub

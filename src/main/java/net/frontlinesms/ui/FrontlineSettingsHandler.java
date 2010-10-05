@@ -16,6 +16,7 @@ import net.frontlinesms.plugins.PluginSettingsController;
 import net.frontlinesms.settings.CoreSettingsSections;
 import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.ui.handler.settings.CoreSettingsAppearanceSectionHandler;
+import net.frontlinesms.ui.handler.settings.CoreSettingsGeneralDatabaseSectionHandler;
 import net.frontlinesms.ui.handler.settings.CoreSettingsGeneralSectionHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.settings.SettingsChangedEventNotification;
@@ -55,6 +56,10 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	private EventBus eventBus;
 	
 	private List<UiSettingsSectionHandler> handlersList;
+
+	private Object selectedPluginItem;
+
+	private Object selectedCoreItem;
 	
 //> CONSTRUCTORS
 	/**
@@ -98,6 +103,9 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		this.uiController.add(find(UI_COMPONENT_CORE_TREE), appearanceRootNode);
 		this.uiController.add(find(UI_COMPONENT_CORE_TREE), generalRootNode);
 		this.uiController.add(find(UI_COMPONENT_CORE_TREE), servicesRootNode);
+		
+		this.uiController.setSelectedItem(find(UI_COMPONENT_CORE_TREE), appearanceRootNode);
+		this.selectionChanged(find(UI_COMPONENT_CORE_TREE));
 	}
 
 	private Object createSectionRootNode(String title, String coreSection, String iconPath) {
@@ -151,12 +159,17 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	}
 	
 	public void selectionChanged(Object tree) {
-		this.uiController.removeAll(find(UI_COMPONENT_PN_DISPLAY_SETTINGS));
-		
 		Object selected = this.uiController.getSelectedItem(tree);
-		if (selected != null) {
+		
+		if (selected == null) {
+			this.reselectItem(tree);
+		} else {
+			// Save the current selected item to avoid a future unselection.
+			this.saveSelectedItem(selected, tree);
+			
+			this.uiController.removeAll(find(UI_COMPONENT_PN_DISPLAY_SETTINGS));
+		
 			Object attachedObject = this.uiController.getAttachedObject(selected);
-
 			if (attachedObject instanceof String) {
 				// Then this panel has not been loaded yet
 				
@@ -174,12 +187,40 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		}
 	}
 
+	/**
+	 * Saves the current selected item to avoid a future unselection.
+	 * @param selected
+	 * @param tree
+	 */
+	private void saveSelectedItem(Object selected, Object tree) {
+		if (tree.equals(find(UI_COMPONENT_PLUGIN_TREE))) {
+			this.selectedPluginItem = selected;
+		} else {
+			this.selectedCoreItem = selected;
+			}
+	}
+	
+	/**
+	 * Reselect the previously selected item in case of an unselection in one of the trees.
+	 * @param tree
+	 */
+	private void reselectItem(Object tree) {
+		if (tree.equals(find(UI_COMPONENT_PLUGIN_TREE))) {
+			if (selectedPluginItem != null)
+				this.uiController.setSelectedItem(find(UI_COMPONENT_PLUGIN_TREE), selectedPluginItem);
+		} else {
+			if (selectedCoreItem != null)
+				this.uiController.setSelectedItem(find(UI_COMPONENT_CORE_TREE), selectedCoreItem);
+		}
+	}
+
 	private void coreSectionSelected(Object selected, String section) {
 		// Let's get the right handler for the selected section
 		UiSettingsSectionHandler settingsSectionHandler = this.getCoreHandlerForSection(section);
 		
 		// We potentially have the UI Handler for the current section, let's take the panel
 		if (settingsSectionHandler != null) {
+			// If we haven't loaded the handler yet, let's do it and save it.
 			if (!this.settingsSectionHandlerLoaded(settingsSectionHandler.getClass())) {
 				this.handlersList.add(settingsSectionHandler);
 			}
@@ -248,9 +289,9 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		CoreSettingsSections section = CoreSettingsSections.valueOf(coreSection);
 		switch (section) {
 			case GENERAL:
+				return new CoreSettingsGeneralSectionHandler(uiController);
 			case GENERAL_DATABASE:
-			case GENERAL_EMAIL:
-				return new CoreSettingsGeneralSectionHandler(uiController, section);
+				return new CoreSettingsGeneralDatabaseSectionHandler(uiController);
 			case APPEARANCE:
 				return new CoreSettingsAppearanceSectionHandler(uiController);
 			default:
