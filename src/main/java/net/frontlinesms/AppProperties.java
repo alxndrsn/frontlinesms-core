@@ -33,6 +33,10 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	private static final String KEY_MMS_POLLING_FREQUENCY = "mms.polling.frequency";
 	/** Property key (String): Whether or not the device connection dialog is shown when a connection problem occurs*/
 	private static final String KEY_SHOW_DEVICE_CONNECTION_DIALOG = "smsdevice.connection.problem.dialog.show";
+	/** Property key (String) indicating whether or not the statistics dialog should be prompted **/
+	private static final String KEY_PROMPT_STATS_DIALOG = "prompt.stats";
+	/** Property key (String) indicating whether or not the statistics can be sent without asking **/
+	private static final String KEY_AUTHORIZE_STATS_SENDING = "authorize.stats.sending";
 	
 //> DEFAULT VALUES
 	/** Default value for {@link #KEY_DATABASE_CONFIG_PATH} */
@@ -143,6 +147,32 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	/** @param showDialog whether the device connection dialog is shown when a connection problem occurs */
 	public void setDeviceConnectionDialogEnabled(boolean showDialog) {
 		super.setPropertyAsBoolean(KEY_SHOW_DEVICE_CONNECTION_DIALOG, showDialog);
+	}
+	
+	/** @return whether or not the statistics dialog should be prompted */
+	public boolean shouldPromptStatsDialog() {
+		return super.getPropertyAsBoolean(KEY_PROMPT_STATS_DIALOG, true);
+	}
+	
+	/**
+	 * Set whether or not the statistics dialog should be prompted.
+	 * @param shouldPrompStatsDialog value for property {@link #KEY_PROMPT_STATS_DIALOG}
+	 */
+	public void shouldPromptStatsDialog(boolean shouldPrompStatsDialog) {
+		super.setPropertyAsBoolean(KEY_PROMPT_STATS_DIALOG, shouldPrompStatsDialog);
+	}
+	
+	/** @return whether or not the statistics dialog should be prompted */
+	public boolean isStatsSendingAuthorized() {
+		return super.getPropertyAsBoolean(KEY_AUTHORIZE_STATS_SENDING, true);
+	}
+	
+	/**
+	 * Set whether or not the statistics can be sent without asking.
+	 * @param authorizeStatsSending value for property {@link #KEY_AUTHORIZE_STATS_SENDING}
+	 */
+	public void setAuthorizeStatsSending(boolean authorizeStatsSending) {
+		super.setPropertyAsBoolean(KEY_AUTHORIZE_STATS_SENDING, authorizeStatsSending);
 	}
 	
 //> INSTANCE HELPER METHODS

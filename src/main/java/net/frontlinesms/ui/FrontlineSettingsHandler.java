@@ -44,7 +44,9 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 
 	private static final String I18N_MESSAGE_CONFIRM_CLOSE_SETTINGS = "message.confirm.close.settings";
 
-	private static final String I18N_MENU_DATABASE_SETTINGS = "menuitem.edit.db.settings";
+	private static final String I18N_MENU_DATABASE_SETTINGS  = "menuitem.edit.db.settings";
+
+	private static final String I18N_MENU_EMAIL_SETTINGS = "menuitem.email.settings";
 
 
 //> INSTANCE PROPERTIES
@@ -92,13 +94,13 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	}
 
 	private void loadCoreSettings() {
-		Object appearanceRootNode = this.createSectionRootNode("Appearance", CoreSettingsSections.APPEARANCE.toString(), "/icons/display.png");
+		Object appearanceRootNode = this.createSectionNode(true, "Appearance", CoreSettingsSections.APPEARANCE.toString(), "/icons/display.png");
 		
-		Object generalRootNode = this.createSectionRootNode("General", CoreSettingsSections.GENERAL.toString(), "/icons/cog.png");
-		this.uiController.add(generalRootNode, this.uiController.createNode(InternationalisationUtils.getI18NString(I18N_MENU_DATABASE_SETTINGS), CoreSettingsSections.GENERAL_DATABASE.toString()));
-		this.uiController.add(generalRootNode, this.uiController.createNode("E-mail settings", CoreSettingsSections.GENERAL_EMAIL.toString()));
+		Object generalRootNode = this.createSectionNode(true, "General", CoreSettingsSections.GENERAL.toString(), "/icons/cog.png");
+		this.uiController.add(generalRootNode, this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_MENU_DATABASE_SETTINGS), CoreSettingsSections.GENERAL_DATABASE.toString(), "/icons/database_edit.png"));
+		this.uiController.add(generalRootNode, this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_MENU_EMAIL_SETTINGS), CoreSettingsSections.GENERAL_EMAIL.toString(), "/icons/emailAccount_edit.png"));
 
-		Object servicesRootNode = this.createSectionRootNode("Services", CoreSettingsSections.SERVICES.toString(), "/icons/phone_manualConfigure.png");
+		Object servicesRootNode = this.createSectionNode(true, "Services", CoreSettingsSections.SERVICES.toString(), "/icons/phone_manualConfigure.png");
 		
 		this.uiController.add(find(UI_COMPONENT_CORE_TREE), appearanceRootNode);
 		this.uiController.add(find(UI_COMPONENT_CORE_TREE), generalRootNode);
@@ -108,14 +110,16 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		this.selectionChanged(find(UI_COMPONENT_CORE_TREE));
 	}
 
-	private Object createSectionRootNode(String title, String coreSection, String iconPath) {
+	private Object createSectionNode(boolean isRootNode, String title, String coreSection, String iconPath) {
 		Object sectionRootNode = this.uiController.createNode(title, coreSection);
 		
 		// Try to get an icon from the classpath
 		this.uiController.setIcon(sectionRootNode, iconPath);
 		
 		// Collapse root node by default
-		this.uiController.setExpanded(sectionRootNode, false);
+		if (isRootNode) {
+			this.uiController.setExpanded(sectionRootNode, false);
+		}
 		
 		return sectionRootNode;
 	}
@@ -195,9 +199,11 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	private void saveSelectedItem(Object selected, Object tree) {
 		if (tree.equals(find(UI_COMPONENT_PLUGIN_TREE))) {
 			this.selectedPluginItem = selected;
+			this.uiController.setSelectedItem(find(UI_COMPONENT_CORE_TREE), null);
 		} else {
 			this.selectedCoreItem = selected;
-			}
+			this.uiController.setSelectedItem(find(UI_COMPONENT_PLUGIN_TREE), null);
+		}
 	}
 	
 	/**

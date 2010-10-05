@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<dialog closable="true" resizable="true" close="closeDialog" width="700" height="300" bottom="4" gap="8" icon="/icons/keyword.png" left="4" modal="true" name="settingsDialog" right="4" text="Settings" top="4" columns="1">
-	<splitpane divider="177" weightx="1" weighty="1">
-		<panel columns="1" gap="10">
-			<panel columns="1" gap="2">
+<dialog closable="true" resizable="true" close="closeDialog" width="700" height="400" bottom="4" gap="8" icon="/icons/keyword.png" left="4" modal="true" name="settingsDialog" right="4" text="Settings" top="4" columns="1">
+	<splitpane divider="200" weightx="1" weighty="1">
+		<panel columns="1" gap="5" weightx="1">
+			<panel columns="1" gap="2" weightx="1">
 				<label icon="/icons/settings/menu_core.png"/>
-				<tree name="generalTree" action="selectionChanged(this)"/>
+				<tree name="generalTree" action="selectionChanged(this)" weightx="1" width="200" height="150"/>
 			</panel>
 			<panel columns="1" gap="2">
 				<label icon="/icons/settings/menu_plugins.png"/>
-				<tree name="pluginTree" action="selectionChanged(this)"/>
+				<tree name="pluginTree" action="selectionChanged(this)" weightx="1" width="200" height="110"/>
 			</panel>
 		</panel>
 	
@@ -16,8 +16,7 @@
 			<!-- Actual settings are displayed in this panel -->
 		</panel>
 	</splitpane>
-	
-	<panel gap="5" halign="center">
+	<panel gap="5" halign="center" weightx="1" weighty="1">
 		<button text="i18n.action.save" name="btSave" action="save" halign="center" icon="/icons/tick.png" enabled="false"/>
 		<button text="i18n.action.cancel" halign="center" icon="/icons/cross.png" action="closeDialog"/>
 	</panel>

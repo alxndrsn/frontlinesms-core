@@ -33,7 +33,7 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	private static final String KEY_HOMETABLOGO_CUSTOM = "hometab.logo.custom";
 	/** Property Key (String) indicating the path to image file containing the logo. */
 	private static final String KEY_HOMETABLOGO_SOURCE = "hometab.logo.source";
-	/** Property Key (String) indicating if the custom logo should keep its original size. */
+	/** Property Key (String) indicating whether the custom logo should keep its original size. */
 	private static final String KEY_HOMETABLOGO_KEEP_ORIGINAL_SIZE = "hometab.logo.keeporiginalsize";
 	/** Property key (double) the price per SMS */
 	private static final String KEY_SMS_COST = "sms.cost";
@@ -147,8 +147,7 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	 */
 	public void setHometabLogoOriginalSizeKept(boolean isOriginalSizeKept) {
 		super.setPropertyAsBoolean(KEY_HOMETABLOGO_KEEP_ORIGINAL_SIZE, isOriginalSizeKept);
-	}
-	
+	}	
 	
 	/** @return the path to the file containing the logo to display on the home tab */
 	public String getHometabLogoPath() {
