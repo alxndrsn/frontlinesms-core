@@ -17,6 +17,7 @@ import net.frontlinesms.settings.CoreSettingsSections;
 import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.ui.handler.settings.CoreSettingsAppearanceSectionHandler;
 import net.frontlinesms.ui.handler.settings.CoreSettingsGeneralDatabaseSectionHandler;
+import net.frontlinesms.ui.handler.settings.CoreSettingsGeneralEmailSectionHandler;
 import net.frontlinesms.ui.handler.settings.CoreSettingsGeneralSectionHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.settings.SettingsChangedEventNotification;
@@ -26,6 +27,7 @@ import org.apache.log4j.Logger;
 
 /**
  * Ui Handler for {@link FrontlineSettingsHandler} settings.
+ * The whole settings dialog system is handled by this class.
  * 
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
@@ -298,6 +300,8 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 				return new CoreSettingsGeneralSectionHandler(uiController);
 			case GENERAL_DATABASE:
 				return new CoreSettingsGeneralDatabaseSectionHandler(uiController);
+			case GENERAL_EMAIL:
+				return new CoreSettingsGeneralEmailSectionHandler(uiController);
 			case APPEARANCE:
 				return new CoreSettingsAppearanceSectionHandler(uiController);
 			default:
@@ -369,7 +373,6 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		
 		this.uiController.removeDialog(settingsDialog);
 		this.uiController.infoMessage("Saved!");
-		//this.uiController.setEnabled(find(UiGeneratorControllerConstants.COMPONENT_BT_SAVE), false);
 	}
 
 //> INSTANCE HELPER METHODS
@@ -380,7 +383,7 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 
 	public void notify(FrontlineEventNotification notification) {
 		if (notification instanceof SettingsChangedEventNotification) {
-			this.uiController.setEnabled(find(UiGeneratorControllerConstants.COMPONENT_BT_SAVE), true);
+			this.uiController.setEnabled(this.uiController.find(this.settingsDialog, UiGeneratorControllerConstants.COMPONENT_BT_SAVE), true);
 		}
 	}
 }

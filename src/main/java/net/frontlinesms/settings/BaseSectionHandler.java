@@ -7,10 +7,10 @@ import net.frontlinesms.ui.settings.SettingsChangedEventNotification;
 
 public class BaseSectionHandler {
 	protected EventBus eventBus;
-	protected FrontlineUI uiController;
+	protected UiGeneratorController uiController;
 	protected Object panel;
 
-	public BaseSectionHandler (FrontlineUI uiController) {
+	public BaseSectionHandler (UiGeneratorController uiController) {
 		this.uiController = uiController;
 		if (this.uiController instanceof UiGeneratorController) {
 			this.eventBus = ((UiGeneratorController) uiController).getFrontlineController().getEventBus();

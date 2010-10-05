@@ -1,7 +1,6 @@
 package net.frontlinesms.ui.handler.settings;
 
 import net.frontlinesms.FrontlineUtils;
-import net.frontlinesms.events.EventBus;
 import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.settings.BaseSectionHandler;
 import net.frontlinesms.ui.FrontlineUI;
