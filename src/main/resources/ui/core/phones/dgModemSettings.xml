@@ -15,8 +15,11 @@
 	<separator colspan="2"/>
 	
 	<panel colspan="2" columns="2" gap="7">
-			<label name="smscnumber" text="i18n.phone.settings.smsc.number" icon="/icons/server.png"/>
+			<label text="i18n.phone.settings.smsc.number" icon="/icons/server.png"/>
 			<textfield name="tfSmscNumber" weightx="1"/>
+			
+			<label text="i18n.phone.settings.pin" icon="/icons/phone.png"/>
+			<textfield name="tfPin" weightx="1"/>
 	</panel>
 	
 	<panel colspan="2" columns="2" gap="7" halign="center">

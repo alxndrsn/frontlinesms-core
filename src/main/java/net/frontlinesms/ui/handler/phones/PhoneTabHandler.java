@@ -100,21 +100,11 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	/** UI Component name: TODO */
 	private static final String COMPONENT_RB_PHONE_DETAILS_ENABLE = "rbPhoneDetailsEnable";
 	/** UI Component name: TODO */
-	private static final String COMPONENT_PHONE_SENDING = "cbSending";
-	/** UI Component name: TODO */
-	private static final String COMPONENT_PHONE_RECEIVING = "cbReceiving";
-	/** UI Component name: TODO */
-	private static final String COMPONENT_PHONE_DELETE = "cbDeleteMsgs";
-	/** UI Component name: TODO */
-	private static final String COMPONENT_PHONE_DELIVERY_REPORTS = "cbUseDeliveryReports";
-	/** UI Component name: TODO */
 	private static final String COMPONENT_PN_PHONE_SETTINGS = "pnPhoneSettings";
 	/** UI Component name: TODO */
 	private static final String COMPONENT_PHONE_MANAGER_MODEM_LIST = "phoneManager_modemList";
 	/** UI Component name: TODO */
 	private static final String COMPONENT_PHONE_MANAGER_MODEM_LIST_ERROR = "phoneManager_modemListError";
-	/** UI COmponent name: TODO */
-	private static final String COMPONENT_SMSC_NUMBER = "tfSmscNumber";
 
 //> INSTANCE PROPERTIES
 	/** The manager of {@link FrontlineMessagingService}s */
@@ -179,11 +169,12 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	 * @param isNewPhone <code>true</code> TODO <if this phone has previously connected (i.e. not first time it has connected)> OR <if this phone has just connected (e.g. may have connected before, but not today)> 
 	 */
 	public void showPhoneSettingsDialog(SmsModem device, boolean isNewPhone) {
-		final DeviceSettingsDialogHandler deviceSettingsDialog = new DeviceSettingsDialogHandler(ui, this, device, isNewPhone);
+		final DeviceSettingsDialogHandler deviceSettingsDialog = new DeviceSettingsDialogHandler(ui, device, isNewPhone);
 		
 		FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
 			
 			public void run() {
+				deviceSettingsDialog.initDialog();
 				ui.add(deviceSettingsDialog.getDialog());
 			}
 		};
@@ -405,87 +396,8 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 		log.trace("EXIT");
 	}
 	
-	public void phoneManagerDetailsUse(Object phoneSettingsDialog, Object radioButton) {
-		Object pnPhoneSettings = ui.find(phoneSettingsDialog, COMPONENT_PN_PHONE_SETTINGS);
-		if(COMPONENT_RB_PHONE_DETAILS_ENABLE.equals(ui.getName(radioButton))) {
-			ui.activate(pnPhoneSettings);
-			// If this phone does not support SMS receiving, we need to pass this info onto
-			// the user.  We also want to gray out the options for receiving.
-			SmsModem modem = ui.getAttachedObject(phoneSettingsDialog, SmsModem.class);
-			if(!modem.supportsReceive()) {
-				ui.setEnabled(ui.find(pnPhoneSettings, COMPONENT_PHONE_RECEIVING), false);
-				ui.setEnabled(ui.find(pnPhoneSettings, COMPONENT_PHONE_DELETE), false);
-			}
-		} else ui.deactivate(pnPhoneSettings);
-	}
-	
 	public void phoneManagerDetailsCheckboxChanged(Object checkbox) {
 		ui.setEnabled(ui.getNextItem(ui.getParent(checkbox), checkbox, false), ui.isSelected(checkbox));
-	}
-	
-	/**
-	 * Event fired when the view phone details action is chosen.  We save the details
-	 * of the phone to the database.
-	 */
-	public void updatePhoneDetails(Object dialog) {
-		SmsModem phone = ui.getAttachedObject(dialog, SmsModem.class);
-		String serial = phone.getSerial();
-
-		boolean useForSending;
-		boolean useDeliveryReports;
-		boolean useForReceiving;
-		boolean deleteMessagesAfterReceiving;
-		if(ui.isSelected(ui.find(dialog, COMPONENT_RB_PHONE_DETAILS_ENABLE))) {
-			useForSending = ui.isSelected(ui.find(dialog, COMPONENT_PHONE_SENDING));
-			useDeliveryReports = ui.isSelected(ui.find(dialog, COMPONENT_PHONE_DELIVERY_REPORTS));
-			useForReceiving = ui.isSelected(ui.find(dialog, COMPONENT_PHONE_RECEIVING));
-			deleteMessagesAfterReceiving = ui.isSelected(ui.find(dialog, COMPONENT_PHONE_DELETE));
-		} else {
-			useForSending = false;
-			useDeliveryReports = false;
-			useForReceiving = false;
-			deleteMessagesAfterReceiving = false;
-		}
-		String smscNumber = ui.getText(ui.find(COMPONENT_SMSC_NUMBER));
-		
-		phone.setUseForSending(useForSending);
-		phone.setUseDeliveryReports(useDeliveryReports);
-		if(phone.supportsReceive()) {
-			phone.setUseForReceiving(useForReceiving);
-			phone.setDeleteMessagesAfterReceiving(deleteMessagesAfterReceiving);
-		} else {
-			useForReceiving = false;
-			deleteMessagesAfterReceiving = false;
-		}
-		
-		SmsModemSettings settings = this.smsModelSettingsDao.getSmsModemSettings(serial);
-		if(settings != null) {
-			settings.setDeleteMessagesAfterReceiving(deleteMessagesAfterReceiving);
-			settings.setUseDeliveryReports(useDeliveryReports);
-			settings.setUseForReceiving(useForReceiving);
-			settings.setUseForSending(useForSending);
-			settings.setSmscNumber(smscNumber);
-			this.smsModelSettingsDao.updateSmsModemSettings(settings);
-		} else {
-			settings = new SmsModemSettings(serial);
-
-			String manufacturer = phone.getManufacturer();
-			String model = phone.getModel();
-			
-			settings.setManufacturer(manufacturer);
-			settings.setModel(model);
-			settings.setUseForSending(useForSending);
-			settings.setUseForReceiving(useForReceiving);
-			settings.setDeleteMessagesAfterReceiving(deleteMessagesAfterReceiving);
-			settings.setUseDeliveryReports(useDeliveryReports);
-			settings.setSmscNumber(smscNumber);
-			
-			this.smsModelSettingsDao.saveSmsModemSettings(settings);
-		}
-		// TODO check if this value has changed
-		phone.setSmscNumber(smscNumber);
-		
-		removeDialog(dialog);
 	}
 
 //> INSTANCE HELPER METHODS
