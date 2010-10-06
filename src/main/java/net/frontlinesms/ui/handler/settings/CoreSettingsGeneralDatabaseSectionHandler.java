@@ -7,6 +7,7 @@ import net.frontlinesms.AppProperties;
 import net.frontlinesms.settings.BaseSectionHandler;
 import net.frontlinesms.settings.DatabaseSettings;
 import net.frontlinesms.settings.FrontlineValidationMessage;
+import net.frontlinesms.ui.FrontlineSettingsHandler;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -28,6 +29,9 @@ public class CoreSettingsGeneralDatabaseSectionHandler extends BaseSectionHandle
 	/** The constant property key for database passwords */
 	private static final String PASSWORD_PROPERTY_KEY = "password";
 	private static final String I18N_MESSAGE_DATABASE_SETTINGS_CHANGED = "message.database.settings.changed";
+	
+	private static final String SECTION_ITEM_DATABASE_CONFIG_PATH = "GENERAL_DATABASE_CONFIG_PATH";
+	private static final String SECTION_ITEM_DATABASE_CONFIG = "GENERAL_DATABASE_CONFIG_";
 	
 	/** The settings currently selected in the combobox */
 	private DatabaseSettings selectedSettings;
@@ -59,6 +63,8 @@ public class CoreSettingsGeneralDatabaseSectionHandler extends BaseSectionHandle
 			}
 		}
 		
+		this.originalValues.put(SECTION_ITEM_DATABASE_CONFIG_PATH, selectedDatabaseConfigPath);
+		
 		// populate settings panel
 		refreshSettingsPanel();
 	}
@@ -80,14 +86,30 @@ public class CoreSettingsGeneralDatabaseSectionHandler extends BaseSectionHandle
 			// TODO would be nice to set icons for the different settings
 			this.uiController.add(settingsPanel, this.uiController.createLabel(key));
 			// TODO may want to set the types of these, e.g. password, number etc.
+			String value = this.selectedSettings.getPropertyValue(key);
 			Object field;
 			if (key.equals(PASSWORD_PROPERTY_KEY)) {
-				field = this.uiController.createPasswordfield(key, this.selectedSettings.getPropertyValue(key));
+				field = this.uiController.createPasswordfield(key, value);
 			} else {
-				field = this.uiController.createTextfield(key, this.selectedSettings.getPropertyValue(key));
+				field = this.uiController.createTextfield(key, value);
 			}
 			
-			this.uiController.setAction(field, "settingChanged", null, this);
+			if (this.selectedSettings.getFilePath().equals(this.originalValues.get(SECTION_ITEM_DATABASE_CONFIG_PATH))) {
+				if (this.originalValues.get(SECTION_ITEM_DATABASE_CONFIG + key) == null) {
+					// Let's save those settings for the first time
+					this.originalValues.put(SECTION_ITEM_DATABASE_CONFIG + key, value);
+				} else {
+					/**
+					 *  The original config path has been reselected.
+					 *	The fields are crecreated, so potential previous changes have been lost
+					 *	Let's call the fields "unchanged" for the {@link FrontlineSettingsHandler}
+				 	**/
+					this.settingChanged(SECTION_ITEM_DATABASE_CONFIG + key, value);
+				}
+			}
+			
+			this.uiController.setAttachedObject(field, key);
+			this.uiController.setAction(field, "configFieldChanged(this)", null, this);
 			this.uiController.add(settingsPanel, field);
 		}
 	}
@@ -99,9 +121,15 @@ public class CoreSettingsGeneralDatabaseSectionHandler extends BaseSectionHandle
 		if (selected != null) {
 			this.selectedSettings = DatabaseSettings.getSettings().get(selectedIndex);
 			this.refreshSettingsPanel();
+			
+			super.settingChanged(SECTION_ITEM_DATABASE_CONFIG_PATH, selectedSettings.getFilePath());
 		}
-		
-		super.settingChanged();
+	}
+	
+	public void configFieldChanged(Object databaseConfigField) {
+		if (selectedSettings.getFilePath().equals(this.originalValues.get(SECTION_ITEM_DATABASE_CONFIG_PATH))) {
+			this.settingChanged(SECTION_ITEM_DATABASE_CONFIG + this.uiController.getAttachedObject(databaseConfigField, String.class), this.uiController.getText(databaseConfigField));
+		}
 	}
 
 	public Object getPanel() {

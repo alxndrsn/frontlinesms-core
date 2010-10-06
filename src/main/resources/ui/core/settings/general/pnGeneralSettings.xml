@@ -2,7 +2,7 @@
 <panel name="pnGeneral" gap="5" weightx="2" columns="1">
 	<panel icon="/icons/hits.png" text="i18n.stats.dialog.statistics" weightx="1" border="true" columns="1" gap="7" top="5" left="5" bottom="5" right="5">
         <checkbox action="promptStatsChanged" name="cbPromptStats" text="Prompt the statistics dialog every month?"/>
-        <checkbox action="settingChanged" name="cbAuthorizeStats" text="Authorize statistics sending automatically?"/>
+        <checkbox action="authorizeStatsChanged" name="cbAuthorizeStats" text="Authorize statistics sending automatically?"/>
 	</panel>
 	<panel icon="/icons/money.png" text="i18n.common.cost.estimator" weightx="1" border="true" columns="1" gap="7" top="5" left="5" bottom="5" right="5">
         <panel gap="5">

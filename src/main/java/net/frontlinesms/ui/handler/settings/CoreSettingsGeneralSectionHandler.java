@@ -23,6 +23,9 @@ public class CoreSettingsGeneralSectionHandler extends BaseSectionHandler implem
 	private static final String COMPONENT_LB_COST_PER_SMS_RECEIVED_PREFIX = "lbCostPerSmsReceivedPrefix";
 	private static final String COMPONENT_LB_COST_PER_SMS_RECEIVED_SUFFIX = "lbCostPerSmsReceivedSuffix";
 	
+	private static final String SECTION_ITEM_PROMPT_STATS = "GENERAL_STATS_PROMPT_DIALOG";
+	private static final String SECTION_ITEM_AUTHORIZE_STATS = "GENERAL_STATS_AUTHORIZE_SENDING";
+	
 	public CoreSettingsGeneralSectionHandler (UiGeneratorController ui) {
 		super(ui);
 		this.uiController = ui;
@@ -55,7 +58,10 @@ public class CoreSettingsGeneralSectionHandler extends BaseSectionHandler implem
 		
 		boolean shouldPromptStatsDialog = appProperties.shouldPromptStatsDialog();
 		boolean isStatsSendingAuthorized = appProperties.isStatsSendingAuthorized();
-
+		
+		this.originalValues.put(SECTION_ITEM_PROMPT_STATS, shouldPromptStatsDialog);
+		this.originalValues.put(SECTION_ITEM_AUTHORIZE_STATS, isStatsSendingAuthorized);
+		
 		this.uiController.setSelected(find(UI_COMPONENT_CB_PROMPT_STATS), shouldPromptStatsDialog);
 		
 		this.uiController.setSelected(find(UI_COMPONENT_CB_AUTHORIZE_STATS), isStatsSendingAuthorized);
@@ -67,9 +73,15 @@ public class CoreSettingsGeneralSectionHandler extends BaseSectionHandler implem
 	}
 	
 	public void promptStatsChanged () {
-		settingChanged();
+		boolean shouldPromptStatsDialog = this.uiController.isSelected(find(UI_COMPONENT_CB_PROMPT_STATS));
+		settingChanged(SECTION_ITEM_PROMPT_STATS, shouldPromptStatsDialog);
 		
-		this.uiController.setEnabled(find(UI_COMPONENT_CB_AUTHORIZE_STATS), !this.uiController.isSelected(find(UI_COMPONENT_CB_PROMPT_STATS)));
+		this.uiController.setEnabled(find(UI_COMPONENT_CB_AUTHORIZE_STATS), !shouldPromptStatsDialog);
+	}
+	
+	public void authorizeStatsChanged () {
+		boolean authorizeStats = this.uiController.isSelected(find(UI_COMPONENT_CB_AUTHORIZE_STATS));
+		settingChanged(SECTION_ITEM_AUTHORIZE_STATS, authorizeStats);
 	}
 
 	public void save() {

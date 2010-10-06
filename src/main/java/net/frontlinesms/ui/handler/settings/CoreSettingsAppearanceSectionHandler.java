@@ -37,6 +37,11 @@ public class CoreSettingsAppearanceSectionHandler extends BaseSectionHandler imp
 	private static final String COMPONENT_TF_IMAGE_SOURCE = "tfImageSource";
 
 	private static final String COMPONENT_PN_LANGUAGES = "fastLanguageSwitch";
+
+	private static final String SECTION_ITEM_IMAGE_SOURCE = "APPEARANCE_LOGO_IMAGE_SOURCE";
+	private static final String SECTION_ITEM_KEEP_LOGO_ORIGINAL_SIZE = "APPEARANCE_LOGO_ORIGINAL_SIZE";
+	private static final String SECTION_ITEM_LOGO_TYPE = "APPEARANCE_LOGO_RADIOBUTTONS";
+	private static final String SECTION_ITEM_LANGUAGE = "APPEARANCE_LANGUAGE";
 	
 	public CoreSettingsAppearanceSectionHandler (UiGeneratorController uiController) {
 		super(uiController);
@@ -60,10 +65,53 @@ public class CoreSettingsAppearanceSectionHandler extends BaseSectionHandler imp
 			this.uiController.setString(button, "tooltip", languageBundle.getLanguageName());
 			this.uiController.setWeight(button, 1, 0);
 			this.uiController.setAttachedObject(button, languageBundle);
-			this.uiController.setAction(button, "settingChanged", null, this);
+			this.uiController.setAction(button, "languageChanged", null, this);
 			
 			this.uiController.add(fastLanguageSwitch, button);
 		}
+		
+		this.originalValues.put(SECTION_ITEM_LANGUAGE, FrontlineUI.currentResourceBundle);
+	}
+	
+	/** Show the settings dialog for the home tab. */
+	public void initLogoSettings() {
+		log.trace("ENTER");
+		UiProperties uiProperties = UiProperties.getInstance();
+		boolean visible 			= uiProperties.isHometabLogoVisible();
+		boolean isCustomLogo 		= uiProperties.isHometabCustomLogo();
+		boolean isOriginalSizeKept 	= uiProperties.isHometabLogoOriginalSizeKept();
+		
+		String imageLocation = uiProperties.getHometabLogoPath();
+		log.debug("Visible? " + visible);
+		log.debug("Logo: " + (isCustomLogo ? "custom" : "default"));
+		if (isCustomLogo)
+			log.debug("Keep original size: " + isOriginalSizeKept);
+		log.debug("Image location [" + imageLocation + "]");
+		
+		String radioButtonName;
+		if(!visible) {
+			radioButtonName = COMPONENT_CB_HOME_TAB_LOGO_INVISIBLE;
+		} else if(isCustomLogo) {
+			radioButtonName = COMPONENT_CB_HOME_TAB_USE_CUSTOM_LOGO;
+		} else {
+			radioButtonName = COMPONENT_CB_HOME_TAB_USE_DEFAULT_LOGO;
+		}
+		
+		this.uiController.setSelected(find(radioButtonName), true);
+		this.uiController.setSelected(find(COMPONENT_CB_HOME_TAB_LOGO_KEEP_ORIGINAL_SIZE), isOriginalSizeKept);
+		
+		setHomeTabCustomLogo(find(COMPONENT_PN_CUSTOM_IMAGE), isCustomLogo && visible);
+		
+		if (imageLocation != null && imageLocation.length() > 0) {
+			this.uiController.setText(find(COMPONENT_TF_IMAGE_SOURCE), imageLocation);
+		}
+		
+		// Save the original values
+		this.originalValues.put(SECTION_ITEM_LOGO_TYPE, radioButtonName);
+		this.originalValues.put(SECTION_ITEM_KEEP_LOGO_ORIGINAL_SIZE, isOriginalSizeKept);
+		this.originalValues.put(SECTION_ITEM_IMAGE_SOURCE, imageLocation);
+				
+		log.trace("EXIT");
 	}
 
 	public Object getPanel() {
@@ -103,6 +151,7 @@ public class CoreSettingsAppearanceSectionHandler extends BaseSectionHandler imp
 						((UiGeneratorController) this.uiController).changeLanguage(radioButton);
 					}
 				}
+				break;
 			}
 		}
 		
@@ -131,9 +180,39 @@ public class CoreSettingsAppearanceSectionHandler extends BaseSectionHandler imp
 		}
 	}
 	
+	public void languageChanged() {
+		for (Object radioButton : this.uiController.getItems(find(COMPONENT_PN_LANGUAGES))) {
+			if (this.uiController.isSelected(radioButton)) {
+				FileLanguageBundle languageBundle = this.uiController.getAttachedObject(radioButton, FileLanguageBundle.class);
+				super.settingChanged(SECTION_ITEM_LANGUAGE, languageBundle);
+				break;
+			}
+		}
+	}
+	
 	public void logoRadioButtonChanged(Object panel, boolean isCustom) {
 		this.setHomeTabCustomLogo(panel, isCustom);
-		super.settingChanged();
+		
+		Object newValue;
+		if (this.uiController.isSelected(find(COMPONENT_CB_HOME_TAB_LOGO_INVISIBLE))) {
+			newValue = COMPONENT_CB_HOME_TAB_LOGO_INVISIBLE;
+		} else if (this.uiController.isSelected(find(COMPONENT_CB_HOME_TAB_USE_CUSTOM_LOGO))) {
+			newValue = COMPONENT_CB_HOME_TAB_USE_CUSTOM_LOGO;
+		} else {
+			newValue = COMPONENT_CB_HOME_TAB_USE_DEFAULT_LOGO;
+		}
+		
+		super.settingChanged(SECTION_ITEM_LOGO_TYPE, newValue);
+	}
+	
+	public void customImageSourceChanged(String imageSource) {
+		this.uiController.setText(find(COMPONENT_TF_IMAGE_SOURCE), imageSource);
+		
+		this.settingChanged(SECTION_ITEM_IMAGE_SOURCE, imageSource);
+	}
+	
+	public void shouldLogoKeepOriginalSizeChanged(boolean shouldLogoKeepOriginalSize) {
+		super.settingChanged(SECTION_ITEM_KEEP_LOGO_ORIGINAL_SIZE, shouldLogoKeepOriginalSize);
 	}
 	
 	/**
@@ -141,51 +220,6 @@ public class CoreSettingsAppearanceSectionHandler extends BaseSectionHandler imp
 	 * @see UiGeneratorController#showOpenModeFileChooser(Object)
 	 */
 	public void showFileChooser(Object component) {
-		this.uiController.showFileChooser(component);
-	}
-	
-	/** Show the settings dialog for the home tab. */
-	public void initLogoSettings() {
-		log.trace("ENTER");
-		UiProperties uiProperties = UiProperties.getInstance();
-		boolean visible 			= uiProperties.isHometabLogoVisible();
-		boolean isCustomLogo 		= uiProperties.isHometabCustomLogo();
-		boolean isOriginalSizeKept 	= uiProperties.isHometabLogoOriginalSizeKept();
-		
-		String imageLocation = uiProperties.getHometabLogoPath();
-		log.debug("Visible? " + visible);
-		log.debug("Logo: " + (isCustomLogo ? "custom" : "default"));
-		if (isCustomLogo)
-			log.debug("Keep original size: " + isOriginalSizeKept);
-		log.debug("Image location [" + imageLocation + "]");
-		
-		String radioButtonName;
-		if(!visible) {
-			radioButtonName = COMPONENT_CB_HOME_TAB_LOGO_INVISIBLE;
-		} else if(isCustomLogo) {
-			radioButtonName = COMPONENT_CB_HOME_TAB_USE_CUSTOM_LOGO;
-		} else {
-			radioButtonName = COMPONENT_CB_HOME_TAB_USE_DEFAULT_LOGO;
-		}
-		
-		this.uiController.setSelected(find(radioButtonName), true);
-		this.uiController.setSelected(find(COMPONENT_CB_HOME_TAB_LOGO_KEEP_ORIGINAL_SIZE), isOriginalSizeKept);
-		
-		setHomeTabCustomLogo(find(COMPONENT_PN_CUSTOM_IMAGE), isCustomLogo && visible);
-		
-		if (imageLocation != null && imageLocation.length() > 0) {
-			this.uiController.setText(find(COMPONENT_TF_IMAGE_SOURCE), imageLocation);
-		}
-		
-		log.trace("EXIT");
-	}
-
-//	public void settingChanged() {
-//		this.eventBus.notifyObservers(new SettingsChangedEventNotification());
-//	}
-
-	public Object getPanel(String section) {
-		// TODO Auto-generated method stub
-		return null;
+		this.uiController.showFileChooser(this, "customImageSourceChanged");
 	}
 }

@@ -41,14 +41,13 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 
 	private static final String UI_COMPONENT_CORE_TREE = "generalTree";
 	private static final String UI_COMPONENT_PLUGIN_TREE = "pluginTree";
-
 	private static final String UI_COMPONENT_PN_DISPLAY_SETTINGS = "pnDisplaySettings";
 
 	private static final String I18N_MESSAGE_CONFIRM_CLOSE_SETTINGS = "message.confirm.close.settings";
-
 	private static final String I18N_MENU_DATABASE_SETTINGS  = "menuitem.edit.db.settings";
-
 	private static final String I18N_MENU_EMAIL_SETTINGS = "menuitem.email.settings";
+	private static final String I18N_TOOLTIP_SETTINGS_BTSAVE_DISABLED = "tooltip.settings.btsave.disabled";
+	private static final String I18N_TOOLTIP_SETTINGS_SAVES_ALL = "tooltip.settings.saves.all";
 
 
 //> INSTANCE PROPERTIES
@@ -60,6 +59,8 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	private EventBus eventBus;
 	
 	private List<UiSettingsSectionHandler> handlersList;
+	
+	private List<String> changesList;
 
 	private Object selectedPluginItem;
 
@@ -74,7 +75,8 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		this.uiController = controller;
 		this.eventBus = controller.getFrontlineController().getEventBus();
 		this.handlersList = new ArrayList<UiSettingsSectionHandler>();
-		
+		this.changesList = new ArrayList<String>();
+
 		this.init();
 	}
 
@@ -383,7 +385,35 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 
 	public void notify(FrontlineEventNotification notification) {
 		if (notification instanceof SettingsChangedEventNotification) {
-			this.uiController.setEnabled(this.uiController.find(this.settingsDialog, UiGeneratorControllerConstants.COMPONENT_BT_SAVE), true);
+			SettingsChangedEventNotification settingsNotification = (SettingsChangedEventNotification) notification;
+			String sectionItem = settingsNotification.getSectionItem();
+			
+			if (settingsNotification.isUnchange()) {
+				// A previous change has been cancelled, let's remove it from our list
+				this.changesList.remove(sectionItem);
+			} else {
+				// This is an actual change, let's add it to our list if it's a new change
+				if (!this.changesList.contains(sectionItem)) {
+					this.changesList.add(sectionItem);
+				}
+			}
+			
+			this.handleSaveButton(!this.changesList.isEmpty());
 		}
+	}
+
+	private void handleSaveButton(boolean shouldEnableSaveButton) {
+		// If our list of changes is empty, this means we went back to the original configuration
+		Object btSave = find(UiGeneratorControllerConstants.COMPONENT_BT_SAVE);
+		this.uiController.setEnabled(btSave, shouldEnableSaveButton);
+		
+		String tooltip;
+		if (shouldEnableSaveButton) {
+			tooltip = InternationalisationUtils.getI18NString(I18N_TOOLTIP_SETTINGS_SAVES_ALL);
+		} else {
+			tooltip = InternationalisationUtils.getI18NString(I18N_TOOLTIP_SETTINGS_BTSAVE_DISABLED);
+		}
+		
+		this.uiController.setTooltip(btSave, tooltip);
 	}
 }

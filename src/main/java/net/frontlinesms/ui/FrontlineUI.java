@@ -115,6 +115,15 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	public void showFileChooser(Object textFieldToBeSet) {
 		FileChooser.showFileChooser(this, textFieldToBeSet);
 	}
+	
+	/**
+	 * This method opens a fileChooser and specifies a handler.
+	 * @param handler The UI handler
+	 * @param methodName The method to be called on the handler
+	 */
+	public void showFileChooser(ThinletUiEventHandler handler, String methodName) {
+		FileChooser.showFileChooser(this, handler, methodName);
+	}
 
 	/**
 	 * Popup an alert to the user with the supplied message.

@@ -17,7 +17,7 @@
 		</panel>
 	</splitpane>
 	<panel gap="5" halign="center" weightx="1" weighty="1">
-		<button text="i18n.action.save" name="btSave" action="save" icon="/icons/tick.png" enabled="false"/>
+		<button text="i18n.action.save" name="btSave" action="save" tooltip="i18n.tooltip.settings.btsave.disabled" icon="/icons/tick.png" enabled="false"/>
 		<button text="i18n.action.cancel" icon="/icons/cross.png" action="closeDialog"/>
 	</panel>
 </dialog>
