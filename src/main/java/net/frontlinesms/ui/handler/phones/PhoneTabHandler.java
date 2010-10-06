@@ -50,7 +50,8 @@ import serial.NoSuchPortException;
 
 /**
  * Event handler for the Phones tab and associated dialogs
- * @author Alex
+ * @author Alex Anderson <alex@frontlinesms.com>
+ * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 @TextResourceKeyOwner(prefix={"COMMON_", "I18N_", "MESSAGE_"})
 public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagingServiceEventListener, EventObserver {
@@ -85,22 +86,10 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	private static final String COMMON_PHONE_CONNECTED = "common.phone.connected";
 	/** I18n Text Key: TODO */
 	private static final String COMMON_SMS_INTERNET_SERVICE_CONNECTED = "common.sms.internet.service.connected";
-	/** I18n Text Key: TODO */
-	private static final String MESSAGE_INVALID_BAUD_RATE = "message.invalid.baud.rate";
-	/** I18n Text Key: TODO */
-	private static final String MESSAGE_PORT_NOT_FOUND = "message.port.not.found";
-	/** I18n Text Key: TODO */
-	private static final String MESSAGE_PORT_ALREADY_CONNECTED = "message.port.already.connected";
-	/** I18n Text Key: The requested port is already in use. */
-	private static final String I18N_PORT_IN_USE = "com.port.inuse";
 	/** I18n Text Key: Last checked: %0. */
 	private static final String I18N_EMAIL_LAST_CHECKED = "email.last.checked";
 	
-//> THINLET UI COMPONENT NAMES	
-	/** UI Component name: TODO */
-	private static final String COMPONENT_RB_PHONE_DETAILS_ENABLE = "rbPhoneDetailsEnable";
-	/** UI Component name: TODO */
-	private static final String COMPONENT_PN_PHONE_SETTINGS = "pnPhoneSettings";
+//> THINLET UI COMPONENT NAMES
 	/** UI Component name: TODO */
 	private static final String COMPONENT_PHONE_MANAGER_MODEM_LIST = "phoneManager_modemList";
 	/** UI Component name: TODO */
@@ -150,8 +139,12 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 		if (selected != null) {
 			FrontlineMessagingService service = ui.getAttachedObject(selected, FrontlineMessagingService.class);
 			if (service instanceof SmsModem) {
-				if (!((SmsModem) service).isDisconnecting())
-					showPhoneSettingsDialog((SmsModem) service, false);
+				SmsModem modem = (SmsModem) service;
+				if (modem.isConnected()) {
+					showPhoneSettingsDialog(modem, false);
+				} else {
+					showPhoneConfigDialog(list);
+				}
 			} else if (service instanceof SmsInternetService) {
 				SmsInternetServiceSettingsHandler serviceHandler = new SmsInternetServiceSettingsHandler(this.ui);
 				serviceHandler.showConfigureService((SmsInternetService) service, null);
@@ -282,50 +275,23 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	/**
 	 * Show the dialog for connecting a phone with manual configuration.
 	 * @param list TODO what is this list, and why is it necessary?  Could surely just find it
+	 * TODO FIXME XXX need to be much clearer about when this method should be available.
 	 */
 	public void showPhoneConfigDialog(Object list) {
 		Object selected = ui.getSelectedItem(list);
-		final FrontlineMessagingService selectedDevice = ui.getAttachedObject(selected, FrontlineMessagingService.class);
+		// This assumes that the attached FrontlineMessagingService is an instance of SmsModem 
+		final SmsModem selectedModem = ui.getAttachedObject(selected, SmsModem.class);
 		
 		// We create the manual config dialog and put the display job in the AWT event queue
-		final DeviceManualConfigDialogHandler configDialog = new DeviceManualConfigDialogHandler(ui, this, selectedDevice);
+		final DeviceManualConfigDialogHandler configDialog = new DeviceManualConfigDialogHandler(ui, selectedModem);
 		
 		FrontlineUiUpateJob upateJob = new FrontlineUiUpateJob() {
-			
 			public void run() {
 				ui.add(configDialog.getDialog());
 			}
 		};
 		
 		EventQueue.invokeLater(upateJob);
-	}
-	
-	/**
-	 * Connect to a phone using the manual settings provided in the {@link #showPhoneConfigDialog(Object)}.
-	 * @param phoneConfigDialog
-	 */
-	public void connectToPhone(Object phoneConfigDialog) {
-		String baudRateAsString = ui.getText(ui.find(phoneConfigDialog,"lbBaudRate"));
-		String requestedPortName = ui.getText(ui.find(phoneConfigDialog,"lbPortName"));
-		if (!phoneManager.hasPhoneConnected(requestedPortName)) {
-			try {
-				String preferredCATHandler = ui.getText(ui.find(phoneConfigDialog,"lbCATHandlers"));
-				if(phoneManager.requestConnect(
-						requestedPortName,
-						Integer.parseInt(baudRateAsString),
-						preferredCATHandler)) {
-					ui.remove(phoneConfigDialog);
-				} else {
-					ui.alert(InternationalisationUtils.getI18NString(I18N_PORT_IN_USE));
-				}
-			} catch (NumberFormatException e) {
-				ui.alert(InternationalisationUtils.getI18NString(MESSAGE_INVALID_BAUD_RATE, baudRateAsString));
-			} catch (NoSuchPortException e) {
-				ui.alert(InternationalisationUtils.getI18NString(MESSAGE_PORT_NOT_FOUND, requestedPortName));
-			}
-		} else {
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_PORT_ALREADY_CONNECTED, requestedPortName));
-		}
 	}
 
 	/** Starts the phone auto-detector. */
@@ -394,10 +360,6 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 		}
 		refresh();
 		log.trace("EXIT");
-	}
-	
-	public void phoneManagerDetailsCheckboxChanged(Object checkbox) {
-		ui.setEnabled(ui.getNextItem(ui.getParent(checkbox), checkbox, false), ui.isSelected(checkbox));
 	}
 
 //> INSTANCE HELPER METHODS
@@ -527,6 +489,11 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 				statusString += " - " + InternationalisationUtils.getI18NString(I18N_EMAIL_LAST_CHECKED, InternationalisationUtils.getDatetimeFormat().format(new Date (lastChecked)));
 			}
 		}
+		
+		
+		// FIXME delete this rubbish
+		statusString += " :: " + service.getStatusDetail();
+		// FIXME end of rubbish
 		
 		return statusString;
 	}

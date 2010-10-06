@@ -631,7 +631,9 @@ public class SmsModem extends Thread implements SmsService {
 		boolean phoneFound = false;
 		
 		this.setStatus(SmsModemStatus.SEARCHING, null);
-		
+
+		// Set this if there was a problem connecting and you'd like to report the detail.
+		String lastDetail = null;
 		for (int currentBaudRate : COMM_SPEEDS) {
 			if (!isDetecting()) {
 				disconnect(true);
@@ -644,6 +646,8 @@ public class SmsModem extends Thread implements SmsService {
 
 			resetWatchdog();
 			cService = new CService(portName, currentBaudRate, "", "", "");
+			// set this flag to false if the status has been updated within the error handling.  It is only
+			// checked if no phone is found.
 			try {
 				cService.serialDriver.open();
 				// wait for port to open and AT handler to awake
@@ -668,12 +672,20 @@ public class SmsModem extends Thread implements SmsService {
 				break;
 			} catch(TooManyListenersException ex) {
 				LOG.debug("Too Many Listeners", ex);
+				lastDetail = ex.getClass().getSimpleName();
+				if(ex.getMessage() != null) lastDetail += " :: " + ex.getMessage();
 			} catch(UnsupportedCommOperationException ex) {
 				LOG.debug("Unsupported Operation", ex);
+				lastDetail = ex.getClass().getSimpleName();
+				if(ex.getMessage() != null) lastDetail += " :: " + ex.getMessage();
 			} catch(NoSuchPortException ex) {
 				LOG.debug("Port does not exist", ex);
+				lastDetail = ex.getClass().getSimpleName();
+				if(ex.getMessage() != null) lastDetail += " :: " + ex.getMessage();
 			} catch(PortInUseException ex) {
 				LOG.debug("Port already in use", ex);
+				lastDetail = ex.getClass().getSimpleName();
+				if(ex.getMessage() != null) lastDetail += " :: " + ex.getMessage();
 			} finally {
 				disconnect(!phoneFound);
 			}
@@ -681,7 +693,7 @@ public class SmsModem extends Thread implements SmsService {
 
 		if (!phoneFound) {
 			disconnect(false);
-			setStatus(SmsModemStatus.NO_PHONE_DETECTED, null);
+			setStatus(SmsModemStatus.NO_PHONE_DETECTED, lastDetail);
 		} else {
 			try {
 				baudRate = maxBaudRate;

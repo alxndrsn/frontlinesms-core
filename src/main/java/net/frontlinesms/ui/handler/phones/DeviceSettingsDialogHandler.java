@@ -10,10 +10,10 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
 import org.apache.log4j.Logger;
-import org.springframework.jdbc.core.SqlOutParameter;
 
 /**
  * @author Morgan Belkadi <morgan@frontlinesms.com>
+ * @author alex@frontlinesms.com
  */
 @TextResourceKeyOwner
 public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
@@ -90,7 +90,6 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 				ui.setSelected(find("rbPhoneDetailsDisable"), true);
 				ui.setSelected(find(COMPONENT_RB_PHONE_DETAILS_ENABLE), false);
 				ui.deactivate(find(COMPONENT_PN_PHONE_SETTINGS));
-				
 			}
 		}
 		
@@ -199,15 +198,22 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 			}
 		} else ui.deactivate(pnPhoneSettings);
 	}
-
-//> UI HELPER METHODS
-	/** @return UI component with the supplied name, or <code>null</code> if none could be found */
-	private Object find(String componentName) {
-		return ui.find(this.dialogComponent, componentName);
+	
+	public void phoneManagerDetailsCheckboxChanged(Object checkbox) {
+		ui.setEnabled(ui.getNextItem(ui.getParent(checkbox), checkbox, false), ui.isSelected(checkbox));
 	}
 
 	/** @see UiGeneratorController#removeDialog(Object) */
 	public void removeDialog() {
 		this.ui.removeDialog(dialogComponent);
+	}
+	public void showHelpPage(String page) {
+		this.ui.showHelpPage(page);
+	}
+
+//> UI HELPER METHODS
+	/** @return UI component with the supplied name, or <code>null</code> if none could be found */
+	private Object find(String componentName) {
+		return ui.find(this.dialogComponent, componentName);
 	}
 }

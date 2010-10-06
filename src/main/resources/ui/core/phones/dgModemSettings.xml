@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<dialog closable="true" close="removeDialog(this)" bottom="7" columns="2" gap="7" icon="/icons/phone_edit.png" left="7" modal="true" name="phoneSettingsDialog" right="7" top="7">
+<dialog closable="true" close="removeDialog" bottom="7" columns="2" gap="7" icon="/icons/phone_edit.png" left="7" modal="true" name="phoneSettingsDialog" right="7" top="7">
 	<checkbox text="i18n.common.phone.dont.use" name="rbPhoneDetailsDisable" group="myGroup" action="phoneManagerDetailsUse(phoneSettingsDialog, this)"/>
 	<button tooltip="i18n.tooltip.click.for.help" halign="right" action="showHelpPage('phones.htm')" icon="/icons/help.png" type="link"/>
 	<checkbox colspan="2" text="i18n.common.phone.use" name="rbPhoneDetailsEnable" group="myGroup" selected="true" action="phoneManagerDetailsUse(phoneSettingsDialog, this)"/>
-	<panel colspan="2" name="pnPhoneSettings" columns="2" left="7" gap="7">
+	<panel colspan="2" name="pnPhoneSettings" columns="2" left="15" gap="7">
 	    <checkbox colspan="2" icon="/icons/sms_send.png" name="cbSending" selected="true" text="i18n.common.use.for.sending" action="phoneManagerDetailsCheckboxChanged(this)"/>
 	    <checkbox colspan="2" icon="/icons/sms_deliveryReport.png" name="cbUseDeliveryReports" selected="true" text="i18n.common.use.delivery.reports"/>
 	    <separator colspan="2"/>
@@ -18,13 +18,13 @@
 			<label text="i18n.phone.settings.smsc.number" icon="/icons/server.png"/>
 			<textfield name="tfSmscNumber" weightx="1"/>
 			
-			<label text="i18n.phone.settings.pin" icon="/icons/phone.png"/>
+			<label text="i18n.phone.settings.pin" icon="/icons/key.png"/>
 			<textfield name="tfPin" weightx="1"/>
 	</panel>
 	
 	<panel colspan="2" columns="2" gap="7" halign="center">
-	    <button action="updatePhoneDetails(phoneSettingsDialog)" icon="/icons/tick.png" name="btSave" text="i18n.action.save"/>
-	    <button action="removeDialog(phoneSettingsDialog)" icon="/icons/cross.png" name="btCancel" text="i18n.action.cancel"/>
+	    <button action="doConnect" icon="/icons/tick.png" name="btSave" text="i18n.action.save"/>
+	    <button action="removeDialog" icon="/icons/cross.png" name="btCancel" text="i18n.action.cancel"/>
 	</panel>
 
 </dialog>
