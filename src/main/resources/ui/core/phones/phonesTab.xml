@@ -9,7 +9,7 @@
 				<column text="" width="18"/>
 				<column text="i18n.common.port" icon="/icons/port_open.png"/>
 				<column text="i18n.services.header.name" width="200" icon="/icons/about.png"/>
-				<column text="i18n.services.header.id" width="150" icon="/icons/serial.png"/>
+				<column text="i18n.services.header.id" width="150" icon="/icons/key.png"/>
 				<column text="" width="19" icon="/icons/sms_send.png"/>
 				<column text="" width="19" icon="/icons/sms_receive.png"/>
 				<column text="i18n.common.status" icon="/icons/status.png"/>
@@ -26,7 +26,7 @@
 				<column text="" width="18"/>
 				<column text="i18n.common.port" icon="/icons/port_open.png"/>
 				<column text="i18n.services.header.name" width="200" icon="/icons/about.png"/>
-				<column text="i18n.services.header.id" width="150" icon="/icons/serial.png"/>
+				<column text="i18n.services.header.id" width="150" icon="/icons/key.png"/>
 				<column text="i18n.common.status" icon="/icons/status.png"/>
 			</header>
 			<popupmenu menushown="phoneManager_enabledFields(this, phoneManager_modemListError)">
