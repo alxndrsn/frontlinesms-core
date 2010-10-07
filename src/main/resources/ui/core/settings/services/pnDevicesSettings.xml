@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<panel name="pnDevices" gap="10" weightx="2" columns="1">
+	<panel icon="/icons/cog.png" text="i18n.settings.menu.general" border="true" weightx="1" columns="1" gap="7" top="5" left="5" bottom="5" right="5">
+        <checkbox name="cbPromptConnectionProblemDialog" action="promptConnectionProblemDialogChanged(this.selected)" text="Prompt the device connection problem dialog"/>
+        <checkbox name="cbDetectAtStartup" action="startDetectingDevicesAtStartup(this.selected)" text="Start detecting devices at startup"/>
+    </panel>
+    <panel icon="/icons/phone_working.png" text="i18n.common.working.devices" border="true" weightx="1" columns="1" gap="7" top="5" left="5" bottom="5" right="5">
+        <checkbox name="cbDisableAllDevices" action="disableAllDevicesChanged(this.selected)" text="Disable all devices"/>
+		<panel name="pnDeviceChoice" halign="center" weightx="1" columns="1" gap="8">
+	    	<combobox name="cbDevices" action="deviceSelected(this.selected)" width="200" height="20"/>
+	    	<separator/>
+    	</panel>
+    	<panel name="pnDeviceSettingsContainer" gap="5" halign="left" bottom="10" columns="1">
+    		<!-- Will be populated by the device settings at runtime -->
+    	</panel>
+    	<label name="lbAppliedNextConnection" visible="false" icon="/icons/about.png" text="These settings will be applied the next time you connect your device." font="11"/>
+    </panel>
+</panel>

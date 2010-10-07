@@ -37,7 +37,12 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	private static final String KEY_PROMPT_STATS_DIALOG = "prompt.stats";
 	/** Property key (String) indicating whether or not the statistics can be sent without asking **/
 	private static final String KEY_AUTHORIZE_STATS_SENDING = "authorize.stats.sending";
-	
+	/** Property key (String) indicating whether or not all devices should be disabled **/
+	private static final String KEY_DISABLE_ALL_DEVICES = "disable.all.devices";
+	/** Property key (String) indicating whether or not devices should be detected at startup **/
+	private static final String KEY_START_DETECTING_AT_STARTUP = "start.detecting.at.startup";
+
+
 //> DEFAULT VALUES
 	/** Default value for {@link #KEY_DATABASE_CONFIG_PATH} */
 	private static final String DEFAULT_DATABASE_CONFIG_PATH = "h2.database.xml";
@@ -173,6 +178,32 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	 */
 	public void setAuthorizeStatsSending(boolean authorizeStatsSending) {
 		super.setPropertyAsBoolean(KEY_AUTHORIZE_STATS_SENDING, authorizeStatsSending);
+	}
+	
+	/** @return whether or not all devices should be disabled. **/
+	public boolean disableAllDevices() {
+		return super.getPropertyAsBoolean(KEY_DISABLE_ALL_DEVICES, false);
+	}
+	
+	/**
+	 * Set whether or not all devices should be disabled.
+	 * @param allDevicesDisabled value for property {@link #KEY_DISABLE_ALL_DEVICES}
+	 */
+	public void shouldDisableAllDevices(boolean allDevicesDisabled) {
+		super.setPropertyAsBoolean(KEY_DISABLE_ALL_DEVICES, allDevicesDisabled);
+	}
+	
+	/** @return whether or not devices should be detected at startup. **/
+	public boolean startDetectingAtStartup() {
+		return super.getPropertyAsBoolean(KEY_START_DETECTING_AT_STARTUP, true);
+	}
+	
+	/**
+	 * Set whether or not all devices should be disabled.
+	 * @param allDevicesDisabled value for property {@link #KEY_DISABLE_ALL_DEVICES}
+	 */
+	public void shouldStartDetectingAtStartup(boolean shouldStartDetectingAtStartup) {
+		super.setPropertyAsBoolean(KEY_START_DETECTING_AT_STARTUP, shouldStartDetectingAtStartup);
 	}
 	
 //> INSTANCE HELPER METHODS

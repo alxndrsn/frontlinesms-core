@@ -22,6 +22,7 @@ public class SmsModemSettings {
 	private String manufacturer;
 	private String model;
 
+	private boolean supportsReceive = true;
 	private boolean useForSending;
 	private boolean useForReceiving;
 	private boolean deleteMessagesAfterReceiving;
@@ -39,10 +40,11 @@ public class SmsModemSettings {
 	 * @param deleteMessagesAfterReceiving whether messages should be deleted from the device after being read by FrontlineSMS 
 	 * @param useDeliveryReports whether delivery reports should be used with this device
 	 */
-	public SmsModemSettings(String serial, String manufacturer, String model, boolean useForSending, boolean useForReceiving, boolean deleteMessagesAfterReceiving, boolean useDeliveryReports) {
+	public SmsModemSettings(String serial, String manufacturer, String model, boolean supportsReceive, boolean useForSending, boolean useForReceiving, boolean deleteMessagesAfterReceiving, boolean useDeliveryReports) {
 		this.serial = serial;
 		this.manufacturer = manufacturer;
 		this.model = model;
+		this.supportsReceive = supportsReceive;
 		this.useForSending = useForSending;
 		this.useForReceiving = useForReceiving;
 		this.deleteMessagesAfterReceiving = deleteMessagesAfterReceiving;
@@ -133,5 +135,13 @@ public class SmsModemSettings {
 		if (useForSending != other.useForSending)
 			return false;
 		return true;
+	}
+
+	public void setSupportsReceive(boolean supportsReceive) {
+		this.supportsReceive = supportsReceive;
+	}
+
+	public boolean supportsReceive() {
+		return supportsReceive;
 	}
 }

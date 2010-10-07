@@ -1,8 +1,5 @@
 package net.frontlinesms.ui.handler.settings;
 
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_COST_PER_SMS_PREFIX;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_COST_PER_SMS_SUFFIX;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_COST_PER_SMS;
 import net.frontlinesms.AppProperties;
 import net.frontlinesms.settings.BaseSectionHandler;
 import net.frontlinesms.settings.FrontlineValidationMessage;
@@ -12,7 +9,7 @@ import net.frontlinesms.ui.UiProperties;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
 
-public class CoreSettingsGeneralSectionHandler extends BaseSectionHandler implements UiSettingsSectionHandler, ThinletUiEventHandler {
+public class SettingsGeneralSectionHandler extends BaseSectionHandler implements UiSettingsSectionHandler, ThinletUiEventHandler {
 	private static final String UI_SECTION_GENERAL = "/ui/core/settings/general/pnGeneralSettings.xml";
 	private static final String UI_COMPONENT_CB_PROMPT_STATS = "cbPromptStats";
 	private static final String UI_COMPONENT_CB_AUTHORIZE_STATS = "cbAuthorizeStats";
@@ -26,7 +23,7 @@ public class CoreSettingsGeneralSectionHandler extends BaseSectionHandler implem
 	private static final String SECTION_ITEM_PROMPT_STATS = "GENERAL_STATS_PROMPT_DIALOG";
 	private static final String SECTION_ITEM_AUTHORIZE_STATS = "GENERAL_STATS_AUTHORIZE_SENDING";
 	
-	public CoreSettingsGeneralSectionHandler (UiGeneratorController ui) {
+	public SettingsGeneralSectionHandler (UiGeneratorController ui) {
 		super(ui);
 		this.uiController = ui;
 		

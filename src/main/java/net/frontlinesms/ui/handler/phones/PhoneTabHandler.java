@@ -121,6 +121,8 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	private final SmsModemSettingsDao smsModelSettingsDao;
 	private MmsServiceManager mmsServiceManager;
 
+	private DeviceSettingsDialogHandler deviceSettingsDialog;
+
 //> CONSTRUCTORS
 	/**
 	 * Create a new instance of this class.
@@ -177,7 +179,7 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	 * @param isNewPhone <code>true</code> TODO <if this phone has previously connected (i.e. not first time it has connected)> OR <if this phone has just connected (e.g. may have connected before, but not today)> 
 	 */
 	public void showPhoneSettingsDialog(SmsModem device, boolean isNewPhone) {
-		final DeviceSettingsDialogHandler deviceSettingsDialog = new DeviceSettingsDialogHandler(ui, this, device, isNewPhone);
+		deviceSettingsDialog = new DeviceSettingsDialogHandler(ui, this, device, isNewPhone);
 		
 		FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
 			
@@ -373,6 +375,14 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 						
 						smsModelSettingsDao.updateSmsModemSettings(settings);
 					}
+					
+					boolean supportsReceive = activeService.supportsReceive();
+					if (settings.supportsReceive() != supportsReceive) {
+						settings.setSupportsReceive(supportsReceive);
+						
+						smsModelSettingsDao.updateSmsModemSettings(settings);
+					}
+					
 					activeService.setUseForSending(settings.useForSending());
 					activeService.setUseDeliveryReports(settings.useDeliveryReports());
 
@@ -403,13 +413,13 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 		log.trace("EXIT");
 	}
 	
-	public void phoneManagerDetailsUse(Object phoneSettingsDialog, Object radioButton) {
-		Object pnPhoneSettings = ui.find(phoneSettingsDialog, COMPONENT_PN_PHONE_SETTINGS);
+	public void phoneManagerDetailsUse(Object radioButton) {
+		Object pnPhoneSettings = ui.find(this.deviceSettingsDialog, COMPONENT_PN_PHONE_SETTINGS);
 		if(COMPONENT_RB_PHONE_DETAILS_ENABLE.equals(ui.getName(radioButton))) {
 			ui.activate(pnPhoneSettings);
 			// If this phone does not support SMS receiving, we need to pass this info onto
 			// the user.  We also want to gray out the options for receiving.
-			SmsModem modem = ui.getAttachedObject(phoneSettingsDialog, SmsModem.class);
+			SmsModem modem = ui.getAttachedObject(this.deviceSettingsDialog, SmsModem.class);
 			if(!modem.supportsReceive()) {
 				ui.setEnabled(ui.find(pnPhoneSettings, COMPONENT_PHONE_RECEIVING), false);
 				ui.setEnabled(ui.find(pnPhoneSettings, COMPONENT_PHONE_DELETE), false);
@@ -418,7 +428,9 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	}
 	
 	public void phoneManagerDetailsCheckboxChanged(Object checkbox) {
-		ui.setEnabled(ui.getNextItem(ui.getParent(checkbox), checkbox, false), ui.isSelected(checkbox));
+		if (checkbox.equals(find(COMPONENT_PHONE_RECEIVING)) || checkbox.equals(find(COMPONENT_PHONE_SENDING))) {
+			ui.setEnabled(ui.getNextItem(ui.getParent(checkbox), checkbox, false), ui.isSelected(checkbox));
+		}
 	}
 	
 	/**
@@ -431,6 +443,8 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 		String manufacturer = phone.getManufacturer();
 		String model = phone.getModel();
 
+		boolean supportsReceive = phone.supportsReceive();
+		
 		boolean useForSending;
 		boolean useDeliveryReports;
 		boolean useForReceiving;
@@ -449,7 +463,7 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 		
 		phone.setUseForSending(useForSending);
 		phone.setUseDeliveryReports(useDeliveryReports);
-		if(phone.supportsReceive()) {
+		if(supportsReceive) {
 			phone.setUseForReceiving(useForReceiving);
 			phone.setDeleteMessagesAfterReceiving(deleteMessagesAfterReceiving);
 		} else {
@@ -463,9 +477,10 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 			settings.setUseDeliveryReports(useDeliveryReports);
 			settings.setUseForReceiving(useForReceiving);
 			settings.setUseForSending(useForSending);
+			settings.setSupportsReceive(supportsReceive);
 			this.smsModelSettingsDao.updateSmsModemSettings(settings);
 		} else {
-			settings = new SmsModemSettings(serial, manufacturer, model, useForSending, useForReceiving, deleteMessagesAfterReceiving, useDeliveryReports);
+			settings = new SmsModemSettings(serial, manufacturer, model, supportsReceive, useForSending, useForReceiving, deleteMessagesAfterReceiving, useDeliveryReports);
 			this.smsModelSettingsDao.saveSmsModemSettings(settings);
 		}
 		

@@ -25,7 +25,7 @@ import org.apache.log4j.Logger;
  * UI Handler for the "General/Email" section of the Core Settings
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
-public class CoreSettingsGeneralEmailSectionHandler extends BaseSectionHandler implements UiSettingsSectionHandler, ThinletUiEventHandler, EventObserver {
+public class SettingsEmailSectionHandler extends BaseSectionHandler implements UiSettingsSectionHandler, ThinletUiEventHandler, EventObserver {
 	//> UI LAYOUT FILES
 	private static final String UI_FILE_EMAIL_ACCOUNTS_PANEL = "/ui/core/settings/general/pnEmailSettings.xml";
 	
@@ -42,7 +42,7 @@ public class CoreSettingsGeneralEmailSectionHandler extends BaseSectionHandler i
 	/** Manager of {@link EmailAccount}s and {@link EmailSender}s */
 	private EmailServerHandler emailManager;
 	
-	public CoreSettingsGeneralEmailSectionHandler (UiGeneratorController ui) {
+	public SettingsEmailSectionHandler (UiGeneratorController ui) {
 		super(ui);
 		this.emailAccountDao = this.uiController.getFrontlineController().getEmailAccountFactory();
 		this.emailManager = this.uiController.getFrontlineController().getEmailServerHandler();
@@ -67,15 +67,14 @@ public class CoreSettingsGeneralEmailSectionHandler extends BaseSectionHandler i
 	private void init() {
 		this.panel = this.uiController.loadComponentFromFile(UI_FILE_EMAIL_ACCOUNTS_PANEL, this);
 		
-		//this.uiController.setText(getDialogComponent(), InternationalisationUtils.getI18NString(I18N_MMS_EMAIL_ACCOUNT_SETTINGS));
-		//this.refresh();
+		this.refresh();
 	}
 
 	public void refresh() {
 		Object table = find(UI_COMPONENT_ACCOUNTS_LIST);
 		this.uiController.removeAll(table);
 		Collection<EmailAccount> emailAccounts;
-		emailAccounts = emailAccountDao.getReceivingEmailAccounts();
+		emailAccounts = emailAccountDao.getSendingEmailAccounts();
 
 		for (EmailAccount acc : emailAccounts) {
 			this.uiController.add(table, this.uiController.getRow(acc));
@@ -113,7 +112,7 @@ public class CoreSettingsGeneralEmailSectionHandler extends BaseSectionHandler i
 	}
 	
 	private void showEmailAccountSettingsDialog(EmailAccount emailAccount) {
-		EmailAccountSettingsDialogHandler emailAccountSettingsDialogHandler = new EmailAccountSettingsDialogHandler(this.uiController, true);
+		EmailAccountSettingsDialogHandler emailAccountSettingsDialogHandler = new EmailAccountSettingsDialogHandler(this.uiController, false);
 		emailAccountSettingsDialogHandler.initDialog(emailAccount);
 		this.uiController.add(emailAccountSettingsDialogHandler.getDialog());
 	}

@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
  * UI Handler for the "Appearance" section of the Core Settings
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
-public class CoreSettingsAppearanceSectionHandler extends BaseSectionHandler implements UiSettingsSectionHandler, ThinletUiEventHandler {
+public class SettingsAppearanceSectionHandler extends BaseSectionHandler implements UiSettingsSectionHandler, ThinletUiEventHandler {
 	protected final Logger log = FrontlineUtils.getLogger(this.getClass());
 
 	private static final String UI_SECTION_APPEARANCE = "/ui/core/settings/appearance/pnAppearanceSettings.xml";
@@ -43,7 +43,7 @@ public class CoreSettingsAppearanceSectionHandler extends BaseSectionHandler imp
 	private static final String SECTION_ITEM_LOGO_TYPE = "APPEARANCE_LOGO_RADIOBUTTONS";
 	private static final String SECTION_ITEM_LANGUAGE = "APPEARANCE_LANGUAGE";
 	
-	public CoreSettingsAppearanceSectionHandler (UiGeneratorController uiController) {
+	public SettingsAppearanceSectionHandler (UiGeneratorController uiController) {
 		super(uiController);
 		this.uiController = uiController;
 		

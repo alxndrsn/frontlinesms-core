@@ -15,10 +15,11 @@ import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.plugins.PluginSettingsController;
 import net.frontlinesms.settings.CoreSettingsSections;
 import net.frontlinesms.settings.FrontlineValidationMessage;
-import net.frontlinesms.ui.handler.settings.CoreSettingsAppearanceSectionHandler;
-import net.frontlinesms.ui.handler.settings.CoreSettingsGeneralDatabaseSectionHandler;
-import net.frontlinesms.ui.handler.settings.CoreSettingsGeneralEmailSectionHandler;
-import net.frontlinesms.ui.handler.settings.CoreSettingsGeneralSectionHandler;
+import net.frontlinesms.ui.handler.settings.SettingsAppearanceSectionHandler;
+import net.frontlinesms.ui.handler.settings.SettingsDatabaseSectionHandler;
+import net.frontlinesms.ui.handler.settings.SettingsDevicesSectionHandler;
+import net.frontlinesms.ui.handler.settings.SettingsEmailSectionHandler;
+import net.frontlinesms.ui.handler.settings.SettingsGeneralSectionHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.settings.SettingsChangedEventNotification;
 import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
@@ -46,9 +47,14 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	private static final String I18N_MESSAGE_CONFIRM_CLOSE_SETTINGS = "message.confirm.close.settings";
 	private static final String I18N_MENU_DATABASE_SETTINGS  = "menuitem.edit.db.settings";
 	private static final String I18N_MENU_EMAIL_SETTINGS = "menuitem.email.settings";
+	private static final String I18N_SETTINGS_MENU_APPEARANCE = "settings.menu.appearance";
+	private static final String I18N_SETTINGS_MENU_DEVICES = "settings.menu.devices";
+	private static final String I18N_SETTINGS_MENU_GENERAL = "settings.menu.general";
+	private static final String I18N_SETTINGS_MENU_INTERNET_SERVICES = "settings.menu.internet.services";
+	private static final String I18N_SETTINGS_MENU_MMS = "settings.menu.mms";
+	private static final String I18N_SETTINGS_MENU_SERVICES = "settings.menu.services";
 	private static final String I18N_TOOLTIP_SETTINGS_BTSAVE_DISABLED = "tooltip.settings.btsave.disabled";
 	private static final String I18N_TOOLTIP_SETTINGS_SAVES_ALL = "tooltip.settings.saves.all";
-
 
 //> INSTANCE PROPERTIES
 	/** Thinlet instance that owns this handler */
@@ -65,6 +71,8 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	private Object selectedPluginItem;
 
 	private Object selectedCoreItem;
+
+	private List<Object> unselectableNodes;
 	
 //> CONSTRUCTORS
 	/**
@@ -76,6 +84,7 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		this.eventBus = controller.getFrontlineController().getEventBus();
 		this.handlersList = new ArrayList<UiSettingsSectionHandler>();
 		this.changesList = new ArrayList<String>();
+		this.unselectableNodes = new ArrayList<Object>();
 
 		this.init();
 	}
@@ -98,20 +107,35 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	}
 
 	private void loadCoreSettings() {
-		Object appearanceRootNode = this.createSectionNode(true, "Appearance", CoreSettingsSections.APPEARANCE.toString(), "/icons/display.png");
-		
-		Object generalRootNode = this.createSectionNode(true, "General", CoreSettingsSections.GENERAL.toString(), "/icons/cog.png");
-		this.uiController.add(generalRootNode, this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_MENU_DATABASE_SETTINGS), CoreSettingsSections.GENERAL_DATABASE.toString(), "/icons/database_edit.png"));
-		this.uiController.add(generalRootNode, this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_MENU_EMAIL_SETTINGS), CoreSettingsSections.GENERAL_EMAIL.toString(), "/icons/emailAccount_edit.png"));
-
-		Object servicesRootNode = this.createSectionNode(true, "Services", CoreSettingsSections.SERVICES.toString(), "/icons/phone_manualConfigure.png");
-		
+		/** APPEARANCE **/
+		Object appearanceRootNode = this.createSectionNode(true, InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_APPEARANCE), CoreSettingsSections.APPEARANCE.toString(), "/icons/display.png");
 		this.uiController.add(find(UI_COMPONENT_CORE_TREE), appearanceRootNode);
-		this.uiController.add(find(UI_COMPONENT_CORE_TREE), generalRootNode);
-		this.uiController.add(find(UI_COMPONENT_CORE_TREE), servicesRootNode);
-		
 		this.uiController.setSelectedItem(find(UI_COMPONENT_CORE_TREE), appearanceRootNode);
 		this.selectionChanged(find(UI_COMPONENT_CORE_TREE));
+		
+		/** GENERAL **/
+		Object generalRootNode = this.createSectionNode(true, InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_GENERAL), CoreSettingsSections.GENERAL.toString(), "/icons/cog.png");
+		this.uiController.add(generalRootNode, this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_MENU_DATABASE_SETTINGS), CoreSettingsSections.GENERAL_DATABASE.toString(), "/icons/database_edit.png"));
+		this.uiController.add(generalRootNode, this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_MENU_EMAIL_SETTINGS), CoreSettingsSections.GENERAL_EMAIL.toString(), "/icons/emailAccount_edit.png"));
+		this.uiController.add(find(UI_COMPONENT_CORE_TREE), generalRootNode);
+		
+		/** SERVICES **/
+		Object servicesRootNode = this.createSectionNode(true, InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_SERVICES), CoreSettingsSections.SERVICES.toString(), "/icons/database_execute.png");
+		/**** SERVICES / DEVICES ****/
+		Object devicesNode = this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_DEVICES), CoreSettingsSections.SERVICES_DEVICES.toString(), "/icons/phone_manualConfigure.png");
+		this.uiController.add(servicesRootNode, devicesNode);
+		
+		/**** SERVICES / INTERNET SERVICES ****/
+		Object internetServicesNode = this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_INTERNET_SERVICES), CoreSettingsSections.SERVICES_INTERNET_SERVICES.toString(), "/icons/sms_http_edit.png");
+		this.uiController.add(servicesRootNode, internetServicesNode);
+		
+		/**** SERVICES / MMS ****/
+		Object mmsNode = this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_MMS), CoreSettingsSections.SERVICES_MMS.toString(), "/icons/mms.png");
+		this.uiController.add(servicesRootNode, mmsNode);
+		
+		
+		this.uiController.add(find(UI_COMPONENT_CORE_TREE), servicesRootNode);
+		this.unselectableNodes.add(servicesRootNode);
 	}
 
 	private Object createSectionNode(boolean isRootNode, String title, String coreSection, String iconPath) {
@@ -169,7 +193,7 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	public void selectionChanged(Object tree) {
 		Object selected = this.uiController.getSelectedItem(tree);
 		
-		if (selected == null) {
+		if (selected == null || this.unselectableNodes.contains(selected)) {
 			this.reselectItem(tree);
 		} else {
 			// Save the current selected item to avoid a future unselection.
@@ -298,14 +322,16 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	private UiSettingsSectionHandler getCoreHandlerForSection(String coreSection) {
 		CoreSettingsSections section = CoreSettingsSections.valueOf(coreSection);
 		switch (section) {
-			case GENERAL:
-				return new CoreSettingsGeneralSectionHandler(uiController);
-			case GENERAL_DATABASE:
-				return new CoreSettingsGeneralDatabaseSectionHandler(uiController);
-			case GENERAL_EMAIL:
-				return new CoreSettingsGeneralEmailSectionHandler(uiController);
 			case APPEARANCE:
-				return new CoreSettingsAppearanceSectionHandler(uiController);
+				return new SettingsAppearanceSectionHandler(uiController);
+			case GENERAL:
+				return new SettingsGeneralSectionHandler(uiController);
+			case GENERAL_DATABASE:
+				return new SettingsDatabaseSectionHandler(uiController);
+			case GENERAL_EMAIL:
+				return new SettingsEmailSectionHandler(uiController);
+			case SERVICES_DEVICES:
+				return new SettingsDevicesSectionHandler(uiController);
 			default:
 				return null;
 		}

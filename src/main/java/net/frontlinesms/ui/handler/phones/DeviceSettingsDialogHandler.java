@@ -18,6 +18,7 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 //> UI LAYOUT FILES
 	/** UI XML File Path: phone settings dialog TODO what is this dialog for? */
 	private static final String UI_FILE_MODEM_SETTINGS_DIALOG = "/ui/core/phones/dgModemSettings.xml";
+	private static final String UI_FILE_PANEL_MODEM_SETTINGS = "/ui/core/phones/pnDeviceSettings.xml";
 	
 //> UI COMPONENT NAMES
 	/** UI Component name: TODO */
@@ -36,6 +37,8 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 //> INSTANCE PROPERTIES
 	/** I18n Text Key: TODO */
 	private static final String COMMON_SETTINGS_FOR_PHONE = "common.settings.for.phone";
+
+private static final String UI_COMPONENT_PN_DEVICE_SETTINGS = "pnDeviceSettings";
 	
 	/** Logger */
 	private Logger LOG = FrontlineUtils.getLogger(this.getClass());
@@ -54,12 +57,15 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 	}
 	
 	/**
-	 * Initialize the statistics dialog
+	 * Initializes the statistics dialog
 	 */
 	private void initDialog() {
 		LOG.trace("INIT DEVICE SETTINGS DIALOG");
 		this.dialogComponent = this.ui.loadComponentFromFile(UI_FILE_MODEM_SETTINGS_DIALOG, handler);
 		this.ui.setText(dialogComponent, InternationalisationUtils.getI18NString(COMMON_SETTINGS_FOR_PHONE) + " '" + device.getModel() + "'");
+		
+		Object pnDeviceSettings = this.ui.loadComponentFromFile(UI_FILE_PANEL_MODEM_SETTINGS, handler);
+		this.ui.add(dialogComponent, pnDeviceSettings, 0);
 		
 		if(!isNewPhone) {
 			boolean useForSending = device.isUseForSending();
@@ -100,6 +106,10 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 		initDialog();
 		
 		return this.dialogComponent;
+	}
+	
+	public Object getDeviceSettingsPanel() {
+		return this.ui.find(this.dialogComponent, UI_COMPONENT_PN_DEVICE_SETTINGS);
 	}
 
 	/** @see UiGeneratorController#removeDialog(Object) */

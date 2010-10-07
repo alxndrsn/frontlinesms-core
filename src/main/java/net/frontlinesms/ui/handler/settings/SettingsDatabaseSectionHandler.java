@@ -7,7 +7,6 @@ import net.frontlinesms.AppProperties;
 import net.frontlinesms.settings.BaseSectionHandler;
 import net.frontlinesms.settings.DatabaseSettings;
 import net.frontlinesms.settings.FrontlineValidationMessage;
-import net.frontlinesms.ui.FrontlineSettingsHandler;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -17,7 +16,7 @@ import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
  * UI Handler for the "General/Database" section of the Core Settings
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
-public class CoreSettingsGeneralDatabaseSectionHandler extends BaseSectionHandler implements UiSettingsSectionHandler, ThinletUiEventHandler {
+public class SettingsDatabaseSectionHandler extends BaseSectionHandler implements UiSettingsSectionHandler, ThinletUiEventHandler {
 	private static final String UI_SECTION_DATABASE = "/ui/core/settings/general/pnDatabaseSettings.xml";
 	private static final String UI_SECTION_DATABASE_AS_DIALOG = "/ui/core/database/pnSettings.xml";
 
@@ -38,7 +37,7 @@ public class CoreSettingsGeneralDatabaseSectionHandler extends BaseSectionHandle
 
 	private Object dialogComponent;
 	
-	public CoreSettingsGeneralDatabaseSectionHandler (UiGeneratorController ui) {
+	public SettingsDatabaseSectionHandler (UiGeneratorController ui) {
 		super(ui);
 		
 		this.init();
@@ -114,6 +113,9 @@ public class CoreSettingsGeneralDatabaseSectionHandler extends BaseSectionHandle
 		}
 	}
 	
+	/**
+	 * A new database type has been selected in the ComboBox
+	 */
 	public void configFileChanged() {
 		String selected = this.uiController.getText(this.uiController.getSelectedItem(find(COMPONENT_SETTINGS_SELECTION)));
 		int selectedIndex = this.uiController.getSelectedIndex(find(COMPONENT_SETTINGS_SELECTION));
@@ -126,6 +128,10 @@ public class CoreSettingsGeneralDatabaseSectionHandler extends BaseSectionHandle
 		}
 	}
 	
+	/**
+	 * A database configuration field has been modified
+	 * @param databaseConfigField The component having been modified.
+	 */
 	public void configFieldChanged(Object databaseConfigField) {
 		if (selectedSettings.getFilePath().equals(this.originalValues.get(SECTION_ITEM_DATABASE_CONFIG_PATH))) {
 			this.settingChanged(SECTION_ITEM_DATABASE_CONFIG + this.uiController.getAttachedObject(databaseConfigField, String.class), this.uiController.getText(databaseConfigField));
