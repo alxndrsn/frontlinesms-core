@@ -19,6 +19,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_RE
 import java.awt.Color;
 import java.util.regex.Pattern;
 
+import net.frontlinesms.AppProperties;
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.Contact;
@@ -100,7 +101,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	}
 	
 	private double getCostPerSms() {
-		return UiProperties.getInstance().getCostPerSms();
+		return AppProperties.getInstance().getCostPerSmsSent();
 	}
 	
 	/**

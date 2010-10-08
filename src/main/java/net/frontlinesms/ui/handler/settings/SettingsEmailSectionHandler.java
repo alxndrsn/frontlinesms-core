@@ -1,46 +1,35 @@
 package net.frontlinesms.ui.handler.settings;
 
-import java.util.Collection;
+import java.util.List;
 
-import net.frontlinesms.data.domain.EmailAccount;
-import net.frontlinesms.data.events.DatabaseEntityNotification;
-import net.frontlinesms.events.EventBus;
-import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.settings.FrontlineValidationMessage;
-import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
-import net.frontlinesms.ui.handler.email.EmailAccountSettingsDialogHandler;
 
 /**
  * UI Handler for the "General/Email" section of the Core Settings
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 public class SettingsEmailSectionHandler extends SettingsAbstractEmailsSectionHandler {
-	
+	private static final String UI_FILE_EMAIL_ACCOUNTS_SETTINGS_PANEL = "/ui/core/settings/general/pnEmailSettings.xml";
+	private static final String UI_COMPONENT_PN_EMAIL_ACCOUNTS = "pnEmailAccounts";
+
 	public SettingsEmailSectionHandler (UiGeneratorController ui) {
-		super(ui);
+		super(ui, false);
+		
+		this.init();
+	}
+	
+	private void init() {
+		this.panel = this.uiController.loadComponentFromFile(UI_FILE_EMAIL_ACCOUNTS_SETTINGS_PANEL, this);
+
+		this.uiController.add(find(UI_COMPONENT_PN_EMAIL_ACCOUNTS), super.getAccountsListPanel());
 	}
 
 	public void save() {
 	}
 
-	public FrontlineValidationMessage validateFields() {
+	public List<FrontlineValidationMessage> validateFields() {
 		return null;
 	}
 //> UI EVENT METHODS
-		
-	@Override
-	public void finishEmailManagement(Object dialog) {
-		Object att = this.uiController.getAttachedObject(dialog);
-		if (att != null) {
-			Object list = this.uiController.find(att, UI_COMPONENT_ACCOUNTS_LIST);
-			this.uiController.removeAll(list);
-			for (EmailAccount acc : emailAccountDao.getAllEmailAccounts()) {
-				Object item = this.uiController.createListItem(acc.getAccountName(), acc);
-				this.uiController.setIcon(item, Icon.SERVER);
-				this.uiController.add(list, item);
-			}
-		}
-		this.uiController.removeDialog(dialog);
-	}
 }

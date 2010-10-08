@@ -4,11 +4,11 @@
 		<panel columns="1" gap="5" weightx="1">
 			<panel columns="1" gap="2" weightx="1">
 				<label icon="/icons/settings/menu_core.png"/>
-				<tree name="generalTree" action="selectionChanged(this)" weightx="1" width="200" height="155"/>
+				<tree name="generalTree" action="selectionChanged(this)" weightx="1" width="200" height="175"/>
 			</panel>
 			<panel columns="1" gap="2">
 				<label icon="/icons/settings/menu_plugins.png"/>
-				<tree name="pluginTree" action="selectionChanged(this)" weightx="1" width="200" height="105"/>
+				<tree name="pluginTree" action="selectionChanged(this)" weightx="1" width="200" height="85"/>
 			</panel>
 		</panel>
 	
@@ -17,7 +17,7 @@
 		</panel>
 	</splitpane>
 	<panel gap="5" halign="center" weightx="1" weighty="1">
-		<button text="i18n.action.save" name="btSave" action="save" tooltip="i18n.tooltip.settings.btsave.disabled" icon="/icons/tick.png" enabled="false"/>
+		<button type="default" text="i18n.action.save" name="btSave" action="save" tooltip="i18n.tooltip.settings.btsave.disabled" icon="/icons/tick.png" enabled="false"/>
 		<button text="i18n.action.cancel" icon="/icons/cross.png" action="closeDialog"/>
 	</panel>
 </dialog>

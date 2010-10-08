@@ -14,34 +14,37 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	
 //> PROPERTY STRINGS
 	/** Property key (String): the file of the language file */
-	private static final String KEY_LANGUAGE_FILE_PATH = "language.file.path";
+	public static final String KEY_LANGUAGE_FILE_PATH = "language.file.path";
 	/** Property key (boolean): show the first time wizard or not */
-	private static final String KEY_SHOW_WIZARD = "first.time.wizard";
+	public static final String KEY_SHOW_WIZARD = "first.time.wizard";
 	/** Property key (String): the version of the application last time it was run */
-	private static final String KEY_VERSION_LAST_RUN = "version";
+	public static final String KEY_VERSION_LAST_RUN = "version";
 	/** Property key (String): Path to the database config file to use */
-	private static final String KEY_DATABASE_CONFIG_PATH = "database.config";
+	public static final String KEY_DATABASE_CONFIG_PATH = "database.config";
 	/** Property key (String): User ID */
-	private static final String KEY_USER_ID = "user.id";
+	public static final String KEY_USER_ID = "user.id";
 	/** Property key (String): User Email address */
-	private static final String KEY_USER_EMAIL = "user.email";
+	public static final String KEY_USER_EMAIL = "user.email";
 	/** Property key (String): Date of last statistics submission */
-	private static final String KEY_LAST_STATS_SUBMISSION = "stats.submit.lastdate";
+	public static final String KEY_LAST_STATS_SUBMISSION = "stats.submit.lastdate";
 	/** Property key (String): Date of last prompt */
-	private static final String KEY_LAST_STATS_PROMPT = "stats.prompt.lastdate";
+	public static final String KEY_LAST_STATS_PROMPT = "stats.prompt.lastdate";
 	/** Property key (String): Mms Polling Frequency */
-	private static final String KEY_MMS_POLLING_FREQUENCY = "mms.polling.frequency";
+	public static final String KEY_MMS_POLLING_FREQUENCY = "mms.polling.frequency";
 	/** Property key (String): Whether or not the device connection dialog is shown when a connection problem occurs*/
-	private static final String KEY_SHOW_DEVICE_CONNECTION_DIALOG = "smsdevice.connection.problem.dialog.show";
+	public static final String KEY_SHOW_DEVICE_CONNECTION_DIALOG = "smsdevice.connection.problem.dialog.show";
 	/** Property key (String) indicating whether or not the statistics dialog should be prompted **/
-	private static final String KEY_PROMPT_STATS_DIALOG = "prompt.stats";
+	public static final String KEY_PROMPT_STATS_DIALOG = "prompt.stats";
 	/** Property key (String) indicating whether or not the statistics can be sent without asking **/
-	private static final String KEY_AUTHORIZE_STATS_SENDING = "authorize.stats.sending";
+	public static final String KEY_AUTHORIZE_STATS_SENDING = "authorize.stats.sending";
 	/** Property key (String) indicating whether or not all devices should be disabled **/
-	private static final String KEY_DISABLE_ALL_DEVICES = "disable.all.devices";
+	public static final String KEY_DISABLE_ALL_DEVICES = "disable.all.devices";
 	/** Property key (String) indicating whether or not devices should be detected at startup **/
-	private static final String KEY_START_DETECTING_AT_STARTUP = "start.detecting.at.startup";
-
+	public static final String KEY_START_DETECTING_AT_STARTUP = "start.detecting.at.startup";
+	/** Property key (double) the price per SMS sent */
+	public static final String KEY_SMS_COST_SENT_MESSAGES = "sms.cost.sent.messages";
+	/** Property key (double) the price per SMS received */
+	public static final String KEY_SMS_COST_RECEIVED_MESSAGES = "sms.cost.received.messages";
 
 //> DEFAULT VALUES
 	/** Default value for {@link #KEY_DATABASE_CONFIG_PATH} */
@@ -207,6 +210,38 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	}
 	
 //> INSTANCE HELPER METHODS
+	
+	/** @return number representing the cost of one SMS sent */
+	public double getCostPerSmsSent() {
+		// TODO ideally this would be an int in the least significant denomination of the currency, e.g. pennies or cents
+		String val = super.getProperty(KEY_SMS_COST_SENT_MESSAGES);
+		double cost = 0.1; // the default cost
+		if(val != null) {
+			try { cost = Double.parseDouble(val); } catch(NumberFormatException ex) { /* just use the default */ }
+		}
+		return cost;
+	}
+	
+	/** @param costPerSmsSent the price of one sms */
+	public void setCostPerSmsSent(double costPerSmsSent) {
+		super.setProperty(KEY_SMS_COST_SENT_MESSAGES, Double.toString(costPerSmsSent));
+	}
+	
+	/** @return number representing the cost of one SMS sent */
+	public double getCostPerSmsReceived() {
+		// TODO ideally this would be an int in the least significant denomination of the currency, e.g. pennies or cents
+		String val = super.getProperty(KEY_SMS_COST_RECEIVED_MESSAGES);
+		double cost = 0.0; // the default cost
+		if(val != null) {
+			try { cost = Double.parseDouble(val); } catch(NumberFormatException ex) { /* just use the default */ }
+		}
+		return cost;
+	}
+	
+	/** @param costPerSmsReceived the price of one sms */
+	public void setCostPerSmsReceived(double costPerSmsReceived) {
+		super.setProperty(KEY_SMS_COST_RECEIVED_MESSAGES, Double.toString(costPerSmsReceived));
+	}
 
 //> STATIC FACTORIES
 	/**

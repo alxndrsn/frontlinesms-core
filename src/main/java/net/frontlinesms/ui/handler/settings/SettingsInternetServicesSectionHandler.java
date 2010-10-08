@@ -2,6 +2,7 @@ package net.frontlinesms.ui.handler.settings;
 
 import java.awt.EventQueue;
 import java.util.Collection;
+import java.util.List;
 
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
@@ -81,14 +82,10 @@ public class SettingsInternetServicesSectionHandler extends BaseSectionHandler i
 		
 	}
 	
-	public FrontlineValidationMessage validateFields() {
+	public List<FrontlineValidationMessage> validateFields() {
 		return null;
 	}
 
-	public Object getPanel() {
-		return panel;
-	}
-	
 	/** Show the wizard for creating a new service. */
 	public void showNewServiceWizard() {
 		SmsInternetServiceSettingsHandler internetServiceSettingsHandler = new SmsInternetServiceSettingsHandler(this.uiController);

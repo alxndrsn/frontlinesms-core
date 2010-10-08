@@ -268,14 +268,10 @@ public class SettingsDevicesSectionHandler extends BaseSectionHandler implements
 		this.smsModemSettingsDao.updateSmsModemSettings(this.selectedModemSettings);
 	}
 
-	public FrontlineValidationMessage validateFields() {
+	public List<FrontlineValidationMessage> validateFields() {
 		return null;
 	}
 
-	public Object getPanel() {
-		return panel;
-	}
-	
 	/**
 	 * The promptConnectionProblemDialog checkbox has changed state
 	 */

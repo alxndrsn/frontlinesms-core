@@ -8,14 +8,14 @@
         <panel gap="5">
 	        <label text="i18n.common.sent.messages" weightx="1"/>
 	        <label name="lbCostPerSmsSentPrefix"/>
-		    <textfield name="tfCostPerSMSSent" columns="4"/>
+		    <textfield action="costPerSmsChanged(this)" name="tfCostPerSMSSent" columns="4"/>
 		    <label name="lbCostPerSmsSentSuffix"/>
 		    <label text="i18n.common.per.sms"/>
         </panel>
         <panel gap="5">
 	        <label text="i18n.common.received.messages" weightx="1"/>
 	        <label name="lbCostPerSmsReceivedPrefix"/>
-		    <textfield name="tfCostPerSMSReceived" columns="4"/>
+		    <textfield action="costPerSmsChanged(this)" name="tfCostPerSMSReceived" columns="4"/>
 		    <label name="lbCostPerSmsReceivedSuffix"/>
 		    <label text="i18n.common.per.sms"/>
         </panel>

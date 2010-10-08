@@ -1723,12 +1723,12 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	/** @return Cost set per SMS message */
 	private double getCostPerSms() {
-		return UiProperties.getInstance().getCostPerSms();
+		return AppProperties.getInstance().getCostPerSmsSent();
 	}
 	/** @param costPerSMS new value for {@link #costPerSMS} */
 	private void setCostPerSms(double costPerSms) {
-		UiProperties properties = UiProperties.getInstance();
-		properties.setCostPerSms(costPerSms);
+		AppProperties properties = AppProperties.getInstance();
+		properties.setCostPerSmsSent(costPerSms);
 		properties.saveToDisk();
 	}
 	
@@ -1866,6 +1866,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				}
 			}
 		} else if (notification instanceof MmsServiceStatusNotification) {
+			// An MMS Service has changed status
 			MmsServiceStatusNotification mmsServiceStatusNotification = ((MmsServiceStatusNotification) notification);
 			if (mmsServiceStatusNotification.getStatus().equals(MmsEmailServiceStatus.FAILED_TO_CONNECT)) {
 				this.newEvent(new Event(Event.TYPE_SMS_INTERNET_SERVICE_RECEIVING_FAILED, 
@@ -1874,19 +1875,28 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		} else if (notification instanceof EntitySavedNotification<?>) {
 			Object entity = ((EntitySavedNotification<?>) notification).getDatabaseEntity();
 			if (entity instanceof FrontlineMultimediaMessage) {
+				// A new Multimedia Message has been received
 				this.incomingMessageEvent((FrontlineMultimediaMessage) entity);
 			}
 		} else if (notification instanceof InternetServiceEventNotification) {
+			// An Internet Service has been added or deleted
 			InternetServiceEventNotification internetServiceNotification = (InternetServiceEventNotification) notification;
 			switch (internetServiceNotification.getEventType()) {
-			case ADD:
-				this.addSmsInternetService(internetServiceNotification.getService());
-				break;
-			case DELETE:
-				this.removeSmsInternetService(internetServiceNotification.getService());
-				break;
-			default:
-				break;
+				case ADD:
+					this.addSmsInternetService(internetServiceNotification.getService());
+					break;
+				case DELETE:
+					this.removeSmsInternetService(internetServiceNotification.getService());
+					break;
+				default:
+					break;
+			}
+		} else if (notification instanceof AppPropertiesEventNotification) {
+			// An AppProperty has been changed
+			AppPropertiesEventNotification appPropertiesNotification = (AppPropertiesEventNotification) notification;
+			
+			if (appPropertiesNotification.getProperty().equals(AppProperties.KEY_SMS_COST_SENT_MESSAGES)) {
+				setText(find(COMPONENT_TF_COST_PER_SMS), InternationalisationUtils.formatCurrency(AppProperties.getInstance().getCostPerSmsSent(), false));
 			}
 		}
 	}

@@ -12,8 +12,6 @@ import net.frontlinesms.events.EventBus;
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.settings.BaseSectionHandler;
-import net.frontlinesms.settings.FrontlineValidationMessage;
-import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.email.EmailAccountSettingsDialogHandler;
@@ -27,7 +25,7 @@ import org.apache.log4j.Logger;
  */
 public abstract class SettingsAbstractEmailsSectionHandler extends BaseSectionHandler implements UiSettingsSectionHandler, ThinletUiEventHandler, EventObserver {
 	//> UI LAYOUT FILES
-	protected static final String UI_FILE_EMAIL_ACCOUNTS_PANEL = "/ui/core/settings/general/pnEmailSettings.xml";
+	protected static final String UI_FILE_LIST_EMAIL_ACCOUNTS_PANEL = "/ui/core/settings/generic/pnAccountsList.xml";
 	
 	//> THINLET COMPONENT NAMES
 	protected static final String UI_COMPONENT_ACCOUNTS_LIST = "accountsList";
@@ -43,6 +41,8 @@ public abstract class SettingsAbstractEmailsSectionHandler extends BaseSectionHa
 	protected EmailServerHandler emailManager;
 	
 	protected boolean isForReceiving;
+
+	private Object accountsListPanel;
 	
 	public SettingsAbstractEmailsSectionHandler (UiGeneratorController ui, boolean isForReceiving) {
 		super(ui);
@@ -52,29 +52,18 @@ public abstract class SettingsAbstractEmailsSectionHandler extends BaseSectionHa
 		
 		// Register with the EventBus to receive notification of new email accounts
 		this.eventBus.registerObserver(this);
-		
-		this.init();
 	}
 
-	public Object getPanel() {
-		return this.panel;
-	}
-
-	public void save() {
-	}
-
-	public FrontlineValidationMessage validateFields() {
-		return null;
-	}
-	
-	private void init() {
-		this.panel = this.uiController.loadComponentFromFile(UI_FILE_EMAIL_ACCOUNTS_PANEL, this);
+	public Object getAccountsListPanel() {
+		this.accountsListPanel = this.uiController.loadComponentFromFile(UI_FILE_LIST_EMAIL_ACCOUNTS_PANEL, this);
 		
 		this.refresh();
+		
+		return this.accountsListPanel;
 	}
 
 	public void refresh() {
-		Object table = find(UI_COMPONENT_ACCOUNTS_LIST);
+		Object table = this.uiController.find(this.accountsListPanel, UI_COMPONENT_ACCOUNTS_LIST);
 		this.uiController.removeAll(table);
 		Collection<EmailAccount> emailAccounts;
 		
@@ -93,8 +82,6 @@ public abstract class SettingsAbstractEmailsSectionHandler extends BaseSectionHa
 
 //> UI EVENT METHODS
 		
-	public abstract void finishEmailManagement(Object dialog);
-	
 	public void newEmailAccountSettings () {
 		showEmailAccountSettingsDialog(null);
 	}
@@ -116,8 +103,8 @@ public abstract class SettingsAbstractEmailsSectionHandler extends BaseSectionHa
 	public void enableBottomButtons(Object table) {
 		boolean enableEditAndDelete = (this.uiController.getSelectedIndex(table) >= 0);
 		
-		this.uiController.setEnabled(find(UI_COMPONENT_BT_EDIT), enableEditAndDelete);
-		this.uiController.setEnabled(find(UI_COMPONENT_BT_DELETE), enableEditAndDelete);
+		this.uiController.setEnabled(this.uiController.find(this.accountsListPanel, UI_COMPONENT_BT_EDIT), enableEditAndDelete);
+		this.uiController.setEnabled(this.uiController.find(this.accountsListPanel, UI_COMPONENT_BT_DELETE), enableEditAndDelete);
 	}
 	
 	/**
@@ -158,7 +145,7 @@ public abstract class SettingsAbstractEmailsSectionHandler extends BaseSectionHa
 	public void removeSelectedFromAccountList() {
 		LOG.trace("ENTER");
 		this.uiController.removeConfirmationDialog();
-		Object list = find(UI_COMPONENT_ACCOUNTS_LIST);
+		Object list = this.uiController.find(this.accountsListPanel, UI_COMPONENT_ACCOUNTS_LIST);
 		Object[] selected = this.uiController.getSelectedItems(list);
 		for (Object o : selected) {
 			EmailAccount acc = this.uiController.getAttachedObject(o, EmailAccount.class);

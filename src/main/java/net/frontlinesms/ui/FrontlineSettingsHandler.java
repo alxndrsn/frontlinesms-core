@@ -21,6 +21,7 @@ import net.frontlinesms.ui.handler.settings.SettingsDevicesSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsEmailSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsGeneralSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsInternetServicesSectionHandler;
+import net.frontlinesms.ui.handler.settings.SettingsMmsSectionHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.settings.SettingsChangedEventNotification;
 import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
@@ -335,6 +336,8 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 				return new SettingsDevicesSectionHandler(uiController);
 			case SERVICES_INTERNET_SERVICES:
 				return new SettingsInternetServicesSectionHandler(uiController);
+			case SERVICES_MMS:
+				return new SettingsMmsSectionHandler(uiController);
 			default:
 				return null;
 		}
@@ -384,9 +387,11 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		String validationMessages = "";
 		
 		for (UiSettingsSectionHandler settingsSectionHandler : this.handlersList) {
-			FrontlineValidationMessage validation = settingsSectionHandler.validateFields();
-			if (validation != null) {
-				validationMessages += validation.getLocalisedMessage() + "\n";
+			List<FrontlineValidationMessage> validation = settingsSectionHandler.validateFields();
+			if (validation != null && !validation.isEmpty()) {
+				for (FrontlineValidationMessage validationMessage : validation) {
+					validationMessages += validationMessage.getLocalisedMessage() + "\n";
+				}
 			}
 		}
 		

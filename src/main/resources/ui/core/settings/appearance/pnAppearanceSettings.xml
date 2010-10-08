@@ -12,15 +12,9 @@
 	    
 	    <panel name="pnCustomImage" gap="5" weightx="1" columns="3">
 	        <label icon="/icons/image.png" text="i18n.common.image.source"/>
-	        <textfield columns="30" name="tfImageSource" weightx="1" editable="false"/>
+	        <textfield name="tfImageSource" weightx="1" editable="false"/>
 	        <button action="showFileChooser(tfImageSource)" icon="/icons/browse.png" name="btBrowse" text="i18n.action.browse"/>
 	    	<checkbox name="cbHomeTabLogoKeepOriginalSize" action="shouldLogoKeepOriginalSizeChanged(this.selected)" text="i18n.hometab.logo.settings.keeporiginalsize"/>
 	    </panel>
-	    <!-- 
-	    <panel bottom="8" columns="2" gap="9" halign="center" left="8" right="8" top="8">
-	        <button action="saveHomeTabSettings(homeTabLogoDialog)" halign="center" icon="/icons/tick.png" text="i18n.action.save"/>
-	        <button action="removeDialog(homeTabLogoDialog)" halign="center" icon="/icons/cross.png" text="i18n.action.cancel"/>
-	    </panel>
-	    -->
 	</panel>
 </panel>

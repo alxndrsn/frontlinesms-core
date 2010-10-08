@@ -36,6 +36,10 @@ public class BaseSectionHandler {
 		}
 	}
 	
+	public Object getPanel() {
+		return this.panel;
+	}
+	
 //	protected void settingChanged(String key, Object newValue) {
 //		Object oldValue = this.originalValues.get(key);
 //		

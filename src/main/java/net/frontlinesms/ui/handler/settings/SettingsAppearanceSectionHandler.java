@@ -1,5 +1,8 @@
 package net.frontlinesms.ui.handler.settings;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.settings.BaseSectionHandler;
@@ -42,6 +45,8 @@ public class SettingsAppearanceSectionHandler extends BaseSectionHandler impleme
 	private static final String SECTION_ITEM_KEEP_LOGO_ORIGINAL_SIZE = "APPEARANCE_LOGO_ORIGINAL_SIZE";
 	private static final String SECTION_ITEM_LOGO_TYPE = "APPEARANCE_LOGO_RADIOBUTTONS";
 	private static final String SECTION_ITEM_LANGUAGE = "APPEARANCE_LANGUAGE";
+
+	private static final String I18N_SETTINGS_MESSAGE_EMPTY_CUSTOM_LOGO = "settings.message.empty.custom.logo";
 	
 	public SettingsAppearanceSectionHandler (UiGeneratorController uiController) {
 		super(uiController);
@@ -114,10 +119,6 @@ public class SettingsAppearanceSectionHandler extends BaseSectionHandler impleme
 		log.trace("EXIT");
 	}
 
-	public Object getPanel() {
-		return this.panel;
-	}
-
 	public void save() {
 		log.trace("Saving appearance settings...");
 		
@@ -158,14 +159,16 @@ public class SettingsAppearanceSectionHandler extends BaseSectionHandler impleme
 		log.trace("EXIT");
 	}
 
-	public FrontlineValidationMessage validateFields() {
+	public List<FrontlineValidationMessage> validateFields() {
+		List<FrontlineValidationMessage> validationMessages = new ArrayList<FrontlineValidationMessage>();
+
 		// Home tab logo
 		if (this.uiController.isSelected(find(COMPONENT_CB_HOME_TAB_USE_CUSTOM_LOGO))
-				&& this.uiController.getText(find(COMPONENT_TF_IMAGE_SOURCE)).length() == 0) {
-			return new FrontlineValidationMessage("XXX", null);
+				&& this.uiController.getText(find(COMPONENT_TF_IMAGE_SOURCE)).isEmpty()) {
+			validationMessages.add(new FrontlineValidationMessage (I18N_SETTINGS_MESSAGE_EMPTY_CUSTOM_LOGO, null));
 		}
 		
-		return null;
+		return validationMessages;
 	}
 	
 	/**

@@ -1,5 +1,7 @@
 package net.frontlinesms.ui.settings;
 
+import java.util.List;
+
 import net.frontlinesms.settings.FrontlineValidationMessage;
 
 public interface UiSettingsSectionHandler {
@@ -19,7 +21,7 @@ public interface UiSettingsSectionHandler {
 	   * @return <code>null</code> if every field in the current panel has been validated,
 	   * otherwise an internationalized validation message.
 	   */
-	  public FrontlineValidationMessage validateFields();
+	  public List<FrontlineValidationMessage> validateFields();
 	  
 //	  /**
 //	   * Used to notify the main settings handler that a change has been made in its panel.

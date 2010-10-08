@@ -138,10 +138,6 @@ public class SettingsDatabaseSectionHandler extends BaseSectionHandler implement
 		}
 	}
 
-	public Object getPanel() {
-		return this.panel;
-	}
-
 	public void save() {
 		// get the settings we are modifying
 		DatabaseSettings selectedSettings = this.selectedSettings;
@@ -216,7 +212,7 @@ public class SettingsDatabaseSectionHandler extends BaseSectionHandler implement
 		this.uiController.remove(this.dialogComponent);
 	}
 
-	public FrontlineValidationMessage validateFields() {
+	public List<FrontlineValidationMessage> validateFields() {
 		return null;
 	}
 }
