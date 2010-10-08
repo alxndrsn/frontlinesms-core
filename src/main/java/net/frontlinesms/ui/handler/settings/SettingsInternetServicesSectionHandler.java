@@ -1,17 +1,18 @@
 package net.frontlinesms.ui.handler.settings;
 
+import java.awt.EventQueue;
 import java.util.Collection;
 
-import net.frontlinesms.data.domain.SmsInternetServiceSettings;
-import net.frontlinesms.data.events.DatabaseEntityNotification;
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
+import net.frontlinesms.messaging.sms.events.InternetServiceEventNotification;
 import net.frontlinesms.messaging.sms.internet.SmsInternetService;
 import net.frontlinesms.settings.BaseSectionHandler;
 import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.events.FrontlineUiUpateJob;
 import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
 
 public class SettingsInternetServicesSectionHandler extends BaseSectionHandler implements UiSettingsSectionHandler, ThinletUiEventHandler, EventObserver {
@@ -33,12 +34,23 @@ public class SettingsInternetServicesSectionHandler extends BaseSectionHandler i
 
 		// Update the list of accounts from the list provided
 		Object accountList = find(UI_COMPONENT_LS_ACCOUNTS);
-		this.refreshAccounts(accountList);
+		this.refresh();
 		
 		selectionChanged(accountList, find(UI_COMPONENT_PN_BUTTONS));
 	}
 
-	private void refreshAccounts(Object accountList) {
+	private void refresh() {
+		FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
+			public void run() {
+				refreshAccounts();
+			}
+		};
+	
+		EventQueue.invokeLater(updateJob);
+	}
+	
+	public void refreshAccounts() {
+		Object accountList = find(UI_COMPONENT_LS_ACCOUNTS);
 		if (accountList != null) {
 			this.uiController.removeAll(accountList);
 			Collection<SmsInternetService> smsInternetServices = this.uiController.getSmsInternetServices();
@@ -46,6 +58,8 @@ public class SettingsInternetServicesSectionHandler extends BaseSectionHandler i
 				this.uiController.add(accountList, this.uiController.createListItem(SmsInternetServiceSettingsHandler.getProviderName(service.getClass()) + " - " + service.getIdentifier(), service));
 			}
 		}
+		
+		this.selectionChanged(accountList, find("pnButtons"));
 	}
 	
 	/**
@@ -66,6 +80,7 @@ public class SettingsInternetServicesSectionHandler extends BaseSectionHandler i
 	public void save() {
 		
 	}
+	
 	public FrontlineValidationMessage validateFields() {
 		return null;
 	}
@@ -79,12 +94,46 @@ public class SettingsInternetServicesSectionHandler extends BaseSectionHandler i
 		SmsInternetServiceSettingsHandler internetServiceSettingsHandler = new SmsInternetServiceSettingsHandler(this.uiController);
 		internetServiceSettingsHandler.showNewServiceWizard();
 	}
+	
+	/** Confirms deletes of {@link SmsInternetService}(s) from the system and removes them from the list of services */
+	public void removeServices() {
+		this.uiController.removeConfirmationDialog();
+		removeServices(find(UI_COMPONENT_LS_ACCOUNTS));
+	}
+	
+	/**
+	 * Delete the selected services from the system and remove them from the list.
+	 * @param lsProviders
+	 */
+	private void removeServices(Object lsProviders) {
+		Object[] obj = this.uiController.getSelectedItems(lsProviders);
+		for (Object object : obj) {
+			SmsInternetService service = (SmsInternetService) this.uiController.getAttachedObject(object);
+			this.eventBus.notifyObservers(new InternetServiceEventNotification(InternetServiceEventNotification.EventType.DELETE, service));
+			this.uiController.getSmsInternetServiceSettingsDao().deleteSmsInternetServiceSettings(service.getSettings());
+			this.uiController.remove(object);
+		}
+		selectionChanged(lsProviders, find("pnButtons"));
+	}
+	
+	/**
+	 * Configure a provider given its UI component.
+	 * @param lsProviders
+	 */
+	public void configureService(Object lsProviders) {
+		Object serviceComponent = this.uiController.getSelectedItem(lsProviders);
+		SmsInternetServiceSettingsHandler internetServiceSettingsHandler = new SmsInternetServiceSettingsHandler(this.uiController);
+		internetServiceSettingsHandler.showConfigureService((SmsInternetService)this.uiController.getAttachedObject(serviceComponent), null);
+	}
+	
+	
+	public void showConfirmationDialog(String methodToBeCalled) {
+		this.uiController.showConfirmationDialog(methodToBeCalled, this);
+	}
 
 	public void notify(FrontlineEventNotification notification) {
-		if (notification instanceof DatabaseEntityNotification<?>) {
-			if (((DatabaseEntityNotification<?>) notification).getDatabaseEntity() instanceof SmsInternetServiceSettings) {
-				this.refreshAccounts(find(UI_COMPONENT_LS_ACCOUNTS));
-			}
+		if (notification instanceof InternetServiceEventNotification) {
+			this.refresh();
 		}
 	}
 }

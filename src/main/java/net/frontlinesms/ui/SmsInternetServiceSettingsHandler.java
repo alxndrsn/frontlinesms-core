@@ -6,7 +6,9 @@ import java.util.*;
 import net.frontlinesms.*;
 import net.frontlinesms.data.*;
 import net.frontlinesms.data.domain.*;
+import net.frontlinesms.events.EventBus;
 import net.frontlinesms.messaging.Provider;
+import net.frontlinesms.messaging.sms.events.InternetServiceEventNotification;
 import net.frontlinesms.messaging.sms.internet.SmsInternetService;
 import net.frontlinesms.messaging.sms.properties.OptionalRadioSection;
 import net.frontlinesms.messaging.sms.properties.OptionalSection;
@@ -58,6 +60,7 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 	private IconMap iconProperties;
 	/** All possible {@link SmsInternetService} classes available. */
 	private final Collection<Class<? extends SmsInternetService>> internetServiceProviders;
+	private EventBus eventBus;
 
 //> CONSTRUCTORS
 	/**
@@ -66,6 +69,8 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 	 */
 	public SmsInternetServiceSettingsHandler(UiGeneratorController controller) {
 		this.controller = controller;
+		this.eventBus = controller.getFrontlineController().getEventBus();
+		
 		iconProperties = new IconMap(FrontlineSMSConstants.PROPERTIES_SMS_INTERNET_ICONS);
 
 		this.internetServiceProviders = getInternetServiceProviders();
@@ -321,10 +326,10 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 		Object[] obj = controller.getSelectedItems(lsProviders);
 		for (Object object : obj) {
 			SmsInternetService service = (SmsInternetService) controller.getAttachedObject(object);
-			service.stopThisThing();
-			controller.getSmsInternetServices().remove(service);
 			controller.getSmsInternetServiceSettingsDao().deleteSmsInternetServiceSettings(service.getSettings());
 			controller.remove(object);
+			
+			this.eventBus.notifyObservers(new InternetServiceEventNotification(InternetServiceEventNotification.EventType.DELETE, service));
 		}
 		selectionChanged(lsProviders, controller.find(settingsDialog, "pnButtons"));
 	}
@@ -589,14 +594,15 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 		service.setSettings(serviceSettings);
 		controller.getSmsInternetServiceSettingsDao().updateSmsInternetServiceSettings(service.getSettings());
 		// Add this service to the frontline controller.  TODO surely there is a nicer way of doing this?
-		controller.addSmsInternetService(service);
-
-		//Remove the settings dialog
 		removeDialog(pnSmsInternetServiceConfigure);
+		
+		this.eventBus.notifyObservers(new InternetServiceEventNotification(InternetServiceEventNotification.EventType.ADD, service));
+		
+		//Remove the settings dialog
 		Object attached = controller.getAttachedObject(btSave);
-		if (attached != null) {
-			//showSettingsDialog();
-		}
+//		if (attached != null) {
+//			//showSettingsDialog();
+//		}
 	}
 
 	@SuppressWarnings("unchecked")

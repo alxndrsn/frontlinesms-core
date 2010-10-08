@@ -47,6 +47,7 @@ import net.frontlinesms.messaging.mms.email.MmsEmailServiceStatus;
 import net.frontlinesms.messaging.mms.events.MmsServiceStatusNotification;
 import net.frontlinesms.messaging.sms.SmsService;
 import net.frontlinesms.messaging.sms.SmsServiceManager;
+import net.frontlinesms.messaging.sms.events.InternetServiceEventNotification;
 import net.frontlinesms.messaging.sms.events.NoSmsServicesConnectedNotification;
 import net.frontlinesms.messaging.sms.internet.SmsInternetService;
 import net.frontlinesms.plugins.*;
@@ -1758,6 +1759,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		this.phoneManager.addSmsInternetService(smsInternetService);
 	}
 
+	private void removeSmsInternetService(SmsInternetService service) {
+		this.phoneManager.removeSmsInternetService(service);
+	}
+
 	public void contactRemovedFromGroup(Contact contact, Group group) {
 		if(this.currentTab.equals(TAB_CONTACT_MANAGER)) {
 			// TODO perhaps update the contact manager to remove the contact from the group, if it is currently relevant
@@ -1870,6 +1875,18 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			Object entity = ((EntitySavedNotification<?>) notification).getDatabaseEntity();
 			if (entity instanceof FrontlineMultimediaMessage) {
 				this.incomingMessageEvent((FrontlineMultimediaMessage) entity);
+			}
+		} else if (notification instanceof InternetServiceEventNotification) {
+			InternetServiceEventNotification internetServiceNotification = (InternetServiceEventNotification) notification;
+			switch (internetServiceNotification.getEventType()) {
+			case ADD:
+				this.addSmsInternetService(internetServiceNotification.getService());
+				break;
+			case DELETE:
+				this.removeSmsInternetService(internetServiceNotification.getService());
+				break;
+			default:
+				break;
 			}
 		}
 	}
