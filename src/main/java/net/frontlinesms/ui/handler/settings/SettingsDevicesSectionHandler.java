@@ -46,7 +46,6 @@ public class SettingsDevicesSectionHandler extends BaseSectionHandler implements
 	
 	public SettingsDevicesSectionHandler (UiGeneratorController ui) {
 		super(ui);
-		this.uiController = ui;
 		this.smsModemSettingsDao = ui.getFrontlineController().getSmsModemSettingsDao();
 		
 		this.init();
@@ -139,14 +138,19 @@ public class SettingsDevicesSectionHandler extends BaseSectionHandler implements
 		}
 		
 		// Save the original values for this device
-		this.originalValues.put(SECTION_ITEM_DEVICE_SETTINGS, this.selectedModemSettings);
-		this.originalValues.put(SECTION_ITEM_DEVICE_USE, useForReceiving || useForSending);
-		this.originalValues.put(SECTION_ITEM_DEVICE_USE_FOR_SENDING, useForSending);
-		this.originalValues.put(SECTION_ITEM_DEVICE_USE_FOR_RECEIVING, useForReceiving);
-		this.originalValues.put(SECTION_ITEM_DEVICE_USE_DELIVERY_REPORTS, useDeliveryReports);
-		this.originalValues.put(SECTION_ITEM_DEVICE_DELETE_MESSAGES, deleteMessages);
+		this.saveAndMarkUnchanged(SECTION_ITEM_DEVICE_SETTINGS, this.selectedModemSettings);
+		this.saveAndMarkUnchanged(SECTION_ITEM_DEVICE_USE, useForReceiving || useForSending);
+		this.saveAndMarkUnchanged(SECTION_ITEM_DEVICE_USE_FOR_SENDING, useForSending);
+		this.saveAndMarkUnchanged(SECTION_ITEM_DEVICE_USE_FOR_RECEIVING, useForReceiving);
+		this.saveAndMarkUnchanged(SECTION_ITEM_DEVICE_USE_DELIVERY_REPORTS, useDeliveryReports);
+		this.saveAndMarkUnchanged(SECTION_ITEM_DEVICE_DELETE_MESSAGES, deleteMessages);
 	}
 	
+	private void saveAndMarkUnchanged(String sectionItem, Object value) {
+		this.originalValues.put(sectionItem, value);
+		super.settingChanged(sectionItem, value);
+	}
+
 	/**
 	 * Called when the "disableAllDevices" Checkbox has changed state.
 	 * @param disableAllDevices

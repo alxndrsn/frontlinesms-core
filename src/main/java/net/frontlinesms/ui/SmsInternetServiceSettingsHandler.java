@@ -34,7 +34,10 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 	private static final String UI_CHOOSE_PROVIDER = "/ui/smsdevice/internet/chooseProvider.xml";
 	/** Path to XML for UI layout for configuration screen, {@link #configurator} */
 	private static final String UI_CONFIGURE = "/ui/smsdevice/internet/configure.xml";
-
+	
+	private static final String UI_COMPONENT_LS_ACCOUNTS = "lsSmsInternetServices";
+	private static final String UI_COMPONENT_PN_BUTTONS = "pnButtons";
+	
 	/** Path of the file containing the list of SMS internet services. */
 	private static final String FILE_SMS_INTERNET_SERVICE_LIST = "conf/SmsInternetServices.txt";
 	
@@ -99,7 +102,7 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 
 	/** Clears the desktop of all dialogs that this controls. */
 	private void clearDesktop() {
-		if(settingsDialog != null) removeDialog(settingsDialog);
+		//if(settingsDialog != null) removeDialog(settingsDialog);
 		if(newServiceWizard != null) removeDialog(newServiceWizard);
 	}
 
@@ -115,18 +118,24 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 	public void showSettingsDialog() {
 		clearDesktop();
 
-		Collection<SmsInternetService> smsInternetServices = controller.getSmsInternetServices();
 		settingsDialog = controller.loadComponentFromFile(UI_SETTINGS, this);
 
 		// Update the list of accounts from the list provided
-		Object accountList = controller.find(settingsDialog, "lsSmsInternetServices");
+		Object accountList = controller.find(settingsDialog, UI_COMPONENT_LS_ACCOUNTS);
+		this.refreshAccounts(accountList);
+		
+		selectionChanged(accountList, controller.find(settingsDialog, UI_COMPONENT_PN_BUTTONS));
+		controller.add(settingsDialog);
+	}
+
+	private void refreshAccounts(Object accountList) {
 		if (accountList != null) {
+			this.controller.removeAll(accountList);
+			Collection<SmsInternetService> smsInternetServices = controller.getSmsInternetServices();
 			for (SmsInternetService service : smsInternetServices) {
 				controller.add(accountList, controller.createListItem(getProviderName(service.getClass()) + " - " + service.getIdentifier(), service));
 			}
 		}
-		selectionChanged(accountList, controller.find(settingsDialog, "pnButtons"));
-		controller.add(settingsDialog);
 	}
 
 	/** Show the wizard for creating a new service. */
@@ -148,7 +157,7 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 
 		selectionChanged(providerList, controller.find(newServiceWizard, "pnButtons"));
 		controller.add(newServiceWizard);
-		if(settingsDialog != null) removeDialog(settingsDialog);
+		//if(settingsDialog != null) removeDialog(settingsDialog);
 	}
 
 	/**
@@ -586,7 +595,7 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 		removeDialog(pnSmsInternetServiceConfigure);
 		Object attached = controller.getAttachedObject(btSave);
 		if (attached != null) {
-			showSettingsDialog();
+			//showSettingsDialog();
 		}
 	}
 

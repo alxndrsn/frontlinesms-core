@@ -20,6 +20,7 @@ import net.frontlinesms.ui.handler.settings.SettingsDatabaseSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsDevicesSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsEmailSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsGeneralSectionHandler;
+import net.frontlinesms.ui.handler.settings.SettingsInternetServicesSectionHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.settings.SettingsChangedEventNotification;
 import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
@@ -332,6 +333,8 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 				return new SettingsEmailSectionHandler(uiController);
 			case SERVICES_DEVICES:
 				return new SettingsDevicesSectionHandler(uiController);
+			case SERVICES_INTERNET_SERVICES:
+				return new SettingsInternetServicesSectionHandler(uiController);
 			default:
 				return null;
 		}
