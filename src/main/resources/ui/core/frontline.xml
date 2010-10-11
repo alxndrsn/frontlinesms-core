@@ -25,7 +25,7 @@
 				<!-- This should be populated at runtime with different language options -->
 			</menu>
 			<separator />
-			<menuitem icon="/icons/keyword.png" text="Settings" name="menu_Settings" action="showFrontlineSettings"/>
+			<menuitem icon="/icons/keyword.png" text="i18n.settings.menu" name="menu_Settings" action="showFrontlineSettings"/>
 		</menu>
 		<menu text="i18n.menubar.view" name="menu_tabs">
 				<checkboxmenuitem action="tabsChanged(this)" name="miHome" icon="/icons/frontline_icon.png" text="i18n.tab.home"/>

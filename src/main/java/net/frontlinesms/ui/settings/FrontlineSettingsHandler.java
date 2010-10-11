@@ -149,11 +149,6 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		// Try to get an icon from the classpath
 		this.uiController.setIcon(sectionRootNode, iconPath);
 		
-		// Collapse root node by default
-		if (isRootNode) {
-			this.uiController.setExpanded(sectionRootNode, false);
-		}
-		
 		return sectionRootNode;
 	}
 	
