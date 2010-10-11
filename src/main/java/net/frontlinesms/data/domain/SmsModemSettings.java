@@ -18,14 +18,20 @@ public class SmsModemSettings {
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY) @Column(unique=true,nullable=false,updatable=false) @SuppressWarnings("unused")
 	private long id;
 	@Column(name=FIELD_SERIAL)
+	/** the serial number of the device */
 	private String serial;
 	private String manufacturer;
 	private String model;
-
 	private boolean supportsReceive = true;
+	/** The SMSC number for this device. */
+	private String smscNumber;
+	/** @param useForSending whether the device should be used for sending SMS */
 	private boolean useForSending;
+	/** whether the device should be used for receiving SMS */
 	private boolean useForReceiving;
+	/** whether messages should be deleted from the device after being read by FrontlineSMS */
 	private boolean deleteMessagesAfterReceiving;
+	/** whether delivery reports should be used with this device */
 	private boolean useDeliveryReports;
 	
 //> CONSTRUCTORS
@@ -35,6 +41,7 @@ public class SmsModemSettings {
 	/**
 	 * Sets the details for the supplied SMS device
 	 * @param serial The serial number of the device
+<<<<<<< HEAD
 	 * @param useForSending whether the device should be used for sending SMS
 	 * @param useForReceiving whether the device should be used for receiving SMS
 	 * @param deleteMessagesAfterReceiving whether messages should be deleted from the device after being read by FrontlineSMS 
@@ -50,28 +57,26 @@ public class SmsModemSettings {
 		this.deleteMessagesAfterReceiving = deleteMessagesAfterReceiving;
 		this.useDeliveryReports = useDeliveryReports;
 	}
-
+	public SmsModemSettings(String serial){
+		this.serial = serial;	
+	}
+	
 //> ACCESSOR METHODS
 	public String getSerial() {
 		return serial;
 	}
-	
 	public String getManufacturer() {
 		return manufacturer;
 	}
-
 	public void setManufacturer(String make) {
 		this.manufacturer = make;
 	}
-
 	public String getModel() {
 		return model;
 	}
-
 	public void setModel(String model) {
 		this.model = model;
 	}
-	
 	public boolean useForSending() {
 		return useForSending;
 	}
@@ -96,6 +101,14 @@ public class SmsModemSettings {
 	public void setUseDeliveryReports(boolean useDeliveryReports) {
 		this.useDeliveryReports = useDeliveryReports;
 	}
+	/** @return the smscNumber */
+	public String getSmscNumber() {
+		return smscNumber;
+	}
+	/** @param smscNumber the smscNumber to set */
+	public void setSmscNumber(String smscNumber) {
+		this.smscNumber = smscNumber;
+	}
 
 //> GENERATED METHODS
 	/** @see java.lang.Object#hashCode() */
@@ -103,11 +116,7 @@ public class SmsModemSettings {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (deleteMessagesAfterReceiving ? 1231 : 1237);
 		result = prime * result + ((serial == null) ? 0 : serial.hashCode());
-		result = prime * result + (useDeliveryReports ? 1231 : 1237);
-		result = prime * result + (useForReceiving ? 1231 : 1237);
-		result = prime * result + (useForSending ? 1231 : 1237);
 		return result;
 	}
 
@@ -121,18 +130,10 @@ public class SmsModemSettings {
 		if (getClass() != obj.getClass())
 			return false;
 		SmsModemSettings other = (SmsModemSettings) obj;
-		if (deleteMessagesAfterReceiving != other.deleteMessagesAfterReceiving)
-			return false;
 		if (serial == null) {
 			if (other.serial != null)
 				return false;
 		} else if (!serial.equals(other.serial))
-			return false;
-		if (useDeliveryReports != other.useDeliveryReports)
-			return false;
-		if (useForReceiving != other.useForReceiving)
-			return false;
-		if (useForSending != other.useForSending)
 			return false;
 		return true;
 	}

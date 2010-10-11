@@ -219,12 +219,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		
 		Object sendButton = find(COMPONENT_BT_SEND);
 		boolean areAllCharactersValidGSM = GsmAlphabet.areAllCharactersValidGSM(message);
-		int totalLengthAllowed;
-		if(areAllCharactersValidGSM) {
-			totalLengthAllowed = FrontlineMessage.SMS_LENGTH_LIMIT + FrontlineMessage.SMS_MULTIPART_LENGTH_LIMIT * (FrontlineMessage.SMS_LIMIT - 1);
-		} else {
-			totalLengthAllowed = FrontlineMessage.SMS_LENGTH_LIMIT_UCS2 + FrontlineMessage.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * (FrontlineMessage.SMS_LIMIT - 1);
-		}
+		int totalLengthAllowed = FrontlineMessage.getTotalLengthAllowed(message);
 		
 		boolean shouldEnableSendButton = (messageLength > 0 && (!shouldCheckMaxMessageLength || messageLength <= totalLengthAllowed)
 											&& (!shouldDisplayRecipientField || recipientLength > 0));
@@ -244,16 +239,15 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 			multipartMessageCharacterLimit = FrontlineMessage.SMS_MULTIPART_LENGTH_LIMIT_UCS2;
 		}
 		
-		Object 	tfMessage = find(COMPONENT_TF_MESSAGE),
-				lbTooManyMessages = find(COMPONENT_LB_TOO_MANY_MESSAGES);
-
-		int numberOfMsgs, remaining;
-		double costEstimate;
+		Object tfMessage = find(COMPONENT_TF_MESSAGE);
+		Object lbTooManyMessages = find(COMPONENT_LB_TOO_MANY_MESSAGES);
+		final int numberOfMsgs = FrontlineMessage.getExpectedNumberOfSmsParts(message);
 		
+		double costEstimate;
+		int remaining;		
 		if (shouldCheckMaxMessageLength && messageLength > totalLengthAllowed) {
 			remaining = 0;
 			costEstimate = 0;
-			numberOfMsgs = (int)Math.ceil((double)messageLength / (double)multipartMessageCharacterLimit);
 			
 			uiController.setVisible(lbTooManyMessages, true);
 			uiController.setColor(tfMessage, "foreground", Color.RED);
@@ -264,12 +258,10 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 			}
 			
 			if (messageLength <= singleMessageCharacterLimit) {
-				numberOfMsgs = messageLength == 0 ? 0 : 1;
 				remaining = (messageLength % singleMessageCharacterLimit) == 0 ? 0
 						: singleMessageCharacterLimit - (messageLength % singleMessageCharacterLimit);	
 			} else {
 				int charCount = messageLength - singleMessageCharacterLimit;
-				numberOfMsgs = (int)Math.ceil((double)charCount / (double)multipartMessageCharacterLimit) + 1;
 				remaining = (charCount % multipartMessageCharacterLimit) == 0 ? 0
 						: multipartMessageCharacterLimit - ((charCount % multipartMessageCharacterLimit));
 			}

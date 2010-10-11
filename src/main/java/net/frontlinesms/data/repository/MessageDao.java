@@ -129,6 +129,8 @@ public interface MessageDao {
 	 */
 	public List<FrontlineMessage> getMessagesForKeyword(FrontlineMessage.Type messageType, Keyword keyword);
 	
+	public List<FrontlineMessage> getMessagesForKeyword(FrontlineMessage.Type messageType, Keyword keyword, Long start, Long end);
+
 	public List<FrontlineMessage> getMessagesForStati(FrontlineMessage.Type messageType, FrontlineMessage.Status[] messageStatuses, Field sortBy, Order order, int startIndex, int limit);
 	
 	/**
@@ -212,8 +214,14 @@ public interface MessageDao {
 	/** @return the number of messages sent to the specified phone numbers within the specified dates */
 	public int getMessageCount(FrontlineMessage.Type messageType, List<String> phoneNumbers, Long messageHistoryStart, Long messageHistoryEnd);
 
-	/** @return the messages sent to the specified phone numbers within the specified dates */
+	/** @return the messages sent or received to/from the specified phone numbers within the specified dates */
 	public List<FrontlineMessage> getMessages(FrontlineMessage.Type messageType, List<String> phoneNumbers, Long messageHistoryStart, Long messageHistoryEnd);
+
+	/** @return the messages sent or received to/from the specified phone numbers within the specified dates */
+	public List<FrontlineMessage> getMessages(FrontlineMessage.Type messageType, List<String> phoneNumbers, Long messageHistoryStart, Long messageHistoryEnd, int startIndex, int limit);
+
+	/** @return all messages sent or received within the specified dates */
+	public List<FrontlineMessage> getMessages(FrontlineMessage.Type messageType, Long messageHistoryStart, Long messageHistoryEnd);
 
 	/**
 	 * Delete the supplied message to the data source.

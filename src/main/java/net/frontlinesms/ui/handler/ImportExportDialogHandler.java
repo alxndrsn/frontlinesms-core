@@ -662,7 +662,13 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		this.refreshValuesTable();
 	}
 
-	public void refreshValuesTable() {
+	public void columnCheckboxChanged() {
+		if(this.importedContactsList != null) {
+			refreshValuesTable();
+		}
+	}
+	
+	private void refreshValuesTable() {
 		Object pnValuesTable = this.uiController.find(this.wizardDialog, COMPONENT_PN_VALUES_TABLE);
 		
 		if (pnValuesTable != null) {
@@ -692,23 +698,25 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 			this.uiController.add(valuesTable, header);
 			
 			/** Lines */
-			for (String[] lineValues : this.importedContactsList) {
-				Object row = this.uiController.createTableRow();
-				for (int i = 0 ; i < columnsNumber && i < lineValues.length ; ++i) {
-					Object cell;
-					if (i == statusIndex) { // We're creating the status cell
-						cell = this.uiController.createTableCell("");
-						if (lineValues[i].toLowerCase().equals("true") || lineValues[i].toLowerCase().equals("active") ) {
-							this.uiController.setIcon(cell, Icon.TICK);
+			if (this.importedContactsList != null) {
+				for (String[] lineValues : this.importedContactsList) {
+					Object row = this.uiController.createTableRow();
+					for (int i = 0 ; i < columnsNumber && i < lineValues.length ; ++i) {
+						Object cell;
+						if (i == statusIndex) { // We're creating the status cell
+							cell = this.uiController.createTableCell("");
+							if (lineValues[i].toLowerCase().equals("true") || lineValues[i].toLowerCase().equals("active") ) {
+								this.uiController.setIcon(cell, Icon.TICK);
+							} else {
+								this.uiController.setIcon(cell, Icon.CANCEL);
+							}
 						} else {
-							this.uiController.setIcon(cell, Icon.CANCEL);
+							cell = this.uiController.createTableCell(lineValues[i].replace(CsvExporter.GROUPS_DELIMITER, ", "));
 						}
-					} else {
-						cell = this.uiController.createTableCell(lineValues[i].replace(CsvExporter.GROUPS_DELIMITER, ", "));
+						this.uiController.add(row, cell);
 					}
-					this.uiController.add(row, cell);
+					this.uiController.add(valuesTable, row);
 				}
-				this.uiController.add(valuesTable, row);
 			}
 		}
 	}

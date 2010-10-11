@@ -26,6 +26,8 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_MESSAGE_HIS
 import java.awt.EventQueue;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -70,8 +72,8 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * Handler for the MessageHistory tab.
  * 
  * @author Alex Anderson alex@frontlinesms.com
- * @author Carlos Eduardo Genz
- * <li> kadu(at)masabi(dot)com
+ * @author Carlos Eduardo Genz kadu(at)masabi(dot)com
+ * @author Morgan Belkadi morgan@frontlinesms.com
  */
 public class MessageHistoryTabHandler extends BaseTabHandler implements PagedComponentItemProvider, SingleGroupSelecterPanelOwner, EventObserver {
 	
@@ -135,6 +137,8 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	private Long messageHistoryEnd;
 	/** The number of people the current SMS will be sent to */
 	private int numberToSend = 1;
+	/** The number of SMS parts */
+	private int numberOfMessageParts = 1;
 	/** The selected lines in the left panel  */
 	private Group selectedGroup;
 	private Contact selectedContact;
@@ -313,7 +317,6 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	/** @return {@link PagedListDetails} for {@link #messageListComponent} */
 	private PagedListDetails getMessageListPagingDetails(int startIndex, int limit) {
 		int messageCount = getMessageCount();
-		numberToSend = messageCount;
 		
 		List<FrontlineMessage> messages = getListMessages(startIndex, limit);
 		Object[] messageRows = new Object[messages.size()];
@@ -332,27 +335,46 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		Object selectedItem = ui.getSelectedItem(filterList);
 
 		if (selectedItem == null) {
-			return 0;
+			numberToSend = 0;
+			numberOfMessageParts = 0; 
 		} else {
 			final FrontlineMessage.Type messageType = getSelectedMessageType();
 			int selectedIndex = ui.getSelectedIndex(filterList);
+			
+			Collection<FrontlineMessage> messageList;
+			
 			if (selectedIndex == 0) {
-				return messageDao.getMessageCount(messageType, messageHistoryStart, messageHistoryEnd);
+				messageList = messageDao.getMessages(messageType, messageHistoryStart, messageHistoryEnd);
 			} else {
 				if(filterClass == Contact.class) {
 					Contact c = ui.getContact(selectedItem);
-					return messageDao.getMessageCountForMsisdn(messageType, c.getPhoneNumber(), messageHistoryStart, messageHistoryEnd);
+					messageList = messageDao.getMessages(messageType, Arrays.asList(new String[] { c.getPhoneNumber() }), messageHistoryStart, messageHistoryEnd);
 				} else if(filterClass == Group.class) {
 					// A Group was selected
 					Group selectedGroup = ui.getGroup(selectedItem);
-					return messageDao.getMessageCount(messageType, getPhoneNumbers(selectedGroup), messageHistoryStart, messageHistoryEnd);
+					List<String> phoneNumbers = getPhoneNumbers(selectedGroup);
+					if (phoneNumbers.isEmpty()) {
+						messageList = Collections.emptyList();
+					} else {
+						messageList = messageDao.getMessages(messageType, phoneNumbers, messageHistoryStart, messageHistoryEnd);
+					}
 				} else /* (filterClass == Keyword.class) */ {
 					// Keyword Selected
 					Keyword k = ui.getKeyword(selectedItem);
-					return messageDao.getMessageCount(messageType, k, messageHistoryStart, messageHistoryEnd);
+					messageList = messageDao.getMessagesForKeyword(messageType, k, messageHistoryStart, messageHistoryEnd);
+				}
+			}
+			
+			numberToSend = messageList.size();
+			numberOfMessageParts = 0;
+			for (FrontlineMessage message : messageList) {
+				if (message.getType().equals(Type.OUTBOUND)) {
+					numberOfMessageParts += message.getExpectedSmsCount();
 				}
 			}
 		}
+		
+		return numberToSend;
 	}
 	
 	/**
@@ -385,7 +407,12 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 				} else if(filterClass == Group.class) {
 					// A Group was selected
 					Group selectedGroup = ui.getGroup(selectedItem);
-					return messageDao.getMessages(messageType, getPhoneNumbers(selectedGroup), messageHistoryStart, messageHistoryEnd);
+					List<String> phoneNumbers = getPhoneNumbers(selectedGroup);
+					if (phoneNumbers.isEmpty()) {
+						return Collections.emptyList();
+					} else {
+						return messageDao.getMessages(messageType, phoneNumbers, messageHistoryStart, messageHistoryEnd, startIndex, limit);
+					}
 				} else if (filterClass == Keyword.class) {
 					// Keyword Selected
 					Keyword k = ui.getKeyword(selectedItem);

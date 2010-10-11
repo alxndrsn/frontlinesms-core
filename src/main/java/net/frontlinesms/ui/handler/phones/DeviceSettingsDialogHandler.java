@@ -8,6 +8,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
 import org.apache.log4j.Logger;
+import org.springframework.jdbc.core.SqlOutParameter;
 
 /**
  * @author Morgan Belkadi <morgan@frontlinesms.com>
@@ -33,6 +34,10 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 	private static final String COMPONENT_PHONE_DELIVERY_REPORTS = "cbUseDeliveryReports";
 	/** UI Component name: TODO */
 	private static final String COMPONENT_PN_PHONE_SETTINGS = "pnPhoneSettings";
+	/** UI Component name: TODO */
+	private static final String COMPONENT_PHONE_PIN = "pinNumber";
+	/** UI Component name: TODO */
+	private static final String COMPONENT_SMSC_NUMBER = "tfSmscNumber";
 
 //> INSTANCE PROPERTIES
 	/** I18n Text Key: TODO */
@@ -48,6 +53,7 @@ private static final String UI_COMPONENT_PN_DEVICE_SETTINGS = "pnDeviceSettings"
 	private SmsModem device;
 	private boolean isNewPhone;
 	private ThinletUiEventHandler handler;
+	private String smscNumero;
 	
 	public DeviceSettingsDialogHandler(UiGeneratorController ui, ThinletUiEventHandler handler, SmsModem device, boolean isNewPhone) {
 		this.ui = ui;
@@ -66,6 +72,11 @@ private static final String UI_COMPONENT_PN_DEVICE_SETTINGS = "pnDeviceSettings"
 		
 		Object pnDeviceSettings = this.ui.loadComponentFromFile(UI_FILE_PANEL_MODEM_SETTINGS, handler);
 		this.ui.add(dialogComponent, pnDeviceSettings, 0);
+
+		// get the smsc number if one exists...
+		smscNumero = this.device.getSmscNumber();
+		Object smscNumField = this.find(COMPONENT_SMSC_NUMBER);
+		this.ui.setText(smscNumField, smscNumero);
 		
 		if(!isNewPhone) {
 			boolean useForSending = device.isUseForSending();
@@ -84,6 +95,7 @@ private static final String UI_COMPONENT_PN_DEVICE_SETTINGS = "pnDeviceSettings"
 				ui.setSelected(find("rbPhoneDetailsDisable"), true);
 				ui.setSelected(find(COMPONENT_RB_PHONE_DETAILS_ENABLE), false);
 				ui.deactivate(find(COMPONENT_PN_PHONE_SETTINGS));
+				
 			}
 		}
 		

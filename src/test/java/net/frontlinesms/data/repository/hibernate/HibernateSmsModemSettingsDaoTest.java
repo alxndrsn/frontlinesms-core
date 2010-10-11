@@ -29,7 +29,15 @@ public class HibernateSmsModemSettingsDaoTest extends HibernateTestCase {
 	 * Test everything all at once!
 	 */
 	public void test() {
-		SmsModemSettings settingsOne = new SmsModemSettings(SERIAL_ONE, "Manufacturer", "Model", false, true, false, true, false);
+		//changes to allow extra method setters used smsc number
+		//SmsModemSettings settingsOne = new SmsModemSettings(SERIAL_ONE, "Manufacturer", "Model", true, false, true, false);
+		SmsModemSettings settingsOne = new SmsModemSettings(SERIAL_ONE);
+		settingsOne.setManufacturer("Manufacturer");
+		settingsOne.setModel("Model");
+		settingsOne.setUseForSending(true);
+		settingsOne.setUseForReceiving(false);
+		settingsOne.setDeleteMessagesAfterReceiving(true);
+		settingsOne.setUseDeliveryReports(false);
 		
 		assertNull(dao.getSmsModemSettings(SERIAL_ONE));
 		
@@ -37,7 +45,13 @@ public class HibernateSmsModemSettingsDaoTest extends HibernateTestCase {
 		
 		assertEquals(settingsOne, dao.getSmsModemSettings(SERIAL_ONE));
 
-		SmsModemSettings settingsTwo = new SmsModemSettings(SERIAL_TWO, "Manufacturer", "Model", true, false, true, false, true);
+		SmsModemSettings settingsTwo = new SmsModemSettings( SERIAL_TWO);
+		settingsTwo.setManufacturer("Manufacturer");
+		settingsTwo.setModel("Model");
+		settingsTwo.setUseForSending(false);
+		settingsTwo.setUseForReceiving(true);
+		settingsTwo.setDeleteMessagesAfterReceiving(false);
+		settingsTwo.setUseDeliveryReports(true);
 		
 		assertNull(dao.getSmsModemSettings(SERIAL_TWO));
 		

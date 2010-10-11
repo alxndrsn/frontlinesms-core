@@ -42,12 +42,14 @@ import org.smslib.CService.MessageClass;
  * @author Ben Whitaker ben(at)masabi(dot)com
  * @author Alex Anderson alex(at)masabi(dot)com
  * @author Carlos Eduardo Genz kadu(at)masabi(dot)com
+ * @author james@tregaskis.org
  */
 public class SmsModem extends Thread implements SmsService {
 	
 //> CONSTANTS
 	private static final boolean SEND_BULK = true;
 	private static final int SMS_BULK_LIMIT = 10;
+
 
 	/** The time, in millis, that this phone handler must have been unresponsive for before it is deemed TIMED OUT
 	 * As far as I know there is no basis for the time chosen for this timeout. */
@@ -123,12 +125,14 @@ public class SmsModem extends Thread implements SmsService {
 	private int batteryPercent;
 	private int signalPercent;
 	private String msisdn;
-	
+	private String smscNumber;
+
 	/** The status of this device */
 	private SmsModemStatus status = SmsModemStatus.DORMANT;
 	/** Extra info relating to the current status. */
 	private String statusDetail;
-
+	
+	
 //> CONSTRUCTORS
 	/**
 	 * Create a new instance {@link SmsModem}
@@ -238,6 +242,20 @@ public class SmsModem extends Thread implements SmsService {
 		if (smsLibConnected) return cService.getDeviceInfo().getBatteryLevel();
 		else return batteryPercent;
 	}
+	/** @return the smscNumber */
+	public String getSmscNumber() {
+		if (smsLibConnected) {
+			this.smscNumber = cService.getSmscNumber();
+		}
+		return this.smscNumber;
+	}
+
+	/** @param smscNumber the smscNumber to set */
+	public void setSmscNumber(String smscNumber) {
+		if (smsLibConnected) cService.setSmscNumber(smscNumber);
+		this.smscNumber = smscNumber;
+	}
+
 	public String getMsisdn() {
 		return msisdn;
 	}
@@ -321,10 +339,6 @@ public class SmsModem extends Thread implements SmsService {
 	public String getServiceName() {
 		return FrontlineUtils.getManufacturerAndModel(getManufacturer(), getModel());
 	}
-	
-	public String getServiceidentification() {
-		return this.getMsisdn();
-	}
 
 	public void connect(){
 		if (!phonePresent || duplicate || manufacturer.length() == 0) return;
@@ -368,8 +382,8 @@ public class SmsModem extends Thread implements SmsService {
 			cService.setSimPin2("0000");
 
 			// Normally, you would want to set the SMSC number to blank. GSM
-			// devices get the SMSC number information from their SIM card.
-			cService.setSmscNumber("");
+			// devices normally get the SMSC number information from their SIM card.
+			cService.setSmscNumber(this.smscNumber == null ? "" : this.smscNumber);
 
 			FrontlineUtils.sleep_ignoreInterrupts(500);
 
