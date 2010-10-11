@@ -26,7 +26,8 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 	
 	private static final String I18N_SETTINGS_INVALID_COST_PER_MESSAGE_RECEIVED = "settings.message.invalid.cost.per.message.received";
 	private static final String I18N_SETTINGS_INVALID_COST_PER_MESSAGE_SENT = "settings.message.invalid.cost.per.message.sent";
-	
+	private static final String I18N_SETTINGS_MENU_GENERAL = "settings.menu.general";
+
 	private static final String SECTION_ITEM_PROMPT_STATS = "GENERAL_STATS_PROMPT_DIALOG";
 	private static final String SECTION_ITEM_AUTHORIZE_STATS = "GENERAL_STATS_AUTHORIZE_SENDING";
 	private static final String SECTION_ITEM_COST_PER_SMS_SENT = "GENERAL_COST_PER_SMS_SENT";
@@ -123,13 +124,13 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 
 			if (costPerSmsSent != appProperties.getCostPerSmsSent()) {
 				appProperties.setCostPerSmsSent(costPerSmsSent);
-				this.eventBus.notifyObservers(new AppPropertiesEventNotification(AppProperties.KEY_SMS_COST_SENT_MESSAGES));
+				this.eventBus.notifyObservers(new AppPropertiesEventNotification(AppProperties.class, AppProperties.KEY_SMS_COST_SENT_MESSAGES));
 			}
 			
 			double costPerSmsReceived = InternationalisationUtils.parseCurrency(this.uiController.getText(find(UI_COMPONENT_TF_COST_PER_SMS_SENT)));
 			if (costPerSmsReceived != appProperties.getCostPerSmsSent()) {
 				appProperties.setCostPerSmsReceived(costPerSmsReceived);
-				this.eventBus.notifyObservers(new AppPropertiesEventNotification(AppProperties.KEY_SMS_COST_RECEIVED_MESSAGES));
+				this.eventBus.notifyObservers(new AppPropertiesEventNotification(AppProperties.class, AppProperties.KEY_SMS_COST_RECEIVED_MESSAGES));
 			}
 		} catch (ParseException e) {
 			// Should never happen
@@ -160,5 +161,9 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 		}
 		
 		return validationMessages;
+	}
+	
+	public String getTitle() {
+		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_GENERAL);
 	}
 }

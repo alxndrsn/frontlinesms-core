@@ -8,7 +8,7 @@ public interface UiSettingsSectionHandler {
 	
 	  /** 
 	   * @param section 
-	 * @return The Thinlet panel for a section 
+	   * @return The Thinlet panel for this section 
 	   **/
 	  public Object getPanel();
 	
@@ -22,9 +22,10 @@ public interface UiSettingsSectionHandler {
 	   * otherwise an internationalized validation message.
 	   */
 	  public List<FrontlineValidationMessage> validateFields();
-	  
-//	  /**
-//	   * Used to notify the main settings handler that a change has been made in its panel.
-//	   */
-//	  public void settingsChanged();
+
+	  /**
+	   * 
+	   * @return The title of the section
+	   */
+	  public String getTitle();
 }

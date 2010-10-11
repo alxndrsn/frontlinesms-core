@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- TODO: change dialog title -->
 <dialog closable="true" close="removeDialog(this)" bottom="4" gap="8" icon="/icons/about.png" left="4" modal="true" name="infoDialog" right="4" text="FrontlineSMS" top="4" columns="1">
-    <label icon="/icons/alert.png" name="infoMessage"/>
+    <panel gap="5" name="pnInfo">
+    	<!-- This will be populated at runtime -->
+    </panel>
     <button type="default" action="removeDialog(infoDialog)" icon="/icons/tick.png" text="i18n.action.ok" halign="center"/>
 </dialog>

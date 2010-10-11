@@ -64,6 +64,7 @@ import net.frontlinesms.ui.handler.mms.MmsSettingsDialogHandler;
 import net.frontlinesms.ui.handler.phones.NoPhonesDetectedDialogHandler;
 import net.frontlinesms.ui.handler.phones.PhoneTabHandler;
 import net.frontlinesms.ui.i18n.*;
+import net.frontlinesms.ui.settings.FrontlineSettingsHandler;
 
 import org.apache.log4j.Logger;
 import org.smslib.CIncomingMessage;
@@ -413,7 +414,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Adds the text resources for a {@link PluginController} to {@link UiGeneratorController}'s text resource manager.
 	 * @param controller the plugin controller whose text resource should be loaded
 	 */
-	private void addPluginTextResources(PluginController controller) {
+	public void addPluginTextResources(PluginController controller) {
 		// Add to the default English bundle
 		InternationalisationUtils.mergeMaps(Thinlet.DEFAULT_ENGLISH_BUNDLE, controller.getDefaultTextResource());
 		
@@ -1895,7 +1896,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			// An AppProperty has been changed
 			AppPropertiesEventNotification appPropertiesNotification = (AppPropertiesEventNotification) notification;
 			
-			if (appPropertiesNotification.getProperty().equals(AppProperties.KEY_SMS_COST_SENT_MESSAGES)) {
+			if (appPropertiesNotification.getAppClass().equals(AppProperties.class) && appPropertiesNotification.getProperty().equals(AppProperties.KEY_SMS_COST_SENT_MESSAGES)) {
 				setText(find(COMPONENT_TF_COST_PER_SMS), InternationalisationUtils.formatCurrency(AppProperties.getInstance().getCostPerSmsSent(), false));
 			}
 		}

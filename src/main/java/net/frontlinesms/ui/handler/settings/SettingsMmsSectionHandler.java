@@ -7,6 +7,7 @@ import net.frontlinesms.AppProperties;
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
 
 /**
@@ -19,7 +20,9 @@ public class SettingsMmsSectionHandler extends SettingsAbstractEmailsSectionHand
 	private static final String UI_COMPONENT_TF_POLLING_FREQUENCY = "tfPollFrequency";
 	
 	private static final String SECTION_ITEM_POLLING_FREQUENCY = "SERVICES_MMS_POLLING_FREQUENCY";
+	
 	private static final String I18N_INVALID_POLLING_FREQUENCY = "settings.message.mms.invalid.polling.frequency";
+	private static final String I18N_SETTINGS_MENU_MMS = "settings.menu.mms";
 
 	public SettingsMmsSectionHandler (UiGeneratorController ui) {
 		super(ui, true);
@@ -81,6 +84,8 @@ public class SettingsMmsSectionHandler extends SettingsAbstractEmailsSectionHand
 		return validationMessages;
 	}
 	
-	
+	public String getTitle() {
+		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_MMS);
+	}
 //> UI EVENT METHODS
 }

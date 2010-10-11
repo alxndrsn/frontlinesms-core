@@ -1,4 +1,4 @@
-package net.frontlinesms.ui;
+package net.frontlinesms.ui.settings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,9 @@ import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.plugins.PluginSettingsController;
 import net.frontlinesms.settings.CoreSettingsSections;
 import net.frontlinesms.settings.FrontlineValidationMessage;
+import net.frontlinesms.ui.ThinletUiEventHandler;
+import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.handler.settings.SettingsAppearanceSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsDatabaseSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsDevicesSectionHandler;
@@ -23,8 +26,6 @@ import net.frontlinesms.ui.handler.settings.SettingsGeneralSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsInternetServicesSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsMmsSectionHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
-import net.frontlinesms.ui.settings.SettingsChangedEventNotification;
-import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
 
 import org.apache.log4j.Logger;
 
@@ -47,16 +48,18 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	private static final String UI_COMPONENT_PN_DISPLAY_SETTINGS = "pnDisplaySettings";
 
 	private static final String I18N_MESSAGE_CONFIRM_CLOSE_SETTINGS = "message.confirm.close.settings";
-	private static final String I18N_MENU_DATABASE_SETTINGS  = "menuitem.edit.db.settings";
-	private static final String I18N_MENU_EMAIL_SETTINGS = "menuitem.email.settings";
+	private static final String I18N_SETTINGS_MENU_DATABASE_SETTINGS  = "menuitem.edit.db.settings";
+	private static final String I18N_SETTINGS_MENU_EMAIL_SETTINGS = "menuitem.email.settings";
 	private static final String I18N_SETTINGS_MENU_APPEARANCE = "settings.menu.appearance";
 	private static final String I18N_SETTINGS_MENU_DEVICES = "settings.menu.devices";
 	private static final String I18N_SETTINGS_MENU_GENERAL = "settings.menu.general";
 	private static final String I18N_SETTINGS_MENU_INTERNET_SERVICES = "settings.menu.internet.services";
 	private static final String I18N_SETTINGS_MENU_MMS = "settings.menu.mms";
 	private static final String I18N_SETTINGS_MENU_SERVICES = "settings.menu.services";
+	private static final String I18N_SETTINGS_SAVED = "settings.saved";
 	private static final String I18N_TOOLTIP_SETTINGS_BTSAVE_DISABLED = "tooltip.settings.btsave.disabled";
 	private static final String I18N_TOOLTIP_SETTINGS_SAVES_ALL = "tooltip.settings.saves.all";
+
 
 //> INSTANCE PROPERTIES
 	/** Thinlet instance that owns this handler */
@@ -117,8 +120,8 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		
 		/** GENERAL **/
 		Object generalRootNode = this.createSectionNode(true, InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_GENERAL), CoreSettingsSections.GENERAL.toString(), "/icons/cog.png");
-		this.uiController.add(generalRootNode, this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_MENU_DATABASE_SETTINGS), CoreSettingsSections.GENERAL_DATABASE.toString(), "/icons/database_edit.png"));
-		this.uiController.add(generalRootNode, this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_MENU_EMAIL_SETTINGS), CoreSettingsSections.GENERAL_EMAIL.toString(), "/icons/emailAccount_edit.png"));
+		this.uiController.add(generalRootNode, this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_DATABASE_SETTINGS), CoreSettingsSections.GENERAL_DATABASE.toString(), "/icons/database_edit.png"));
+		this.uiController.add(generalRootNode, this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_EMAIL_SETTINGS), CoreSettingsSections.GENERAL_EMAIL.toString(), "/icons/emailAccount_edit.png"));
 		this.uiController.add(find(UI_COMPONENT_CORE_TREE), generalRootNode);
 		
 		/** SERVICES **/
@@ -159,7 +162,9 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 			PluginSettingsController pluginSettingsController = null;
 			
 			try {
-				pluginSettingsController = pluginClass.newInstance().getSettingsController(this.uiController);
+				PluginController pluginController = pluginClass.newInstance();
+				this.uiController.addPluginTextResources(pluginController);
+				pluginSettingsController = pluginController.getSettingsController(this.uiController);
 			} catch (InstantiationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -362,8 +367,11 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	}
 	
 	public void closeDialog() {
-		//this.uiController.showConfirmationDialog("removeDialog", this, I18N_MESSAGE_CONFIRM_CLOSE_SETTINGS);
-		this.removeDialog();
+		if (this.changesList.isEmpty()) {
+			removeDialog();
+		} else {
+			this.uiController.showConfirmationDialog("removeDialog", this, I18N_MESSAGE_CONFIRM_CLOSE_SETTINGS);
+		}
 	}
 
 	/** Shows this dialog to the user. */
@@ -384,21 +392,21 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	}
 	
 	public void save () {
-		String validationMessages = "";
+		List<String> validationMessages = new ArrayList<String>();
 		
 		for (UiSettingsSectionHandler settingsSectionHandler : this.handlersList) {
 			List<FrontlineValidationMessage> validation = settingsSectionHandler.validateFields();
 			if (validation != null && !validation.isEmpty()) {
 				for (FrontlineValidationMessage validationMessage : validation) {
-					validationMessages += validationMessage.getLocalisedMessage() + "\n";
+					validationMessages.add("[" + settingsSectionHandler.getTitle() + "] " + validationMessage.getLocalisedMessage());
 				}
 			}
 		}
 		
-		if (validationMessages.length() > 0) {
-			this.uiController.alert(validationMessages);
-		} else {
+		if (validationMessages.isEmpty()) {
 			this.doSave();
+		} else {
+			this.uiController.alert(validationMessages.toArray(new String[0]));
 		}
 	}
 
@@ -408,7 +416,7 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		}
 		
 		this.uiController.removeDialog(settingsDialog);
-		this.uiController.infoMessage("Saved!");
+		this.uiController.infoMessage(InternationalisationUtils.getI18NString(I18N_SETTINGS_SAVED));
 	}
 
 //> INSTANCE HELPER METHODS

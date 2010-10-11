@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
  * UI Handler for the "General/Email" section of the Core Settings
@@ -12,6 +13,8 @@ import net.frontlinesms.ui.UiGeneratorController;
 public class SettingsEmailSectionHandler extends SettingsAbstractEmailsSectionHandler {
 	private static final String UI_FILE_EMAIL_ACCOUNTS_SETTINGS_PANEL = "/ui/core/settings/general/pnEmailSettings.xml";
 	private static final String UI_COMPONENT_PN_EMAIL_ACCOUNTS = "pnEmailAccounts";
+
+	private static final String I18N_SETTINGS_MENU_EMAIL_SETTINGS = "menuitem.email.settings";
 
 	public SettingsEmailSectionHandler (UiGeneratorController ui) {
 		super(ui, false);
@@ -31,5 +34,8 @@ public class SettingsEmailSectionHandler extends SettingsAbstractEmailsSectionHa
 	public List<FrontlineValidationMessage> validateFields() {
 		return null;
 	}
-//> UI EVENT METHODS
+	
+	public String getTitle() {
+		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_EMAIL_SETTINGS);
+	}
 }

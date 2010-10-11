@@ -47,7 +47,8 @@ public class SettingsAppearanceSectionHandler extends BaseSectionHandler impleme
 	private static final String SECTION_ITEM_LANGUAGE = "APPEARANCE_LANGUAGE";
 
 	private static final String I18N_SETTINGS_MESSAGE_EMPTY_CUSTOM_LOGO = "settings.message.empty.custom.logo";
-	
+	private static final String I18N_SETTINGS_MENU_APPEARANCE = "settings.menu.appearance";
+
 	public SettingsAppearanceSectionHandler (UiGeneratorController uiController) {
 		super(uiController);
 		this.uiController = uiController;
@@ -224,5 +225,9 @@ public class SettingsAppearanceSectionHandler extends BaseSectionHandler impleme
 	 */
 	public void showFileChooser(Object component) {
 		this.uiController.showFileChooser(this, "customImageSourceChanged");
+	}
+
+	public String getTitle() {
+		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_APPEARANCE);
 	}
 }

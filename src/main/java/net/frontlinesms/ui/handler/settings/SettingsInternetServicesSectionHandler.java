@@ -14,6 +14,7 @@ import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.events.FrontlineUiUpateJob;
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
 
 public class SettingsInternetServicesSectionHandler extends BaseSectionHandler implements UiSettingsSectionHandler, ThinletUiEventHandler, EventObserver {
@@ -21,6 +22,8 @@ public class SettingsInternetServicesSectionHandler extends BaseSectionHandler i
 
 	private static final String UI_COMPONENT_LS_ACCOUNTS = "lsSmsInternetServices";
 	private static final String UI_COMPONENT_PN_BUTTONS = "pnButtons";
+
+	private static final String I18N_SETTINGS_MENU_INTERNET_SERVICES = "settings.menu.internet.services";
 
 	public SettingsInternetServicesSectionHandler (UiGeneratorController ui) {
 		super(ui);
@@ -132,5 +135,9 @@ public class SettingsInternetServicesSectionHandler extends BaseSectionHandler i
 		if (notification instanceof InternetServiceEventNotification) {
 			this.refresh();
 		}
+	}
+	
+	public String getTitle() {
+		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_INTERNET_SERVICES);
 	}
 }

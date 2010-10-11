@@ -20,7 +20,8 @@ public class SettingsDatabaseSectionHandler extends BaseSectionHandler implement
 	private static final String UI_SECTION_DATABASE = "/ui/core/settings/general/pnDatabaseSettings.xml";
 	private static final String UI_SECTION_DATABASE_AS_DIALOG = "/ui/core/database/pnSettings.xml";
 
-	
+	private static final String I18N_SETTINGS_MENU_DATABASE_SETTINGS  = "menuitem.edit.db.settings";
+
 	/** The combobox containing the different databases */
 	private static final String COMPONENT_SETTINGS_SELECTION = "cbConfigFile";
 	/** The panel containing individual settings controls */
@@ -214,6 +215,10 @@ public class SettingsDatabaseSectionHandler extends BaseSectionHandler implement
 
 	public List<FrontlineValidationMessage> validateFields() {
 		return null;
+	}
+	
+	public String getTitle() {
+		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_DATABASE_SETTINGS);
 	}
 }
 

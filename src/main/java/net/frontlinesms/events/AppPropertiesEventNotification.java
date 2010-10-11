@@ -8,12 +8,18 @@ import net.frontlinesms.events.FrontlineEventNotification;
  */
 public class AppPropertiesEventNotification implements FrontlineEventNotification {
 	private String property;
-
-	public AppPropertiesEventNotification (String property) {
+	private Class<?> clazz;
+	
+	public AppPropertiesEventNotification (Class<?> clazz, String property) {
+		this.clazz = clazz;
 		this.property = property;
 	}
 
 	public String getProperty() {
 		return this.property;
+	}
+
+	public Class<?> getAppClass() {
+		return clazz;
 	}
 }

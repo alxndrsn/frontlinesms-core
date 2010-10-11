@@ -9,6 +9,7 @@ import net.frontlinesms.settings.BaseSectionHandler;
 import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
 
 public class SettingsDevicesSectionHandler extends BaseSectionHandler implements UiSettingsSectionHandler, ThinletUiEventHandler {
@@ -39,6 +40,8 @@ public class SettingsDevicesSectionHandler extends BaseSectionHandler implements
 	private static final String SECTION_ITEM_DEVICE_USE_DELIVERY_REPORTS = "SERVICES_DEVICES_USE_DELIVERY_REPORTS";
 	private static final String SECTION_ITEM_DEVICE_DELETE_MESSAGES = "SERVICES_DEVICES_DELETE_MESSAGES";
 	
+	private static final String I18N_SETTINGS_MENU_DEVICES = "settings.menu.devices";
+
 	private SmsModemSettingsDao smsModemSettingsDao;
 
 	private List<SmsModemSettings> modemSettingsList;
@@ -277,5 +280,9 @@ public class SettingsDevicesSectionHandler extends BaseSectionHandler implements
 	 */
 	public void promptConnectionProblemDialogChanged (boolean shouldPromptConnectionProblemDialog) {
 		super.settingChanged(SECTION_ITEM_PROMPT_DEVICE_CONNECTION_PROBLEM_DIALOG, shouldPromptConnectionProblemDialog);
+	}
+	
+	public String getTitle() {
+		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_DEVICES);
 	}
 }
