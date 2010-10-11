@@ -19,6 +19,7 @@
  */
 package net.frontlinesms;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -38,6 +39,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -49,6 +51,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 
@@ -222,24 +225,35 @@ public class ErrorUtils {
 		
 
 		final JLabel nameLabel = new JLabel(I18N_YOUR_NAME.toString());
-		emailPanel.add(nameLabel, new SimpleConstraints(5, cumulativeY));
-		final JTextField nameTextfield = new JTextField(20);
-		final int TF_NAME_X = nameLabel.getFontMetrics(nameLabel.getFont()).stringWidth(nameLabel.getText()) + EM__LEFT_INDENT;
-		emailPanel.add(nameTextfield,  new SimpleConstraints(TF_NAME_X, cumulativeY));
-
-		cumulativeY += FONT_HEIGHT + EM__LINESPACING;
-		
 		final JLabel emailLabel = new JLabel(I18N_YOUR_EMAIL.toString());
+		final JLabel descriptionLabel = new JLabel(I18N_DESCRIPTION.toString());
+		final int TF_NAME_X = nameLabel.getFontMetrics(nameLabel.getFont()).stringWidth(nameLabel.getText()) + EM__LEFT_INDENT;
+		final int TF_EMAIL_X = emailLabel.getFontMetrics(emailLabel.getFont()).stringWidth(emailLabel.getText()) + EM__LEFT_INDENT;
+		final int TF_DESCRIPTION_X = descriptionLabel.getFontMetrics(descriptionLabel.getFont()).stringWidth(descriptionLabel.getText()) + EM__LEFT_INDENT;
+		final int MAX_X = Math.max(TF_NAME_X, Math.max(TF_EMAIL_X, TF_DESCRIPTION_X));
+		
+		Border border = BorderFactory.createEtchedBorder();
+		
+		emailPanel.add(nameLabel, new SimpleConstraints(5, cumulativeY));
+		final JTextField nameTextfield = new JTextField(30);
+		nameTextfield.setBorder(border);
+		emailPanel.add(nameTextfield,  new SimpleConstraints(MAX_X, cumulativeY));
+				
+		cumulativeY += FONT_HEIGHT + EM__LINESPACING;
+		
 		emailPanel.add(emailLabel, new SimpleConstraints(5, cumulativeY));
-		final JTextField emailTextfield = new JTextField(20);
-		emailPanel.add(emailTextfield, new SimpleConstraints(TF_NAME_X, cumulativeY));
+		final JTextField emailTextfield = new JTextField(30);
+		emailTextfield.setBorder(border);
+		emailPanel.add(emailTextfield, new SimpleConstraints(MAX_X, cumulativeY));
 		
 		cumulativeY += FONT_HEIGHT + EM__LINESPACING;
 		
-		final JLabel descriptionLabel = new JLabel(I18N_DESCRIPTION.toString());
 		emailPanel.add(descriptionLabel, new SimpleConstraints(5, cumulativeY));
-		final JTextField descriptionTextfield = new JTextField(20);
-		emailPanel.add(descriptionTextfield, new SimpleConstraints(TF_NAME_X, cumulativeY));
+		final JTextArea descriptionTextArea = new JTextArea(3, 30);
+		descriptionTextArea.setBorder(border);
+		emailPanel.add(descriptionTextArea, new SimpleConstraints(MAX_X, cumulativeY));
+		
+		cumulativeY += 65;
 		
 		final JButton btSend = new JButton(I18N_SEND_LOGS.toString());
 		ImageIcon sendIcon = getImageIcon("/icons/email_send.png");
@@ -248,7 +262,7 @@ public class ErrorUtils {
 		}
 		btSend.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(reportError(nameTextfield.getText(), emailTextfield.getText(), descriptionTextfield.getText())) {
+				if(reportError(nameTextfield.getText(), emailTextfield.getText(), descriptionTextArea.getText())) {
 					errorFrame.dispose();
 				}
 			}
@@ -427,7 +441,7 @@ public class ErrorUtils {
 	public static void sendLogsToFrontlineSupport(String fromName, String fromEmailAddress, String description, String attachment) throws EmailException {
 		StringBuilder sb = new StringBuilder();
 		
-		//sb.append("Description: " + description);
+		sb.append("Description: " + description + "\n");
 	    appendFrontlineProperties(sb);
 	    appendSystemProperties(sb);
 	    appendCommProperties(sb);
