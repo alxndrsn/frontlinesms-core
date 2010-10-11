@@ -59,6 +59,7 @@
 			<menuitem icon="/icons/hits.png" text="i18n.stats.send" name="menu_statsDialog" action="showStatsDialog"/>
 			<separator />
 			<menuitem icon="/icons/about.png" text="i18n.menuitem.help.about" action="showAboutScreen"/>
+			<menuitem icon="/icons/help.png" text="i18n.contribute.menu" action="showContributeScreen"/>
 		</menu>
 	</menubar>
 	

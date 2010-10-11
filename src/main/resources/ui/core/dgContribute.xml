@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dialog closable="true" close="removeDialog(this)" bottom="4" gap="8" icon="/icons/about.png" left="4" modal="true" name="contributeDialog" right="4" text="i18n.contribute.title" top="4" columns="1" halign="left">
+	<button halign="left" type="link" text="i18n.contribute.join.community" action="showHelpPage('http://frontlinesms.ning.com')"/>
+	<panel gap="5">
+		<label text="i18n.contribute.frontlinesms.working"/>
+		<button type="link" text="laura@frontlinesms.com" action="mailTo('laura@frontlinesms.com')"/>
+	</panel>
+	<panel gap="5">
+		<label text="i18n.contribute.guest.post.0"/>
+		<button type="link" text="laura@frontlinesms.com" action="mailTo('laura@frontlinesms.com')"/>
+		<label text="i18n.contribute.guest.post.1"/>
+	</panel>
+	<button halign="left" type="link" text="i18n.contribute.send.logo.pictures" action="showHelpPage('http://www.frontlinesms.com/2010/06/25/throw-your-hands-up-in-the-air/')"/>
+	<panel gap="5">
+		<label text="i18n.contribute.frontlinesms.not.working"/>
+		<button type="link" text="frontlinesupport@kiwanja.net" action="mailTo('frontlinesupport@kiwanja.net')"/>
+	</panel>
+	<separator/>
+	<panel halign="center">
+		<button type="cancel" icon="/icons/tick.png" text="i18n.action.ok" action="removeDialog(contributeDialog)"/>
+	</panel>
+</dialog>

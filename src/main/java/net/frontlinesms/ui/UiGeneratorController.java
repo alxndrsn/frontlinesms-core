@@ -1513,6 +1513,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		setText(find(about, "version"), version);
 		add(about);
 	}
+	
+	public void showContributeScreen() {
+		Object contributeDialog = loadComponentFromFile(UI_FILE_CONTRIBUTE_DIALOG);
+		add(contributeDialog);
+	}
 
 	public void incomingMessageEvent(FrontlineMessage message) {
 		LOG.trace("ENTER");

@@ -199,6 +199,14 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	}
 	
 	/**
+	 * Opens a mailto window
+	 * @param emailAddress
+	 */
+	public void mailTo(String emailAddress) {
+		FrontlineUtils.openExternalBrowser("mailto:" + emailAddress);
+	}
+	
+	/**
 	 * Shows an error dialog informing the user that an unhandled error has occurred.
 	 */
 	@Override
