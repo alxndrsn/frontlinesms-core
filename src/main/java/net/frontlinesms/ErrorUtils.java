@@ -100,6 +100,8 @@ public class ErrorUtils {
 	private static final I18nString I18N_SEND_LOGS = new I18nString("error.logs.action.logs.send", "Send Logs");
 	private static final I18nString I18N_YOUR_EMAIL = new I18nString("error.logs.field.email", "Your email:");
 	private static final I18nString I18N_YOUR_NAME = new I18nString("error.logs.field.name", "Your name:");
+	private static final I18nString I18N_DESCRIPTION = new I18nString("error.logs.field.description", "Description:");;
+
 	private static final I18nString I18N_VISIT_COMMUNITY_BODY = new I18nString("error.logs.community.dialog.body",
 			"Please also report this error on the FrontlineSMS community forum at %0" +
 			"\n\nWould you like to go there now?");
@@ -114,9 +116,9 @@ public class ErrorUtils {
 	 * @param userEmail
 	 * @return <code>true</code> if the error report was sent successfully; <code>false</code> otherwise
 	 */
-	public static boolean reportError(String userName, String userEmail) {
+	public static boolean reportError(String userName, String userEmail, String description) {
 		try {
-			sendLogs(userName, userEmail, false);
+			sendLogs(userName, userEmail, description, false);
 			showMessageDialog(I18N_LOGS_SENT_SUCCESSFULLY.toString());
 			return true;
 		} catch (EmailException e) {
@@ -140,7 +142,7 @@ public class ErrorUtils {
 			// Problem writing logs.zip
 			showMessageDialog(I18N_UNABLE_TO_SEND_LOGS.toString());
 			try {
-				sendLogsToFrontlineSupport(userName, userEmail, null);
+				sendLogsToFrontlineSupport(userName, userEmail, description, null);
 				return true;
 			} catch (EmailException e1) {
 				// If it fails, there is nothing we can do.
@@ -232,6 +234,13 @@ public class ErrorUtils {
 		final JTextField emailTextfield = new JTextField(20);
 		emailPanel.add(emailTextfield, new SimpleConstraints(TF_NAME_X, cumulativeY));
 		
+		cumulativeY += FONT_HEIGHT + EM__LINESPACING;
+		
+		final JLabel descriptionLabel = new JLabel(I18N_DESCRIPTION.toString());
+		emailPanel.add(descriptionLabel, new SimpleConstraints(5, cumulativeY));
+		final JTextField descriptionTextfield = new JTextField(20);
+		emailPanel.add(descriptionTextfield, new SimpleConstraints(TF_NAME_X, cumulativeY));
+		
 		final JButton btSend = new JButton(I18N_SEND_LOGS.toString());
 		ImageIcon sendIcon = getImageIcon("/icons/email_send.png");
 		if(sendIcon != null) {
@@ -239,7 +248,7 @@ public class ErrorUtils {
 		}
 		btSend.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(reportError(nameTextfield.getText(), emailTextfield.getText())) {
+				if(reportError(nameTextfield.getText(), emailTextfield.getText(), descriptionTextfield.getText())) {
 					errorFrame.dispose();
 				}
 			}
@@ -393,13 +402,13 @@ public class ErrorUtils {
 	 * @throws IOException
 	 * @throws MessagingException
 	 */
-	public static void sendLogs(String name, String emailAddress, boolean resetConfiguration) throws IOException, EmailException {
+	public static void sendLogs(String name, String emailAddress, String description, boolean resetConfiguration) throws IOException, EmailException {
 		LogManager.shutdown();
 		try {
 			// FIXME this will not actually work if the log directory has been configured to be different to the default
 			ResourceUtils.zip(ResourceUtils.getConfigDirectoryPath() + "logs",
 					new File(ResourceUtils.getConfigDirectoryPath() + FrontlineSMSConstants.ZIPPED_LOGS_FILENAME));
-			sendLogsToFrontlineSupport(name, emailAddress, ResourceUtils.getConfigDirectoryPath() + FrontlineSMSConstants.ZIPPED_LOGS_FILENAME);
+			sendLogsToFrontlineSupport(name, emailAddress, description, ResourceUtils.getConfigDirectoryPath() + FrontlineSMSConstants.ZIPPED_LOGS_FILENAME);
 		} finally {
 			if (resetConfiguration) {
 				FrontlineUtils.loadLogConfiguration();
@@ -415,8 +424,10 @@ public class ErrorUtils {
 	 * @param attachment
 	 * @throws MessagingException
 	 */
-	public static void sendLogsToFrontlineSupport(String fromName, String fromEmailAddress, String attachment) throws EmailException {
+	public static void sendLogsToFrontlineSupport(String fromName, String fromEmailAddress, String description, String attachment) throws EmailException {
 		StringBuilder sb = new StringBuilder();
+		
+		//sb.append("Description: " + description);
 	    appendFrontlineProperties(sb);
 	    appendSystemProperties(sb);
 	    appendCommProperties(sb);
