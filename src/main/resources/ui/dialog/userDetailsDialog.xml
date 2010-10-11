@@ -4,5 +4,7 @@
 	<textfield name="tfName" columns="30"/>
 	<label text="i18n.user.details.email"/>
 	<textfield name="tfEmail"/>
+	<label text="i18n.user.details.reason"/>
+	<textarea name="taReason"/>
 	<button colspan="2" icon="/icons/report_error.png" text="i18n.menuitem.error.report" action="reportError(userDetailsDialog)" halign="center" />
 </dialog>

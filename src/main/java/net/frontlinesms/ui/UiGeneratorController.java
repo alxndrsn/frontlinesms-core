@@ -1620,10 +1620,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		removeDialog(dialog);
 		final String userName = getText(find(dialog, "tfName"));
 		final String userEmail = getText(find(dialog, "tfEmail"));
+		final String reason = getText(find(dialog, "taReason"));
 		new Thread("ERROR_REPORT") {
 			public void run() {
 				try {
-					ErrorUtils.sendLogs(userName, userEmail, true);
+					ErrorUtils.sendLogs(userName, userEmail, reason, true);
 					String success = InternationalisationUtils.getI18NString(MESSAGE_LOG_FILES_SENT);
 					LOG.debug(success);
 					alert(success);
@@ -1653,7 +1654,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 					// Problem writing logs.zip
 					LOG.debug("", e);
 					try {
-						ErrorUtils.sendLogsToFrontlineSupport(userName, userEmail, null);
+						ErrorUtils.sendLogsToFrontlineSupport(userName, userEmail, reason, null);
 					} catch (EmailException e1) {
 						LOG.debug("", e1);
 					}
