@@ -127,8 +127,8 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 				this.eventBus.notifyObservers(new AppPropertiesEventNotification(AppProperties.class, AppProperties.KEY_SMS_COST_SENT_MESSAGES));
 			}
 			
-			double costPerSmsReceived = InternationalisationUtils.parseCurrency(this.uiController.getText(find(UI_COMPONENT_TF_COST_PER_SMS_SENT)));
-			if (costPerSmsReceived != appProperties.getCostPerSmsSent()) {
+			double costPerSmsReceived = InternationalisationUtils.parseCurrency(this.uiController.getText(find(UI_COMPONENT_TF_COST_PER_SMS_RECEIVED)));
+			if (costPerSmsReceived != appProperties.getCostPerSmsReceived()) {
 				appProperties.setCostPerSmsReceived(costPerSmsReceived);
 				this.eventBus.notifyObservers(new AppPropertiesEventNotification(AppProperties.class, AppProperties.KEY_SMS_COST_RECEIVED_MESSAGES));
 			}
