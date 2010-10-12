@@ -140,7 +140,7 @@ public class SmsModemSettings {
 	}
 
 	public void setSupportsReceive(Boolean supportsReceive) {
-		this.supportingReceive = supportsReceive;
+		this.supportingReceive = (supportsReceive == null ? true : supportsReceive);
 	}
 
 	public boolean supportsReceive() {
