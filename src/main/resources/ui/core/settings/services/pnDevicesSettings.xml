@@ -5,9 +5,11 @@
         <checkbox name="cbDetectAtStartup" action="startDetectingDevicesAtStartup(this.selected)" text="i18n.settings.devices.detect.at.startup"/>
     </panel>
     <panel icon="/icons/phone_working.png" text="i18n.common.working.devices" border="true" weightx="1" columns="1" gap="7" top="5" left="5" bottom="5" right="5">
-        <checkbox name="cbDisableAllDevices" action="disableAllDevicesChanged(this.selected)" text="i18n.settings.devices.disable.all"/>
+        <!-- 
+       		<checkbox name="cbDisableAllDevices" action="disableAllDevicesChanged(this.selected)" text="i18n.settings.devices.disable.all"/>
+         -->
 		<panel name="pnDeviceChoice" halign="center" weightx="1" columns="1" gap="8">
-	    	<combobox name="cbDevices" action="deviceSelected(this.selected)" width="200" height="20"/>
+	    	<combobox name="cbDevices" editable="false" action="deviceSelected(this.selected)" width="200" height="20"/>
     	</panel>
     	<panel name="pnDeviceSettingsContainer" gap="5" halign="left" columns="1">
     		<!-- Will be populated by the device settings at runtime -->

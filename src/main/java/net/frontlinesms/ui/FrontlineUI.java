@@ -195,7 +195,6 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	 * @param page The name of the help manual page, including file extension.
 	 */
 	public void showHelpPage(String page) {
-		page = null;
 		FrontlineUtils.openHelpPageInBrowser(page);
 	}
 	

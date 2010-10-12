@@ -18,7 +18,7 @@ public class SettingsDevicesSectionHandler extends BaseSectionHandler implements
 	
 	private static final String UI_COMPONENT_CB_PROMPT_DEVICE_CONNECTION_PROBLEM_DIALOG = "cbPromptConnectionProblemDialog";
 	private static final String UI_COMPONENT_CB_START_DETECTING = "cbDetectAtStartup";
-	private static final String UI_COMPONENT_CB_DISABLE_ALL = "cbDisableAllDevices";
+	//private static final String UI_COMPONENT_CB_DISABLE_ALL = "cbDisableAllDevices";
 	private static final String UI_COMPONENT_CB_DEVICES = "cbDevices";
 	private static final String UI_COMPONENT_LB_APPLIED_NEXT_CONNECTION = "lbAppliedNextConnection";
 	private static final String UI_COMPONENT_PHONE_SENDING = "cbSending";
@@ -65,7 +65,7 @@ public class SettingsDevicesSectionHandler extends BaseSectionHandler implements
 		
 		this.uiController.setSelected(find(UI_COMPONENT_CB_PROMPT_DEVICE_CONNECTION_PROBLEM_DIALOG), shouldPromptDeviceConnectionProblemDialog);
 		this.uiController.setSelected(find(UI_COMPONENT_CB_START_DETECTING), startDetectingAtStartup);
-		this.uiController.setSelected(find(UI_COMPONENT_CB_DISABLE_ALL), disableAllDevices);
+		//this.uiController.setSelected(find(UI_COMPONENT_CB_DISABLE_ALL), disableAllDevices);
 
 		this.modemSettingsList = this.smsModemSettingsDao.getAll();
 		
@@ -228,7 +228,7 @@ public class SettingsDevicesSectionHandler extends BaseSectionHandler implements
 		
 		appProperties.setDeviceConnectionDialogEnabled(this.uiController.isSelected(find(UI_COMPONENT_CB_PROMPT_DEVICE_CONNECTION_PROBLEM_DIALOG)));
 		appProperties.shouldStartDetectingAtStartup(this.uiController.isSelected(find(UI_COMPONENT_CB_START_DETECTING)));
-		appProperties.shouldDisableAllDevices(this.uiController.isSelected(find(UI_COMPONENT_CB_DISABLE_ALL)));
+		//appProperties.shouldDisableAllDevices(this.uiController.isSelected(find(UI_COMPONENT_CB_DISABLE_ALL)));
 
 		appProperties.saveToDisk();
 

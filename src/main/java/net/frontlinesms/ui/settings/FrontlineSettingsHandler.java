@@ -22,6 +22,7 @@ import net.frontlinesms.ui.handler.settings.SettingsAppearanceSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsDatabaseSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsDevicesSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsEmailSectionHandler;
+import net.frontlinesms.ui.handler.settings.SettingsEmptySectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsGeneralSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsInternetServicesSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsMmsSectionHandler;
@@ -140,7 +141,6 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		
 		
 		this.uiController.add(find(UI_COMPONENT_CORE_TREE), servicesRootNode);
-		this.unselectableNodes.add(servicesRootNode);
 	}
 
 	private Object createSectionNode(boolean isRootNode, String title, String coreSection, String iconPath) {
@@ -332,6 +332,8 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 				return new SettingsDatabaseSectionHandler(uiController);
 			case GENERAL_EMAIL:
 				return new SettingsEmailSectionHandler(uiController);
+			case SERVICES:
+				return new SettingsEmptySectionHandler(uiController, I18N_SETTINGS_MENU_SERVICES);
 			case SERVICES_DEVICES:
 				return new SettingsDevicesSectionHandler(uiController);
 			case SERVICES_INTERNET_SERVICES:
