@@ -232,26 +232,25 @@ public class ErrorUtils {
 		final int TF_DESCRIPTION_X = descriptionLabel.getFontMetrics(descriptionLabel.getFont()).stringWidth(descriptionLabel.getText()) + EM__LEFT_INDENT;
 		final int MAX_X = Math.max(TF_NAME_X, Math.max(TF_EMAIL_X, TF_DESCRIPTION_X));
 		
-		Border border = BorderFactory.createEtchedBorder();
-		
 		emailPanel.add(nameLabel, new SimpleConstraints(5, cumulativeY));
-		final JTextField nameTextfield = new JTextField(30);
-		nameTextfield.setBorder(border);
+		final JTextField nameTextfield = new JTextField(35);
 		emailPanel.add(nameTextfield,  new SimpleConstraints(MAX_X, cumulativeY));
 				
 		cumulativeY += FONT_HEIGHT + EM__LINESPACING;
 		
 		emailPanel.add(emailLabel, new SimpleConstraints(5, cumulativeY));
-		final JTextField emailTextfield = new JTextField(30);
-		emailTextfield.setBorder(border);
+		final JTextField emailTextfield = new JTextField(35);
 		emailPanel.add(emailTextfield, new SimpleConstraints(MAX_X, cumulativeY));
 		
 		cumulativeY += FONT_HEIGHT + EM__LINESPACING;
 		
 		emailPanel.add(descriptionLabel, new SimpleConstraints(5, cumulativeY));
-		final JTextArea descriptionTextArea = new JTextArea(3, 30);
-		descriptionTextArea.setBorder(border);
-		emailPanel.add(descriptionTextArea, new SimpleConstraints(MAX_X, cumulativeY));
+		final JTextArea descriptionTextArea = new JTextArea(3, 35);
+		descriptionTextArea.setLineWrap(true);
+		
+		final JScrollPane descriptionScrollPane = new JScrollPane(descriptionTextArea);
+		
+		emailPanel.add(descriptionScrollPane, new SimpleConstraints(MAX_X, cumulativeY));
 		
 		cumulativeY += 65;
 		
