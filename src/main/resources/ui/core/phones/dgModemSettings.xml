@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dialog closable="true" close="removeDialog(this)" bottom="7" columns="1" gap="7" icon="/icons/phone_edit.png" left="7" modal="true" name="phoneSettingsDialog" right="7" top="7">
 	<!-- Will be populated here by device settings at runtime -->
-	<panel colspan="2" columns="2" halign="center">
+	<panel colspan="2" columns="2" halign="center" gap="5">
 	    <button action="updatePhoneDetails(phoneSettingsDialog)" icon="/icons/tick.png" name="btSave" text="i18n.action.save"/>
 	    <button action="removeDialog(phoneSettingsDialog)" icon="/icons/cross.png" name="btCancel" text="i18n.action.cancel"/>
 	</panel>

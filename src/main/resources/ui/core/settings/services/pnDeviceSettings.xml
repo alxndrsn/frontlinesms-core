@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<panel name="pnDevice" gap="7" weightx="2" columns="1">
+    <panel icon="/icons/phone_working.png" text="i18n.common.working.devices" border="true" weightx="1" columns="1" gap="7" top="5" left="5" bottom="5" right="5">
+    	<panel name="pnDeviceSettingsContainer" gap="5" halign="left" columns="1">
+    		<!-- Will be populated by the device settings at runtime -->
+    	</panel>
+    	<label name="lbAppliedNextConnection" icon="/icons/about.png" text="i18n.settings.devices.applied.next.time" font="11"/>
+    </panel>
+</panel>
