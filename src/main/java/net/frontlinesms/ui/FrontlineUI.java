@@ -19,7 +19,11 @@
  */
 package net.frontlinesms.ui;
 
+import java.awt.Desktop;
 import java.awt.Image;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import net.frontlinesms.ErrorUtils;
 import net.frontlinesms.FrontlineUtils;
@@ -195,7 +199,6 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	 * @param page The name of the help manual page, including file extension.
 	 */
 	public void showHelpPage(String page) {
-		page = null;
 		FrontlineUtils.openHelpPageInBrowser(page);
 	}
 	
@@ -204,8 +207,20 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	 * @param emailAddress
 	 */
 	public void mailTo(String emailAddress) {
-		FrontlineUtils.openExternalBrowser("mailto:" + emailAddress);
+		mailTo(emailAddress, "", "");
 	}
+	
+	/**
+	 * Opens a mailto window
+	 * @param emailAddress
+	 */
+	public void mailTo(String emailAddress, String subject, String body) {
+		try {
+			FrontlineUtils.openDefaultMailClient(new URI("mailto", emailAddress, "?subject=" + subject + "&body=" + body));
+		} catch (URISyntaxException e1) {}
+	}
+	
+	
 	
 	/**
 	 * Shows an error dialog informing the user that an unhandled error has occurred.

@@ -22,6 +22,7 @@ package net.frontlinesms;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_UNDEFINED;
 import static net.frontlinesms.FrontlineSMSConstants.DEFAULT_END_DATE;
 
+import java.awt.Desktop;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.BufferedReader;
@@ -32,6 +33,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
@@ -380,6 +382,18 @@ public class FrontlineUtils {
 		}
 		
 		openExternalBrowser(url);
+	}
+	
+	/**
+	 * Opens an email editor in the default email client
+	 * @param uri
+	 */
+	public static void openDefaultMailClient(URI uri) {
+		if (uri != null) {
+			try {
+				Desktop.getDesktop().mail(uri.resolve(uri.toString().replace("#", "")));
+			} catch (IOException e) {}
+		}
 	}
 	
 	private final static String getOnlineHelpUrl(String page) {
