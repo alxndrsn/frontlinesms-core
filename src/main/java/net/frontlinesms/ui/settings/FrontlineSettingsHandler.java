@@ -193,34 +193,30 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 				PluginController pluginController = pluginClass.newInstance();
 				this.uiController.addPluginTextResources(pluginController);
 				pluginSettingsController = pluginController.getSettingsController(this.uiController);
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			
-			if (pluginSettingsController != null) { // Then the Plugin has some settings
-				Object rootSettingsNode = this.uiController.createNode(pluginSettingsController.getTitle(), pluginClass.getName());
-				
-				// Some plugin may need submenus
-				pluginSettingsController.addSubSettingsNodes(rootSettingsNode);
-				
-				// Try to get an icon from the classpath
-				String iconPath;
-				if(pluginClass.isAnnotationPresent(PluginControllerProperties.class)) {
-					PluginControllerProperties properties = pluginClass.getAnnotation(PluginControllerProperties.class);
-					iconPath = properties.iconPath();
-				} else {
-					iconPath = '/' + pluginClass.getPackage().getName().replace('.', '/') + '/' + pluginClass.getSimpleName() + ".png";
+				if (pluginSettingsController != null) { // Then the Plugin has some settings
+					Object rootSettingsNode = this.uiController.createNode(pluginSettingsController.getTitle(), pluginClass.getName());
+					
+					// Some plugin may need submenus
+					pluginSettingsController.addSubSettingsNodes(rootSettingsNode);
+					
+					// Try to get an icon from the classpath
+					String iconPath;
+					if(pluginClass.isAnnotationPresent(PluginControllerProperties.class)) {
+						PluginControllerProperties properties = pluginClass.getAnnotation(PluginControllerProperties.class);
+						iconPath = properties.iconPath();
+					} else {
+						iconPath = '/' + pluginClass.getPackage().getName().replace('.', '/') + '/' + pluginClass.getSimpleName() + ".png";
+					}
+					this.uiController.setIcon(rootSettingsNode, iconPath);
+					
+					// Collapse all root nodes by default
+					this.uiController.setExpanded(rootSettingsNode, false);
+					
+					this.uiController.add(find(UI_COMPONENT_PLUGIN_TREE), rootSettingsNode);
 				}
-				this.uiController.setIcon(rootSettingsNode, iconPath);
-				
-				// Collapse all root nodes by default
-				this.uiController.setExpanded(rootSettingsNode, false);
-				
-				this.uiController.add(find(UI_COMPONENT_PLUGIN_TREE), rootSettingsNode);
+			} catch (Exception e) {
+				// Prevents a plugin from messing the whole process up
 			}
 		}
 	}
