@@ -161,7 +161,11 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		List<SmsModemSettings> devicesSettings = this.deviceSettingsDao.getAll();
 		
 		for (SmsModemSettings deviceSettings : devicesSettings) {
-			this.uiController.add(devicesNode, this.createSectionNode(false, deviceSettings.getManufacturer() + " " + deviceSettings.getModel(), deviceSettings, "/icons/phone_number.png"));
+			String deviceItemName = deviceSettings.getManufacturer() + " " + deviceSettings.getModel();
+			if (deviceItemName.trim().isEmpty()) {
+				deviceItemName = deviceSettings.getSerial();
+			}
+			this.uiController.add(devicesNode, this.createSectionNode(false, deviceItemName, deviceSettings, "/icons/phone_number.png"));
 		}
 	}
 
