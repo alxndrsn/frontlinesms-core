@@ -215,7 +215,7 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 					
 					this.uiController.add(find(UI_COMPONENT_PLUGIN_TREE), rootSettingsNode);
 				}
-			} catch (Exception e) {
+			} catch (Throwable t) {
 				// Prevents a plugin from messing the whole process up
 			}
 		}
