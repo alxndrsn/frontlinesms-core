@@ -1545,6 +1545,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		body.append("Short description of your use of SMS (e.g. keeping in touch with staff in the field, monitoring well maintenance, providing information to remote farmers): \n\n");
 		mailTo("you2us@frontlinesms.com", "Contribute to FrontlineSMS", body.toString());
 	}
+	
+	public void emailForGuestPost() {
+		mailTo("you2us@frontlinesms.com", "Writing a guest blog post for FrontlineSMS.com", "");
+	}
 
 	public void incomingMessageEvent(FrontlineMessage message) {
 		LOG.trace("ENTER");
