@@ -1,19 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dialog closable="true" close="removeDialog(this)" bottom="4" gap="8" icon="/icons/about.png" left="4" modal="true" name="contributeDialog" right="4" text="i18n.contribute.title" top="4" columns="1" halign="left">
-	<button halign="left" type="link" text="i18n.contribute.join.community" action="showHelpPage('http://frontlinesms.ning.com')"/>
+	<panel gap="5" columns="2">
+		<panel gap="5" columns="1" valign="bottom">
+			<label icon="/icons/images/frontlinesms_armsup.jpg"/>
+		</panel>
+		<panel gap="5" columns="1">
+			<label font="13 bold" icon="/icons/frontline_icon.png" text="FrontlineSMS needs you"/>
+			<panel name="pnExplanation" gap="5" columns="1">
+				<!-- This will be populated at runtime by Internationalized labels -->
+			</panel>
+		</panel>
+	</panel>
+	
+	<separator/>
+	<panel gap="5">
+		<label text="i18n.contribute.join.community"/>
+		<button type="link" text="i18n.contribute.click.to.know.more" action="showHelpPage('http://frontlinesms.ning.com')"/>
+	</panel>
+	
 	<panel gap="5">
 		<label text="i18n.contribute.frontlinesms.working"/>
-		<button type="link" text="laura@frontlinesms.com" action="mailTo('laura@frontlinesms.com')"/>
+		<button name="linkWorking" type="link" action="emailMyExperience"/>
 	</panel>
 	<panel gap="5">
-		<label text="i18n.contribute.guest.post.0"/>
-		<button type="link" text="laura@frontlinesms.com" action="mailTo('laura@frontlinesms.com')"/>
-		<label text="i18n.contribute.guest.post.1"/>
+		<label text="i18n.contribute.guest.post"/>
+		<button name="linkGuestPost" type="link" action="emailForGuestPost"/>
 	</panel>
-	<button halign="left" type="link" text="i18n.contribute.send.logo.pictures" action="showHelpPage('http://www.frontlinesms.com/2010/06/25/throw-your-hands-up-in-the-air/')"/>
+	
+	<panel gap="5">
+		<label text="i18n.contribute.send.logo.pictures"/>
+		<button type="link" text="i18n.contribute.click.here.is.why" action="showHelpPage('http://www.kiwanja.net/blog/2010/06/become-a-frontlinesms-icon/')"/>
+	</panel>
+	
 	<panel gap="5">
 		<label text="i18n.contribute.frontlinesms.not.working"/>
-		<button type="link" text="frontlinesupport@kiwanja.net" action="mailTo('frontlinesupport@kiwanja.net')"/>
+		<button name="linkNotWorking" type="link" action="mailTo('frontlinesupport@kiwanja.net')"/>
 	</panel>
 	<separator/>
 	<panel halign="center">

@@ -12,8 +12,6 @@ import net.frontlinesms.AppProperties;
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.StatisticsManager;
-import net.frontlinesms.email.EmailException;
-import net.frontlinesms.email.smtp.SmtpEmailSender;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -68,9 +66,6 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 		
 		this.statisticsManager.collectData();
 		
-		// Log the stats data.
-		LOG.info(statisticsManager.getDataAsEmailString());
-
 		Object taStatsContent = ui.find(dialogComponent, COMPONENT_TA_STATS_CONTENT);
 		for (Entry<String, String> entry : this.statisticsManager.getStatisticsList().entrySet()) {
 			ui.add(taStatsContent, getRow(entry));
@@ -163,9 +158,7 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 		appProperties.setUserEmail(userEmail);
 		appProperties.saveToDisk();
 		
-		if (!sendStatisticsViaEmail()) {
-			sendStatisticsViaSms();
-		}
+		this.statisticsManager.sendStatistics(this.ui.getFrontlineController());
 		
 		this.saveLastSubmissionDate();
 		
@@ -177,67 +170,8 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 		return ui.getText(find(COMPONENT_EMAIL_TEXTFIELD));
 	}
 	
-	/**
-	 * Actually send an SMS containing the statistics in a short version
-	 */
-	private void sendStatisticsViaSms() {
-		String content = this.statisticsManager.getDataAsSmsString();
-		String number = FrontlineSMSConstants.FRONTLINE_STATS_PHONE_NUMBER;
-		this.ui.getFrontlineController().sendTextMessage(number, content);
-	}
-	
-	/**
-	 * Try to send an e-mail containing the statistics in plain text
-	 * @return true if the statistics were successfully sent
-	 */
-	private boolean sendStatisticsViaEmail() {
-		try {
-			new SmtpEmailSender(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL_SERVER).sendEmail(
-					FrontlineSMSConstants.FRONTLINE_STATS_EMAIL,
-					this.statisticsManager.getUserEmailAddress(),
-					"FrontlineSMS Statistics",
-					getStatisticsForEmail());
-			return true;
-		} catch(EmailException ex) { 
-			LOG.info("Sending statistics by email failed.", ex);
-			return false;
-		}
-	}
-
-	/**
-	 * Gets the statistics in a format suitable for emailing.
-	 * @param bob {@link StringBuilder} used for compiling the body of the e-mail.
-	 */
-	private String getStatisticsForEmail() {
-		StringBuilder bob = new StringBuilder();
-		beginSection(bob, "Statistics");
-	    bob.append(this.statisticsManager.getDataAsEmailString());
-		endSection(bob, "Statistics");
-	    return bob.toString();
-	}
-	
 	/** @return UI component with the supplied name, or <code>null</code> if none could be found */
 	private Object find(String componentName) {
 		return ui.find(this.dialogComponent, componentName);
-	}
-	
-	/**
-	 * Starts a section of the e-mail's body.
-	 * Sections started with this method should be ended with {@link #endSection(StringBuilder, String)}
-	 * @param bob The {@link StringBuilder} used for building the e-mail's body.
-	 * @param sectionName The name of the section of the report that is being started.
-	 */
-	private static void beginSection(StringBuilder bob, String sectionName) {
-		bob.append("\n### Begin Section '" + sectionName + "' ###\n");
-	}
-	
-	/**
-	 * Ends a section of the e-mail's body.
-	 * Sections ended with this should have been started with {@link #beginSection(StringBuilder, String)}
-	 * @param bob The {@link StringBuilder} used for building the e-mail's body.
-	 * @param sectionName The name of the section of the report that is being started.
-	 */
-	private static void endSection(StringBuilder bob, String sectionName) {
-		bob.append("### End Section '" + sectionName + "' ###\n");
 	}
 }

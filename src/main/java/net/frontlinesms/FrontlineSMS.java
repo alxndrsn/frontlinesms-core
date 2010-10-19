@@ -51,6 +51,7 @@ import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginControllerProperties;
 import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
+import net.frontlinesms.ui.UiGeneratorController;
 
 import org.apache.log4j.Logger;
 import org.smslib.CIncomingMessage;
@@ -623,21 +624,44 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 		return this.smsServiceManager.getSmsInternetServices();
 	}
 
-	public boolean shouldLaunchStatsCollection() {
-		if (AppProperties.getInstance().shouldPromptStatsDialog()) {
-			Long dateLastPrompt = AppProperties.getInstance().getLastStatisticsPromptDate();
-			if (dateLastPrompt == null) {
-				// This is the first time we are checking if the dialog must be prompted, this should then be the first launch.
-				// We set the last prompt date to the current date to delay the pompt until STATISTICS_DAYS_BEFORE_RELAUNCH of use.
-				AppProperties.getInstance().setLastStatisticsPromptDate();
-				AppProperties.getInstance().saveToDisk();
-				return false;
+	/**
+	 * Handles the way statistics are loaded or not at startup.
+	 * @param uiController
+	 */
+	public void handleStatistics(UiGeneratorController uiController) {
+		AppProperties appProperties = AppProperties.getInstance();
+		if (shouldLaunchStatsCollection()) {
+			if (appProperties.shouldPromptStatsDialog()) {
+				uiController.showStatsDialog();
 			} else {
-				long dateNextPrompt = dateLastPrompt + (FrontlineSMSConstants.MILLIS_PER_DAY * FrontlineSMSConstants.STATISTICS_DAYS_BEFORE_RELAUNCH);
-				return System.currentTimeMillis() >= dateNextPrompt;
+				// The user doesn't want to prompt the statistics dialog
+				// Let's check if he authorized to send the stats automatically
+				if (appProperties.isStatsSendingAuthorized()) {
+					StatisticsManager statisticsManager = getStatisticsManager();
+					statisticsManager.setUserEmailAddress(appProperties.getUserEmail());
+					statisticsManager.collectData();
+					statisticsManager.sendStatistics(this);
+				}
 			}
-		} else {
+		}
+	}
+	
+	/**
+	 * Check if it's time to collect statistics 
+	 */
+	public boolean shouldLaunchStatsCollection() {
+		AppProperties appProperties = AppProperties.getInstance();
+		Long dateLastPrompt = appProperties.getLastStatisticsPromptDate();
+		if (dateLastPrompt == null) {
+			// This is the first time we are checking if the dialog must be prompted, this should then be the first launch.
+			// We set the last prompt date to the current date to delay the prompt until STATISTICS_DAYS_BEFORE_RELAUNCH days of use.
+			appProperties.setLastStatisticsPromptDate();
+			appProperties.saveToDisk();
+			
 			return false;
+		} else {
+			long dateNextPrompt = dateLastPrompt + (FrontlineSMSConstants.MILLIS_PER_DAY * FrontlineSMSConstants.STATISTICS_DAYS_BEFORE_RELAUNCH);
+			return System.currentTimeMillis() >= dateNextPrompt;
 		}
 	}
 

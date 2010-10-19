@@ -9,6 +9,7 @@
 			</menu>
 			<menu icon="/icons/import.png" text="i18n.menuitem.import" name="menu_import">
 				<menuitem icon="/icons/users.png" text="i18n.common.contacts" action="showImportWizard('contacts')"/>
+				<menuitem icon="/icons/sms.png" text="i18n.common.messages" action="showImportWizard('messages')"/>
 			</menu>
 			<separator />
 			<menuitem icon="/icons/exit.png" text="i18n.menuitem.exit" name="menu_exit" action="close"/>

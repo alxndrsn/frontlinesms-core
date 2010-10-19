@@ -22,7 +22,8 @@ public class SmsModemSettings {
 	private String serial;
 	private String manufacturer;
 	private String model;
-	private Boolean supportsReceive = true;
+	/** Whether or not the device was supporting receiving last time it was connected **/
+	private Boolean supportingReceive;
 	/** The SMSC number for this device. */
 	private String smscNumber;
 	/** The PIN number for this device. */
@@ -43,7 +44,6 @@ public class SmsModemSettings {
 	/**
 	 * Sets the details for the supplied SMS device
 	 * @param serial The serial number of the device
-<<<<<<< HEAD
 	 * @param useForSending whether the device should be used for sending SMS
 	 * @param useForReceiving whether the device should be used for receiving SMS
 	 * @param deleteMessagesAfterReceiving whether messages should be deleted from the device after being read by FrontlineSMS 
@@ -53,7 +53,7 @@ public class SmsModemSettings {
 		this.serial = serial;
 		this.manufacturer = manufacturer;
 		this.model = model;
-		this.supportsReceive = supportsReceive;
+		this.supportingReceive = supportsReceive;
 		this.useForSending = useForSending;
 		this.useForReceiving = useForReceiving;
 		this.deleteMessagesAfterReceiving = deleteMessagesAfterReceiving;
@@ -148,11 +148,11 @@ public class SmsModemSettings {
 		return true;
 	}
 
-	public void setSupportsReceive(boolean supportsReceive) {
-		this.supportsReceive = supportsReceive;
+	public void setSupportsReceive(Boolean supportsReceive) {
+		this.supportingReceive = (supportsReceive == null ? true : supportsReceive);
 	}
 
 	public boolean supportsReceive() {
-		return supportsReceive != null ? supportsReceive : true;
+		return supportingReceive == null ? true : supportingReceive;
 	}
 }
