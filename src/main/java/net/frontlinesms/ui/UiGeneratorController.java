@@ -333,9 +333,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				this.autodetectModems();
 			}
 			
-			if (frontlineController.shouldLaunchStatsCollection()) {
-				this.showStatsDialog();
-			}
+			// Statistics
+			getFrontlineController().handleStatistics(this);
 			
 		} catch(Throwable t) {
 			LOG.error("Problem starting User Interface module.", t);

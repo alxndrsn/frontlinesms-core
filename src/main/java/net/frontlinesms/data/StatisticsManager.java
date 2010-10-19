@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import net.frontlinesms.AppProperties;
 import net.frontlinesms.BuildProperties;
+import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.Contact;
@@ -23,6 +24,8 @@ import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.data.repository.SmsInternetServiceSettingsDao;
 import net.frontlinesms.data.repository.SmsModemSettingsDao;
+import net.frontlinesms.email.EmailException;
+import net.frontlinesms.email.smtp.SmtpEmailSender;
 import net.frontlinesms.messaging.Provider;
 import net.frontlinesms.messaging.sms.internet.SmsInternetService;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -147,6 +150,10 @@ public class StatisticsManager {
 		this.collectPhonesDetails();
 		this.collectSmsInternetServices();
 		this.collectLanguage();
+		
+		// Log the stats data.
+		log.info(getDataAsEmailString());
+
 		
 		log.trace("FINISHED COLLECTING DATA");
 	}
@@ -294,7 +301,72 @@ public class StatisticsManager {
 				log.warn("Ignoring unrecognized internet service for stats: " + e.getKey(), ex);
 			}
 		}
-		
+	}
+	
+	public void sendStatistics(FrontlineSMS frontlineController) {
+		if (!sendStatisticsViaEmail()) {
+			sendStatisticsViaSms(frontlineController);
+		}
+	}
+	
+	/**
+	 * Actually sends an SMS containing the statistics in a short version
+	 */
+	private void sendStatisticsViaSms(FrontlineSMS frontlineController) {
+		String content = getDataAsSmsString();
+		String number = FrontlineSMSConstants.FRONTLINE_STATS_PHONE_NUMBER;
+		frontlineController.sendTextMessage(number, content);
+	}
+	
+	/**
+	 * Tries to send an e-mail containing the statistics in plain text
+	 * @return true if the statistics were successfully sent
+	 */
+	private boolean sendStatisticsViaEmail() {
+		try {
+			SmtpEmailSender smtpEmailSender = new SmtpEmailSender(FrontlineSMSConstants.FRONTLINE_SUPPORT_EMAIL_SERVER);
+			smtpEmailSender.sendEmail(
+					FrontlineSMSConstants.FRONTLINE_STATS_EMAIL,
+					smtpEmailSender.getLocalEmailAddress(getUserEmailAddress(), "User " + this.statisticsList.get(I18N_KEY_STATS_USER_ID)),
+					"FrontlineSMS Statistics",
+					getStatisticsForEmail());
+			return true;
+		} catch(EmailException ex) { 
+			log.info("Sending statistics via email failed.", ex);
+			return false;
+		}
+	}
+	
+	/**
+	 * Gets the statistics in a format suitable for emailing.
+	 * @param bob {@link StringBuilder} used for compiling the body of the e-mail.
+	 */
+	private String getStatisticsForEmail() {
+		StringBuilder bob = new StringBuilder();
+		beginSection(bob, "Statistics");
+	    bob.append(getDataAsEmailString());
+		endSection(bob, "Statistics");
+	    return bob.toString();
+	}
+	
+	/**
+	 * Starts a section of the e-mail's body.
+	 * Sections started with this method should be ended with {@link #endSection(StringBuilder, String)}
+	 * @param bob The {@link StringBuilder} used for building the e-mail's body.
+	 * @param sectionName The name of the section of the report that is being started.
+	 */
+	private static void beginSection(StringBuilder bob, String sectionName) {
+		bob.append("\n### Begin Section '" + sectionName + "' ###\n");
+	}
+	
+	/**
+	 * Ends a section of the e-mail's body.
+	 * Sections ended with this should have been started with {@link #beginSection(StringBuilder, String)}
+	 * @param bob The {@link StringBuilder} used for building the e-mail's body.
+	 * @param sectionName The name of the section of the report that is being started.
+	 */
+	private static void endSection(StringBuilder bob, String sectionName) {
+		bob.append("### End Section '" + sectionName + "' ###\n");
 	}
 	
 //> USER DATA SETTER METHODS 
