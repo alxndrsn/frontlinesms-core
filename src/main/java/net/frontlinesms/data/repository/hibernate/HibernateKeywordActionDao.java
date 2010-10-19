@@ -6,7 +6,6 @@ package net.frontlinesms.data.repository.hibernate;
 import java.util.Collection;
 import java.util.List;
 
-import org.hibernate.Query;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 

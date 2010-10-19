@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<panel name="pnGeneral" gap="5" weightx="2" columns="1">
+	<panel icon="/icons/hits.png" text="i18n.stats.dialog.statistics" weightx="1" border="true" columns="1" gap="7" top="5" left="5" bottom="5" right="5">
+        <checkbox action="promptStatsChanged" name="cbPromptStats" text="Prompt the statistics dialog every month?"/>
+        <checkbox action="authorizeStatsChanged" name="cbAuthorizeStats" text="Authorize statistics sending automatically?"/>
+	</panel>
+	<panel icon="/icons/money.png" text="i18n.common.cost.estimator" weightx="1" border="true" columns="1" gap="7" top="5" left="5" bottom="5" right="5">
+        <panel gap="5">
+	        <label text="i18n.common.sent.messages" weightx="1"/>
+	        <label name="lbCostPerSmsSentPrefix"/>
+		    <textfield action="costPerSmsChanged(this)" name="tfCostPerSMSSent" columns="4"/>
+		    <label name="lbCostPerSmsSentSuffix"/>
+		    <label text="i18n.common.per.sms"/>
+        </panel>
+        <panel gap="5">
+	        <label text="i18n.common.received.messages" weightx="1"/>
+	        <label name="lbCostPerSmsReceivedPrefix"/>
+		    <textfield action="costPerSmsChanged(this)" name="tfCostPerSMSReceived" columns="4"/>
+		    <label name="lbCostPerSmsReceivedSuffix"/>
+		    <label text="i18n.common.per.sms"/>
+        </panel>
+       </panel>
+</panel>

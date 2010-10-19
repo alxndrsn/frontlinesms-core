@@ -43,9 +43,9 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 
 //> UI COMPONENTS
 	/** Component of {@link #UI_FILE_ALERT} which contains the message to display */
-	private static final String COMPONENT_ALERT_MESSAGE = "alertMessage";
+	private static final String COMPONENT_PN_ALERTS = "pnAlerts";
 	/** Component of {@link #UI_FILE_INFO} which contains the message to display */
-	private static final String COMPONENT_INFO_MESSAGE = "infoMessage";
+	private static final String COMPONENT_PN_INFO = "pnInfo";
 	
 //> INSTANCE PROPERTIES
 	/** Logging object */
@@ -115,15 +115,53 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	public void showFileChooser(Object textFieldToBeSet) {
 		FileChooser.showFileChooser(this, textFieldToBeSet);
 	}
+	
+	/**
+	 * This method opens a fileChooser and specifies a handler.
+	 * @param handler The UI handler
+	 * @param methodName The method to be called on the handler
+	 */
+	public void showFileChooser(ThinletUiEventHandler handler, String methodName) {
+		FileChooser.showFileChooser(this, handler, methodName);
+	}
 
+	/**
+	 * Popup an alert to the user with the supplied messages.
+	 * @param alertMessages
+	 */
+	public void alert(String[] alertMessages) {
+		Object alertDialog = loadComponentFromFile(UI_FILE_ALERT);
+		Object pnAlerts = find(alertDialog, COMPONENT_PN_ALERTS);
+
+		for (String alertMessage : alertMessages) {
+			add(pnAlerts, createLabel(alertMessage));
+		}
+		
+		add(alertDialog);
+	}
+	
 	/**
 	 * Popup an alert to the user with the supplied message.
 	 * @param alertMessage
 	 */
 	public void alert(String alertMessage) {
-		Object alertDialog = loadComponentFromFile(UI_FILE_ALERT);
-		setText(find(alertDialog, COMPONENT_ALERT_MESSAGE), alertMessage);
-		add(alertDialog);
+		alert(new String[] { alertMessage });
+	}
+	
+	/**
+	 * Popup an info message to the user with the supplied messages.
+	 * @param infoMessages
+	 */
+	public void infoMessage(String[] infoMessages) {
+		Object infoDialog = loadComponentFromFile(UI_FILE_INFO);
+		Object pnInfo = find(infoDialog, COMPONENT_PN_INFO);
+		
+		for (String infoMessage : infoMessages) {
+			add(pnInfo, createLabel(infoMessage));
+		}
+		
+		//setText(find(infoDialog, COMPONENT_INFO_MESSAGE), infoMessage);
+		add(infoDialog);
 	}
 	
 	/**
@@ -131,9 +169,7 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	 * @param infoMessage
 	 */
 	public void infoMessage(String infoMessage) {
-		Object infoDialog = loadComponentFromFile(UI_FILE_INFO);
-		setText(find(infoDialog, COMPONENT_INFO_MESSAGE), infoMessage);
-		add(infoDialog);
+		infoMessage(new String[] { infoMessage });
 	}
 	
 	/**
@@ -159,7 +195,16 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	 * @param page The name of the help manual page, including file extension.
 	 */
 	public void showHelpPage(String page) {
+		page = null;
 		FrontlineUtils.openHelpPageInBrowser(page);
+	}
+	
+	/**
+	 * Opens a mailto window
+	 * @param emailAddress
+	 */
+	public void mailTo(String emailAddress) {
+		FrontlineUtils.openExternalBrowser("mailto:" + emailAddress);
 	}
 	
 	/**

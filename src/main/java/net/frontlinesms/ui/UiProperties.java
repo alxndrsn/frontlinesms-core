@@ -33,10 +33,8 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	private static final String KEY_HOMETABLOGO_CUSTOM = "hometab.logo.custom";
 	/** Property Key (String) indicating the path to image file containing the logo. */
 	private static final String KEY_HOMETABLOGO_SOURCE = "hometab.logo.source";
-	/** Property Key (String) indicating if the custom logo should keep its original size. */
+	/** Property Key (String) indicating whether the custom logo should keep its original size. */
 	private static final String KEY_HOMETABLOGO_KEEP_ORIGINAL_SIZE = "hometab.logo.keeporiginalsize";
-	/** Property key (double) the price per SMS */
-	private static final String KEY_SMS_COST = "sms.cost";
 	/** Property key (int) the number of items to display per page */
 	private static final String KEY_ITEMS_PER_PAGE = "paging.itemcount";
 	
@@ -147,8 +145,7 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	 */
 	public void setHometabLogoOriginalSizeKept(boolean isOriginalSizeKept) {
 		super.setPropertyAsBoolean(KEY_HOMETABLOGO_KEEP_ORIGINAL_SIZE, isOriginalSizeKept);
-	}
-	
+	}	
 	
 	/** @return the path to the file containing the logo to display on the home tab */
 	public String getHometabLogoPath() {
@@ -160,20 +157,6 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	 */
 	public void setHometabLogoPath(String path) {
 		super.setProperty(KEY_HOMETABLOGO_SOURCE, path);
-	}
-	/** @return number representing the cost of one SMS for displaying in the UI */
-	public double getCostPerSms() {
-		// TODO ideally this would be an int in the least significant denomination of the currency, e.g. pennies or cents
-		String val = super.getProperty(KEY_SMS_COST);
-		double cost = 0.1; // the default cost
-		if(val != null) {
-			try { cost = Double.parseDouble(val); } catch(NumberFormatException ex) { /* just use the default */ }
-		}
-		return cost;
-	}
-	/** @param costPerSms the price of one sms */
-	public void setCostPerSms(double costPerSms) {
-		super.setProperty(KEY_SMS_COST, Double.toString(costPerSms));
 	}
 
 	/** @return number of items to display per page */

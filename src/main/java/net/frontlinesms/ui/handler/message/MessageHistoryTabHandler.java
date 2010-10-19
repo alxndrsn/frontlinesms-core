@@ -36,6 +36,7 @@ import org.apache.log4j.Logger;
 import thinlet.Thinlet;
 import thinlet.ThinletText;
 
+import net.frontlinesms.AppProperties;
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.Order;
@@ -504,7 +505,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		LOG.trace("ENTRY");
 		
 		ui.setText(find(COMPONENT_LB_MSGS_NUMBER), String.valueOf(numberToSend));		
-		ui.setText(find(COMPONENT_LB_COST), InternationalisationUtils.formatCurrency(UiProperties.getInstance().getCostPerSms() * numberOfMessageParts));
+		ui.setText(find(COMPONENT_LB_COST), InternationalisationUtils.formatCurrency(AppProperties.getInstance().getCostPerSmsSent() * numberToSend));
 		
 		LOG.trace("EXIT");
 	}

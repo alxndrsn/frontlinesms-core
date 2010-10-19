@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<panel name="pnDeviceSettings" columns="2" gap="5">
+	<checkbox text="i18n.common.phone.dont.use" name="rbPhoneDetailsDisable" group="myGroup" action="phoneManagerDetailsUse(this)"/>
+	<button tooltip="i18n.tooltip.click.for.help" halign="right" action="showHelpPage('phones.htm')" icon="/icons/help.png" type="link"/>
+	<checkbox colspan="2" text="i18n.common.phone.use" name="rbPhoneDetailsEnable" group="myGroup" selected="true" action="phoneManagerDetailsUse(this)"/>
+	<panel colspan="2" name="pnPhoneSettings" columns="2" left="15" gap="7">
+	    <checkbox colspan="2" icon="/icons/sms_send.png" name="cbSending" selected="true" text="i18n.common.use.for.sending" action="phoneManagerDetailsCheckboxChanged(this)"/>
+	    <checkbox colspan="2" icon="/icons/sms_deliveryReport.png" name="cbUseDeliveryReports" selected="true" text="i18n.common.use.delivery.reports"/>
+	    <separator colspan="2"/>
+	    <label name="lbReceiveNotSupported" text="i18n.error.phone.receive.not.supported"/>
+	    <checkbox colspan="2" icon="/icons/sms_receive.png" name="cbReceiving" selected="true" text="i18n.common.use.for.receiving" action="phoneManagerDetailsCheckboxChanged(this)"/>
+	    <checkbox colspan="2" icon="/icons/sms_delete.png" name="cbDeleteMsgs" selected="true" text="i18n.common.delete.from.phone"/>
+	</panel>
+	
+	<separator colspan="2"/>
+	
+	<panel colspan="2" columns="2" gap="7">
+			<label text="i18n.phone.settings.smsc.number" icon="/icons/server.png"/>
+			<textfield name="tfSmscNumber" weightx="1"/>
+			
+			<label text="i18n.phone.settings.pin" icon="/icons/key.png"/>
+			<textfield name="tfPin" weightx="1"/>
+	</panel>
+</panel>

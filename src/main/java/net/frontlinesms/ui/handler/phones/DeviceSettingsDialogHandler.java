@@ -21,6 +21,8 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 //> UI LAYOUT FILES
 	/** UI XML File Path: phone settings dialog TODO what is this dialog for? */
 	private static final String UI_FILE_MODEM_SETTINGS_DIALOG = "/ui/core/phones/dgModemSettings.xml";
+	/** FIXME comment please */
+	private static final String UI_FILE_PANEL_MODEM_SETTINGS = "/ui/core/phones/pnDeviceSettings.xml";
 	
 //> UI COMPONENT NAMES
 	/** UI Component name: checkbox for use device (at all) on/off setting */
@@ -43,6 +45,8 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 //> INSTANCE PROPERTIES
 	/** I18n Text Key: TODO */
 	private static final String COMMON_SETTINGS_FOR_PHONE = "common.settings.for.phone";
+	/** FIXME comment please */
+	private static final String UI_COMPONENT_PN_DEVICE_SETTINGS = "pnDeviceSettings";
 	
 	/** Logger */
 	private Logger LOG = FrontlineUtils.getLogger(this.getClass());
@@ -59,13 +63,14 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 		this.isNewPhone = isNewPhone;
 	}
 	
-	/**
-	 * Initialize the statistics dialog
-	 */
+	/** Initializes the statistics dialog */
 	void initDialog() {
 		LOG.trace("INIT DEVICE SETTINGS DIALOG");	
 		this.dialogComponent = this.ui.loadComponentFromFile(UI_FILE_MODEM_SETTINGS_DIALOG, this);
 		this.ui.setText(dialogComponent, InternationalisationUtils.getI18NString(COMMON_SETTINGS_FOR_PHONE) + " '" + device.getModel() + "'");
+
+		Object pnDeviceSettings = this.ui.loadComponentFromFile(UI_FILE_PANEL_MODEM_SETTINGS, this);
+		this.ui.add(dialogComponent, pnDeviceSettings, 0);
 		
 		// Get the PIN and SMSC number, and display if they exist
 		String smscNumber = this.device.getSmscNumber();
@@ -184,14 +189,13 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 	}
 	
 	/** TODO someone please rename this method */
-	public void phoneManagerDetailsUse(Object phoneSettingsDialog, Object radioButton) {
-		Object pnPhoneSettings = ui.find(phoneSettingsDialog, COMPONENT_PN_PHONE_SETTINGS);
+	public void phoneManagerDetailsUse(Object radioButton) {
+		Object pnPhoneSettings = find(COMPONENT_PN_PHONE_SETTINGS);
 		if(COMPONENT_RB_PHONE_DETAILS_ENABLE.equals(ui.getName(radioButton))) {
 			ui.activate(pnPhoneSettings);
 			// If this phone does not support SMS receiving, we need to pass this info onto
 			// the user.  We also want to gray out the options for receiving.
-			SmsModem modem = ui.getAttachedObject(phoneSettingsDialog, SmsModem.class);
-			if(!modem.supportsReceive()) {
+			if(!this.device.supportsReceive()) {
 				ui.setEnabled(ui.find(pnPhoneSettings, COMPONENT_PHONE_RECEIVING), false);
 				ui.setEnabled(ui.find(pnPhoneSettings, COMPONENT_PHONE_DELETE), false);
 			}

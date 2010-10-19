@@ -6,6 +6,8 @@ package net.frontlinesms.ui;
 import java.awt.Font;
 import java.awt.Image;
 
+import javax.swing.ToolTipManager;
+
 import thinlet.Thinlet;
 import thinlet.ThinletText;
 
@@ -222,6 +224,15 @@ private static final String START = "start";
 	}
 	
 	/**
+	 * Sets the display of a tree node, expanded or not.
+	 * @param node
+	 * @param expanded <code>true</code> if the node should be expanded, <code>false</code> otherwise.
+	 */
+	public void setExpanded(Object node, boolean expanded) {
+		setBoolean(node, EXPANDED, expanded);
+	}
+	
+	/**
 	 * Sets the icon of a component
 	 * @param component
 	 * @param icon
@@ -290,6 +301,15 @@ private static final String START = "start";
 	 */
 	public void setRemove(Object component, String methodCall, Object root, Object handler) {
 		setMethod(component, Thinlet.REMOVE, methodCall, root, handler);
+	}
+	
+	/**
+	 * Sets the TOOLTIP of a component
+	 * @param component
+	 * @param tooltip
+	 */
+	public void setTooltip (Object component, String tooltip) {
+		setString(component, Thinlet.TOOLTIP, tooltip);
 	}
 	
 	/**

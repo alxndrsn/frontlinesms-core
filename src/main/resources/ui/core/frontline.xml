@@ -24,6 +24,8 @@
 			<menu icon="/icons/language.png" text="i18n.menu.language" name="menu_language">
 				<!-- This should be populated at runtime with different language options -->
 			</menu>
+			<separator />
+			<menuitem icon="/icons/keyword.png" text="i18n.settings.menu" name="menu_Settings" action="showFrontlineSettings"/>
 		</menu>
 		<menu text="i18n.menubar.view" name="menu_tabs">
 				<checkboxmenuitem action="tabsChanged(this)" name="miHome" icon="/icons/frontline_icon.png" text="i18n.tab.home"/>
@@ -57,6 +59,7 @@
 			<menuitem icon="/icons/hits.png" text="i18n.stats.send" name="menu_statsDialog" action="showStatsDialog"/>
 			<separator />
 			<menuitem icon="/icons/about.png" text="i18n.menuitem.help.about" action="showAboutScreen"/>
+			<menuitem icon="/icons/help.png" text="i18n.contribute.menu" action="showContributeScreen"/>
 		</menu>
 	</menubar>
 	

@@ -14,7 +14,6 @@ import javax.swing.filechooser.FileFilter;
 import org.apache.log4j.Logger;
 
 import net.frontlinesms.FrontlineUtils;
-import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
  * @author kadu <kadu@masabi.com>

@@ -45,7 +45,6 @@ public class HibernateSmsModemSettingsDaoTest extends HibernateTestCase {
 		
 		assertEquals(settingsOne, dao.getSmsModemSettings(SERIAL_ONE));
 
-		//SmsModemSettings settingsTwo = new SmsModemSettings(SERIAL_TWO, "Manufacturer", "Model", false, true, false, true);
 		SmsModemSettings settingsTwo = new SmsModemSettings( SERIAL_TWO);
 		settingsTwo.setManufacturer("Manufacturer");
 		settingsTwo.setModel("Model");

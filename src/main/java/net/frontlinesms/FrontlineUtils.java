@@ -372,8 +372,13 @@ public class FrontlineUtils {
 		// the FrontlineSMS website.
 		String url = "help/" + page;
 		if (!new File(url).exists()) {
-			url = getOnlineHelpUrl(page);
+			if (!page.toLowerCase().startsWith("http")) {
+				url = getOnlineHelpUrl(url);
+			} else {
+				url = page;
+			}
 		}
+		
 		openExternalBrowser(url);
 	}
 	

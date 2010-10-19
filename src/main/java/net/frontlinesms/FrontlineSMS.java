@@ -51,6 +51,7 @@ import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginControllerProperties;
 import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.resources.ResourceUtils;
+
 import org.apache.log4j.Logger;
 import org.smslib.CIncomingMessage;
 import org.springframework.beans.MutablePropertyValues;
@@ -623,16 +624,20 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 	}
 
 	public boolean shouldLaunchStatsCollection() {
-		Long dateLastPrompt = AppProperties.getInstance().getLastStatisticsPromptDate();
-		if (dateLastPrompt == null) {
-			// This is the first time we are checking if the dialog must be prompted, this should then be the first launch.
-			// We set the last prompt date to the current date to delay the pompt until STATISTICS_DAYS_BEFORE_RELAUNCH of use.
-			AppProperties.getInstance().setLastStatisticsPromptDate();
-			AppProperties.getInstance().saveToDisk();
-			return false;
+		if (AppProperties.getInstance().shouldPromptStatsDialog()) {
+			Long dateLastPrompt = AppProperties.getInstance().getLastStatisticsPromptDate();
+			if (dateLastPrompt == null) {
+				// This is the first time we are checking if the dialog must be prompted, this should then be the first launch.
+				// We set the last prompt date to the current date to delay the pompt until STATISTICS_DAYS_BEFORE_RELAUNCH of use.
+				AppProperties.getInstance().setLastStatisticsPromptDate();
+				AppProperties.getInstance().saveToDisk();
+				return false;
+			} else {
+				long dateNextPrompt = dateLastPrompt + (FrontlineSMSConstants.MILLIS_PER_DAY * FrontlineSMSConstants.STATISTICS_DAYS_BEFORE_RELAUNCH);
+				return System.currentTimeMillis() >= dateNextPrompt;
+			}
 		} else {
-			long dateNextPrompt = dateLastPrompt + (FrontlineSMSConstants.MILLIS_PER_DAY * FrontlineSMSConstants.STATISTICS_DAYS_BEFORE_RELAUNCH);
-			return System.currentTimeMillis() >= dateNextPrompt;
+			return false;
 		}
 	}
 

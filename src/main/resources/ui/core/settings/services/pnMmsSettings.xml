@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<panel name="pnMmsSettings" columns="1" gap="18">
+	<panel name="pnEmailAccounts" gap="5" border="true" text="i18n.mms.email.account.settings" icon="/icons/emailAccount_edit.png" weightx="1" top="5" left="5" bottom="5" right="5" columns="1">
+		<!-- Will be populated by the list of accounts at runtime -->
+	</panel>
+	<panel name="pnMmsOptions" gap="5" border="true" text="i18n.menuitem.mms.settings" icon="/icons/mms.png" weightx="1" top="5" left="5" bottom="5" right="5" columns="2">
+		<label text="i18n.mms.email.polling.frequency" weightx="1"/>
+		<textfield action="pollFrequencyChanged(this.text)" name="tfPollFrequency" columns="5"/>
+	</panel>
+</panel> 

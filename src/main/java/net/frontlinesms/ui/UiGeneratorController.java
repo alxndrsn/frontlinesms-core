@@ -47,6 +47,7 @@ import net.frontlinesms.messaging.mms.email.MmsEmailServiceStatus;
 import net.frontlinesms.messaging.mms.events.MmsServiceStatusNotification;
 import net.frontlinesms.messaging.sms.SmsService;
 import net.frontlinesms.messaging.sms.SmsServiceManager;
+import net.frontlinesms.messaging.sms.events.InternetServiceEventNotification;
 import net.frontlinesms.messaging.sms.events.NoSmsServicesConnectedNotification;
 import net.frontlinesms.messaging.sms.internet.SmsInternetService;
 import net.frontlinesms.plugins.*;
@@ -63,6 +64,7 @@ import net.frontlinesms.ui.handler.mms.MmsSettingsDialogHandler;
 import net.frontlinesms.ui.handler.phones.NoPhonesDetectedDialogHandler;
 import net.frontlinesms.ui.handler.phones.PhoneTabHandler;
 import net.frontlinesms.ui.i18n.*;
+import net.frontlinesms.ui.settings.FrontlineSettingsHandler;
 
 import org.apache.log4j.Logger;
 import org.smslib.CIncomingMessage;
@@ -412,7 +414,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Adds the text resources for a {@link PluginController} to {@link UiGeneratorController}'s text resource manager.
 	 * @param controller the plugin controller whose text resource should be loaded
 	 */
-	private void addPluginTextResources(PluginController controller) {
+	public void addPluginTextResources(PluginController controller) {
 		// Add to the default English bundle
 		InternationalisationUtils.mergeMaps(Thinlet.DEFAULT_ENGLISH_BUNDLE, controller.getDefaultTextResource());
 		
@@ -1511,6 +1513,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		setText(find(about, "version"), version);
 		add(about);
 	}
+	
+	public void showContributeScreen() {
+		Object contributeDialog = loadComponentFromFile(UI_FILE_CONTRIBUTE_DIALOG);
+		add(contributeDialog);
+	}
 
 	public void incomingMessageEvent(FrontlineMessage message) {
 		LOG.trace("ENTER");
@@ -1613,10 +1620,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		removeDialog(dialog);
 		final String userName = getText(find(dialog, "tfName"));
 		final String userEmail = getText(find(dialog, "tfEmail"));
+		final String reason = getText(find(dialog, "taReason"));
 		new Thread("ERROR_REPORT") {
 			public void run() {
 				try {
-					ErrorUtils.sendLogs(userName, userEmail, true);
+					ErrorUtils.sendLogs(userName, userEmail, reason, true);
 					String success = InternationalisationUtils.getI18NString(MESSAGE_LOG_FILES_SENT);
 					LOG.debug(success);
 					alert(success);
@@ -1646,7 +1654,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 					// Problem writing logs.zip
 					LOG.debug("", e);
 					try {
-						ErrorUtils.sendLogsToFrontlineSupport(userName, userEmail, null);
+						ErrorUtils.sendLogsToFrontlineSupport(userName, userEmail, reason, null);
 					} catch (EmailException e1) {
 						LOG.debug("", e1);
 					}
@@ -1722,12 +1730,12 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	/** @return Cost set per SMS message */
 	private double getCostPerSms() {
-		return UiProperties.getInstance().getCostPerSms();
+		return AppProperties.getInstance().getCostPerSmsSent();
 	}
 	/** @param costPerSMS new value for {@link #costPerSMS} */
 	private void setCostPerSms(double costPerSms) {
-		UiProperties properties = UiProperties.getInstance();
-		properties.setCostPerSms(costPerSms);
+		AppProperties properties = AppProperties.getInstance();
+		properties.setCostPerSmsSent(costPerSms);
 		properties.saveToDisk();
 	}
 	
@@ -1758,6 +1766,10 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		this.phoneManager.addSmsInternetService(smsInternetService);
 	}
 
+	private void removeSmsInternetService(SmsInternetService service) {
+		this.phoneManager.removeSmsInternetService(service);
+	}
+
 	public void contactRemovedFromGroup(Contact contact, Group group) {
 		if(this.currentTab.equals(TAB_CONTACT_MANAGER)) {
 			// TODO perhaps update the contact manager to remove the contact from the group, if it is currently relevant
@@ -1768,6 +1780,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		DatabaseSettingsPanel databaseSettings = DatabaseSettingsPanel.createNew(this, null);
 		boolean needToRestartApplication = true;
 		databaseSettings.showAsDialog(needToRestartApplication);
+	}
+	
+	public void showFrontlineSettings() {
+		FrontlineSettingsHandler settingsDialog = new FrontlineSettingsHandler(this);
+		add(settingsDialog.getDialog());
 	}
 	
 	/** Reloads the ui. */
@@ -1856,6 +1873,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				}
 			}
 		} else if (notification instanceof MmsServiceStatusNotification) {
+			// An MMS Service has changed status
 			MmsServiceStatusNotification mmsServiceStatusNotification = ((MmsServiceStatusNotification) notification);
 			if (mmsServiceStatusNotification.getStatus().equals(MmsEmailServiceStatus.FAILED_TO_CONNECT)) {
 				this.newEvent(new Event(Event.TYPE_SMS_INTERNET_SERVICE_RECEIVING_FAILED, 
@@ -1864,7 +1882,28 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		} else if (notification instanceof EntitySavedNotification<?>) {
 			Object entity = ((EntitySavedNotification<?>) notification).getDatabaseEntity();
 			if (entity instanceof FrontlineMultimediaMessage) {
+				// A new Multimedia Message has been received
 				this.incomingMessageEvent((FrontlineMultimediaMessage) entity);
+			}
+		} else if (notification instanceof InternetServiceEventNotification) {
+			// An Internet Service has been added or deleted
+			InternetServiceEventNotification internetServiceNotification = (InternetServiceEventNotification) notification;
+			switch (internetServiceNotification.getEventType()) {
+				case ADD:
+					this.addSmsInternetService(internetServiceNotification.getService());
+					break;
+				case DELETE:
+					this.removeSmsInternetService(internetServiceNotification.getService());
+					break;
+				default:
+					break;
+			}
+		} else if (notification instanceof AppPropertiesEventNotification) {
+			// An AppProperty has been changed
+			AppPropertiesEventNotification appPropertiesNotification = (AppPropertiesEventNotification) notification;
+			
+			if (appPropertiesNotification.getAppClass().equals(AppProperties.class) && appPropertiesNotification.getProperty().equals(AppProperties.KEY_SMS_COST_SENT_MESSAGES)) {
+				setText(find(COMPONENT_TF_COST_PER_SMS), InternationalisationUtils.formatCurrency(AppProperties.getInstance().getCostPerSmsSent(), false));
 			}
 		}
 	}

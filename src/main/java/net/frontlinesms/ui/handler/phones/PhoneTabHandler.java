@@ -102,6 +102,8 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	private final SmsModemSettingsDao smsModelSettingsDao;
 	private MmsServiceManager mmsServiceManager;
 
+	private DeviceSettingsDialogHandler deviceSettingsDialog;
+
 //> CONSTRUCTORS
 	/**
 	 * Create a new instance of this class.
@@ -332,6 +334,14 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 						
 						smsModelSettingsDao.updateSmsModemSettings(settings);
 					}
+					
+					boolean supportsReceive = activeService.supportsReceive();
+					if (settings.supportsReceive() != supportsReceive) {
+						settings.setSupportsReceive(supportsReceive);
+						
+						smsModelSettingsDao.updateSmsModemSettings(settings);
+					}
+					
 					activeService.setUseForSending(settings.useForSending());
 					activeService.setUseDeliveryReports(settings.useDeliveryReports());
 
