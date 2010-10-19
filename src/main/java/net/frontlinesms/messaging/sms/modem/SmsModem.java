@@ -590,7 +590,9 @@ public class SmsModem extends Thread implements SmsService {
 						disconnect(true);
 					}
 				} else {
-					FrontlineUtils.sleep_ignoreInterrupts(500); /* 0.1 seconds */
+					// Changed this from 100ms to 500ms in an attempt to improve modem stability.  There was no explanation
+					// for the original duration.
+					FrontlineUtils.sleep_ignoreInterrupts(500);
 				}
 			}
 		}
