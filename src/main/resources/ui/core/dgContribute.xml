@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dialog closable="true" close="removeDialog(this)" bottom="4" gap="8" icon="/icons/about.png" left="4" modal="true" name="contributeDialog" right="4" text="i18n.contribute.title" top="4" columns="1" halign="left">
 	<panel gap="5" columns="2">
-		<panel gap="5" columns="1">
+		<panel gap="5" columns="1" valign="bottom">
 			<label icon="/icons/images/frontlinesms_armsup.jpg"/>
 		</panel>
 		<panel gap="5" columns="1">
