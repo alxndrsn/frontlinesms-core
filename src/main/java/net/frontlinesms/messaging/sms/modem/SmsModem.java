@@ -126,6 +126,7 @@ public class SmsModem extends Thread implements SmsService {
 	private int signalPercent;
 	private String msisdn;
 	private String smscNumber;
+	private String simPin;
 
 	/** The status of this device */
 	private SmsModemStatus status = SmsModemStatus.DORMANT;
@@ -242,18 +243,27 @@ public class SmsModem extends Thread implements SmsService {
 		if (smsLibConnected) return cService.getDeviceInfo().getBatteryLevel();
 		else return batteryPercent;
 	}
+	
 	/** @return the smscNumber */
 	public String getSmscNumber() {
-		if (smsLibConnected) {
-			this.smscNumber = cService.getSmscNumber();
-		}
+		if (smsLibConnected) this.smscNumber = cService.getSmscNumber();
 		return this.smscNumber;
 	}
-
 	/** @param smscNumber the smscNumber to set */
 	public void setSmscNumber(String smscNumber) {
 		if (smsLibConnected) cService.setSmscNumber(smscNumber);
 		this.smscNumber = smscNumber;
+	}
+	
+	/** @return the SIM PIN */
+	public String getSimPin() {
+		if (smsLibConnected) this.simPin = cService.getSimPin();
+		return this.simPin;
+	}
+	/** @param simPin the SIM PIN to set */
+	public void setSimPin(String simPin) {
+		if (smsLibConnected) cService.setSimPin(simPin);
+		this.simPin = simPin;
 	}
 
 	public String getMsisdn() {
@@ -372,14 +382,29 @@ public class SmsModem extends Thread implements SmsService {
 
 		try {
 			// If the GSM device is PIN protected, enter the PIN here.
-			// PIN information will be used only when the GSM device reports
-			// that it needs a PIN in order to continue.
-			cService.setSimPin("0000");
+			// PIN information will be used only when the GSM device reports that it needs a PIN in order to continue.
+			if(this.simPin != null) {
+				cService.setSimPin(this.simPin);
+			} else {
+				// If we don't have a PIN, then don't set it!
+			}
+
+//			// If the GSM device is PIN protected, enter the PIN here.
+//			// PIN information will be used only when the GSM device reports
+//			// that it needs a PIN in order to continue.
+//			// If we have a simPin set in this class, use it now.  Otherwise we set a PIN of 0000 for legacy reasons.
+//			// TODO looking at this code, it may be foolish to assume a PIN of 0000 when we don't actually know what it is
+//			if(this.simPin != null) {
+//				cService.setSimPin(this.simPin);
+//			} else {
+//				cService.setSimPin("0000");
+//			}
 
 			// Some modems may require a SIM PIN 2 to unlock their full functionality.
 			// Like the Vodafone 3G/GPRS PCMCIA card.
 			// If you have such a modem, you should also define the SIM PIN 2.
-			cService.setSimPin2("0000");
+			// We don't have a SIM PIN2 set, so we don't set anything in the CService.  Previously
+			// this code set PIN2 to 0000, but that seems foolish (see comments re: PIN1)
 
 			// Normally, you would want to set the SMSC number to blank. GSM
 			// devices normally get the SMSC number information from their SIM card.
@@ -432,6 +457,12 @@ public class SmsModem extends Thread implements SmsService {
 			LOG.debug("Connection successful!");
 			LOG.trace("EXIT");
 			return true;
+//		} catch (BadModemCredentialException ex) {
+//			String detail = ex.getClass().getSimpleName();
+//			if(ex.getMessage() != null) {
+//				detail += ": " + ex.getMessage();
+//			}
+//			this.setStatus(SmsModemStatus.BAD_CREDENTIAL, detail);
 		} catch (GsmNetworkRegistrationException e) {
 			this.setStatus(SmsModemStatus.GSM_REG_FAILED, null);
 		} catch (PortInUseException ex) {
@@ -559,7 +590,9 @@ public class SmsModem extends Thread implements SmsService {
 						disconnect(true);
 					}
 				} else {
-					FrontlineUtils.sleep_ignoreInterrupts(100); /* 0.1 seconds */
+					// Changed this from 100ms to 500ms in an attempt to improve modem stability.  There was no explanation
+					// for the original duration.
+					FrontlineUtils.sleep_ignoreInterrupts(500);
 				}
 			}
 		}
@@ -600,7 +633,9 @@ public class SmsModem extends Thread implements SmsService {
 		boolean phoneFound = false;
 		
 		this.setStatus(SmsModemStatus.SEARCHING, null);
-		
+
+		// Set this if there was a problem connecting and you'd like to report the detail.
+		String lastDetail = null;
 		for (int currentBaudRate : COMM_SPEEDS) {
 			if (!isDetecting()) {
 				disconnect(true);
@@ -613,6 +648,8 @@ public class SmsModem extends Thread implements SmsService {
 
 			resetWatchdog();
 			cService = new CService(portName, currentBaudRate, "", "", "");
+			// set this flag to false if the status has been updated within the error handling.  It is only
+			// checked if no phone is found.
 			try {
 				cService.serialDriver.open();
 				// wait for port to open and AT handler to awake
@@ -637,12 +674,20 @@ public class SmsModem extends Thread implements SmsService {
 				break;
 			} catch(TooManyListenersException ex) {
 				LOG.debug("Too Many Listeners", ex);
+				lastDetail = ex.getClass().getSimpleName();
+				if(ex.getMessage() != null) lastDetail += " :: " + ex.getMessage();
 			} catch(UnsupportedCommOperationException ex) {
 				LOG.debug("Unsupported Operation", ex);
+				lastDetail = ex.getClass().getSimpleName();
+				if(ex.getMessage() != null) lastDetail += " :: " + ex.getMessage();
 			} catch(NoSuchPortException ex) {
 				LOG.debug("Port does not exist", ex);
+				lastDetail = ex.getClass().getSimpleName();
+				if(ex.getMessage() != null) lastDetail += " :: " + ex.getMessage();
 			} catch(PortInUseException ex) {
 				LOG.debug("Port already in use", ex);
+				lastDetail = ex.getClass().getSimpleName();
+				if(ex.getMessage() != null) lastDetail += " :: " + ex.getMessage();
 			} finally {
 				disconnect(!phoneFound);
 			}
@@ -650,7 +695,7 @@ public class SmsModem extends Thread implements SmsService {
 
 		if (!phoneFound) {
 			disconnect(false);
-			setStatus(SmsModemStatus.NO_PHONE_DETECTED, null);
+			setStatus(SmsModemStatus.NO_PHONE_DETECTED, lastDetail);
 		} else {
 			try {
 				baudRate = maxBaudRate;

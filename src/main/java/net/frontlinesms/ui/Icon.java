@@ -69,8 +69,8 @@ public class Icon {
 	public static final String MMS = "/icons/mms.png";
 	public static final String MMS_RECEIVE = "/icons/mms_receive.png";
 	public static final String MMS_SEND = "/icons/mms_send.png";
-	public static final String PHONE_CONNECTED = "/icons/phone_working.png";
-	public static final String PHONE_NUMBER = "/icons/phone_number.png";
+	public static final String PHONE_CONNECTED = "/icons/phone.png";
+	public static final String PHONE_NUMBER = "/icons/phone.png";
 	public static final String SMS_HISTORY = "/icons/history.png";
 	public static final String SMS_HTTP = "/icons/sms_http.png";
 	public static final String BIN = "/icons/bin.png";

@@ -455,8 +455,17 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 	 * Request the phone manager to attempt a connection to a particular COM port.
 	 * @param port
 	 */
-	public void requestConnect(String port) throws NoSuchPortException {
-		requestConnect(CommPortIdentifier.getPortIdentifier(port), true);
+	public boolean requestConnect(String port) throws NoSuchPortException {
+		return requestConnect(CommPortIdentifier.getPortIdentifier(port), null, true);
+	}
+
+	/**
+	 * Request the phone manager to attempt a connection to a particular COM port.
+	 * @param port
+	 * @param simPin the PIN to use when connecting to the phone
+	 */
+	public boolean requestConnect(String port, String simPin) throws NoSuchPortException {
+		return requestConnect(CommPortIdentifier.getPortIdentifier(port), simPin, true);
 	}
 
 	/**
@@ -469,13 +478,14 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 	 * @return <code>true</code> if connection is being attempted to the port; <code>false</code> if the port is already in use.
 	 * @throws NoSuchPortException
 	 */
-	public boolean requestConnect(String portName, int baudRate, String preferredCATHandler) throws NoSuchPortException {
+	public boolean requestConnect(String portName, String simPin, int baudRate, String preferredCATHandler) throws NoSuchPortException {
 		CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(portName);
 
 		if(LOG.isInfoEnabled()) LOG.info("Requested connection to port: '" + portName + "'");
 		if(!portIdentifier.isCurrentlyOwned()) {
 			LOG.info("Connecting to port...");
 			SmsModem phoneHandler = new SmsModem(portName, this);
+			phoneHandler.setSimPin(simPin);
 			phoneHandlers.put(portName, phoneHandler);
 			phoneHandler.start(baudRate, preferredCATHandler);
 			return true;
@@ -535,29 +545,48 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 	 * @param portIdentifier
 	 * @param connectToDiscoveredPhone
 	 * @param findPhoneName
+	 * @return <code>true</code> if connection is being attempted to the port; <code>false</code> if the port is already in use or does not exist or is not a serial port.
 	 */
-	private void requestConnect(CommPortIdentifier portIdentifier, boolean connectToDiscoveredPhones) {
+	private boolean requestConnect(CommPortIdentifier portIdentifier, boolean connectToDiscoveredPhones) {
+		return requestConnect(portIdentifier, null, connectToDiscoveredPhones);
+	}
+	
+	/**
+	 * Attempts to connect to the supplied comm port
+	 * @param portIdentifier
+	 * @param connectToDiscoveredPhone
+	 * @param findPhoneName
+	 * @return <code>true</code> if connection is being attempted to the port; <code>false</code> if the port is already in use or does not exist or is not a serial port.
+	 */
+	private boolean requestConnect(CommPortIdentifier portIdentifier, String simPin, boolean connectToDiscoveredPhones) {
 		String portName = portIdentifier.getName();
 		LOG.debug("Port Name [" + portName + "]");
 		if(!shouldIgnore(portName) && portIdentifier.getPortType() == CommPortIdentifier.PORT_SERIAL) {
 			LOG.debug("It is a suitable port.");
 			try {
 				SmsModem modem = new SmsModem(portName, this);
+				modem.setSimPin(simPin);
 				if(!portIdentifier.isCurrentlyOwned()) {
 					LOG.debug("Connecting to port...");
-					SmsModem phoneHandler = modem;
-					phoneHandlers.put(portName, phoneHandler);
-					if(connectToDiscoveredPhones) phoneHandler.start();
+					phoneHandlers.put(portName, modem);
+					if(connectToDiscoveredPhones) modem.start();
+					return true;
 				} else {
 					// If we don't have a handle on this port, but it's owned by someone else,
 					// then we add it to the phoneHandlers list anyway so that we can see its
 					// status.
 					LOG.debug("Port currently owned by another process.");
 					phoneHandlers.putIfAbsent(portName, modem);
+					return false;
 				}
 			} catch(NoSuchPortException ex) {
 				LOG.warn("Port is no longer available.", ex);
+				return false;
 			}
+		} else {
+			// Requesting to connect to a parallel port.  Not possible, apparently.
+			// TODO throw a BadPortException or something
+			return false;
 		}
 	}
 

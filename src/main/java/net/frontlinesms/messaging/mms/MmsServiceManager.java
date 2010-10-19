@@ -62,6 +62,9 @@ public class MmsServiceManager extends Thread  {
 
 	public MmsServiceManager() {
 		super("MmsServiceManager");
+		
+		// TODO Is there a cleaner way of doing this?  Email.receive() blocks in run().processMmsEmailReceiving()  
+		this.setDaemon(true);
 	}
 	
 	public void setEventBus(EventBus eventBus) {

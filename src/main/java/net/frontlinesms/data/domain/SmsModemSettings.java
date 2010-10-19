@@ -22,11 +22,12 @@ public class SmsModemSettings {
 	private String serial;
 	private String manufacturer;
 	private String model;
-	
 	/** Whether or not the device was supporting receiving last time it was connected **/
 	private Boolean supportingReceive;
 	/** The SMSC number for this device. */
 	private String smscNumber;
+	/** The PIN number for this device. */
+	private String simPin;
 	/** @param useForSending whether the device should be used for sending SMS */
 	private boolean useForSending;
 	/** whether the device should be used for receiving SMS */
@@ -109,6 +110,14 @@ public class SmsModemSettings {
 	/** @param smscNumber the smscNumber to set */
 	public void setSmscNumber(String smscNumber) {
 		this.smscNumber = smscNumber;
+	}
+	/** @return the PIN for the device's SIM */
+	public String getSimPin() {
+		return simPin;
+	}
+	/** @param simPin the PIN for the device's SIM */
+	public void setSimPin(String simPin) {
+		this.simPin = simPin;
 	}
 
 //> GENERATED METHODS

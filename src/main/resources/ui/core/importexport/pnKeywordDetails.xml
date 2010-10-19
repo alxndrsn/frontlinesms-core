@@ -13,5 +13,5 @@
     <checkbox icon="/icons/user.png" name="cbContactName" text="i18n.common.contact.name"/>
     <checkbox icon="/icons/email.png" name="cbContactEmail" text="i18n.common.contact.email"/>
     <checkbox icon="/icons/note.png" name="cbContactNotes" text="i18n.common.contact.notes"/>
-    <checkbox icon="/icons/phone_number.png" name="cbContactOtherNumber" text="i18n.common.contact.other.phone.number"/>
+    <checkbox icon="/icons/phone.png" name="cbContactOtherNumber" text="i18n.common.contact.other.phone.number"/>
 </panel>

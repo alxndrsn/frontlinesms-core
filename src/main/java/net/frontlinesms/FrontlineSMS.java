@@ -441,6 +441,10 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 				SmsModemSettings settings = this.smsModemSettingsDao.getSmsModemSettings(serial);
 				if(settings != null) {
 					modem.setSmscNumber(settings.getSmscNumber());
+					// Only set the PIN number if it hasn't been set in the Manual Connection dialog
+					if(modem.getSimPin() == null) {
+						modem.setSimPin(settings.getSimPin());
+					}
 				}
 			}
 			this.smsDeviceEventListener.messagingServiceEvent(activeService, status);

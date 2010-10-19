@@ -1,25 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<dialog closable="true" close="removeDialog(this)" bottom="10" columns="3" gap="15" icon="/icons/phone_manualConfigure.png" left="10" modal="true" name="phoneConfigDialog" right="10" text="i18n.action.manually.connect" top="10">
+<dialog closable="true" close="removeDialog" bottom="7" columns="3" gap="7" icon="/icons/phone_manualConfigure.png" left="10" modal="true" name="phoneConfigDialog" right="10" text="i18n.action.manually.connect" top="10">
     <label icon="/icons/port_open.png" text="i18n.common.port"/>
-    <combobox name="lbPortName" weightx="1"/>
+    <combobox name="cbPortName" weightx="1"/>
     <button tooltip="i18n.tooltip.click.for.help" halign="right" action="showHelpPage('troubleshooting.htm')" icon="/icons/help.png" type="link"/>
+	
+	<panel columns="2" gap="7" colspan="3">
+		<label text="i18n.phone.settings.pin" icon="/icons/key.png"/>
+		<textfield name="tfPin" weightx="1"/>
+	</panel>
     
-    <label icon="/icons/baudrate.png" text="i18n.common.baud.rate"/>
-    <combobox colspan="2" columns="40" name="lbBaudRate">
-    	<choice text="9600"/>
-    	<choice text="19200"/>
-    	<choice text="57600"/>
-    	<choice text="115200"/>
-    	<choice text="230400"/>
-    	<choice text="460800"/>
-    	<choice text="921600"/>
-    </combobox>
-        
-    <label icon="/icons/phone_driver.png" text="i18n.common.handler"/>
-    <combobox colspan="2" name="lbCATHandlers" selected="0" editable="false"/>
+	<separator colspan="3"/>
 
-    <panel colspan="3" gap="5" halign="center">
-        <button icon="/icons/tick.png" name="btSave" text="i18n.action.phone.connect" action="connectToPhone(phoneConfigDialog)" />
-        <button action="removeDialog(phoneConfigDialog)" icon="/icons/cross.png" name="btCancel" text="i18n.action.cancel"/>
+	<checkbox group="rgDetectVsManual" text="Detect handler config" action="setDetectManual('false')" name="cbDetectConfig" colspan="3"/>
+	<checkbox group="rgDetectVsManual" text="Specify handler config" action="setDetectManual('true')" name="cbManualConfig" colspan="3"/>
+	<panel columns="2" gap="7" left="15" name="pnManualSettings" colspan="3">
+	    <label icon="/icons/baudrate.png" text="i18n.common.baud.rate"/>
+	    <combobox columns="40" name="cbBaudRate">
+	    	<choice text="9600"/>
+	    	<choice text="19200"/>
+	    	<choice text="57600"/>
+	    	<choice text="115200"/>
+	    	<choice text="230400"/>
+	    	<choice text="460800"/>
+	    	<choice text="921600"/>
+	    </combobox>
+	        
+	    <label icon="/icons/phone_driver.png" text="i18n.common.handler"/>
+	    <combobox name="cbCatHandler" selected="0" editable="false"/>
+    </panel>
+	
+    <panel gap="5" halign="center" colspan="3">
+        <button icon="/icons/tick.png" name="btSave" text="i18n.action.phone.connect" action="doConnect" type="default"/>
+        <button action="removeDialog" icon="/icons/cross.png" name="btCancel" text="i18n.action.cancel" type="cancel"/>
     </panel>
 </dialog>
