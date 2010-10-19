@@ -403,8 +403,8 @@ public class SmsModem extends Thread implements SmsService {
 			// Some modems may require a SIM PIN 2 to unlock their full functionality.
 			// Like the Vodafone 3G/GPRS PCMCIA card.
 			// If you have such a modem, you should also define the SIM PIN 2.
-			// TODO looking at this code, it may be foolish to assume a PIN2 of 0000 when we don't actually know what it is
-			cService.setSimPin2("0000");
+			// We don't have a SIM PIN2 set, so we don't set anything in the CService.  Previously
+			// this code set PIN2 to 0000, but that seems foolish (see comments re: PIN1)
 
 			// Normally, you would want to set the SMSC number to blank. GSM
 			// devices normally get the SMSC number information from their SIM card.
@@ -590,7 +590,7 @@ public class SmsModem extends Thread implements SmsService {
 						disconnect(true);
 					}
 				} else {
-					FrontlineUtils.sleep_ignoreInterrupts(100); /* 0.1 seconds */
+					FrontlineUtils.sleep_ignoreInterrupts(500); /* 0.1 seconds */
 				}
 			}
 		}

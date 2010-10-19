@@ -568,9 +568,8 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 				modem.setSimPin(simPin);
 				if(!portIdentifier.isCurrentlyOwned()) {
 					LOG.debug("Connecting to port...");
-					SmsModem phoneHandler = modem;
-					phoneHandlers.put(portName, phoneHandler);
-					if(connectToDiscoveredPhones) phoneHandler.start();
+					phoneHandlers.put(portName, modem);
+					if(connectToDiscoveredPhones) modem.start();
 					return true;
 				} else {
 					// If we don't have a handle on this port, but it's owned by someone else,

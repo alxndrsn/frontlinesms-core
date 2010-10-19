@@ -23,7 +23,7 @@
 	</panel>
 	
 	<panel colspan="2" columns="2" gap="7" halign="center">
-	    <button action="doConnect" icon="/icons/tick.png" name="btSave" text="i18n.action.save"/>
+	    <button action="updatePhoneDetails" icon="/icons/tick.png" name="btSave" text="i18n.action.save"/>
 	    <button action="removeDialog" icon="/icons/cross.png" name="btCancel" text="i18n.action.cancel"/>
 	</panel>
 

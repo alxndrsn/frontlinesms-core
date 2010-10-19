@@ -118,19 +118,18 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 	 * Event fired when the view phone details action is chosen.  We save the details
 	 * of the phone to the database.
 	 */
-	public void updatePhoneDetails(Object dialog) {
-		SmsModem phone = ui.getAttachedObject(dialog, SmsModem.class);
-		String serial = phone.getSerial();
+	public void updatePhoneDetails() {
+		String serial = this.device.getSerial();
 
 		boolean useForSending;
 		boolean useDeliveryReports;
 		boolean useForReceiving;
 		boolean deleteMessagesAfterReceiving;
-		if(ui.isSelected(ui.find(dialog, COMPONENT_RB_PHONE_DETAILS_ENABLE))) {
-			useForSending = ui.isSelected(ui.find(dialog, COMPONENT_PHONE_SENDING));
-			useDeliveryReports = ui.isSelected(ui.find(dialog, COMPONENT_PHONE_DELIVERY_REPORTS));
-			useForReceiving = ui.isSelected(ui.find(dialog, COMPONENT_PHONE_RECEIVING));
-			deleteMessagesAfterReceiving = ui.isSelected(ui.find(dialog, COMPONENT_PHONE_DELETE));
+		if(ui.isSelected(find(COMPONENT_RB_PHONE_DETAILS_ENABLE))) {
+			useForSending = ui.isSelected(find(COMPONENT_PHONE_SENDING));
+			useDeliveryReports = ui.isSelected(find(COMPONENT_PHONE_DELIVERY_REPORTS));
+			useForReceiving = ui.isSelected(find(COMPONENT_PHONE_RECEIVING));
+			deleteMessagesAfterReceiving = ui.isSelected(find(COMPONENT_PHONE_DELETE));
 		} else {
 			useForSending = false;
 			useDeliveryReports = false;
@@ -140,11 +139,11 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 		String smscNumber = ui.getText(ui.find(COMPONENT_SMSC_NUMBER));
 		String simPin = ui.getText(ui.find(COMPONENT_SIM_PIN));
 		
-		phone.setUseForSending(useForSending);
-		phone.setUseDeliveryReports(useDeliveryReports);
-		if(phone.supportsReceive()) {
-			phone.setUseForReceiving(useForReceiving);
-			phone.setDeleteMessagesAfterReceiving(deleteMessagesAfterReceiving);
+		device.setUseForSending(useForSending);
+		device.setUseDeliveryReports(useDeliveryReports);
+		if(device.supportsReceive()) {
+			device.setUseForReceiving(useForReceiving);
+			device.setDeleteMessagesAfterReceiving(deleteMessagesAfterReceiving);
 		} else {
 			useForReceiving = false;
 			deleteMessagesAfterReceiving = false;
@@ -156,8 +155,8 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 		if(newSettings) {
 			settings = new SmsModemSettings(serial);
 
-			String manufacturer = phone.getManufacturer();
-			String model = phone.getModel();
+			String manufacturer = device.getManufacturer();
+			String model = device.getModel();
 			
 			settings.setManufacturer(manufacturer);
 			settings.setModel(model);
@@ -176,10 +175,10 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 		}
 		
 		// TODO check if this value has changed iff there is any value to that
-		phone.setSmscNumber(smscNumber);
+		device.setSmscNumber(smscNumber);
 		// TODO check if this value has changed iff there is any value to that
 		// TODO how is the PIN change propagated?  Guessing that we will need to reconnect to the phone.
-		phone.setSimPin(simPin);
+		device.setSimPin(simPin);
 		
 		removeDialog();
 	}
