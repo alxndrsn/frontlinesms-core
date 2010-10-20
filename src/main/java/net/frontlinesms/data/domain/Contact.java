@@ -220,11 +220,12 @@ public class Contact {
 	@Override
 	public String toString() {
 		return this.getClass().getName() + "[" +
-				"name=" + this.name + ";"+
-				"phoneNumber=" + this.phoneNumber + ";"+
-				"emailAddress=" + this.emailAddress + ";"+
-				"otherPhoneNumber=" + this.otherPhoneNumber + ";"+
-				"notes=" + this.notes +
+				"name=" + this.name + ";" +
+				"phoneNumber=" + this.phoneNumber + ";" +
+				"emailAddress=" + this.emailAddress + ";" +
+				"otherPhoneNumber=" + this.otherPhoneNumber + ";" +
+				"notes=" + this.notes + ";" + 
+				"active=" + this.active +
 				"]";
 	}
 
@@ -251,8 +252,11 @@ public class Contact {
 		if (phoneNumber == null) {
 			if (other.phoneNumber != null)
 				return false;
-		} else if (!phoneNumber.equals(other.phoneNumber))
+		} else if (!phoneNumber.equals(other.phoneNumber)) {
 			return false;
+		} else if (active != other.isActive()) {
+			return false;
+		}
 		return true;
 	}
 	

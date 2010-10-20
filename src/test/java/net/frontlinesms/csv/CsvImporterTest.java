@@ -86,6 +86,31 @@ public class CsvImporterTest extends HibernateTestCase {
 		}		
 	}
 	
+	public void testImportContactStatus () {
+		File importFile = new File(RESOURCE_PATH + "ImportWithStatus.csv");
+		CsvRowFormat rowFormat = getRowFormatForContacts();
+		
+		ContactDao contactDao = mock(ContactDao.class);
+		GroupDao groupDao = mock(GroupDao.class);
+		GroupMembershipDao groupMembershipDao = mock(GroupMembershipDao.class);
+		
+		try {
+			CsvImporter.importContacts(importFile, contactDao, groupMembershipDao, groupDao, rowFormat);
+			
+			Contact morgan = new Contact("Morgan", "07691321654", "", "", "dangerous", false);
+			Contact testNumber = new Contact("Test Number", "000", "", "", "dangerous", true);
+			Contact alex = new Contact("alex", "123456789", "", "", "dangerous", false);
+			Contact laura = new Contact("laura", "07788112233", "+44123456789", "lol@example.com", "", true);
+			
+			verify(contactDao, new Times(1)).saveContact(morgan);
+			verify(contactDao, new Times(1)).saveContact(testNumber);
+			verify(contactDao, new Times(1)).saveContact(alex);
+			verify(contactDao, new Times(1)).saveContact(laura);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
 	private CsvRowFormat getRowFormatForContacts() {
 		CsvRowFormat rowFormat = new CsvRowFormat();
 		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_NAME);

@@ -81,6 +81,13 @@ public abstract class BasePluginController implements PluginController {
 		}
 	}
 	
+	/**
+	 * Override if the plugin needs settings
+	 */
+	public PluginSettingsController getSettingsController(UiGeneratorController uiController) {
+		return null;
+	}
+	
 	/** @see net.frontlinesms.plugins.PluginController#getDefaultTextResource() */
 	public Map<String, String> getDefaultTextResource() {
 		Map<String, String> defaultTextResource = getTextResource();

@@ -149,7 +149,6 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		Object mmsNode = this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_MMS), CoreSettingsSections.SERVICES_MMS.toString(), "/icons/mms.png");
 		this.uiController.add(servicesRootNode, mmsNode);
 		
-		
 		this.uiController.add(find(UI_COMPONENT_CORE_TREE), servicesRootNode);
 	}
 
@@ -353,7 +352,7 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	 * @return <code>true</code> if the handler has already been loaded, <code>false</code> otherwise.
 	 */
 	private boolean settingsSectionHandlerLoaded(UiSettingsSectionHandler sectionHandler) {
-		Class<UiSettingsSectionHandler> clazz = (Class<UiSettingsSectionHandler>) sectionHandler.getClass();
+		Class<? extends UiSettingsSectionHandler> clazz = sectionHandler.getClass();
 		for (UiSettingsSectionHandler handler : handlersList) {
 			if (handler.getClass().equals(clazz)) {
 				if (clazz.equals(SettingsDeviceSectionHandler.class)) {

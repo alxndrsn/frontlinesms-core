@@ -19,5 +19,5 @@
 		    <label name="lbCostPerSmsReceivedSuffix"/>
 		    <label text="i18n.common.per.sms"/>
         </panel>
-       </panel>
+	</panel>
 </panel>

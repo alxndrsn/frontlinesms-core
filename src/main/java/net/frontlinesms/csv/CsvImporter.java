@@ -75,8 +75,10 @@ public class CsvImporter {
 					String email = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_EMAIL);
 					String notes = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_NOTES);
 					String otherPhoneNumber = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE);
-					boolean active = Boolean.valueOf(getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_STATUS));
 					String groups = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_GROUPS);
+					
+					String statusString = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_STATUS).toLowerCase();
+					boolean active = !"false".equals(statusString) && !"dormant".equals(statusString);
 					
 					Contact c = new Contact(name, number, otherPhoneNumber, email, notes, active);						
 					try {
