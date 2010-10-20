@@ -500,11 +500,6 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 			}
 		}
 		
-		
-		// FIXME delete this rubbish
-		statusString += " :: " + service.getStatusDetail();
-		// FIXME end of rubbish
-		
 		return statusString;
 	}
 	
