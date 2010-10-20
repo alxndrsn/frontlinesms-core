@@ -55,6 +55,17 @@ public class InternationalisationUtilsTest extends BaseTestCase {
 	private final Logger log = Logger.getLogger(this.getClass());
 	
 //> TEST METHODS
+	public void testFormatString() {
+		testFormatString("Connecting at %0bps", "Connecting at %0bps");
+		testFormatString("Connecting at 19600bps", "Connecting at %0bps", "19600");
+		testFormatString("Connecting at %bps", "Connecting at %bps", "19600");
+		testFormatString("Connecting at 19600bps on port COM1", "Connecting at %0bps on port %1", "19600", "COM1");
+	}
+	
+	private void testFormatString(String expected, String i18nString, String... argValues) {
+		assertEquals(expected, InternationalisationUtils.formatString(i18nString, argValues));
+	}
+
 	/**
 	 * This method loads all date formats from each language bundle, and makes sure that they are valid.
 	 * This tests {@link InternationalisationUtils#getDateFormat()} vs {@link InternationalisationUtils#parseDate(String)}.
