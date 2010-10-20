@@ -375,7 +375,7 @@ public class FrontlineUtils {
 		String url = "help/" + page;
 		if (!new File(url).exists()) {
 			if (!page.toLowerCase().startsWith("http")) {
-				url = getOnlineHelpUrl(url);
+				url = getOnlineHelpUrl(page);
 			} else {
 				url = page;
 			}

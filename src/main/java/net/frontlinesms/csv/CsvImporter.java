@@ -117,10 +117,10 @@ public class CsvImporter {
 	 * @throws IOException If there was a problem accessing the file
 	 * @throws CsvParseException If there was a problem with the format of the file
 	 */
-	public static List<String[]> getContactsFromCsvFile(String filename) throws IOException, CsvParseException {
+	public static List<String[]> getValuesFromCsvFile(String filename) throws IOException, CsvParseException {
 		LOG.trace("ENTER");
 		File importFile = new File(filename);
-		List<String[]> contactsList = new ArrayList<String[]>();
+		List<String[]> valuesList = new ArrayList<String[]>();
 		
 		if(LOG.isDebugEnabled()) LOG.debug("File [" + importFile.getAbsolutePath() + "]");
 		Utf8FileReader reader = null;
@@ -132,7 +132,7 @@ public class CsvImporter {
 				if(firstLine) {
 					firstLine = false;
 				} else {
-					contactsList.add(lineValues);
+					valuesList.add(lineValues);
 				}
 			}
 		} finally {
@@ -140,7 +140,7 @@ public class CsvImporter {
 		}
 		
 		LOG.trace("EXIT");
-		return contactsList;
+		return valuesList;
 	}
 
 //> STATIC HELPER METHODS	

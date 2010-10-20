@@ -21,19 +21,16 @@ import java.util.regex.Pattern;
 
 import net.frontlinesms.AppProperties;
 import net.frontlinesms.FrontlineSMSConstants;
-import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiGeneratorControllerConstants;
-import net.frontlinesms.ui.UiProperties;
 import net.frontlinesms.ui.handler.contacts.ContactSelecter;
 import net.frontlinesms.ui.handler.keyword.BaseActionDialog;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
-import org.apache.log4j.Logger;
 import org.smslib.util.GsmAlphabet;
 
 /**
@@ -50,8 +47,6 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	private static final String COMPONENT_BT_SEND = "btSend";
 
 //> INSTANCE PROPERTIES
-	/** Logging obhect */
-	private final Logger log = FrontlineUtils.getLogger(this.getClass());
 	/** The {@link UiGeneratorController} that shows the tab. */
 	private final UiGeneratorController uiController;
 	/** The parent component */
