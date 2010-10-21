@@ -18,11 +18,9 @@ public class SettingsEmailSectionHandler extends SettingsAbstractEmailsSectionHa
 
 	public SettingsEmailSectionHandler (UiGeneratorController ui) {
 		super(ui, false);
-		
-		this.init();
 	}
 	
-	private void init() {
+	protected void init() {
 		this.panel = this.uiController.loadComponentFromFile(UI_FILE_EMAIL_ACCOUNTS_SETTINGS_PANEL, this);
 
 		this.uiController.add(find(UI_COMPONENT_PN_EMAIL_ACCOUNTS), super.getAccountsListPanel());
@@ -37,5 +35,9 @@ public class SettingsEmailSectionHandler extends SettingsAbstractEmailsSectionHa
 	
 	public String getTitle() {
 		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_EMAIL_SETTINGS);
+	}
+	
+	public Object getSectionNode() {
+		return createSectionNode(InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_EMAIL_SETTINGS), this, "/icons/emailAccount_edit.png");
 	}
 }

@@ -6,8 +6,9 @@ import java.util.Map;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.settings.SettingsChangedEventNotification;
+import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
 
-public class BaseSectionHandler {
+public abstract class BaseSectionHandler {
 	protected EventBus eventBus;
 	protected UiGeneratorController uiController;
 	protected Object panel;
@@ -37,24 +38,33 @@ public class BaseSectionHandler {
 	}
 	
 	public Object getPanel() {
+		if (this.panel == null) {
+			init();
+		}
 		return this.panel;
 	}
 	
-//	protected void settingChanged(String key, Object newValue) {
-//		Object oldValue = this.originalValues.get(key);
-//		
-//		if (newValue == null && oldValue == null || newValue.equals(oldValue)) {
-//			this.notifyChange(key, true);
-//		} else {
-//			this.notifyChange(key, false);
-//		}
-//	}
-//	
-//	protected void notifyChange(String sectionItem, boolean isUnchange) {
-//		if (this.eventBus != null) {
-//			this.eventBus.notifyObservers(new SettingsChangedEventNotification(sectionItem, isUnchange));
-//		}
-//	}
+	/**
+	 * Override to load the panel
+	 */
+	abstract protected void init();
+	
+	/**
+	 * Helps create a Thinlet node for a section
+	 * @param isRootNode
+	 * @param title
+	 * @param attachedObject
+	 * @param iconPath
+	 * @return
+	 */
+	protected Object createSectionNode(String title, UiSettingsSectionHandler attachedObject, String iconPath) {
+		Object sectionRootNode = uiController.createNode(title, attachedObject);
+		
+		// Try to get an icon from the classpath
+		this.uiController.setIcon(sectionRootNode, iconPath);
+		
+		return sectionRootNode;
+	}
 	
 	protected Object find (String component) {
 		return this.uiController.find(this.panel, component);

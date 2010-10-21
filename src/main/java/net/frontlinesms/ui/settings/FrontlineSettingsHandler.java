@@ -5,8 +5,6 @@ import java.util.List;
 
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.SmsInternetServiceSettings;
-import net.frontlinesms.data.domain.SmsModemSettings;
-import net.frontlinesms.data.repository.SmsModemSettingsDao;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
@@ -15,20 +13,14 @@ import net.frontlinesms.plugins.PluginController;
 import net.frontlinesms.plugins.PluginControllerProperties;
 import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.plugins.PluginSettingsController;
-import net.frontlinesms.settings.CoreSettingsSections;
 import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.handler.settings.SettingsAppearanceSectionHandler;
-import net.frontlinesms.ui.handler.settings.SettingsDatabaseSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsDeviceSectionHandler;
-import net.frontlinesms.ui.handler.settings.SettingsDevicesSectionHandler;
-import net.frontlinesms.ui.handler.settings.SettingsEmailSectionHandler;
-import net.frontlinesms.ui.handler.settings.SettingsEmptySectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsGeneralSectionHandler;
-import net.frontlinesms.ui.handler.settings.SettingsInternetServicesSectionHandler;
-import net.frontlinesms.ui.handler.settings.SettingsMmsSectionHandler;
+import net.frontlinesms.ui.handler.settings.SettingsServicesSectionHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 import org.apache.log4j.Logger;
@@ -52,14 +44,6 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	private static final String UI_COMPONENT_PN_DISPLAY_SETTINGS = "pnDisplaySettings";
 
 	private static final String I18N_MESSAGE_CONFIRM_CLOSE_SETTINGS = "message.confirm.close.settings";
-	private static final String I18N_SETTINGS_MENU_DATABASE_SETTINGS  = "menuitem.edit.db.settings";
-	private static final String I18N_SETTINGS_MENU_EMAIL_SETTINGS = "menuitem.email.settings";
-	private static final String I18N_SETTINGS_MENU_APPEARANCE = "settings.menu.appearance";
-	private static final String I18N_SETTINGS_MENU_DEVICES = "settings.menu.devices";
-	private static final String I18N_SETTINGS_MENU_GENERAL = "settings.menu.general";
-	private static final String I18N_SETTINGS_MENU_INTERNET_SERVICES = "settings.menu.internet.services";
-	private static final String I18N_SETTINGS_MENU_MMS = "settings.menu.mms";
-	private static final String I18N_SETTINGS_MENU_SERVICES = "settings.menu.services";
 	private static final String I18N_SETTINGS_SAVED = "settings.saved";
 	private static final String I18N_TOOLTIP_SETTINGS_BTSAVE_DISABLED = "tooltip.settings.btsave.disabled";
 	private static final String I18N_TOOLTIP_SETTINGS_SAVES_ALL = "tooltip.settings.saves.all";
@@ -83,10 +67,6 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 
 	private List<Object> unselectableNodes;
 
-	private SmsModemSettingsDao deviceSettingsDao;
-
-	private SmsModemSettings selectedDeviceSettings;
-	
 //> CONSTRUCTORS
 	/**
 	 * Creates a new instance of this UI.
@@ -94,7 +74,6 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	 */
 	public FrontlineSettingsHandler(UiGeneratorController controller) {
 		this.uiController = controller;
-		this.deviceSettingsDao = controller.getFrontlineController().getSmsModemSettingsDao();
 		this.eventBus = controller.getFrontlineController().getEventBus();
 		this.handlersList = new ArrayList<UiSettingsSectionHandler>();
 		this.changesList = new ArrayList<String>();
@@ -121,70 +100,28 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	}
 
 	private void loadCoreSettings() {
+		Object coreTree = find(UI_COMPONENT_CORE_TREE);
+
 		/** APPEARANCE **/
-		Object appearanceRootNode = this.createSectionNode(true, InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_APPEARANCE), CoreSettingsSections.APPEARANCE.toString(), "/icons/display.png");
-		this.uiController.add(find(UI_COMPONENT_CORE_TREE), appearanceRootNode);
-		this.uiController.setSelectedItem(find(UI_COMPONENT_CORE_TREE), appearanceRootNode);
-		this.selectionChanged(find(UI_COMPONENT_CORE_TREE));
+		SettingsAppearanceSectionHandler appearanceSection = new SettingsAppearanceSectionHandler(this.uiController);
+		Object appearanceRootNode = appearanceSection.getSectionNode();
+		this.uiController.add(coreTree, appearanceRootNode);
+		this.uiController.setSelectedItem(coreTree, appearanceRootNode);
+		this.selectionChanged(coreTree);
 		
 		/** GENERAL **/
-		Object generalRootNode = this.createSectionNode(true, InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_GENERAL), CoreSettingsSections.GENERAL.toString(), "/icons/cog.png");
-		this.uiController.add(generalRootNode, this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_DATABASE_SETTINGS), CoreSettingsSections.GENERAL_DATABASE.toString(), "/icons/database_edit.png"));
-		this.uiController.add(generalRootNode, this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_EMAIL_SETTINGS), CoreSettingsSections.GENERAL_EMAIL.toString(), "/icons/emailAccount_edit.png"));
-		this.uiController.add(find(UI_COMPONENT_CORE_TREE), generalRootNode);
+		SettingsGeneralSectionHandler generalSection = new SettingsGeneralSectionHandler(this.uiController);
+		Object generalRootNode = generalSection.getSectionNode();
+		this.uiController.add(coreTree, generalRootNode);
 		
 		/** SERVICES **/
-		Object servicesRootNode = this.createSectionNode(true, InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_SERVICES), CoreSettingsSections.SERVICES.toString(), "/icons/database_execute.png");
-		/**** SERVICES / DEVICES ****/
-		Object devicesNode = this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_DEVICES), CoreSettingsSections.SERVICES_DEVICES.toString(), "/icons/phone_manualConfigure.png");
-		this.addSubDevices(devicesNode);
-		this.uiController.setExpanded(devicesNode, false);
-		this.uiController.add(servicesRootNode, devicesNode);
-		
-		/**** SERVICES / INTERNET SERVICES ****/
-		Object internetServicesNode = this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_INTERNET_SERVICES), CoreSettingsSections.SERVICES_INTERNET_SERVICES.toString(), "/icons/sms_http_edit.png");
-		this.uiController.add(servicesRootNode, internetServicesNode);
-		
-		/**** SERVICES / MMS ****/
-		Object mmsNode = this.createSectionNode(false, InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_MMS), CoreSettingsSections.SERVICES_MMS.toString(), "/icons/mms.png");
-		this.uiController.add(servicesRootNode, mmsNode);
-		
-		this.uiController.add(find(UI_COMPONENT_CORE_TREE), servicesRootNode);
+		SettingsServicesSectionHandler servicesSection = new SettingsServicesSectionHandler(this.uiController);
+		Object servicesRootNode = servicesSection.getSectionNode();
+		this.uiController.add(coreTree, servicesRootNode);
 	}
 
-	/**
-	 * Adds as many subnodes as there is known devices
-	 * @param devicesNode
-	 */
-	private void addSubDevices(Object devicesNode) {
-		List<SmsModemSettings> devicesSettings = this.deviceSettingsDao.getAll();
-		
-		for (SmsModemSettings deviceSettings : devicesSettings) {
-			String deviceItemName = deviceSettings.getManufacturer() + " " + deviceSettings.getModel();
-			if (deviceItemName.trim().isEmpty()) {
-				deviceItemName = deviceSettings.getSerial();
-			}
-			this.uiController.add(devicesNode, this.createSectionNode(false, deviceItemName, deviceSettings, "/icons/phone_number.png"));
-		}
-	}
-
-	/**
-	 * Helps create a Thinlet node for a section
-	 * @param isRootNode
-	 * @param title
-	 * @param attachedObject
-	 * @param iconPath
-	 * @return
-	 */
-	private Object createSectionNode(boolean isRootNode, String title, Object attachedObject, String iconPath) {
-		Object sectionRootNode = this.uiController.createNode(title, attachedObject);
-		
-		// Try to get an icon from the classpath
-		this.uiController.setIcon(sectionRootNode, iconPath);
-		
-		return sectionRootNode;
-	}
 	
+
 	/**
 	 * Loads the different plugins into the plugins tree
 	 */
@@ -240,24 +177,13 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 			this.uiController.removeAll(find(UI_COMPONENT_PN_DISPLAY_SETTINGS));
 		
 			Object attachedObject = this.uiController.getAttachedObject(selected);
-			if (attachedObject instanceof SmsModemSettings) {
-				this.selectedDeviceSettings = (SmsModemSettings) attachedObject;
-				attachedObject = CoreSettingsSections.SERVICES_DEVICE.toString();
-			}
-			
 			if (attachedObject instanceof String) {
 				// Then this panel has not been loaded yet
-				
 				// The section String is the object attached to the item
 				String section = (String) attachedObject;
-				
-				if (tree.equals(find(UI_COMPONENT_PLUGIN_TREE))) {
-					pluginSectionSelected(selected, section);
-				} else {
-					coreSectionSelected(selected, section);
-				}
+				pluginSectionSelected(selected, section);
 			} else {
-				this.displayPanel(attachedObject);
+				this.displayPanel((UiSettingsSectionHandler) attachedObject);
 			}
 		}
 	}
@@ -292,26 +218,6 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	}
 
 	/**
-	 * Called to handle a clic on a section of the Core tree
-	 * @param selected
-	 * @param section
-	 */
-	private void coreSectionSelected(Object selected, String section) {
-		// Let's get the right handler for the selected section
-		UiSettingsSectionHandler settingsSectionHandler = this.getCoreHandlerForSection(section);
-		
-		// We potentially have the UI Handler for the current section, let's take the panel
-		if (settingsSectionHandler != null) {
-			// If we haven't loaded the handler yet, let's do it and save it.
-			if (!this.settingsSectionHandlerLoaded(settingsSectionHandler)) {
-				this.handlersList.add(settingsSectionHandler);
-			}
-			this.uiController.setAttachedObject(selected, settingsSectionHandler.getPanel());
-			this.displayPanel(settingsSectionHandler.getPanel());
-		}
-	}
-
-	/**
 	 * Called to handle a clic on a section of the Plugin tree
 	 * @param selected
 	 * @param section
@@ -332,12 +238,12 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 			}
 			
 			if (settingsSectionHandler != null) {
-				if (!this.settingsSectionHandlerLoaded(settingsSectionHandler)) {
-					this.handlersList.add(settingsSectionHandler);
-				}
+//				if (!this.settingsSectionHandlerLoaded(settingsSectionHandler)) {
+//					this.handlersList.add(settingsSectionHandler);
+//				}
 				
 				// We have the UI Handler for the current section, let's take the panel
-				this.displayPanel(settingsSectionHandler.getPanel());
+				this.displayPanel(settingsSectionHandler);
 			}
 		} catch (InstantiationException e) {
 			e.printStackTrace();
@@ -372,41 +278,14 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	 * Handles the display in the dialog
 	 * @param panel
 	 */
-	private void displayPanel(Object panel) {
+	private void displayPanel(UiSettingsSectionHandler handler) {
 		Object pnDisplaySettings = find(UI_COMPONENT_PN_DISPLAY_SETTINGS);
 		
 		this.uiController.removeAll(pnDisplaySettings);
-		this.uiController.add(pnDisplaySettings, panel);
-	}
-
-	/**
-	 * Gets the correct handler for a section
-	 * @param coreSection
-	 * @return
-	 */
-	private UiSettingsSectionHandler getCoreHandlerForSection(String coreSection) {
-		CoreSettingsSections section = CoreSettingsSections.valueOf(coreSection);
-		switch (section) {
-			case APPEARANCE:
-				return new SettingsAppearanceSectionHandler(uiController);
-			case GENERAL:
-				return new SettingsGeneralSectionHandler(uiController);
-			case GENERAL_DATABASE:
-				return new SettingsDatabaseSectionHandler(uiController);
-			case GENERAL_EMAIL:
-				return new SettingsEmailSectionHandler(uiController);
-			case SERVICES:
-				return new SettingsEmptySectionHandler(uiController, I18N_SETTINGS_MENU_SERVICES);
-			case SERVICES_DEVICES:
-				return new SettingsDevicesSectionHandler(uiController);
-			case SERVICES_DEVICE:
-				return new SettingsDeviceSectionHandler(uiController, this.selectedDeviceSettings);
-			case SERVICES_INTERNET_SERVICES:
-				return new SettingsInternetServicesSectionHandler(uiController);
-			case SERVICES_MMS:
-				return new SettingsMmsSectionHandler(uiController);
-			default:
-				return null;
+		this.uiController.add(pnDisplaySettings, handler.getPanel());
+		
+		if (!this.handlersList.contains(handler)) {
+			this.handlersList.add(handler);
 		}
 	}
 	
@@ -520,4 +399,6 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		
 		this.uiController.setTooltip(btSave, tooltip);
 	}
+	
+//> CONSTANT HANDLERS
 }

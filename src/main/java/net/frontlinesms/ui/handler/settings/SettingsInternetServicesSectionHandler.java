@@ -29,11 +29,9 @@ public class SettingsInternetServicesSectionHandler extends BaseSectionHandler i
 		super(ui);
 
 		this.eventBus.registerObserver(this);
-		
-		this.init();
 	}
 	
-	private void init() {
+	protected void init() {
 		this.panel = uiController.loadComponentFromFile(UI_SECTION_INTERNET_SERVICES, this);
 
 		// Update the list of accounts from the list provided
@@ -139,5 +137,9 @@ public class SettingsInternetServicesSectionHandler extends BaseSectionHandler i
 	
 	public String getTitle() {
 		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_INTERNET_SERVICES);
+	}
+
+	public Object getSectionNode() {
+		return createSectionNode(InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_INTERNET_SERVICES), this, "/icons/sms_http_edit.png");
 	}
 }

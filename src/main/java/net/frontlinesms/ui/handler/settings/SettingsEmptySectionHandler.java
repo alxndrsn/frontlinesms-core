@@ -16,11 +16,9 @@ public class SettingsEmptySectionHandler extends BaseSectionHandler implements U
 	public SettingsEmptySectionHandler (UiGeneratorController ui, String sectionTitle) {
 		super(ui);
 		this.sectionTitle = sectionTitle;
-
-		this.init();
 	}
 	
-	private void init() {
+	protected void init() {
 		this.panel = uiController.loadComponentFromFile(UI_EMPTY_SECTION, this);
 	}
 	

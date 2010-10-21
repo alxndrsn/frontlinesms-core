@@ -40,11 +40,9 @@ public class SettingsDatabaseSectionHandler extends BaseSectionHandler implement
 	
 	public SettingsDatabaseSectionHandler (UiGeneratorController ui) {
 		super(ui);
-		
-		this.init();
 	}
 	
-	private void init() {
+	protected void init() {
 		this.panel = uiController.loadComponentFromFile(UI_SECTION_DATABASE, this);
 		
 		// Populate combobox
@@ -219,6 +217,10 @@ public class SettingsDatabaseSectionHandler extends BaseSectionHandler implement
 	
 	public String getTitle() {
 		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_DATABASE_SETTINGS);
+	}
+	
+	public Object getSectionNode() {
+		return createSectionNode(InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_DATABASE_SETTINGS), this, "/icons/database_edit.png");
 	}
 }
 

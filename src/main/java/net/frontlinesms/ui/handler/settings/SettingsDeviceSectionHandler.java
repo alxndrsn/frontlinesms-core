@@ -40,11 +40,9 @@ public class SettingsDeviceSectionHandler extends BaseSectionHandler implements 
 		super(ui);
 		this.smsModemSettingsDao = ui.getFrontlineController().getSmsModemSettingsDao();
 		this.setDeviceSettings(deviceSettings);
-		
-		this.init();
 	}
 	
-	private void init() {
+	protected void init() {
 		this.panel = uiController.loadComponentFromFile(UI_SECTION_DEVICE, this);
 		
 		Object deviceSettingsPanelContainer = find(UI_COMPONENT_PN_DEVICE_SETTINGS_CONTAINER);
@@ -60,6 +58,7 @@ public class SettingsDeviceSectionHandler extends BaseSectionHandler implements 
 	 * Populates the device settings in the panel.
 	 */
 	private void populateDeviceSettingsPanel() {
+		// TODO: Merge this with the DeviceSettingsHandler to avoid duplication
 		boolean supportsReceive = this.getDeviceSettings().supportsReceive();
 		boolean useForSending = this.getDeviceSettings().useForSending();
 		boolean useForReceiving = this.getDeviceSettings().useForReceiving();

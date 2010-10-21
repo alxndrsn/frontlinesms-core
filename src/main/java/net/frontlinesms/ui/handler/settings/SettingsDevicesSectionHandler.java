@@ -3,6 +3,7 @@ package net.frontlinesms.ui.handler.settings;
 import java.util.List;
 
 import net.frontlinesms.AppProperties;
+import net.frontlinesms.data.domain.SmsModemSettings;
 import net.frontlinesms.settings.BaseSectionHandler;
 import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.ui.ThinletUiEventHandler;
@@ -23,11 +24,9 @@ public class SettingsDevicesSectionHandler extends BaseSectionHandler implements
 
 	public SettingsDevicesSectionHandler (UiGeneratorController ui) {
 		super(ui);
-		
-		this.init();
 	}
 	
-	private void init() {
+	protected void init() {
 		this.panel = uiController.loadComponentFromFile(UI_SECTION_DEVICES, this);
 		
 		// Populating
@@ -82,5 +81,32 @@ public class SettingsDevicesSectionHandler extends BaseSectionHandler implements
 	
 	public String getTitle() {
 		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_DEVICES);
+	}
+
+	public Object getSectionNode() {
+		Object devicesNode = createSectionNode(InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_DEVICES), this, "/icons/phone_manualConfigure.png");
+		addSubDevices(devicesNode);
+		uiController.setExpanded(devicesNode, false);
+		
+		return devicesNode;
+	}
+	
+	/**
+	 * Adds as many subnodes as there is known devices
+	 * @param uiController
+	 * @param devicesNode 
+	 */
+	private void addSubDevices(Object devicesNode) {
+		List<SmsModemSettings> devicesSettings = this.uiController.getFrontlineController().getSmsModemSettingsDao().getAll();
+		
+		for (SmsModemSettings deviceSettings : devicesSettings) {
+			String deviceItemName = deviceSettings.getManufacturer() + " " + deviceSettings.getModel();
+			if (deviceItemName.trim().isEmpty()) {
+				deviceItemName = deviceSettings.getSerial();
+			}
+			
+			SettingsDeviceSectionHandler deviceHandler = new SettingsDeviceSectionHandler(this.uiController, deviceSettings);
+			this.uiController.add(devicesNode, createSectionNode(deviceItemName, deviceHandler, "/icons/phone_number.png"));
+		}
 	}
 }

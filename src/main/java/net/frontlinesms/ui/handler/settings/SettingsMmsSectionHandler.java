@@ -26,11 +26,9 @@ public class SettingsMmsSectionHandler extends SettingsAbstractEmailsSectionHand
 
 	public SettingsMmsSectionHandler (UiGeneratorController ui) {
 		super(ui, true);
-		
-		this.init();
 	}
 	
-	private void init() {
+	protected void init() {
 		this.panel = this.uiController.loadComponentFromFile(UI_FILE_EMAIL_ACCOUNTS_SETTINGS_PANEL, this);
 
 		this.uiController.add(find(UI_COMPONENT_PN_EMAIL_ACCOUNTS), super.getAccountsListPanel());
@@ -88,4 +86,8 @@ public class SettingsMmsSectionHandler extends SettingsAbstractEmailsSectionHand
 		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_MMS);
 	}
 //> UI EVENT METHODS
+
+	public Object getSectionNode() {
+		return createSectionNode(InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_MMS), this, "/icons/mms.png");
+	}
 }

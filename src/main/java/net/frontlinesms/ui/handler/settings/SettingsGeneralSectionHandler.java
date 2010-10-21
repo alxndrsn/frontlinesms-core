@@ -36,11 +36,9 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 	public SettingsGeneralSectionHandler (UiGeneratorController ui) {
 		super(ui);
 		this.uiController = ui;
-		
-		this.init();
 	}
 	
-	private void init() {
+	protected void init() {
 		this.panel = uiController.loadComponentFromFile(UI_SECTION_GENERAL, this);
 		
 		this.initStatisticsSettings();
@@ -165,5 +163,17 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 	
 	public String getTitle() {
 		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_GENERAL);
+	}
+	
+	public Object getSectionNode() {
+		Object generalRootNode = createSectionNode(InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_GENERAL), this, "/icons/cog.png");
+		
+		SettingsDatabaseSectionHandler databaseHandler = new SettingsDatabaseSectionHandler(uiController);
+		uiController.add(generalRootNode, databaseHandler.getSectionNode());
+		
+		SettingsEmailSectionHandler emailHandler = new SettingsEmailSectionHandler(uiController);
+		uiController.add(generalRootNode, emailHandler.getSectionNode());
+		
+		return generalRootNode;
 	}
 }
