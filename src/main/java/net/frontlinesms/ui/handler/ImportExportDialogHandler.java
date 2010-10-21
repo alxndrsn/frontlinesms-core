@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.csv.CsvExporter;
 import net.frontlinesms.csv.CsvImporter;
+import net.frontlinesms.csv.CsvParseException;
 import net.frontlinesms.csv.CsvRowFormat;
 import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.domain.Contact;
@@ -277,17 +278,23 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		
 		try {
 			// Do the import
-			if(type == EntityType.CONTACTS) {
+			if (type == EntityType.CONTACTS) {
 				CsvRowFormat rowFormat = getRowFormatForContact();
 				CsvImporter.importContacts(new File(dataPath), this.contactDao, this.groupMembershipDao, this.groupDao, rowFormat);
 				this.uiController.refreshContactsTab();
+				// TODO: display a confirmation message
+			} else if (type == EntityType.MESSAGES) {
+				CsvRowFormat rowFormat = getRowFormatForMessage();
+				CsvImporter.importMessages(new File(dataPath), this.messageDao, rowFormat);
+				//this.uiController.refreshContactsTab();
 				// TODO: display a confirmation message
 			} else {
 				throw new IllegalStateException("Import is not supported for: " + getType());
 			}
 			uiController.setStatus(InternationalisationUtils.getI18NString(MESSAGE_IMPORT_TASK_SUCCESSFUL));
 			uiController.removeDialog(wizardDialog);
-		} catch(Exception ex) {
+		} catch(IOException ex) {
+		} catch(CsvParseException ex) {
 			log.debug(InternationalisationUtils.getI18NString(MESSAGE_IMPORT_TASK_FAILED), ex);
 			uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_IMPORT_TASK_FAILED) + ": " + ex.getMessage());
 		}
@@ -597,10 +604,6 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		addMarker(rowFormat, CsvUtils.MARKER_MESSAGE_CONTENT, COMPONENT_CB_CONTENT);
 		addMarker(rowFormat, CsvUtils.MARKER_SENDER_NUMBER, COMPONENT_CB_SENDER);
 		addMarker(rowFormat, CsvUtils.MARKER_RECIPIENT_NUMBER, COMPONENT_CB_RECIPIENT);
-		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NAME, COMPONENT_CB_CONTACT_NAME);
-		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE, COMPONENT_CB_CONTACT_OTHER_NUMBER);
-		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_EMAIL, COMPONENT_CB_EMAIL);
-		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NOTES, COMPONENT_CB_NOTES);
 		return rowFormat;
 	}
 	
