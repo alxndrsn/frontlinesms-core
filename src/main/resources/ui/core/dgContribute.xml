@@ -18,6 +18,8 @@
 		<button type="link" text="i18n.contribute.click.to.know.more" action="showHelpPage('http://frontlinesms.ning.com')"/>
 	</panel>
 	
+	<label text="i18n.contribute.stats"/>
+	
 	<panel gap="5">
 		<label text="i18n.contribute.frontlinesms.working"/>
 		<button name="linkWorking" type="link" action="emailMyExperience"/>
