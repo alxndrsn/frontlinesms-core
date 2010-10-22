@@ -176,6 +176,19 @@ public abstract class BasePluginController implements PluginController {
 		return fileName;
 	}
 
+	/**
+	 * Gets the main icon of the Plugin 
+	 * @return
+	 */
+	public String getIcon(Class<? extends BasePluginController> clazz) {
+		if(clazz.isAnnotationPresent(PluginControllerProperties.class)) {
+			PluginControllerProperties properties = clazz.getAnnotation(PluginControllerProperties.class);
+			return properties.iconPath();
+		} else {
+			return '/' + clazz.getPackage().getName().replace('.', '/') + '/' + clazz.getSimpleName() + ".png";
+		}
+	}
+
 //> STATIC FACTORIES
 
 //> STATIC HELPER METHODS

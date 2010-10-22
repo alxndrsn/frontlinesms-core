@@ -10,7 +10,6 @@ import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.messaging.sms.internet.SmsInternetService;
 import net.frontlinesms.plugins.PluginController;
-import net.frontlinesms.plugins.PluginControllerProperties;
 import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.plugins.PluginSettingsController;
 import net.frontlinesms.settings.FrontlineValidationMessage;
@@ -18,7 +17,6 @@ import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.handler.settings.SettingsAppearanceSectionHandler;
-import net.frontlinesms.ui.handler.settings.SettingsDeviceSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsGeneralSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsServicesSectionHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -120,8 +118,6 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		this.uiController.add(coreTree, servicesRootNode);
 	}
 
-	
-
 	/**
 	 * Loads the different plugins into the plugins tree
 	 */
@@ -134,26 +130,13 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 				this.uiController.addPluginTextResources(pluginController);
 				pluginSettingsController = pluginController.getSettingsController(this.uiController);
 			
-				if (pluginSettingsController != null) { // Then the Plugin has some settings
-					Object rootSettingsNode = this.uiController.createNode(pluginSettingsController.getTitle(), pluginClass.getName());
-					
-					// Some plugin may need submenus
-					pluginSettingsController.addSubSettingsNodes(rootSettingsNode);
-					
-					// Try to get an icon from the classpath
-					String iconPath;
-					if(pluginClass.isAnnotationPresent(PluginControllerProperties.class)) {
-						PluginControllerProperties properties = pluginClass.getAnnotation(PluginControllerProperties.class);
-						iconPath = properties.iconPath();
-					} else {
-						iconPath = '/' + pluginClass.getPackage().getName().replace('.', '/') + '/' + pluginClass.getSimpleName() + ".png";
-					}
-					this.uiController.setIcon(rootSettingsNode, iconPath);
+				if (pluginSettingsController != null) { // Then the Plugin has settings
+					Object pluginRootNode = pluginSettingsController.getRootNode();
 					
 					// Collapse all root nodes by default
-					this.uiController.setExpanded(rootSettingsNode, false);
+					this.uiController.setExpanded(pluginRootNode, false);
 					
-					this.uiController.add(find(UI_COMPONENT_PLUGIN_TREE), rootSettingsNode);
+					this.uiController.add(find(UI_COMPONENT_PLUGIN_TREE), pluginRootNode);
 				}
 			} catch (Throwable t) {
 				// Prevents a plugin from messing the whole process up
@@ -177,14 +160,7 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 			this.uiController.removeAll(find(UI_COMPONENT_PN_DISPLAY_SETTINGS));
 		
 			Object attachedObject = this.uiController.getAttachedObject(selected);
-			if (attachedObject instanceof String) {
-				// Then this panel has not been loaded yet
-				// The section String is the object attached to the item
-				String section = (String) attachedObject;
-				pluginSectionSelected(selected, section);
-			} else {
-				this.displayPanel((UiSettingsSectionHandler) attachedObject);
-			}
+			this.displayPanel((UiSettingsSectionHandler) attachedObject);
 		}
 	}
 
@@ -218,63 +194,6 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	}
 
 	/**
-	 * Called to handle a clic on a section of the Plugin tree
-	 * @param selected
-	 * @param section
-	 */
-	private void pluginSectionSelected(Object selected, String section) {
-		try {
-			Object rootNode = this.getSelectedRootNode(selected, find(UI_COMPONENT_PLUGIN_TREE));
-
-			String className = this.uiController.getAttachedObject(rootNode, String.class);
-			PluginSettingsController settingsController = PluginProperties.getInstance().getPluginClass(className).newInstance().getSettingsController(this.uiController);
-			
-			// We now know where we are, now looking for the UI Handler
-			UiSettingsSectionHandler settingsSectionHandler;
-			if (section.equals(className)) {
-				settingsSectionHandler = settingsController.getRootPanelHandler();
-			} else {
-				settingsSectionHandler = settingsController.getHandlerForSection(section);
-			}
-			
-			if (settingsSectionHandler != null) {
-//				if (!this.settingsSectionHandlerLoaded(settingsSectionHandler)) {
-//					this.handlersList.add(settingsSectionHandler);
-//				}
-				
-				// We have the UI Handler for the current section, let's take the panel
-				this.displayPanel(settingsSectionHandler);
-			}
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * Checks whether or not a {@link UiSettingsSectionHandler} has been loaded yet.
-	 * @param clazz
-	 * @return <code>true</code> if the handler has already been loaded, <code>false</code> otherwise.
-	 */
-	private boolean settingsSectionHandlerLoaded(UiSettingsSectionHandler sectionHandler) {
-		Class<? extends UiSettingsSectionHandler> clazz = sectionHandler.getClass();
-		for (UiSettingsSectionHandler handler : handlersList) {
-			if (handler.getClass().equals(clazz)) {
-				if (clazz.equals(SettingsDeviceSectionHandler.class)) {
-					if (((SettingsDeviceSectionHandler) handler).getDeviceSettings().equals(((SettingsDeviceSectionHandler) sectionHandler).getDeviceSettings())) {
-						return true;
-					}
-				} else {
-					return true;
-				}
-			}
-		}
-		
-		return false;
-	}
-
-	/**
 	 * Handles the display in the dialog
 	 * @param panel
 	 */
@@ -287,24 +206,6 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		if (!this.handlersList.contains(handler)) {
 			this.handlersList.add(handler);
 		}
-	}
-	
-	/**
-	 * Gets the root node of the selected section, in order to load the right handler/panel.
-	 * @param selected
-	 * @param tree
-	 * @return The root node
-	 */
-	private Object getSelectedRootNode(Object selected, Object tree) {
-		Object parent = selected;
-		
-		// We don't know exactly where we're located.
-		// Let's look for the root node to identify the plugin.
-		while (this.uiController.getParent(parent) != tree) {
-			parent = this.uiController.getParent(selected);
-		}
-		
-		return parent;
 	}
 	
 	public void closeDialog() {

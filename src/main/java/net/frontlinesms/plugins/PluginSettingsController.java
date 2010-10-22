@@ -32,4 +32,6 @@ public interface PluginSettingsController {
 	 * @return The text to be displayed for the root node in the plugins tree.
 	 */
 	public String getTitle();
+
+	public Object getRootNode();
 }
