@@ -18,7 +18,11 @@
 		<button type="link" text="i18n.contribute.click.to.know.more" action="showHelpPage('http://frontlinesms.ning.com')"/>
 	</panel>
 	
+	<panel gap="5">
 	<label text="i18n.contribute.stats"/>
+		<button type="link" text="i18n.contribute.click.here.for.stats" action="showStatsDialog"/>
+	</panel>
+	
 	
 	<panel gap="5">
 		<label text="i18n.contribute.frontlinesms.working"/>
