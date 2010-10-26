@@ -34,6 +34,7 @@ import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
+import net.frontlinesms.ui.i18n.LanguageBundle;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
 /**
@@ -286,7 +287,6 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 			} else if (type == EntityType.MESSAGES) {
 				CsvRowFormat rowFormat = getRowFormatForMessage();
 				CsvImporter.importMessages(new File(dataPath), this.messageDao, rowFormat);
-				//this.uiController.refreshContactsTab();
 				// TODO: display a confirmation message
 			} else {
 				throw new IllegalStateException("Import is not supported for: " + getType());
@@ -718,14 +718,19 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 			
 			/** Lines */
 			if (this.importedValuesList != null) {
+				LanguageBundle usedLanguageBundle = null;
 				for (String[] lineValues : this.importedValuesList) {
 					Object row = this.uiController.createTableRow();
 					switch (this.type) {
 					case CONTACTS:
-						this.addContactsCells(row, lineValues, columnsNumber);
+						this.addContactCells(row, lineValues, columnsNumber);
 						break;
 					case MESSAGES:
-						this.addMessagesCells(row, lineValues, columnsNumber, messageTypeIndex);
+						if (usedLanguageBundle == null && messageTypeIndex > -1) {
+							usedLanguageBundle = CsvImporter.getUsedLanguageBundle(lineValues[messageTypeIndex]);
+						}
+						
+						this.addMessageCells(row, lineValues, columnsNumber, messageTypeIndex, usedLanguageBundle);
 						break;
 					default:
 						break;
@@ -736,7 +741,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		}
 	}
 	
-	private void addContactsCells(Object row, String[] lineValues, int columnsNumber) {
+	private void addContactCells(Object row, String[] lineValues, int columnsNumber) {
 		Object cell = this.uiController.createTableCell("");
 		this.uiController.setIcon(cell, Icon.CONTACT);
 		this.uiController.add(row, cell);
@@ -757,19 +762,26 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		}
 	}
 	
-	private void addMessagesCells(Object row, String[] lineValues, int columnsNumber, int messageTypeIndex) {
+	private void addMessageCells(Object row, String[] lineValues, int columnsNumber, int messageTypeIndex, LanguageBundle usedLanguageBundle) {
 		String rowIcon = Icon.SMS;
 		if (messageTypeIndex > -1) {
 			// The message type is present in the imported fields
-			rowIcon = (lineValues[messageTypeIndex].equals("Sent") ? Icon.SMS_SEND 
-																		: (lineValues[messageTypeIndex].equals("Received") 
-																				? Icon.SMS_RECEIVE : Icon.SMS));
+			switch (CsvImporter.getTypeFromString(lineValues[messageTypeIndex], usedLanguageBundle)) {
+				case OUTBOUND :
+					rowIcon = Icon.SMS_SEND;
+					break;
+				case RECEIVED :
+					rowIcon = Icon.SMS_RECEIVE;
+					break;
+				default :
+					rowIcon = Icon.SMS;
+					break;
+			}
 		}
 		
 		Object cell = this.uiController.createTableCell("");
 		this.uiController.setIcon(cell, rowIcon);
 		this.uiController.add(row, cell);
-		
 		
 		for (int i = 0 ; i < columnsNumber && i < lineValues.length ; ++i) {
 			cell =  this.uiController.createTableCell(lineValues[i]);

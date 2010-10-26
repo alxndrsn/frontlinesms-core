@@ -21,18 +21,27 @@ package net.frontlinesms.csv;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.TimeZone;
 
+import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.FrontlineUtils;
-import net.frontlinesms.data.domain.*;
-import net.frontlinesms.data.domain.FrontlineMessage.Status;
-import net.frontlinesms.data.repository.*;
 import net.frontlinesms.data.DuplicateKeyException;
+import net.frontlinesms.data.domain.Contact;
+import net.frontlinesms.data.domain.FrontlineMessage;
+import net.frontlinesms.data.domain.FrontlineMessage.Status;
+import net.frontlinesms.data.domain.FrontlineMessage.Type;
+import net.frontlinesms.data.domain.Group;
+import net.frontlinesms.data.repository.ContactDao;
+import net.frontlinesms.data.repository.GroupDao;
+import net.frontlinesms.data.repository.GroupMembershipDao;
+import net.frontlinesms.data.repository.MessageDao;
+import net.frontlinesms.ui.i18n.FileLanguageBundle;
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
+import net.frontlinesms.ui.i18n.LanguageBundle;
 
 import org.apache.log4j.Logger;
 
@@ -131,12 +140,13 @@ public class CsvImporter {
 			reader = new Utf8FileReader(importFile);
 			boolean firstLine = true;
 			String[] lineValues;
+			LanguageBundle usedLanguageBundle = null;
 			while((lineValues = CsvUtils.readLine(reader)) != null) {
 				if(firstLine) {
 					// Ignore the first line of the CSV file as it should be the column titles
 					firstLine = false;
 				} else {
-					String type = getString(lineValues, rowFormat, CsvUtils.MARKER_MESSAGE_TYPE);
+					String typeString = getString(lineValues, rowFormat, CsvUtils.MARKER_MESSAGE_TYPE);
 					String status = getString(lineValues, rowFormat, CsvUtils.MARKER_MESSAGE_STATUS);
 					String sender = getString(lineValues, rowFormat, CsvUtils.MARKER_SENDER_NUMBER);
 					String recipient = getString(lineValues, rowFormat, CsvUtils.MARKER_RECIPIENT_NUMBER);
@@ -151,9 +161,16 @@ public class CsvImporter {
 					} catch (Exception e) {
 						date = System.currentTimeMillis();
 					}
-							
+					
 					FrontlineMessage message;
-					if (type.equals("Sent")) {
+					
+					// To avoid checking the language bandle used everytime, we store it 
+					if (usedLanguageBundle == null) {
+						usedLanguageBundle = getUsedLanguageBundle(typeString);
+					}
+					Type type = getTypeFromString(typeString, usedLanguageBundle);
+					//Status status = getStatusFromString(statusString);
+					if (type.equals(Type.OUTBOUND)) {
 						message = FrontlineMessage.createOutgoingMessage(date, sender, recipient, content);
 					} else {
 						message = FrontlineMessage.createIncomingMessage(date, sender, recipient, content);
@@ -167,6 +184,28 @@ public class CsvImporter {
 			if (reader != null) reader.close();
 		}
 		LOG.trace("EXIT");
+	}
+
+	public static LanguageBundle getUsedLanguageBundle(String typeString) {
+		Collection<FileLanguageBundle> languageBundles = InternationalisationUtils.getLanguageBundles();
+		for (FileLanguageBundle languageBundle : languageBundles) {
+			if (typeString.equals(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SENT, languageBundle))
+					|| typeString.equals(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_RECEIVED, languageBundle))) {
+				return languageBundle;
+			}
+		}
+
+		return null;
+	}
+	
+	public static Type getTypeFromString(String typeString, LanguageBundle languageBundle) {
+		if (typeString.equals(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SENT, languageBundle))) {
+			return Type.OUTBOUND;
+		} else if (typeString.equals(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_RECEIVED, languageBundle))) {
+			return Type.RECEIVED;
+		}
+		
+		return Type.UNKNOWN;
 	}
 
 	/**

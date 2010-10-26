@@ -172,8 +172,8 @@ public class CsvExporter {
 				}
 	
 				CsvUtils.writeLine(out, messageFormat,
-					CsvUtils.MARKER_MESSAGE_TYPE, message.getType() == Type.RECEIVED ? InternationalisationUtils.getI18NString(COMMON_RECEIVED) : InternationalisationUtils.getI18NString(COMMON_SENT),
-					CsvUtils.MARKER_MESSAGE_STATUS, UiGeneratorController.getMessageStatusAsString(message),
+					CsvUtils.MARKER_MESSAGE_TYPE, message.getType() == Type.RECEIVED ? InternationalisationUtils.getI18NString(COMMON_RECEIVED, InternationalisationUtils.getDefaultLanguageBundle()) : InternationalisationUtils.getI18NString(COMMON_SENT, InternationalisationUtils.getDefaultLanguageBundle()),
+					CsvUtils.MARKER_MESSAGE_STATUS, UiGeneratorController.getMessageStatusAsString(message, InternationalisationUtils.getDefaultLanguageBundle()),
 					CsvUtils.MARKER_MESSAGE_DATE, dateFormatter.format(new Date(message.getDate())),
 					CsvUtils.MARKER_MESSAGE_CONTENT, message.getTextContent().replace('\n', ' ').replace('\r', ' '),
 					CsvUtils.MARKER_SENDER_NUMBER, message.getSenderMsisdn(),
