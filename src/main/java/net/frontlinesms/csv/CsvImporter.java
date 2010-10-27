@@ -172,9 +172,9 @@ public class CsvImporter {
 					Type type = getTypeFromString(typeString, usedLanguageBundle);
 					//Status status = getStatusFromString(statusString);
 					
-					if (content.startsWith("\"") && content.contains("File:")) {
+					if (content.contains("File:")) {
 						// Then it's a multimedia message
-						message = new FrontlineMultimediaMessage(type, "", content, null);
+						message = FrontlineMultimediaMessage.createMessageFromContentString(content, false);
 					} else {
 						if (type.equals(Type.OUTBOUND)) {
 							message = FrontlineMessage.createOutgoingMessage(date, sender, recipient, content);

@@ -173,7 +173,7 @@ public class CsvExporter {
 				}
 				
 				if (message instanceof FrontlineMultimediaMessage) {
-					messageContent = ((FrontlineMultimediaMessage) message).getFullContent();
+					messageContent = ((FrontlineMultimediaMessage) message).toString(false);
 				} else {
 					messageContent = message.getTextContent();
 				}

@@ -11,27 +11,27 @@ import net.frontlinesms.junit.BaseTestCase;
 public class FrontlineMultimediaMessageTest extends BaseTestCase {
 	public void testExtractPartsFromContent() {
 		final String contentOne = "\"Librarians in DC\"; File: IMG_3057.JPG";
-		FrontlineMultimediaMessage multimediaMessage = FrontlineMultimediaMessage.createMessageFromContentString(contentOne);
+		FrontlineMultimediaMessage multimediaMessage = FrontlineMultimediaMessage.createMessageFromContentString(contentOne, false);
 		assertTrue(partsContain(multimediaMessage.getMultimediaParts(), new FrontlineMultimediaMessagePart(false, "Librarians in DC")));
 		assertTrue(partsContain(multimediaMessage.getMultimediaParts(), new FrontlineMultimediaMessagePart(true, "IMG_3057.JPG")));
 		
 		final String contentTwo = "File: IMG_6807.jpg; Subject: Sub!; \"My dog wants to hel...\"";
-		multimediaMessage = FrontlineMultimediaMessage.createMessageFromContentString(contentTwo);
+		multimediaMessage = FrontlineMultimediaMessage.createMessageFromContentString(contentTwo, false);
 		assertTrue(partsContain(multimediaMessage.getMultimediaParts(), new FrontlineMultimediaMessagePart(false, "My dog wants to hel...")));
 		assertTrue(partsContain(multimediaMessage.getMultimediaParts(), new FrontlineMultimediaMessagePart(true, "IMG_6807.jpg")));
 		assertEquals("Sub!", multimediaMessage.getSubject());
 		
 		final String contentThree = "File: 08-08-09_1601.jpg";
-		multimediaMessage = FrontlineMultimediaMessage.createMessageFromContentString(contentThree);
+		multimediaMessage = FrontlineMultimediaMessage.createMessageFromContentString(contentThree, false);
 		assertTrue(partsContain(multimediaMessage.getMultimediaParts(), new FrontlineMultimediaMessagePart(true, "08-08-09_1601.jpg")));
 		
 		final String contentFour = "\"The first batch of ...\"; File: IMG_0615.JPG";
-		multimediaMessage = FrontlineMultimediaMessage.createMessageFromContentString(contentFour);
+		multimediaMessage = FrontlineMultimediaMessage.createMessageFromContentString(contentFour, false);
 		assertTrue(partsContain(multimediaMessage.getMultimediaParts(), new FrontlineMultimediaMessagePart(false, "The first batch of ...")));
 		assertTrue(partsContain(multimediaMessage.getMultimediaParts(), new FrontlineMultimediaMessagePart(true, "IMG_0615.JPG")));
 		
 		final String contentFive = "Subject: My \"Sub\"";
-		multimediaMessage = FrontlineMultimediaMessage.createMessageFromContentString(contentFive);
+		multimediaMessage = FrontlineMultimediaMessage.createMessageFromContentString(contentFive, false);
 		assertTrue(multimediaMessage.getMultimediaParts().isEmpty());
 		assertEquals("My \"Sub\"", multimediaMessage.getSubject());
 	}
@@ -60,16 +60,16 @@ public class FrontlineMultimediaMessageTest extends BaseTestCase {
 		mms.setMultimediaParts(multimediaParts );
 		
 		String expectedContent = "\"Text part\"; File: File1.jpg";
-		assertEquals(expectedContent, mms.getFullContent());
+		assertEquals(expectedContent, mms.toString(false));
 		
 		// One binary part, one text part
 		multimediaParts.clear();
 		multimediaParts.add(FrontlineMultimediaMessagePart.createBinaryPart("File1.jpg"));
 		multimediaParts.add(FrontlineMultimediaMessagePart.createTextPart("Text part"));
-		mms.setMultimediaParts(multimediaParts );
+		mms.setMultimediaParts(multimediaParts);
 		
 		expectedContent = "File: File1.jpg; \"Text part\"";
-		assertEquals(expectedContent, mms.getFullContent());
+		assertEquals(expectedContent, mms.toString(false));
 		
 		// One empty text part, one binary part
 		multimediaParts.clear();
@@ -78,7 +78,7 @@ public class FrontlineMultimediaMessageTest extends BaseTestCase {
 		mms.setMultimediaParts(multimediaParts );
 		
 		expectedContent = "File: File1.jpg";
-		assertEquals(expectedContent, mms.getFullContent());
+		assertEquals(expectedContent, mms.toString(false));
 		
 		// One binary part only
 		multimediaParts.clear();
@@ -86,6 +86,6 @@ public class FrontlineMultimediaMessageTest extends BaseTestCase {
 		mms.setMultimediaParts(multimediaParts );
 		
 		expectedContent = "File: File1.jpg";
-		assertEquals(expectedContent, mms.getFullContent());
+		assertEquals(expectedContent, mms.toString(false));
 	}
 }

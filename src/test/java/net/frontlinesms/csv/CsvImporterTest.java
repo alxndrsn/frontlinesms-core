@@ -10,12 +10,15 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.FrontlineMessage;
+import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.repository.ContactDao;
@@ -154,9 +157,20 @@ public class CsvImporterTest extends HibernateTestCase {
 		try {
 			CsvImporter.importMessages(importFile, messageDao, rowFormat);
 
-			//FrontlineMessage messageOne = FrontlineMessage.createIncomingMessage(formatter.parse("2010-07-20 17:17:37").getTime(), "+17072177773", "frontlinemms", "\"Librarians in DC\"; File: IMG_3057.JPG");
-			FrontlineMessage messageOne = new FrontlineMultimediaMessage(Type.RECEIVED, "", "\"Librarians in DC\"; File: IMG_3057.JPG", null);
+			FrontlineMessage messageOne = new FrontlineMultimediaMessage(Type.RECEIVED, "You have received a new message", "Subject: You have received a new message; File: 100MEDIA_IMAG0041.jpg; \"It's like Charles bloody dickens!\"");
+			List<FrontlineMultimediaMessagePart> multimediaPartsOne = new ArrayList<FrontlineMultimediaMessagePart>();
+			multimediaPartsOne.add(FrontlineMultimediaMessagePart.createBinaryPart("100MEDIA_IMAG0041.jpg"));
+			multimediaPartsOne.add(FrontlineMultimediaMessagePart.createTextPart("It's like Charles bloody dickens!"));
+			((FrontlineMultimediaMessage)messageOne).setMultimediaParts(multimediaPartsOne);
+			
+			FrontlineMessage messageTwo = new FrontlineMultimediaMessage(Type.RECEIVED, "", "\"Testing frontline sms\"; File: Image040.jpg");
+			List<FrontlineMultimediaMessagePart> multimediaPartsTwo = new ArrayList<FrontlineMultimediaMessagePart>();
+			multimediaPartsTwo.add(FrontlineMultimediaMessagePart.createTextPart("Testing frontline sms"));
+			multimediaPartsTwo.add(FrontlineMultimediaMessagePart.createBinaryPart("Image040.jpg"));
+			((FrontlineMultimediaMessage)messageTwo).setMultimediaParts(multimediaPartsTwo);
+			
 			verify(messageDao, new Times(1)).saveMessage(messageOne);
+			verify(messageDao, new Times(1)).saveMessage(messageTwo);
 		} catch (Exception e) {
 			fail();
 		}

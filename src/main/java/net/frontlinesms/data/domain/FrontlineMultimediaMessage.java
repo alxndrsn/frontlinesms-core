@@ -43,7 +43,10 @@ public class FrontlineMultimediaMessage extends FrontlineMessage {
 	}
 	
 	public FrontlineMultimediaMessage(Type type, String subject, String textContent) {
-		new FrontlineMultimediaMessage(type, subject, textContent, null);
+		super(type, textContent);
+
+		if (subject == null) subject = "";
+		this.subject = subject;
 	}
 
 	public List<FrontlineMultimediaMessagePart> getMultimediaParts() {
@@ -59,25 +62,7 @@ public class FrontlineMultimediaMessage extends FrontlineMessage {
 		return false;
 	}
 	
-	/**
-	 * Creates an incoming multimedia message in the internal data structure.
-	 * @param dateReceived The date this message was received.
-	 * @param senderMsisdn The MSISDN (phone number) of the sender of this message.
-	 * @param recipientMsisdn The MSISDN (phone number) of the recipient of this message.
-	 * @param messageContent The text content of this message.
-	 * @returna Message object representing the sent message.
-	 */
-	public static FrontlineMultimediaMessage createIncomingMultimediaMessage(long dateReceived, String senderMsisdn, String recipientMsisdn, String messageContent) {
-		FrontlineMultimediaMessage m = createMessageFromContentString(messageContent);
-		m.setStatus(Status.RECEIVED);
-		m.setDate(dateReceived);
-		m.setSenderMsisdn(senderMsisdn);
-		m.setRecipientMsisdn(recipientMsisdn);
-
-		return m;
-	}
-	
-	public static FrontlineMultimediaMessage createMessageFromContentString(String messageContent) {
+	public static FrontlineMultimediaMessage createMessageFromContentString(String messageContent, boolean truncate) {
 		FrontlineMultimediaMessage multimediaMessage = new FrontlineMultimediaMessage(Type.RECEIVED, "", "");
 		
 		List<FrontlineMultimediaMessagePart> multimediaParts = new ArrayList<FrontlineMultimediaMessagePart>();
@@ -98,31 +83,68 @@ public class FrontlineMultimediaMessage extends FrontlineMessage {
 		}
 		
 		multimediaMessage.setMultimediaParts(multimediaParts);
+		multimediaMessage.setTextMessageContent(multimediaMessage.toString(truncate));
 		
 		return multimediaMessage;
 	}
 	
-	public String getFullContent() {
+	@Override
+	public String toString() {
+		return toString(true);
+	}
+	
+	public String toString(boolean truncate) {
 		StringBuilder textContent = new StringBuilder();
 		
 		if (this.subject != null && !this.subject.trim().isEmpty()) {
 			textContent.append("Subject: " + this.subject);
 		}
 		
-		for(FrontlineMultimediaMessagePart part : this.multimediaParts) {
-			if(textContent.length() > 0) textContent.append("; ");
-			
-			String text;
-			if (part.isBinary()) {
-				text = "File: " + part.getFilename();
-			} else if (!(text = part.getTextContent().trim()).isEmpty()) {
-				text = "\"" + text + "\"";
+		if (this.multimediaParts != null) {
+			for(FrontlineMultimediaMessagePart part : this.multimediaParts) {
+				if(textContent.length() > 0) textContent.append("; ");
+				textContent.append(part.toString(truncate));
 			}
-		
-			textContent.append(text);
 		}
 
 		return textContent.toString();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof FrontlineMultimediaMessage)) {
+			return false; 
+		}
+		
+		FrontlineMultimediaMessage multimediaMessage = (FrontlineMultimediaMessage) obj;
+		if ((this.subject != null && multimediaMessage.getSubject() == null) 
+				|| (this.subject == null && multimediaMessage.getSubject() != null)
+				|| (this.subject != null && multimediaMessage.getSubject() != null 
+						&& !this.subject.equals(multimediaMessage.getSubject()))) {
+			return false;
+		} else if (!sameMultimediaParts(multimediaMessage)) {
+			return false;
+		}
+		
+		// Finally, let the super comparator check if the basic fields
+		// (sender, recipient, ...) are equals.
+		return super.equals(obj);
+	}
+
+	private boolean sameMultimediaParts(FrontlineMultimediaMessage multimediaMessage) {
+		if (this.multimediaParts.size() != multimediaMessage.getMultimediaParts().size()) {
+			return false;
+		}
+		
+		// Clone the local multimedia parts to prevent loss
+		List<FrontlineMultimediaMessagePart> theseMultimediaParts = new ArrayList<FrontlineMultimediaMessagePart>(this.multimediaParts);
+		for (FrontlineMultimediaMessagePart part : multimediaMessage.getMultimediaParts()) {
+			if (!theseMultimediaParts.remove(part)) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 	public void setSubject(String subject) {
