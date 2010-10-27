@@ -32,6 +32,7 @@ import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.FrontlineMessage;
+import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.domain.Group;
@@ -170,10 +171,16 @@ public class CsvImporter {
 					}
 					Type type = getTypeFromString(typeString, usedLanguageBundle);
 					//Status status = getStatusFromString(statusString);
-					if (type.equals(Type.OUTBOUND)) {
-						message = FrontlineMessage.createOutgoingMessage(date, sender, recipient, content);
+					
+					if (content.startsWith("\"") && content.contains("File:")) {
+						// Then it's a multimedia message
+						message = new FrontlineMultimediaMessage(type, "", content, null);
 					} else {
-						message = FrontlineMessage.createIncomingMessage(date, sender, recipient, content);
+						if (type.equals(Type.OUTBOUND)) {
+							message = FrontlineMessage.createOutgoingMessage(date, sender, recipient, content);
+						} else {
+							message = FrontlineMessage.createIncomingMessage(date, sender, recipient, content);
+						}
 					}
 					
 					message.setStatus(Status.valueOf(status.toUpperCase()));

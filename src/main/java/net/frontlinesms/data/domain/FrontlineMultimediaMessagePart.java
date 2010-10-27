@@ -26,7 +26,7 @@ public class FrontlineMultimediaMessagePart {
 	
 	FrontlineMultimediaMessagePart() {}
 	
-	private FrontlineMultimediaMessagePart(boolean binary, String content) {
+	public FrontlineMultimediaMessagePart(boolean binary, String content) {
 		this.binary = binary;
 		this.content = content;
 	}

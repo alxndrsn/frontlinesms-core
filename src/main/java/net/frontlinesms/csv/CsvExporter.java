@@ -163,6 +163,7 @@ public class CsvExporter {
 				String otherPhone = "";
 				String email = "";
 				String notes = "";
+				String messageContent = "";
 	
 				if (c != null) {
 					name = c.getName();
@@ -170,12 +171,18 @@ public class CsvExporter {
 					email = c.getEmailAddress();
 					notes = c.getNotes();
 				}
+				
+				if (message instanceof FrontlineMultimediaMessage) {
+					messageContent = ((FrontlineMultimediaMessage) message).getFullContent();
+				} else {
+					messageContent = message.getTextContent();
+				}
 	
 				CsvUtils.writeLine(out, messageFormat,
 					CsvUtils.MARKER_MESSAGE_TYPE, message.getType() == Type.RECEIVED ? InternationalisationUtils.getI18NString(COMMON_RECEIVED, InternationalisationUtils.getDefaultLanguageBundle()) : InternationalisationUtils.getI18NString(COMMON_SENT, InternationalisationUtils.getDefaultLanguageBundle()),
 					CsvUtils.MARKER_MESSAGE_STATUS, UiGeneratorController.getMessageStatusAsString(message, InternationalisationUtils.getDefaultLanguageBundle()),
 					CsvUtils.MARKER_MESSAGE_DATE, dateFormatter.format(new Date(message.getDate())),
-					CsvUtils.MARKER_MESSAGE_CONTENT, message.getTextContent().replace('\n', ' ').replace('\r', ' '),
+					CsvUtils.MARKER_MESSAGE_CONTENT, messageContent.replace('\n', ' ').replace('\r', ' '),
 					CsvUtils.MARKER_SENDER_NUMBER, message.getSenderMsisdn(),
 					CsvUtils.MARKER_RECIPIENT_NUMBER, message.getRecipientMsisdn(),
 					CsvUtils.MARKER_CONTACT_NAME, name,

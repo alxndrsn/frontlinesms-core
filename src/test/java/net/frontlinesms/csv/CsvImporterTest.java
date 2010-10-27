@@ -8,13 +8,20 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Contact;
+import net.frontlinesms.data.domain.FrontlineMessage;
+import net.frontlinesms.data.domain.FrontlineMessage.Type;
+import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
+import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.junit.HibernateTestCase;
 
 import org.apache.log4j.Logger;
@@ -111,6 +118,50 @@ public class CsvImporterTest extends HibernateTestCase {
 		}
 	}
 	
+	public void testImportMessages() {
+		File importFile = new File(RESOURCE_PATH + "ImportMessages.csv");
+		File importFileInternationalised = new File(RESOURCE_PATH + "ImportMessagesFR.csv");
+		
+		CsvRowFormat rowFormat = getRowFormatForMessages();
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		MessageDao messageDao = mock(MessageDao.class);
+		
+		try {
+			CsvImporter.importMessages(importFile, messageDao, rowFormat);
+			CsvImporter.importMessages(importFileInternationalised, messageDao, rowFormat);
+
+			FrontlineMessage messageOne = FrontlineMessage.createOutgoingMessage(formatter.parse("2010-10-13 14:28:57").getTime(), "+33673586586", "+15559999", "Message sent!");
+			FrontlineMessage messageTwo = FrontlineMessage.createIncomingMessage(formatter.parse("2010-10-13 13:08:57").getTime(), "+15559999", "+33673586586", "Received this later...");
+			FrontlineMessage messageThree = FrontlineMessage.createOutgoingMessage(formatter.parse("2010-10-12 15:17:02").getTime(), "+447789654123", "+447762297258", "First message sent");
+			FrontlineMessage messageFour = FrontlineMessage.createIncomingMessage(formatter.parse("2010-12-13 10:29:02").getTime(), "+447762297258", "+447789654123", "First message received");
+			
+			verify(messageDao, new Times(2)).saveMessage(messageOne);
+			verify(messageDao, new Times(2)).saveMessage(messageTwo);
+			verify(messageDao, new Times(2)).saveMessage(messageThree);
+			verify(messageDao, new Times(2)).saveMessage(messageFour);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	public void testImportMultimediaMessages() {
+		File importFile = new File(RESOURCE_PATH + "MMS.csv");
+		
+		CsvRowFormat rowFormat = getRowFormatForMessages();
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		MessageDao messageDao = mock(MessageDao.class);
+		
+		try {
+			CsvImporter.importMessages(importFile, messageDao, rowFormat);
+
+			//FrontlineMessage messageOne = FrontlineMessage.createIncomingMessage(formatter.parse("2010-07-20 17:17:37").getTime(), "+17072177773", "frontlinemms", "\"Librarians in DC\"; File: IMG_3057.JPG");
+			FrontlineMessage messageOne = new FrontlineMultimediaMessage(Type.RECEIVED, "", "\"Librarians in DC\"; File: IMG_3057.JPG", null);
+			verify(messageDao, new Times(1)).saveMessage(messageOne);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
 	private CsvRowFormat getRowFormatForContacts() {
 		CsvRowFormat rowFormat = new CsvRowFormat();
 		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_NAME);
@@ -120,6 +171,18 @@ public class CsvImporterTest extends HibernateTestCase {
 		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_STATUS);
 		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_NOTES);
 		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_GROUPS);
+		
+		return rowFormat;
+	}
+	
+	private CsvRowFormat getRowFormatForMessages() {
+		CsvRowFormat rowFormat = new CsvRowFormat();
+		rowFormat.addMarker(CsvUtils.MARKER_MESSAGE_TYPE);
+		rowFormat.addMarker(CsvUtils.MARKER_MESSAGE_STATUS);
+		rowFormat.addMarker(CsvUtils.MARKER_MESSAGE_DATE);
+		rowFormat.addMarker(CsvUtils.MARKER_MESSAGE_CONTENT);
+		rowFormat.addMarker(CsvUtils.MARKER_SENDER_NUMBER);
+		rowFormat.addMarker(CsvUtils.MARKER_RECIPIENT_NUMBER);
 		
 		return rowFormat;
 	}
