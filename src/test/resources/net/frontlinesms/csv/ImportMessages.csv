@@ -1,0 +1,5 @@
+"Message Type","Message Status","Message Date","Message Content","Sender Number","Recipient Number"
+"Sent","Delivered","2010-10-13 14:28:57","Message sent!","+33673586586","+15559999"
+"Received","Received","2010-10-13 13:08:57","Received this later...","+15559999","+33673586586"
+"Sent","Delivered","2010-10-12 15:17:02","First message sent","+447789654123","+447762297258"
+"Received","Received","2010-12-13 10:29:02","First message received","+447762297258","+447789654123"

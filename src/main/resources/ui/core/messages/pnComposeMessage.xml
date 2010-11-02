@@ -36,6 +36,5 @@
         <panel halign="right" weightx="1" top="1">
         	<button icon="/icons/sms_send.png" name="btSend" text="i18n.common.send" enabled="false" action="send"/>
         </panel>
-        
     </panel>
 </panel>

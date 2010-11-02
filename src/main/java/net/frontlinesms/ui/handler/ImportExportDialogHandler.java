@@ -5,6 +5,9 @@ package net.frontlinesms.ui.handler;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -15,6 +18,7 @@ import org.apache.log4j.Logger;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.csv.CsvExporter;
 import net.frontlinesms.csv.CsvImporter;
+import net.frontlinesms.csv.CsvParseException;
 import net.frontlinesms.csv.CsvRowFormat;
 import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.domain.Contact;
@@ -32,6 +36,7 @@ import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
+import net.frontlinesms.ui.i18n.LanguageBundle;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
 /**
@@ -65,7 +70,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	/** I18n Text Key: TODO document */
 	private static final String MESSAGE_IMPORTING_SELECTED_KEYWORDS = "message.importing.selected.keywords";
 	/** I18n Text Key: TODO document */
-	private static final String MESSAGE_IMPORTING_SELECTED_MESSAGES = "message.importing.selected.messages";
+	private static final String MESSAGE_IMPORTING_SELECTED_MESSAGES = "message.importing.messages";
 	/** I18n Text Key: TODO document */
 	private static final String MESSAGE_IMPORT_TASK_FAILED = "message.import.failed";
 	/** I18n Text Key: TODO document */
@@ -136,9 +141,10 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private static final String COMPONENT_BT_DO_EXPORT = "btDoExport";
 	/** Thinlet component name: list displaying values from the CSV file */
 	private static final String COMPONENT_TB_VALUES = "tbValues";
-	private static final String COMPONENT_PN_CHECKBOXES = "pnContactInfo"; // TODO: get this changed
+	private static final String COMPONENT_PN_CHECKBOXES = "pnInfo"; // TODO: get this changed
 	private static final String COMPONENT_PN_VALUES_TABLE = "pnValuesTable";
 	private static final String COMPONENT_PN_DETAILS = "pnDetails";
+	private static final String COMPONENT_PN_CHECKBOXES_2 = "pnInfo2";
 	
 //> STATIC CONSTANTS
 	public enum EntityType {
@@ -187,8 +193,10 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private EntityType type;
 	/** The objects we are exporting - a selection of thinlet components with attached {@link Contact}s, {@link Keyword}s or {@link FrontlineMessage}s */
 	private Object attachedObject;
-	/** The list of contacts taken in the imported file */
-	private List<String[]> importedContactsList;
+	/** The list of values taken in the imported file */
+	private List<String[]> importedValuesList;
+	/** The list of headers taken in the imported file */
+	private List<String> importedHeadersList;
 
 //> CONSTRUCTORS
 	/**
@@ -202,6 +210,8 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		this.messageDao = uiController.getFrontlineController().getMessageDao();
 		this.keywordDao = uiController.getFrontlineController().getKeywordDao();
 		this.groupDao = uiController.getFrontlineController().getGroupDao();
+		
+		this.importedHeadersList = new ArrayList<String>();
 	}
 	
 //> ACCESSORS
@@ -272,17 +282,22 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		
 		try {
 			// Do the import
-			if(type == EntityType.CONTACTS) {
+			if (type == EntityType.CONTACTS) {
 				CsvRowFormat rowFormat = getRowFormatForContact();
 				CsvImporter.importContacts(new File(dataPath), this.contactDao, this.groupMembershipDao, this.groupDao, rowFormat);
 				this.uiController.refreshContactsTab();
+				// TODO: display a confirmation message
+			} else if (type == EntityType.MESSAGES) {
+				CsvRowFormat rowFormat = getRowFormatForMessage();
+				CsvImporter.importMessages(new File(dataPath), this.messageDao, rowFormat);
 				// TODO: display a confirmation message
 			} else {
 				throw new IllegalStateException("Import is not supported for: " + getType());
 			}
 			uiController.setStatus(InternationalisationUtils.getI18NString(MESSAGE_IMPORT_TASK_SUCCESSFUL));
 			uiController.removeDialog(wizardDialog);
-		} catch(Exception ex) {
+		} catch(IOException ex) {
+		} catch(CsvParseException ex) {
 			log.debug(InternationalisationUtils.getI18NString(MESSAGE_IMPORT_TASK_FAILED), ex);
 			uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_IMPORT_TASK_FAILED) + ": " + ex.getMessage());
 		}
@@ -592,10 +607,6 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		addMarker(rowFormat, CsvUtils.MARKER_MESSAGE_CONTENT, COMPONENT_CB_CONTENT);
 		addMarker(rowFormat, CsvUtils.MARKER_SENDER_NUMBER, COMPONENT_CB_SENDER);
 		addMarker(rowFormat, CsvUtils.MARKER_RECIPIENT_NUMBER, COMPONENT_CB_RECIPIENT);
-		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NAME, COMPONENT_CB_CONTACT_NAME);
-		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE, COMPONENT_CB_CONTACT_OTHER_NUMBER);
-		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_EMAIL, COMPONENT_CB_EMAIL);
-		addMarker(rowFormat, CsvUtils.MARKER_CONTACT_NOTES, COMPONENT_CB_NOTES);
 		return rowFormat;
 	}
 	
@@ -626,7 +637,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	 * @see FrontlineUI#showOpenModeFileChooser(Object) */
 	public void showOpenModeFileChooser() {
 		FileChooser fc = FileChooser.createFileChooser(this.uiController, this, "openChooseComplete");
-		fc.setFileFilter(new FileNameExtensionFilter("FrontlineSMS Exported Contacts (" + CsvExporter.CSV_EXTENSION + ")", CsvExporter.CSV_FORMAT));
+		fc.setFileFilter(new FileNameExtensionFilter("FrontlineSMS Exported Data (" + CsvExporter.CSV_EXTENSION + ")", CsvExporter.CSV_FORMAT));
 		fc.show();
 	}
 	
@@ -649,10 +660,11 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	
 	private void loadCsvFile (String filename) {
 		try {
-			if (this.importedContactsList != null) {
-				this.importedContactsList.clear();
+			if (this.importedValuesList != null) {
+				this.importedValuesList.clear();
 			}
-			this.importedContactsList = CsvImporter.getContactsFromCsvFile(filename);
+			
+			this.importedValuesList = CsvImporter.getValuesFromCsvFile(filename);
 		} catch (Exception e) {
 			this.uiController.alert(InternationalisationUtils.getI18NString(I18N_FILE_NOT_PARSED));
 		}
@@ -663,7 +675,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	}
 
 	public void columnCheckboxChanged() {
-		if(this.importedContactsList != null) {
+		if(this.importedValuesList != null) {
 			refreshValuesTable();
 		}
 	}
@@ -672,25 +684,34 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		Object pnValuesTable = this.uiController.find(this.wizardDialog, COMPONENT_PN_VALUES_TABLE);
 		
 		if (pnValuesTable != null) {
-			Object pnCheckboxes = this.uiController.find(this.wizardDialog, COMPONENT_PN_CHECKBOXES);
-			Object[] checkboxes = this.uiController.getItems(pnCheckboxes);
+			List<Object> checkboxes = this.getCheckboxesFromType();
 			
 			Object valuesTable = this.uiController.find(this.wizardDialog, COMPONENT_TB_VALUES);
 			this.uiController.removeAll(valuesTable);
+			
 			// The number of import columns
 			int columnsNumber = 0;
-			int statusIndex = -1;
+			// Only used for messages, to spot the "type" column index
+			int messageTypeIndex = -1;
 			
 			/** HEADER */
+			this.importedHeadersList.clear();
 			Object header = this.uiController.createTableHeader();
+
+			Object iconHeader = this.uiController.createColumn("", "");
+			this.uiController.setWidth(iconHeader, 20);
+			this.uiController.add(header, iconHeader);
 			
 			for (Object checkbox : checkboxes) {
 				if (this.uiController.isSelected(checkbox)) {
 					String attributeName = this.uiController.getText(checkbox);
-					if (this.uiController.getName(checkbox).equals(COMPONENT_CB_STATUS)) {
+					if (this.uiController.getName(checkbox).equals(COMPONENT_CB_STATUS) && this.type.equals(EntityType.CONTACTS)) {
 						attributeName = InternationalisationUtils.getI18NString(I18N_COMMON_ACTIVE);
-						statusIndex = columnsNumber;
+					} else if (this.uiController.getName(checkbox).equals(COMPONENT_CB_TYPE)) {
+						messageTypeIndex = columnsNumber;
 					}
+
+					this.importedHeadersList.add(attributeName);
 					this.uiController.add(header, this.uiController.createColumn(attributeName, attributeName));
 					++columnsNumber;
 				}
@@ -698,26 +719,95 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 			this.uiController.add(valuesTable, header);
 			
 			/** Lines */
-			if (this.importedContactsList != null) {
-				for (String[] lineValues : this.importedContactsList) {
+			if (this.importedValuesList != null) {
+				LanguageBundle usedLanguageBundle = null;
+				for (String[] lineValues : this.importedValuesList) {
 					Object row = this.uiController.createTableRow();
-					for (int i = 0 ; i < columnsNumber && i < lineValues.length ; ++i) {
-						Object cell;
-						if (i == statusIndex) { // We're creating the status cell
-							cell = this.uiController.createTableCell("");
-							if (!lineValues[i].toLowerCase().equals("false") && !lineValues[i].toLowerCase().equals("dormant")) {
-								this.uiController.setIcon(cell, Icon.TICK);
-							} else {
-								this.uiController.setIcon(cell, Icon.CANCEL);
-							}
-						} else {
-							cell = this.uiController.createTableCell(lineValues[i].replace(CsvExporter.GROUPS_DELIMITER, ", "));
+					switch (this.type) {
+					case CONTACTS:
+						this.addContactCells(row, lineValues, columnsNumber);
+						break;
+					case MESSAGES:
+						if (usedLanguageBundle == null && messageTypeIndex > -1) {
+							usedLanguageBundle = CsvImporter.getUsedLanguageBundle(lineValues[messageTypeIndex]);
 						}
-						this.uiController.add(row, cell);
+						
+						this.addMessageCells(row, lineValues, columnsNumber, messageTypeIndex, usedLanguageBundle);
+						break;
+					default:
+						break;
 					}
 					this.uiController.add(valuesTable, row);
 				}
 			}
+		}
+	}
+	
+	/**
+	 * @return A {@link List} of checkboxes used to generate the preview.
+	 */
+	private List<Object> getCheckboxesFromType() {
+		Object pnCheckboxes = this.uiController.find(this.wizardDialog, COMPONENT_PN_CHECKBOXES);
+		switch (this.type) {
+			case CONTACTS:
+				return Arrays.asList(this.uiController.getItems(pnCheckboxes));
+			case MESSAGES:
+				// For messages, the checkboxes are located in two different panels
+				Object pnCheckboxes2 = this.uiController.find(this.wizardDialog, COMPONENT_PN_CHECKBOXES_2);
+				List<Object> allCheckboxes = new ArrayList<Object>();
+				allCheckboxes.addAll(Arrays.asList(this.uiController.getItems(pnCheckboxes)));
+				allCheckboxes.addAll(Arrays.asList(this.uiController.getItems(pnCheckboxes2)));
+				return allCheckboxes;
+			default:
+				return null;
+		}
+	}
+
+	private void addContactCells(Object row, String[] lineValues, int columnsNumber) {
+		Object cell = this.uiController.createTableCell("");
+		this.uiController.setIcon(cell, Icon.CONTACT);
+		this.uiController.add(row, cell);
+		
+		for (int i = 0 ; i < columnsNumber && i < lineValues.length ; ++i) {
+			cell = this.uiController.createTableCell(lineValues[i].replace(CsvExporter.GROUPS_DELIMITER, ", "));
+			
+			if (lineValues[i].equals(InternationalisationUtils.getI18NString(I18N_COMMON_ACTIVE))) { // We're creating the status cell
+				lineValues[i] = lineValues[i].toLowerCase();
+				if (!lineValues[i].equals("false") && !lineValues[i].equals("dormant")) {
+					this.uiController.setIcon(cell, Icon.TICK);
+				} else {
+					this.uiController.setIcon(cell, Icon.CANCEL);
+				}
+			}
+			
+			this.uiController.add(row, cell);
+		}
+	}
+	
+	private void addMessageCells(Object row, String[] lineValues, int columnsNumber, int messageTypeIndex, LanguageBundle usedLanguageBundle) {
+		String rowIcon = Icon.SMS;
+		if (messageTypeIndex > -1) {
+			// The message type is present in the imported fields
+			switch (CsvImporter.getTypeFromString(lineValues[messageTypeIndex], usedLanguageBundle)) {
+				case OUTBOUND :
+					rowIcon = Icon.SMS_SEND;
+					break;
+				case RECEIVED :
+					rowIcon = Icon.SMS_RECEIVE;
+					break;
+				default :
+					rowIcon = Icon.SMS;
+					break;
+			}
+		}
+		
+		Object cell = this.uiController.createTableCell("");
+		this.uiController.setIcon(cell, rowIcon);
+		this.uiController.add(row, cell);
+		
+		for (int i = 0 ; i < columnsNumber && i < lineValues.length ; ++i) {
+			cell =  this.uiController.createTableCell(lineValues[i]);
+			this.uiController.add(row, cell);
 		}
 	}
 

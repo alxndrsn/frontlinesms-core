@@ -21,13 +21,28 @@ package net.frontlinesms.csv;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.FrontlineUtils;
-import net.frontlinesms.data.domain.*;
-import net.frontlinesms.data.repository.*;
 import net.frontlinesms.data.DuplicateKeyException;
+import net.frontlinesms.data.domain.Contact;
+import net.frontlinesms.data.domain.FrontlineMessage;
+import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
+import net.frontlinesms.data.domain.FrontlineMessage.Status;
+import net.frontlinesms.data.domain.FrontlineMessage.Type;
+import net.frontlinesms.data.domain.Group;
+import net.frontlinesms.data.repository.ContactDao;
+import net.frontlinesms.data.repository.GroupDao;
+import net.frontlinesms.data.repository.GroupMembershipDao;
+import net.frontlinesms.data.repository.MessageDao;
+import net.frontlinesms.ui.i18n.FileLanguageBundle;
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
+import net.frontlinesms.ui.i18n.LanguageBundle;
 
 import org.apache.log4j.Logger;
 
@@ -90,7 +105,7 @@ public class CsvImporter {
 						c = contactDao.getFromMsisdn(number);
 					}
 					
-					// We make the contact join its groups
+					// We make the contact joins its groups
 					String[] pathList = groups.split(GROUPS_DELIMITER);
 					for (String path : pathList) {
 						if (path.length() == 0) continue;
@@ -111,16 +126,109 @@ public class CsvImporter {
 	}
 
 	/**
+	 * Import messages from a CSV file.
+	 * @param importFile the file to import from
+	 * @param messageDao
+	 * @param rowFormat 
+	 * @throws IOException If there was a problem accessing the file
+	 * @throws CsvParseException If there was a problem with the format of the file
+	 */
+	public static void importMessages(File importFile, MessageDao messageDao, CsvRowFormat rowFormat) throws IOException, CsvParseException {
+		LOG.trace("ENTER");
+		if(LOG.isDebugEnabled()) LOG.debug("File [" + importFile.getAbsolutePath() + "]");
+		Utf8FileReader reader = null;
+		try {
+			reader = new Utf8FileReader(importFile);
+			boolean firstLine = true;
+			String[] lineValues;
+			LanguageBundle usedLanguageBundle = null;
+			while((lineValues = CsvUtils.readLine(reader)) != null) {
+				if(firstLine) {
+					// Ignore the first line of the CSV file as it should be the column titles
+					firstLine = false;
+				} else {
+					String typeString = getString(lineValues, rowFormat, CsvUtils.MARKER_MESSAGE_TYPE);
+					String status = getString(lineValues, rowFormat, CsvUtils.MARKER_MESSAGE_STATUS);
+					String sender = getString(lineValues, rowFormat, CsvUtils.MARKER_SENDER_NUMBER);
+					String recipient = getString(lineValues, rowFormat, CsvUtils.MARKER_RECIPIENT_NUMBER);
+					String dateString = getString(lineValues, rowFormat, CsvUtils.MARKER_MESSAGE_DATE);
+					String content = getString(lineValues, rowFormat, CsvUtils.MARKER_MESSAGE_CONTENT);
+					
+					long date;
+					try {
+						SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+						ParsePosition pos = new ParsePosition(0);
+						date = formatter.parse(dateString, pos).getTime();
+					} catch (Exception e) {
+						date = System.currentTimeMillis();
+					}
+					
+					FrontlineMessage message;
+					
+					// To avoid checking the language bandle used everytime, we store it 
+					if (usedLanguageBundle == null) {
+						usedLanguageBundle = getUsedLanguageBundle(typeString);
+					}
+					Type type = getTypeFromString(typeString, usedLanguageBundle);
+					//Status status = getStatusFromString(statusString);
+					
+					if (content.contains("File:")) {
+						// Then it's a multimedia message
+						message = FrontlineMultimediaMessage.createMessageFromContentString(content, false);
+						message.setDate(date);
+						message.setSenderMsisdn(sender);
+						message.setRecipientMsisdn(recipient);
+					} else {
+						if (type.equals(Type.OUTBOUND)) {
+							message = FrontlineMessage.createOutgoingMessage(date, sender, recipient, content);
+						} else {
+							message = FrontlineMessage.createIncomingMessage(date, sender, recipient, content);
+						}
+					}
+					
+					message.setStatus(Status.valueOf(status.toUpperCase()));
+					messageDao.saveMessage(message);
+				}
+			}
+		} finally {
+			if (reader != null) reader.close();
+		}
+		LOG.trace("EXIT");
+	}
+
+	public static LanguageBundle getUsedLanguageBundle(String typeString) {
+		Collection<FileLanguageBundle> languageBundles = InternationalisationUtils.getLanguageBundles();
+		for (FileLanguageBundle languageBundle : languageBundles) {
+			if (typeString.equals(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SENT, languageBundle))
+					|| typeString.equals(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_RECEIVED, languageBundle))) {
+				return languageBundle;
+			}
+		}
+
+		return null;
+	}
+	
+	public static Type getTypeFromString(String typeString, LanguageBundle languageBundle) {
+		if (typeString.equals(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SENT, languageBundle))) {
+			return Type.OUTBOUND;
+		} else if (typeString.equals(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_RECEIVED, languageBundle))) {
+			return Type.RECEIVED;
+		}
+		
+		return Type.UNKNOWN;
+	}
+
+	/**
 	 * Import contacts from a CSV file.
 	 * @param filename the file to import from
 	 * @param rowFormat 
 	 * @throws IOException If there was a problem accessing the file
 	 * @throws CsvParseException If there was a problem with the format of the file
 	 */
-	public static List<String[]> getContactsFromCsvFile(String filename) throws IOException, CsvParseException {
+	public static List<String[]> getValuesFromCsvFile(String filename) throws IOException, CsvParseException {
 		LOG.trace("ENTER");
 		File importFile = new File(filename);
-		List<String[]> contactsList = new ArrayList<String[]>();
+		List<String[]> valuesList = new ArrayList<String[]>();
 		
 		if(LOG.isDebugEnabled()) LOG.debug("File [" + importFile.getAbsolutePath() + "]");
 		Utf8FileReader reader = null;
@@ -132,7 +240,7 @@ public class CsvImporter {
 				if(firstLine) {
 					firstLine = false;
 				} else {
-					contactsList.add(lineValues);
+					valuesList.add(lineValues);
 				}
 			}
 		} finally {
@@ -140,7 +248,7 @@ public class CsvImporter {
 		}
 		
 		LOG.trace("EXIT");
-		return contactsList;
+		return valuesList;
 	}
 
 //> STATIC HELPER METHODS	

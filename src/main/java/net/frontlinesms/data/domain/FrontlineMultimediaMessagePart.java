@@ -26,7 +26,7 @@ public class FrontlineMultimediaMessagePart {
 	
 	FrontlineMultimediaMessagePart() {}
 	
-	private FrontlineMultimediaMessagePart(boolean binary, String content) {
+	public FrontlineMultimediaMessagePart(boolean binary, String content) {
 		this.binary = binary;
 		this.content = content;
 	}
@@ -48,6 +48,19 @@ public class FrontlineMultimediaMessagePart {
 	public boolean isBinary() {
 		return this.binary;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof FrontlineMultimediaMessagePart)) {
+			return false;
+		}
+		FrontlineMultimediaMessagePart part = (FrontlineMultimediaMessagePart) obj;
+		if (this.binary) {
+			return part.isBinary() && this.getFilename().equals(part.getFilename());
+		} else {
+			return !part.isBinary() && this.getTextContent().equals(part.getTextContent());
+		}
+	}
 
 //> FACTORY METHODS
 	public static FrontlineMultimediaMessagePart createTextPart(String textContent) {
@@ -55,5 +68,22 @@ public class FrontlineMultimediaMessagePart {
 	}
 	public static FrontlineMultimediaMessagePart createBinaryPart(String filename) {
 		return new FrontlineMultimediaMessagePart(true, filename);
+	}
+
+	public String toString(boolean truncate) {
+		if (isBinary()) {
+			return "File: " + getFilename();
+		} else {
+			String trim = getTextContent().trim();
+			if (!trim.isEmpty()) {
+				if (truncate && trim.length() > 20) {
+					return "\"" + trim.substring(0, 19) + "...\"";
+				} else {
+					return "\"" + trim + "\"";
+				}
+			} else {
+				return "";
+			}
+		}
 	}
 }

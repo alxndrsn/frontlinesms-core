@@ -155,7 +155,7 @@ public class FrontlineMessage {
 	
 	protected FrontlineMessage(Type type, String textContent) {
 		this.type = type;
-		this.textMessageContent = textContent;
+		this.setTextMessageContent(textContent);
 	}
 	
 //> ACCESSOR METHODS
@@ -240,7 +240,7 @@ public class FrontlineMessage {
 	 * @return {@link #textMessageContent}
 	 */
 	public String getTextContent() {
-		return this.textMessageContent;
+		return this.getTextMessageContent();
 	}
 	
 	/**
@@ -340,7 +340,7 @@ public class FrontlineMessage {
 		m.recipientMsisdn = recipientMsisdn;
 		m.recipientSmsPort = recipientPort;
 		m.binaryMessageContent = content;
-		m.textMessageContent = HexUtils.encode(content);
+		m.setTextMessageContent(HexUtils.encode(content));
 		return m;
 	}
 
@@ -364,7 +364,7 @@ public class FrontlineMessage {
 		m.recipientMsisdn = recipientMsisdn;
 		m.recipientSmsPort = recipientPort;
 		m.binaryMessageContent = content;
-		m.textMessageContent = HexUtils.encode(content);
+		m.setTextMessageContent(HexUtils.encode(content));
 		return m;
 	}
 	
@@ -383,7 +383,7 @@ public class FrontlineMessage {
 		m.setDate(dateSent);
 		m.senderMsisdn = senderMsisdn;
 		m.recipientMsisdn = recipientMsisdn;
-		m.textMessageContent = messageContent;
+		m.setTextMessageContent(messageContent);
 		return m;
 	}
 
@@ -402,7 +402,7 @@ public class FrontlineMessage {
 		m.setDate(dateReceived);
 		m.senderMsisdn = senderMsisdn;
 		m.recipientMsisdn = recipientMsisdn;
-		m.textMessageContent = messageContent;
+		m.setTextMessageContent(messageContent);
 		return m;
 	}
 	
@@ -420,7 +420,7 @@ public class FrontlineMessage {
 		result = prime * result + (int) (getDate() ^ (getDate() >>> 32));
 		result = prime * result + Arrays.hashCode(binaryMessageContent);
 		result = prime * result
-				+ ((textMessageContent == null) ? 0 : textMessageContent.hashCode());
+				+ ((getTextMessageContent() == null) ? 0 : getTextMessageContent().hashCode());
 		
 		if(!(type == Type.RECEIVED || type == Type.DELIVERY_REPORT)) {
 			result = prime * result
@@ -458,10 +458,10 @@ public class FrontlineMessage {
 			return false;
 		if (!Arrays.equals(binaryMessageContent, other.binaryMessageContent))
 			return false;
-		if (textMessageContent == null) {
-			if (other.textMessageContent != null)
+		if (getTextMessageContent() == null) {
+			if (other.getTextMessageContent() != null)
 				return false;
-		} else if (!textMessageContent.equals(other.textMessageContent))
+		} else if (!getTextMessageContent().equals(other.getTextMessageContent()))
 			return false;
 		
 		if(!(type == Type.RECEIVED || type == Type.DELIVERY_REPORT)) {
@@ -536,5 +536,13 @@ public class FrontlineMessage {
 		} else {
 			return FrontlineMessage.SMS_LENGTH_LIMIT_UCS2 + FrontlineMessage.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * (FrontlineMessage.SMS_LIMIT - 1);
 		}
+	}
+
+	public void setTextMessageContent(String textMessageContent) {
+		this.textMessageContent = textMessageContent;
+	}
+
+	public String getTextMessageContent() {
+		return textMessageContent;
 	}
 }

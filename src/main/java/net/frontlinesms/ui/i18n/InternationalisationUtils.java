@@ -85,16 +85,26 @@ public class InternationalisationUtils {
 	
 //>
 	/**
-	 * Return an internationalised message for this key. 
-	 * <br> This method tries to get the string for the current bundle and if it does not exist, it looks into
-	 * the default bundle (English GB). 
+	 * Return an internationalised message for this key, with the current resource bundle
 	 * @param key
 	 * @return the internationalised text, or the english text if no internationalised text could be found
 	 */
 	public static String getI18NString(String key) {
-		if(FrontlineUI.currentResourceBundle != null) {
+		return getI18NString(key, FrontlineUI.currentResourceBundle);
+	}
+	
+	/**
+	 * Return an internationalised message for this key and the given resource bundle. 
+	 * <br> This method tries to get the string for the bundle given in parameter and looks into
+	 * the default bundle (English GB) if <code>null</code>. 
+	 * @param key
+	 * @param languageBundle
+	 * @return the internationalised text, or the english text if no internationalised text could be found
+	 */
+	public static String getI18NString(String key, LanguageBundle languageBundle) {
+		if(languageBundle != null) {
 			try {
-				return FrontlineUI.currentResourceBundle.getValue(key);
+				return languageBundle.getValue(key);
 			} catch(MissingResourceException ex) {}
 		}
 		return Thinlet.DEFAULT_ENGLISH_BUNDLE.get(key);

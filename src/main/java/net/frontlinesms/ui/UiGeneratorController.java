@@ -67,6 +67,7 @@ import net.frontlinesms.ui.i18n.*;
 import net.frontlinesms.ui.settings.FrontlineSettingsHandler;
 
 import org.apache.log4j.Logger;
+import org.hibernate.type.YesNoType;
 import org.smslib.CIncomingMessage;
 
 import thinlet.FrameLauncher;
@@ -1132,25 +1133,35 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @return {@link String} representation of the status.
 	 */
 	public static final String getMessageStatusAsString(FrontlineMessage message) {
+		return getMessageStatusAsString(message, currentResourceBundle);
+	}
+	
+	/**
+	 * Get the status of a {@link FrontlineMessage} as a {@link String}.
+	 * @param message
+	 * @param languageBundle
+	 * @return {@link String} representation of the status.
+	 */
+	public static final String getMessageStatusAsString(FrontlineMessage message, LanguageBundle languageBundle) {
 		switch(message.getStatus()) {
 			case DRAFT:
-				return InternationalisationUtils.getI18NString(COMMON_DRAFT);
+				return InternationalisationUtils.getI18NString(COMMON_DRAFT, languageBundle);
 			case RECEIVED:
-				return InternationalisationUtils.getI18NString(COMMON_RECEIVED);
+				return InternationalisationUtils.getI18NString(COMMON_RECEIVED, languageBundle);
 			case OUTBOX:
-				return InternationalisationUtils.getI18NString(COMMON_OUTBOX);
+				return InternationalisationUtils.getI18NString(COMMON_OUTBOX, languageBundle);
 			case PENDING:
-				return InternationalisationUtils.getI18NString(COMMON_PENDING);
+				return InternationalisationUtils.getI18NString(COMMON_PENDING, languageBundle);
 			case SENT:
-				return InternationalisationUtils.getI18NString(COMMON_SENT);
+				return InternationalisationUtils.getI18NString(COMMON_SENT, languageBundle);
 			case DELIVERED:
-				return InternationalisationUtils.getI18NString(COMMON_DELIVERED);
+				return InternationalisationUtils.getI18NString(COMMON_DELIVERED, languageBundle);
 			case KEEP_TRYING:
-				return InternationalisationUtils.getI18NString(COMMON_RETRYING);
+				return InternationalisationUtils.getI18NString(COMMON_RETRYING, languageBundle);
 			case ABORTED:
 				return "(aborted)";
 			case FAILED:
-				return InternationalisationUtils.getI18NString(COMMON_FAILED);
+				return InternationalisationUtils.getI18NString(COMMON_FAILED, languageBundle);
 			case UNKNOWN:
 			default:
 				return "(unknown)";
@@ -1949,12 +1960,22 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 
 	/**
-	 * Refreshes the contact tab iff it is currently visible.  If it is not visible,
-	 * it will not be refreshed until it is show again.
+	 * Refreshes the contact tab if it is currently visible.  If it is not visible,
+	 * it will not be refreshed until it is shown again.
 	 */
 	public void refreshContactsTab() {
 		if (this.currentTab.equals(TAB_CONTACT_MANAGER)) {
 			this.contactsTabController.refresh();
+		}
+	}
+	
+	/**
+	 * Refreshes the messages tab if it is currently visible.  If it is not visible,
+	 * it will not be refreshed until it is shown again.
+	 */
+	public void refreshMessagesTab() {
+		if (this.currentTab.equals(TAB_MESSAGE_HISTORY)) {
+			this.messageTabController.refresh();
 		}
 	}
 }
