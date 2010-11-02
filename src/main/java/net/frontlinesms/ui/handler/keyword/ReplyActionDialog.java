@@ -83,7 +83,7 @@ public class ReplyActionDialog extends BaseActionDialog {
 			Object tfMessage = find(COMPONENT_TF_MESSAGE);
 			// Set the initial value of the reply text
 			ui.setText(tfMessage, action.getUnformattedReplyText());
-			messagePanelController.messageChanged("", action.getUnformattedReplyText());
+			messagePanelController.updateMessageDetails("", action.getUnformattedReplyText());
 			// Put the cursor (caret) at the end of the text area, so the click on a constant
 			// button inserts it at the end by default
 			ui.setCaretPosition(tfMessage, ui.getText(tfMessage).length());

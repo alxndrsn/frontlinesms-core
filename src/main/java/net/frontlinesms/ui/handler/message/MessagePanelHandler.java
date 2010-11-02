@@ -17,30 +17,31 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_ME
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_RECIPIENT;
 
 import java.awt.Color;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import net.frontlinesms.AppProperties;
 import net.frontlinesms.FrontlineSMSConstants;
-import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.FrontlineMessage;
+import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiGeneratorControllerConstants;
-import net.frontlinesms.ui.UiProperties;
 import net.frontlinesms.ui.handler.contacts.ContactSelecter;
+import net.frontlinesms.ui.handler.contacts.GroupSelecterDialog;
+import net.frontlinesms.ui.handler.contacts.SingleGroupSelecterDialogOwner;
 import net.frontlinesms.ui.handler.keyword.BaseActionDialog;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
-import org.apache.log4j.Logger;
 import org.smslib.util.GsmAlphabet;
 
 /**
  * Controller for a panel which allows sending of text SMS messages
  * @author Alex
  */
-public class MessagePanelHandler implements ThinletUiEventHandler {
+public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSelecterDialogOwner {
 //> STATIC CONSTANTS
 	/** UI XML File Path: the panel containing the messaging controls */
 	protected static final String UI_FILE_MESSAGE_PANEL = "/ui/core/messages/pnComposeMessage.xml";
@@ -48,10 +49,9 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 //> THINLET COMPONENTS
 	/** Thinlet component name: Button to send message */
 	private static final String COMPONENT_BT_SEND = "btSend";
+	private static final String COMPONENT_LB_ICON = "lbIcon";
 
 //> INSTANCE PROPERTIES
-	/** Logging obhect */
-	private final Logger log = FrontlineUtils.getLogger(this.getClass());
 	/** The {@link UiGeneratorController} that shows the tab. */
 	private final UiGeneratorController uiController;
 	/** The parent component */
@@ -87,7 +87,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 			uiController.setVisible(lbTooManyMessages, false);
 			uiController.setColor(lbTooManyMessages, "foreground", Color.RED);
 		}
-		messageChanged("", "");
+		updateMessageDetails("", "");
 	}
 
 	private Object find(String component) {
@@ -114,7 +114,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		BaseActionDialog.addConstantToCommand(uiController, currentText, tfMessage, type);
 		
 		String recipient = uiController.getText(find(COMPONENT_TF_RECIPIENT));
-		messageChanged(recipient, uiController.getText(tfMessage));
+		updateMessageDetails(recipient, uiController.getText(tfMessage));
 	}
 	
 //> THINLET UI METHODS
@@ -137,6 +137,10 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		} 
 		this.uiController.getFrontlineController().sendTextMessage(recipient, message);
 		
+		this.clearComponents();
+	}
+	
+	private void clearComponents() {
 		// We clear the components
 		uiController.setText(find(COMPONENT_TF_RECIPIENT), "");
 		uiController.setText(find(COMPONENT_TF_MESSAGE), "");
@@ -152,6 +156,19 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		Object sendButton = find(COMPONENT_BT_SEND);
 		if (sendButton != null) uiController.setEnabled(sendButton, false);
 	}
+
+	public void sendToGroup() {
+		Object attachedObject = this.uiController.getAttachedObject(find(COMPONENT_TF_RECIPIENT));
+		
+		if (attachedObject != null && attachedObject instanceof Group) {
+			List<Contact> recipientList = this.uiController.getFrontlineController().getGroupMembershipDao().getMembers((Group) attachedObject);
+			for (Contact contact : recipientList) {
+				this.uiController.getFrontlineController().sendTextMessage(contact.getPhoneNumber(), this.uiController.getText(find(COMPONENT_TF_MESSAGE)));
+			}
+		}
+		
+		this.clearComponents();
+	}
 	
 	/**
 	 * Event triggered when the message recipient has changed
@@ -159,20 +176,11 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	 * 
 	 */
 	public void recipientChanged(String recipient, String message) {
-		int recipientLength = recipient.length(),
-			messageLength = message.length();
+		this.uiController.setAttachedObject(find(UiGeneratorControllerConstants.COMPONENT_TF_RECIPIENT), null);
+		this.uiController.setIcon(find(COMPONENT_LB_ICON), Icon.USER_STATUS_ACTIVE);
+		this.numberToSend = 1;
 		
-		Object sendButton = find(COMPONENT_BT_SEND);
-		
-		int totalLengthAllowed;
-		if(GsmAlphabet.areAllCharactersValidGSM(message))totalLengthAllowed = FrontlineMessage.SMS_MULTIPART_LENGTH_LIMIT * FrontlineMessage.SMS_LIMIT;
-		else totalLengthAllowed = FrontlineMessage.SMS_MULTIPART_LENGTH_LIMIT_UCS2 * FrontlineMessage.SMS_LIMIT;
-		
-		boolean shouldEnableSendButton = ((!shouldCheckMaxMessageLength || messageLength <= totalLengthAllowed)
-											&& recipientLength > 0
-											&& messageLength > 0);
-		if (sendButton != null)
-			uiController.setEnabled(sendButton, shouldEnableSendButton);
+		this.updateMessageDetails(recipient, message);
 	}
 	
 	/** Method which triggers showing of the contact selecter. */
@@ -180,6 +188,27 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		ContactSelecter contactSelecter = new ContactSelecter(this.uiController);
 		final boolean shouldHaveEmail = false;
 		contactSelecter.show(InternationalisationUtils.getI18NString(FrontlineSMSConstants.SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "setRecipientTextfield(contactSelecter_contactList, contactSelecter)", null, this, shouldHaveEmail);
+	}
+	
+	/** Method which triggers showing of the group selecter. */
+	public void selectGroup() {
+		GroupSelecterDialog groupSelect = new GroupSelecterDialog(this.uiController, this);
+		groupSelect.init(this.uiController.getRootGroup());
+		
+		groupSelect.show();
+	}
+	
+	public void groupSelectionCompleted(Group group) {
+		this.numberToSend = this.uiController.getFrontlineController().getGroupMembershipDao().getMemberCount(group);
+		
+		Object tfRecipient = find(UiGeneratorControllerConstants.COMPONENT_TF_RECIPIENT);
+		this.uiController.setText(tfRecipient, group.getName() + " (" + this.numberToSend + ")");
+		this.uiController.setAttachedObject(tfRecipient, group);
+		this.uiController.setIcon(find(COMPONENT_LB_ICON), Icon.GROUP);
+		setSendButtonMethod(this, this.messagePanel, "sendToGroup");
+		
+		uiController.updateCost();
+		this.updateMessageDetails(group.getName(), this.uiController.getText(find(UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE)));
 	}
 	
 	/**
@@ -201,6 +230,9 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		Contact selectedContact = uiController.getContact(selectedItem);
 		uiController.setText(tfRecipient, selectedContact.getPhoneNumber());
 		uiController.remove(dialog);
+		
+		setSendButtonMethod(this, null, "send");
+		
 		uiController.updateCost();
 		
 		// The recipient text has changed, we check whether the send button should be enabled
@@ -208,12 +240,10 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 	}
 	
 	/**
-	 * Event triggered when the message details have changed
-	 * @param panel TODO this should be removed
 	 * @param message the new text value for the message body
 	 * 
 	 */
-	public void messageChanged(String recipient, String message) {
+	public void updateMessageDetails(String recipient, String message) {
 		int recipientLength = recipient.length();
 		int messageLength = message.length();
 		
@@ -286,7 +316,6 @@ public class MessagePanelHandler implements ThinletUiEventHandler {
 		if (numberOfMsgs == 3) uiController.setIcon(find(COMPONENT_LB_THIRD), Icon.SMS);
 		if (numberOfMsgs > 3) uiController.setIcon(find(COMPONENT_LB_THIRD), Icon.SMS_ADD);
 		
-
 		if (Pattern.matches(".*\\$[^ ]*\\}.*", message)) {
 			uiController.setVisible(find(COMPONENT_LB_HELP), true);
 		}
