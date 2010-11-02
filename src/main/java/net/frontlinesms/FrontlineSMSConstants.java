@@ -144,7 +144,6 @@ public final class FrontlineSMSConstants {
 	public static final String COMMON_KEYWORD_ACTIONS_OF = "common.keyword.actions.of";
 	public static final String COMMON_EDITING_SMS_SERVICE = "common.edting.sms.service";
 	public static final String COMMON_BLANK = "common.blank";
-	public static final String COMMON_CURRENCY = "common.currency";
 	public static final String COMMON_DATABASE_CONNECTION_PROBLEM = "common.db.connection.problem";
 	public static final String COMMON_RECEIVED_MESSAGES = "common.received.messages";
 	public static final String COMMON_SENT_MESSAGES = "common.sent.messages";

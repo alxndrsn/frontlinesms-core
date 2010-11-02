@@ -221,16 +221,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			// Find the languages submenu, and add all present language packs to it
 			addLanguageMenu(find("menu_language"));
 			
-			setText(find(COMPONENT_TF_COST_PER_SMS), InternationalisationUtils.formatCurrency(this.getCostPerSms(), false));
-			setText(find(COMPONENT_LB_COST_PER_SMS_PREFIX),
-					InternationalisationUtils.isCurrencySymbolPrefix() 
-							? InternationalisationUtils.getCurrencySymbol()
-							: "");
-			setText(find(COMPONENT_LB_COST_PER_SMS_SUFFIX),
-					InternationalisationUtils.isCurrencySymbolSuffix() 
-					? InternationalisationUtils.getCurrencySymbol()
-					: "");
-			
 			Object tabbedPane = find(COMPONENT_TABBED_PANE);
 			
 			this.phoneTabController = new PhoneTabHandler(this);
@@ -890,7 +880,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			try {
 				double costPerSMS = (InternationalisationUtils.parseCurrency(cost))/* * Utils.TIMES_TO_INT*/;//FIXME this will likely give some very odd costs - needs adjusting for moving decimal point.
 				this.setCostPerSms(costPerSMS);
-			} catch (ParseException e) {
+			} catch (NumberFormatException e) {
 				alert("Did not understand currency value: " + cost + ".  Should be of the form: " + InternationalisationUtils.formatCurrency(123456.789)); // TODO i18n
 			} 
 		}

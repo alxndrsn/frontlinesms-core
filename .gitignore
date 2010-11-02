@@ -31,3 +31,6 @@ test_temp/
 
 # FrontlineSMS ini file for applying local settings
 frontlinesms.ini
+
+# OSX files
+.DS_Store

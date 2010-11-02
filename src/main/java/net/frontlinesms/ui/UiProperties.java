@@ -4,6 +4,7 @@
 package net.frontlinesms.ui;
 
 import net.frontlinesms.resources.UserHomeFilePropertySet;
+import net.frontlinesms.ui.i18n.CurrencyFormatter;
 
 /**
  * Wrapper class for UI properties file.
@@ -39,6 +40,9 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	private static final String KEY_SMS_COST = "sms.cost";
 	/** Property key (int) the number of items to display per page */
 	private static final String KEY_ITEMS_PER_PAGE = "paging.itemcount";
+
+	/** Property Key (String) currency of currently selected language */
+	private static final String CURRENCY_FORMAT = "currency.format";
 	
 	/** Singleton instance of this class. */
 	private static UiProperties instance;
@@ -179,6 +183,16 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	/** @return number of items to display per page */
 	public int getItemsPerPage() {
 		return super.getPropertyAsInt(KEY_ITEMS_PER_PAGE, 100);
+	}
+	
+	/** @return currency format string to be used for currency formatting */
+	public String getCurrencyFormat() {
+		return super.getProperty(CURRENCY_FORMAT);
+	}
+	
+	/** @param format the currency format string to be used for currency formatting*/
+	public void setCurrencyFormat(String format) {
+		super.setProperty(CURRENCY_FORMAT, format);
 	}
 	
 //> INSTANCE HELPER METHODS
