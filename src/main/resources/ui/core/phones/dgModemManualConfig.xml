@@ -6,7 +6,7 @@
 	
 	<panel columns="2" gap="7" colspan="3">
 		<label text="i18n.phone.settings.pin" icon="/icons/key.png"/>
-		<textfield name="tfPin" weightx="1"/>
+		<passwordfield name="tfPin" weightx="1"/>
 	</panel>
     
 	<separator colspan="3"/>

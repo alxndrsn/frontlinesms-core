@@ -6,6 +6,8 @@ package net.frontlinesms.ui.handler;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -68,7 +70,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	/** I18n Text Key: TODO document */
 	private static final String MESSAGE_IMPORTING_SELECTED_KEYWORDS = "message.importing.selected.keywords";
 	/** I18n Text Key: TODO document */
-	private static final String MESSAGE_IMPORTING_SELECTED_MESSAGES = "message.importing.selected.messages";
+	private static final String MESSAGE_IMPORTING_SELECTED_MESSAGES = "message.importing.messages";
 	/** I18n Text Key: TODO document */
 	private static final String MESSAGE_IMPORT_TASK_FAILED = "message.import.failed";
 	/** I18n Text Key: TODO document */
@@ -142,6 +144,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private static final String COMPONENT_PN_CHECKBOXES = "pnInfo"; // TODO: get this changed
 	private static final String COMPONENT_PN_VALUES_TABLE = "pnValuesTable";
 	private static final String COMPONENT_PN_DETAILS = "pnDetails";
+	private static final String COMPONENT_PN_CHECKBOXES_2 = "pnInfo2";
 	
 //> STATIC CONSTANTS
 	public enum EntityType {
@@ -681,8 +684,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		Object pnValuesTable = this.uiController.find(this.wizardDialog, COMPONENT_PN_VALUES_TABLE);
 		
 		if (pnValuesTable != null) {
-			Object pnCheckboxes = this.uiController.find(this.wizardDialog, COMPONENT_PN_CHECKBOXES);
-			Object[] checkboxes = this.uiController.getItems(pnCheckboxes);
+			List<Object> checkboxes = this.getCheckboxesFromType();
 			
 			Object valuesTable = this.uiController.find(this.wizardDialog, COMPONENT_TB_VALUES);
 			this.uiController.removeAll(valuesTable);
@@ -741,6 +743,26 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		}
 	}
 	
+	/**
+	 * @return A {@link List} of checkboxes used to generate the preview.
+	 */
+	private List<Object> getCheckboxesFromType() {
+		Object pnCheckboxes = this.uiController.find(this.wizardDialog, COMPONENT_PN_CHECKBOXES);
+		switch (this.type) {
+			case CONTACTS:
+				return Arrays.asList(this.uiController.getItems(pnCheckboxes));
+			case MESSAGES:
+				// For messages, the checkboxes are located in two different panels
+				Object pnCheckboxes2 = this.uiController.find(this.wizardDialog, COMPONENT_PN_CHECKBOXES_2);
+				List<Object> allCheckboxes = new ArrayList<Object>();
+				allCheckboxes.addAll(Arrays.asList(this.uiController.getItems(pnCheckboxes)));
+				allCheckboxes.addAll(Arrays.asList(this.uiController.getItems(pnCheckboxes2)));
+				return allCheckboxes;
+			default:
+				return null;
+		}
+	}
+
 	private void addContactCells(Object row, String[] lineValues, int columnsNumber) {
 		Object cell = this.uiController.createTableCell("");
 		this.uiController.setIcon(cell, Icon.CONTACT);

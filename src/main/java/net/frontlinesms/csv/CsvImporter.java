@@ -175,6 +175,9 @@ public class CsvImporter {
 					if (content.contains("File:")) {
 						// Then it's a multimedia message
 						message = FrontlineMultimediaMessage.createMessageFromContentString(content, false);
+						message.setDate(date);
+						message.setSenderMsisdn(sender);
+						message.setRecipientMsisdn(recipient);
 					} else {
 						if (type.equals(Type.OUTBOUND)) {
 							message = FrontlineMessage.createOutgoingMessage(date, sender, recipient, content);
