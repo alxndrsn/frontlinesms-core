@@ -5,8 +5,8 @@
     <button tooltip="i18n.tooltip.click.for.help" halign="right" action="showHelpPage('troubleshooting.htm')" icon="/icons/help.png" type="link"/>
 	
 	<panel columns="2" gap="7" colspan="3">
-		<label text="i18n.phone.settings.pin" icon="/icons/key.png"/>
-		<passwordfield name="tfPin" weightx="1"/>
+		<label text="i18n.phone.settings.pin" icon="/icons/key.png" tooltip="phone.settings.pin.tooltip"/>
+		<passwordfield name="tfPin" weightx="1" tooltip="phone.settings.pin.tooltip"/>
 	</panel>
     
 	<separator colspan="3"/>
