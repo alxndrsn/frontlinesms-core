@@ -1,14 +1,17 @@
 package net.frontlinesms.events;
 
+import net.frontlinesms.AppProperties;
 import net.frontlinesms.events.FrontlineEventNotification;
 /**
- * A superclass for notifications involving internet services.
+ * A superclass for notifications involving changes in the {@link AppProperties}.
  * 
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 public class AppPropertiesEventNotification implements FrontlineEventNotification {
-	private String property;
+	/** The Properties class */
 	private Class<?> clazz;
+	/** The property itself */
+	private String property;
 	
 	public AppPropertiesEventNotification (Class<?> clazz, String property) {
 		this.clazz = clazz;

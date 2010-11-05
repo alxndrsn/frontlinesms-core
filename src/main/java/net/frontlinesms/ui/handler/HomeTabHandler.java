@@ -13,8 +13,6 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import net.frontlinesms.FrontlineSMSConstants;
-import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
@@ -171,28 +169,6 @@ public class HomeTabHandler extends BaseTabHandler implements EventObserver {
 		for (Object obj : ui.getItems(panel)) {
 			ui.setEnabled(obj, isCustom);
 		}
-	}
-	
-
-	/**
-	 * Sets the phone number of the selected contact.
-	 * 
-	 * This method is triggered by the contact selected, as detailed in {@link #selectMessageRecipient()}.
-	 * 
-	 * @param contactSelecter_contactList
-	 * @param dialog
-	 */
-	public void setRecipientTextfield(Object contactSelecter_contactList, Object dialog) {
-		Object tfRecipient = ui.find(this.getTab(), UiGeneratorControllerConstants.COMPONENT_TF_RECIPIENT);
-		Object selectedItem = ui.getSelectedItem(contactSelecter_contactList);
-		if (selectedItem == null) {
-			ui.alert(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_NO_CONTACT_SELECTED));
-			return;
-		}
-		Contact selectedContact = ui.getContact(selectedItem);
-		ui.setText(tfRecipient, selectedContact.getPhoneNumber());
-		ui.remove(dialog);
-		ui.updateCost();
 	}
 
 	

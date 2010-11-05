@@ -67,7 +67,6 @@ import net.frontlinesms.ui.i18n.*;
 import net.frontlinesms.ui.settings.FrontlineSettingsHandler;
 
 import org.apache.log4j.Logger;
-import org.hibernate.type.YesNoType;
 import org.smslib.CIncomingMessage;
 
 import thinlet.FrameLauncher;
@@ -881,14 +880,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 		LOG.trace("EXIT");
 	}
-	
-	/*
-	 * Presumably this should be part of the messaging panel controller 
-	 */
-	public void updateCost() {
-		// TODO everything relying on message cost should be updated when this is changed
-		this.messageTabController.updateMessageHistoryCost();
-	}
 
 	// FIXME fire this on textfield lostFocus or textfield execution (<return> pressed)
 	public void costChanged(String cost) {
@@ -901,7 +892,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				alert("Did not understand currency value: " + cost + ".  Should be of the form: " + InternationalisationUtils.formatCurrency(123456.789)); // TODO i18n
 			} 
 		}
-		updateCost();
+
+		this.getFrontlineController().getEventBus().notifyObservers(new AppPropertiesEventNotification(AppProperties.class, AppProperties.KEY_SMS_COST_SENT_MESSAGES));
 	}
 	
 	/**
@@ -1943,7 +1935,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 					break;
 			}
 		} else if (notification instanceof AppPropertiesEventNotification) {
-			// An AppProperty has been changed
+			// An AppProperty has changed
 			AppPropertiesEventNotification appPropertiesNotification = (AppPropertiesEventNotification) notification;
 			
 			if (appPropertiesNotification.getAppClass().equals(AppProperties.class) && appPropertiesNotification.getProperty().equals(AppProperties.KEY_SMS_COST_SENT_MESSAGES)) {

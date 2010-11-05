@@ -5,9 +5,11 @@ package net.frontlinesms.ui.handler.message;
 
 // TODO Remove static imports
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_CONTACT_SELECTED;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_COST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_ESTIMATED_MONEY;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_FIRST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_HELP;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_MSGS_NUMBER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_MSG_NUMBER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_REMAINING_CHARS;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_SECOND;
@@ -22,6 +24,7 @@ import java.util.regex.Pattern;
 
 import net.frontlinesms.AppProperties;
 import net.frontlinesms.FrontlineSMSConstants;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.Group;
@@ -35,6 +38,7 @@ import net.frontlinesms.ui.handler.contacts.SingleGroupSelecterDialogOwner;
 import net.frontlinesms.ui.handler.keyword.BaseActionDialog;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
+import org.apache.log4j.Logger;
 import org.smslib.util.GsmAlphabet;
 
 /**
@@ -52,6 +56,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 	private static final String COMPONENT_LB_ICON = "lbIcon";
 
 //> INSTANCE PROPERTIES
+	private final Logger LOG = FrontlineUtils.getLogger(this.getClass());
 	/** The {@link UiGeneratorController} that shows the tab. */
 	private final UiGeneratorController uiController;
 	/** The parent component */
@@ -207,7 +212,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 		this.uiController.setIcon(find(COMPONENT_LB_ICON), Icon.GROUP);
 		setSendButtonMethod(this, this.messagePanel, "sendToGroup");
 		
-		uiController.updateCost();
+		this.updateCost();
 		this.updateMessageDetails(group.getName(), this.uiController.getText(find(UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE)));
 	}
 	
@@ -233,7 +238,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 		
 		setSendButtonMethod(this, null, "send");
 		
-		uiController.updateCost();
+		this.updateCost();
 		
 		// The recipient text has changed, we check whether the send button should be enabled
 		this.recipientChanged(uiController.getText(tfRecipient), uiController.getText(tfMessage));
@@ -338,7 +343,16 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 		uiController.setText(tfRecipient, selectedContact.getPhoneNumber());
 		uiController.remove(dialog);
 		this.numberToSend = 1;
-		uiController.updateCost();
+		this.updateCost();
+	}
+	
+	private void updateCost() {
+		LOG.trace("Updating message panel cost estimate");
+		
+		this.uiController.setText(find(COMPONENT_LB_MSGS_NUMBER), String.valueOf(numberToSend));		
+		this.uiController.setText(find(COMPONENT_LB_COST), InternationalisationUtils.formatCurrency(AppProperties.getInstance().getCostPerSmsSent() * numberToSend));
+		
+		LOG.trace("EXIT");
 	}
 
 //> INSTANCE HELPER METHODS

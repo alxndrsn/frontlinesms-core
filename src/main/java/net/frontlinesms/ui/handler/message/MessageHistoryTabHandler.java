@@ -53,6 +53,7 @@ import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
+import net.frontlinesms.events.AppPropertiesEventNotification;
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.ui.Icon;
@@ -134,10 +135,12 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	private Long messageHistoryStart;
 	/** End date of the message history, or <code>null</code> if none has been set. */
 	private Long messageHistoryEnd;
-	/** The number of people the current SMS will be sent to */
-	private int numberToSend = 1;
-	/** The number of SMS parts */
-	private int numberOfMessageParts = 1;
+	/** The total number of messages **/
+	private int totalNumberOfMessages;
+	/** The number of SMS parts already sent */
+	private int numberOfSMSPartsSent = 1;
+	/** The number of SMS parts already received */
+	private int numberOfSMSPartsReceived = 1;
 	/** The selected lines in the left panel  */
 	private Group selectedGroup;
 	private Contact selectedContact;
@@ -165,7 +168,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	 * UI event called when the user changes tab
 	 */
 	public void notify(FrontlineEventNotification notification) {
-		if(notification instanceof EntitySavedNotification<?>) {
+		if (notification instanceof EntitySavedNotification<?>) {
 			Object entity = ((EntitySavedNotification<?>) notification).getDatabaseEntity();
 			if(entity instanceof FrontlineMessage) {
 				if(entity instanceof FrontlineMultimediaMessage) {
@@ -173,12 +176,17 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 					refresh();
 				}
 			}
-		} else if(notification instanceof TabChangedNotification) {
+		} else if (notification instanceof TabChangedNotification) {
 			// This object is registered to the UIGeneratorController and get notified when the users changes tab
 			String newTabName = ((TabChangedNotification) notification).getNewTabName();
 			if (newTabName.equals(TAB_MESSAGE_HISTORY)) {
 				this.refresh();
 				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGES_LOADED));
+			}
+		} else if (notification instanceof AppPropertiesEventNotification) {
+			String property = ((AppPropertiesEventNotification) notification).getProperty();
+			if (property.equals(AppProperties.KEY_SMS_COST_RECEIVED_MESSAGES) || property.equals(AppProperties.KEY_SMS_COST_SENT_MESSAGES)) {
+				this.updateMessageHistoryCost();
 			}
 		}
 	}
@@ -315,7 +323,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 
 	/** @return {@link PagedListDetails} for {@link #messageListComponent} */
 	private PagedListDetails getMessageListPagingDetails(int startIndex, int limit) {
-		int messageCount = getMessageCount();
+		totalNumberOfMessages = getMessageCount();
 		
 		List<FrontlineMessage> messages = getListMessages(startIndex, limit);
 		Object[] messageRows = new Object[messages.size()];
@@ -324,7 +332,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			messageRows[i] = ui.getRow(m);
 		}
 		
-		return new PagedListDetails(messageCount, messageRows);
+		return new PagedListDetails(totalNumberOfMessages, messageRows);
 	}
 	
 	/** @return total number of messages to be displayed in the message list. */
@@ -333,9 +341,11 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		Object filterList = getMessageHistoryFilterList();
 		Object selectedItem = ui.getSelectedItem(filterList);
 
+		numberOfSMSPartsSent = 0;
+		numberOfSMSPartsReceived = 0;
+		
 		if (selectedItem == null) {
-			numberToSend = 0;
-			numberOfMessageParts = 0; 
+			return 0;
 		} else {
 			final FrontlineMessage.Type messageType = getSelectedMessageType();
 			int selectedIndex = ui.getSelectedIndex(filterList);
@@ -364,16 +374,16 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 				}
 			}
 			
-			numberToSend = messageList.size();
-			numberOfMessageParts = 0;
 			for (FrontlineMessage message : messageList) {
 				if (message.getType().equals(Type.OUTBOUND)) {
-					numberOfMessageParts += message.getExpectedSmsCount();
+					numberOfSMSPartsSent += message.getNumberOfSMS();
+				} else {
+					numberOfSMSPartsReceived += message.getNumberOfSMS();
 				}
 			}
+			
+			return messageList.size();
 		}
-		
-		return numberToSend;
 	}
 	
 	/**
@@ -499,12 +509,14 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		}
 	}
 	
-	/** @deprecated this should be private */
-	public void updateMessageHistoryCost() {
-		LOG.trace("ENTRY");
+	private void updateMessageHistoryCost() {
+		LOG.trace("Updating message history cost...");
 		
-		ui.setText(find(COMPONENT_LB_MSGS_NUMBER), String.valueOf(numberToSend));		
-		ui.setText(find(COMPONENT_LB_COST), InternationalisationUtils.formatCurrency(AppProperties.getInstance().getCostPerSmsSent() * numberToSend));
+		ui.setText(find(COMPONENT_LB_MSGS_NUMBER), String.valueOf(totalNumberOfMessages));
+		double cost = AppProperties.getInstance().getCostPerSmsSent() * numberOfSMSPartsSent 
+					+ AppProperties.getInstance().getCostPerSmsReceived() * numberOfSMSPartsReceived;
+		
+		ui.setText(find(COMPONENT_LB_COST), InternationalisationUtils.formatCurrency(cost));
 		
 		LOG.trace("EXIT");
 	}
@@ -668,7 +680,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 					// FIXME should not be getting the phone manager like this - should be a local propery i rather think
 					ui.getPhoneManager().removeFromOutbox(toBeRemoved);
 				}
-				numberToSend -= toBeRemoved.getNumberOfSMS();
+				numberOfSMSPartsSent -= toBeRemoved.getNumberOfSMS();
 				messageDao.deleteMessage(toBeRemoved);
 				numberRemoved++;
 			} else {
@@ -869,9 +881,12 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 				ui.add(messageListComponent, ui.getRow(message));
 				ui.setEnabled(messageListComponent, true);
 				if (message.getType() == Type.OUTBOUND) {
-					numberToSend += message.getNumberOfSMS();
-					updateMessageHistoryCost();
+					numberOfSMSPartsSent += message.getNumberOfSMS();
+				} else {
+					numberOfSMSPartsReceived += message.getNumberOfSMS();
 				}
+				
+				updateMessageHistoryCost();
 			}
 		}
 	}

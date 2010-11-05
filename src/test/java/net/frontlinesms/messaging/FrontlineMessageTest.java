@@ -29,36 +29,36 @@ public class FrontlineMessageTest extends BaseTestCase {
 	}
 
 	/**
-	 * Unit test for {@link FrontlineMessage#getExpectedSmsCount()}
+	 * Unit test for {@link FrontlineMessage#getNumberOfSMS()}
 	 */
-	public void testGetExpectedSmsCount() {
-		assertEquals(1, createMessage("").getExpectedSmsCount());
+	public void testgetNumberOfSMS() {
+		assertEquals(1, createMessage("").getNumberOfSMS());
 		
 		// GSM 7bit
-		assertEquals(1, createMessage(ONE_PART_MESSAGE).getExpectedSmsCount());
-		assertEquals(1, createMessage(ONE_PART_MESSAGE_LIMIT).getExpectedSmsCount());
-		assertEquals(2, createMessage(ONE_PART_MESSAGE_LIMIT + ".").getExpectedSmsCount());
-		assertEquals(2, createMessage(TWO_PART_MESSAGE_LIMIT).getExpectedSmsCount());
-		assertEquals(3, createMessage(TWO_PART_MESSAGE_LIMIT + ".").getExpectedSmsCount());
-		assertEquals(3, createMessage(THREE_PART_MESSAGE_LIMIT).getExpectedSmsCount());
-		assertEquals(4, createMessage(THREE_PART_MESSAGE_LIMIT + ".").getExpectedSmsCount());
+		assertEquals(1, createMessage(ONE_PART_MESSAGE).getNumberOfSMS());
+		assertEquals(1, createMessage(ONE_PART_MESSAGE_LIMIT).getNumberOfSMS());
+		assertEquals(2, createMessage(ONE_PART_MESSAGE_LIMIT + ".").getNumberOfSMS());
+		assertEquals(2, createMessage(TWO_PART_MESSAGE_LIMIT).getNumberOfSMS());
+		assertEquals(3, createMessage(TWO_PART_MESSAGE_LIMIT + ".").getNumberOfSMS());
+		assertEquals(3, createMessage(THREE_PART_MESSAGE_LIMIT).getNumberOfSMS());
+		assertEquals(4, createMessage(THREE_PART_MESSAGE_LIMIT + ".").getNumberOfSMS());
 		
 		// UCS2
-		assertEquals(1, createMessage(ONE_PART_MESSAGE_UCS2).getExpectedSmsCount());
-		assertEquals(1, createMessage(ONE_PART_MESSAGE_LIMIT_UCS2).getExpectedSmsCount());
-		assertEquals(2, createMessage(ONE_PART_MESSAGE_LIMIT_UCS2 + ".").getExpectedSmsCount());
-		assertEquals(2, createMessage(TWO_PART_MESSAGE_LIMIT_UCS2).getExpectedSmsCount());
-		assertEquals(3, createMessage(TWO_PART_MESSAGE_LIMIT_UCS2 + ".").getExpectedSmsCount());
-		assertEquals(3, createMessage(THREE_PART_MESSAGE_LIMIT_UCS2).getExpectedSmsCount());
-		assertEquals(4, createMessage(THREE_PART_MESSAGE_LIMIT_UCS2 + ".").getExpectedSmsCount());
+		assertEquals(1, createMessage(ONE_PART_MESSAGE_UCS2).getNumberOfSMS());
+		assertEquals(1, createMessage(ONE_PART_MESSAGE_LIMIT_UCS2).getNumberOfSMS());
+		assertEquals(2, createMessage(ONE_PART_MESSAGE_LIMIT_UCS2 + ".").getNumberOfSMS());
+		assertEquals(2, createMessage(TWO_PART_MESSAGE_LIMIT_UCS2).getNumberOfSMS());
+		assertEquals(3, createMessage(TWO_PART_MESSAGE_LIMIT_UCS2 + ".").getNumberOfSMS());
+		assertEquals(3, createMessage(THREE_PART_MESSAGE_LIMIT_UCS2).getNumberOfSMS());
+		assertEquals(4, createMessage(THREE_PART_MESSAGE_LIMIT_UCS2 + ".").getNumberOfSMS());
 		
 		// Binary
-		assertEquals(1, createMessage(ONE_PART_BINARY_MIN).getExpectedSmsCount());
-		assertEquals(1, createMessage(ONE_PART_BINARY_MAX).getExpectedSmsCount());
-		assertEquals(2, createMessage(TWO_PART_BINARY_MIN).getExpectedSmsCount());
-		assertEquals(2, createMessage(TWO_PART_BINARY_MAX).getExpectedSmsCount());
-		assertEquals(3, createMessage(THREE_PART_BINARY_MIN).getExpectedSmsCount());
-		assertEquals(3, createMessage(THREE_PART_BINARY_MAX).getExpectedSmsCount());
+		assertEquals(1, createMessage(ONE_PART_BINARY_MIN).getNumberOfSMS());
+		assertEquals(1, createMessage(ONE_PART_BINARY_MAX).getNumberOfSMS());
+		assertEquals(2, createMessage(TWO_PART_BINARY_MIN).getNumberOfSMS());
+		assertEquals(2, createMessage(TWO_PART_BINARY_MAX).getNumberOfSMS());
+		assertEquals(3, createMessage(THREE_PART_BINARY_MIN).getNumberOfSMS());
+		assertEquals(3, createMessage(THREE_PART_BINARY_MAX).getNumberOfSMS());
 	}
 	
 	/**

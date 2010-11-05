@@ -42,6 +42,7 @@ public class FrontlineMessage {
 	/** Discriminator column for this class.  This was only implemented when {@link FrontlineMultimediaMessage} was
 	 * added.  Setting it to null will result in a plain {@link FrontlineMessage} being instantiated, as per the
 	 * {@link DiscriminatorFormula} annotation on this class. */
+	@SuppressWarnings("unused")
 	private String dtype = this.getClass().getSimpleName();
 	
 //> DATABASE COLUMN NAMES
@@ -156,6 +157,7 @@ public class FrontlineMessage {
 	protected FrontlineMessage(Type type, String textContent) {
 		this.type = type;
 		this.setTextMessageContent(textContent);
+		this.setSmsPartsCount(getExpectedSmsCount());
 	}
 	
 //> ACCESSOR METHODS
@@ -256,7 +258,7 @@ public class FrontlineMessage {
 	 * @return the number of parts this message was sent as
 	 */
 	public int getNumberOfSMS() {
-		return this.smsPartsCount;
+		return this.getSmsPartsCount() == 0 ? this.getExpectedSmsCount() : this.getSmsPartsCount();
 	}
 	
 	/**
@@ -303,7 +305,7 @@ public class FrontlineMessage {
 	}
 
 	/** @return the number of SMS parts that we'd expect this message to take */
-	public int getExpectedSmsCount() {
+	private int getExpectedSmsCount() {
 		if(this.isBinaryMessage()) {
 			int octetCount = this.getBinaryContent().length;
 			if(octetCount <= SMS_LENGTH_LIMIT_BINARY) {
@@ -435,7 +437,7 @@ public class FrontlineMessage {
 					+ ((senderMsisdn == null) ? 0 : senderMsisdn.hashCode());
 		}
 		
-		result = prime * result + smsPartsCount;
+		result = prime * result + getSmsPartsCount();
 		result = prime * result + (type==null ? 0 : type.hashCode());
 		return result;
 	}
@@ -485,7 +487,7 @@ public class FrontlineMessage {
 				return false;
 		}
 		
-		if (smsPartsCount != other.smsPartsCount)
+		if (getSmsPartsCount() != other.getSmsPartsCount())
 			return false;
 		if (type != other.type)
 			return false;
@@ -544,5 +546,13 @@ public class FrontlineMessage {
 
 	public String getTextMessageContent() {
 		return textMessageContent;
+	}
+
+	public void setSmsPartsCount(int smsPartsCount) {
+		this.smsPartsCount = smsPartsCount;
+	}
+
+	public int getSmsPartsCount() {
+		return smsPartsCount;
 	}
 }
