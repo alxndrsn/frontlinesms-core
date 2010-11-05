@@ -117,10 +117,21 @@ public class InternationalisationUtils {
 	 * @param key
 	 * @return the list internationalised text, or an empty list if no internationalised text could be found
 	 */
-	public static List<String> getI18nStrings(String key) {
+	public static List<String> getI18nStrings(String key, String ... i18nValues) {
 		if(FrontlineUI.currentResourceBundle != null) {
 			try {
-				return FrontlineUI.currentResourceBundle.getValues(key);
+				List<String> values = FrontlineUI.currentResourceBundle.getValues(key);
+
+				if (i18nValues.length == 0) {
+					return values;
+				} else {
+					List<String> formattedValues = new ArrayList<String>();
+					for (String value : values) {
+						formattedValues.add(formatString(value, i18nValues));
+					}
+					
+					return formattedValues;
+				}
 			} catch(MissingResourceException ex) {}
 		}
 		return LanguageBundle.getValues(Thinlet.DEFAULT_ENGLISH_BUNDLE, key);

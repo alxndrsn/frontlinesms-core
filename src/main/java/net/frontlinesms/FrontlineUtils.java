@@ -324,7 +324,6 @@ public class FrontlineUtils {
 	 * is in the public domain.</p>
 	 * @param url
 	 */
-	@SuppressWarnings("unchecked")
 	public static void openExternalBrowser(String url) {
 		Runtime rt = Runtime.getRuntime();
 	
@@ -347,7 +346,7 @@ public class FrontlineUtils {
 				rt.exec("open " + url);
 
 				LOG.debug("Trying to open with FileManager...");
-				Class fileManager = Class.forName("com.apple.eio.FileManager");
+				Class<?> fileManager = Class.forName("com.apple.eio.FileManager");
 				Method openURL = fileManager.getDeclaredMethod("openURL", String.class);
 				openURL.invoke(null, new Object[] {url});
 			} else {
@@ -573,5 +572,36 @@ public class FrontlineUtils {
 							  subject,
 							  textContent,
 							  new File(attachment));
+	}
+
+	/**
+	 * @param msisdn A phone number
+	 * @return <code>true</code> if the number is in a proper international format, <code>false</code> otherwise.
+	 */
+	public static boolean isInInternationalFormat(String msisdn) {
+		return msisdn.matches("\\+\\d+");
+	}
+	
+	/**
+	 * Tries to format the given phone number into a valid international format.
+	 * @param msisdn A non-formatted phone number
+	 */
+	public static String getInternationalFormat(String msisdn) {
+		// Remove the (0) sometimes present is certain numbers.
+		// This 0 MUST NOT be present in the international formatted number
+		String formattedNumber = msisdn.replace("(0)", "");
+		
+		// Remove every character which is not a digit
+		formattedNumber = formattedNumber.replaceAll("\\D", "");
+		
+		// If the number was prefixed by the (valid) 00(code) format,
+		// we transform it to the + sign
+		if (formattedNumber.startsWith("00")) {
+			return "+" + formattedNumber.substring(2);
+		} else {
+			// NB: even if a + sign had been specified, it's been removed by the replaceAll function
+			// We have to put one back
+			return "+" + formattedNumber;
+		}
 	}
 }

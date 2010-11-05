@@ -6,15 +6,11 @@ package net.frontlinesms.ui.handler.contacts;
 // TODO remove static imports
 import static net.frontlinesms.FrontlineSMSConstants.ACTION_ADD_TO_GROUP;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_CONTACTS_IN_GROUP;
-import static net.frontlinesms.FrontlineSMSConstants.COMMON_E_MAIL_ADDRESS;
-import static net.frontlinesms.FrontlineSMSConstants.COMMON_NAME;
-import static net.frontlinesms.FrontlineSMSConstants.COMMON_PHONE_NUMBER;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_CONTACTS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_CONTACT_MANAGER_LOADED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUPS_AND_CONTACTS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUP_ALREADY_EXISTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_REMOVING_CONTACTS;
-import static net.frontlinesms.FrontlineSMSConstants.PROPERTY_FIELD;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BUTTON_YES;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_MANAGER_CONTACT_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_DELETE_NEW_CONTACT;
@@ -37,7 +33,6 @@ import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.Order;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
-import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
@@ -47,13 +42,12 @@ import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.BaseTabHandler;
+import net.frontlinesms.ui.handler.ChoiceDialogHandler;
 import net.frontlinesms.ui.handler.ComponentPagingHandler;
 import net.frontlinesms.ui.handler.PagedComponentItemProvider;
 import net.frontlinesms.ui.handler.PagedListDetails;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
-
 import thinlet.Thinlet;
-import thinlet.ThinletText;
 
 /**
  * Event handler for the Contacts tab and associated dialogs.
@@ -64,7 +58,6 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	//> STATIC CONSTANTS
 	/** UI XML File Path: the Home Tab itself */
 	private static final String UI_FILE_CONTACTS_TAB = "/ui/core/contacts/contactsTab.xml";
-	private static final String UI_FILE_DELETE_OPTION_DIALOG_FORM = "/ui/dialog/deleteOptionDialogForm.xml"; // TODO move this to the correct path
 	private static final String UI_FILE_NEW_GROUP_FORM = "/ui/dialog/newGroupForm.xml"; // TODO move this to the correct path
 	
 	private static final String COMPONENT_GROUP_SELECTER_CONTAINER = "pnGroupsContainer";
@@ -72,6 +65,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	private static final String COMPONENT_CONTACTS_PANEL = "pnContacts";
 	private static final String COMPONENT_DELETE_BUTTON = "deleteButton";
 	private static final String COMPONENT_SEND_SMS_BUTTON_GROUP_SIDE = "sendSMSButtonGroupSide";
+	private static final String I18N_SENTENCE_DELETE_CONTACTS_FROM_GROUPS = "sentence.choice.remove.contacts.of.groups";
 	
 //> INSTANCE PROPERTIES
 	
@@ -117,6 +111,9 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	public void init() {
 		super.init();
 		this.groupSelecter.init(ui.getRootGroup());
+		
+		this.ui.setDeleteAction(this.groupSelecter.getGroupTreeComponent(), "showDeleteOptionDialog", null, this);
+		
 		// We register the observer to the UIGeneratorController, which notifies when tabs have changed
 		this.ui.getFrontlineController().getEventBus().registerObserver(this);
 		
@@ -227,8 +224,8 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		if (!this.ui.isDefaultGroup(g)) {
 			if (groupMembershipDao.getMemberCount(g) > 0) {
 				// If the group is not empty, we ask if the user also wants to delete the contacts
-				Object deleteDialog = ui.loadComponentFromFile(UI_FILE_DELETE_OPTION_DIALOG_FORM, this);
-				ui.add(deleteDialog);
+				ChoiceDialogHandler choiceDialogHandler = new ChoiceDialogHandler(this.ui);
+				choiceDialogHandler.showChoiceDialog(this, "removeSelectedFromGroupList(this, choiceDialog)", I18N_SENTENCE_DELETE_CONTACTS_FROM_GROUPS);
 			} else {
 				// Otherwise, the
 				showConfirmationDialog("deleteSelectedGroup");
@@ -614,20 +611,20 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		return tabComponent;
 	}
 	
-	/** Initialise the message table's HEADER component for sorting the table. */
-	private void initContactTableForSorting() {
-		Object header = Thinlet.get(contactListComponent, ThinletText.HEADER);
-		for (Object o : ui.getItems(header)) {
-			String text = ui.getString(o, Thinlet.TEXT);
-			// Here, the FIELD property is set on each column of the message table.  These field objects are
-			// then used for easy sorting of the message table.
-			if(text != null) {
-				if (text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_NAME))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.STATUS);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_PHONE_NUMBER))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.DATE);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_E_MAIL_ADDRESS))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.SENDER_MSISDN);
-			}
-		}
-	}
+//	/** Initialise the message table's HEADER component for sorting the table. */
+//	private void initContactTableForSorting() {
+//		Object header = Thinlet.get(contactListComponent, ThinletText.HEADER);
+//		for (Object o : ui.getItems(header)) {
+//			String text = ui.getString(o, Thinlet.TEXT);
+//			// Here, the FIELD property is set on each column of the message table.  These field objects are
+//			// then used for easy sorting of the message table.
+//			if(text != null) {
+//				if (text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_NAME))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.STATUS);
+//				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_PHONE_NUMBER))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.DATE);
+//				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_E_MAIL_ADDRESS))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.SENDER_MSISDN);
+//			}
+//		}
+//	}
 	
 	/**
 	 * UI event called when the user changes tab
