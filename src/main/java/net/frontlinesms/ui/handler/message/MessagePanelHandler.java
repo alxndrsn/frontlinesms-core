@@ -87,7 +87,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 			uiController.setVisible(lbTooManyMessages, false);
 			uiController.setColor(lbTooManyMessages, "foreground", Color.RED);
 		}
-		updateMessageDetails("", "");
+		updateMessageDetails(find(COMPONENT_TF_RECIPIENT), "");
 	}
 
 	private Object find(String component) {
@@ -113,8 +113,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 	public void addConstantToCommand(String currentText, Object tfMessage, String type) {
 		BaseActionDialog.addConstantToCommand(uiController, currentText, tfMessage, type);
 		
-		String recipient = uiController.getText(find(COMPONENT_TF_RECIPIENT));
-		updateMessageDetails(recipient, uiController.getText(tfMessage));
+		updateMessageDetails(find(COMPONENT_TF_RECIPIENT), uiController.getText(tfMessage));
 	}
 	
 //> THINLET UI METHODS
@@ -175,12 +174,12 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 	 * @param text the new text value for the message recipient
 	 * 
 	 */
-	public void recipientChanged(String recipient, String message) {
-		this.uiController.setAttachedObject(find(UiGeneratorControllerConstants.COMPONENT_TF_RECIPIENT), null);
+	public void recipientChanged(Object recipientField, String message) {
+		this.uiController.setAttachedObject(recipientField, null);
 		this.uiController.setIcon(find(COMPONENT_LB_ICON), Icon.USER_STATUS_ACTIVE);
 		this.numberToSend = 1;
 		
-		this.updateMessageDetails(recipient, message);
+		this.updateMessageDetails(recipientField, message);
 	}
 	
 	/** Method which triggers showing of the contact selecter. */
@@ -208,7 +207,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 		setSendButtonMethod(this, this.messagePanel, "sendToGroup");
 		
 		uiController.updateCost();
-		this.updateMessageDetails(group.getName(), this.uiController.getText(find(UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE)));
+		this.updateMessageDetails(group, this.uiController.getText(find(UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE)));
 	}
 	
 	/**
@@ -236,23 +235,29 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 		uiController.updateCost();
 		
 		// The recipient text has changed, we check whether the send button should be enabled
-		this.recipientChanged(uiController.getText(tfRecipient), uiController.getText(tfMessage));
+		this.recipientChanged(tfRecipient, uiController.getText(tfMessage));
 	}
 	
 	/**
+	 * @param recipients Either the recipients field's text or the group attached
 	 * @param message the new text value for the message body
-	 * 
 	 */
-	public void updateMessageDetails(String recipient, String message) {
-		int recipientLength = recipient.length();
+	public void updateMessageDetails(Object recipients, String message) {
 		int messageLength = message.length();
 		
 		Object sendButton = find(COMPONENT_BT_SEND);
 		boolean areAllCharactersValidGSM = GsmAlphabet.areAllCharactersValidGSM(message);
 		int totalLengthAllowed = FrontlineMessage.getTotalLengthAllowed(message);
 		
-		boolean shouldEnableSendButton = (messageLength > 0 && (!shouldCheckMaxMessageLength || messageLength <= totalLengthAllowed)
-											&& (!shouldDisplayRecipientField || recipientLength > 0));
+		boolean shouldEnableSendButton = (messageLength > 0 && (!shouldCheckMaxMessageLength || messageLength <= totalLengthAllowed));
+		if (shouldDisplayRecipientField) {
+			if (recipients instanceof Group) {
+				shouldEnableSendButton &= this.numberToSend > 0;
+			} else {
+				shouldEnableSendButton &= !this.uiController.getText(recipients).isEmpty();
+			}
+		}
+											
 		
 		if (sendButton != null)
 			uiController.setEnabled(sendButton, shouldEnableSendButton);

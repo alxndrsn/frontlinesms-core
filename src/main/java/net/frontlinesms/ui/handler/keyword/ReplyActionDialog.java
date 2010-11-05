@@ -9,6 +9,7 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_RE
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BT_RECIPIENT_NUMBER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_BOTTOM;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_RECIPIENT;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.UI_FILE_SENDER_NAME_PANEL;
 
 import net.frontlinesms.data.domain.Keyword;
@@ -83,7 +84,7 @@ public class ReplyActionDialog extends BaseActionDialog {
 			Object tfMessage = find(COMPONENT_TF_MESSAGE);
 			// Set the initial value of the reply text
 			ui.setText(tfMessage, action.getUnformattedReplyText());
-			messagePanelController.updateMessageDetails("", action.getUnformattedReplyText());
+			messagePanelController.updateMessageDetails(find(COMPONENT_TF_RECIPIENT), action.getUnformattedReplyText());
 			// Put the cursor (caret) at the end of the text area, so the click on a constant
 			// button inserts it at the end by default
 			ui.setCaretPosition(tfMessage, ui.getText(tfMessage).length());

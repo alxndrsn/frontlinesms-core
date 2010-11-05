@@ -4,7 +4,7 @@
         <panel name="pnMessageRecipient" gap="10">
             <label icon="/icons/sms_receive.png" text="i18n.common.recipient.to"/>
             <label name="lbIcon"/>
-            <textfield action="recipientChanged(this.text, tfMessage.text)" columns="20" name="tfRecipient"/>
+            <textfield action="recipientChanged(this, tfMessage.text)" columns="20" name="tfRecipient"/>
             <button action="selectMessageRecipient" icon="/icons/user_receiver.png" tooltip="i18n.common.select.contact"/>
             <button action="selectGroup" icon="/icons/group_join.png" tooltip="i18n.common.group.select"/>
         </panel>
@@ -24,7 +24,7 @@
         <label font="bold" name="lbEstimatedMoney"/>
         <label icon="/icons/help.png" name="lbHelp" visible="false" tooltip="i18n.tooltip.approximative.count"/>
     </panel>
-    <textarea action="updateMessageDetails(tfRecipient.text, this.text)" rows="8" columns="40" name="tfMessage"/>
+    <textarea action="updateMessageDetails(tfRecipient, this.text)" rows="8" columns="40" name="tfMessage"/>
     <panel name="pnBottom" gap="13" weightx="1" columns="2">
         <panel gap="8" halign="left" weightx="1">
             <label halign="left" text="i18n.sentence.you.can.include"/>
