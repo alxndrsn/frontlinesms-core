@@ -31,7 +31,7 @@ public class SettingsDevicesSectionHandler extends BaseSectionHandler implements
 		
 		// Populating
 		AppProperties appProperties = AppProperties.getInstance();
-		boolean shouldPromptDeviceConnectionProblemDialog = appProperties.isDeviceConnectionDialogEnabled();
+		boolean shouldPromptDeviceConnectionProblemDialog = appProperties.shouldPromptDeviceConnectionDialog();
 		//boolean disableAllDevices = appProperties.disableAllDevices();
 		boolean startDetectingAtStartup = appProperties.startDetectingAtStartup();
 		
@@ -61,7 +61,7 @@ public class SettingsDevicesSectionHandler extends BaseSectionHandler implements
 		/** PROPERTIES **/
 		AppProperties appProperties = AppProperties.getInstance();
 		
-		appProperties.setDeviceConnectionDialogEnabled(this.uiController.isSelected(find(UI_COMPONENT_CB_PROMPT_DEVICE_CONNECTION_PROBLEM_DIALOG)));
+		appProperties.setShouldPromptDeviceConnectionDialog(this.uiController.isSelected(find(UI_COMPONENT_CB_PROMPT_DEVICE_CONNECTION_PROBLEM_DIALOG)));
 		appProperties.shouldStartDetectingAtStartup(this.uiController.isSelected(find(UI_COMPONENT_CB_START_DETECTING)));
 		//appProperties.shouldDisableAllDevices(this.uiController.isSelected(find(UI_COMPONENT_CB_DISABLE_ALL)));
 

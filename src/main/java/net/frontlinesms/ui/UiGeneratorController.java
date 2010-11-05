@@ -1900,8 +1900,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/** Handle notifications from the {@link EventBus} */
 	public void notify(final FrontlineEventNotification notification) {
 		if(notification instanceof NoSmsServicesConnectedNotification) {
-			// Unable to connect to SMS devices.  If enabled, show the help dialog to prompt connection 
-			if (AppProperties.getInstance().isDeviceConnectionDialogEnabled()) {
+			// Unable to connect to SMS devices.  If configured so, prompt the help dialog
+			if (AppProperties.getInstance().shouldPromptDeviceConnectionDialog()) {
 				synchronized (deviceConnectionDialogHandlerLock) {
 					// If the dialog is not already created AND not already displayed, create a new one and show it now
 					if (deviceConnectionDialogHandler == null) {

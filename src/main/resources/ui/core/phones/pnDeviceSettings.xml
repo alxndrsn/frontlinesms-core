@@ -18,7 +18,7 @@
 			<label text="i18n.phone.settings.smsc.number" icon="/icons/server.png"/>
 			<textfield name="tfSmscNumber" weightx="1"/>
 			
-			<label text="i18n.phone.settings.pin" icon="/icons/key.png" tooltip="phone.settings.pin.tooltip"/>
-			<textfield name="tfPin" weightx="1" tooltip="phone.settings.pin.tooltip"/>
+			<label text="i18n.phone.settings.pin" icon="/icons/key.png" tooltip="i18n.phone.settings.pin.tooltip"/>
+			<passwordfield name="tfPin" weightx="1" tooltip="i18n.phone.settings.pin.tooltip"/>
 	</panel>
 </panel>

@@ -141,7 +141,7 @@ public class NoPhonesDetectedDialogHandler implements ThinletUiEventHandler {
 	 */
 	public void manageAlwaysShow(boolean shouldAlwaysShow) {
 		AppProperties appProperties = AppProperties.getInstance();
-		appProperties.setDeviceConnectionDialogEnabled(shouldAlwaysShow);
+		appProperties.setShouldPromptDeviceConnectionDialog(shouldAlwaysShow);
 		appProperties.saveToDisk();
 	}
 	

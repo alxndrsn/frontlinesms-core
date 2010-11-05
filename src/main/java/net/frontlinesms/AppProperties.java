@@ -149,11 +149,11 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	}
 	
 	/** @return <code>true</code> if the device connection dialog must be shown when a connection problem occurs, <code>false</code> otherwise */
-	public boolean isDeviceConnectionDialogEnabled() {
+	public boolean shouldPromptDeviceConnectionDialog() {
 		return super.getPropertyAsBoolean(KEY_SHOW_DEVICE_CONNECTION_DIALOG, true);
 	}
 	/** @param showDialog whether the device connection dialog is shown when a connection problem occurs */
-	public void setDeviceConnectionDialogEnabled(boolean showDialog) {
+	public void setShouldPromptDeviceConnectionDialog(boolean showDialog) {
 		super.setPropertyAsBoolean(KEY_SHOW_DEVICE_CONNECTION_DIALOG, showDialog);
 	}
 	
