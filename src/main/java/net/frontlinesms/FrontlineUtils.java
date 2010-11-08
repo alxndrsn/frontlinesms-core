@@ -44,6 +44,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Locale;
 
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.email.EmailException;
@@ -586,7 +587,7 @@ public class FrontlineUtils {
 	 * Tries to format the given phone number into a valid international format.
 	 * @param msisdn A non-formatted phone number
 	 */
-	public static String getInternationalFormat(String msisdn) {
+	public static String getInternationalFormat(String msisdn, Locale locale) {
 		// Remove the (0) sometimes present is certain numbers.
 		// This 0 MUST NOT be present in the international formatted number
 		String formattedNumber = msisdn.replace("(0)", "");
@@ -594,14 +595,31 @@ public class FrontlineUtils {
 		// Remove every character which is not a digit
 		formattedNumber = formattedNumber.replaceAll("\\D", "");
 		
-		// If the number was prefixed by the (valid) 00(code) format,
-		// we transform it to the + sign
-		if (formattedNumber.startsWith("00")) {
-			return "+" + formattedNumber.substring(2);
-		} else {
-			// NB: even if a + sign had been specified, it's been removed by the replaceAll function
-			// We have to put one back
+		if (msisdn.startsWith("+")) {
+			// If the original number was prefixed by ++,
+			// we put it back
 			return "+" + formattedNumber;
+		} else if (formattedNumber.startsWith("00")) {
+			// If the number was prefixed by the (valid) 00(code) format,
+			// we transform it to the + sign
+			return "+" + formattedNumber.substring(2);
+		} else if (formattedNumber.startsWith(InternationalisationUtils.getInternationalCountryCode(locale.getCountry()))) {
+			// If the number was prefixed by the current country code,
+			// we just put a + sign back in front of it.
+			return "+" + formattedNumber;
+		} else if (formattedNumber.startsWith("0")) {
+			// Most internal numbers starts with one 0. We'll have to remove it
+			// Before putting a + sign in front of it.
+			formattedNumber = formattedNumber.substring(1);
 		}
+		
+		// NB: even if a + sign had been specified, it's been removed by the replaceAll function
+		// We have to put one back.
+		// We also try to prefix the number with the current country code
+		return "+" + InternationalisationUtils.getInternationalCountryCode(locale.getCountry()) + formattedNumber;
+	}
+	
+	public static String getInternationalFormat(String msisdn) {
+		return getInternationalFormat(msisdn, InternationalisationUtils.getCurrentLocale());
 	}
 }

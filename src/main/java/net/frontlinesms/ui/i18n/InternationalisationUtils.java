@@ -530,4 +530,12 @@ public class InternationalisationUtils {
 				? FrontlineUI.currentResourceBundle.getLocale()
 				: new Locale("en", "gb");
 	}
+	
+	public static String getInternationalCountryCode(String country) {
+		if (country == null || country.isEmpty()) {	
+			return "";
+		} else {
+			return InternationalCountryCodes.valueOf(country.toUpperCase()).getCountryCode();
+		}
+	}
 }
