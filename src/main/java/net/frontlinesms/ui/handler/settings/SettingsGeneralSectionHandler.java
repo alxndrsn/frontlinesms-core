@@ -8,6 +8,7 @@ import net.frontlinesms.AppProperties;
 import net.frontlinesms.events.AppPropertiesEventNotification;
 import net.frontlinesms.settings.BaseSectionHandler;
 import net.frontlinesms.settings.FrontlineValidationMessage;
+import net.frontlinesms.ui.EnumCountry;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -15,8 +16,11 @@ import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
 
 public class SettingsGeneralSectionHandler extends BaseSectionHandler implements UiSettingsSectionHandler, ThinletUiEventHandler {
 	private static final String UI_SECTION_GENERAL = "/ui/core/settings/general/pnGeneralSettings.xml";
-	private static final String UI_COMPONENT_CB_PROMPT_STATS = "cbPromptStats";
+	
 	private static final String UI_COMPONENT_CB_AUTHORIZE_STATS = "cbAuthorizeStats";
+	private static final String UI_COMPONENT_CB_PROMPT_STATS = "cbPromptStats";
+	private static final String UI_COMPONENT_COMBOBOX_COUNTRIES = "cbCountries";
+
 	private static final String UI_COMPONENT_TF_COST_PER_SMS_SENT = "tfCostPerSMSSent";
 	private static final String UI_COMPONENT_LB_COST_PER_SMS_SENT_PREFIX = "lbCostPerSmsSentPrefix";
 	private static final String UI_COMPONENT_LB_COST_PER_SMS_SENT_SUFFIX = "lbCostPerSmsSentSuffix";
@@ -28,10 +32,11 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 	private static final String I18N_SETTINGS_INVALID_COST_PER_MESSAGE_SENT = "settings.message.invalid.cost.per.message.sent";
 	private static final String I18N_SETTINGS_MENU_GENERAL = "settings.menu.general";
 
-	private static final String SECTION_ITEM_PROMPT_STATS = "GENERAL_STATS_PROMPT_DIALOG";
 	private static final String SECTION_ITEM_AUTHORIZE_STATS = "GENERAL_STATS_AUTHORIZE_SENDING";
 	private static final String SECTION_ITEM_COST_PER_SMS_SENT = "GENERAL_COST_PER_SMS_SENT";
 	private static final String SECTION_ITEM_COST_PER_SMS_RECEIVED = "GENERAL_COST_PER_SMS_RECEIVED";
+	private static final String SECTION_ITEM_COUNTRY = "GENERAL_COUNTRY";
+	private static final String SECTION_ITEM_PROMPT_STATS = "GENERAL_STATS_PROMPT_DIALOG";
 	
 	public SettingsGeneralSectionHandler (UiGeneratorController ui) {
 		super(ui);
@@ -43,6 +48,22 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 		
 		this.initStatisticsSettings();
 		this.initCostEstimatorSettings();
+		this.initCountrySettings();
+	}	
+	
+	private void initStatisticsSettings() {
+		AppProperties appProperties = AppProperties.getInstance();
+		
+		boolean shouldPromptStatsDialog = appProperties.shouldPromptStatsDialog();
+		boolean isStatsSendingAuthorized = appProperties.isStatsSendingAuthorized();
+		
+		this.originalValues.put(SECTION_ITEM_PROMPT_STATS, shouldPromptStatsDialog);
+		this.originalValues.put(SECTION_ITEM_AUTHORIZE_STATS, isStatsSendingAuthorized);
+		
+		this.uiController.setSelected(find(UI_COMPONENT_CB_PROMPT_STATS), shouldPromptStatsDialog);
+		
+		this.uiController.setSelected(find(UI_COMPONENT_CB_AUTHORIZE_STATS), isStatsSendingAuthorized);
+		this.uiController.setEnabled(find(UI_COMPONENT_CB_AUTHORIZE_STATS), !shouldPromptStatsDialog);
 	}
 	
 	private void initCostEstimatorSettings() {
@@ -65,21 +86,30 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 		this.originalValues.put(SECTION_ITEM_COST_PER_SMS_RECEIVED, costPerSmsReceived);
 		this.originalValues.put(SECTION_ITEM_COST_PER_SMS_SENT, costPerSmsSent);
 	}
+	
+	/** Populate and display the countries in a Combo Box. */
+	private void initCountrySettings() {
+		Object countryList = find(UI_COMPONENT_COMBOBOX_COUNTRIES);
+		int selectedIndex = -1;
+		Object currentCountry = AppProperties.getInstance().getCurrentCountry();
 
-	private void initStatisticsSettings() {
-		AppProperties appProperties = AppProperties.getInstance();
+		// Missing translation files
+		for (int i = 0 ; i < EnumCountry.values().length ; ++i) {
+			EnumCountry enumCountry = EnumCountry.values()[i];
+			
+			Object comboBoxChoice = this.uiController.createComboboxChoice(enumCountry.getEnglishName(), enumCountry.getCode().toUpperCase());
+			this.uiController.setIcon(comboBoxChoice, this.uiController.getFlagIcon(enumCountry.getCode()));
+			
+			this.uiController.add(countryList, comboBoxChoice);
+			if (currentCountry.equals(enumCountry.getCode().toUpperCase())) {
+				selectedIndex = i;
+			}
+		}
 		
-		boolean shouldPromptStatsDialog = appProperties.shouldPromptStatsDialog();
-		boolean isStatsSendingAuthorized = appProperties.isStatsSendingAuthorized();
-		
-		this.originalValues.put(SECTION_ITEM_PROMPT_STATS, shouldPromptStatsDialog);
-		this.originalValues.put(SECTION_ITEM_AUTHORIZE_STATS, isStatsSendingAuthorized);
-		
-		this.uiController.setSelected(find(UI_COMPONENT_CB_PROMPT_STATS), shouldPromptStatsDialog);
-		
-		this.uiController.setSelected(find(UI_COMPONENT_CB_AUTHORIZE_STATS), isStatsSendingAuthorized);
-		this.uiController.setEnabled(find(UI_COMPONENT_CB_AUTHORIZE_STATS), !shouldPromptStatsDialog);
+		this.uiController.setSelectedIndex(countryList, selectedIndex);
+		this.originalValues.put(SECTION_ITEM_COUNTRY, currentCountry);
 	}
+
 
 	/**
 	 * Called when the "Prompt the statistics dialog" checkbox has changed state.
@@ -100,6 +130,17 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 	}
 	
 	/**
+	 * Called when the "country" combobox has changed
+	 */
+	public void countryChanged (Object combobox) {
+		Object selectedItem = this.uiController.getSelectedItem(combobox);
+		
+		if (selectedItem != null) {
+			this.settingChanged(SECTION_ITEM_COUNTRY, this.uiController.getAttachedObject(selectedItem, String.class));
+		}
+	}
+	
+	/**
 	 * Called when the cost per SMS (sent or received) has changed.
 	 */
 	public void costPerSmsChanged(Object textField) {
@@ -117,6 +158,7 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 		appProperties.shouldPromptStatsDialog(this.uiController.isSelected(find(UI_COMPONENT_CB_PROMPT_STATS)));
 		appProperties.setAuthorizeStatsSending(this.uiController.isSelected(find(UI_COMPONENT_CB_AUTHORIZE_STATS)));
 		
+		/** COST **/
 		try {
 			double costPerSmsSent = InternationalisationUtils.parseCurrency(this.uiController.getText(find(UI_COMPONENT_TF_COST_PER_SMS_SENT)));
 
@@ -133,6 +175,10 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 		} catch (ParseException e) {
 			// Should never happen
 		}
+		
+		/** COUNTRY **/
+		String country = this.uiController.getAttachedObject(this.uiController.getSelectedItem(find(UI_COMPONENT_COMBOBOX_COUNTRIES)), String.class);
+		appProperties.setCurrentCountry(country);
 		
 		appProperties.saveToDisk();		
 	}

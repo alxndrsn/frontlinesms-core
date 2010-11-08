@@ -95,15 +95,18 @@ public class FrontlineUtilsTest extends BaseTestCase {
 		assertFalse(FrontlineUtils.isInInternationalFormat("+1-(555)-9999"));
 		assertFalse(FrontlineUtils.isInInternationalFormat("+44(0)7762975852"));
 		
+		// The country code specified in the current properties
+		String currentAreaCode = InternationalisationUtils.getInternationalCountryCode(AppProperties.getInstance().getCurrentCountry());
+		
 		assertEquals("+15559999", FrontlineUtils.getInternationalFormat("+15559999"));
 		assertEquals("+15559999", FrontlineUtils.getInternationalFormat("0015559999"));
 		assertEquals("+15559999", FrontlineUtils.getInternationalFormat("+1-(555)-9999"));
-		assertEquals("+4415559999", FrontlineUtils.getInternationalFormat("1-(555)-9999")); // This is unfortunately the expected result!
-		assertEquals("+15559999", FrontlineUtils.getInternationalFormat("1-(555)-9999", Locale.US));
+		assertEquals("+" + currentAreaCode + "15559999", FrontlineUtils.getInternationalFormat("1-(555)-9999")); // This is unfortunately the expected result!
+		assertEquals("+15559999", FrontlineUtils.getInternationalFormat("1-(555)-9999", Locale.US.getCountry()));
 		assertEquals("+15559999", FrontlineUtils.getInternationalFormat("001-(555)-9999"));
-		assertEquals("+44712345678", FrontlineUtils.getInternationalFormat("0712345678", Locale.UK));
-		assertEquals("+15559999", FrontlineUtils.getInternationalFormat("555-9999", Locale.US));
-		assertEquals("+336123456789", FrontlineUtils.getInternationalFormat("06123456789", Locale.FRANCE));
+		assertEquals("+44712345678", FrontlineUtils.getInternationalFormat("0712345678", Locale.UK.getCountry()));
+		assertEquals("+15559999", FrontlineUtils.getInternationalFormat("555-9999", Locale.US.getCountry()));
+		assertEquals("+336123456789", FrontlineUtils.getInternationalFormat("06123456789", Locale.FRANCE.getCountry()));
 		assertEquals("+33678965454", FrontlineUtils.getInternationalFormat("+33(0)6 78 96 54 54"));
 		assertEquals("+33678965454", FrontlineUtils.getInternationalFormat("0033(0)678965454"));
 		assertEquals("+33678965454", FrontlineUtils.getInternationalFormat("0033(0)6-78-96-54-54"));

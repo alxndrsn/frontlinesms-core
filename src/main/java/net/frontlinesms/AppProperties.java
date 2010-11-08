@@ -4,6 +4,7 @@
 package net.frontlinesms;
 
 import net.frontlinesms.resources.UserHomeFilePropertySet;
+import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
  * @author Alex Anderson <alex@frontlinesms.com>
@@ -41,10 +42,12 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	public static final String KEY_DISABLE_ALL_DEVICES = "disable.all.devices";
 	/** Property key (String) indicating whether or not devices should be detected at startup **/
 	public static final String KEY_START_DETECTING_AT_STARTUP = "start.detecting.at.startup";
-	/** Property key (double) the price per SMS sent */
+	/** Property key (double) indicating the price per SMS sent */
 	public static final String KEY_SMS_COST_SENT_MESSAGES = "sms.cost.sent.messages";
-	/** Property key (double) the price per SMS received */
+	/** Property key (double) indicating the price per SMS received */
 	public static final String KEY_SMS_COST_RECEIVED_MESSAGES = "sms.cost.received.messages";
+	/** Property key (String) indicating the country the user is currently in */
+	public static final String KEY_CURRENT_COUNTRY = "current.country";
 
 //> DEFAULT VALUES
 	/** Default value for {@link #KEY_DATABASE_CONFIG_PATH} */
@@ -227,7 +230,7 @@ public final class AppProperties extends UserHomeFilePropertySet {
 		super.setProperty(KEY_SMS_COST_SENT_MESSAGES, Double.toString(costPerSmsSent));
 	}
 	
-	/** @return number representing the cost of one SMS sent */
+	/** @return a {@link Double} representing the cost of one SMS sent */
 	public double getCostPerSmsReceived() {
 		// TODO ideally this would be an int in the least significant denomination of the currency, e.g. pennies or cents
 		String val = super.getProperty(KEY_SMS_COST_RECEIVED_MESSAGES);
@@ -241,6 +244,20 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	/** @param costPerSmsReceived the price of one sms */
 	public void setCostPerSmsReceived(double costPerSmsReceived) {
 		super.setProperty(KEY_SMS_COST_RECEIVED_MESSAGES, Double.toString(costPerSmsReceived));
+	}
+	
+	/** @return the current country the user is located in. */
+	public String getCurrentCountry() {
+		if (super.getProperty(KEY_CURRENT_COUNTRY) == null) {
+			return InternationalisationUtils.getCurrentLocale().getCountry().toUpperCase();
+		} else {
+			return super.getProperty(KEY_CURRENT_COUNTRY);
+		}
+	}
+	
+	/** @param the current country the user is located in. */
+	public void setCurrentCountry(String country) {
+		super.setProperty(KEY_CURRENT_COUNTRY, country);
 	}
 
 //> STATIC FACTORIES

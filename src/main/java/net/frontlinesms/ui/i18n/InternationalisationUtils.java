@@ -531,6 +531,7 @@ public class InternationalisationUtils {
 				: new Locale("en", "gb");
 	}
 	
+	/** @return the area calling code for a country */
 	public static String getInternationalCountryCode(String country) {
 		if (country == null || country.isEmpty()) {	
 			return "";

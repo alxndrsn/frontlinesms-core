@@ -250,6 +250,6 @@ public enum InternationalCountryCodes {
 	}
 
 	public String getCountryCode() {
-		return countryCode;
+		return countryCode.replace(" ", "");
 	}
 }
