@@ -6,8 +6,6 @@ package net.frontlinesms.ui;
 import java.awt.Font;
 import java.awt.Image;
 
-import javax.swing.ToolTipManager;
-
 import thinlet.Thinlet;
 import thinlet.ThinletText;
 
@@ -279,6 +277,17 @@ private static final String START = "start";
 	 */
 	public void setPerform(Object component, String methodCall, Object root, Object handler) {
 		setMethod(component, Thinlet.PERFORM, methodCall, root, handler);
+	}
+	
+	/**
+	 * Set the DELETE method of a component
+	 * @param component
+	 * @param methodCall
+	 * @param root
+	 * @param handler
+	 */
+	public void setDeleteAction(Object component, String methodCall, Object root, Object handler) {
+		setMethod(component, "delete", methodCall, root, handler);
 	}
 	
 	/**

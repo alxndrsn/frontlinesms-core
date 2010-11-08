@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
@@ -21,6 +22,8 @@ import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.UiGeneratorControllerConstants;
+import net.frontlinesms.ui.handler.ChoiceDialogHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
@@ -44,6 +47,8 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	public static final String MESSAGE_EXISTENT_CONTACT = "message.contact.already.exists";
 
 	private static final String COMPONENT_SAVE_BUTTON = "btSave";
+
+	private static final String I18N_SENTENCE_DID_YOU_MEAN_INTERNATIONAL = "sentence.did.you.mean.international";
 
 //> INSTANCE PROPERTIES
 	private Logger LOG = Logger.getLogger(this.getClass());
@@ -194,8 +199,27 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 		}
 		
 		// Extract the new details of the contact from the UI
-		String name = getText(COMPONENT_CONTACT_NAME);
 		String msisdn = getText(COMPONENT_CONTACT_MOBILE_MSISDN);
+		
+		if (!FrontlineUtils.isInInternationalFormat(msisdn)) {
+			ChoiceDialogHandler choiceDialogHandler = new ChoiceDialogHandler(this.ui);
+			String internationalFormat = FrontlineUtils.getInternationalFormat(msisdn);
+			choiceDialogHandler.showChoiceDialog(this, "doSave('" + internationalFormat + "', this, choiceDialog)", I18N_SENTENCE_DID_YOU_MEAN_INTERNATIONAL, internationalFormat);
+		} else {
+			this.doSave(msisdn, null, null);
+		}
+	}
+		
+	public void doSave(String msisdn, Object button, Object dialog) {
+		if (dialog != null) {
+			this.removeDialog(dialog);
+		}
+		
+		if (button == null || button.equals(this.ui.find(dialog, UiGeneratorControllerConstants.COMPONENT_BUTTON_NO))) {
+			msisdn = getText(COMPONENT_CONTACT_MOBILE_MSISDN);
+		}
+		
+		String name = getText(COMPONENT_CONTACT_NAME);
 		String otherMsisdn = getText(COMPONENT_CONTACT_OTHER_MSISDN);
 		String emailAddress = getText(COMPONENT_CONTACT_EMAIL_ADDRESS);
 		String notes = getText(COMPONENT_CONTACT_NOTES);
@@ -287,7 +311,12 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	
 	/** Remove the dialog from view. */
 	public void removeDialog() {
-		this.ui.removeDialog(this.dialogComponent);
+		this.removeDialog(this.dialogComponent);
+	}
+	
+	/** Remove a dialog from view. */
+	public void removeDialog(Object dialog) {
+		this.ui.removeDialog(dialog);
 	}
 	
 //> UI HELPER METHODS

@@ -121,6 +121,7 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_FORWARD_FORM_TEXTAREA = "forward";
 	public static final String COMPONENT_GROUPS_MENU = "groupsMenu";
 	public static final String COMPONENT_BUTTON_YES = "btYes";
+	public static final String COMPONENT_BUTTON_NO = "btNo";
 	public static final String COMPONENT_DELETE_NEW_CONTACT = "deleteNewContact";
 	public static final String COMPONENT_LABEL_STATUS = "lbStatus";
 	public static final String COMPONENT_MENU_ITEM_VIEW_CONTACT = "viewContact";

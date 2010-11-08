@@ -117,10 +117,21 @@ public class InternationalisationUtils {
 	 * @param key
 	 * @return the list internationalised text, or an empty list if no internationalised text could be found
 	 */
-	public static List<String> getI18nStrings(String key) {
+	public static List<String> getI18nStrings(String key, String ... i18nValues) {
 		if(FrontlineUI.currentResourceBundle != null) {
 			try {
-				return FrontlineUI.currentResourceBundle.getValues(key);
+				List<String> values = FrontlineUI.currentResourceBundle.getValues(key);
+
+				if (i18nValues.length == 0) {
+					return values;
+				} else {
+					List<String> formattedValues = new ArrayList<String>();
+					for (String value : values) {
+						formattedValues.add(formatString(value, i18nValues));
+					}
+					
+					return formattedValues;
+				}
 			} catch(MissingResourceException ex) {}
 		}
 		return LanguageBundle.getValues(Thinlet.DEFAULT_ENGLISH_BUNDLE, key);
@@ -518,5 +529,14 @@ public class InternationalisationUtils {
 		return FrontlineUI.currentResourceBundle != null
 				? FrontlineUI.currentResourceBundle.getLocale()
 				: new Locale("en", "gb");
+	}
+	
+	/** @return the area calling code for a country */
+	public static String getInternationalCountryCode(String country) {
+		if (country == null || country.isEmpty()) {	
+			return "";
+		} else {
+			return InternationalCountryCodes.valueOf(country.toUpperCase()).getCountryCode();
+		}
 	}
 }
