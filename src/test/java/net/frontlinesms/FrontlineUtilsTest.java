@@ -111,5 +111,6 @@ public class FrontlineUtilsTest extends BaseTestCase {
 		assertEquals("+33678965454", FrontlineUtils.getInternationalFormat("0033(0)678965454"));
 		assertEquals("+33678965454", FrontlineUtils.getInternationalFormat("0033(0)6-78-96-54-54"));
 		assertEquals("+33678965454", FrontlineUtils.getInternationalFormat("0033(0)6.78.96.54.54"));
+		assertEquals("+447771592981", FrontlineUtils.getInternationalFormat("+44 (0) 7771 592981"));
 	}
 }
