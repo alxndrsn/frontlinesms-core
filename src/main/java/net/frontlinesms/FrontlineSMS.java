@@ -664,6 +664,14 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 			return System.currentTimeMillis() >= dateNextPrompt;
 		}
 	}
+	
+	/**
+	 * @return The total number of active connections running (SMS & MMS)
+	 */
+	public int getNumberOfActiveConnections() {
+		return this.smsServiceManager.getNumberOfActiveConnections() 
+			 + this.mmsServiceManager.getNumberOfActiveConnections();
+	}
 
 	public void notify(FrontlineEventNotification notification) {
 		if (notification instanceof MmsReceivedNotification) {

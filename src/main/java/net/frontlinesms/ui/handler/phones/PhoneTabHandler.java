@@ -101,9 +101,6 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	/** Data Access Object for {@link SmsModemSettings}s */
 	private final SmsModemSettingsDao smsModelSettingsDao;
 	private MmsServiceManager mmsServiceManager;
-
-	private DeviceSettingsDialogHandler deviceSettingsDialog;
-
 //> CONSTRUCTORS
 	/**
 	 * Create a new instance of this class.
@@ -404,10 +401,12 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 				}
 	
 				ui.setSelectedIndex(getModemListComponent(), indexTop);
-				ui.setSelectedIndex(modemListError, index);		}
-			};
+				ui.setSelectedIndex(modemListError, index);
+				ui.updateActiveConnections();
+			}
+		};
 	
-			EventQueue.invokeLater(updateJob);
+		EventQueue.invokeLater(updateJob);
 	}
 	
 	private Object getTableRow(FrontlineMessagingService service, boolean isConnected) {

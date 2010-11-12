@@ -211,7 +211,6 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 		this.uiController.setIcon(find(COMPONENT_LB_ICON), Icon.GROUP);
 		setSendButtonMethod(this, this.messagePanel, "sendToGroup");
 		
-		uiController.updateCost();
 		this.updateMessageDetails(group, this.uiController.getText(find(UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE)));
 	}
 	

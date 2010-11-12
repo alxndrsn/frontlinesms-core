@@ -81,6 +81,7 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_LB_SECOND = "lbSecond";
 	public static final String COMPONENT_LB_FIRST = "lbFirst";
 	public static final String COMPONENT_LB_MSG_NUMBER = "lbMsgNumber";
+	public static final String COMPONENT_LB_ACTIVE_CONNECTIONS = "lbActiveConnections";
 	public static final String COMPONENT_LB_HELP = "lbHelp";
 	public static final String COMPONENT_LB_REMAINING_CHARS = "lbRemainingChars";
 	public static final String COMPONENT_PN_MESSAGE = "pnMessage";

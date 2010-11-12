@@ -190,4 +190,19 @@ public class MmsServiceManager extends Thread  {
 			}
 		}
 	}
+
+	/**
+	 * @return The number of active MMS connections running
+	 */
+	public int getNumberOfActiveConnections() {
+		int total = 0;
+
+		for(MmsService modem : this.mmsEmailServices) {
+			if (modem.isConnected()) {
+				++total;
+			}
+		}
+
+		return total;
+	}
 }
