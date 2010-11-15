@@ -24,7 +24,6 @@ import java.awt.Font;
 import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -225,15 +224,15 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			// Find the languages submenu, and add all present language packs to it
 			addLanguageMenu(find("menu_language"));
 			
-			setText(find(COMPONENT_TF_COST_PER_SMS), InternationalisationUtils.formatCurrency(this.getCostPerSms(), false));
-			setText(find(COMPONENT_LB_COST_PER_SMS_PREFIX),
-					InternationalisationUtils.isCurrencySymbolPrefix() 
-							? InternationalisationUtils.getCurrencySymbol()
-							: "");
-			setText(find(COMPONENT_LB_COST_PER_SMS_SUFFIX),
-					InternationalisationUtils.isCurrencySymbolSuffix() 
-					? InternationalisationUtils.getCurrencySymbol()
-					: "");
+//			setText(find(COMPONENT_TF_COST_PER_SMS), InternationalisationUtils.formatCurrency(this.getCostPerSms(), false));
+//			setText(find(COMPONENT_LB_COST_PER_SMS_PREFIX),
+//					InternationalisationUtils.isCurrencySymbolPrefix() 
+//							? InternationalisationUtils.getCurrencySymbol()
+//							: "");
+//			setText(find(COMPONENT_LB_COST_PER_SMS_SUFFIX),
+//					InternationalisationUtils.isCurrencySymbolSuffix() 
+//					? InternationalisationUtils.getCurrencySymbol()
+//					: "");
 			
 			Object tabbedPane = find(COMPONENT_TABBED_PANE);
 			
@@ -331,6 +330,9 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			
 			setStatus(InternationalisationUtils.getI18NString(MESSAGE_PHONE_MANAGER_INITIALISED));
 			
+			// Active connections
+			this.updateActiveConnections();
+			
 			if (detectPhones) {
 				this.autodetectModems();
 			}
@@ -344,7 +346,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			throw t;
 		}
 	}
-	
+
 	public void autodetectModems() {
 		this.phoneTabController.phoneManager_detectModems();
 	}
@@ -879,21 +881,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			throw new RuntimeException(e);
 		}
 		LOG.trace("EXIT");
-	}
-
-	// FIXME fire this on textfield lostFocus or textfield execution (<return> pressed)
-	public void costChanged(String cost) {
-		if (cost.length() == 0) this.setCostPerSms(0);
-		else {
-			try {
-				double costPerSMS = (InternationalisationUtils.parseCurrency(cost))/* * Utils.TIMES_TO_INT*/;//FIXME this will likely give some very odd costs - needs adjusting for moving decimal point.
-				this.setCostPerSms(costPerSMS);
-			} catch (ParseException e) {
-				alert("Did not understand currency value: " + cost + ".  Should be of the form: " + InternationalisationUtils.formatCurrency(123456.789)); // TODO i18n
-			} 
-		}
-
-		this.getFrontlineController().getEventBus().notifyObservers(new AppPropertiesEventNotification(AppProperties.class, AppProperties.KEY_SMS_COST_SENT_MESSAGES));
 	}
 	
 	/**
@@ -1764,17 +1751,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		return phoneDetailsManager;
 	}
 	
-	/** @return Cost set per SMS message */
-	private double getCostPerSms() {
-		return AppProperties.getInstance().getCostPerSmsSent();
-	}
-	/** @param costPerSMS new value for {@link #costPerSMS} */
-	private void setCostPerSms(double costPerSms) {
-		AppProperties properties = AppProperties.getInstance();
-		properties.setCostPerSmsSent(costPerSms);
-		properties.saveToDisk();
-	}
-	
 	/** @return the current tab as an object component */
 	public Object getCurrentTab() {
 		return this.find(this.currentTab);
@@ -1834,6 +1810,15 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		} catch(Throwable t) {
 			log.error("Unable to reload frontlineSMS.", t);
 		}
+	}
+	
+
+	
+	/**
+	 * Updates the number of active connections in the status bar.
+	 */
+	public void updateActiveConnections() {
+		setText(find(COMPONENT_LB_ACTIVE_CONNECTIONS), String.valueOf(getFrontlineController().getNumberOfActiveConnections()));
 	}
 	
 //> DEBUG METHODS
@@ -1915,6 +1900,14 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				this.newEvent(new Event(Event.TYPE_SMS_INTERNET_SERVICE_RECEIVING_FAILED, 
 											mmsServiceStatusNotification.getMmsService().getServiceName() + " - " + InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED)));
 			}
+			FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
+				
+				public void run() {
+					updateActiveConnections();
+				}
+			};
+			
+			EventQueue.invokeLater(updateJob);
 		} else if (notification instanceof EntitySavedNotification<?>) {
 			Object entity = ((EntitySavedNotification<?>) notification).getDatabaseEntity();
 			if (entity instanceof FrontlineMultimediaMessage) {
@@ -1934,13 +1927,15 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				default:
 					break;
 			}
-		} else if (notification instanceof AppPropertiesEventNotification) {
-			// An AppProperty has changed
-			AppPropertiesEventNotification appPropertiesNotification = (AppPropertiesEventNotification) notification;
 			
-			if (appPropertiesNotification.getAppClass().equals(AppProperties.class) && appPropertiesNotification.getProperty().equals(AppProperties.KEY_SMS_COST_SENT_MESSAGES)) {
-				setText(find(COMPONENT_TF_COST_PER_SMS), InternationalisationUtils.formatCurrency(AppProperties.getInstance().getCostPerSmsSent(), false));
-			}
+			FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
+				
+				public void run() {
+					updateActiveConnections();
+				}
+			};
+			
+			EventQueue.invokeLater(updateJob);
 		}
 	}
 
