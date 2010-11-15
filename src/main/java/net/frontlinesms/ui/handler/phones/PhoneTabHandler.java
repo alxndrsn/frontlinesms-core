@@ -514,15 +514,29 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_MODEM_LIST_UPDATED));
 			}
 		} else if (notification instanceof MmsServiceStatusNotification) {
-			this.refresh();
+			FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
+				
+				public void run() {
+					refresh();
+				}
+			};
+			
+			EventQueue.invokeLater(updateJob);
 		} else if (notification instanceof DatabaseEntityNotification<?>) {
 			// Database notification
 			Object entity = ((DatabaseEntityNotification<?>) notification).getDatabaseEntity();
 			if (entity instanceof EmailAccount
 					|| entity instanceof SmsModemSettings
 					|| entity instanceof SmsInternetServiceSettings) {
-				// If there is any change in the E-Mail accounts, we refresh the list of Messaging Services
-				this.refresh();
+					FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
+					
+					public void run() {
+						// If there is any change in the E-Mail accounts, we refresh the list of Messaging Services
+						refresh();
+					}
+				};
+				
+				EventQueue.invokeLater(updateJob);
 			}
 		}
 	}

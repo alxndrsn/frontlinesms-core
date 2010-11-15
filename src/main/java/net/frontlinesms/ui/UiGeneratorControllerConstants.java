@@ -73,7 +73,6 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_NEW_GROUP = "newGroup";
 	public static final String COMPONENT_PN_BOTTOM = "pnBottom";
 	public static final String COMPONENT_PN_CONTACTS = "pnContacts";
-	public static final String COMPONENT_TF_COST_PER_SMS = "tfCostPerSMS";
 	public static final String COMPONENT_LB_COST_PER_SMS_PREFIX = "lbCostPerSmsPrefix";
 	public static final String COMPONENT_LB_COST_PER_SMS_SUFFIX = "lbCostPerSmsSuffix";
 	public static final String COMPONENT_LB_ESTIMATED_MONEY = "lbEstimatedMoney";

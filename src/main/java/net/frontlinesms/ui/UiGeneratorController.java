@@ -24,7 +24,6 @@ import java.awt.Font;
 import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -1901,7 +1900,14 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				this.newEvent(new Event(Event.TYPE_SMS_INTERNET_SERVICE_RECEIVING_FAILED, 
 											mmsServiceStatusNotification.getMmsService().getServiceName() + " - " + InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED)));
 			}
-			this.updateActiveConnections();
+			FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
+				
+				public void run() {
+					updateActiveConnections();
+				}
+			};
+			
+			EventQueue.invokeLater(updateJob);
 		} else if (notification instanceof EntitySavedNotification<?>) {
 			Object entity = ((EntitySavedNotification<?>) notification).getDatabaseEntity();
 			if (entity instanceof FrontlineMultimediaMessage) {
@@ -1921,15 +1927,16 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				default:
 					break;
 			}
-			this.updateActiveConnections();
-		} //else if (notification instanceof AppPropertiesEventNotification) {
-//			// An AppProperty has changed
-//			AppPropertiesEventNotification appPropertiesNotification = (AppPropertiesEventNotification) notification;
-//			
-//			if (appPropertiesNotification.getAppClass().equals(AppProperties.class) && appPropertiesNotification.getProperty().equals(AppProperties.KEY_SMS_COST_SENT_MESSAGES)) {
-//				setText(find(COMPONENT_TF_COST_PER_SMS), InternationalisationUtils.formatCurrency(AppProperties.getInstance().getCostPerSmsSent(), false));
-//			}
-//		}
+			
+			FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
+				
+				public void run() {
+					updateActiveConnections();
+				}
+			};
+			
+			EventQueue.invokeLater(updateJob);
+		}
 	}
 
 	public void closeDeviceConnectionDialog(Object dialog) {

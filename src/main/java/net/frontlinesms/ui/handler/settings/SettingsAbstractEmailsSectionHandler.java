@@ -2,7 +2,6 @@ package net.frontlinesms.ui.handler.settings;
 
 import java.awt.EventQueue;
 import java.util.Collection;
-import java.util.List;
 
 import net.frontlinesms.EmailSender;
 import net.frontlinesms.EmailServerHandler;
@@ -14,7 +13,6 @@ import net.frontlinesms.events.EventBus;
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.settings.BaseSectionHandler;
-import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.events.FrontlineUiUpateJob;
@@ -27,7 +25,7 @@ import org.apache.log4j.Logger;
  * UI Handler for the sections incorporating a list of email accounts
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
-public class SettingsAbstractEmailsSectionHandler extends BaseSectionHandler implements UiSettingsSectionHandler, ThinletUiEventHandler, EventObserver {
+public abstract class SettingsAbstractEmailsSectionHandler extends BaseSectionHandler implements UiSettingsSectionHandler, ThinletUiEventHandler, EventObserver {
 	//> UI LAYOUT FILES
 	protected static final String UI_FILE_LIST_EMAIL_ACCOUNTS_PANEL = "/ui/core/settings/generic/pnAccountsList.xml";
 	
@@ -81,7 +79,14 @@ public class SettingsAbstractEmailsSectionHandler extends BaseSectionHandler imp
 				this.uiController.add(table, this.uiController.getRow(acc));
 			}
 			
-			this.enableBottomButtons(table);
+			FrontlineUiUpateJob upateJob = new FrontlineUiUpateJob() {
+				
+				public void run() {
+					enableBottomButtons(null);	
+				}
+			};
+			
+			EventQueue.invokeLater(upateJob);
 		}
 	}
 
@@ -106,6 +111,10 @@ public class SettingsAbstractEmailsSectionHandler extends BaseSectionHandler imp
 	}
 	
 	public void enableBottomButtons(Object table) {
+		if (table == null) {
+			table = this.uiController.find(UI_COMPONENT_ACCOUNTS_LIST);
+		}
+		
 		boolean enableEditAndDelete = (this.uiController.getSelectedIndex(table) >= 0);
 		
 		this.uiController.setEnabled(this.uiController.find(this.accountsListPanel, UI_COMPONENT_BT_EDIT), enableEditAndDelete);
@@ -195,28 +204,6 @@ public class SettingsAbstractEmailsSectionHandler extends BaseSectionHandler imp
 	/** @see UiGeneratorController#removeDialog(Object) */
 	public void removeDialog(Object dialog) {
 		this.uiController.removeDialog(dialog);
-	}
-
-	public void save() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public List<FrontlineValidationMessage> validateFields() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public String getTitle() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	protected void init() {
-		// TODO Auto-generated method stub
-		
-	}
-	
+	}	
 //> UI HELPER METHODS
 }
