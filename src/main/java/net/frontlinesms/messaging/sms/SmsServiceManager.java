@@ -756,6 +756,29 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 		}
 		return senders;
 	}
+
+	/**
+	 * @return The number of active SMS connections running
+	 */
+	public int getNumberOfActiveConnections() {
+		int total = 0;
+
+		for(SmsModem modem : this.phoneHandlers.values()) {
+			if (modem.isConnected()) {
+				++total;
+			}
+		}
+		
+		for (SmsInternetService service : this.smsInternetServices) {
+			if (service.isConnected()) {
+				++total;
+			}
+		}		
+		
+		// NB: this may be cleaner if using FrontlineMessagingServices,
+		// but it doesn't sound really useful right now.
+		return total;
+	}
 }
 
 enum MessageType {

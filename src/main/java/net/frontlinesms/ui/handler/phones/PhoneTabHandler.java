@@ -101,9 +101,6 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	/** Data Access Object for {@link SmsModemSettings}s */
 	private final SmsModemSettingsDao smsModelSettingsDao;
 	private MmsServiceManager mmsServiceManager;
-
-	private DeviceSettingsDialogHandler deviceSettingsDialog;
-
 //> CONSTRUCTORS
 	/**
 	 * Create a new instance of this class.
@@ -404,10 +401,12 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 				}
 	
 				ui.setSelectedIndex(getModemListComponent(), indexTop);
-				ui.setSelectedIndex(modemListError, index);		}
-			};
+				ui.setSelectedIndex(modemListError, index);
+				ui.updateActiveConnections();
+			}
+		};
 	
-			EventQueue.invokeLater(updateJob);
+		EventQueue.invokeLater(updateJob);
 	}
 	
 	private Object getTableRow(FrontlineMessagingService service, boolean isConnected) {
@@ -515,15 +514,29 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_MODEM_LIST_UPDATED));
 			}
 		} else if (notification instanceof MmsServiceStatusNotification) {
-			this.refresh();
+			FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
+				
+				public void run() {
+					refresh();
+				}
+			};
+			
+			EventQueue.invokeLater(updateJob);
 		} else if (notification instanceof DatabaseEntityNotification<?>) {
 			// Database notification
 			Object entity = ((DatabaseEntityNotification<?>) notification).getDatabaseEntity();
 			if (entity instanceof EmailAccount
 					|| entity instanceof SmsModemSettings
 					|| entity instanceof SmsInternetServiceSettings) {
-				// If there is any change in the E-Mail accounts, we refresh the list of Messaging Services
-				this.refresh();
+					FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
+					
+					public void run() {
+						// If there is any change in the E-Mail accounts, we refresh the list of Messaging Services
+						refresh();
+					}
+				};
+				
+				EventQueue.invokeLater(updateJob);
 			}
 		}
 	}

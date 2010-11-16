@@ -225,7 +225,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			if (groupMembershipDao.getMemberCount(g) > 0) {
 				// If the group is not empty, we ask if the user also wants to delete the contacts
 				ChoiceDialogHandler choiceDialogHandler = new ChoiceDialogHandler(this.ui);
-				choiceDialogHandler.showChoiceDialog(this, "removeSelectedFromGroupList(this, choiceDialog)", I18N_SENTENCE_DELETE_CONTACTS_FROM_GROUPS);
+				choiceDialogHandler.showChoiceDialog(this, true, "removeSelectedFromGroupList(this, choiceDialog)", I18N_SENTENCE_DELETE_CONTACTS_FROM_GROUPS);
 			} else {
 				// Otherwise, the
 				showConfirmationDialog("deleteSelectedGroup");

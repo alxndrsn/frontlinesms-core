@@ -1,5 +1,6 @@
 package net.frontlinesms.ui.handler.settings;
 
+import java.awt.EventQueue;
 import java.util.Collection;
 
 import net.frontlinesms.EmailSender;
@@ -14,6 +15,7 @@ import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.settings.BaseSectionHandler;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.events.FrontlineUiUpateJob;
 import net.frontlinesms.ui.handler.email.EmailAccountSettingsDialogHandler;
 import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
 
@@ -49,14 +51,13 @@ public abstract class SettingsAbstractEmailsSectionHandler extends BaseSectionHa
 		this.emailAccountDao = this.uiController.getFrontlineController().getEmailAccountFactory();
 		this.emailManager = this.uiController.getFrontlineController().getEmailServerHandler();
 		this.isForReceiving = isForReceiving;
+		this.accountsListPanel = this.uiController.loadComponentFromFile(UI_FILE_LIST_EMAIL_ACCOUNTS_PANEL, this);
 		
 		// Register with the EventBus to receive notification of new email accounts
 		this.eventBus.registerObserver(this);
 	}
 
 	public Object getAccountsListPanel() {
-		this.accountsListPanel = this.uiController.loadComponentFromFile(UI_FILE_LIST_EMAIL_ACCOUNTS_PANEL, this);
-		
 		this.refresh();
 		
 		return this.accountsListPanel;
@@ -64,20 +65,29 @@ public abstract class SettingsAbstractEmailsSectionHandler extends BaseSectionHa
 
 	public void refresh() {
 		Object table = this.uiController.find(this.accountsListPanel, UI_COMPONENT_ACCOUNTS_LIST);
-		this.uiController.removeAll(table);
-		Collection<EmailAccount> emailAccounts;
-		
-		if (this.isForReceiving) {
-			emailAccounts = emailAccountDao.getReceivingEmailAccounts();
-		} else {
-			emailAccounts = emailAccountDao.getSendingEmailAccounts();
+		if (table != null) {
+			this.uiController.removeAll(table);
+			Collection<EmailAccount> emailAccounts;
+			
+			if (this.isForReceiving) {
+				emailAccounts = emailAccountDao.getReceivingEmailAccounts();
+			} else {
+				emailAccounts = emailAccountDao.getSendingEmailAccounts();
+			}
+			
+			for (EmailAccount acc : emailAccounts) {
+				this.uiController.add(table, this.uiController.getRow(acc));
+			}
+			
+			FrontlineUiUpateJob upateJob = new FrontlineUiUpateJob() {
+				
+				public void run() {
+					enableBottomButtons(null);	
+				}
+			};
+			
+			EventQueue.invokeLater(upateJob);
 		}
-		
-		for (EmailAccount acc : emailAccounts) {
-			this.uiController.add(table, this.uiController.getRow(acc));
-		}
-		
-		this.enableBottomButtons(table);
 	}
 
 //> UI EVENT METHODS
@@ -101,6 +111,10 @@ public abstract class SettingsAbstractEmailsSectionHandler extends BaseSectionHa
 	}
 	
 	public void enableBottomButtons(Object table) {
+		if (table == null) {
+			table = this.uiController.find(UI_COMPONENT_ACCOUNTS_LIST);
+		}
+		
 		boolean enableEditAndDelete = (this.uiController.getSelectedIndex(table) >= 0);
 		
 		this.uiController.setEnabled(this.uiController.find(this.accountsListPanel, UI_COMPONENT_BT_EDIT), enableEditAndDelete);
@@ -162,7 +176,14 @@ public abstract class SettingsAbstractEmailsSectionHandler extends BaseSectionHa
 	public void notify(FrontlineEventNotification event) {
 		if(event instanceof DatabaseEntityNotification<?>) {
 			if(((DatabaseEntityNotification<?>)event).getDatabaseEntity() instanceof EmailAccount) {
-				this.refresh();
+				FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
+					
+					public void run() {
+						refresh();
+					}
+				};
+				
+				EventQueue.invokeLater(updateJob);
 			}
 		}
 	}
@@ -183,7 +204,6 @@ public abstract class SettingsAbstractEmailsSectionHandler extends BaseSectionHa
 	/** @see UiGeneratorController#removeDialog(Object) */
 	public void removeDialog(Object dialog) {
 		this.uiController.removeDialog(dialog);
-	}
-	
+	}	
 //> UI HELPER METHODS
 }

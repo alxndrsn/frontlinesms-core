@@ -21,6 +21,7 @@ public class ChoiceDialogHandler implements ThinletUiEventHandler {
 
 	/** UI Thinlet component: panel containing all custom labels **/
 	private static final String UI_COMPONENT_PN_LABELS = "pnLabels";
+	private static final String UI_COMPONENT_BT_CANCEL = "btCancel";
 
 //> INSTANCE PROPERTIES
 	private Logger LOG = Logger.getLogger(this.getClass());
@@ -39,11 +40,14 @@ public class ChoiceDialogHandler implements ThinletUiEventHandler {
 	 * Shows the choice dialog with custom labels
 	 * @param propertyKey The property key used to generate the custom labels
 	 */
-	public void showChoiceDialog (ThinletUiEventHandler handler, String methodToBeCalledByYesNoButtons, String propertyKey, String ... i18nValues) {
+	public void showChoiceDialog (ThinletUiEventHandler handler, boolean showCancelButton, String methodToBeCalledByYesNoButtons, String propertyKey, String ... i18nValues) {
 		LOG.trace("Populating choice dialog with custom labels (Key:" + propertyKey + ")");
 
 		this.dialogComponent = this.uiController.loadComponentFromFile(UI_FILE_DELETE_OPTION_DIALOG_FORM, handler);
 		Object pnLabels = this.uiController.find(this.dialogComponent, UI_COMPONENT_PN_LABELS);
+		
+		Object btCancel = this.uiController.find(this.dialogComponent, UI_COMPONENT_BT_CANCEL);
+		this.uiController.setVisible(btCancel, showCancelButton);
 		
 		for (String label : InternationalisationUtils.getI18nStrings(propertyKey, i18nValues)) {
 			this.uiController.add(pnLabels, this.uiController.createLabel(label));
