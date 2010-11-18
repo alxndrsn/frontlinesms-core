@@ -21,7 +21,7 @@
             <label icon="/icons/sms_disabled.png" name="lbThird"/>
         </panel>
         <label icon="/icons/money.png"/>
-        <label font="bold" name="lbEstimatedMoney"/>
+        <label font="bold" name="lbCost"/>
         <label icon="/icons/help.png" name="lbHelp" visible="false" tooltip="i18n.tooltip.approximative.count"/>
     </panel>
     <textarea action="updateMessageDetails(tfRecipient, this.text)" rows="8" columns="40" name="tfMessage"/>

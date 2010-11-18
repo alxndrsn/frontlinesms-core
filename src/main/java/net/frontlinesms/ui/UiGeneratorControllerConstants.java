@@ -63,7 +63,6 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_BT_RECIPIENT_NAME = "btRecipientName";
 	public static final String COMPONENT_BT_RECIPIENT_NUMBER = "btRecipientNumber";
 	public static final String COMPONENT_LB_COST = "lbCost";
-	public static final String COMPONENT_LB_MSGS_NUMBER = "lbMsgsNumber";
 	public static final String COMPONENT_CB_CONTACTS = "cbContacts";
 	public static final String COMPONENT_PN_KEYWORD_ACTIONS_ADVANCED = "pnKeywordActionsAdvanced";
 	public static final String COMPONENT_CONTACT_SELECTER = "contactSelecter";
@@ -75,7 +74,6 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_PN_CONTACTS = "pnContacts";
 	public static final String COMPONENT_LB_COST_PER_SMS_PREFIX = "lbCostPerSmsPrefix";
 	public static final String COMPONENT_LB_COST_PER_SMS_SUFFIX = "lbCostPerSmsSuffix";
-	public static final String COMPONENT_LB_ESTIMATED_MONEY = "lbEstimatedMoney";
 	public static final String COMPONENT_LB_THIRD = "lbThird";
 	public static final String COMPONENT_LB_SECOND = "lbSecond";
 	public static final String COMPONENT_LB_FIRST = "lbFirst";

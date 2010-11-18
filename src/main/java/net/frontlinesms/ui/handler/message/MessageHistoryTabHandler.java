@@ -15,7 +15,7 @@ import static net.frontlinesms.FrontlineSMSConstants.PROPERTY_FIELD;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_CONTACTS;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CB_GROUPS;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_COST;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_MSGS_NUMBER;
+import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_MSG_NUMBER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_PN_BOTTOM;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RECEIVED_MESSAGES_TOGGLE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_SENT_MESSAGES_TOGGLE;
@@ -512,7 +512,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	private void updateMessageHistoryCost() {
 		LOG.trace("Updating message history cost...");
 		
-		ui.setText(find(COMPONENT_LB_MSGS_NUMBER), String.valueOf(totalNumberOfMessages));
+		ui.setText(find(COMPONENT_LB_MSG_NUMBER), String.valueOf(totalNumberOfMessages));
 		double cost = AppProperties.getInstance().getCostPerSmsSent() * numberOfSMSPartsSent 
 					+ AppProperties.getInstance().getCostPerSmsReceived() * numberOfSMSPartsReceived;
 		

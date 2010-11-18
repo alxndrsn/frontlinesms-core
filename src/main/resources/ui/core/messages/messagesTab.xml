@@ -62,7 +62,7 @@
 	            <panel name="pnBottom" columns="4" gap="5" weightx="1">
 	                <panel gap="4" halign="right" weightx="1" top="2">
 	                    <label icon="/icons/history.png" text="i18n.common.messages.colon"/>
-	                    <label font="bold" name="lbMsgsNumber"/>
+	                    <label font="bold" name="lbMsgNumber"/>
 	                    <label text=","/>
 	                    <label icon="/icons/money.png" text="i18n.common.estimated.cost"/>
 	                    <label font="bold" name="lbCost"/>

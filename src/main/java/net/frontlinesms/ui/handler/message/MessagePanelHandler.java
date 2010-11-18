@@ -6,10 +6,8 @@ package net.frontlinesms.ui.handler.message;
 // TODO Remove static imports
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_NO_CONTACT_SELECTED;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_COST;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_ESTIMATED_MONEY;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_FIRST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_HELP;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_MSGS_NUMBER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_MSG_NUMBER;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_REMAINING_CHARS;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LB_SECOND;
@@ -153,7 +151,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 		uiController.setIcon(find(COMPONENT_LB_FIRST), Icon.SMS_DISABLED);
 		uiController.setIcon(find(COMPONENT_LB_SECOND), Icon.SMS_DISABLED);
 		uiController.setIcon(find(COMPONENT_LB_THIRD), Icon.SMS_DISABLED);
-		uiController.setText(find(COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(0));
+		uiController.setText(find(COMPONENT_LB_COST), InternationalisationUtils.formatCurrency(0));
 		if (shouldCheckMaxMessageLength) // Otherwise this component doesn't exist
 			uiController.setVisible(find(COMPONENT_LB_TOO_MANY_MESSAGES), false);
 
@@ -312,7 +310,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 		costEstimate *= numberOfRecipients;
 		
 		uiController.setText(find(COMPONENT_LB_REMAINING_CHARS), String.valueOf(remaining));
-		uiController.setText(find(COMPONENT_LB_ESTIMATED_MONEY), InternationalisationUtils.formatCurrency(costEstimate));
+		uiController.setText(find(COMPONENT_LB_COST), InternationalisationUtils.formatCurrency(costEstimate));
 		uiController.setVisible(find(COMPONENT_LB_HELP), false);
 		
 		uiController.setText(find(COMPONENT_LB_MSG_NUMBER), String.valueOf(numberOfMsgs));
@@ -350,10 +348,10 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 		this.updateCost();
 	}
 	
-	private void updateCost() {
+	public void updateCost() {
 		LOG.trace("Updating message panel cost estimate");
 		
-		this.uiController.setText(find(COMPONENT_LB_MSGS_NUMBER), String.valueOf(numberToSend));		
+		this.uiController.setText(find(COMPONENT_LB_MSG_NUMBER), String.valueOf(numberToSend));		
 		this.uiController.setText(find(COMPONENT_LB_COST), InternationalisationUtils.formatCurrency(AppProperties.getInstance().getCostPerSmsSent() * numberToSend));
 		
 		LOG.trace("EXIT");

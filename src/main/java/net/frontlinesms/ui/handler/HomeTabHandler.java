@@ -13,6 +13,8 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import net.frontlinesms.AppProperties;
+import net.frontlinesms.events.AppPropertiesEventNotification;
 import net.frontlinesms.events.EventBus;
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
@@ -68,6 +70,8 @@ public class HomeTabHandler extends BaseTabHandler implements EventObserver {
 	private static final double FRONTLINE_LOGO_MAX_HEIGHT = 300.0;
 
 	private EventBus eventBus;
+
+	private MessagePanelHandler messagePanel;
 
 
 //> INSTANCE PROPERTIES
@@ -202,8 +206,8 @@ public class HomeTabHandler extends BaseTabHandler implements EventObserver {
 		final boolean shouldCheckMaxMessageLength = false;
 		final int numberOfRecipients = 1;
 		
-		Object pnMessage = MessagePanelHandler.create(this.ui, shouldDisplayRecipientField, shouldCheckMaxMessageLength, numberOfRecipients).getPanel();
-		ui.add(pnSend, pnMessage);
+		messagePanel = MessagePanelHandler.create(this.ui, shouldDisplayRecipientField, shouldCheckMaxMessageLength, numberOfRecipients);
+		ui.add(pnSend, messagePanel.getPanel());
 		
 		refreshLogoVisibility(tabComponent);
 		
@@ -326,6 +330,11 @@ public class HomeTabHandler extends BaseTabHandler implements EventObserver {
 	public void notify(FrontlineEventNotification notification) {
 		if (notification instanceof HomeTabLogoChangedEventNotification) {
 			this.refreshLogoVisibility(getTab());
+		} else if (notification instanceof AppPropertiesEventNotification) {
+			String property = ((AppPropertiesEventNotification) notification).getProperty();
+			if (property.equals(AppProperties.KEY_SMS_COST_SENT_MESSAGES)) {
+				this.messagePanel.updateCost();
+			}
 		}
 	}
 

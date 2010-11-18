@@ -71,8 +71,8 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 //		
 		AppProperties appProperties = AppProperties.getInstance();
 		
-		String costPerSmsReceived = InternationalisationUtils.formatCurrency(appProperties.getCostPerSmsReceived());
-		String costPerSmsSent = InternationalisationUtils.formatCurrency(appProperties.getCostPerSmsSent());
+		String costPerSmsReceived = String.valueOf(appProperties.getCostPerSmsReceived());
+		String costPerSmsSent = String.valueOf(appProperties.getCostPerSmsSent());
 
 		this.uiController.setText(find(UI_COMPONENT_TF_COST_PER_SMS_SENT), costPerSmsSent);
 //		this.uiController.setText(find(UI_COMPONENT_LB_COST_PER_SMS_SENT_PREFIX), isCurrencySymbolPrefix ? currencySymbol : "");
