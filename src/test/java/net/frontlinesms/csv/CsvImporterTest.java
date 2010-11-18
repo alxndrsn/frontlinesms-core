@@ -3,24 +3,27 @@
  */
 package net.frontlinesms.csv;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.FrontlineMessage;
-import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
+import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
+import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
@@ -30,8 +33,6 @@ import net.frontlinesms.junit.HibernateTestCase;
 import org.apache.log4j.Logger;
 import org.mockito.internal.verification.Times;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import static org.mockito.Mockito.*;
 
 /**
  * Test class for {@link CsvImporter}.
@@ -64,6 +65,12 @@ public class CsvImporterTest extends HibernateTestCase {
 	/** DAO for {@link Group}s; used in {@link #testCreateGroupIfAbsent()} */
 	@Autowired
 	private GroupDao groupDao;
+
+	private SimpleDateFormat formatter;
+	
+	public CsvImporterTest () {
+		this.formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	}
 	
 	/**
 	 * Get all import test files from /test/net/frontlinesms/csv/import/, and read
@@ -126,7 +133,6 @@ public class CsvImporterTest extends HibernateTestCase {
 		File importFileInternationalised = new File(RESOURCE_PATH + "ImportMessagesFR.csv");
 		
 		CsvRowFormat rowFormat = getRowFormatForMessages();
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		MessageDao messageDao = mock(MessageDao.class);
 		
 		try {
@@ -151,7 +157,6 @@ public class CsvImporterTest extends HibernateTestCase {
 		File importFile = new File(RESOURCE_PATH + "MMS.csv");
 		
 		CsvRowFormat rowFormat = getRowFormatForMessages();
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		MessageDao messageDao = mock(MessageDao.class);
 		
 		try {
@@ -162,12 +167,16 @@ public class CsvImporterTest extends HibernateTestCase {
 			multimediaPartsOne.add(FrontlineMultimediaMessagePart.createBinaryPart("100MEDIA_IMAG0041.jpg"));
 			multimediaPartsOne.add(FrontlineMultimediaMessagePart.createTextPart("It's like Charles bloody dickens!"));
 			((FrontlineMultimediaMessage)messageOne).setMultimediaParts(multimediaPartsOne);
+			messageOne.setDate(formatter.parse("2010-07-21 17:18:20").getTime());
+			messageOne.setSenderMsisdn("+447988156550");
 			
 			FrontlineMessage messageTwo = new FrontlineMultimediaMessage(Type.RECEIVED, "", "\"Testing frontline sms\"; File: Image040.jpg");
 			List<FrontlineMultimediaMessagePart> multimediaPartsTwo = new ArrayList<FrontlineMultimediaMessagePart>();
 			multimediaPartsTwo.add(FrontlineMultimediaMessagePart.createTextPart("Testing frontline sms"));
 			multimediaPartsTwo.add(FrontlineMultimediaMessagePart.createBinaryPart("Image040.jpg"));
 			((FrontlineMultimediaMessage)messageTwo).setMultimediaParts(multimediaPartsTwo);
+			messageTwo.setDate(formatter.parse("2010-07-20 17:57:04").getTime());
+			messageTwo.setSenderMsisdn("+254722707140");
 			
 			verify(messageDao, new Times(1)).saveMessage(messageOne);
 			verify(messageDao, new Times(1)).saveMessage(messageTwo);
