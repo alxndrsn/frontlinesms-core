@@ -188,7 +188,7 @@
 		<dependency>
 			<groupId>net.frontlinesms.core</groupId>
 			<artifactId>smslib</artifactId>
-			<version>1.0.3-SNAPSHOT</version>
+			<version>1.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>net.frontlinesms.core</groupId>
