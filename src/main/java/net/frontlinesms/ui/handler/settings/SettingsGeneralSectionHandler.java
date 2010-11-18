@@ -10,6 +10,7 @@ import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.ui.EnumCountry;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.UiProperties;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
 
@@ -17,15 +18,14 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 	private static final String UI_SECTION_GENERAL = "/ui/core/settings/general/pnGeneralSettings.xml";
 	
 	private static final String UI_COMPONENT_CB_AUTHORIZE_STATS = "cbAuthorizeStats";
+	private static final String UI_COMPONENT_CB_CURRENCY_CUSTOM_FORMAT = "cbCustomFormat";
+	private static final String UI_COMPONENT_CB_CURRENCY_LANGUAGE_FORMAT = "cbLanguageFormat";
 	private static final String UI_COMPONENT_CB_PROMPT_STATS = "cbPromptStats";
 	private static final String UI_COMPONENT_COMBOBOX_COUNTRIES = "cbCountries";
 
 	private static final String UI_COMPONENT_TF_COST_PER_SMS_SENT = "tfCostPerSMSSent";
-	private static final String UI_COMPONENT_LB_COST_PER_SMS_SENT_PREFIX = "lbCostPerSmsSentPrefix";
-	private static final String UI_COMPONENT_LB_COST_PER_SMS_SENT_SUFFIX = "lbCostPerSmsSentSuffix";
 	private static final String UI_COMPONENT_TF_COST_PER_SMS_RECEIVED = "tfCostPerSMSReceived";
-	private static final String UI_COMPONENT_LB_COST_PER_SMS_RECEIVED_PREFIX = "lbCostPerSmsReceivedPrefix";
-	private static final String UI_COMPONENT_LB_COST_PER_SMS_RECEIVED_SUFFIX = "lbCostPerSmsReceivedSuffix";
+	private static final String UI_COMPONENT_TF_CURRENCY_FORMAT_CUSTOM = "tfCustomFormat";
 	
 	private static final String I18N_SETTINGS_INVALID_COST_PER_MESSAGE_RECEIVED = "settings.message.invalid.cost.per.message.received";
 	private static final String I18N_SETTINGS_INVALID_COST_PER_MESSAGE_SENT = "settings.message.invalid.cost.per.message.sent";
@@ -35,8 +35,10 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 	private static final String SECTION_ITEM_COST_PER_SMS_SENT = "GENERAL_COST_PER_SMS_SENT";
 	private static final String SECTION_ITEM_COST_PER_SMS_RECEIVED = "GENERAL_COST_PER_SMS_RECEIVED";
 	private static final String SECTION_ITEM_COUNTRY = "GENERAL_COUNTRY";
+	private static final String SECTION_ITEM_CURRENCY_FORMAT_CUSTOM = "GENERAL_CURRENCY_FORMAT_CUSTOM";
+	private static final String SECTION_ITEM_CURRENCY_FORMAT_IS_CUSTOM = "GENERAL_CURRENCY_IS_CUSTOM";
 	private static final String SECTION_ITEM_PROMPT_STATS = "GENERAL_STATS_PROMPT_DIALOG";
-	
+
 	public SettingsGeneralSectionHandler (UiGeneratorController ui) {
 		super(ui);
 		this.uiController = ui;
@@ -60,30 +62,33 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 		this.originalValues.put(SECTION_ITEM_AUTHORIZE_STATS, isStatsSendingAuthorized);
 		
 		this.uiController.setSelected(find(UI_COMPONENT_CB_PROMPT_STATS), shouldPromptStatsDialog);
-		
 		this.uiController.setSelected(find(UI_COMPONENT_CB_AUTHORIZE_STATS), isStatsSendingAuthorized);
 		this.uiController.setEnabled(find(UI_COMPONENT_CB_AUTHORIZE_STATS), !shouldPromptStatsDialog);
 	}
 	
 	private void initCostEstimatorSettings() {
-//		boolean isCurrencySymbolPrefix = InternationalisationUtils.isCurrencySymbolPrefix();
-//		String currencySymbol = InternationalisationUtils.getCurrencySymbol();
-//		
 		AppProperties appProperties = AppProperties.getInstance();
+		UiProperties uiProperties = UiProperties.getInstance();
 		
 		String costPerSmsReceived = String.valueOf(appProperties.getCostPerSmsReceived());
 		String costPerSmsSent = String.valueOf(appProperties.getCostPerSmsSent());
+		boolean isCurrencyFormatCustom = uiProperties.isCurrencyFormatCustom();
+		String customCurrencyFormat = uiProperties.getCustomCurrencyFormat();
+		
+		Object selectedRadio = (isCurrencyFormatCustom ? find(UI_COMPONENT_CB_CURRENCY_CUSTOM_FORMAT) : find(UI_COMPONENT_CB_CURRENCY_LANGUAGE_FORMAT));
+		this.uiController.setSelected(selectedRadio, true);
+		this.uiController.setText(find(UI_COMPONENT_TF_CURRENCY_FORMAT_CUSTOM), customCurrencyFormat);
 
 		this.uiController.setText(find(UI_COMPONENT_TF_COST_PER_SMS_SENT), costPerSmsSent);
-//		this.uiController.setText(find(UI_COMPONENT_LB_COST_PER_SMS_SENT_PREFIX), isCurrencySymbolPrefix ? currencySymbol : "");
-//		this.uiController.setText(find(UI_COMPONENT_LB_COST_PER_SMS_SENT_SUFFIX), isCurrencySymbolPrefix ? "" : currencySymbol);
-		
 		this.uiController.setText(find(UI_COMPONENT_TF_COST_PER_SMS_RECEIVED), costPerSmsReceived);
-//		this.uiController.setText(find(UI_COMPONENT_LB_COST_PER_SMS_RECEIVED_PREFIX), isCurrencySymbolPrefix ? currencySymbol : "");
-//		this.uiController.setText(find(UI_COMPONENT_LB_COST_PER_SMS_RECEIVED_SUFFIX), isCurrencySymbolPrefix ? "" : currencySymbol);
 		
 		this.originalValues.put(SECTION_ITEM_COST_PER_SMS_RECEIVED, costPerSmsReceived);
 		this.originalValues.put(SECTION_ITEM_COST_PER_SMS_SENT, costPerSmsSent);
+		this.originalValues.put(SECTION_ITEM_CURRENCY_FORMAT_IS_CUSTOM, isCurrencyFormatCustom);
+		this.originalValues.put(SECTION_ITEM_CURRENCY_FORMAT_CUSTOM, customCurrencyFormat);
+
+		// Let's enable/disable the right components automatically
+		this.currencyFormatSourceChanged(selectedRadio);
 	}
 	
 	/** Populate and display the countries in a Combo Box. */
@@ -149,10 +154,31 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 			super.settingChanged(SECTION_ITEM_COST_PER_SMS_SENT, this.uiController.getText(textField));
 		}
 	}
+	
+	/**
+	 * Called when the currency format source has changed.
+	 * @param checkbox
+	 */
+	public void currencyFormatSourceChanged(Object checkbox) {
+		boolean isCustom = checkbox.equals(find(UI_COMPONENT_CB_CURRENCY_CUSTOM_FORMAT));
+		this.uiController.setEnabled(find(UI_COMPONENT_TF_CURRENCY_FORMAT_CUSTOM), isCustom);
+		
+		super.settingChanged(SECTION_ITEM_CURRENCY_FORMAT_IS_CUSTOM, isCustom);
+	}
+	
+	/**
+	 * Called when the currency custom format has actually changed.
+	 * @param customFormat
+	 */
+	public void currencyFormatChanged(String customFormat) {
+		super.settingChanged(SECTION_ITEM_CURRENCY_FORMAT_CUSTOM, customFormat);
 
+	}
+	
 	public void save() {
 		/*** STATISTICS ***/
 		AppProperties appProperties = AppProperties.getInstance();
+		UiProperties uiProperties = UiProperties.getInstance();
 		
 		appProperties.shouldPromptStatsDialog(this.uiController.isSelected(find(UI_COMPONENT_CB_PROMPT_STATS)));
 		appProperties.setAuthorizeStatsSending(this.uiController.isSelected(find(UI_COMPONENT_CB_AUTHORIZE_STATS)));
@@ -169,6 +195,19 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 		if (costPerSmsReceived != appProperties.getCostPerSmsReceived()) {
 			appProperties.setCostPerSmsReceived(costPerSmsReceived);
 			this.eventBus.notifyObservers(new AppPropertiesEventNotification(AppProperties.class, AppProperties.KEY_SMS_COST_RECEIVED_MESSAGES));
+		}
+		
+		/** CURRENCY FORMAT **/
+		boolean isCurrencyFormatCustom = this.uiController.isSelected(find(UI_COMPONENT_CB_CURRENCY_CUSTOM_FORMAT));
+		if (isCurrencyFormatCustom != uiProperties.isCurrencyFormatCustom()) {
+			uiProperties.setIsCurrencyFormatCustom(isCurrencyFormatCustom);
+			this.eventBus.notifyObservers(new AppPropertiesEventNotification(UiProperties.class, UiProperties.CURRENCY_FORMAT_IS_CUSTOM));
+		}
+		
+		String customFormat = this.uiController.getText(find(UI_COMPONENT_TF_CURRENCY_FORMAT_CUSTOM));
+		if (!customFormat.equals(uiProperties.getCustomCurrencyFormat())) {
+			uiProperties.setCustomCurrencyFormat(customFormat);			
+			this.eventBus.notifyObservers(new AppPropertiesEventNotification(UiProperties.class, UiProperties.CURRENCY_FORMAT));
 		}
 		
 		/** COUNTRY **/

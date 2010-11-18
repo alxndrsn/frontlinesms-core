@@ -7,17 +7,20 @@
 	<panel icon="/icons/money.png" text="i18n.common.cost.estimator" weightx="1" border="true" columns="1" gap="7" top="5" left="5" bottom="5" right="5">
         <panel gap="5">
 	        <label text="i18n.common.sent.messages" weightx="1"/>
-	        <label name="lbCostPerSmsSentPrefix"/>
 		    <textfield action="costPerSmsChanged(this)" name="tfCostPerSMSSent" columns="4"/>
-		    <label name="lbCostPerSmsSentSuffix"/>
 		    <label text="i18n.common.per.sms"/>
         </panel>
         <panel gap="5">
 	        <label text="i18n.common.received.messages" weightx="1"/>
-	        <label name="lbCostPerSmsReceivedPrefix"/>
 		    <textfield action="costPerSmsChanged(this)" name="tfCostPerSMSReceived" columns="4"/>
-		    <label name="lbCostPerSmsReceivedSuffix"/>
 		    <label text="i18n.common.per.sms"/>
+        </panel>
+        <panel gap="5" columns="3">
+	        <label colspan="3" font="bold" text="XXX Currency format:" weightx="1"/>
+	        <checkbox colspan="3" action="currencyFormatSourceChanged(this)" name="cbLanguageFormat" group="groupCurrencyFormat" text="i18n.hometab.logo.settings.usedefault"/>
+  	        <checkbox action="currencyFormatSourceChanged(this)" name="cbCustomFormat" group="groupCurrencyFormat" text="i18n.hometab.logo.settings.usecustom"/>
+  		    <textfield action="currencyFormatChanged(this.text)" name="tfCustomFormat" weightx="1" columns="4"/>
+  		    <label icon="/icons/about.png"/>
         </panel>
 	</panel>
 	<panel icon="/icons/flags/gb.png" text="Country" weightx="1" border="true" columns="2" gap="7" top="5" left="5" bottom="5" right="5">

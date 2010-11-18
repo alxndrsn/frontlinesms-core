@@ -91,14 +91,10 @@ public class InternationalisationUtils {
 
 	// >
 	/**
-<<<<<<< HEAD
 	 * Return an internationalised message for this key, with the current resource bundle
-=======
-	 * Return an internationalised message for this key. <br>
 	 * This method tries to get the string for the current bundle and if it does
 	 * not exist, it looks into the default bundle (English GB).
 	 * 
->>>>>>> goncalo-github/master
 	 * @param key
 	 * @return the internationalised text, or the english text if no
 	 *         internationalised text could be found
@@ -279,9 +275,14 @@ public class InternationalisationUtils {
 	 * @return formatted value
 	 */
 	public static final String formatCurrency(double value) {
-		String currencyFormat = UiProperties.getInstance().getCurrencyFormat();
+		if (UiProperties.getInstance().isCurrencyFormatCustom()) {
+			String currencyFormat = UiProperties.getInstance().getCustomCurrencyFormat();
+			return new CurrencyFormatter(currencyFormat).format(value);
+		} else {
+			return NumberFormat.getCurrencyInstance(getCurrentLocale()).format(value);
+		}
 		
-		return new CurrencyFormatter(currencyFormat).format(value);
+		
 	}
 
 	// > LANGUAGE BUNDLE LOADING METHODS

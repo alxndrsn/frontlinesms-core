@@ -271,6 +271,5 @@ public final class AppProperties extends UserHomeFilePropertySet {
 		}
 		return instance;
 	}
-
 //> STATIC HELPER METHODS
 }

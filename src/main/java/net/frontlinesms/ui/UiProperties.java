@@ -16,33 +16,38 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	
 //> PROPERTY KEYS & VALUES
 	/** Property key (int): Window Width */
-	private static final String KEY_WINDOW_WIDTH = "window.width";
+	public static final String KEY_WINDOW_WIDTH = "window.width";
 	/** Property key (int): Window Height */
-	private static final String KEY_WINDOW_HEIGHT = "window.height";
+	public static final String KEY_WINDOW_HEIGHT = "window.height";
 
 	/** Property key (String): Window State */
-	private static final String KEY_WINDOW_STATE = "window.state";
+	public static final String KEY_WINDOW_STATE = "window.state";
 	/** Property value for {@link #KEY_WINDOW_STATE}: maximised */
-	private static final String WINDOW_STATE_MAXIMISED = "maximised";
+	public static final String WINDOW_STATE_MAXIMISED = "maximised";
 	/** Property value for {@link #KEY_WINDOW_STATE}: not maximised */
-	private static final String WINDOW_STATE_NORMAL = "normal";
+	public static final String WINDOW_STATE_NORMAL = "normal";
 
 	/** Property Key (boolean) indicating if the logo is visible */
-	private static final String KEY_HOMETABLOGO_VISIBLE = "hometab.logo.visible";
+	public static final String KEY_HOMETABLOGO_VISIBLE = "hometab.logo.visible";
 	/** Property Key (boolean) indicating if the logo is the default logo */
-	private static final String KEY_HOMETABLOGO_CUSTOM = "hometab.logo.custom";
+	public static final String KEY_HOMETABLOGO_CUSTOM = "hometab.logo.custom";
 	/** Property Key (String) indicating the path to image file containing the logo. */
-	private static final String KEY_HOMETABLOGO_SOURCE = "hometab.logo.source";
+	public static final String KEY_HOMETABLOGO_SOURCE = "hometab.logo.source";
 	/** Property Key (String) indicating whether the custom logo should keep its original size. */
-	private static final String KEY_HOMETABLOGO_KEEP_ORIGINAL_SIZE = "hometab.logo.keeporiginalsize";
+	public static final String KEY_HOMETABLOGO_KEEP_ORIGINAL_SIZE = "hometab.logo.keeporiginalsize";
 	/** Property key (int) the number of items to display per page */
-	private static final String KEY_ITEMS_PER_PAGE = "paging.itemcount";
+	public static final String KEY_ITEMS_PER_PAGE = "paging.itemcount";
 
 	/** Property Key (String) currency of currently selected language */
-	private static final String CURRENCY_FORMAT = "currency.format";
+	public static final String CURRENCY_FORMAT = "currency.format";
+	/** Property key (boolean) indicating whether the user uses a custom currency format */
+	public static final String CURRENCY_FORMAT_IS_CUSTOM = "currency.format.is.custom";
 	
 	/** Singleton instance of this class. */
 	private static UiProperties instance;
+	
+
+	private static final String DEFAULT_CURRENCY_FORMAT = "£#,##0.00";
 
 //> INSTANCE PROPERTIES
 
@@ -168,13 +173,23 @@ public final class UiProperties extends UserHomeFilePropertySet {
 	}
 	
 	/** @return currency format string to be used for currency formatting */
-	public String getCurrencyFormat() {
-		return super.getProperty(CURRENCY_FORMAT) == null ? "£#,##0.00" : super.getProperty(CURRENCY_FORMAT);
+	public String getCustomCurrencyFormat() {
+		return super.getProperty(CURRENCY_FORMAT) == null ? DEFAULT_CURRENCY_FORMAT : super.getProperty(CURRENCY_FORMAT);
 	}
 	
 	/** @param format the currency format string to be used for currency formatting*/
-	public void setCurrencyFormat(String format) {
+	public void setCustomCurrencyFormat(String format) {
 		super.setProperty(CURRENCY_FORMAT, format);
+	}
+	
+	/** @return <code>true</code> if the user uses a custom currency format, <code>false</code> otherwise. */
+	public boolean isCurrencyFormatCustom() {
+		return super.getPropertyAsBoolean(CURRENCY_FORMAT_IS_CUSTOM, false);
+	}
+	
+	/** @param isCurrencyFormatCustom A boolean indicating whether the user uses a custom currency format */
+	public void setIsCurrencyFormatCustom(boolean isCurrencyFormatCustom) {
+		super.setPropertyAsBoolean(CURRENCY_FORMAT_IS_CUSTOM, isCurrencyFormatCustom);
 	}
 	
 //> INSTANCE HELPER METHODS

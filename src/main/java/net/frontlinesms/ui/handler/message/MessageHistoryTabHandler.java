@@ -58,6 +58,7 @@ import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.UiProperties;
 import net.frontlinesms.ui.events.FrontlineUiUpateJob;
 import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.BaseTabHandler;
@@ -185,7 +186,8 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			}
 		} else if (notification instanceof AppPropertiesEventNotification) {
 			String property = ((AppPropertiesEventNotification) notification).getProperty();
-			if (property.equals(AppProperties.KEY_SMS_COST_RECEIVED_MESSAGES) || property.equals(AppProperties.KEY_SMS_COST_SENT_MESSAGES)) {
+			if (property.equals(AppProperties.KEY_SMS_COST_RECEIVED_MESSAGES) || property.equals(AppProperties.KEY_SMS_COST_SENT_MESSAGES)
+					|| property.equals(UiProperties.CURRENCY_FORMAT) || property.equals(UiProperties.CURRENCY_FORMAT_IS_CUSTOM)) {
 				this.updateMessageHistoryCost();
 			}
 		}

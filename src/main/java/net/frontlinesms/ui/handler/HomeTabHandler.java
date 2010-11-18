@@ -332,7 +332,9 @@ public class HomeTabHandler extends BaseTabHandler implements EventObserver {
 			this.refreshLogoVisibility(getTab());
 		} else if (notification instanceof AppPropertiesEventNotification) {
 			String property = ((AppPropertiesEventNotification) notification).getProperty();
-			if (property.equals(AppProperties.KEY_SMS_COST_SENT_MESSAGES)) {
+			if (property.equals(AppProperties.KEY_SMS_COST_SENT_MESSAGES)
+					|| property.equals(UiProperties.CURRENCY_FORMAT)
+					|| property.equals(UiProperties.CURRENCY_FORMAT_IS_CUSTOM)) {
 				this.messagePanel.updateCost();
 			}
 		}
