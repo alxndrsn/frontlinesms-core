@@ -1,6 +1,5 @@
 package net.frontlinesms.ui.handler.settings;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,21 +66,21 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 	}
 	
 	private void initCostEstimatorSettings() {
-		boolean isCurrencySymbolPrefix = InternationalisationUtils.isCurrencySymbolPrefix();
-		String currencySymbol = InternationalisationUtils.getCurrencySymbol();
-		
+//		boolean isCurrencySymbolPrefix = InternationalisationUtils.isCurrencySymbolPrefix();
+//		String currencySymbol = InternationalisationUtils.getCurrencySymbol();
+//		
 		AppProperties appProperties = AppProperties.getInstance();
 		
-		String costPerSmsReceived = InternationalisationUtils.formatCurrency(appProperties.getCostPerSmsReceived(), false);
-		String costPerSmsSent = InternationalisationUtils.formatCurrency(appProperties.getCostPerSmsSent(), false);
+		String costPerSmsReceived = InternationalisationUtils.formatCurrency(appProperties.getCostPerSmsReceived());
+		String costPerSmsSent = InternationalisationUtils.formatCurrency(appProperties.getCostPerSmsSent());
 
 		this.uiController.setText(find(UI_COMPONENT_TF_COST_PER_SMS_SENT), costPerSmsSent);
-		this.uiController.setText(find(UI_COMPONENT_LB_COST_PER_SMS_SENT_PREFIX), isCurrencySymbolPrefix ? currencySymbol : "");
-		this.uiController.setText(find(UI_COMPONENT_LB_COST_PER_SMS_SENT_SUFFIX), isCurrencySymbolPrefix ? "" : currencySymbol);
+//		this.uiController.setText(find(UI_COMPONENT_LB_COST_PER_SMS_SENT_PREFIX), isCurrencySymbolPrefix ? currencySymbol : "");
+//		this.uiController.setText(find(UI_COMPONENT_LB_COST_PER_SMS_SENT_SUFFIX), isCurrencySymbolPrefix ? "" : currencySymbol);
 		
 		this.uiController.setText(find(UI_COMPONENT_TF_COST_PER_SMS_RECEIVED), costPerSmsReceived);
-		this.uiController.setText(find(UI_COMPONENT_LB_COST_PER_SMS_RECEIVED_PREFIX), isCurrencySymbolPrefix ? currencySymbol : "");
-		this.uiController.setText(find(UI_COMPONENT_LB_COST_PER_SMS_RECEIVED_SUFFIX), isCurrencySymbolPrefix ? "" : currencySymbol);
+//		this.uiController.setText(find(UI_COMPONENT_LB_COST_PER_SMS_RECEIVED_PREFIX), isCurrencySymbolPrefix ? currencySymbol : "");
+//		this.uiController.setText(find(UI_COMPONENT_LB_COST_PER_SMS_RECEIVED_SUFFIX), isCurrencySymbolPrefix ? "" : currencySymbol);
 		
 		this.originalValues.put(SECTION_ITEM_COST_PER_SMS_RECEIVED, costPerSmsReceived);
 		this.originalValues.put(SECTION_ITEM_COST_PER_SMS_SENT, costPerSmsSent);
@@ -159,21 +158,17 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 		appProperties.setAuthorizeStatsSending(this.uiController.isSelected(find(UI_COMPONENT_CB_AUTHORIZE_STATS)));
 		
 		/** COST **/
-		try {
-			double costPerSmsSent = InternationalisationUtils.parseCurrency(this.uiController.getText(find(UI_COMPONENT_TF_COST_PER_SMS_SENT)));
+		double costPerSmsSent = InternationalisationUtils.parseCurrency(this.uiController.getText(find(UI_COMPONENT_TF_COST_PER_SMS_SENT)));
 
-			if (costPerSmsSent != appProperties.getCostPerSmsSent()) {
-				appProperties.setCostPerSmsSent(costPerSmsSent);
-				this.eventBus.notifyObservers(new AppPropertiesEventNotification(AppProperties.class, AppProperties.KEY_SMS_COST_SENT_MESSAGES));
-			}
-			
-			double costPerSmsReceived = InternationalisationUtils.parseCurrency(this.uiController.getText(find(UI_COMPONENT_TF_COST_PER_SMS_RECEIVED)));
-			if (costPerSmsReceived != appProperties.getCostPerSmsReceived()) {
-				appProperties.setCostPerSmsReceived(costPerSmsReceived);
-				this.eventBus.notifyObservers(new AppPropertiesEventNotification(AppProperties.class, AppProperties.KEY_SMS_COST_RECEIVED_MESSAGES));
-			}
-		} catch (ParseException e) {
-			// Should never happen
+		if (costPerSmsSent != appProperties.getCostPerSmsSent()) {
+			appProperties.setCostPerSmsSent(costPerSmsSent);
+			this.eventBus.notifyObservers(new AppPropertiesEventNotification(AppProperties.class, AppProperties.KEY_SMS_COST_SENT_MESSAGES));
+		}
+		
+		double costPerSmsReceived = InternationalisationUtils.parseCurrency(this.uiController.getText(find(UI_COMPONENT_TF_COST_PER_SMS_RECEIVED)));
+		if (costPerSmsReceived != appProperties.getCostPerSmsReceived()) {
+			appProperties.setCostPerSmsReceived(costPerSmsReceived);
+			this.eventBus.notifyObservers(new AppPropertiesEventNotification(AppProperties.class, AppProperties.KEY_SMS_COST_RECEIVED_MESSAGES));
 		}
 		
 		/** COUNTRY **/
@@ -186,21 +181,12 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 	public List<FrontlineValidationMessage> validateFields() {
 		List<FrontlineValidationMessage> validationMessages = new ArrayList<FrontlineValidationMessage>();
 		
-		try {
-			double costPerSmsSent = InternationalisationUtils.parseCurrency(this.uiController.getText(find(UI_COMPONENT_TF_COST_PER_SMS_SENT)));
-			if (costPerSmsSent < 0) {
-				validationMessages.add(new FrontlineValidationMessage(I18N_SETTINGS_INVALID_COST_PER_MESSAGE_SENT, null));
-			}
-		} catch (ParseException e) {
+		double costPerSmsSent = InternationalisationUtils.parseCurrency(this.uiController.getText(find(UI_COMPONENT_TF_COST_PER_SMS_SENT)));
+		if (costPerSmsSent < 0) {
 			validationMessages.add(new FrontlineValidationMessage(I18N_SETTINGS_INVALID_COST_PER_MESSAGE_SENT, null));
 		}
-			
-		try {
-			double costPerSmsReceived = InternationalisationUtils.parseCurrency(this.uiController.getText(find(UI_COMPONENT_TF_COST_PER_SMS_RECEIVED)));
-			if (costPerSmsReceived < 0) {
-				validationMessages.add(new FrontlineValidationMessage(I18N_SETTINGS_INVALID_COST_PER_MESSAGE_RECEIVED, null));
-			}
-		} catch (ParseException e) {
+		double costPerSmsReceived = InternationalisationUtils.parseCurrency(this.uiController.getText(find(UI_COMPONENT_TF_COST_PER_SMS_RECEIVED)));
+		if (costPerSmsReceived < 0) {
 			validationMessages.add(new FrontlineValidationMessage(I18N_SETTINGS_INVALID_COST_PER_MESSAGE_RECEIVED, null));
 		}
 		

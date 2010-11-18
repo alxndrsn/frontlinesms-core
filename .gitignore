@@ -31,4 +31,10 @@ test_temp/
 
 # FrontlineSMS ini file for applying local settings
 frontlinesms.ini
+<<<<<<< HEAD
 .bak/
+=======
+
+# OSX files
+.DS_Store
+>>>>>>> goncalo-github/master

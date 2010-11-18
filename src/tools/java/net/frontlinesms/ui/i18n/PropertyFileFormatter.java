@@ -52,6 +52,11 @@ public class PropertyFileFormatter {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
+		
+		if(args.length < 2){
+			printUsage();
+		}
+		
 		String baseFile = args[0];
 		
 		info("Creating new base file from: " + baseFile);
@@ -71,10 +76,24 @@ public class PropertyFileFormatter {
 			}
 		} else {
 			// A list of filenames should be provided
-			processFileNames = new String[args.length - 2];
+			int processFileCount = args.length - 2;
+			
+			if(processFileCount <= 0){
+				throw new RuntimeException("No files listed for processing");
+			}
+			
+			processFileNames = new String[processFileCount];
 			System.arraycopy(args, 2, processFileNames, 0, processFileNames.length);
 		}
 		process(formatter, targetDir, processFileNames);
+	}
+
+	private static void printUsage() {
+		System.out.println("Necessary arguments are missing. Valid arguments:");
+		System.out.println("[0] frontlineSMS.properties  <-- File whose format is used as basis");
+		System.out.println("[1] temp  <-- Destination directory");
+		System.out.println("-d does something");  // TODO Find out what something is
+		System.out.println("[2] frontlineSMS_pt.properties  <-- File(s) whose values are used as basis");
 	}
 
 	private static void process(PropertyFileFormatter formatter, File targetDir, String... filenames) throws IOException {

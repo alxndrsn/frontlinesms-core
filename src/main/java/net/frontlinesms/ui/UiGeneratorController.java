@@ -882,7 +882,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 		LOG.trace("EXIT");
 	}
-	
+
 	/**
 	 * Method called when an event is fired and should be added to the event list on the home tab.
 	 * @param newEvent New instance of {@link Event} to be added to the list.
