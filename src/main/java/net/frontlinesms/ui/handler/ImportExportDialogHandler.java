@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -145,6 +144,8 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private static final String COMPONENT_PN_VALUES_TABLE = "pnValuesTable";
 	private static final String COMPONENT_PN_DETAILS = "pnDetails";
 	private static final String COMPONENT_PN_CHECKBOXES_2 = "pnInfo2";
+	private static final String I18N_IMPORT_SUCCESSFUL = "importexport.import.successful";
+	private static final String I18N_MULTIMEDIA_MESSAGES_IMPORT_SUCCESSFUL = "importexport.import.multimedia.messages.successful";
 	
 //> STATIC CONSTANTS
 	public enum EntityType {
@@ -286,11 +287,16 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 				CsvRowFormat rowFormat = getRowFormatForContact();
 				CsvImporter.importContacts(new File(dataPath), this.contactDao, this.groupMembershipDao, this.groupDao, rowFormat);
 				this.uiController.refreshContactsTab();
-				// TODO: display a confirmation message
+				this.uiController.infoMessage(InternationalisationUtils.getI18NString(I18N_IMPORT_SUCCESSFUL));
 			} else if (type == EntityType.MESSAGES) {
 				CsvRowFormat rowFormat = getRowFormatForMessage();
-				CsvImporter.importMessages(new File(dataPath), this.messageDao, rowFormat);
-				// TODO: display a confirmation message
+				int multimediaMessagesCount = CsvImporter.importMessages(new File(dataPath), this.messageDao, rowFormat);
+				
+				if (multimediaMessagesCount == 0) {
+					this.uiController.infoMessage(InternationalisationUtils.getI18NString(I18N_IMPORT_SUCCESSFUL));
+				} else {
+					this.uiController.infoMessage(InternationalisationUtils.getI18nStrings(I18N_MULTIMEDIA_MESSAGES_IMPORT_SUCCESSFUL, String.valueOf(multimediaMessagesCount)).toArray(new String[0]));
+				}
 			} else {
 				throw new IllegalStateException("Import is not supported for: " + getType());
 			}
