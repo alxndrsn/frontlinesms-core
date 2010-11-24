@@ -88,7 +88,6 @@ public class InternationalisationUtilsTest extends BaseTestCase {
 				Date testDate = getDate(dateDetails);
 				String formattedDate = dateFormat.format(testDate);
 				Date parsedDate = dateFormat.parse(formattedDate);
-				System.err.println(testDate + " --> " + parsedDate);
 				
 				assertEquals("Parsed date was incorrect for language '" + bungle.getLanguageName() + "' - format='" + formatString + "'",
 						DATEFORMAT_DATE_ONLY.format(testDate),
@@ -183,14 +182,22 @@ public class InternationalisationUtilsTest extends BaseTestCase {
 		assertEquals(1234567890.123, InternationalisationUtils.parseCurrency("1 234 567 890.123"));
 		assertEquals(1234567890.123, InternationalisationUtils.parseCurrency("$1 234 567 890.123"));
 		assertEquals(1234.567, InternationalisationUtils.parseCurrency("GBP1,234.567"));
-		
-//		assertEquals(1.3, InternationalisationUtils.parseCurrency("\u0967.\u0969\u0966"));
-//		assertEquals(1.4, InternationalisationUtils.parseCurrency("\u0967.\u096a\u0966"));
-//		assertEquals(0.5, InternationalisationUtils.parseCurrency("\u0966.\u096b\u0966"));
-//		assertEquals(1.0, InternationalisationUtils.parseCurrency("\u0967.\u0966\u0966"));
-//		assertEquals(1.0, InternationalisationUtils.parseCurrency("\u0967"));
 
 	}
+	
+	public void testPhoneNumberFormatting() {
+		assertEquals("+15559999", InternationalisationUtils.getInternationalPhoneNumber("+15559999"));
+		assertEquals("+15559999", InternationalisationUtils.getInternationalPhoneNumber("0015559999"));
+		assertEquals("+15559999", InternationalisationUtils.getInternationalPhoneNumber("+1-(555)-9999"));
+		assertEquals("+15559999", InternationalisationUtils.getInternationalPhoneNumber("001-(555)-9999"));
+		assertEquals("+33678965454", InternationalisationUtils.getInternationalPhoneNumber("+33(0)6 78 96 54 54"));
+		assertEquals("+33678965454", InternationalisationUtils.getInternationalPhoneNumber("0033(0)678965454"));
+		assertEquals("+33678965454", InternationalisationUtils.getInternationalPhoneNumber("0033(0)6-78-96-54-54"));
+		assertEquals("+33678965454", InternationalisationUtils.getInternationalPhoneNumber("0033(0)6.78.96.54.54"));
+		assertEquals("+447771592981", InternationalisationUtils.getInternationalPhoneNumber("+44 (0) 7771 592981"));
+	}
+	
+	
 	
 //> INSTANCE HELPER METHODS
 	

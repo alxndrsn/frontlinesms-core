@@ -24,6 +24,7 @@ import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.handler.ChoiceDialogHandler;
+import net.frontlinesms.ui.i18n.CountryCallingCode;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
@@ -48,7 +49,6 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 
 	private static final String COMPONENT_SAVE_BUTTON = "btSave";
 
-	private static final String I18N_SENTENCE_DID_YOU_MEAN_INTERNATIONAL = "sentence.did.you.mean.international";
 	private static final String I18N_SENTENCE_TRY_INTERNATIONAL = "sentence.try.international";
 
 //> INSTANCE PROPERTIES
@@ -202,8 +202,8 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 		// Extract the new details of the contact from the UI
 		String msisdn = getText(COMPONENT_CONTACT_MOBILE_MSISDN);
 		
-		if (!FrontlineUtils.isInInternationalFormat(msisdn)) {
-			String internationalFormat = FrontlineUtils.getInternationalFormat(msisdn);
+		if (!CountryCallingCode.isInInternationalFormat(msisdn)) {
+			String internationalFormat = InternationalisationUtils.getInternationalPhoneNumber(msisdn);
 			ChoiceDialogHandler choiceDialogHandler = new ChoiceDialogHandler(this.ui);
 			choiceDialogHandler.showChoiceDialog(this, false, "doSave('" + internationalFormat + "', this, choiceDialog)", I18N_SENTENCE_TRY_INTERNATIONAL, internationalFormat);
 		} else {

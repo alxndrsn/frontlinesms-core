@@ -47,6 +47,7 @@ import java.util.MissingResourceException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.frontlinesms.AppProperties;
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.Email;
@@ -61,14 +62,12 @@ import thinlet.Thinlet;
 /**
  * Utilities for helping internationalise text etc.
  * 
- * @author Alex | Gonçalo Silva
- * 
- *         TODO always use UTF-8 with no exceptions. All Unicode characters, and
- *         therefore all characters, can be encoded as UTF-8
+ * @author Alex Anderson
+ * @author Gonçalo Silva
  */
 public class InternationalisationUtils {
 
-	// > STATIC PROPERTIES
+//> STATIC PROPERTIES
 	/**
 	 * Name of the directory containing the languages files. This is located
 	 * within the config directory.
@@ -83,13 +82,11 @@ public class InternationalisationUtils {
 	private static Logger LOG = FrontlineUtils
 			.getLogger(InternationalisationUtils.class);
 
-	// > GENERAL i18n HELP METHODS
+//> GENERAL i18n HELP METHODS
 	/** The default characterset, UTF-8. This must be available for every JVM. */
 	public static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
-	private static final String COMA = ",";
-	private static final String DOT = ".";
 
-	// >
+//>
 	/**
 	 * Return an internationalised message for this key, with the current resource bundle
 	 * This method tries to get the string for the current bundle and if it does
@@ -523,12 +520,7 @@ public class InternationalisationUtils {
 				: new Locale("en", "gb");
 	}
 	
-	/** @return the area calling code for a country */
-	public static String getInternationalCountryCode(String country) {
-		if (country == null || country.isEmpty()) {	
-			return "";
-		} else {
-			return InternationalCountryCode.valueOf(country.toUpperCase()).getCountryCode();
-		}
+	public static String getInternationalPhoneNumber(String phoneNumber) {
+		return CountryCallingCode.format(phoneNumber, AppProperties.getInstance().getCurrentCountry());
 	}
 }
