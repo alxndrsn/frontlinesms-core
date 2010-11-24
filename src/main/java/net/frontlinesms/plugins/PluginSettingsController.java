@@ -12,14 +12,15 @@ import net.frontlinesms.ui.settings.UiSettingsSectionHandler;
 public interface PluginSettingsController {
 	
 	/**
-	 * Lets the plugin add subnodes to their main settings node
+	 * Lets the plugin add subnodes to their main settings node.
+	 * <p>If there are no subsettings, this method should do nothing.
 	 * @param rootSettingsNode The root node for this plugin in the tree.
 	 */
 	public void addSubSettingsNodes(Object rootSettingsNode);
 	
 	/**
 	 * @param section
-	 * @return The {@link UiSettingsSectionHandler} for the section given in parameter.
+	 * @return The {@link UiSettingsSectionHandler} for the section given in parameter, or <code>null</code> if there is no handler.
 	 */
 	public UiSettingsSectionHandler getHandlerForSection(String section);
 	

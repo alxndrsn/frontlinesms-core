@@ -626,6 +626,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 
 	/**
 	 * Handles the way statistics are loaded or not at startup.
+	 * TODO this method should not be here - most likely should be in {@link UiGeneratorController}
 	 * @param uiController
 	 */
 	public void handleStatistics(UiGeneratorController uiController) {
