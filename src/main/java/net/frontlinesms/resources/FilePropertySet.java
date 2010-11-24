@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
@@ -117,6 +118,18 @@ public class FilePropertySet extends BasePropertySet {
 		} catch(NumberFormatException ex) {
 			return defaultValue;
 		}
+	}
+	
+	protected String[] getPropertyValues(String propertyName) {
+		LinkedList<String> values = new LinkedList<String>();
+
+		for(int i=0; i>=0; ++i) {
+			String val = getProperty(propertyName + "." + i);
+			if(val == null) break;
+			else values.add(val);
+		}
+		
+		return values.toArray(new String[0]);
 	}
 	
 	/** Sets the {@link Integer} value of a property. */
