@@ -528,7 +528,7 @@ public class InternationalisationUtils {
 		if (country == null || country.isEmpty()) {	
 			return "";
 		} else {
-			return InternationalCountryCodes.valueOf(country.toUpperCase()).getCountryCode();
+			return InternationalCountryCode.valueOf(country.toUpperCase()).getCountryCode();
 		}
 	}
 }
