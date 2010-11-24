@@ -15,6 +15,7 @@ import net.frontlinesms.FrontlineSMS;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.repository.unmodifiable.UnmodifiableGroupDao;
 import net.frontlinesms.ui.Icon;
+import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.BasePanelHandler;
 
@@ -227,6 +228,10 @@ public class GroupSelecterPanel extends BasePanelHandler {
 
 	public void setRootGroup(Group rootGroup) {
 		this.rootGroup = rootGroup;
+	}
+
+	public void setPerform(ThinletUiEventHandler groupSelecterDialog, String methodCall) {
+		ui.setPerform(this.groupTreeComponent, methodCall, this.groupTreeComponent, groupSelecterDialog);
 	}
 
 	public Group getRootGroup() {
