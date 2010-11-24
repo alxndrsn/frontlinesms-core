@@ -1,6 +1,5 @@
 package net.frontlinesms.ui.handler.settings;
 
-import java.awt.EventQueue;
 import java.util.Collection;
 
 import net.frontlinesms.EmailSender;
@@ -79,14 +78,11 @@ public abstract class SettingsAbstractEmailsSectionHandler extends BaseSectionHa
 				this.uiController.add(table, this.uiController.getRow(acc));
 			}
 			
-			FrontlineUiUpateJob upateJob = new FrontlineUiUpateJob() {
-				
+			new FrontlineUiUpateJob() {
 				public void run() {
 					enableBottomButtons(null);	
 				}
-			};
-			
-			EventQueue.invokeLater(upateJob);
+			}.execute();
 		}
 	}
 
@@ -176,14 +172,11 @@ public abstract class SettingsAbstractEmailsSectionHandler extends BaseSectionHa
 	public void notify(FrontlineEventNotification event) {
 		if(event instanceof DatabaseEntityNotification<?>) {
 			if(((DatabaseEntityNotification<?>)event).getDatabaseEntity() instanceof EmailAccount) {
-				FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
-					
+				new FrontlineUiUpateJob() {
 					public void run() {
 						refresh();
 					}
-				};
-				
-				EventQueue.invokeLater(updateJob);
+				}.execute();
 			}
 		}
 	}

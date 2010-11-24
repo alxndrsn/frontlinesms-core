@@ -23,7 +23,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_EN
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_START_DATE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_MESSAGE_HISTORY;
 
-import java.awt.EventQueue;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -639,15 +638,12 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			FrontlineMessage e = ui.getMessage(ui.getItem(messageListComponent, i));
 			if (e.equals(message)) {
 				final int index = i;
-				FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
-					
+				new FrontlineUiUpateJob() {
 					public void run() {
 						ui.remove(ui.getItem(messageListComponent, index));
 						ui.add(messageListComponent, ui.getRow(message), index);
 					}
-				};
-				
-				EventQueue.invokeLater(updateJob);
+				}.execute();
 				return;
 			}
 		}
@@ -846,16 +842,11 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			}
 			if (toAdd) {
 				LOG.debug("Time to try to add this message to list...");
-				FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
-					
+				new FrontlineUiUpateJob() {
 					public void run() {
 						addMessage(message);
 					}
-				};
-				
-				EventQueue.invokeLater(updateJob);
-				
-				
+				}.execute();
 			}
 		}
 		LOG.trace("EXIT");

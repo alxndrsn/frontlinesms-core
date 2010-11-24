@@ -1,5 +1,9 @@
 package net.frontlinesms.ui.events;
 
-public interface FrontlineUiUpateJob extends Runnable {
+import java.awt.EventQueue;
 
+public abstract class FrontlineUiUpateJob implements Runnable {
+	public void execute() {
+		EventQueue.invokeLater(this);
+	}
 }

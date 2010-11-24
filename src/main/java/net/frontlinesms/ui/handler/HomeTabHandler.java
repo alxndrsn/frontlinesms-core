@@ -5,7 +5,6 @@ package net.frontlinesms.ui.handler;
 
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_EVENTS_LIST;
 
-import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -311,8 +310,7 @@ public class HomeTabHandler extends BaseTabHandler implements EventObserver {
 
 //> LISTENER EVENT METHODS
 	public void newEvent(final Event newEvent) {
-		FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
-			
+		new FrontlineUiUpateJob() {
 			public void run() {
 				Object eventListComponent = find(COMPONENT_EVENTS_LIST);
 				if(eventListComponent != null) {
@@ -322,9 +320,7 @@ public class HomeTabHandler extends BaseTabHandler implements EventObserver {
 					ui.add(eventListComponent, getRow(newEvent));
 				}		
 			}
-		};
-		
-		EventQueue.invokeLater(updateJob);
+		}.execute();
 	}
 
 	public void notify(FrontlineEventNotification notification) {

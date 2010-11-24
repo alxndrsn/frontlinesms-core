@@ -23,7 +23,6 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_K
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_NEW_KEYWORD_FORM_TITLE;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_KEYWORD_MANAGER;
 
-import java.awt.EventQueue;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.List;
@@ -632,16 +631,13 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	 * <br>Has no effect in classic mode.
 	 */
 	private void updateKeywordList() {
-		FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
-			
+		new FrontlineUiUpateJob() {
 			public void run() {
 				keywordListPagingHandler.refresh();
 				showSelectedKeyword();
 				enableKeywordFields(ui.find(COMPONENT_KEY_PANEL));		
 			}
-		};
-		
-		EventQueue.invokeLater(updateJob);
+		}.execute();
 	}
 	
 	/**
