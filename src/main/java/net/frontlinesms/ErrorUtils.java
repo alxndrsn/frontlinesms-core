@@ -440,7 +440,8 @@ public class ErrorUtils {
 	public static void sendLogsToFrontlineSupport(String fromName, String fromEmailAddress, String description, String attachment) throws EmailException {
 		StringBuilder sb = new StringBuilder();
 		
-		sb.append("Description: " + description + "\n");
+		appendDescription(sb, description);
+		
 	    appendFrontlineProperties(sb);
 	    appendSystemProperties(sb);
 	    appendCommProperties(sb);
@@ -492,6 +493,13 @@ public class ErrorUtils {
 		}
 		
 		endSection(bob, "Plugin Properties");
+	}
+	
+	private static void appendDescription(StringBuilder bob, String description) {
+		beginSection(bob, "User Description");
+		bob.append(description);
+		bob.append("\n");
+		endSection(bob, "User Description");
 	}
 	
 	private static void appendFrontlineProperties(StringBuilder bob) {
