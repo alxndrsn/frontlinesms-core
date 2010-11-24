@@ -48,7 +48,7 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 
 	private static final String COMPONENT_SAVE_BUTTON = "btSave";
 
-	private static final String I18N_SENTENCE_DID_YOU_MEAN_INTERNATIONAL = "sentence.did.you.mean.international";
+	private static final String I18N_COMMON_USE = "common.use";
 	private static final String I18N_SENTENCE_TRY_INTERNATIONAL = "sentence.try.international";
 
 //> INSTANCE PROPERTIES
@@ -204,8 +204,11 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 		
 		if (!FrontlineUtils.isInInternationalFormat(msisdn)) {
 			String internationalFormat = FrontlineUtils.getInternationalFormat(msisdn);
-			ChoiceDialogHandler choiceDialogHandler = new ChoiceDialogHandler(this.ui);
-			choiceDialogHandler.showChoiceDialog(this, false, "doSave('" + internationalFormat + "', this, choiceDialog)", I18N_SENTENCE_TRY_INTERNATIONAL, internationalFormat);
+			ChoiceDialogHandler choiceDialogHandler = new ChoiceDialogHandler(this.ui, this);
+			choiceDialogHandler.setFirstButtonText(InternationalisationUtils.getI18NString(I18N_COMMON_USE, internationalFormat));
+			choiceDialogHandler.setSecondButtonText(InternationalisationUtils.getI18NString(I18N_COMMON_USE, msisdn));
+			
+			choiceDialogHandler.showChoiceDialog(true, "doSave('" + internationalFormat + "', this, choiceDialog)", I18N_SENTENCE_TRY_INTERNATIONAL, internationalFormat);
 		} else {
 			this.doSave(msisdn, null, null);
 		}
@@ -216,57 +219,58 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 			this.removeDialog(dialog);
 		}
 		
-		if (button != null && button.equals(this.ui.find(dialog, UiGeneratorControllerConstants.COMPONENT_BUTTON_YES))) {
-			String name = getText(COMPONENT_CONTACT_NAME);
-			String otherMsisdn = getText(COMPONENT_CONTACT_OTHER_MSISDN);
-			String emailAddress = getText(COMPONENT_CONTACT_EMAIL_ADDRESS);
-			String notes = getText(COMPONENT_CONTACT_NOTES);
-			boolean isActive = contactDetails_getActive();
-			
-			// Update or save the contact
-			Contact contact = this.target;
-			try {
-				if (contact == null) {
-					LOG.debug("Creating a new contact [" + name + ", " + msisdn + "]");
-					contact = new Contact(name, msisdn, otherMsisdn, emailAddress, notes, isActive);
-					
-					this.contactDao.saveContact(contact);
-	
-					// Update the groups that this contact is a member of
-					for(Group g : getAddedGroups()) {
-						groupMembershipDao.addMember(g, contact);
-					}
-					
-					removeDialog();
-					owner.contactCreationComplete(contact);
-				} else {
-					// If this is not a new contact, we still need to update all details
-					// that would otherwise be set by the constructor called in the block
-					// above.
-					LOG.debug("Editing contact [" + contact.getName() + "]. Setting new values!");
-					contact.setPhoneNumber(msisdn);
-					contact.setName(name);
-					contact.setOtherPhoneNumber(otherMsisdn);
-					contact.setEmailAddress(emailAddress);
-					contact.setNotes(notes);
-					contact.setActive(isActive);
-	
-					// Update the groups that this contact is a member of
-					for(Group g : getRemovedGroups()) {
-						groupMembershipDao.removeMember(g, contact);
-					}
-					for(Group g : getAddedGroups()) {
-						groupMembershipDao.addMember(g, contact);
-					}
-					
-					this.contactDao.updateContact(contact);
-					removeDialog();
-					owner.contactEditingComplete(contact);
+		if (button != null && button.equals(this.ui.find(dialog, UiGeneratorControllerConstants.COMPONENT_BUTTON_NO))) {
+			msisdn = getText(COMPONENT_CONTACT_MOBILE_MSISDN);
+		}
+		String name = getText(COMPONENT_CONTACT_NAME);
+		String otherMsisdn = getText(COMPONENT_CONTACT_OTHER_MSISDN);
+		String emailAddress = getText(COMPONENT_CONTACT_EMAIL_ADDRESS);
+		String notes = getText(COMPONENT_CONTACT_NOTES);
+		boolean isActive = contactDetails_getActive();
+		
+		// Update or save the contact
+		Contact contact = this.target;
+		try {
+			if (contact == null) {
+				LOG.debug("Creating a new contact [" + name + ", " + msisdn + "]");
+				contact = new Contact(name, msisdn, otherMsisdn, emailAddress, notes, isActive);
+				
+				this.contactDao.saveContact(contact);
+
+				// Update the groups that this contact is a member of
+				for(Group g : getAddedGroups()) {
+					groupMembershipDao.addMember(g, contact);
 				}
-			} catch(DuplicateKeyException ex) {
-				LOG.debug("There is already a contact with this mobile number - cannot save!", ex);
-				showMergeContactDialog(contact, this.dialogComponent);
+				
+				removeDialog();
+				owner.contactCreationComplete(contact);
+			} else {
+				// If this is not a new contact, we still need to update all details
+				// that would otherwise be set by the constructor called in the block
+				// above.
+				LOG.debug("Editing contact [" + contact.getName() + "]. Setting new values!");
+				contact.setPhoneNumber(msisdn);
+				contact.setName(name);
+				contact.setOtherPhoneNumber(otherMsisdn);
+				contact.setEmailAddress(emailAddress);
+				contact.setNotes(notes);
+				contact.setActive(isActive);
+
+				// Update the groups that this contact is a member of
+				for(Group g : getRemovedGroups()) {
+					groupMembershipDao.removeMember(g, contact);
+				}
+				for(Group g : getAddedGroups()) {
+					groupMembershipDao.addMember(g, contact);
+				}
+				
+				this.contactDao.updateContact(contact);
+				removeDialog();
+				owner.contactEditingComplete(contact);
 			}
+		} catch(DuplicateKeyException ex) {
+			LOG.debug("There is already a contact with this mobile number - cannot save!", ex);
+			showMergeContactDialog(contact, this.dialogComponent);
 		}
 	}
 	
