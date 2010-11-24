@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.MissingResourceException;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -72,7 +73,14 @@ public class InternationalisationUtilsTest extends BaseTestCase {
 		for(LanguageBundle bungle : getLanguageBundles()) {
 			log.info("Testing " + bungle.getLanguageName());
 			
-			String formatString = bungle.getValue(FrontlineSMSConstants.DATEFORMAT_YMD);
+			String formatString;
+			try {
+				formatString = bungle.getValue(FrontlineSMSConstants.DATEFORMAT_YMD);
+			} catch(MissingResourceException ex) {
+				// Don't attempt to test when there is no date format specified.
+				continue;
+			}
+			
 			DateFormat dateFormat = new SimpleDateFormat(formatString);
 			for(int[] dateDetails : TEST_DATES) {
 				// Create a date object and format it as a String.  Reparse the String and make sure that the returned date is

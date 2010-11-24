@@ -1,6 +1,5 @@
 package net.frontlinesms.ui.handler.settings;
 
-import java.awt.EventQueue;
 import java.util.Collection;
 import java.util.List;
 
@@ -42,13 +41,11 @@ public class SettingsInternetServicesSectionHandler extends BaseSectionHandler i
 	}
 
 	private void refresh() {
-		FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
+		new FrontlineUiUpateJob() {
 			public void run() {
 				refreshAccounts();
 			}
-		};
-	
-		EventQueue.invokeLater(updateJob);
+		}.execute();
 	}
 	
 	public void refreshAccounts() {

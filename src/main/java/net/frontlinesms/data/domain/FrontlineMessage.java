@@ -544,7 +544,8 @@ public class FrontlineMessage {
 		this.textMessageContent = textMessageContent;
 	}
 
-	public String getTextMessageContent() {
+	// FIXME what does this method provide which getTextContent() does not?  N.B. obviously don't rename the field unless appropriate hibernate mapping is applied
+	private String getTextMessageContent() {
 		return textMessageContent;
 	}
 

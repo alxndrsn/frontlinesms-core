@@ -54,6 +54,8 @@ public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSe
 		ui.setWeight(selecterPanel, 1, 1);
 		ui.add(dialogComponent, selecterPanel, 0);
 		
+		selecter.setPerform(this, "done");
+		
 		// Disable the DONE button until the user has selected something
 		setDoneButtonEnabled(false);
 	}

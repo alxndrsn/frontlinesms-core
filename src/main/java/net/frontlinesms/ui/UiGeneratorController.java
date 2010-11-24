@@ -19,7 +19,6 @@
  */
 package net.frontlinesms.ui;
 
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Frame;
 import java.io.File;
@@ -57,6 +56,8 @@ import net.frontlinesms.ui.handler.*;
 import net.frontlinesms.ui.handler.contacts.*;
 import net.frontlinesms.ui.handler.core.DatabaseSettingsPanel;
 import net.frontlinesms.ui.handler.email.*;
+import net.frontlinesms.ui.handler.help.AboutDialog;
+import net.frontlinesms.ui.handler.help.ContributeDialog;
 import net.frontlinesms.ui.handler.keyword.KeywordTabHandler;
 import net.frontlinesms.ui.handler.message.*;
 import net.frontlinesms.ui.handler.mms.MmsSettingsDialogHandler;
@@ -102,8 +103,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/** Default width of the Thinlet frame launcher */
 	public static final int DEFAULT_WIDTH = 1024;
 	private static final String I18N_CONFIRM_EXIT = "message.confirm.exit";
-	private static final String I18N_CONTRIBUTE_EXPLANATION = "contribute.explanation";
-	private static final String I18N_CONTRIBUTE_EMAIL_US = "contribute.click.to.email.us";
+	private static final String I18N_ACTIVE_CONNECTIONS = "connections.active.connections.statusbar";
 
 //> INSTANCE PROPERTIES
 	/** Logging object */
@@ -448,14 +448,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public void showStatsDialog() {
 		final StatisticsDialogHandler statisticsDialogHandler = new StatisticsDialogHandler(this);
 		
-		FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
-			
+		new FrontlineUiUpateJob() {
 			public void run() {
 				add(statisticsDialogHandler.getDialog());
 			}
-		};
-		
-		EventQueue.invokeLater(updateJob);
+		}.execute();
 	}
 
 	/**
@@ -784,14 +781,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param status the new status to display
 	 */
 	public void setStatus(final String status) {
-		FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
-			
+		new FrontlineUiUpateJob() {
 			public void run() {
 				setString(statusBarComponent, TEXT, status);		
 			}
-		};
-
-		EventQueue.invokeLater(updateJob);
+		}.execute();
 		LOG.debug("Status Text [" + status + "]");
 	}
 	
@@ -1502,44 +1496,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	public void showAboutScreen() {
-		Object about = loadComponentFromFile(UI_FILE_ABOUT_PANEL);
-		String version = InternationalisationUtils.getI18NString(FrontlineSMSConstants.I18N_APP_VERSION, BuildProperties.getInstance().getVersion());
-		setText(find(about, "version"), version);
-		add(about);
+		new AboutDialog(this).show();
 	}
 	
 	public void showContributeScreen() {
-		Object contributeDialog = loadComponentFromFile(UI_FILE_CONTRIBUTE_DIALOG);
-		
-		Object pnExplanation = find(contributeDialog, "pnExplanation");
-		
-		for (String label : InternationalisationUtils.getI18nStrings(I18N_CONTRIBUTE_EXPLANATION)) {
-			add(pnExplanation, createLabel(label));
-		}
-		
-		Object linkWorking = find(contributeDialog, "linkWorking");
-		Object linkGuestPost = find(contributeDialog, "linkGuestPost");
-		Object linkNotWorking = find(contributeDialog, "linkNotWorking");
-		
-		setText(linkWorking, InternationalisationUtils.getI18NString(I18N_CONTRIBUTE_EMAIL_US, "you2us@frontlinesms.com"));
-		setText(linkGuestPost, InternationalisationUtils.getI18NString(I18N_CONTRIBUTE_EMAIL_US, "you2us@frontlinesms.com"));
-		setText(linkNotWorking, InternationalisationUtils.getI18NString(I18N_CONTRIBUTE_EMAIL_US, "frontlinesupport@kiwanja.net"));
-
-		add(contributeDialog);
-	}
-	
-	public void emailMyExperience() {
-		StringBuilder body = new StringBuilder();
-		body.append("Name of organisation: \n\n");
-		body.append("Area of work: \n\n");
-		body.append("Country/region of work: \n\n");
-		body.append("Sector (e.g. health, human rights etc.): \n\n");
-		body.append("Short description of your use of SMS (e.g. keeping in touch with staff in the field, monitoring well maintenance, providing information to remote farmers): \n\n");
-		mailTo("you2us@frontlinesms.com", "Contribute to FrontlineSMS", body.toString());
-	}
-	
-	public void emailForGuestPost() {
-		mailTo("you2us@frontlinesms.com", "Writing a guest blog post for FrontlineSMS.com", "");
+		new ContributeDialog(this).show();
 	}
 
 	public void incomingMessageEvent(FrontlineMessage message) {
@@ -1818,7 +1779,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * Updates the number of active connections in the status bar.
 	 */
 	public void updateActiveConnections() {
-		setText(find(COMPONENT_LB_ACTIVE_CONNECTIONS), String.valueOf(getFrontlineController().getNumberOfActiveConnections()));
+		setText(find(COMPONENT_LB_ACTIVE_CONNECTIONS),
+				InternationalisationUtils.getI18NString(I18N_ACTIVE_CONNECTIONS, getFrontlineController().getNumberOfActiveConnections()));
 	}
 	
 //> DEBUG METHODS
@@ -1883,13 +1845,12 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 					// If the dialog is not already created AND not already displayed, create a new one and show it now
 					if (deviceConnectionDialogHandler == null) {
 						deviceConnectionDialogHandler = new NoPhonesDetectedDialogHandler(this);
-						FrontlineUiUpateJob job = new FrontlineUiUpateJob() {
+						new FrontlineUiUpateJob() {
 							public void run() {
 								deviceConnectionDialogHandler.initDialog((NoSmsServicesConnectedNotification) notification);
 								add(deviceConnectionDialogHandler.getDialog());
 							}
-						};
-						EventQueue.invokeLater(job);
+						}.execute();
 					}
 				}
 			}
@@ -1900,14 +1861,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				this.newEvent(new Event(Event.TYPE_SMS_INTERNET_SERVICE_RECEIVING_FAILED, 
 											mmsServiceStatusNotification.getMmsService().getServiceName() + " - " + InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED)));
 			}
-			FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
-				
-				public void run() {
-					updateActiveConnections();
-				}
-			};
-			
-			EventQueue.invokeLater(updateJob);
 		} else if (notification instanceof EntitySavedNotification<?>) {
 			Object entity = ((EntitySavedNotification<?>) notification).getDatabaseEntity();
 			if (entity instanceof FrontlineMultimediaMessage) {
@@ -1927,15 +1880,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				default:
 					break;
 			}
-			
-			FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
-				
-				public void run() {
-					updateActiveConnections();
-				}
-			};
-			
-			EventQueue.invokeLater(updateJob);
 		}
 	}
 

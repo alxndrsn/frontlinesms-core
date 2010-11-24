@@ -7,37 +7,37 @@ package net.frontlinesms.ui.i18n;
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  *
  */
-public enum InternationalCountryCodes {
+public enum InternationalCountryCode {
 	AF("93"),
 	AL("355"),
 	DZ("213"),
-	AS("1 684"),
+	AS("1684"),
 	AD("376"),
 	AO("244"),
-	AI("1 264"),
+	AI("1264"),
 	AQ("672"),
-	AG("1 268"),
+	AG("1268"),
 	AR("54"),
 	AM("374"),
 	AW("297"),
 	AU("61"),
 	AT("43"),
 	AZ("994"),
-	BS("1 242"),
+	BS("1242"),
 	BH("973"),
 	BD("880"),
-	BB("1 246"),
+	BB("1246"),
 	BY("375"),
 	BE("32"),
 	BZ("501"),
 	BJ("229"),
-	BM("1 441"),
+	BM("1441"),
 	BT("975"),
 	BO("591"),
 	BA("387"),
 	BW("267"),
 	BR("55"),
-	VG("1 284"),
+	VG("1284"),
 	BN("673"),
 	BG("359"),
 	BF("226"),
@@ -47,7 +47,7 @@ public enum InternationalCountryCodes {
 	CM("237"),
 	CA("1"),
 	CV("238"),
-	KY("1 345"),
+	KY("1345"),
 	CF("236"),
 	TD("235"),
 	CL("56"),
@@ -65,8 +65,8 @@ public enum InternationalCountryCodes {
 	CD("243"),
 	DK("45"),
 	DJ("253"),
-	DM("1 767"),
-	DO("1 809"),
+	DM("1767"),
+	DO("1809"),
 	EC("593"),
 	EG("20"),
 	SV("503"),
@@ -88,8 +88,8 @@ public enum InternationalCountryCodes {
 	GI("350"),
 	GR("30"),
 	GL("299"),
-	GD("1 473"),
-	GU("1 671"),
+	GD("1473"),
+	GU("1671"),
 	GT("502"),
 	GN("224"),
 	GW("245"),
@@ -109,7 +109,7 @@ public enum InternationalCountryCodes {
 	IL("972"),
 	IT("39"),
 	CI("225"),
-	JM("1 876"),
+	JM("1876"),
 	JP("81"),
 	JE("44"),
 	JO("962"),
@@ -145,7 +145,7 @@ public enum InternationalCountryCodes {
 	MC("377"),
 	MN("976"),
 	ME("382"),
-	MS("1 664"),
+	MS("1664"),
 	MA("212"),
 	MZ("258"),
 	NA("264"),
@@ -160,7 +160,7 @@ public enum InternationalCountryCodes {
 	NG("234"),
 	NU("683"),
 	KP("850"),
-	MP("1 670"),
+	MP("1670"),
 	NO("47"),
 	OM("968"),
 	PK("92"),
@@ -181,11 +181,11 @@ public enum InternationalCountryCodes {
 	RW("250"),
 	BL("590"),
 	SH("290"),
-	KN("1 869"),
-	LC("1 758"),
-	MF("1 599"),
+	KN("1869"),
+	LC("1758"),
+	MF("1599"),
 	PM("508"),
-	VC("1 784"),
+	VC("1784"),
 	WS("685"),
 	SM("378"),
 	ST("239"),
@@ -217,11 +217,11 @@ public enum InternationalCountryCodes {
 	TG("228"),
 	TK("690"),
 	TO("676"),
-	TT("1 868"),
+	TT("1868"),
 	TN("216"),
 	TR("90"),
 	TM("993"),
-	TC("1 649"),
+	TC("1649"),
 	TV("688"),
 	UG("256"),
 	UA("380"),
@@ -229,7 +229,7 @@ public enum InternationalCountryCodes {
 	GB("44"),
 	US("1"),
 	UY("598"),
-	VI("1 340"),
+	VI("1340"),
 	UZ("998"),
 	VU("678"),
 	VE("58"),
@@ -239,17 +239,13 @@ public enum InternationalCountryCodes {
 	ZM("260"),
 	ZW("263");
 	
-	private String countryCode;
+	private final String countryCode;
 
-	InternationalCountryCodes (String countryCode) {
-		this.setCountryCode(countryCode);
-	}
-
-	public void setCountryCode(String countryCode) {
+	InternationalCountryCode (String countryCode) {
 		this.countryCode = countryCode;
 	}
 
 	public String getCountryCode() {
-		return countryCode.replace(" ", "");
+		return countryCode;
 	}
 }

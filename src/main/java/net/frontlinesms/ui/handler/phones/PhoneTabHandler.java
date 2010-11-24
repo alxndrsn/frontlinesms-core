@@ -6,7 +6,6 @@ package net.frontlinesms.ui.handler.phones;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_MODEM_LIST_UPDATED;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_ADVANCED_PHONE_MANAGER;
 
-import java.awt.EventQueue;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -163,15 +162,12 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	public void showPhoneSettingsDialog(SmsModem device, boolean isNewPhone) {
 		final DeviceSettingsDialogHandler deviceSettingsDialog = new DeviceSettingsDialogHandler(ui, device, isNewPhone);
 		
-		FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
-			
+		new FrontlineUiUpateJob() {
 			public void run() {
 				deviceSettingsDialog.initDialog();
 				ui.add(deviceSettingsDialog.getDialog());
 			}
-		};
-		
-		EventQueue.invokeLater(updateJob);
+		}.execute();
 	}
 	
 	/**
@@ -284,13 +280,11 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 		// We create the manual config dialog and put the display job in the AWT event queue
 		final DeviceManualConfigDialogHandler configDialog = new DeviceManualConfigDialogHandler(ui, selectedModem);
 		
-		FrontlineUiUpateJob upateJob = new FrontlineUiUpateJob() {
+		new FrontlineUiUpateJob() {
 			public void run() {
 				ui.add(configDialog.getDialog());
 			}
-		};
-		
-		EventQueue.invokeLater(upateJob);
+		}.execute();
 	}
 
 	/** Starts the phone auto-detector. */
@@ -374,7 +368,7 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	 * Refreshes the list of PhoneHandlers displayed on the PhoneManager tab.
 	 */
 	public void refresh() {
-		FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
+		new FrontlineUiUpateJob() {
 			public void run() {
 				Object modemListError = ui.find(COMPONENT_PHONE_MANAGER_MODEM_LIST_ERROR);
 				// cache the selected item so we can reselect it when we've finished!
@@ -404,9 +398,7 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 				ui.setSelectedIndex(modemListError, index);
 				ui.updateActiveConnections();
 			}
-		};
-	
-		EventQueue.invokeLater(updateJob);
+		}.execute();
 	}
 	
 	private Object getTableRow(FrontlineMessagingService service, boolean isConnected) {
@@ -514,29 +506,15 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_MODEM_LIST_UPDATED));
 			}
 		} else if (notification instanceof MmsServiceStatusNotification) {
-			FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
-				
-				public void run() {
-					refresh();
-				}
-			};
-			
-			EventQueue.invokeLater(updateJob);
+			refresh();
 		} else if (notification instanceof DatabaseEntityNotification<?>) {
 			// Database notification
 			Object entity = ((DatabaseEntityNotification<?>) notification).getDatabaseEntity();
 			if (entity instanceof EmailAccount
 					|| entity instanceof SmsModemSettings
 					|| entity instanceof SmsInternetServiceSettings) {
-					FrontlineUiUpateJob updateJob = new FrontlineUiUpateJob() {
-					
-					public void run() {
-						// If there is any change in the E-Mail accounts, we refresh the list of Messaging Services
-						refresh();
-					}
-				};
-				
-				EventQueue.invokeLater(updateJob);
+				// If there is any change in the E-Mail accounts, we refresh the list of Messaging Services
+				refresh();
 			}
 		}
 	}

@@ -202,24 +202,6 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 		FrontlineUtils.openHelpPageInBrowser(page);
 	}
 	
-	/**
-	 * Opens a mailto window
-	 * @param emailAddress
-	 */
-	public void mailTo(String emailAddress) {
-		mailTo(emailAddress, "", "");
-	}
-	
-	/**
-	 * Opens a mailto window
-	 * @param emailAddress
-	 */
-	public void mailTo(String emailAddress, String subject, String body) {
-		try {
-			FrontlineUtils.openDefaultMailClient(new URI("mailto", emailAddress, "?subject=" + subject + "&body=" + body));
-		} catch (URISyntaxException e1) {}
-	}
-	
 	
 	
 	/**

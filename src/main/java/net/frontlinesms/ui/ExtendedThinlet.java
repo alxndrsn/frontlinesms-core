@@ -275,7 +275,7 @@ private static final String START = "start";
 	 * @param root
 	 * @param handler
 	 */
-	public void setPerform(Object component, String methodCall, Object root, Object handler) {
+	public void setPerform(Object component, String methodCall, Object root, ThinletUiEventHandler handler) {
 		setMethod(component, Thinlet.PERFORM, methodCall, root, handler);
 	}
 	
