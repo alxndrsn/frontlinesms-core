@@ -56,6 +56,8 @@ import net.frontlinesms.ui.handler.*;
 import net.frontlinesms.ui.handler.contacts.*;
 import net.frontlinesms.ui.handler.core.DatabaseSettingsPanel;
 import net.frontlinesms.ui.handler.email.*;
+import net.frontlinesms.ui.handler.help.AboutDialog;
+import net.frontlinesms.ui.handler.help.ContributeDialog;
 import net.frontlinesms.ui.handler.keyword.KeywordTabHandler;
 import net.frontlinesms.ui.handler.message.*;
 import net.frontlinesms.ui.handler.mms.MmsSettingsDialogHandler;
@@ -101,8 +103,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	/** Default width of the Thinlet frame launcher */
 	public static final int DEFAULT_WIDTH = 1024;
 	private static final String I18N_CONFIRM_EXIT = "message.confirm.exit";
-	private static final String I18N_CONTRIBUTE_EXPLANATION = "contribute.explanation";
-	private static final String I18N_CONTRIBUTE_EMAIL_US = "contribute.click.to.email.us";
 	private static final String I18N_ACTIVE_CONNECTIONS = "connections.active.connections.statusbar";
 
 //> INSTANCE PROPERTIES
@@ -1496,44 +1496,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	public void showAboutScreen() {
-		Object about = loadComponentFromFile(UI_FILE_ABOUT_PANEL);
-		String version = InternationalisationUtils.getI18NString(FrontlineSMSConstants.I18N_APP_VERSION, BuildProperties.getInstance().getVersion());
-		setText(find(about, "version"), version);
-		add(about);
+		new AboutDialog(this).show();
 	}
 	
 	public void showContributeScreen() {
-		Object contributeDialog = loadComponentFromFile(UI_FILE_CONTRIBUTE_DIALOG);
-		
-		Object pnExplanation = find(contributeDialog, "pnExplanation");
-		
-		for (String label : InternationalisationUtils.getI18nStrings(I18N_CONTRIBUTE_EXPLANATION)) {
-			add(pnExplanation, createLabel(label));
-		}
-		
-		Object linkWorking = find(contributeDialog, "linkWorking");
-		Object linkGuestPost = find(contributeDialog, "linkGuestPost");
-		Object linkNotWorking = find(contributeDialog, "linkNotWorking");
-		
-		setText(linkWorking, InternationalisationUtils.getI18NString(I18N_CONTRIBUTE_EMAIL_US, "you2us@frontlinesms.com"));
-		setText(linkGuestPost, InternationalisationUtils.getI18NString(I18N_CONTRIBUTE_EMAIL_US, "you2us@frontlinesms.com"));
-		setText(linkNotWorking, InternationalisationUtils.getI18NString(I18N_CONTRIBUTE_EMAIL_US, "frontlinesupport@kiwanja.net"));
-
-		add(contributeDialog);
-	}
-	
-	public void emailMyExperience() {
-		StringBuilder body = new StringBuilder();
-		body.append("Name of organisation: \n\n");
-		body.append("Area of work: \n\n");
-		body.append("Country/region of work: \n\n");
-		body.append("Sector (e.g. health, human rights etc.): \n\n");
-		body.append("Short description of your use of SMS (e.g. keeping in touch with staff in the field, monitoring well maintenance, providing information to remote farmers): \n\n");
-		mailTo("you2us@frontlinesms.com", "Contribute to FrontlineSMS", body.toString());
-	}
-	
-	public void emailForGuestPost() {
-		mailTo("you2us@frontlinesms.com", "Writing a guest blog post for FrontlineSMS.com", "");
+		new ContributeDialog(this).show();
 	}
 
 	public void incomingMessageEvent(FrontlineMessage message) {
