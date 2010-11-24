@@ -133,15 +133,18 @@ public class CsvImporter {
 	 * @throws IOException If there was a problem accessing the file
 	 * @throws CsvParseException If there was a problem with the format of the file
 	 */
-	public static void importMessages(File importFile, MessageDao messageDao, CsvRowFormat rowFormat) throws IOException, CsvParseException {
+	public static int importMessages(File importFile, MessageDao messageDao, CsvRowFormat rowFormat) throws IOException, CsvParseException {
 		LOG.trace("ENTER");
 		if(LOG.isDebugEnabled()) LOG.debug("File [" + importFile.getAbsolutePath() + "]");
 		Utf8FileReader reader = null;
+		int multimediaMessagesCount = 0;
+
 		try {
 			reader = new Utf8FileReader(importFile);
 			boolean firstLine = true;
 			String[] lineValues;
 			LanguageBundle usedLanguageBundle = null;
+			
 			while((lineValues = CsvUtils.readLine(reader)) != null) {
 				if(firstLine) {
 					// Ignore the first line of the CSV file as it should be the column titles
@@ -178,6 +181,7 @@ public class CsvImporter {
 						message.setDate(date);
 						message.setSenderMsisdn(sender);
 						message.setRecipientMsisdn(recipient);
+						++multimediaMessagesCount;
 					} else {
 						if (type.equals(Type.OUTBOUND)) {
 							message = FrontlineMessage.createOutgoingMessage(date, sender, recipient, content);
@@ -194,6 +198,8 @@ public class CsvImporter {
 			if (reader != null) reader.close();
 		}
 		LOG.trace("EXIT");
+		
+		return multimediaMessagesCount;
 	}
 
 	public static LanguageBundle getUsedLanguageBundle(String typeString) {
