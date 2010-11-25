@@ -206,7 +206,7 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 			String internationalFormat = InternationalisationUtils.getInternationalPhoneNumber(phoneNumber);
 			ChoiceDialogHandler choiceDialogHandler = new ChoiceDialogHandler(this.ui, this);
 			choiceDialogHandler.setFirstButtonText(InternationalisationUtils.getI18nString(I18N_COMMON_USE, internationalFormat));
-			choiceDialogHandler.setFirstButtonIcon(ui.getFlagIconPath(AppProperties.getInstance().getUserCountry()));
+			choiceDialogHandler.setFirstButtonIcon(ui.getFlagIconPath(AppProperties.getInstance().getUserCountry().toLowerCase()));
 			choiceDialogHandler.setSecondButtonText(InternationalisationUtils.getI18nString(I18N_COMMON_USE, phoneNumber));
 			choiceDialogHandler.setSecondButtonIcon(Icon.TICK);
 			
