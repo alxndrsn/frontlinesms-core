@@ -80,6 +80,8 @@ public class FrontlineMessage {
 		DELIVERED(FrontlineSMSConstants.COMMON_DELIVERED),
 		/** Outgoing message that had status KEEP TRYING returned by the GSM network */
 		KEEP_TRYING(FrontlineSMSConstants.COMMON_RETRYING),
+		@Deprecated ABORTED(null),
+		@Deprecated UNKNOWN(null),
 		/** Outgoing message that had status FAILED returned by the GSM network */
 		FAILED(FrontlineSMSConstants.COMMON_FAILED);
 		

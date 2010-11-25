@@ -120,7 +120,7 @@ public class FilePropertySet extends BasePropertySet {
 		}
 	}
 	
-	protected String[] getPropertyValues(String propertyName) {
+	protected String[] getPropertyValues(String propertyName, String... defaultValues) {
 		LinkedList<String> values = new LinkedList<String>();
 
 		for(int i=0; i>=0; ++i) {
@@ -129,7 +129,11 @@ public class FilePropertySet extends BasePropertySet {
 			else values.add(val);
 		}
 		
-		return values.toArray(new String[0]);
+		if(values.isEmpty()) {
+			return defaultValues;
+		} else {
+			return values.toArray(new String[0]);
+		}
 	}
 	
 	/** Sets the {@link Integer} value of a property. */
