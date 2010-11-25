@@ -444,8 +444,8 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 		Object useForSendingCell = ui.createTableCell("");
 		Object useForReceiveCell = ui.createTableCell("");
 		if (isConnected) {
-			if (service.isUseForSending()) ui.setIcon(useForSendingCell, Icon.TICK);
-			if (service.isUseForReceiving()) ui.setIcon(useForReceiveCell, Icon.TICK);
+			if (service.isUseForSending()) ui.setIcon(useForSendingCell, Icon.CIRLCE_TICK);
+			if (service.isUseForReceiving()) ui.setIcon(useForReceiveCell, Icon.CIRLCE_TICK);
 			ui.add(row, useForSendingCell);
 			ui.add(row, useForReceiveCell);
 		}

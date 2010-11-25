@@ -1147,7 +1147,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		
 		Object cell = createTableCell("");
 		if (contact.isActive()) {
-			setIcon(cell, Icon.TICK);
+			setIcon(cell, Icon.CIRLCE_TICK);
 		} else {
 			setIcon(cell, Icon.CANCEL);
 		}
@@ -1210,7 +1210,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			add(row, createTableCell(InternationalisationUtils.getI18nString(COMMON_UNDEFINED)));
 		}
 		cell = createTableCell("");
-		setIcon(cell, action.isAlive(System.currentTimeMillis()) ? Icon.TICK : Icon.CANCEL);
+		setIcon(cell, action.isAlive(System.currentTimeMillis()) ? Icon.CIRLCE_TICK : Icon.CANCEL);
 		setChoice(cell, ALIGNMENT, CENTER);
 		add(row, cell);
 		add(row, createTableCell(action.getCounter()));

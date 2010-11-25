@@ -780,7 +780,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 			if (lineValues[i].equals(InternationalisationUtils.getI18nString(I18N_COMMON_ACTIVE))) { // We're creating the status cell
 				lineValues[i] = lineValues[i].toLowerCase();
 				if (!lineValues[i].equals("false") && !lineValues[i].equals("dormant")) {
-					this.uiController.setIcon(cell, Icon.TICK);
+					this.uiController.setIcon(cell, Icon.CIRLCE_TICK);
 				} else {
 					this.uiController.setIcon(cell, Icon.CANCEL);
 				}

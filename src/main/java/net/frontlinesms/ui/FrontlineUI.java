@@ -19,11 +19,7 @@
  */
 package net.frontlinesms.ui;
 
-import java.awt.Desktop;
 import java.awt.Image;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import net.frontlinesms.ErrorUtils;
 import net.frontlinesms.FrontlineUtils;
@@ -69,13 +65,21 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	}
 	
 	/**
+	 * Gets the path to the icon for a specific country
+	 * @param languageBundle
+	 * @return the flag image for the language bundle, or <code>null</code> if none could be found.
+	 */
+	public String getFlagIconPath(String country) {
+		return country != null ? "/icons/flags/" + country + ".png" : null;
+	}
+	
+	/**
 	 * Gets the icon for a specific country
 	 * @param languageBundle
 	 * @return the flag image for the language bundle, or <code>null</code> if none could be found.
 	 */
 	public Image getFlagIcon(String country) {
-		String flagFile = country != null ? "/icons/flags/" + country + ".png" : null;
-		return country == null ? null : getIcon(flagFile);
+		return country == null ? null : getIcon(getFlagIconPath(country));
 	}
 	
 	/**

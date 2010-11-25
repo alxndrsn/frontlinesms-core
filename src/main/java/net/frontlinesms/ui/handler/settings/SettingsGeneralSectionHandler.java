@@ -95,7 +95,7 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 	private void initCountrySettings() {
 		Object countryList = find(UI_COMPONENT_COMBOBOX_COUNTRIES);
 		int selectedIndex = -1;
-		Object currentCountry = AppProperties.getInstance().getCurrentCountry();
+		Object currentCountry = AppProperties.getInstance().getUserCountry();
 
 		// Missing translation files
 		for (int i = 0 ; i < EnumCountry.values().length ; ++i) {
@@ -212,7 +212,7 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 		
 		/** COUNTRY **/
 		String country = this.uiController.getAttachedObject(this.uiController.getSelectedItem(find(UI_COMPONENT_COMBOBOX_COUNTRIES)), String.class);
-		appProperties.setCurrentCountry(country);
+		appProperties.setUserCountry(country);
 		
 		appProperties.saveToDisk();		
 	}

@@ -16,7 +16,7 @@ public class ChoiceDialogHandler implements ThinletUiEventHandler {
 
 //> STATIC CONSTANTS
 	/** UI XML File Path */
-	private static final String UI_FILE_DELETE_OPTION_DIALOG_FORM = "/ui/dialog/choiceDialogForm.xml";
+	private static final String UI_FILE_DELETE_OPTION_DIALOG_FORM = "/ui/core/util/dgChoice.xml";
 
 	/** UI Thinlet component: panel containing all custom labels **/
 	private static final String UI_COMPONENT_PN_LABELS = "pnLabels";
@@ -25,18 +25,18 @@ public class ChoiceDialogHandler implements ThinletUiEventHandler {
 	private static final String UI_COMPONENT_BT_CANCEL = "btCancel";
 
 //> INSTANCE PROPERTIES
-	private Logger LOG = Logger.getLogger(this.getClass());
-	private UiGeneratorController uiController;
+	private Logger log = Logger.getLogger(this.getClass());
+	private UiGeneratorController ui;
 
 	private Object dialogComponent;
 
-	private ThinletUiEventHandler handler;
+	private ThinletUiEventHandler buttonActionHandler;
 	
 //> CONSTRUCTORS
 	public ChoiceDialogHandler (UiGeneratorController uiController, ThinletUiEventHandler handler) {
-		this.uiController = uiController;
-		this.handler = handler;
-		this.dialogComponent = this.uiController.loadComponentFromFile(UI_FILE_DELETE_OPTION_DIALOG_FORM, handler);
+		this.ui = uiController;
+		this.buttonActionHandler = handler;
+		this.dialogComponent = this.ui.loadComponentFromFile(UI_FILE_DELETE_OPTION_DIALOG_FORM, this);
 	}
 	
 //> INIT METHODS
@@ -46,22 +46,26 @@ public class ChoiceDialogHandler implements ThinletUiEventHandler {
 	 * @param propertyKey The property key used to generate the custom labels
 	 */
 	public void showChoiceDialog (boolean showCancelButton, String yesMethod, String noMethod, String propertyKey, String ... i18nValues) {
-		LOG.trace("Populating choice dialog with custom labels (Key:" + propertyKey + ")");
+		log.trace("Populating choice dialog with custom labels (Key:" + propertyKey + ")");
 
 		Object btCancel = find(UI_COMPONENT_BT_CANCEL);
-		this.uiController.setVisible(btCancel, showCancelButton);
+		this.ui.setVisible(btCancel, showCancelButton);
 
 		Object pnLabels = find(UI_COMPONENT_PN_LABELS);		
 		for (String label : InternationalisationUtils.getI18nStrings(propertyKey, i18nValues)) {
-			this.uiController.add(pnLabels, this.uiController.createLabel(label));
+			this.ui.add(pnLabels, this.ui.createLabel(label));
 		}
 
 		setButtonMethod(UI_COMPONENT_BT_YES, yesMethod);
 		setButtonMethod(UI_COMPONENT_BT_NO, noMethod);
 		
-		this.uiController.add(this.dialogComponent);
+		this.ui.add(this.dialogComponent);
 		
-		LOG.trace("EXIT");
+		log.trace("EXIT");
+	}
+	
+	public void removeDialog() {
+		ui.remove(this.dialogComponent);
 	}
 	
 	public void setFirstButtonText (String text) {
@@ -72,20 +76,28 @@ public class ChoiceDialogHandler implements ThinletUiEventHandler {
 		setButtonText(UI_COMPONENT_BT_NO, text);
 	}
 	
-	public void setThirdButtonText(String text) {
-		setButtonText(UI_COMPONENT_BT_CANCEL, text);
+	public void setFirstButtonIcon(String iconPath) {
+		setButtonIcon(UI_COMPONENT_BT_YES, iconPath);
+	}
+	
+	public void setSecondButtonIcon(String iconPath) {
+		setButtonIcon(UI_COMPONENT_BT_NO, iconPath);
 	}
 	
 //> PRIVATE HELPER METHODS
 	private void setButtonText(String buttonName, String newText) {
-		this.uiController.setText(find(buttonName), newText);
+		this.ui.setText(find(buttonName), newText);
+	}
+	
+	private void setButtonIcon(String buttonName, String iconPath) {
+		this.ui.setIcon(find(buttonName), iconPath);
 	}
 	
 	private void setButtonMethod(String buttonName, String method) {
-		this.uiController.setAction(find(buttonName), method, this.dialogComponent, this.handler);
+		this.ui.setAction(find(buttonName), method, this.dialogComponent, this.buttonActionHandler);
 	}
 	
 	private Object find(String componentName) {
-		return this.uiController.find(this.dialogComponent, componentName);
+		return this.ui.find(this.dialogComponent, componentName);
 	}
 }

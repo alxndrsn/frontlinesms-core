@@ -26,7 +26,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  */
 public class MessageDetailsDisplay implements ThinletUiEventHandler {
 	/** Path to the Thinlet XML layout file for the message details form */
-	public static final String UI_FILE_MSG_DETAILS_FORM = "/ui/core/messages/dgMessageDetails.xml";
+	private static final String UI_FILE_MSG_DETAILS_FORM = "/ui/core/messages/dgMessageDetails.xml";
 
 	private static final String I18N_MESSAGE_NO_CONTENT = "message.no.content";
 

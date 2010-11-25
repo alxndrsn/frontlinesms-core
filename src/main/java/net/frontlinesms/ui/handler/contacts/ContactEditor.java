@@ -4,7 +4,6 @@
 package net.frontlinesms.ui.handler.contacts;
 
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LABEL_STATUS;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RADIO_BUTTON_ACTIVE;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -13,7 +12,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import net.frontlinesms.FrontlineSMSConstants;
+import net.frontlinesms.AppProperties;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
@@ -35,16 +34,17 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	/** UI XML File Path: Edit and Create dialog for {@link Contact} objects */
 	private static final String UI_FILE_CREATE_CONTACT_FORM = "/ui/core/contacts/dgEditContact.xml";
 
-	public static final String COMPONENT_BT_REMOVE_FROM_GROUP = "btRemoveFromGroup";
-	public static final String COMPONENT_NEW_CONTACT_GROUP_LIST = "newContact_groupList";
-	public static final String COMPONENT_CONTACT_NAME = "contact_name";
-	public static final String COMPONENT_CONTACT_MOBILE_MSISDN = "contact_mobileMsisdn";
-	public static final String COMPONENT_CONTACT_OTHER_MSISDN = "contact_otherMsisdn";
-	public static final String COMPONENT_CONTACT_EMAIL_ADDRESS = "contact_emailAddress";
-	public static final String COMPONENT_CONTACT_NOTES = "contact_notes";
-	public static final String COMPONENT_CONTACT_DORMANT = "rb_dormant";
+	private static final String COMPONENT_BT_REMOVE_FROM_GROUP = "btRemoveFromGroup";
+	private static final String COMPONENT_NEW_CONTACT_GROUP_LIST = "newContact_groupList";
+	private static final String COMPONENT_CONTACT_NAME = "contact_name";
+	private static final String COMPONENT_CONTACT_MOBILE_MSISDN = "contact_mobileMsisdn";
+	private static final String COMPONENT_CONTACT_OTHER_MSISDN = "contact_otherMsisdn";
+	private static final String COMPONENT_CONTACT_EMAIL_ADDRESS = "contact_emailAddress";
+	private static final String COMPONENT_CONTACT_NOTES = "contact_notes";
+	private static final String COMPONENT_CONTACT_DORMANT = "rb_dormant";
+	private static final String COMPONENT_RADIO_BUTTON_ACTIVE = "rb_active";
 
-	public static final String MESSAGE_EXISTENT_CONTACT = "message.contact.already.exists";
+	private static final String MESSAGE_EXISTENT_CONTACT = "message.contact.already.exists";
 
 	private static final String COMPONENT_SAVE_BUTTON = "btSave";
 
@@ -206,8 +206,9 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 			String internationalFormat = InternationalisationUtils.getInternationalPhoneNumber(phoneNumber);
 			ChoiceDialogHandler choiceDialogHandler = new ChoiceDialogHandler(this.ui, this);
 			choiceDialogHandler.setFirstButtonText(InternationalisationUtils.getI18nString(I18N_COMMON_USE, internationalFormat));
+			choiceDialogHandler.setFirstButtonIcon(ui.getFlagIconPath(AppProperties.getInstance().getUserCountry()));
 			choiceDialogHandler.setSecondButtonText(InternationalisationUtils.getI18nString(I18N_COMMON_USE, phoneNumber));
-			choiceDialogHandler.setThirdButtonText(InternationalisationUtils.getI18nString(FrontlineSMSConstants.ACTION_BACK));
+			choiceDialogHandler.setSecondButtonIcon(Icon.TICK);
 			
 			choiceDialogHandler.showChoiceDialog(true,
 					"doSave('true', choiceDialog)",

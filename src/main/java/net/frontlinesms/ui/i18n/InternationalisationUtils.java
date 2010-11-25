@@ -528,6 +528,6 @@ public class InternationalisationUtils {
 	}
 	
 	public static String getInternationalPhoneNumber(String phoneNumber) {
-		return CountryCallingCode.format(phoneNumber, AppProperties.getInstance().getCurrentCountry());
+		return CountryCallingCode.format(phoneNumber, AppProperties.getInstance().getUserCountry());
 	}
 }

@@ -74,7 +74,6 @@ public final class FrontlineSMSConstants {
 	public static final String ACTION_ADD_TO_GROUP = "action.add.to.group";
 	public static final String ACTION_SAVE = "action.save";
 	public static final String ACTION_CANCEL = "action.cancel";
-	public static final String ACTION_BACK = "action.back";
 	
 //> CONTACTS i18n Keys
 	/** [i18n key] "All contacts" */
