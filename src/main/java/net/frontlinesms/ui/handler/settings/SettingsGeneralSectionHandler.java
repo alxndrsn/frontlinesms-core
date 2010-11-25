@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.frontlinesms.AppProperties;
+import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.events.AppPropertiesEventNotification;
 import net.frontlinesms.settings.BaseSectionHandler;
 import net.frontlinesms.settings.FrontlineValidationMessage;
@@ -220,12 +221,21 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 	public List<FrontlineValidationMessage> validateFields() {
 		List<FrontlineValidationMessage> validationMessages = new ArrayList<FrontlineValidationMessage>();
 		
-		double costPerSmsSent = InternationalisationUtils.parseCurrency(this.uiController.getText(find(UI_COMPONENT_TF_COST_PER_SMS_SENT)));
-		if (costPerSmsSent < 0) {
+		try {
+			double costPerSmsSent = InternationalisationUtils.parseCurrency(this.uiController.getText(find(UI_COMPONENT_TF_COST_PER_SMS_SENT)));
+			if (costPerSmsSent < 0) {
+				validationMessages.add(new FrontlineValidationMessage(I18N_SETTINGS_INVALID_COST_PER_MESSAGE_SENT, null));
+			}
+		} catch (NumberFormatException exc) {
 			validationMessages.add(new FrontlineValidationMessage(I18N_SETTINGS_INVALID_COST_PER_MESSAGE_SENT, null));
 		}
-		double costPerSmsReceived = InternationalisationUtils.parseCurrency(this.uiController.getText(find(UI_COMPONENT_TF_COST_PER_SMS_RECEIVED)));
-		if (costPerSmsReceived < 0) {
+		
+		try {
+			double costPerSmsReceived = InternationalisationUtils.parseCurrency(this.uiController.getText(find(UI_COMPONENT_TF_COST_PER_SMS_RECEIVED)));
+			if (costPerSmsReceived < 0) {
+				validationMessages.add(new FrontlineValidationMessage(I18N_SETTINGS_INVALID_COST_PER_MESSAGE_RECEIVED, null));
+			}
+		} catch (NumberFormatException exc) {
 			validationMessages.add(new FrontlineValidationMessage(I18N_SETTINGS_INVALID_COST_PER_MESSAGE_RECEIVED, null));
 		}
 		
@@ -246,5 +256,10 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 		uiController.add(generalRootNode, emailHandler.getSectionNode());
 		
 		return generalRootNode;
+	}
+	
+	/** @see UiGeneratorController#openBrowser(String) */
+	public void openBrowser(String url) {
+		FrontlineUtils.openExternalBrowser(url);
 	}
 }

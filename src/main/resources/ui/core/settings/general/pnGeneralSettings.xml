@@ -20,7 +20,7 @@
 	        <checkbox colspan="3" action="currencyFormatSourceChanged(this)" name="cbLanguageFormat" group="groupCurrencyFormat" text="i18n.hometab.logo.settings.usedefault"/>
   	        <checkbox action="currencyFormatSourceChanged(this)" name="cbCustomFormat" group="groupCurrencyFormat" text="i18n.hometab.logo.settings.usecustom"/>
   		    <textfield action="currencyFormatChanged(this.text)" name="tfCustomFormat" weightx="1" columns="4"/>
-  		    <label icon="/icons/about.png"/>
+  		    <button type="link" icon="/icons/about.png" action="openBrowser('http://download.oracle.com/javase/tutorial/i18n/format/decimalFormat.html')"/>
         </panel>
 	</panel>
 	<panel icon="/icons/flags/gb.png" text="Country" weightx="1" border="true" columns="2" gap="7" top="5" left="5" bottom="5" right="5">

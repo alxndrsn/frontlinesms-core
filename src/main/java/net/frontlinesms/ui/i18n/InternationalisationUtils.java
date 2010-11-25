@@ -238,8 +238,10 @@ public class InternationalisationUtils {
 		if (matcher.find()) {
 			
 			String[] splitValues = currencyString.split(regexPattern);
-
-			if (splitValues.length == 2) {
+			
+			if (splitValues.length == 0) {
+				throw new NumberFormatException();
+			} else if (splitValues.length == 2) {
 				// Only one separator - assume its for decimal places
 				currencyString = splitValues[0] + "." + splitValues[1];
 			} else {
