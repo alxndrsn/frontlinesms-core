@@ -16,7 +16,7 @@
 		    <label text="i18n.common.per.sms"/>
         </panel>
         <panel gap="5" columns="3">
-	        <label colspan="3" font="bold" text="XXX Currency format:" weightx="1"/>
+	        <label colspan="3" font="bold" text="i18n.common.currency.format" weightx="1"/>
 	        <checkbox colspan="3" action="currencyFormatSourceChanged(this)" name="cbLanguageFormat" group="groupCurrencyFormat" text="i18n.hometab.logo.settings.usedefault"/>
   	        <checkbox action="currencyFormatSourceChanged(this)" name="cbCustomFormat" group="groupCurrencyFormat" text="i18n.hometab.logo.settings.usecustom"/>
   		    <textfield action="currencyFormatChanged(this.text)" name="tfCustomFormat" weightx="1" columns="4"/>

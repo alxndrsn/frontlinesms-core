@@ -28,10 +28,14 @@ public class ChoiceDialogHandler implements ThinletUiEventHandler {
 	private UiGeneratorController uiController;
 
 	private Object dialogComponent;
+
+	private ThinletUiEventHandler handler;
 	
 //> CONSTRUCTORS
-	public ChoiceDialogHandler (UiGeneratorController uiController) {
+	public ChoiceDialogHandler (UiGeneratorController uiController, ThinletUiEventHandler handler) {
 		this.uiController = uiController;
+		this.handler = handler;
+		this.dialogComponent = this.uiController.loadComponentFromFile(UI_FILE_DELETE_OPTION_DIALOG_FORM, handler);
 	}
 	
 //> INIT METHODS
@@ -40,10 +44,9 @@ public class ChoiceDialogHandler implements ThinletUiEventHandler {
 	 * Shows the choice dialog with custom labels
 	 * @param propertyKey The property key used to generate the custom labels
 	 */
-	public void showChoiceDialog (ThinletUiEventHandler handler, boolean showCancelButton, String methodToBeCalledByYesNoButtons, String propertyKey, String ... i18nValues) {
+	public void showChoiceDialog (boolean showCancelButton, String methodToBeCalledByYesNoButtons, String propertyKey, String ... i18nValues) {
 		LOG.trace("Populating choice dialog with custom labels (Key:" + propertyKey + ")");
 
-		this.dialogComponent = this.uiController.loadComponentFromFile(UI_FILE_DELETE_OPTION_DIALOG_FORM, handler);
 		Object pnLabels = this.uiController.find(this.dialogComponent, UI_COMPONENT_PN_LABELS);
 		
 		Object btCancel = this.uiController.find(this.dialogComponent, UI_COMPONENT_BT_CANCEL);
@@ -62,5 +65,17 @@ public class ChoiceDialogHandler implements ThinletUiEventHandler {
 		this.uiController.add(this.dialogComponent);
 		
 		LOG.trace("EXIT");
+	}
+	
+	public void setFirstButtonText (String text) {
+		Object btYes = this.uiController.find(this.dialogComponent, UiGeneratorControllerConstants.COMPONENT_BUTTON_YES);
+		
+		this.uiController.setText(btYes, text);
+	}
+	
+	public void setSecondButtonText (String text) {
+		Object btNo = this.uiController.find(this.dialogComponent, UiGeneratorControllerConstants.COMPONENT_BUTTON_NO);
+		
+		this.uiController.setText(btNo, text);
 	}
 }
