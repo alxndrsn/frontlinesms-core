@@ -669,7 +669,7 @@ class I18nString {
 	public String toString() {
 		String text = null;
 		try {
-			text = InternationalisationUtils.getI18NString(getKey());
+			text = InternationalisationUtils.getI18nString(getKey());
 		} catch(Throwable t) { /* Something went wrong.  We'll return the default value later. */ }
 		
 		if(text != null) {

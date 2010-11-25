@@ -80,11 +80,11 @@ public class SettingsDevicesSectionHandler extends BaseSectionHandler implements
 	}
 	
 	public String getTitle() {
-		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_DEVICES);
+		return InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_DEVICES);
 	}
 
 	public Object getSectionNode() {
-		Object devicesNode = createSectionNode(InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_DEVICES), this, "/icons/phone_manualConfigure.png");
+		Object devicesNode = createSectionNode(InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_DEVICES), this, "/icons/phone_manualConfigure.png");
 		addSubDevices(devicesNode);
 		uiController.setExpanded(devicesNode, false);
 		

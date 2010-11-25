@@ -67,7 +67,7 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 	void initDialog() {
 		LOG.trace("INIT DEVICE SETTINGS DIALOG");	
 		this.dialogComponent = this.ui.loadComponentFromFile(UI_FILE_MODEM_SETTINGS_DIALOG, this);
-		this.ui.setText(dialogComponent, InternationalisationUtils.getI18NString(COMMON_SETTINGS_FOR_PHONE) + " '" + device.getModel() + "'");
+		this.ui.setText(dialogComponent, InternationalisationUtils.getI18nString(COMMON_SETTINGS_FOR_PHONE) + " '" + device.getModel() + "'");
 
 		Object pnDeviceSettings = this.ui.loadComponentFromFile(UI_FILE_PANEL_MODEM_SETTINGS, this);
 		this.ui.add(dialogComponent, pnDeviceSettings, 0);

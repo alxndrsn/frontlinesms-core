@@ -53,9 +53,9 @@ public class ForwardActionDialog extends BaseActionDialog {
 		KeywordAction action = isEditing() ? super.getTargetObject(KeywordAction.class) : null;
 		
 		// Set the title of the dialog
-		String title = InternationalisationUtils.getI18NString(COMMON_AUTO_FORWARD_FOR_KEYWORD)
+		String title = InternationalisationUtils.getI18nString(COMMON_AUTO_FORWARD_FOR_KEYWORD)
 				+ " '" + super.getTargetKeyword().getKeyword() + "' "
-				+ InternationalisationUtils.getI18NString(COMMON_TO_GROUP) + ":";
+				+ InternationalisationUtils.getI18nString(COMMON_TO_GROUP) + ":";
 		ui.setText(find(COMPONENT_FORWARD_FORM_TITLE), title);
 
 		// Add the date panel, and set dates
@@ -121,13 +121,13 @@ public class ForwardActionDialog extends BaseActionDialog {
 			}
 			if(end < start) {
 				log.debug("Start date is not before the end date");
-				ui.alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
+				ui.alert(InternationalisationUtils.getI18nString(MESSAGE_START_DATE_AFTER_END));
 				log.trace("EXIT");
 				return;
 			}
 			doCreateKeywordActionForward(group, forwardText, start, end);
 		} else {
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_GROUP_SELECTED_TO_FWD));
+			ui.alert(InternationalisationUtils.getI18nString(MESSAGE_NO_GROUP_SELECTED_TO_FWD));
 		}
 		log.trace("EXIT");
 	}

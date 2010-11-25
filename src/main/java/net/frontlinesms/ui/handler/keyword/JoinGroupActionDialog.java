@@ -21,9 +21,9 @@ public class JoinGroupActionDialog extends BaseGroupActionDialog {
 	/** @see BaseGroupActionDialog#getDialogTitle() */
 	@Override
 	protected String getDialogTitle() {
-		return InternationalisationUtils.getI18NString(COMMON_KEYWORD)
+		return InternationalisationUtils.getI18nString(COMMON_KEYWORD)
 				+ " \"" + KeywordTabHandler.getDisplayableKeyword(super.getTargetKeyword()) + "\" "
-				+ InternationalisationUtils.getI18NString(COMMON_AUTO_JOIN_GROUP) + ":";
+				+ InternationalisationUtils.getI18nString(COMMON_AUTO_JOIN_GROUP) + ":";
 	}
 
 	@Override

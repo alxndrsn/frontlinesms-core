@@ -171,7 +171,7 @@ public class SettingsDatabaseSectionHandler extends BaseSectionHandler implement
 				this.selectedSettings.saveProperties();
 			}
 			
-			this.uiController.alert(InternationalisationUtils.getI18NString(I18N_MESSAGE_DATABASE_SETTINGS_CHANGED));
+			this.uiController.alert(InternationalisationUtils.getI18nString(I18N_MESSAGE_DATABASE_SETTINGS_CHANGED));
 		}
 	}
 	
@@ -216,11 +216,11 @@ public class SettingsDatabaseSectionHandler extends BaseSectionHandler implement
 	}
 	
 	public String getTitle() {
-		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_DATABASE_SETTINGS);
+		return InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_DATABASE_SETTINGS);
 	}
 	
 	public Object getSectionNode() {
-		return createSectionNode(InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_DATABASE_SETTINGS), this, "/icons/database_edit.png");
+		return createSectionNode(InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_DATABASE_SETTINGS), this, "/icons/database_edit.png");
 	}
 }
 

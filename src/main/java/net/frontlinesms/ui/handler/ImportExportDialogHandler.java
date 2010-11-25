@@ -276,7 +276,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		// Make sure that a file has been selected to import from
 		if (dataPath.equals("")) {
 			log.debug("dataPath is blank.");
-			uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_FILENAME));
+			uiController.alert(InternationalisationUtils.getI18nString(MESSAGE_NO_FILENAME));
 			log.trace("EXIT");
 			return;
 		}
@@ -287,25 +287,25 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 				CsvRowFormat rowFormat = getRowFormatForContact();
 				CsvImporter.importContacts(new File(dataPath), this.contactDao, this.groupMembershipDao, this.groupDao, rowFormat);
 				this.uiController.refreshContactsTab();
-				this.uiController.infoMessage(InternationalisationUtils.getI18NString(I18N_IMPORT_SUCCESSFUL));
+				this.uiController.infoMessage(InternationalisationUtils.getI18nString(I18N_IMPORT_SUCCESSFUL));
 			} else if (type == EntityType.MESSAGES) {
 				CsvRowFormat rowFormat = getRowFormatForMessage();
 				int multimediaMessagesCount = CsvImporter.importMessages(new File(dataPath), this.messageDao, rowFormat);
 				
 				if (multimediaMessagesCount == 0) {
-					this.uiController.infoMessage(InternationalisationUtils.getI18NString(I18N_IMPORT_SUCCESSFUL));
+					this.uiController.infoMessage(InternationalisationUtils.getI18nString(I18N_IMPORT_SUCCESSFUL));
 				} else {
 					this.uiController.infoMessage(InternationalisationUtils.getI18nStrings(I18N_MULTIMEDIA_MESSAGES_IMPORT_SUCCESSFUL, String.valueOf(multimediaMessagesCount)).toArray(new String[0]));
 				}
 			} else {
 				throw new IllegalStateException("Import is not supported for: " + getType());
 			}
-			uiController.setStatus(InternationalisationUtils.getI18NString(MESSAGE_IMPORT_TASK_SUCCESSFUL));
+			uiController.setStatus(InternationalisationUtils.getI18nString(MESSAGE_IMPORT_TASK_SUCCESSFUL));
 			uiController.removeDialog(wizardDialog);
 		} catch(IOException ex) {
 		} catch(CsvParseException ex) {
-			log.debug(InternationalisationUtils.getI18NString(MESSAGE_IMPORT_TASK_FAILED), ex);
-			uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_IMPORT_TASK_FAILED) + ": " + ex.getMessage());
+			log.debug(InternationalisationUtils.getI18nString(MESSAGE_IMPORT_TASK_FAILED), ex);
+			uiController.alert(InternationalisationUtils.getI18nString(MESSAGE_IMPORT_TASK_FAILED) + ": " + ex.getMessage());
 		}
 		log.trace("EXIT");
 	}
@@ -319,9 +319,9 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		
 		// Check if the file already exists.  If it does, show a warning.
 		if (!dataPath.contains(File.separator) || !(new File(dataPath.substring(0, dataPath.lastIndexOf(File.separator))).isDirectory())) {
-			this.uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_BAD_DIRECTORY));
+			this.uiController.alert(InternationalisationUtils.getI18nString(MESSAGE_BAD_DIRECTORY));
 		} else if (dataPath.substring(dataPath.lastIndexOf(File.separator), dataPath.length()).equals(File.separator)) {
-			this.uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_FILENAME));
+			this.uiController.alert(InternationalisationUtils.getI18nString(MESSAGE_NO_FILENAME));
 		} else {
 			log.debug("Filename is [" + dataPath + "] before [" + CsvExporter.CSV_EXTENSION + "] check.");
 			if (!dataPath.endsWith(CsvExporter.CSV_EXTENSION)) {
@@ -366,8 +366,8 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 
 			uiController.removeDialog(wizardDialog);
 		} catch(IOException ex) {
-			log.debug(InternationalisationUtils.getI18NString(MESSAGE_EXPORT_TASK_FAILED), ex);
-			uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_EXPORT_TASK_FAILED) + ": " + ex.getMessage());
+			log.debug(InternationalisationUtils.getI18nString(MESSAGE_EXPORT_TASK_FAILED), ex);
+			uiController.alert(InternationalisationUtils.getI18nString(MESSAGE_EXPORT_TASK_FAILED) + ": " + ex.getMessage());
 		} finally {
 			log.trace("EXIT");
 		}
@@ -383,14 +383,14 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private void exportMessages(List<FrontlineMessage> messages, String filename) throws IOException {
 		CsvRowFormat rowFormat = getRowFormatForMessage();
 		if (!rowFormat.hasMarkers()) {
-			uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_FIELD_SELECTED));
+			uiController.alert(InternationalisationUtils.getI18nString(MESSAGE_NO_FIELD_SELECTED));
 			log.trace("EXIT");
 			return;
 		}
 		if(log.isDebugEnabled()) log.debug("Row Format: " + rowFormat);
 		CsvExporter.exportMessages(new File(filename), messages, rowFormat, contactDao);
-		uiController.setStatus(InternationalisationUtils.getI18NString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
-		this.uiController.infoMessage(InternationalisationUtils.getI18NString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
+		uiController.setStatus(InternationalisationUtils.getI18nString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
+		this.uiController.infoMessage(InternationalisationUtils.getI18nString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
 	}
 	
 	/**
@@ -403,7 +403,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		CsvRowFormat rowFormat = getRowFormatForContact();
 		
 		if (!rowFormat.hasMarkers()) {
-			uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_FIELD_SELECTED));
+			uiController.alert(InternationalisationUtils.getI18nString(MESSAGE_NO_FIELD_SELECTED));
 			log.trace("EXIT");
 			return;
 		}
@@ -411,8 +411,8 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		log.debug("Row Format [" + rowFormat + "]");
 		
 		CsvExporter.exportContacts(new File(filename), contacts, groupMembershipDao, rowFormat);
-		uiController.setStatus(InternationalisationUtils.getI18NString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
-		this.uiController.infoMessage(InternationalisationUtils.getI18NString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
+		uiController.setStatus(InternationalisationUtils.getI18nString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
+		this.uiController.infoMessage(InternationalisationUtils.getI18nString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
 	}
 	
 	/**
@@ -428,14 +428,14 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		FrontlineMessage.Type messageType = getMessageType();
 		CsvRowFormat rowFormat = getRowFormatForKeyword(messageType);
 		if (!rowFormat.hasMarkers()) {
-			uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_FIELD_SELECTED));
+			uiController.alert(InternationalisationUtils.getI18nString(MESSAGE_NO_FIELD_SELECTED));
 			log.trace("EXIT");
 			return;
 		}
 		log.debug("Row Format [" + rowFormat + "]");
 		CsvExporter.exportKeywords(new File(filename), keywords, rowFormat, this.contactDao, this.messageDao, messageType);
-		uiController.setStatus(InternationalisationUtils.getI18NString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
-		this.uiController.infoMessage(InternationalisationUtils.getI18NString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
+		uiController.setStatus(InternationalisationUtils.getI18nString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
+		this.uiController.infoMessage(InternationalisationUtils.getI18nString(MESSAGE_EXPORT_TASK_SUCCESSFUL));
 	}
 	
 	/**
@@ -480,7 +480,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		uiController.setAttachedObject(this.wizardDialog, attachedObject);
 		
 		String titleI18nKey = getWizardTitleI18nKey();
-		uiController.setText(this.wizardDialog, InternationalisationUtils.getI18NString(titleI18nKey));
+		uiController.setText(this.wizardDialog, InternationalisationUtils.getI18nString(titleI18nKey));
 		
 		Object pnDetails = this.uiController.find(this.wizardDialog, COMPONENT_PN_DETAILS);
 		if (pnDetails == null) {
@@ -672,7 +672,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 			
 			this.importedValuesList = CsvImporter.getValuesFromCsvFile(filename);
 		} catch (Exception e) {
-			this.uiController.alert(InternationalisationUtils.getI18NString(I18N_FILE_NOT_PARSED));
+			this.uiController.alert(InternationalisationUtils.getI18nString(I18N_FILE_NOT_PARSED));
 		}
 		
 		Object pnValuesTable = this.uiController.find(this.wizardDialog, COMPONENT_PN_VALUES_TABLE);
@@ -712,7 +712,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 				if (this.uiController.isSelected(checkbox)) {
 					String attributeName = this.uiController.getText(checkbox);
 					if (this.uiController.getName(checkbox).equals(COMPONENT_CB_STATUS) && this.type.equals(EntityType.CONTACTS)) {
-						attributeName = InternationalisationUtils.getI18NString(I18N_COMMON_ACTIVE);
+						attributeName = InternationalisationUtils.getI18nString(I18N_COMMON_ACTIVE);
 					} else if (this.uiController.getName(checkbox).equals(COMPONENT_CB_TYPE)) {
 						messageTypeIndex = columnsNumber;
 					}
@@ -777,7 +777,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		for (int i = 0 ; i < columnsNumber && i < lineValues.length ; ++i) {
 			cell = this.uiController.createTableCell(lineValues[i].replace(CsvExporter.GROUPS_DELIMITER, ", "));
 			
-			if (lineValues[i].equals(InternationalisationUtils.getI18NString(I18N_COMMON_ACTIVE))) { // We're creating the status cell
+			if (lineValues[i].equals(InternationalisationUtils.getI18nString(I18N_COMMON_ACTIVE))) { // We're creating the status cell
 				lineValues[i] = lineValues[i].toLowerCase();
 				if (!lineValues[i].equals("false") && !lineValues[i].equals("dormant")) {
 					this.uiController.setIcon(cell, Icon.TICK);

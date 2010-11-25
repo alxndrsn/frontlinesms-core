@@ -80,7 +80,7 @@ public class FirstTimeWizard extends FrontlineUI {
 	public FirstTimeWizard(FrontlineSMS frontline) {
 		this.frontline = frontline;
 		
-		frameLauncher = new FrameLauncher(InternationalisationUtils.getI18NString(I18N_FIRST_TIME_WIZARD_TITLE), this, 510, 380, getIcon(Icon.FRONTLINE_ICON));
+		frameLauncher = new FrameLauncher(InternationalisationUtils.getI18nString(I18N_FIRST_TIME_WIZARD_TITLE), this, 510, 380, getIcon(Icon.FRONTLINE_ICON));
 		frameLauncher.setResizable(false);
 		showLanguageSelection();
 	}
@@ -104,7 +104,7 @@ public class FirstTimeWizard extends FrontlineUI {
 			setFont(new Font(font.getName(), getFont().getStyle(), getFont().getSize()));
 		}
 		appProperties.saveToDisk();
-		frameLauncher.setTitle(InternationalisationUtils.getI18NString(I18N_FIRST_TIME_WIZARD_TITLE));
+		frameLauncher.setTitle(InternationalisationUtils.getI18nString(I18N_FIRST_TIME_WIZARD_TITLE));
 		loadPages();
 		showPage(0);
 	}

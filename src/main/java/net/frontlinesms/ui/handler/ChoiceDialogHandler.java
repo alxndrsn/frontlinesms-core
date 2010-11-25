@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
-import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 
@@ -21,6 +20,8 @@ public class ChoiceDialogHandler implements ThinletUiEventHandler {
 
 	/** UI Thinlet component: panel containing all custom labels **/
 	private static final String UI_COMPONENT_PN_LABELS = "pnLabels";
+	private static final String UI_COMPONENT_BT_YES = "btYes";
+	private static final String UI_COMPONENT_BT_NO = "btNo";
 	private static final String UI_COMPONENT_BT_CANCEL = "btCancel";
 
 //> INSTANCE PROPERTIES
@@ -44,23 +45,19 @@ public class ChoiceDialogHandler implements ThinletUiEventHandler {
 	 * Shows the choice dialog with custom labels
 	 * @param propertyKey The property key used to generate the custom labels
 	 */
-	public void showChoiceDialog (boolean showCancelButton, String methodToBeCalledByYesNoButtons, String propertyKey, String ... i18nValues) {
+	public void showChoiceDialog (boolean showCancelButton, String yesMethod, String noMethod, String propertyKey, String ... i18nValues) {
 		LOG.trace("Populating choice dialog with custom labels (Key:" + propertyKey + ")");
 
-		Object pnLabels = this.uiController.find(this.dialogComponent, UI_COMPONENT_PN_LABELS);
-		
-		Object btCancel = this.uiController.find(this.dialogComponent, UI_COMPONENT_BT_CANCEL);
+		Object btCancel = find(UI_COMPONENT_BT_CANCEL);
 		this.uiController.setVisible(btCancel, showCancelButton);
-		
+
+		Object pnLabels = find(UI_COMPONENT_PN_LABELS);		
 		for (String label : InternationalisationUtils.getI18nStrings(propertyKey, i18nValues)) {
 			this.uiController.add(pnLabels, this.uiController.createLabel(label));
 		}
-		
-		Object btYes = this.uiController.find(this.dialogComponent, UiGeneratorControllerConstants.COMPONENT_BUTTON_YES);
-		Object btNo = this.uiController.find(this.dialogComponent, UiGeneratorControllerConstants.COMPONENT_BUTTON_NO);
-		
-		this.uiController.setAction(btYes, methodToBeCalledByYesNoButtons, this.dialogComponent, handler);
-		this.uiController.setAction(btNo, methodToBeCalledByYesNoButtons, this.dialogComponent, handler);
+
+		setButtonMethod(UI_COMPONENT_BT_YES, yesMethod);
+		setButtonMethod(UI_COMPONENT_BT_NO, noMethod);
 		
 		this.uiController.add(this.dialogComponent);
 		
@@ -68,14 +65,27 @@ public class ChoiceDialogHandler implements ThinletUiEventHandler {
 	}
 	
 	public void setFirstButtonText (String text) {
-		Object btYes = this.uiController.find(this.dialogComponent, UiGeneratorControllerConstants.COMPONENT_BUTTON_YES);
-		
-		this.uiController.setText(btYes, text);
+		setButtonText(UI_COMPONENT_BT_YES, text);
 	}
 	
 	public void setSecondButtonText (String text) {
-		Object btNo = this.uiController.find(this.dialogComponent, UiGeneratorControllerConstants.COMPONENT_BUTTON_NO);
-		
-		this.uiController.setText(btNo, text);
+		setButtonText(UI_COMPONENT_BT_NO, text);
+	}
+	
+	public void setThirdButtonText(String text) {
+		setButtonText(UI_COMPONENT_BT_CANCEL, text);
+	}
+	
+//> PRIVATE HELPER METHODS
+	private void setButtonText(String buttonName, String newText) {
+		this.uiController.setText(find(buttonName), newText);
+	}
+	
+	private void setButtonMethod(String buttonName, String method) {
+		this.uiController.setAction(find(buttonName), method, this.dialogComponent, this.handler);
+	}
+	
+	private Object find(String componentName) {
+		return this.uiController.find(this.dialogComponent, componentName);
 	}
 }

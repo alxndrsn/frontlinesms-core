@@ -11,7 +11,7 @@ public class SettingsServicesSectionHandler extends SettingsEmptySectionHandler 
 	}
 	
 	public Object getSectionNode() {
-		Object servicesRootNode = createSectionNode(InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_SERVICES), this, "/icons/database_execute.png");
+		Object servicesRootNode = createSectionNode(InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_SERVICES), this, "/icons/database_execute.png");
 
 		SettingsDevicesSectionHandler devicesHandler = new SettingsDevicesSectionHandler(uiController);
 		uiController.add(servicesRootNode, devicesHandler.getSectionNode());

@@ -104,7 +104,7 @@ public class FrontlineUtils {
 	 */
 	public static long getLongDateFromStringDate (String dateFieldString, boolean isStartDate) throws ParseException {
 		if (dateFieldString.length() == 0
-				|| (!isStartDate && dateFieldString.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED)))) {
+				|| (!isStartDate && dateFieldString.equals(InternationalisationUtils.getI18nString(COMMON_UNDEFINED)))) {
 			return (isStartDate ? System.currentTimeMillis() : DEFAULT_END_DATE); // FIXME Should we take the TimeZone into account?
 		} else {
 			Date ds = InternationalisationUtils.parseDate(dateFieldString);

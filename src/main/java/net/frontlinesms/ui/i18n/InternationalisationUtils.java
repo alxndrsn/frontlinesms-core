@@ -87,6 +87,10 @@ public class InternationalisationUtils {
 	public static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
 
 //>
+	public static String getI18nString(Internationalised i) {
+		return getI18nString(i.getI18nKey());
+	}
+	
 	/**
 	 * Return an internationalised message for this key, with the current resource bundle
 	 * This method tries to get the string for the current bundle and if it does
@@ -96,8 +100,17 @@ public class InternationalisationUtils {
 	 * @return the internationalised text, or the english text if no
 	 *         internationalised text could be found
 	 */
-	public static String getI18NString(String key) {
-		return getI18NString(key, FrontlineUI.currentResourceBundle);
+	public static String getI18nString(String key) {
+		if (FrontlineUI.currentResourceBundle != null) {
+			try {
+				return FrontlineUI.currentResourceBundle.getValue(key);
+			} catch (MissingResourceException ex) {
+			}
+		}
+		String value = Thinlet.DEFAULT_ENGLISH_BUNDLE.get(key);
+		if(value == null) {
+			return key;
+		} else return value;
 	}
 	
 	/**
@@ -108,17 +121,11 @@ public class InternationalisationUtils {
 	 * @param languageBundle
 	 * @return the internationalised text, or the english text if no internationalised text could be found
 	 */
-	public static String getI18NString(String key, LanguageBundle languageBundle) {
+	public static String getI18nString(String key, LanguageBundle languageBundle) {
 		if(languageBundle != null) {
 			try {
 				return languageBundle.getValue(key);
 			} catch(MissingResourceException ex) {}
-		}
-		if (FrontlineUI.currentResourceBundle != null) {
-			try {
-				return FrontlineUI.currentResourceBundle.getValue(key);
-			} catch (MissingResourceException ex) {
-			}
 		}
 		return Thinlet.DEFAULT_ENGLISH_BUNDLE.get(key);
 	}
@@ -154,7 +161,7 @@ public class InternationalisationUtils {
 
 	/**
 	 * Return an internationalised message for this key. This calls
-	 * {@link #getI18NString(String)} and then replaces any instance of
+	 * {@link #getI18nString(String)} and then replaces any instance of
 	 * {@link FrontlineSMSConstants#ARG_VALUE} with @param argValues
 	 * 
 	 * @param key
@@ -162,14 +169,14 @@ public class InternationalisationUtils {
 	 * @return an internationalised string with any substitution variables
 	 *         converted
 	 */
-	public static String getI18NString(String key, String... argValues) {
-		String string = getI18NString(key);
+	public static String getI18nString(String key, String... argValues) {
+		String string = getI18nString(key);
 		return formatString(string, argValues);
 	}
 
 	/**
 	 * Return an internationalised message for this key. This calls
-	 * {@link #getI18NString(String)} and then replaces any instance of
+	 * {@link #getI18nString(String)} and then replaces any instance of
 	 * {@link FrontlineSMSConstants#ARG_VALUE} with @param argValues
 	 * 
 	 * @param key
@@ -200,15 +207,15 @@ public class InternationalisationUtils {
 	/**
 	 * Return an internationalised message for this key. This converts the
 	 * integer to a {@link String} and then calls
-	 * {@link #getI18NString(String, String...)} with this argument.
+	 * {@link #getI18nString(String, String...)} with this argument.
 	 * 
 	 * @param key
 	 * @param intValue
 	 * @return the internationalised string with the supplied integer embedded
 	 *         at the appropriate place
 	 */
-	public static String getI18NString(String key, int intValue) {
-		return getI18NString(key, Integer.toString(intValue));
+	public static String getI18nString(String key, int intValue) {
+		return getI18nString(key, Integer.toString(intValue));
 	}
 
 	
@@ -416,7 +423,7 @@ public class InternationalisationUtils {
 	 */
 	public static DateFormat getDateFormat() {
 		return new SimpleDateFormat(
-				getI18NString(FrontlineSMSConstants.DATEFORMAT_YMD));
+				getI18nString(FrontlineSMSConstants.DATEFORMAT_YMD));
 	}
 
 	/**
@@ -426,7 +433,7 @@ public class InternationalisationUtils {
 	 */
 	public static DateFormat getDatetimeFormat() {
 		return new SimpleDateFormat(
-				getI18NString(FrontlineSMSConstants.DATEFORMAT_YMD_HMS));
+				getI18nString(FrontlineSMSConstants.DATEFORMAT_YMD_HMS));
 	}
 
 	/**
@@ -496,15 +503,15 @@ public class InternationalisationUtils {
 	public static final String getEmailStatusAsString(Email email) {
 		switch (email.getStatus()) {
 		case OUTBOX:
-			return getI18NString(COMMON_OUTBOX);
+			return getI18nString(COMMON_OUTBOX);
 		case PENDING:
-			return getI18NString(COMMON_PENDING);
+			return getI18nString(COMMON_PENDING);
 		case SENT:
-			return getI18NString(COMMON_SENT);
+			return getI18nString(COMMON_SENT);
 		case RETRYING:
-			return getI18NString(COMMON_RETRYING);
+			return getI18nString(COMMON_RETRYING);
 		case FAILED:
-			return getI18NString(COMMON_FAILED);
+			return getI18nString(COMMON_FAILED);
 		default:
 			return "(unknown)";
 		}

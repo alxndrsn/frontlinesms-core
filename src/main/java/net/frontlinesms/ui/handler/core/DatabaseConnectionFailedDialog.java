@@ -54,7 +54,7 @@ public class DatabaseConnectionFailedDialog extends FrontlineUI implements Datab
 
 	/** Show the UI. */
 	private void showFrameLauncher() {
-		frameLauncher = new FrameLauncher(InternationalisationUtils.getI18NString(COMMON_DATABASE_CONNECTION_PROBLEM), this, 400, 315, getIcon(Icon.FRONTLINE_ICON));
+		frameLauncher = new FrameLauncher(InternationalisationUtils.getI18nString(COMMON_DATABASE_CONNECTION_PROBLEM), this, 400, 315, getIcon(Icon.FRONTLINE_ICON));
 		frameLauncher.setResizable(true);
 	}
 	

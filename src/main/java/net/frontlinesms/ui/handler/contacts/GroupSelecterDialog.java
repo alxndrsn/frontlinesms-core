@@ -26,12 +26,12 @@ public class GroupSelecterDialog implements ThinletUiEventHandler, SingleGroupSe
 	
 	/** Init with default title and no hidden groups */
 	public void init(Group rootGroup) {
-		init(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_GROUP), rootGroup);
+		init(InternationalisationUtils.getI18nString(FrontlineSMSConstants.COMMON_GROUP), rootGroup);
 	}
 	
 	/** Init with default title */
 	public void init(Group rootGroup, Collection<Group> hiddenGroups) {
-		init(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_GROUP), rootGroup, hiddenGroups);
+		init(InternationalisationUtils.getI18nString(FrontlineSMSConstants.COMMON_GROUP), rootGroup, hiddenGroups);
 	}
 	
 	/** Init with specific title and no hidden groups */

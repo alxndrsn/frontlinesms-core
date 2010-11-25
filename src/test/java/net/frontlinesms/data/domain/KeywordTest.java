@@ -155,7 +155,7 @@ public class KeywordTest extends BaseTestCase {
 		
 		assertEquals("", KeywordTabHandler.getDisplayableDescription(keywordOne));
 		assertEquals(DESCRIPTION, KeywordTabHandler.getDisplayableDescription(keywordTwo));
-		assertEquals(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_BLANK_KEYWORD_DESCRIPTION), KeywordTabHandler.getDisplayableDescription(blankKeywordWithoutDescription));
+		assertEquals(InternationalisationUtils.getI18nString(FrontlineSMSConstants.MESSAGE_BLANK_KEYWORD_DESCRIPTION), KeywordTabHandler.getDisplayableDescription(blankKeywordWithoutDescription));
 		assertEquals(DESCRIPTION, KeywordTabHandler.getDisplayableDescription(blankKeywordWithDescription));
 	}
 	

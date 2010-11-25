@@ -226,10 +226,10 @@ public class SettingsAppearanceSectionHandler extends BaseSectionHandler impleme
 	}
 
 	public String getTitle() {
-		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_APPEARANCE);
+		return InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_APPEARANCE);
 	}
 	
 	public Object getSectionNode() {
-		return createSectionNode(InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_APPEARANCE), this, "/icons/display.png");
+		return createSectionNode(InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_APPEARANCE), this, "/icons/display.png");
 	}
 }

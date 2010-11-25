@@ -128,7 +128,7 @@ public class ComponentPagingHandler implements ThinletUiEventHandler {
 		
 		// Update the paging text, and enable previous and next page buttons as appropriate
 		ui.setText(ui.find(this.panel, "lbPageNumber"),
-				InternationalisationUtils.getI18NString(I18N_KEY_PAGES_X_OF_Y,
+				InternationalisationUtils.getI18nString(I18N_KEY_PAGES_X_OF_Y,
 						Integer.toString(this.currentPage + 1),
 						Integer.toString(Math.max(1, this.totalPages))));
 		ui.setEnabled(ui.find(panel, COMPONENT_BT_PREVIOUS_PAGE), this.currentPage > 0);

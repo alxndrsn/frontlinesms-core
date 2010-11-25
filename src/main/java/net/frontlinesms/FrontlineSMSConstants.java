@@ -74,6 +74,7 @@ public final class FrontlineSMSConstants {
 	public static final String ACTION_ADD_TO_GROUP = "action.add.to.group";
 	public static final String ACTION_SAVE = "action.save";
 	public static final String ACTION_CANCEL = "action.cancel";
+	public static final String ACTION_BACK = "action.back";
 	
 //> CONTACTS i18n Keys
 	/** [i18n key] "All contacts" */
@@ -264,6 +265,7 @@ public final class FrontlineSMSConstants {
 	public static final String MESSAGE_GROUP_ALREADY_EXISTS = "message.group.already.exists";
 	public static final String MESSAGE_MESSAGES_DELETED = "message.messages.deleted";
 	public static final String MESSAGE_REMOVING_MESSAGES = "message.removing.messages";
+	public static final String MESSAGE_GROUPS_DELETED = "message.groups.deleted";
 	public static final String MESSAGE_GROUPS_AND_CONTACTS_DELETED = "message.group.and.contacts.deleted";
 	public static final String MESSAGE_PHONE_BLANK = "message.phone.number.blank";
 	public static final String MESSAGE_NO_GROUP_SELECTED = "message.no.group.selected.to.send";

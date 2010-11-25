@@ -150,7 +150,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		@Override
 		/** Provide an internationalised version of this group's name */
 		public String getName() {
-			return InternationalisationUtils.getI18NString(FrontlineSMSConstants.CONTACTS_ALL);
+			return InternationalisationUtils.getI18nString(FrontlineSMSConstants.CONTACTS_ALL);
 		}
 	};
 
@@ -219,7 +219,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			}
 			
 			statusBarComponent = find(COMPONENT_STATUS_BAR);
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_STARTING));
+			setStatus(InternationalisationUtils.getI18nString(MESSAGE_STARTING));
 			
 			// Find the languages submenu, and add all present language packs to it
 			addLanguageMenu(find("menu_language"));
@@ -308,7 +308,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			}
 			
 			// Initialise the phone manager, and start auto-detection of connected phones.
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_INITIALISING_PHONE_MANAGER));
+			setStatus(InternationalisationUtils.getI18nString(MESSAGE_INITIALISING_PHONE_MANAGER));
 
 			//Window size				
 			Integer width = uiProperties.getWindowWidth();
@@ -328,7 +328,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			frontlineController.setUiListener(this);
 			frontlineController.setSmsDeviceEventListener(this.phoneTabController);
 			
-			setStatus(InternationalisationUtils.getI18NString(MESSAGE_PHONE_MANAGER_INITIALISED));
+			setStatus(InternationalisationUtils.getI18nString(MESSAGE_PHONE_MANAGER_INITIALISED));
 			
 			// Active connections
 			this.updateActiveConnections();
@@ -573,7 +573,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	public Object showConfirmationDialog(String methodToBeCalled, ThinletUiEventHandler handler, String confirmationMessageKey) {
 		Object conf = loadComponentFromFile(UI_FILE_CONFIRMATION_DIALOG_FORM);
 		setMethod(find(conf, COMPONENT_BT_CONTINUE), ATTRIBUTE_ACTION, methodToBeCalled, conf, handler);
-		setText(find(conf, "lbText"), InternationalisationUtils.getI18NString(confirmationMessageKey));
+		setText(find(conf, "lbText"), InternationalisationUtils.getI18nString(confirmationMessageKey));
 		add(conf);
 		return conf;
 	}
@@ -659,7 +659,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		if (recipients.size() == 0) {
 			LOG.debug("No contacts to send, or selected groups contain only dormants.");
 			String key = hasMembers ? MESSAGE_ONLY_DORMANTS : MESSAGE_GROUP_NO_MEMBERS;
-			alert(InternationalisationUtils.getI18NString(key));
+			alert(InternationalisationUtils.getI18nString(key));
 			LOG.trace("EXIT");
 		} else {
 			show_composeMessageForm(recipients);
@@ -771,7 +771,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param o
 	 */
 	public void removeUndefinedString(Object o) {
-		if (getText(o).equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED))) {
+		if (getText(o).equals(InternationalisationUtils.getI18nString(COMMON_UNDEFINED))) {
 			setText(o, "");
 		}
 	}
@@ -800,7 +800,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		Object tf = find(obj, "tfAccountSender");
 		Object selectedItem = getSelectedItem(contactSelecter_contactList);
 		if (selectedItem == null) {
-			alert(InternationalisationUtils.getI18NString(MESSAGE_NO_CONTACT_SELECTED));
+			alert(InternationalisationUtils.getI18nString(MESSAGE_NO_CONTACT_SELECTED));
 			return;
 		}
 		Contact selectedContact = getContact(selectedItem);
@@ -819,7 +819,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		Object tf = find(obj, "tfAccountSender");
 		Object selectedItem = getSelectedItem(contactSelecter_contactList);
 		if (selectedItem == null) {
-			alert(InternationalisationUtils.getI18NString(MESSAGE_NO_CONTACT_SELECTED));
+			alert(InternationalisationUtils.getI18nString(MESSAGE_NO_CONTACT_SELECTED));
 			return;
 		}
 		Contact selectedContact = getContact(selectedItem);
@@ -843,11 +843,11 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		Object label = find(dialog, COMPONENT_LB_TEXT);
 		if (name.equalsIgnoreCase(COMPONENT_RB_HTTP)) {
 			//HTTP
-			setText(label, InternationalisationUtils.getI18NString(COMMON_URL));
+			setText(label, InternationalisationUtils.getI18nString(COMMON_URL));
 			setIcon(label, Icon.ACTION_HTTP_REQUEST);
 		} else {
 			//CMD
-			setText(label, InternationalisationUtils.getI18NString(COMMON_COMMAND));
+			setText(label, InternationalisationUtils.getI18nString(COMMON_COMMAND));
 			setIcon(label, Icon.ACTION_EXTERNAL_COMMAND);
 		}
 	}
@@ -1042,72 +1042,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			return (KeywordAction)obj;	
 		} else throw new RuntimeException();
 	}
-
-//	/**
-//	 * Get's the group from the selected node of the groups list
-//	 * @param selected
-//	 * @return
-//	 */
-//	public Group getGroupFromSelectedNode(Object selected) {
-//		while (selected != null && !isAttachment(selected, Group.class)) selected = getParent(selected);
-//		if (selected == null) return null;
-//		return getGroup(selected);
-//	}
-
-//	/**
-//	 * Creates a node for the supplied group, creating nodes for its sub-groups and contacts as well.
-//	 * 
-//	 * @param group The group to be put into a node.
-//	 * @param showContactsNumber set <code>true</code> to show the number of contacts per group in the node's text or <code>false</code> otherwise
-//	 *   TODO removing this argument, and treating it as always <code>false</code> speeds up the contact tab a lot
-//	 * @return
-//	 */
-//	public Object getNode(Group group, boolean showContactsNumber) {
-//		LOG.trace("ENTER");
-//		
-//		LOG.debug("Group [" + group.getName() + "]");
-//		
-//		String toSet = group.getName();
-//		if (showContactsNumber) {
-//			toSet += " (" + group.getAllMembers().size() + ")";
-//		}
-//		
-//		Object node = createNode(toSet, group);
-//
-//		if ((getBoolean(node, EXPANDED) && group.hasDescendants()) || group == this.rootGroup) {
-//			setIcon(node, Icon.FOLDER_OPEN);
-//		} else {
-//			setIcon(node, Icon.FOLDER_CLOSED);
-//		}
-//		
-//		if (group.equals(this.unnamedContacts)) {
-//			setString(node, TOOLTIP, InternationalisationUtils.getI18NString(TOOLTIP_UNNAMED_GROUP));
-//		} else if(group.equals(this.ungroupedContacts)) {
-//			setString(node, TOOLTIP, InternationalisationUtils.getI18NString(TOOLTIP_UNGROUPED_GROUP));
-//		} 
-//		
-//		if (group == rootGroup) {
-//			add(node, getNode(this.ungroupedContacts, showContactsNumber));
-//			add(node, getNode(this.unnamedContacts, showContactsNumber));
-//		}
-//		
-//		// Add subgroup components to this node
-//		for (Group subGroup : group.getDirectSubGroups()) {
-//			Object groupNode = getNode(subGroup, showContactsNumber);
-//			add(node, groupNode);
-//		}
-//		LOG.trace("EXIT");
-//		return node;
-//	}
-	
-	/**
-	 * Get the status of a {@link FrontlineMessage} as a {@link String}.
-	 * @param message
-	 * @return {@link String} representation of the status.
-	 */
-	public static final String getMessageStatusAsString(FrontlineMessage message) {
-		return getMessageStatusAsString(message, currentResourceBundle);
-	}
 	
 	/**
 	 * Get the status of a {@link FrontlineMessage} as a {@link String}.
@@ -1116,29 +1050,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @return {@link String} representation of the status.
 	 */
 	public static final String getMessageStatusAsString(FrontlineMessage message, LanguageBundle languageBundle) {
-		switch(message.getStatus()) {
-			case DRAFT:
-				return InternationalisationUtils.getI18NString(COMMON_DRAFT, languageBundle);
-			case RECEIVED:
-				return InternationalisationUtils.getI18NString(COMMON_RECEIVED, languageBundle);
-			case OUTBOX:
-				return InternationalisationUtils.getI18NString(COMMON_OUTBOX, languageBundle);
-			case PENDING:
-				return InternationalisationUtils.getI18NString(COMMON_PENDING, languageBundle);
-			case SENT:
-				return InternationalisationUtils.getI18NString(COMMON_SENT, languageBundle);
-			case DELIVERED:
-				return InternationalisationUtils.getI18NString(COMMON_DELIVERED, languageBundle);
-			case KEEP_TRYING:
-				return InternationalisationUtils.getI18NString(COMMON_RETRYING, languageBundle);
-			case ABORTED:
-				return "(aborted)";
-			case FAILED:
-				return InternationalisationUtils.getI18NString(COMMON_FAILED, languageBundle);
-			case UNKNOWN:
-			default:
-				return "(unknown)";
-		}
+		return InternationalisationUtils.getI18nString(message.getStatus().getI18nKey(), languageBundle);
 	}
 
 	/**
@@ -1150,39 +1062,39 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		StringBuilder ret = new StringBuilder("");
 		switch (action.getType()) {
 			case FORWARD:
-				ret.append(InternationalisationUtils.getI18NString(ACTION_FORWARD));
+				ret.append(InternationalisationUtils.getI18nString(ACTION_FORWARD));
 				ret.append(": \"");
 				ret.append(KeywordAction.KeywordUtils.getForwardText(action, DEMO_SENDER, DEMO_SENDER.getPhoneNumber(), action.getKeyword().getKeyword() +  DEMO_MESSAGE_TEXT_INCOMING));
 				ret.append("\" ");
-				ret.append(InternationalisationUtils.getI18NString(COMMON_TO_GROUP));
+				ret.append(InternationalisationUtils.getI18nString(COMMON_TO_GROUP));
 				ret.append(": \"");
 				ret.append(action.getGroup().getName());
 				ret.append("\"");
 				break;
 			case JOIN:
-				ret.append(InternationalisationUtils.getI18NString(COMMON_JOIN));
+				ret.append(InternationalisationUtils.getI18nString(COMMON_JOIN));
 				ret.append(": ");
 				ret.append(action.getGroup().getName());
 				break;
 			case LEAVE:
-				ret.append(InternationalisationUtils.getI18NString(COMMON_LEAVE));
+				ret.append(InternationalisationUtils.getI18nString(COMMON_LEAVE));
 				ret.append(": ");
 				ret.append(action.getGroup().getName());
 				break;
 			case REPLY:
-				ret.append(InternationalisationUtils.getI18NString(COMMON_REPLY));
+				ret.append(InternationalisationUtils.getI18nString(COMMON_REPLY));
 				ret.append(": ");
 				ret.append(KeywordAction.KeywordUtils.getReplyText(action, DEMO_SENDER, DEMO_SENDER.getPhoneNumber(), DEMO_MESSAGE_TEXT_INCOMING, DEMO_MESSAGE_KEYWORD));
 				break;
 			case EXTERNAL_CMD:
 				if (action.getExternalCommandType() == KeywordAction.ExternalCommandType.HTTP_REQUEST) {
-					ret.append(InternationalisationUtils.getI18NString(COMMON_HTTP_REQUEST));
+					ret.append(InternationalisationUtils.getI18nString(COMMON_HTTP_REQUEST));
 				} else {
-					ret.append(InternationalisationUtils.getI18NString(COMMON_EXTERNAL_COMMAND));
+					ret.append(InternationalisationUtils.getI18nString(COMMON_EXTERNAL_COMMAND));
 				}
 				break;
 			case EMAIL:
-				ret.append(InternationalisationUtils.getI18NString(COMMON_E_MAIL));
+				ret.append(InternationalisationUtils.getI18nString(COMMON_E_MAIL));
 				ret.append(": ");
 				ret.append(KeywordAction.KeywordUtils.getReplyText(action, DEMO_SENDER, DEMO_SENDER.getPhoneNumber(), action.getKeyword().getKeyword() + DEMO_MESSAGE_TEXT_INCOMING, DEMO_MESSAGE_KEYWORD));
 				break;
@@ -1205,7 +1117,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @return
 	 */
 	public Object createListItem(Keyword keyword) {
-		String key = keyword.getKeyword().length() == 0 ? "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">" : keyword.getKeyword();
+		String key = keyword.getKeyword().length() == 0 ? "<" + InternationalisationUtils.getI18nString(COMMON_BLANK) + ">" : keyword.getKeyword();
 		Object listItem = createListItem(
 				key,
 				keyword);
@@ -1295,62 +1207,13 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		if (action.getEndDate() != DEFAULT_END_DATE) {
 			add(row, createTableCell(InternationalisationUtils.getDateFormat().format(action.getEndDate())));
 		} else {
-			add(row, createTableCell(InternationalisationUtils.getI18NString(COMMON_UNDEFINED)));
+			add(row, createTableCell(InternationalisationUtils.getI18nString(COMMON_UNDEFINED)));
 		}
 		cell = createTableCell("");
 		setIcon(cell, action.isAlive(System.currentTimeMillis()) ? Icon.TICK : Icon.CANCEL);
 		setChoice(cell, ALIGNMENT, CENTER);
 		add(row, cell);
 		add(row, createTableCell(action.getCounter()));
-		return row;
-	}
-
-	/**
-	 * Creates a Thinlet UI table row containing details of an SMS message.
-	 * @param message
-	 * @return
-	 */
-	public Object getRow(FrontlineMessage message) {
-		Object row = createTableRow(message);
-
-		String icon;
-		if (message.getType() == Type.RECEIVED) {
-			if (message instanceof FrontlineMultimediaMessage) {
-				icon = Icon.MMS_RECEIVE;
-			} else {
-				icon = Icon.SMS_RECEIVE;
-			}
-		} else {
-			if (message instanceof FrontlineMultimediaMessage) {
-				icon = Icon.MMS_SEND;
-			} else {
-				icon = Icon.SMS_SEND;
-			}
-		}
-		Object iconCell = createTableCell("");
-		setIcon(iconCell, icon);
-		add(row, iconCell);
-		
-		
-		/** "ATTACHED" ICON (only for MMS containing multimedia parts) */
-		Object attachCell = createTableCell("");
-		if (message instanceof FrontlineMultimediaMessage && ((FrontlineMultimediaMessage) message).hasBinaryPart()) {
-			setIcon(attachCell, Icon.ATTACH);
-		}
-		add(row, attachCell);
-		
-
-		add(row, createTableCell(getMessageStatusAsString(message)));
-		add(row, createTableCell(InternationalisationUtils.getDatetimeFormat().format(message.getDate())));
-		add(row, createTableCell(message.getSenderMsisdn()));
-		add(row, createTableCell(message.getRecipientMsisdn()));
-		
-		if (message instanceof FrontlineMultimediaMessage && ((FrontlineMultimediaMessage) message).getSubject().length() > 0) {
-			add(row, createTableCell(((FrontlineMultimediaMessage) message).getSubject()));
-		} else {
-			add(row, createTableCell(message.getTextContent()));
-		}
-		
 		return row;
 	}
 
@@ -1390,28 +1253,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	}
 	
 	/**
-	 * Creates a Thinlet UI table row containing details of an Email.
-	 * @param email
-	 * @return
-	 */
-	public Object getRow(Email email) {
-		Object row = createTableRow(email);
-
-		add(row, createTableCell(InternationalisationUtils.getEmailStatusAsString(email)));
-		if (email.getDate() == DEFAULT_END_DATE) {
-			add(row, createTableCell(""));
-		} else {
-			add(row, createTableCell(InternationalisationUtils.getDatetimeFormat().format(email.getDate())));
-		}
-		add(row, createTableCell(email.getEmailFrom().getAccountName()));
-		add(row, createTableCell(email.getEmailRecipients()));
-		add(row, createTableCell(email.getEmailSubject()));
-		add(row, createTableCell(email.getEmailContent()));
-
-		return row;
-	}
-	
-	/**
 	 * Called when the current tab is changed; handles the tab-specific refreshments that need to be made.
 	 * @param tabbedPane
 	 */
@@ -1434,9 +1275,9 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 		if (email.getStatus() == Email.Status.SENT) {
 			String[] recipients = email.getEmailRecipients().split(";");
-			String strRecipients = recipients[0] + (recipients.length > 1 ? InternationalisationUtils.getI18NString(EVENT_DESCRIPTION_MULTI_RECIPIENTS, recipients.length) : ""); 
+			String strRecipients = recipients[0] + (recipients.length > 1 ? InternationalisationUtils.getI18nString(EVENT_DESCRIPTION_MULTI_RECIPIENTS, recipients.length) : ""); 
 			
-			newEvent(new Event(Event.TYPE_OUTGOING_EMAIL, InternationalisationUtils.getI18NString(EVENT_DESCRIPTION, strRecipients, email.getEmailContent())));
+			newEvent(new Event(Event.TYPE_OUTGOING_EMAIL, InternationalisationUtils.getI18nString(EVENT_DESCRIPTION, strRecipients, email.getEmailContent())));
 		}
 		LOG.trace("EXIT");
 	}
@@ -1512,8 +1353,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		String strSender = (sender == null ? message.getSenderMsisdn() : sender.getName());
 		
 		int eventType = (message instanceof FrontlineMultimediaMessage ? Event.TYPE_INCOMING_MMS : Event.TYPE_INCOMING_MESSAGE);
-		newEvent(new Event(eventType, InternationalisationUtils.getI18NString(EVENT_DESCRIPTION, strSender, message.getTextContent())));
-		setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGE_RECEIVED));
+		newEvent(new Event(eventType, InternationalisationUtils.getI18nString(EVENT_DESCRIPTION, strSender, message.getTextContent())));
+		setStatus(InternationalisationUtils.getI18nString(MESSAGE_MESSAGE_RECEIVED));
 		LOG.trace("EXIT");
 	}
 
@@ -1528,9 +1369,9 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		String strRecipient = (recipient == null ? message.getRecipientMsisdn() : recipient.getName());
 		
 		if (message.getStatus() == Status.SENT) {
-			newEvent(new Event(Event.TYPE_OUTGOING_MESSAGE, InternationalisationUtils.getI18NString(EVENT_DESCRIPTION, strRecipient, message.getTextContent())));
+			newEvent(new Event(Event.TYPE_OUTGOING_MESSAGE, InternationalisationUtils.getI18nString(EVENT_DESCRIPTION, strRecipient, message.getTextContent())));
 		} else if (message.getStatus() == Status.FAILED) {
-			newEvent(new Event(Event.TYPE_OUTGOING_MESSAGE_FAILED, InternationalisationUtils.getI18NString(EVENT_DESCRIPTION, strRecipient, message.getTextContent())));
+			newEvent(new Event(Event.TYPE_OUTGOING_MESSAGE_FAILED, InternationalisationUtils.getI18nString(EVENT_DESCRIPTION, strRecipient, message.getTextContent())));
 		}
 		LOG.trace("ENTER");
 	}
@@ -1609,12 +1450,12 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			public void run() {
 				try {
 					ErrorUtils.sendLogs(userName, userEmail, reason, true);
-					String success = InternationalisationUtils.getI18NString(MESSAGE_LOG_FILES_SENT);
+					String success = InternationalisationUtils.getI18nString(MESSAGE_LOG_FILES_SENT);
 					LOG.debug(success);
 					alert(success);
 					setStatus(success);
 				} catch (EmailException e) {
-					String msg = InternationalisationUtils.getI18NString(MESSAGE_FAILED_TO_SEND_REPORT);
+					String msg = InternationalisationUtils.getI18nString(MESSAGE_FAILED_TO_SEND_REPORT);
 					LOG.debug(msg, e);
 					setStatus(msg);
 					alert(msg);
@@ -1625,12 +1466,12 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 							ErrorUtils.copyLogsZippedToDir(dir);
 						} catch (IOException e1) {
 							LOG.debug("", e1);
-							String first = InternationalisationUtils.getI18NString(MESSAGE_FAILED_TO_COPY_LOGS);
-							String second = InternationalisationUtils.getI18NString(MESSAGE_LOGS_LOCATED_IN);
+							String first = InternationalisationUtils.getI18nString(MESSAGE_FAILED_TO_COPY_LOGS);
+							String second = InternationalisationUtils.getI18nString(MESSAGE_LOGS_LOCATED_IN);
 							setStatus(first.replace(ARG_VALUE, ZIPPED_LOGS_FILENAME) + "." + second.replace(ARG_VALUE, ResourceUtils.getConfigDirectoryPath() + "logs") + ".");
 							alert(first.replace(ARG_VALUE, ZIPPED_LOGS_FILENAME) + "." + second.replace(ARG_VALUE, ResourceUtils.getConfigDirectoryPath() + "logs") + ".");
 						}
-						msg = InternationalisationUtils.getI18NString(MESSAGE_LOGS_SAVED_PLEASE_REPORT);
+						msg = InternationalisationUtils.getI18nString(MESSAGE_LOGS_SAVED_PLEASE_REPORT);
 						setStatus(msg);
 						alert(msg);
 					}
@@ -1780,7 +1621,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 */
 	public void updateActiveConnections() {
 		setText(find(COMPONENT_LB_ACTIVE_CONNECTIONS),
-				InternationalisationUtils.getI18NString(I18N_ACTIVE_CONNECTIONS, getFrontlineController().getNumberOfActiveConnections()));
+				InternationalisationUtils.getI18nString(I18N_ACTIVE_CONNECTIONS, getFrontlineController().getNumberOfActiveConnections()));
 	}
 	
 //> DEBUG METHODS
@@ -1807,7 +1648,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		
 		removeConfirmationDialog();
 		contactsTabController.refresh();
-		infoMessage(InternationalisationUtils.getI18NString(MESSAGE_GROUPS_AND_CONTACTS_DELETED));
+		infoMessage(InternationalisationUtils.getI18nString(MESSAGE_GROUPS_AND_CONTACTS_DELETED));
 	}
 	
 	public void showGroupSelecter() {
@@ -1859,7 +1700,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			MmsServiceStatusNotification mmsServiceStatusNotification = ((MmsServiceStatusNotification) notification);
 			if (mmsServiceStatusNotification.getStatus().equals(MmsEmailServiceStatus.FAILED_TO_CONNECT)) {
 				this.newEvent(new Event(Event.TYPE_SMS_INTERNET_SERVICE_RECEIVING_FAILED, 
-											mmsServiceStatusNotification.getMmsService().getServiceName() + " - " + InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED)));
+											mmsServiceStatusNotification.getMmsService().getServiceName() + " - " + InternationalisationUtils.getI18nString(FrontlineSMSConstants.COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED)));
 			}
 		} else if (notification instanceof EntitySavedNotification<?>) {
 			Object entity = ((EntitySavedNotification<?>) notification).getDatabaseEntity();

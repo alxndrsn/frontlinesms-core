@@ -144,7 +144,7 @@ public class DeviceManualConfigDialogHandler implements ThinletUiEventHandler {
 		// check the port is free
 		String requestedPortName = ui.getText(find(COMPONENT_PORT_NAME_COMBOBOX));
 		if(phoneManager.hasPhoneConnected(requestedPortName)) {
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_PORT_ALREADY_CONNECTED, requestedPortName));
+			ui.alert(InternationalisationUtils.getI18nString(MESSAGE_PORT_ALREADY_CONNECTED, requestedPortName));
 		} else {
 			String pin = ui.getText(find(COMPONENT_PIN_TEXTFIELD)).trim();
 			if(pin.length() == 0) pin = null;
@@ -164,17 +164,17 @@ public class DeviceManualConfigDialogHandler implements ThinletUiEventHandler {
 	
 					} catch (NumberFormatException e) {
 						// The specified baud is not a valid number
-						ui.alert(InternationalisationUtils.getI18NString(MESSAGE_INVALID_BAUD_RATE, baudRateAsString));
+						ui.alert(InternationalisationUtils.getI18nString(MESSAGE_INVALID_BAUD_RATE, baudRateAsString));
 						connectingOk = false;
 					}
 				}
 				if(connectingOk) {
 					removeDialog();
 				} else {
-					ui.alert(InternationalisationUtils.getI18NString(I18N_PORT_IN_USE));
+					ui.alert(InternationalisationUtils.getI18nString(I18N_PORT_IN_USE));
 				}
 			} catch (NoSuchPortException e) {
-				ui.alert(InternationalisationUtils.getI18NString(MESSAGE_PORT_NOT_FOUND, requestedPortName));
+				ui.alert(InternationalisationUtils.getI18nString(MESSAGE_PORT_NOT_FOUND, requestedPortName));
 			}
 		}
 	}

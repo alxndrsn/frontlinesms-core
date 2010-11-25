@@ -233,11 +233,11 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 	}
 	
 	public String getTitle() {
-		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_GENERAL);
+		return InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_GENERAL);
 	}
 	
 	public Object getSectionNode() {
-		Object generalRootNode = createSectionNode(InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_GENERAL), this, "/icons/cog.png");
+		Object generalRootNode = createSectionNode(InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_GENERAL), this, "/icons/cog.png");
 		
 		SettingsDatabaseSectionHandler databaseHandler = new SettingsDatabaseSectionHandler(uiController);
 		uiController.add(generalRootNode, databaseHandler.getSectionNode());

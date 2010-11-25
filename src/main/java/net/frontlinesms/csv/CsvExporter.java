@@ -84,7 +84,7 @@ public class CsvExporter {
 	public static void export(File exportFile, List<? extends FrontlineMessage> messages, CsvRowFormat messageFormat, String dateFormat, ContactDao contactDao) throws IOException {
 		LOG.trace("ENTER");
 		if (messageFormat == null) messageFormat = getDefaultMessageExportFormat();
-		if (dateFormat == null) dateFormat = InternationalisationUtils.getI18NString(DEFAULT_EXPORT_DATE_FORMAT);
+		if (dateFormat == null) dateFormat = InternationalisationUtils.getI18nString(DEFAULT_EXPORT_DATE_FORMAT);
 		LOG.debug("Message format [" + messageFormat + "]");
 		LOG.debug("Date format [" + dateFormat + "]");
 		LOG.debug("Filename [" + exportFile.getAbsolutePath() + "]");
@@ -96,12 +96,12 @@ public class CsvExporter {
 			out = new Utf8FileWriter(exportFile);
 			
 			CsvUtils.writeLine(out, messageFormat, 
-					CsvUtils.MARKER_MESSAGE_DATE,		/*->*/ InternationalisationUtils.getI18NString(COMMON_MESSAGE_DATE),
-					CsvUtils.MARKER_SENDER_NAME, 		/*->*/ InternationalisationUtils.getI18NString(COMMON_SENDER_NAME),
-					CsvUtils.MARKER_SENDER_NUMBER,		/*->*/ InternationalisationUtils.getI18NString(COMMON_SENDER_NUMBER),
-					CsvUtils.MARKER_RECIPIENT_NAME,		/*->*/ InternationalisationUtils.getI18NString(COMMON_RECIPIENT_NAME),
-					CsvUtils.MARKER_RECIPIENT_NUMBER,	/*->*/ InternationalisationUtils.getI18NString(COMMON_RECIPIENT_NUMBER),
-					CsvUtils.MARKER_MESSAGE_CONTENT,		/*->*/ InternationalisationUtils.getI18NString(COMMON_MESSAGE_CONTENT));
+					CsvUtils.MARKER_MESSAGE_DATE,		/*->*/ InternationalisationUtils.getI18nString(COMMON_MESSAGE_DATE),
+					CsvUtils.MARKER_SENDER_NAME, 		/*->*/ InternationalisationUtils.getI18nString(COMMON_SENDER_NAME),
+					CsvUtils.MARKER_SENDER_NUMBER,		/*->*/ InternationalisationUtils.getI18nString(COMMON_SENDER_NUMBER),
+					CsvUtils.MARKER_RECIPIENT_NAME,		/*->*/ InternationalisationUtils.getI18nString(COMMON_RECIPIENT_NAME),
+					CsvUtils.MARKER_RECIPIENT_NUMBER,	/*->*/ InternationalisationUtils.getI18nString(COMMON_RECIPIENT_NUMBER),
+					CsvUtils.MARKER_MESSAGE_CONTENT,		/*->*/ InternationalisationUtils.getI18nString(COMMON_MESSAGE_CONTENT));
 			for (FrontlineMessage message : messages) {
 				Contact sender = contactDao.getFromMsisdn(message.getSenderMsisdn());
 				String senderName = sender == null ? "" : sender.getName();
@@ -138,19 +138,19 @@ public class CsvExporter {
 		Utf8FileWriter out = null;
 	
 		try {
-			DateFormat dateFormatter = new SimpleDateFormat(InternationalisationUtils.getI18NString(DEFAULT_EXPORT_DATE_FORMAT));
+			DateFormat dateFormatter = new SimpleDateFormat(InternationalisationUtils.getI18nString(DEFAULT_EXPORT_DATE_FORMAT));
 			out = new Utf8FileWriter(exportFile);
 			CsvUtils.writeLine(out, messageFormat,
-					CsvUtils.MARKER_MESSAGE_TYPE, InternationalisationUtils.getI18NString(COMMON_MESSAGE_TYPE),
-					CsvUtils.MARKER_MESSAGE_STATUS, InternationalisationUtils.getI18NString(COMMON_MESSAGE_STATUS),
-					CsvUtils.MARKER_MESSAGE_DATE, InternationalisationUtils.getI18NString(COMMON_MESSAGE_DATE),
-					CsvUtils.MARKER_MESSAGE_CONTENT, InternationalisationUtils.getI18NString(COMMON_MESSAGE_CONTENT),
-					CsvUtils.MARKER_SENDER_NUMBER, InternationalisationUtils.getI18NString(COMMON_SENDER_NUMBER),
-					CsvUtils.MARKER_RECIPIENT_NUMBER, InternationalisationUtils.getI18NString(COMMON_RECIPIENT_NUMBER),
-					CsvUtils.MARKER_CONTACT_NAME, InternationalisationUtils.getI18NString(COMMON_CONTACT_NAME),
-					CsvUtils.MARKER_CONTACT_OTHER_PHONE, InternationalisationUtils.getI18NString(COMMON_CONTACT_OTHER_PHONE_NUMBER),
-					CsvUtils.MARKER_CONTACT_EMAIL, InternationalisationUtils.getI18NString(COMMON_CONTACT_E_MAIL_ADDRESS),
-					CsvUtils.MARKER_CONTACT_NOTES, InternationalisationUtils.getI18NString(COMMON_CONTACT_NOTES));
+					CsvUtils.MARKER_MESSAGE_TYPE, InternationalisationUtils.getI18nString(COMMON_MESSAGE_TYPE),
+					CsvUtils.MARKER_MESSAGE_STATUS, InternationalisationUtils.getI18nString(COMMON_MESSAGE_STATUS),
+					CsvUtils.MARKER_MESSAGE_DATE, InternationalisationUtils.getI18nString(COMMON_MESSAGE_DATE),
+					CsvUtils.MARKER_MESSAGE_CONTENT, InternationalisationUtils.getI18nString(COMMON_MESSAGE_CONTENT),
+					CsvUtils.MARKER_SENDER_NUMBER, InternationalisationUtils.getI18nString(COMMON_SENDER_NUMBER),
+					CsvUtils.MARKER_RECIPIENT_NUMBER, InternationalisationUtils.getI18nString(COMMON_RECIPIENT_NUMBER),
+					CsvUtils.MARKER_CONTACT_NAME, InternationalisationUtils.getI18nString(COMMON_CONTACT_NAME),
+					CsvUtils.MARKER_CONTACT_OTHER_PHONE, InternationalisationUtils.getI18nString(COMMON_CONTACT_OTHER_PHONE_NUMBER),
+					CsvUtils.MARKER_CONTACT_EMAIL, InternationalisationUtils.getI18nString(COMMON_CONTACT_E_MAIL_ADDRESS),
+					CsvUtils.MARKER_CONTACT_NOTES, InternationalisationUtils.getI18nString(COMMON_CONTACT_NOTES));
 			for (FrontlineMessage message : messages) {
 				Contact c;
 				if (message.getType() == Type.RECEIVED) {
@@ -179,7 +179,9 @@ public class CsvExporter {
 				}
 	
 				CsvUtils.writeLine(out, messageFormat,
-					CsvUtils.MARKER_MESSAGE_TYPE, message.getType() == Type.RECEIVED ? InternationalisationUtils.getI18NString(COMMON_RECEIVED, InternationalisationUtils.getDefaultLanguageBundle()) : InternationalisationUtils.getI18NString(COMMON_SENT, InternationalisationUtils.getDefaultLanguageBundle()),
+					CsvUtils.MARKER_MESSAGE_TYPE, InternationalisationUtils.getI18nString(
+									message.getType() == Type.RECEIVED ? COMMON_RECEIVED : COMMON_SENT,
+									InternationalisationUtils.getDefaultLanguageBundle()),
 					CsvUtils.MARKER_MESSAGE_STATUS, UiGeneratorController.getMessageStatusAsString(message, InternationalisationUtils.getDefaultLanguageBundle()),
 					CsvUtils.MARKER_MESSAGE_DATE, dateFormatter.format(new Date(message.getDate())),
 					CsvUtils.MARKER_MESSAGE_CONTENT, messageContent.replace('\n', ' ').replace('\r', ' '),
@@ -214,13 +216,13 @@ public class CsvExporter {
 		try {
 			out = new Utf8FileWriter(exportFile);
 			CsvUtils.writeLine(out, contactFormat,
-					CsvUtils.MARKER_CONTACT_NAME, InternationalisationUtils.getI18NString(COMMON_NAME),
-					CsvUtils.MARKER_CONTACT_PHONE, InternationalisationUtils.getI18NString(COMMON_PHONE_NUMBER),
-					CsvUtils.MARKER_CONTACT_OTHER_PHONE, InternationalisationUtils.getI18NString(COMMON_OTHER_PHONE_NUMBER),
-					CsvUtils.MARKER_CONTACT_EMAIL, InternationalisationUtils.getI18NString(COMMON_E_MAIL_ADDRESS),
-					CsvUtils.MARKER_CONTACT_STATUS, InternationalisationUtils.getI18NString(COMMON_CURRENT_STATUS),
-					CsvUtils.MARKER_CONTACT_NOTES, InternationalisationUtils.getI18NString(COMMON_NOTES),
-					CsvUtils.MARKER_CONTACT_GROUPS, InternationalisationUtils.getI18NString(COMMON_AT_LEAST_ONE_GROUP));
+					CsvUtils.MARKER_CONTACT_NAME, InternationalisationUtils.getI18nString(COMMON_NAME),
+					CsvUtils.MARKER_CONTACT_PHONE, InternationalisationUtils.getI18nString(COMMON_PHONE_NUMBER),
+					CsvUtils.MARKER_CONTACT_OTHER_PHONE, InternationalisationUtils.getI18nString(COMMON_OTHER_PHONE_NUMBER),
+					CsvUtils.MARKER_CONTACT_EMAIL, InternationalisationUtils.getI18nString(COMMON_E_MAIL_ADDRESS),
+					CsvUtils.MARKER_CONTACT_STATUS, InternationalisationUtils.getI18nString(COMMON_CURRENT_STATUS),
+					CsvUtils.MARKER_CONTACT_NOTES, InternationalisationUtils.getI18nString(COMMON_NOTES),
+					CsvUtils.MARKER_CONTACT_GROUPS, InternationalisationUtils.getI18nString(COMMON_AT_LEAST_ONE_GROUP));
 			for (Contact contact : contacts) {
 				CsvUtils.writeLine(out, contactFormat, 
 					CsvUtils.MARKER_CONTACT_NAME, contact.getName(),
@@ -257,20 +259,20 @@ public class CsvExporter {
 		Utf8FileWriter out = null;
 		
 		try {
-			DateFormat dateFormatter = new SimpleDateFormat(InternationalisationUtils.getI18NString(DEFAULT_EXPORT_DATE_FORMAT));
+			DateFormat dateFormatter = new SimpleDateFormat(InternationalisationUtils.getI18nString(DEFAULT_EXPORT_DATE_FORMAT));
 			out = new Utf8FileWriter(exportFile);
 			CsvUtils.writeLine(out, rowFormat, 
-					CsvUtils.MARKER_KEYWORD_KEY, 		/*->*/ InternationalisationUtils.getI18NString(COMMON_KEYWORD),
-					CsvUtils.MARKER_KEYWORD_DESCRIPTION, /*->*/ InternationalisationUtils.getI18NString(COMMON_KEYWORD_DESCRIPTION),
-					CsvUtils.MARKER_MESSAGE_TYPE, 		/*->*/ InternationalisationUtils.getI18NString(COMMON_MESSAGE_TYPE),
-					CsvUtils.MARKER_MESSAGE_DATE, 		/*->*/ InternationalisationUtils.getI18NString(COMMON_MESSAGE_DATE),
-					CsvUtils.MARKER_MESSAGE_CONTENT, 	/*->*/ InternationalisationUtils.getI18NString(COMMON_MESSAGE_CONTENT),
-					CsvUtils.MARKER_SENDER_NUMBER, 		/*->*/ InternationalisationUtils.getI18NString(COMMON_MESSAGE_SENDER),
-					CsvUtils.MARKER_RECIPIENT_NUMBER, 	/*->*/ InternationalisationUtils.getI18NString(COMMON_MESSAGE_RECIPIENT),
-					CsvUtils.MARKER_CONTACT_NAME, 		/*->*/ InternationalisationUtils.getI18NString(COMMON_CONTACT_NAME),
-					CsvUtils.MARKER_CONTACT_OTHER_PHONE, /*->*/ InternationalisationUtils.getI18NString(COMMON_CONTACT_OTHER_PHONE_NUMBER),
-					CsvUtils.MARKER_CONTACT_EMAIL, 		/*->*/ InternationalisationUtils.getI18NString(COMMON_CONTACT_E_MAIL_ADDRESS),
-					CsvUtils.MARKER_CONTACT_NOTES, 		/*->*/ InternationalisationUtils.getI18NString(COMMON_CONTACT_NOTES));
+					CsvUtils.MARKER_KEYWORD_KEY, 		/*->*/ InternationalisationUtils.getI18nString(COMMON_KEYWORD),
+					CsvUtils.MARKER_KEYWORD_DESCRIPTION, /*->*/ InternationalisationUtils.getI18nString(COMMON_KEYWORD_DESCRIPTION),
+					CsvUtils.MARKER_MESSAGE_TYPE, 		/*->*/ InternationalisationUtils.getI18nString(COMMON_MESSAGE_TYPE),
+					CsvUtils.MARKER_MESSAGE_DATE, 		/*->*/ InternationalisationUtils.getI18nString(COMMON_MESSAGE_DATE),
+					CsvUtils.MARKER_MESSAGE_CONTENT, 	/*->*/ InternationalisationUtils.getI18nString(COMMON_MESSAGE_CONTENT),
+					CsvUtils.MARKER_SENDER_NUMBER, 		/*->*/ InternationalisationUtils.getI18nString(COMMON_MESSAGE_SENDER),
+					CsvUtils.MARKER_RECIPIENT_NUMBER, 	/*->*/ InternationalisationUtils.getI18nString(COMMON_MESSAGE_RECIPIENT),
+					CsvUtils.MARKER_CONTACT_NAME, 		/*->*/ InternationalisationUtils.getI18nString(COMMON_CONTACT_NAME),
+					CsvUtils.MARKER_CONTACT_OTHER_PHONE, /*->*/ InternationalisationUtils.getI18nString(COMMON_CONTACT_OTHER_PHONE_NUMBER),
+					CsvUtils.MARKER_CONTACT_EMAIL, 		/*->*/ InternationalisationUtils.getI18nString(COMMON_CONTACT_E_MAIL_ADDRESS),
+					CsvUtils.MARKER_CONTACT_NOTES, 		/*->*/ InternationalisationUtils.getI18nString(COMMON_CONTACT_NOTES));
 			for (Keyword keyword : keywords) {
 				if (messageType == null) {
 					// User dont want any message from this keywords.
@@ -301,7 +303,7 @@ public class CsvExporter {
 						CsvUtils.writeLine(out, rowFormat, 
 									CsvUtils.MARKER_KEYWORD_KEY,			/*->*/ keyword.getKeyword(),
 									CsvUtils.MARKER_KEYWORD_DESCRIPTION,	/*->*/ keyword.getDescription(),
-									CsvUtils.MARKER_MESSAGE_TYPE,		/*->*/ message.getType() == Type.RECEIVED ? InternationalisationUtils.getI18NString(COMMON_RECEIVED) : InternationalisationUtils.getI18NString(COMMON_SENT),
+									CsvUtils.MARKER_MESSAGE_TYPE,		/*->*/ message.getType() == Type.RECEIVED ? InternationalisationUtils.getI18nString(COMMON_RECEIVED) : InternationalisationUtils.getI18nString(COMMON_SENT),
 									CsvUtils.MARKER_MESSAGE_DATE, 		/*->*/ dateFormatter.format(new Date(message.getDate())),
 									CsvUtils.MARKER_MESSAGE_CONTENT, 	/*->*/ message.getTextContent().replace('\n', ' ').replace('\r', ' '),
 									CsvUtils.MARKER_SENDER_NUMBER,		/*->*/ message.getSenderMsisdn(),

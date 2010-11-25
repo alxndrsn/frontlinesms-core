@@ -136,7 +136,7 @@ public class EmailActionDialog extends BaseActionDialog implements EventObserver
 	public void selectMailRecipient() {
 		ContactSelecter contactSelecter = new ContactSelecter(ui);
 		final boolean shouldHaveEmail   = true;
-		contactSelecter.show(InternationalisationUtils.getI18NString(SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "setMailRecipient(contactSelecter_contactList, contactSelecter)", this.getDialogComponent(), this, shouldHaveEmail);
+		contactSelecter.show(InternationalisationUtils.getI18nString(SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "setMailRecipient(contactSelecter_contactList, contactSelecter)", this.getDialogComponent(), this, shouldHaveEmail);
 	}
 	
 	/**
@@ -150,7 +150,7 @@ public class EmailActionDialog extends BaseActionDialog implements EventObserver
 		Object recipientTextfield = ui.find(emailDialog, COMPONENT_TF_RECIPIENT);
 		Object selectedItem = ui.getSelectedItem(contactSelecter_contactList);
 		if (selectedItem == null) {
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_CONTACT_SELECTED));
+			ui.alert(InternationalisationUtils.getI18nString(MESSAGE_NO_CONTACT_SELECTED));
 			log.trace("EXIT");
 			return;
 		}
@@ -180,13 +180,13 @@ public class EmailActionDialog extends BaseActionDialog implements EventObserver
 		log.debug("Subject [" + subject + "]");
 		if (recipients.equals("") || recipients.equals(";")) {
 			log.debug("No valid recipients.");
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_BLANK_RECIPIENTS));
+			ui.alert(InternationalisationUtils.getI18nString(MESSAGE_BLANK_RECIPIENTS));
 			return;
 		}
 		EmailAccount account = (EmailAccount) ui.getAttachedObject(ui.getSelectedItem(find(COMPONENT_MAIL_LIST)));
 		if (account == null) {
 			log.debug("No account selected to send the e-mail from.");
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_ACCOUNT_SELECTED_TO_SEND_FROM));
+			ui.alert(InternationalisationUtils.getI18nString(MESSAGE_NO_ACCOUNT_SELECTED_TO_SEND_FROM));
 			return;
 		}
 		log.debug("Account [" + account.getAccountName() + "]");
@@ -201,7 +201,7 @@ public class EmailActionDialog extends BaseActionDialog implements EventObserver
 		}
 		if(end < start) {
 			log.debug("Start date is not before the end date");
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
+			ui.alert(InternationalisationUtils.getI18nString(MESSAGE_START_DATE_AFTER_END));
 			log.trace("EXIT");
 			return;
 		}

@@ -183,7 +183,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 			ui.remove(lbKeywordDescription);
 		}
 		
-		ui.setText(panel, InternationalisationUtils.getI18NString(COMMON_KEYWORD_ACTIONS_OF, getDisplayableKeyword(keyword)));
+		ui.setText(panel, InternationalisationUtils.getI18nString(COMMON_KEYWORD_ACTIONS_OF, getDisplayableKeyword(keyword)));
 		for (KeywordAction action : this.keywordActionDao.getActions(keyword)) {
 			ui.add(table, ui.getRow(action));
 		}
@@ -254,7 +254,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	 * @param parentKeyword
 	 */
 	public void showNewKeywordForm() {
-		String title = InternationalisationUtils.getI18NString(I18N_CREATE_KEYWORD);
+		String title = InternationalisationUtils.getI18nString(I18N_CREATE_KEYWORD);
 		this.keywordForm = ui.loadComponentFromFile(UI_FILE_NEW_KEYWORD_FORM, this);
 		ui.setText(ui.find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_TITLE), title);
 		
@@ -283,7 +283,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 			Keyword keyword = new Keyword(newKeyword, description);
 			this.keywordDao.saveKeyword(keyword);
 		} catch (DuplicateKeyException e) {
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_KEYWORD_EXISTS));
+			ui.alert(InternationalisationUtils.getI18nString(MESSAGE_KEYWORD_EXISTS));
 			log.trace("EXIT");
 			return;
 		}
@@ -321,7 +321,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 				keyword = new Keyword(newkeyword, "");
 				this.keywordDao.saveKeyword(keyword);
 			} catch (DuplicateKeyException e) {
-				ui.alert(InternationalisationUtils.getI18NString(MESSAGE_KEYWORD_EXISTS));
+				ui.alert(InternationalisationUtils.getI18nString(MESSAGE_KEYWORD_EXISTS));
 				log.trace("EXIT");
 				return;
 			}
@@ -385,7 +385,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		
 		// Refresh the UI
 		updateKeywordList();
-		ui.infoMessage(InternationalisationUtils.getI18NString(MESSAGE_KEYWORD_SAVED));
+		ui.infoMessage(InternationalisationUtils.getI18nString(MESSAGE_KEYWORD_SAVED));
 		log.trace("EXIT");
 	}
 
@@ -569,7 +569,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 			} else {
 				ui.remove(lbKeywordDescription);
 			}
-			ui.setText(panel, InternationalisationUtils.getI18NString(COMMON_KEYWORD_ACTIONS_OF, getDisplayableKeyword(keyword)));
+			ui.setText(panel, InternationalisationUtils.getI18nString(COMMON_KEYWORD_ACTIONS_OF, getDisplayableKeyword(keyword)));
 			//Fill every field
 			for (KeywordAction action : actions) {
 				ui.add(table, ui.getRow(action));
@@ -678,7 +678,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	 */
 	private void showKeywordDialogForEdition(Keyword keyword) {
 		String key = getDisplayableKeyword(keyword);
-		String title = InternationalisationUtils.getI18NString(COMMON_EDITING_KEYWORD, key);
+		String title = InternationalisationUtils.getI18nString(COMMON_EDITING_KEYWORD, key);
 		keywordForm = ui.loadComponentFromFile(UI_FILE_NEW_KEYWORD_FORM, this);
 		ui.setAttachedObject(keywordForm, keyword);
 		ui.setText(ui.find(keywordForm, COMPONENT_NEW_KEYWORD_FORM_TITLE), title);
@@ -724,7 +724,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		if(group != null) {
 			ui.setText(joinGroupButton, group.getPath());
 		} else {
-			ui.setText(joinGroupButton, InternationalisationUtils.getI18NString(I18N_KEYWORD_ACTION_NO_GROUP, InternationalisationUtils.getI18NString(I18N_COMMON_NONE)));
+			ui.setText(joinGroupButton, InternationalisationUtils.getI18nString(I18N_KEYWORD_ACTION_NO_GROUP, InternationalisationUtils.getI18nString(I18N_COMMON_NONE)));
 		}
 	}
 	private void setLeaveGroupDisplay(Group group) {
@@ -737,7 +737,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 		if(group != null) {
 			ui.setText(leaveGroupButton, group.getPath());
 		} else {
-			ui.setText(leaveGroupButton, InternationalisationUtils.getI18NString(I18N_KEYWORD_ACTION_NO_GROUP, InternationalisationUtils.getI18NString(I18N_COMMON_NONE)));
+			ui.setText(leaveGroupButton, InternationalisationUtils.getI18nString(I18N_KEYWORD_ACTION_NO_GROUP, InternationalisationUtils.getI18nString(I18N_COMMON_NONE)));
 		}
 	}
 
@@ -810,7 +810,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	 */
 	public static String getDisplayableKeyword(Keyword keyword) {
 		String displayable = keyword.getKeyword();
-		if (displayable.length() == 0) return "<" + InternationalisationUtils.getI18NString(COMMON_BLANK) + ">";
+		if (displayable.length() == 0) return "<" + InternationalisationUtils.getI18nString(COMMON_BLANK) + ">";
 		else return displayable;		
 	}
 	
@@ -822,9 +822,9 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 	 */
 	public static String getDisplayableDescription(Keyword keyword) {
 		boolean hasDescription = (keyword.getDescription() != null && keyword.getDescription().length() > 0); 
-		if (keyword.getKeyword().length() == 0 && !hasDescription) return InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_BLANK_KEYWORD_DESCRIPTION);
+		if (keyword.getKeyword().length() == 0 && !hasDescription) return InternationalisationUtils.getI18nString(FrontlineSMSConstants.MESSAGE_BLANK_KEYWORD_DESCRIPTION);
 		else if (keyword.getKeyword().equals(FrontlineSMSConstants.MMS_KEYWORD)){
-			return InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_MMS_KEYWORD_DESCRIPTION);
+			return InternationalisationUtils.getI18nString(FrontlineSMSConstants.MESSAGE_MMS_KEYWORD_DESCRIPTION);
 		} else {
 			return keyword.getDescription();
 		}
@@ -839,7 +839,7 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 			String newTabName = ((TabChangedNotification) notification).getNewTabName();
 			if (newTabName.equals(TAB_KEYWORD_MANAGER)) {
 				this.refresh();
-				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_KEYWORDS_LOADED));
+				this.ui.setStatus(InternationalisationUtils.getI18nString(MESSAGE_KEYWORDS_LOADED));
 			}
 		}
 	}

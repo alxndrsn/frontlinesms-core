@@ -205,8 +205,8 @@ public class CsvImporter {
 	public static LanguageBundle getUsedLanguageBundle(String typeString) {
 		Collection<FileLanguageBundle> languageBundles = InternationalisationUtils.getLanguageBundles();
 		for (FileLanguageBundle languageBundle : languageBundles) {
-			if (typeString.equals(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SENT, languageBundle))
-					|| typeString.equals(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_RECEIVED, languageBundle))) {
+			if (typeString.equals(InternationalisationUtils.getI18nString(FrontlineSMSConstants.COMMON_SENT, languageBundle))
+					|| typeString.equals(InternationalisationUtils.getI18nString(FrontlineSMSConstants.COMMON_RECEIVED, languageBundle))) {
 				return languageBundle;
 			}
 		}
@@ -215,9 +215,9 @@ public class CsvImporter {
 	}
 	
 	public static Type getTypeFromString(String typeString, LanguageBundle languageBundle) {
-		if (typeString.equals(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SENT, languageBundle))) {
+		if (typeString.equals(InternationalisationUtils.getI18nString(FrontlineSMSConstants.COMMON_SENT, languageBundle))) {
 			return Type.OUTBOUND;
-		} else if (typeString.equals(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_RECEIVED, languageBundle))) {
+		} else if (typeString.equals(InternationalisationUtils.getI18nString(FrontlineSMSConstants.COMMON_RECEIVED, languageBundle))) {
 			return Type.RECEIVED;
 		}
 		

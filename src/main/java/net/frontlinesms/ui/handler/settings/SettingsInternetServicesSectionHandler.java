@@ -133,10 +133,10 @@ public class SettingsInternetServicesSectionHandler extends BaseSectionHandler i
 	}
 	
 	public String getTitle() {
-		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_INTERNET_SERVICES);
+		return InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_INTERNET_SERVICES);
 	}
 
 	public Object getSectionNode() {
-		return createSectionNode(InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_INTERNET_SERVICES), this, "/icons/sms_http_edit.png");
+		return createSectionNode(InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_INTERNET_SERVICES), this, "/icons/sms_http_edit.png");
 	}
 }
