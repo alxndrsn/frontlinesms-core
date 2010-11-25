@@ -233,7 +233,7 @@ public class DatabaseSettingsPanel extends BasePanelHandler implements DatabaseS
 		this.settingsChangedCallbackListener = this;
 		this.needToRestartApplication = needToRestartApplication;
 		
-		Object dialogComponent = ui.createDialog(InternationalisationUtils.getI18NString(I18N_KEY_DATABASE_CONFIG));
+		Object dialogComponent = ui.createDialog(InternationalisationUtils.getI18nString(I18N_KEY_DATABASE_CONFIG));
 		ui.add(dialogComponent, this.getPanelComponent());
 		ui.setCloseAction(dialogComponent, "removeDialog", dialogComponent, this);
 		ui.add(dialogComponent);

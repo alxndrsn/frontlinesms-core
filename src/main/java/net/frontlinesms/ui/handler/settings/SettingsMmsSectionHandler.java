@@ -83,11 +83,11 @@ public class SettingsMmsSectionHandler extends SettingsAbstractEmailsSectionHand
 	}
 	
 	public String getTitle() {
-		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_MMS);
+		return InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_MMS);
 	}
 //> UI EVENT METHODS
 
 	public Object getSectionNode() {
-		return createSectionNode(InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_MMS), this, "/icons/mms.png");
+		return createSectionNode(InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_MMS), this, "/icons/mms.png");
 	}
 }

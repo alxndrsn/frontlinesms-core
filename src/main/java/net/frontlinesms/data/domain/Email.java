@@ -21,7 +21,9 @@ package net.frontlinesms.data.domain;
 
 import javax.persistence.*;
 
+import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.data.EntityField;
+import net.frontlinesms.ui.i18n.Internationalised;
 
 /**
  * Object representing an email in our data structure.
@@ -73,17 +75,27 @@ public class Email {
 	}
 	
 //> CONSTANTS
-	public enum Status {
+	public enum Status implements Internationalised {
 		/** outgoing email that is created, and will be sent when the server is available */
-		OUTBOX,
+		OUTBOX(FrontlineSMSConstants.COMMON_OUTBOX),
 		/** outgoing email successfully delivered*/
-		SENT,
+		SENT(FrontlineSMSConstants.COMMON_SENT),
 		/** outgoing email failed*/
-		FAILED,
+		FAILED(FrontlineSMSConstants.COMMON_FAILED),
 		/** outgoing email pending*/
-		PENDING,
+		PENDING(FrontlineSMSConstants.COMMON_PENDING),
 		/** outgoing email re-trying*/
-		RETRYING
+		RETRYING(FrontlineSMSConstants.COMMON_RETRYING);
+		
+		private Status(String i18nKey) {
+			this.i18nKey = i18nKey;
+		}
+		
+		private final String i18nKey;
+
+		public String getI18nKey() {
+			return this.i18nKey;
+		}
 	}
 
 //> INSTANCE PROPERTIES

@@ -101,9 +101,9 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 			String[] parts = StatisticsManager.splitStatsMapKey(key);
 			if(parts.length > 1) {
 				String[] subsequentParts = Arrays.copyOfRange(parts, 1, parts.length);
-				label = InternationalisationUtils.getI18NString(parts[0], subsequentParts);
-			} else label = InternationalisationUtils.getI18NString(key);
-		} else label = InternationalisationUtils.getI18NString(key);
+				label = InternationalisationUtils.getI18nString(parts[0], subsequentParts);
+			} else label = InternationalisationUtils.getI18nString(key);
+		} else label = InternationalisationUtils.getI18nString(key);
 		ui.add(row, ui.createTableCell(label));
 		ui.add(row, ui.createTableCell(entry.getValue()));
 		
@@ -162,7 +162,7 @@ public class StatisticsDialogHandler implements ThinletUiEventHandler {
 		
 		this.saveLastSubmissionDate();
 		
-		this.ui.alert(InternationalisationUtils.getI18NString(I18N_STATS_DIALOG_THANKS, FrontlineSMSConstants.STATISTICS_DAYS_BEFORE_RELAUNCH));
+		this.ui.alert(InternationalisationUtils.getI18nString(I18N_STATS_DIALOG_THANKS, FrontlineSMSConstants.STATISTICS_DAYS_BEFORE_RELAUNCH));
 		this.removeDialog();
 	}
 	

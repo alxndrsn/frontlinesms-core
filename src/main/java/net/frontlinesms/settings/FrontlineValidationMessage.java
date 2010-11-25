@@ -12,6 +12,6 @@ public class FrontlineValidationMessage {
 	}
 	
 	public String getLocalisedMessage() {
-	    return InternationalisationUtils.getI18NString(i18nKey, details);
+	    return InternationalisationUtils.getI18nString(i18nKey, details);
 	}
 }

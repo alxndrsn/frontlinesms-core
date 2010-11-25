@@ -104,7 +104,7 @@ public class FrontlineUtils {
 	 */
 	public static long getLongDateFromStringDate (String dateFieldString, boolean isStartDate) throws ParseException {
 		if (dateFieldString.length() == 0
-				|| (!isStartDate && dateFieldString.equals(InternationalisationUtils.getI18NString(COMMON_UNDEFINED)))) {
+				|| (!isStartDate && dateFieldString.equals(InternationalisationUtils.getI18nString(COMMON_UNDEFINED)))) {
 			return (isStartDate ? System.currentTimeMillis() : DEFAULT_END_DATE); // FIXME Should we take the TimeZone into account?
 		} else {
 			Date ds = InternationalisationUtils.parseDate(dateFieldString);
@@ -572,53 +572,5 @@ public class FrontlineUtils {
 							  subject,
 							  textContent,
 							  new File(attachment));
-	}
-
-	/**
-	 * @param msisdn A phone number
-	 * @return <code>true</code> if the number is in a proper international format, <code>false</code> otherwise.
-	 */
-	public static boolean isInInternationalFormat(String msisdn) {
-		return msisdn.matches("\\+\\d+");
-	}
-	
-	/**
-	 * Tries to format the given phone number into a valid international format.
-	 * @param msisdn A non-formatted phone number
-	 */
-	public static String getInternationalFormat(String msisdn, String countryCode) {
-		// Remove the (0) sometimes present is certain numbers.
-		// This 0 MUST NOT be present in the international formatted number
-		String formattedNumber = msisdn.replace("(0)", "");
-		
-		// Remove every character which is not a digit
-		formattedNumber = formattedNumber.replaceAll("\\D", "");
-		
-		if (msisdn.startsWith("+")) {
-			// If the original number was prefixed by ++,
-			// we put it back
-			return "+" + formattedNumber;
-		} else if (formattedNumber.startsWith("00")) {
-			// If the number was prefixed by the (valid) 00(code) format,
-			// we transform it to the + sign
-			return "+" + formattedNumber.substring(2);
-		} else if (formattedNumber.startsWith(InternationalisationUtils.getInternationalCountryCode(countryCode))) {
-			// If the number was prefixed by the current country code,
-			// we just put a + sign back in front of it.
-			return "+" + formattedNumber;
-		} else if (formattedNumber.startsWith("0")) {
-			// Most internal numbers starts with one 0. We'll have to remove it
-			// Before putting a + sign in front of it.
-			formattedNumber = formattedNumber.substring(1);
-		}
-		
-		// NB: even if a + sign had been specified, it's been removed by the replaceAll function
-		// We have to put one back.
-		// We also try to prefix the number with the current country code
-		return "+" + InternationalisationUtils.getInternationalCountryCode(countryCode) + formattedNumber;
-	}
-	
-	public static String getInternationalFormat(String msisdn) {
-		return getInternationalFormat(msisdn, AppProperties.getInstance().getCurrentCountry());
 	}
 }

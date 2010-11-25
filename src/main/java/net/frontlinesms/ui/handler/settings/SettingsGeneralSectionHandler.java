@@ -96,7 +96,7 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 	private void initCountrySettings() {
 		Object countryList = find(UI_COMPONENT_COMBOBOX_COUNTRIES);
 		int selectedIndex = -1;
-		Object currentCountry = AppProperties.getInstance().getCurrentCountry();
+		Object currentCountry = AppProperties.getInstance().getUserCountry();
 
 		// Missing translation files
 		for (int i = 0 ; i < EnumCountry.values().length ; ++i) {
@@ -213,7 +213,7 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 		
 		/** COUNTRY **/
 		String country = this.uiController.getAttachedObject(this.uiController.getSelectedItem(find(UI_COMPONENT_COMBOBOX_COUNTRIES)), String.class);
-		appProperties.setCurrentCountry(country);
+		appProperties.setUserCountry(country);
 		
 		appProperties.saveToDisk();		
 	}
@@ -243,11 +243,11 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 	}
 	
 	public String getTitle() {
-		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_GENERAL);
+		return InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_GENERAL);
 	}
 	
 	public Object getSectionNode() {
-		Object generalRootNode = createSectionNode(InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_GENERAL), this, "/icons/cog.png");
+		Object generalRootNode = createSectionNode(InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_GENERAL), this, "/icons/cog.png");
 		
 		SettingsDatabaseSectionHandler databaseHandler = new SettingsDatabaseSectionHandler(uiController);
 		uiController.add(generalRootNode, databaseHandler.getSectionNode());

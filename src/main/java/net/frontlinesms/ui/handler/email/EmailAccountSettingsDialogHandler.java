@@ -113,27 +113,27 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 		this.ui.setSelected(find(UI_COMPONENT_RB_POP), false);
 		
 		if (this.isForReceiving) {
-			ui.setText(find(UI_COMPONENT_LB_EXAMPLE_PORT), InternationalisationUtils.getI18NString(EXAMPLE_PORT_POP));
-			ui.setText(find(UI_COMPONENT_LB_EXAMPLE_SERVER), InternationalisationUtils.getI18NString(EXAMPLE_SERVER_POP));
+			ui.setText(find(UI_COMPONENT_LB_EXAMPLE_PORT), InternationalisationUtils.getI18nString(EXAMPLE_PORT_POP));
+			ui.setText(find(UI_COMPONENT_LB_EXAMPLE_SERVER), InternationalisationUtils.getI18nString(EXAMPLE_SERVER_POP));
 			ui.setText(tfPort, String.valueOf(DEFAULT_PORT_POP));
-			this.ui.setText(dialogComponent, InternationalisationUtils.getI18NString(I18N_MMS_EMAIL_ACCOUNT_SETTINGS));
+			this.ui.setText(dialogComponent, InternationalisationUtils.getI18nString(I18N_MMS_EMAIL_ACCOUNT_SETTINGS));
 			if (this.originalEmailAccount != null && this.originalEmailAccount.getProtocol().equals(EmailUtils.POP3)) {
 				this.ui.setSelected(find(UI_COMPONENT_RB_IMAP), false);
 				this.ui.setSelected(find(UI_COMPONENT_RB_POP), true);
 			}
 		} else {
-			ui.setText(dialogComponent, InternationalisationUtils.getI18NString(I18N_NEW_ACCOUNT));
-			ui.setText(find(UI_COMPONENT_LB_EXAMPLE_PORT), InternationalisationUtils.getI18NString(EXAMPLE_PORT_SMTP));
-			ui.setText(find(UI_COMPONENT_LB_EXAMPLE_SERVER), InternationalisationUtils.getI18NString(EXAMPLE_SERVER_SMTP));
+			ui.setText(dialogComponent, InternationalisationUtils.getI18nString(I18N_NEW_ACCOUNT));
+			ui.setText(find(UI_COMPONENT_LB_EXAMPLE_PORT), InternationalisationUtils.getI18nString(EXAMPLE_PORT_SMTP));
+			ui.setText(find(UI_COMPONENT_LB_EXAMPLE_SERVER), InternationalisationUtils.getI18nString(EXAMPLE_SERVER_SMTP));
 			ui.setText(tfPort, String.valueOf(DEFAULT_PORT_SMTP));
-			this.ui.setText(dialogComponent, InternationalisationUtils.getI18NString(I18N_COMMON_EMAIL_ACCOUNT_SETTINGS));
+			this.ui.setText(dialogComponent, InternationalisationUtils.getI18nString(I18N_COMMON_EMAIL_ACCOUNT_SETTINGS));
 		}
 		
 		this.ui.setVisible(find(UI_COMPONENT_PN_POP_IMAP), isForReceiving);
 		this.ui.setVisible(find(UI_COMPONENT_LK_HELP), isForReceiving);
 		
 		if (emailAccount != null) {
-			ui.setText(dialogComponent, InternationalisationUtils.getI18NString(I18N_EDITING_EMAIL_ACCOUNT, emailAccount.getAccountName()));
+			ui.setText(dialogComponent, InternationalisationUtils.getI18nString(I18N_EDITING_EMAIL_ACCOUNT, emailAccount.getAccountName()));
 			this.populatePanel();
 		}
 	}
@@ -209,7 +209,7 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 			}
 		} catch (DuplicateKeyException e) {
 			log.debug("Account already exists", e);
-			ui.alert(InternationalisationUtils.getI18NString(I18N_ACCOUNT_NAME_ALREADY_EXISTS));
+			ui.alert(InternationalisationUtils.getI18nString(I18N_ACCOUNT_NAME_ALREADY_EXISTS));
 			log.trace("EXIT");
 			return;
 		}
@@ -251,7 +251,7 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 		log.debug("SSL [" + useSSL + "]");
 		
 		if (accountName.equals("")) {
-			ui.alert(InternationalisationUtils.getI18NString(I18N_ACCOUNT_NAME_BLANK));
+			ui.alert(InternationalisationUtils.getI18nString(I18N_ACCOUNT_NAME_BLANK));
 			log.trace("EXIT");
 			return;
 		}
@@ -286,8 +286,8 @@ public class EmailAccountSettingsDialogHandler implements ThinletUiEventHandler 
 			}
 			this.showConnectionWarningDialog(dialog);
 		}  catch (DuplicateKeyException e) {
-			log.debug(InternationalisationUtils.getI18NString(I18N_ACCOUNT_NAME_ALREADY_EXISTS), e);
-			ui.alert(InternationalisationUtils.getI18NString(I18N_ACCOUNT_NAME_ALREADY_EXISTS));
+			log.debug(InternationalisationUtils.getI18nString(I18N_ACCOUNT_NAME_ALREADY_EXISTS), e);
+			ui.alert(InternationalisationUtils.getI18nString(I18N_ACCOUNT_NAME_ALREADY_EXISTS));
 		}
 		log.trace("EXIT");
 	}

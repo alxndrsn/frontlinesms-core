@@ -240,6 +240,6 @@ public class DateSelecter {
 	 * @return Month name
 	 */
 	private String getMonthAsString(int i) {
-		return InternationalisationUtils.getI18NString(FrontlineSMSConstants.MONTH_KEYS[i]);
+		return InternationalisationUtils.getI18nString(FrontlineSMSConstants.MONTH_KEYS[i]);
 	}
 }

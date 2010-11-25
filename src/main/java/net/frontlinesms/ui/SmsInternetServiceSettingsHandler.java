@@ -346,7 +346,7 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 		Object[] components;
 		String label;
 		try {
-			label = InternationalisationUtils.getI18NString(key);
+			label = InternationalisationUtils.getI18nString(key);
 		} catch(MissingResourceException ex) {
 			label = key;
 		}
@@ -509,14 +509,14 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 		Object textField = controller.getAttachedObject(button);
 		ContactSelecter contactSelecter = new ContactSelecter(controller);
 		final boolean shouldHaveEmail = false;
-		contactSelecter.show(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SENDER_NUMBER), "setContactNumber(contactSelecter_contactList, contactSelecter)", textField, this, shouldHaveEmail);
+		contactSelecter.show(InternationalisationUtils.getI18nString(FrontlineSMSConstants.COMMON_SENDER_NUMBER), "setContactNumber(contactSelecter_contactList, contactSelecter)", textField, this, shouldHaveEmail);
 	}
 
 	public void setContactNumber(Object list, Object dialog) {
 		Object textField = controller.getAttachedObject(dialog);
 		Object selectedItem = controller.getSelectedItem(list);
 		if (selectedItem == null) {
-			controller.alert(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_NO_CONTACT_SELECTED));
+			controller.alert(InternationalisationUtils.getI18nString(FrontlineSMSConstants.MESSAGE_NO_CONTACT_SELECTED));
 			return;
 		}
 		Contact selectedContact = controller.getContact(selectedItem);

@@ -8,10 +8,10 @@ import static net.frontlinesms.FrontlineSMSConstants.ACTION_ADD_TO_GROUP;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_CONTACTS_IN_GROUP;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_CONTACTS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_CONTACT_MANAGER_LOADED;
+import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUPS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUPS_AND_CONTACTS_DELETED;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_GROUP_ALREADY_EXISTS;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_REMOVING_CONTACTS;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_BUTTON_YES;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_CONTACT_MANAGER_CONTACT_LIST;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_DELETE_NEW_CONTACT;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_GROUPS_MENU;
@@ -141,7 +141,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			contactsPanelTitle = "";
 			enableDeleteButton = false;
 		} else {
-			contactsPanelTitle = InternationalisationUtils.getI18NString(COMMON_CONTACTS_IN_GROUP, selectedGroup.getName());
+			contactsPanelTitle = InternationalisationUtils.getI18nString(COMMON_CONTACTS_IN_GROUP, selectedGroup.getName());
 			enableDeleteButton = !this.ui.isDefaultGroup(selectedGroup);
 		}
 		this.ui.setText(find(COMPONENT_CONTACTS_PANEL), contactsPanelTitle);
@@ -225,7 +225,10 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			if (groupMembershipDao.getMemberCount(g) > 0) {
 				// If the group is not empty, we ask if the user also wants to delete the contacts
 				ChoiceDialogHandler choiceDialogHandler = new ChoiceDialogHandler(this.ui, this);
-				choiceDialogHandler.showChoiceDialog(true, "removeSelectedFromGroupList(this, choiceDialog)", I18N_SENTENCE_DELETE_CONTACTS_FROM_GROUPS);
+				choiceDialogHandler.showChoiceDialog(true,
+						"removeSelectedFromGroupList('true', choiceDialog)",
+						"removeSelectedFromGroupList('false', choiceDialog)",
+						I18N_SENTENCE_DELETE_CONTACTS_FROM_GROUPS);
 			} else {
 				// Otherwise, the
 				showConfirmationDialog("deleteSelectedGroup");
@@ -239,7 +242,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 	 */
 	public void deleteSelectedGroup () {
 		this.ui.removeConfirmationDialog();
-		removeSelectedFromGroupList(null, null);
+		removeSelectedFromGroupList(false, null);
 	}
 
 	/**
@@ -299,7 +302,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 				this.ui.add(menu, menuItem);
 			}
 			this.ui.setVisible(menu, allGroups.size() != 0);
-			String menuName = InternationalisationUtils.getI18NString(ACTION_ADD_TO_GROUP);
+			String menuName = InternationalisationUtils.getI18nString(ACTION_ADD_TO_GROUP);
 			this.ui.setText(menu, menuName);
 			
 			Object menuRemove = this.ui.find(popUp, "groupsMenuRemove");
@@ -403,29 +406,26 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		log.trace("EXIT");
 	}
 	
+	public void removeSelectedFromGroupList(String deleteContacts, Object dialog) {
+		removeSelectedFromGroupList(Boolean.valueOf(deleteContacts), dialog);
+	}
 	/**
-	 * Remove selected groups and contacts.
-	 * 
-	 * @param button
-	 * @param dialog
+	 * Remove selected groups and optionally contacts.
+	 * @param confirmationDialog the confirmation dialog, or <code>null</code> if none was displayed
 	 */
-	public void removeSelectedFromGroupList(final Object button, Object dialog) {
+	private void removeSelectedFromGroupList(boolean deleteContacts, Object confirmationDialog) {
 		log.trace("ENTER");
-		if (dialog != null) {
-			this.ui.removeDialog(dialog);
+		if (confirmationDialog != null) {
+			this.ui.removeDialog(confirmationDialog);
 		}
 
 		Group selectedGroup = this.groupSelecter.getSelectedGroup();
 		if(!ui.isDefaultGroup(selectedGroup)) {
-			boolean removeContactsAlso = false;
-			if (button != null) {
-				removeContactsAlso = ui.getName(button).equals(COMPONENT_BUTTON_YES);
-			}
 			log.debug("Selected Group [" + selectedGroup.getName() + "]");
-			log.debug("Remove Contacts from database [" + removeContactsAlso + "]");
+			log.debug("Remove Contacts from database [" + deleteContacts + "]");
 			if (!ui.isDefaultGroup(selectedGroup)) {
 				log.debug("Removing group [" + selectedGroup.getName() + "] from database");
-				groupDao.deleteGroup(selectedGroup, removeContactsAlso);
+				groupDao.deleteGroup(selectedGroup, deleteContacts);
 				this.groupSelecter.selectGroup(groupSelecter.getRootGroup());
 			} else {
 				// Inside a default group
@@ -435,7 +435,8 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		
 		Object sms = ui.find(find(COMPONENT_GROUP_SELECTER_CONTAINER), COMPONENT_SEND_SMS_BUTTON_GROUP_SIDE);
 		ui.setEnabled(sms, selectedGroup != null);
-		ui.infoMessage(InternationalisationUtils.getI18NString(MESSAGE_GROUPS_AND_CONTACTS_DELETED));
+		ui.infoMessage(InternationalisationUtils.getI18nString(
+				deleteContacts ? MESSAGE_GROUPS_AND_CONTACTS_DELETED : MESSAGE_GROUPS_DELETED));
 		refresh();
 		log.trace("EXIT");
 	}
@@ -460,14 +461,14 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 		log.trace("ENTER");
 		Group selectedGroup = this.groupSelecter.getSelectedGroup();
 		this.ui.removeConfirmationDialog();
-		this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_REMOVING_CONTACTS));
+		this.ui.setStatus(InternationalisationUtils.getI18nString(MESSAGE_REMOVING_CONTACTS));
 		final Object[] selected = this.ui.getSelectedItems(contactListComponent);
 		for (Object o : selected) {
 			Contact contact = ui.getContact(o);
 			log.debug("Deleting contact [" + contact.getName() + "]");
 			contactDao.deleteContact(contact);
 		}
-		ui.alert(InternationalisationUtils.getI18NString(MESSAGE_CONTACTS_DELETED));
+		ui.alert(InternationalisationUtils.getI18nString(MESSAGE_CONTACTS_DELETED));
 		refresh();
 		this.groupSelecter.selectGroup(selectedGroup);
 		
@@ -520,7 +521,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			log.debug("Group created successfully!");
 		} catch (DuplicateKeyException e) {
 			log.debug("A group with this name already exists.", e);
-			this.ui.alert(InternationalisationUtils.getI18NString(MESSAGE_GROUP_ALREADY_EXISTS));
+			this.ui.alert(InternationalisationUtils.getI18nString(MESSAGE_GROUP_ALREADY_EXISTS));
 		}
 		log.trace("EXIT");
 	}
@@ -635,7 +636,7 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			String newTabName = ((TabChangedNotification) notification).getNewTabName();
 			if (newTabName.equals(TAB_CONTACT_MANAGER)) {
 				this.refresh();
-				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_CONTACT_MANAGER_LOADED));
+				this.ui.setStatus(InternationalisationUtils.getI18nString(MESSAGE_CONTACT_MANAGER_LOADED));
 			}
 		}
 	}

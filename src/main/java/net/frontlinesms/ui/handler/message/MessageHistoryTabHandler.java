@@ -181,7 +181,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			String newTabName = ((TabChangedNotification) notification).getNewTabName();
 			if (newTabName.equals(TAB_MESSAGE_HISTORY)) {
 				this.refresh();
-				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGES_LOADED));
+				this.ui.setStatus(InternationalisationUtils.getI18nString(MESSAGE_MESSAGES_LOADED));
 			}
 		} else if (notification instanceof AppPropertiesEventNotification) {
 			String property = ((AppPropertiesEventNotification) notification).getProperty();
@@ -330,7 +330,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		Object[] messageRows = new Object[messages.size()];
 		for (int i = 0; i < messages.size(); i++) {
 			FrontlineMessage m = messages.get(i);
-			messageRows[i] = ui.getRow(m);
+			messageRows[i] = getRow(m);
 		}
 		
 		return new PagedListDetails(totalNumberOfMessages, messageRows);
@@ -641,7 +641,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 				new FrontlineUiUpateJob() {
 					public void run() {
 						ui.remove(ui.getItem(messageListComponent, index));
-						ui.add(messageListComponent, ui.getRow(message), index);
+						ui.add(messageListComponent, getRow(message), index);
 					}
 				}.execute();
 				return;
@@ -664,7 +664,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		LOG.trace("ENTER");
 		
 		ui.removeConfirmationDialog();
-		ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_REMOVING_MESSAGES));
+		ui.setStatus(InternationalisationUtils.getI18nString(MESSAGE_REMOVING_MESSAGES));
 
 		final Object[] selected = ui.getSelectedItems(messageListComponent);
 		int numberRemoved = 0;
@@ -686,7 +686,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			}
 		}
 		if (numberRemoved > 0) {
-			ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_MESSAGES_DELETED));
+			ui.setStatus(InternationalisationUtils.getI18nString(MESSAGE_MESSAGES_DELETED));
 			updateMessageList();
 		}
 		
@@ -775,6 +775,55 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	}
 
 //> UI HELPER METHODS
+	/**
+	 * Creates a Thinlet UI table row containing details of an SMS message.
+	 * @param message
+	 * @return
+	 */
+	public Object getRow(FrontlineMessage message) {
+		Object row = ui.createTableRow(message);
+
+		String icon;
+		if (message.getType() == Type.RECEIVED) {
+			if (message instanceof FrontlineMultimediaMessage) {
+				icon = Icon.MMS_RECEIVE;
+			} else {
+				icon = Icon.SMS_RECEIVE;
+			}
+		} else {
+			if (message instanceof FrontlineMultimediaMessage) {
+				icon = Icon.MMS_SEND;
+			} else {
+				icon = Icon.SMS_SEND;
+			}
+		}
+		Object iconCell = ui.createTableCell("");
+		ui.setIcon(iconCell, icon);
+		ui.add(row, iconCell);
+		
+		
+		/** "ATTACHED" ICON (only for MMS containing multimedia parts) */
+		Object attachCell = ui.createTableCell("");
+		if (message instanceof FrontlineMultimediaMessage && ((FrontlineMultimediaMessage) message).hasBinaryPart()) {
+			ui.setIcon(attachCell, Icon.ATTACH);
+		}
+		ui.add(row, attachCell);
+		
+
+		ui.add(row, ui.createTableCell(InternationalisationUtils.getI18nString(message.getStatus())));
+		ui.add(row, ui.createTableCell(InternationalisationUtils.getDatetimeFormat().format(message.getDate())));
+		ui.add(row, ui.createTableCell(message.getSenderMsisdn()));
+		ui.add(row, ui.createTableCell(message.getRecipientMsisdn()));
+		
+		if (message instanceof FrontlineMultimediaMessage && ((FrontlineMultimediaMessage) message).getSubject().length() > 0) {
+			ui.add(row, ui.createTableCell(((FrontlineMultimediaMessage) message).getSubject()));
+		} else {
+			ui.add(row, ui.createTableCell(message.getTextContent()));
+		}
+		
+		return row;
+	}
+	
 	/** Initialise the message table's HEADER component for sorting the table. */
 	private void initMessageTableForSorting() {
 		Object header = Thinlet.get(messageListComponent, ThinletText.HEADER);
@@ -783,11 +832,11 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			// Here, the FIELD property is set on each column of the message table.  These field objects are
 			// then used for easy sorting of the message table.
 			if(text != null) {
-				if (text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_STATUS))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.STATUS);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_DATE))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.DATE);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_SENDER))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.SENDER_MSISDN);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_RECIPIENT))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.RECIPIENT_MSISDN);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_MESSAGE))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.MESSAGE_CONTENT);
+				if (text.equalsIgnoreCase(InternationalisationUtils.getI18nString(COMMON_STATUS))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.STATUS);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18nString(COMMON_DATE))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.DATE);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18nString(COMMON_SENDER))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.SENDER_MSISDN);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18nString(COMMON_RECIPIENT))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.RECIPIENT_MSISDN);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18nString(COMMON_MESSAGE))) ui.putProperty(o, PROPERTY_FIELD, FrontlineMessage.Field.MESSAGE_CONTENT);
 			}
 		}
 	}
@@ -861,7 +910,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 			Object currentRowComponent = messageItems[rowIndex];
 			if(message.equals(ui.getAttachedObject(currentRowComponent))) {
 				// replace or update the row in the message table
-				ui.add(messageListComponent, ui.getRow(message), rowIndex);
+				ui.add(messageListComponent, getRow(message), rowIndex);
 				ui.remove(currentRowComponent);
 				replaced = true;
 				break;
@@ -871,7 +920,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		if(!replaced) {
 			if (ui.getItems(messageListComponent).length < this.messagePagingHandler.getMaxItemsPerPage()) {
 				LOG.debug("There's space! Adding...");
-				ui.add(messageListComponent, ui.getRow(message));
+				ui.add(messageListComponent, getRow(message));
 				ui.setEnabled(messageListComponent, true);
 				if (message.getType() == Type.OUTBOUND) {
 					numberOfSMSPartsSent += message.getNumberOfSMS();
@@ -907,7 +956,7 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	
 	/** @return list item component representing ALL MESSAGES in the system */
 	private Object getAllMessagesListItem() {
-		Object allMessages = ui.createListItem(InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_ALL_MESSAGES), null);
+		Object allMessages = ui.createListItem(InternationalisationUtils.getI18nString(FrontlineSMSConstants.COMMON_ALL_MESSAGES), null);
 		ui.setIcon(allMessages, Icon.SMS_HISTORY);
 		return allMessages;
 	}

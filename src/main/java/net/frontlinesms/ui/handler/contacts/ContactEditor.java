@@ -4,7 +4,6 @@
 package net.frontlinesms.ui.handler.contacts;
 
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_LABEL_STATUS;
-import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_RADIO_BUTTON_ACTIVE;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -13,7 +12,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import net.frontlinesms.FrontlineUtils;
+import net.frontlinesms.AppProperties;
 import net.frontlinesms.data.DuplicateKeyException;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Group;
@@ -22,8 +21,8 @@ import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
-import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.handler.ChoiceDialogHandler;
+import net.frontlinesms.ui.i18n.CountryCallingCode;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
 /**
@@ -35,16 +34,17 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	/** UI XML File Path: Edit and Create dialog for {@link Contact} objects */
 	private static final String UI_FILE_CREATE_CONTACT_FORM = "/ui/core/contacts/dgEditContact.xml";
 
-	public static final String COMPONENT_BT_REMOVE_FROM_GROUP = "btRemoveFromGroup";
-	public static final String COMPONENT_NEW_CONTACT_GROUP_LIST = "newContact_groupList";
-	public static final String COMPONENT_CONTACT_NAME = "contact_name";
-	public static final String COMPONENT_CONTACT_MOBILE_MSISDN = "contact_mobileMsisdn";
-	public static final String COMPONENT_CONTACT_OTHER_MSISDN = "contact_otherMsisdn";
-	public static final String COMPONENT_CONTACT_EMAIL_ADDRESS = "contact_emailAddress";
-	public static final String COMPONENT_CONTACT_NOTES = "contact_notes";
-	public static final String COMPONENT_CONTACT_DORMANT = "rb_dormant";
+	private static final String COMPONENT_BT_REMOVE_FROM_GROUP = "btRemoveFromGroup";
+	private static final String COMPONENT_NEW_CONTACT_GROUP_LIST = "newContact_groupList";
+	private static final String COMPONENT_CONTACT_NAME = "contact_name";
+	private static final String COMPONENT_CONTACT_MOBILE_MSISDN = "contact_mobileMsisdn";
+	private static final String COMPONENT_CONTACT_OTHER_MSISDN = "contact_otherMsisdn";
+	private static final String COMPONENT_CONTACT_EMAIL_ADDRESS = "contact_emailAddress";
+	private static final String COMPONENT_CONTACT_NOTES = "contact_notes";
+	private static final String COMPONENT_CONTACT_DORMANT = "rb_dormant";
+	private static final String COMPONENT_RADIO_BUTTON_ACTIVE = "rb_active";
 
-	public static final String MESSAGE_EXISTENT_CONTACT = "message.contact.already.exists";
+	private static final String MESSAGE_EXISTENT_CONTACT = "message.contact.already.exists";
 
 	private static final String COMPONENT_SAVE_BUTTON = "btSave";
 
@@ -200,27 +200,36 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 		}
 		
 		// Extract the new details of the contact from the UI
-		String msisdn = getText(COMPONENT_CONTACT_MOBILE_MSISDN);
+		String phoneNumber = getText(COMPONENT_CONTACT_MOBILE_MSISDN);
 		
-		if (!FrontlineUtils.isInInternationalFormat(msisdn)) {
-			String internationalFormat = FrontlineUtils.getInternationalFormat(msisdn);
+		if (!CountryCallingCode.isInInternationalFormat(phoneNumber)) {
+			String internationalFormat = InternationalisationUtils.getInternationalPhoneNumber(phoneNumber);
 			ChoiceDialogHandler choiceDialogHandler = new ChoiceDialogHandler(this.ui, this);
-			choiceDialogHandler.setFirstButtonText(InternationalisationUtils.getI18NString(I18N_COMMON_USE, internationalFormat));
-			choiceDialogHandler.setSecondButtonText(InternationalisationUtils.getI18NString(I18N_COMMON_USE, msisdn));
+			choiceDialogHandler.setFirstButtonText(InternationalisationUtils.getI18nString(I18N_COMMON_USE, internationalFormat));
+			choiceDialogHandler.setFirstButtonIcon(ui.getFlagIconPath(AppProperties.getInstance().getUserCountry()));
+			choiceDialogHandler.setSecondButtonText(InternationalisationUtils.getI18nString(I18N_COMMON_USE, phoneNumber));
+			choiceDialogHandler.setSecondButtonIcon(Icon.TICK);
 			
-			choiceDialogHandler.showChoiceDialog(true, "doSave('" + internationalFormat + "', this, choiceDialog)", I18N_SENTENCE_TRY_INTERNATIONAL, internationalFormat);
+			choiceDialogHandler.showChoiceDialog(true,
+					"doSave('true', choiceDialog)",
+					"doSave('false', choiceDialog)",
+					I18N_SENTENCE_TRY_INTERNATIONAL, internationalFormat);
 		} else {
-			this.doSave(msisdn, null, null);
+			this.doSave(false, null);
 		}
 	}
-		
-	public void doSave(String msisdn, Object button, Object dialog) {
-		if (dialog != null) {
-			this.removeDialog(dialog);
+
+	public void doSave(String internationalisePhoneNumber, Object confirmDialog) {
+		doSave(Boolean.valueOf(internationalisePhoneNumber), confirmDialog);
+	}
+	private void doSave(boolean internationalisePhoneNumber, Object confirmDialog) {
+		if (confirmDialog != null) {
+			this.removeDialog(confirmDialog);
 		}
 		
-		if (button != null && button.equals(this.ui.find(dialog, UiGeneratorControllerConstants.COMPONENT_BUTTON_NO))) {
-			msisdn = getText(COMPONENT_CONTACT_MOBILE_MSISDN);
+		String phoneNumber = getText(COMPONENT_CONTACT_MOBILE_MSISDN);
+		if(internationalisePhoneNumber) {
+			phoneNumber = InternationalisationUtils.getInternationalPhoneNumber(phoneNumber);
 		}
 		String name = getText(COMPONENT_CONTACT_NAME);
 		String otherMsisdn = getText(COMPONENT_CONTACT_OTHER_MSISDN);
@@ -232,8 +241,8 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 		Contact contact = this.target;
 		try {
 			if (contact == null) {
-				LOG.debug("Creating a new contact [" + name + ", " + msisdn + "]");
-				contact = new Contact(name, msisdn, otherMsisdn, emailAddress, notes, isActive);
+				LOG.debug("Creating a new contact [" + name + ", " + phoneNumber + "]");
+				contact = new Contact(name, phoneNumber, otherMsisdn, emailAddress, notes, isActive);
 				
 				this.contactDao.saveContact(contact);
 
@@ -249,7 +258,7 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 				// that would otherwise be set by the constructor called in the block
 				// above.
 				LOG.debug("Editing contact [" + contact.getName() + "]. Setting new values!");
-				contact.setPhoneNumber(msisdn);
+				contact.setPhoneNumber(phoneNumber);
 				contact.setName(name);
 				contact.setOtherPhoneNumber(otherMsisdn);
 				contact.setEmailAddress(emailAddress);
@@ -383,6 +392,6 @@ public class ContactEditor implements ThinletUiEventHandler, SingleGroupSelecter
 	 * TODO if we work out a good-looking way of doing this, we should implement it.  Currently this just warns the user that a contact with this number already exists.
 	 */
 	private void showMergeContactDialog(Contact oldContact, Object createContactForm) { // FIXME remove arguments from this method
-		this.ui.alert(InternationalisationUtils.getI18NString(MESSAGE_EXISTENT_CONTACT));
+		this.ui.alert(InternationalisationUtils.getI18nString(MESSAGE_EXISTENT_CONTACT));
 	}
 }

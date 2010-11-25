@@ -70,9 +70,9 @@ public class ContributeDialog implements ThinletUiEventHandler {
 		Object linkGuestPost = find("linkGuestPost");
 		Object linkNotWorking = find("linkNotWorking");
 		
-		ui.setText(linkWorking, InternationalisationUtils.getI18NString(I18N_CONTRIBUTE_EMAIL_US, "you2us@frontlinesms.com"));
-		ui.setText(linkGuestPost, InternationalisationUtils.getI18NString(I18N_CONTRIBUTE_EMAIL_US, "you2us@frontlinesms.com"));
-		ui.setText(linkNotWorking, InternationalisationUtils.getI18NString(I18N_CONTRIBUTE_EMAIL_US, "frontlinesupport@kiwanja.net"));
+		ui.setText(linkWorking, InternationalisationUtils.getI18nString(I18N_CONTRIBUTE_EMAIL_US, "you2us@frontlinesms.com"));
+		ui.setText(linkGuestPost, InternationalisationUtils.getI18nString(I18N_CONTRIBUTE_EMAIL_US, "you2us@frontlinesms.com"));
+		ui.setText(linkNotWorking, InternationalisationUtils.getI18nString(I18N_CONTRIBUTE_EMAIL_US, "frontlinesupport@kiwanja.net"));
 	}
 	
 	/**

@@ -180,7 +180,7 @@ public class SettingsDeviceSectionHandler extends BaseSectionHandler implements 
 	}
 
 	public String getTitle() {
-		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_DEVICES);
+		return InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_DEVICES);
 	}
 
 	public void setDeviceSettings(SmsModemSettings deviceSettings) {

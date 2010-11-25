@@ -134,7 +134,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 		String message = uiController.getText(find(COMPONENT_TF_MESSAGE));
 		
 		if (recipient.length() == 0) {
-			uiController.alert(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_BLANK_PHONE_NUMBER));
+			uiController.alert(InternationalisationUtils.getI18nString(FrontlineSMSConstants.MESSAGE_BLANK_PHONE_NUMBER));
 			return;
 		} 
 		this.uiController.getFrontlineController().sendTextMessage(recipient, message);
@@ -189,7 +189,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 	public void selectMessageRecipient() {
 		ContactSelecter contactSelecter = new ContactSelecter(this.uiController);
 		final boolean shouldHaveEmail = false;
-		contactSelecter.show(InternationalisationUtils.getI18NString(FrontlineSMSConstants.SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "setRecipientTextfield(contactSelecter_contactList, contactSelecter)", null, this, shouldHaveEmail);
+		contactSelecter.show(InternationalisationUtils.getI18nString(FrontlineSMSConstants.SENTENCE_SELECT_MESSAGE_RECIPIENT_TITLE), "setRecipientTextfield(contactSelecter_contactList, contactSelecter)", null, this, shouldHaveEmail);
 	}
 	
 	/** Method which triggers showing of the group selecter. */
@@ -225,7 +225,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 				tfMessage	= find(UiGeneratorControllerConstants.COMPONENT_TF_MESSAGE);
 		Object selectedItem = uiController.getSelectedItem(contactSelecter_contactList);
 		if (selectedItem == null) {
-			uiController.alert(InternationalisationUtils.getI18NString(FrontlineSMSConstants.MESSAGE_NO_CONTACT_SELECTED));
+			uiController.alert(InternationalisationUtils.getI18nString(FrontlineSMSConstants.MESSAGE_NO_CONTACT_SELECTED));
 			return;
 		}
 		Contact selectedContact = uiController.getContact(selectedItem);
@@ -338,7 +338,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 		Object tfRecipient = find(COMPONENT_TF_RECIPIENT);
 		Object selectedItem = uiController.getSelectedItem(contactSelecter_contactList);
 		if (selectedItem == null) {
-			uiController.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_CONTACT_SELECTED));
+			uiController.alert(InternationalisationUtils.getI18nString(MESSAGE_NO_CONTACT_SELECTED));
 			return;
 		}
 		Contact selectedContact = uiController.getContact(selectedItem);

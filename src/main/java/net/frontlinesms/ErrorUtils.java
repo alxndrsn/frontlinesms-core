@@ -19,7 +19,6 @@
  */
 package net.frontlinesms;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -39,7 +38,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
 
-import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -51,7 +49,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
-import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 
@@ -669,7 +666,7 @@ class I18nString {
 	public String toString() {
 		String text = null;
 		try {
-			text = InternationalisationUtils.getI18NString(getKey());
+			text = InternationalisationUtils.getI18nString(getKey());
 		} catch(Throwable t) { /* Something went wrong.  We'll return the default value later. */ }
 		
 		if(text != null) {

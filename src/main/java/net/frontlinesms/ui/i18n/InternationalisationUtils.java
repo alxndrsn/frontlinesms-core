@@ -47,6 +47,7 @@ import java.util.MissingResourceException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.frontlinesms.AppProperties;
 import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.Email;
@@ -61,14 +62,12 @@ import thinlet.Thinlet;
 /**
  * Utilities for helping internationalise text etc.
  * 
- * @author Alex | Gonçalo Silva
- * 
- *         TODO always use UTF-8 with no exceptions. All Unicode characters, and
- *         therefore all characters, can be encoded as UTF-8
+ * @author Alex Anderson
+ * @author Gonçalo Silva
  */
 public class InternationalisationUtils {
 
-	// > STATIC PROPERTIES
+//> STATIC PROPERTIES
 	/**
 	 * Name of the directory containing the languages files. This is located
 	 * within the config directory.
@@ -83,13 +82,15 @@ public class InternationalisationUtils {
 	private static Logger LOG = FrontlineUtils
 			.getLogger(InternationalisationUtils.class);
 
-	// > GENERAL i18n HELP METHODS
+//> GENERAL i18n HELP METHODS
 	/** The default characterset, UTF-8. This must be available for every JVM. */
 	public static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
-	private static final String COMA = ",";
-	private static final String DOT = ".";
 
-	// >
+//>
+	public static String getI18nString(Internationalised i) {
+		return getI18nString(i.getI18nKey());
+	}
+	
 	/**
 	 * Return an internationalised message for this key, with the current resource bundle
 	 * This method tries to get the string for the current bundle and if it does
@@ -99,8 +100,17 @@ public class InternationalisationUtils {
 	 * @return the internationalised text, or the english text if no
 	 *         internationalised text could be found
 	 */
-	public static String getI18NString(String key) {
-		return getI18NString(key, FrontlineUI.currentResourceBundle);
+	public static String getI18nString(String key) {
+		if (FrontlineUI.currentResourceBundle != null) {
+			try {
+				return FrontlineUI.currentResourceBundle.getValue(key);
+			} catch (MissingResourceException ex) {
+			}
+		}
+		String value = Thinlet.DEFAULT_ENGLISH_BUNDLE.get(key);
+		if(value == null) {
+			return key;
+		} else return value;
 	}
 	
 	/**
@@ -111,17 +121,11 @@ public class InternationalisationUtils {
 	 * @param languageBundle
 	 * @return the internationalised text, or the english text if no internationalised text could be found
 	 */
-	public static String getI18NString(String key, LanguageBundle languageBundle) {
+	public static String getI18nString(String key, LanguageBundle languageBundle) {
 		if(languageBundle != null) {
 			try {
 				return languageBundle.getValue(key);
 			} catch(MissingResourceException ex) {}
-		}
-		if (FrontlineUI.currentResourceBundle != null) {
-			try {
-				return FrontlineUI.currentResourceBundle.getValue(key);
-			} catch (MissingResourceException ex) {
-			}
 		}
 		return Thinlet.DEFAULT_ENGLISH_BUNDLE.get(key);
 	}
@@ -157,7 +161,7 @@ public class InternationalisationUtils {
 
 	/**
 	 * Return an internationalised message for this key. This calls
-	 * {@link #getI18NString(String)} and then replaces any instance of
+	 * {@link #getI18nString(String)} and then replaces any instance of
 	 * {@link FrontlineSMSConstants#ARG_VALUE} with @param argValues
 	 * 
 	 * @param key
@@ -165,14 +169,14 @@ public class InternationalisationUtils {
 	 * @return an internationalised string with any substitution variables
 	 *         converted
 	 */
-	public static String getI18NString(String key, String... argValues) {
-		String string = getI18NString(key);
+	public static String getI18nString(String key, String... argValues) {
+		String string = getI18nString(key);
 		return formatString(string, argValues);
 	}
 
 	/**
 	 * Return an internationalised message for this key. This calls
-	 * {@link #getI18NString(String)} and then replaces any instance of
+	 * {@link #getI18nString(String)} and then replaces any instance of
 	 * {@link FrontlineSMSConstants#ARG_VALUE} with @param argValues
 	 * 
 	 * @param key
@@ -203,15 +207,15 @@ public class InternationalisationUtils {
 	/**
 	 * Return an internationalised message for this key. This converts the
 	 * integer to a {@link String} and then calls
-	 * {@link #getI18NString(String, String...)} with this argument.
+	 * {@link #getI18nString(String, String...)} with this argument.
 	 * 
 	 * @param key
 	 * @param intValue
 	 * @return the internationalised string with the supplied integer embedded
 	 *         at the appropriate place
 	 */
-	public static String getI18NString(String key, int intValue) {
-		return getI18NString(key, Integer.toString(intValue));
+	public static String getI18nString(String key, int intValue) {
+		return getI18nString(key, Integer.toString(intValue));
 	}
 
 	
@@ -421,7 +425,7 @@ public class InternationalisationUtils {
 	 */
 	public static DateFormat getDateFormat() {
 		return new SimpleDateFormat(
-				getI18NString(FrontlineSMSConstants.DATEFORMAT_YMD));
+				getI18nString(FrontlineSMSConstants.DATEFORMAT_YMD));
 	}
 
 	/**
@@ -431,7 +435,7 @@ public class InternationalisationUtils {
 	 */
 	public static DateFormat getDatetimeFormat() {
 		return new SimpleDateFormat(
-				getI18NString(FrontlineSMSConstants.DATEFORMAT_YMD_HMS));
+				getI18nString(FrontlineSMSConstants.DATEFORMAT_YMD_HMS));
 	}
 
 	/**
@@ -501,15 +505,15 @@ public class InternationalisationUtils {
 	public static final String getEmailStatusAsString(Email email) {
 		switch (email.getStatus()) {
 		case OUTBOX:
-			return getI18NString(COMMON_OUTBOX);
+			return getI18nString(COMMON_OUTBOX);
 		case PENDING:
-			return getI18NString(COMMON_PENDING);
+			return getI18nString(COMMON_PENDING);
 		case SENT:
-			return getI18NString(COMMON_SENT);
+			return getI18nString(COMMON_SENT);
 		case RETRYING:
-			return getI18NString(COMMON_RETRYING);
+			return getI18nString(COMMON_RETRYING);
 		case FAILED:
-			return getI18NString(COMMON_FAILED);
+			return getI18nString(COMMON_FAILED);
 		default:
 			return "(unknown)";
 		}
@@ -525,12 +529,7 @@ public class InternationalisationUtils {
 				: new Locale("en", "gb");
 	}
 	
-	/** @return the area calling code for a country */
-	public static String getInternationalCountryCode(String country) {
-		if (country == null || country.isEmpty()) {	
-			return "";
-		} else {
-			return InternationalCountryCode.valueOf(country.toUpperCase()).getCountryCode();
-		}
+	public static String getInternationalPhoneNumber(String phoneNumber) {
+		return CountryCallingCode.format(phoneNumber, AppProperties.getInstance().getUserCountry());
 	}
 }

@@ -34,10 +34,10 @@ public class SettingsEmailSectionHandler extends SettingsAbstractEmailsSectionHa
 	}
 	
 	public String getTitle() {
-		return InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_EMAIL_SETTINGS);
+		return InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_EMAIL_SETTINGS);
 	}
 	
 	public Object getSectionNode() {
-		return createSectionNode(InternationalisationUtils.getI18NString(I18N_SETTINGS_MENU_EMAIL_SETTINGS), this, "/icons/emailAccount_edit.png");
+		return createSectionNode(InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_EMAIL_SETTINGS), this, "/icons/emailAccount_edit.png");
 	}
 }

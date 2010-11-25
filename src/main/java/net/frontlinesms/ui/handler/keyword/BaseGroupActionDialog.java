@@ -58,7 +58,7 @@ abstract class BaseGroupActionDialog extends BaseActionDialog {
 		Object list = find(COMPONENT_GROUP_SELECTER_GROUP_LIST);
 		List<Group> userGroups = this.groupDao.getAllGroups();
 		if (userGroups.size() == 0) {
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_GROUP_CREATED_BY_USERS));
+			ui.alert(InternationalisationUtils.getI18nString(MESSAGE_NO_GROUP_CREATED_BY_USERS));
 			return;
 		}
 		for (Group g : userGroups) {
@@ -98,7 +98,7 @@ abstract class BaseGroupActionDialog extends BaseActionDialog {
 		Group group = ui.getGroup(ui.getSelectedItem(find(COMPONENT_GROUP_SELECTER_GROUP_LIST)));
 		if (group == null) {
 			log.debug("No group selected");
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_NO_GROUP_SELECTED_TO_FWD));
+			ui.alert(InternationalisationUtils.getI18nString(MESSAGE_NO_GROUP_SELECTED_TO_FWD));
 			log.trace("EXIT");
 			return;
 		}
@@ -113,7 +113,7 @@ abstract class BaseGroupActionDialog extends BaseActionDialog {
 		}
 		if(end < start) {
 			log.debug("Start date is not before the end date");
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
+			ui.alert(InternationalisationUtils.getI18nString(MESSAGE_START_DATE_AFTER_END));
 			log.trace("EXIT");
 			return;
 		}

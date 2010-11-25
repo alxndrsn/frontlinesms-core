@@ -258,7 +258,7 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		}
 		
 		this.uiController.removeDialog(settingsDialog);
-		this.uiController.infoMessage(InternationalisationUtils.getI18NString(I18N_SETTINGS_SAVED));
+		this.uiController.infoMessage(InternationalisationUtils.getI18nString(I18N_SETTINGS_SAVED));
 	}
 
 //> INSTANCE HELPER METHODS
@@ -293,9 +293,9 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		
 		String tooltip;
 		if (shouldEnableSaveButton) {
-			tooltip = InternationalisationUtils.getI18NString(I18N_TOOLTIP_SETTINGS_SAVES_ALL);
+			tooltip = InternationalisationUtils.getI18nString(I18N_TOOLTIP_SETTINGS_SAVES_ALL);
 		} else {
-			tooltip = InternationalisationUtils.getI18NString(I18N_TOOLTIP_SETTINGS_BTSAVE_DISABLED);
+			tooltip = InternationalisationUtils.getI18nString(I18N_TOOLTIP_SETTINGS_BTSAVE_DISABLED);
 		}
 		
 		this.uiController.setTooltip(btSave, tooltip);

@@ -26,7 +26,7 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  */
 public class MessageDetailsDisplay implements ThinletUiEventHandler {
 	/** Path to the Thinlet XML layout file for the message details form */
-	public static final String UI_FILE_MSG_DETAILS_FORM = "/ui/core/messages/dgMessageDetails.xml";
+	private static final String UI_FILE_MSG_DETAILS_FORM = "/ui/core/messages/dgMessageDetails.xml";
 
 	private static final String I18N_MESSAGE_NO_CONTENT = "message.no.content";
 
@@ -40,6 +40,7 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 	private static final String UI_COMPONENT_TF_SUBJECT = "tfSubject";
 
 	private final UiGeneratorController ui;
+	private Object dialog;
 
 	private final String[] messageFileExtensions = { ".txt", ".htm", ".html" };
 	
@@ -48,28 +49,24 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 	}
 
 	public void show(FrontlineMessage message) {
-		Object details = ui.loadComponentFromFile(UI_FILE_MSG_DETAILS_FORM, this);
-		String senderDisplayName = ui.getSenderDisplayValue(message);
-		String recipientDisplayName = ui.getRecipientDisplayValue(message);
-		String status = UiGeneratorController.getMessageStatusAsString(message);
-		String date = InternationalisationUtils.getDatetimeFormat().format(message.getDate());
+		this.dialog = ui.loadComponentFromFile(UI_FILE_MSG_DETAILS_FORM, this);
 		
-		ui.setText(ui.find(details, UI_COMPONENT_TF_STATUS), status);
-		ui.setText(ui.find(details, UI_COMPONENT_TF_SENDER), senderDisplayName);
-		ui.setText(ui.find(details, UI_COMPONENT_TF_RECIPIENT), recipientDisplayName);
-		ui.setText(ui.find(details, UI_COMPONENT_TF_DATE), date);
+		setText(UI_COMPONENT_TF_STATUS, InternationalisationUtils.getI18nString(message.getStatus()));
+		setText(UI_COMPONENT_TF_SENDER, ui.getSenderDisplayValue(message));
+		setText(UI_COMPONENT_TF_RECIPIENT, ui.getRecipientDisplayValue(message));
+		setText(UI_COMPONENT_TF_DATE, InternationalisationUtils.getDatetimeFormat().format(message.getDate()));
 		
 		if (message instanceof FrontlineMultimediaMessage && ((FrontlineMultimediaMessage) message).getSubject().length() > 0) {
-			ui.setText(ui.find(details, UI_COMPONENT_TF_SUBJECT), ((FrontlineMultimediaMessage) message).getSubject());
-			ui.setVisible(ui.find(details, UI_COMPONENT_PN_SUBJECT), true);
+			setText(UI_COMPONENT_TF_SUBJECT, ((FrontlineMultimediaMessage) message).getSubject());
+			ui.setVisible(find(UI_COMPONENT_PN_SUBJECT), true);
 		}
 		
-		Object contentPanel = ui.find(details, UI_COMPONENT_PN_CONTENT);
+		Object contentPanel = find(UI_COMPONENT_PN_CONTENT);
 		for(Object contentComponent : getContentComponents(message)) {
 			ui.add(contentPanel, contentComponent);
 		}
 		
-		ui.add(details);
+		ui.add(this.dialog);
 	}
 
 	private Object[] getContentComponents(FrontlineMessage message) {
@@ -78,7 +75,7 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 			List<FrontlineMultimediaMessagePart> parts = mm.getMultimediaParts();
 			
 			if(parts.size() == 0) {
-				return new Object[]{ ui.createLabel(InternationalisationUtils.getI18NString(I18N_MESSAGE_NO_CONTENT)) }; // FIXME i18n
+				return new Object[]{ ui.createLabel(InternationalisationUtils.getI18nString(I18N_MESSAGE_NO_CONTENT)) }; // FIXME i18n
 			} else {
 				return getContentComponents(parts);
 			}
@@ -156,13 +153,11 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 		this.ui.removeDialog(dialog);
 	}
 	
-	public static void main(String[] args) {
-		len("Relaxing on a Sunday with a nice cuppa and a");
-		len("pair of flip flops. This is my first MMS on this");
+	private void setText(String componentName, String text) {
+		ui.setText(find(componentName), text);
 	}
 	
-
-	private static void len(String string) {
-		System.out.println(string + " : " + string.length());
+	private Object find(String componentName) {
+		return this.ui.find(this.dialog, componentName);
 	}
 }

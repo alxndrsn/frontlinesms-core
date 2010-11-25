@@ -105,7 +105,6 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_CB_AUTO_REPLY = "cbAutoReply";
 	public static final String COMPONENT_TF_END_DATE = "tfEndDate";
 	public static final String COMPONENT_TF_START_DATE = "tfStartDate";
-	public static final String COMPONENT_RADIO_BUTTON_ACTIVE = "rb_active";
 	public static final String COMPONENT_TABBED_PANE = "tabbedPane";
 	public static final String COMPONENT_NEW_KEYWORD_FORM_KEYWORD = "newKeywordForm_keyword";
 	public static final String COMPONENT_NEW_KEYWORD_FORM_DESCRIPTION = "newKeywordForm_description";
@@ -115,8 +114,6 @@ public class UiGeneratorControllerConstants {
 	public static final String COMPONENT_FORWARD_FORM_TITLE = "forwardForm_title";
 	public static final String COMPONENT_FORWARD_FORM_TEXTAREA = "forward";
 	public static final String COMPONENT_GROUPS_MENU = "groupsMenu";
-	public static final String COMPONENT_BUTTON_YES = "btYes";
-	public static final String COMPONENT_BUTTON_NO = "btNo";
 	public static final String COMPONENT_DELETE_NEW_CONTACT = "deleteNewContact";
 	public static final String COMPONENT_LABEL_STATUS = "lbStatus";
 	public static final String COMPONENT_MENU_ITEM_VIEW_CONTACT = "viewContact";

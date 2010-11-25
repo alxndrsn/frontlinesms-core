@@ -1,13 +1,15 @@
 package net.frontlinesms.ui.i18n;
 
+import net.frontlinesms.AppProperties;
+
 /**
  * International area codes
- * This has been taken from http://countrycode.org/
- * 
+ * This has been taken from http://countrycode.org/, using the following regexp
+ * Find: .*(([A-Z]{2}) / [A-Z]*  ([0-9 ]*[0-9]+)).*
+ * Replace: \2\(\"\3\"),
  * @author Morgan Belkadi <morgan@frontlinesms.com>
- *
  */
-public enum InternationalCountryCode {
+public enum CountryCallingCode {
 	AF("93"),
 	AL("355"),
 	DZ("213"),
@@ -241,11 +243,67 @@ public enum InternationalCountryCode {
 	
 	private final String countryCode;
 
-	InternationalCountryCode (String countryCode) {
+	CountryCallingCode (String countryCode) {
 		this.countryCode = countryCode;
 	}
 
 	public String getCountryCode() {
 		return countryCode;
+	}
+	
+	/**
+	 * @param 2-letter country ISO country code
+	 */
+	static String getCountryCode(String country) {
+		if (country == null || country.length()==0) {	
+			return "";
+		} else {
+			CountryCallingCode code = valueOf(country.toUpperCase());
+			return code == null ? "" : code.getCountryCode();
+		}
+	}
+	
+	/**
+	 * Tries to format the given phone number into a valid international format.
+	 * @param phoneNumber A non-formatted phone number
+	 */
+	public static String format(String phoneNumber, String countryCode) {
+		// Remove the (0) sometimes present is certain numbers.
+		// This 0 MUST NOT be present in the international formatted number
+		String formattedNumber = phoneNumber.replace("(0)", "");
+		
+		// Remove every character which is not a digit
+		formattedNumber = formattedNumber.replaceAll("\\D", "");
+		
+		if (phoneNumber.startsWith("+")) {
+			// If the original number was prefixed by ++,
+			// we put it back
+			return "+" + formattedNumber;
+		} else if (formattedNumber.startsWith("00")) {
+			// If the number was prefixed by the (valid) 00(code) format,
+			// we transform it to the + sign
+			return "+" + formattedNumber.substring(2);
+		} else if (formattedNumber.startsWith(getCountryCode(countryCode))) {
+			// If the number was prefixed by the current country code,
+			// we just put a + sign back in front of it.
+			return "+" + formattedNumber;
+		} else if (formattedNumber.startsWith("0")) {
+			// Most internal numbers starts with one 0. We'll have to remove it
+			// Before putting a + sign in front of it.
+			formattedNumber = formattedNumber.substring(1);
+		}
+		
+		// NB: even if a + sign had been specified, it's been removed by the replaceAll function
+		// We have to put one back.
+		// We also try to prefix the number with the current country code
+		return "+" + getCountryCode(countryCode) + formattedNumber;
+	}
+
+	/**
+	 * @param msisdn A phone number
+	 * @return <code>true</code> if the number is in a proper international format, <code>false</code> otherwise.
+	 */
+	public static boolean isInInternationalFormat(String msisdn) {
+		return msisdn.matches("\\+\\d+");
 	}
 }

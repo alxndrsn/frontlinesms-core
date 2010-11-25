@@ -78,9 +78,9 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler, EventOb
 		this.ui.add(this.getDialogComponent(), pnAccountsList, 0);
 		
 		if (this.isForReceiving) {
-			this.ui.setText(getDialogComponent(), InternationalisationUtils.getI18NString(I18N_MMS_EMAIL_ACCOUNT_SETTINGS));
+			this.ui.setText(getDialogComponent(), InternationalisationUtils.getI18nString(I18N_MMS_EMAIL_ACCOUNT_SETTINGS));
 		} else {
-			this.ui.setText(getDialogComponent(), InternationalisationUtils.getI18NString(I18N_COMMON_EMAIL_ACCOUNT_SETTINGS));
+			this.ui.setText(getDialogComponent(), InternationalisationUtils.getI18nString(I18N_COMMON_EMAIL_ACCOUNT_SETTINGS));
 		}
 		this.refresh();
 	}

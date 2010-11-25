@@ -342,7 +342,7 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 					}
 				}
 
-				ui.newEvent(new Event(Event.TYPE_PHONE_CONNECTED, InternationalisationUtils.getI18NString(COMMON_PHONE_CONNECTED) + ": " + activeService.getModel()));
+				ui.newEvent(new Event(Event.TYPE_PHONE_CONNECTED, InternationalisationUtils.getI18nString(COMMON_PHONE_CONNECTED) + ": " + activeService.getModel()));
 			}
 		} else {
 			SmsInternetService service = (SmsInternetService) messagingService;
@@ -350,13 +350,13 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 			if (serviceStatus.equals(SmsInternetServiceStatus.CONNECTED)) {
 				ui.newEvent(new Event(
 						Event.TYPE_SMS_INTERNET_SERVICE_CONNECTED,
-						InternationalisationUtils.getI18NString(COMMON_SMS_INTERNET_SERVICE_CONNECTED) 
+						InternationalisationUtils.getI18nString(COMMON_SMS_INTERNET_SERVICE_CONNECTED) 
 						+ ": " + SmsInternetServiceSettingsHandler.getProviderName(service.getClass()) + " - " + service.getIdentifier()));
 			} else if (serviceStatus.equals(SmsInternetServiceStatus.RECEIVING_FAILED)) {
 				ui.newEvent(new Event(
 						Event.TYPE_SMS_INTERNET_SERVICE_RECEIVING_FAILED,
 						SmsInternetServiceSettingsHandler.getProviderName(service.getClass()) + " - " + service.getIdentifier()
-						+ ": " + InternationalisationUtils.getI18NString(FrontlineSMSConstants.COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED)));
+						+ ": " + InternationalisationUtils.getI18nString(FrontlineSMSConstants.COMMON_SMS_INTERNET_SERVICE_RECEIVING_FAILED)));
 			}
 		}
 		refresh();
@@ -444,8 +444,8 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 		Object useForSendingCell = ui.createTableCell("");
 		Object useForReceiveCell = ui.createTableCell("");
 		if (isConnected) {
-			if (service.isUseForSending()) ui.setIcon(useForSendingCell, Icon.TICK);
-			if (service.isUseForReceiving()) ui.setIcon(useForReceiveCell, Icon.TICK);
+			if (service.isUseForSending()) ui.setIcon(useForSendingCell, Icon.CIRLCE_TICK);
+			if (service.isUseForReceiving()) ui.setIcon(useForReceiveCell, Icon.CIRLCE_TICK);
 			ui.add(row, useForSendingCell);
 			ui.add(row, useForReceiveCell);
 		}
@@ -482,12 +482,12 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 	 * @return An internationalised {@link String} describing the status of the {@link FrontlineMessagingService}.
 	 */
 	private static String getServiceStatusAsString(FrontlineMessagingService service) {
-		String statusString = InternationalisationUtils.getI18NString(service.getStatus().getI18nKey(), service.getStatusDetail());
+		String statusString = InternationalisationUtils.getI18nString(service.getStatus().getI18nKey(), service.getStatusDetail());
 		
 		if (service instanceof MmsEmailService && service.getStatus().equals(MmsEmailServiceStatus.READY)) {
 			Long lastChecked = ((MmsEmailService) service).getEmailAccount().getLastCheck();
 			if (lastChecked != null) {
-				statusString += " - " + InternationalisationUtils.getI18NString(I18N_EMAIL_LAST_CHECKED, InternationalisationUtils.getDatetimeFormat().format(new Date (lastChecked)));
+				statusString += " - " + InternationalisationUtils.getI18nString(I18N_EMAIL_LAST_CHECKED, InternationalisationUtils.getDatetimeFormat().format(new Date (lastChecked)));
 			}
 		}
 		
@@ -503,7 +503,7 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 			String newTabName = ((TabChangedNotification) notification).getNewTabName();
 			if (newTabName.equals(TAB_ADVANCED_PHONE_MANAGER)) {
 				this.refresh();
-				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_MODEM_LIST_UPDATED));
+				this.ui.setStatus(InternationalisationUtils.getI18nString(MESSAGE_MODEM_LIST_UPDATED));
 			}
 		} else if (notification instanceof MmsServiceStatusNotification) {
 			refresh();

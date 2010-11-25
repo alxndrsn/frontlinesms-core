@@ -18,7 +18,7 @@ public class AboutDialog implements ThinletUiEventHandler {
 	
 	public void show() {
 		this.dialog = ui.loadComponentFromFile(UI_FILE_ABOUT_PANEL, this);
-		String version = InternationalisationUtils.getI18NString(FrontlineSMSConstants.I18N_APP_VERSION, BuildProperties.getInstance().getVersion());
+		String version = InternationalisationUtils.getI18nString(FrontlineSMSConstants.I18N_APP_VERSION, BuildProperties.getInstance().getVersion());
 		ui.setText(ui.find(dialog, "version"), version);
 		ui.add(dialog);
 	}

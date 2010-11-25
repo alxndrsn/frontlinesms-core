@@ -59,7 +59,7 @@ public class MmsSettingsDialogHandler implements ThinletUiEventHandler {
 	private void populate() {
 		Object accountsList = find(UI_COMPONENT_PN_ACCOUNTS_LIST);
 		this.ui.setBorder(accountsList, true);
-		this.ui.setText(accountsList, InternationalisationUtils.getI18NString(I18N_MMS_EMAIL_ACCOUNTS));
+		this.ui.setText(accountsList, InternationalisationUtils.getI18nString(I18N_MMS_EMAIL_ACCOUNTS));
 		
 		AppProperties appProperties = AppProperties.getInstance();
 		this.ui.setText(find(UI_COMPONENT_TF_POLL_FREQUENCY), String.valueOf(appProperties.getMmsPollingFrequency() / 1000));
@@ -79,7 +79,7 @@ public class MmsSettingsDialogHandler implements ThinletUiEventHandler {
 		}
 		
 		if (frequency < 1) {
-			this.ui.alert(InternationalisationUtils.getI18NString(I18N_ERROR_INVALID_NUMBER));
+			this.ui.alert(InternationalisationUtils.getI18nString(I18N_ERROR_INVALID_NUMBER));
 			return;
 		}
 		
@@ -87,7 +87,7 @@ public class MmsSettingsDialogHandler implements ThinletUiEventHandler {
 		appProperties.setMmsPollingFrequency(frequency * 1000);
 		appProperties.saveToDisk();
 		
-		this.ui.infoMessage(InternationalisationUtils.getI18NString(I18N_SETTINGS_SAVED));
+		this.ui.infoMessage(InternationalisationUtils.getI18nString(I18N_SETTINGS_SAVED));
 	}
 	
 	public void checkSettingsFields () {

@@ -9,6 +9,7 @@ import static net.frontlinesms.FrontlineSMSConstants.COMMON_RECIPIENT;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_SENDER;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_STATUS;
 import static net.frontlinesms.FrontlineSMSConstants.COMMON_SUBJECT;
+import static net.frontlinesms.FrontlineSMSConstants.DEFAULT_END_DATE;
 import static net.frontlinesms.FrontlineSMSConstants.MESSAGE_EMAILS_LOADED;
 import static net.frontlinesms.FrontlineSMSConstants.PROPERTY_FIELD;
 import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_EMAIL_LOG;
@@ -121,7 +122,7 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 		Object[] components = new Object[emails.size()];
 		for (int i=0; i<components.length; ++i) {
 			Email email = emails.get(i);
-			components[i] = ui.getRow(email);
+			components[i] = getRow(email);
 		}
 		
 		return new PagedListDetails(totalItemCount, components);
@@ -158,12 +159,12 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 			// Here, the FIELD property is set on each column of the message table.  These field objects are
 			// then used for easy sorting of the message table.
 			if (text != null) {
-				if (text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_STATUS))) ui.putProperty(o, PROPERTY_FIELD, Email.Field.STATUS);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_DATE))) ui.putProperty(o, PROPERTY_FIELD, Email.Field.DATE);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_SENDER))) ui.putProperty(o, PROPERTY_FIELD, Email.Field.FROM);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_RECIPIENT))) ui.putProperty(o, PROPERTY_FIELD, Email.Field.TO);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_CONTENT))) ui.putProperty(o, PROPERTY_FIELD, Email.Field.EMAIL_CONTENT);
-				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18NString(COMMON_SUBJECT))) ui.putProperty(o, PROPERTY_FIELD, Email.Field.SUBJECT);
+				if (text.equalsIgnoreCase(InternationalisationUtils.getI18nString(COMMON_STATUS))) ui.putProperty(o, PROPERTY_FIELD, Email.Field.STATUS);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18nString(COMMON_DATE))) ui.putProperty(o, PROPERTY_FIELD, Email.Field.DATE);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18nString(COMMON_SENDER))) ui.putProperty(o, PROPERTY_FIELD, Email.Field.FROM);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18nString(COMMON_RECIPIENT))) ui.putProperty(o, PROPERTY_FIELD, Email.Field.TO);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18nString(COMMON_CONTENT))) ui.putProperty(o, PROPERTY_FIELD, Email.Field.EMAIL_CONTENT);
+				else if(text.equalsIgnoreCase(InternationalisationUtils.getI18nString(COMMON_SUBJECT))) ui.putProperty(o, PROPERTY_FIELD, Email.Field.SUBJECT);
 			}
 		}
 	}
@@ -175,7 +176,7 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 	public void removeSelectedFromEmailList() {
 		log.trace("ENTER");
 		ui.removeConfirmationDialog();
-		ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_REMOVING_EMAILS));
+		ui.setStatus(InternationalisationUtils.getI18nString(MESSAGE_REMOVING_EMAILS));
 		final Object[] selected = ui.getSelectedItems(emailListComponent);
 		int numberRemoved = 0;
 		for (Object o : selected) {
@@ -197,7 +198,7 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 		if (numberRemoved > 0) {
 			updateEmailList();
 		}
-		ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_EMAILS_DELETED));
+		ui.setStatus(InternationalisationUtils.getI18nString(MESSAGE_EMAILS_DELETED));
 		log.trace("EXIT");
 	}
 	
@@ -254,6 +255,27 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 	}
 	
 //> UI HELPER METHODS
+	/**
+	 * Creates a Thinlet UI table row containing details of an Email.
+	 * @param email
+	 * @return
+	 */
+	private Object getRow(Email email) {
+		Object row = ui.createTableRow(email);
+
+		ui.add(row, ui.createTableCell(InternationalisationUtils.getI18nString(email.getStatus())));
+		if (email.getDate() == DEFAULT_END_DATE) {
+			ui.add(row, ui.createTableCell(""));
+		} else {
+			ui.add(row, ui.createTableCell(InternationalisationUtils.getDatetimeFormat().format(email.getDate())));
+		}
+		ui.add(row, ui.createTableCell(email.getEmailFrom().getAccountName()));
+		ui.add(row, ui.createTableCell(email.getEmailRecipients()));
+		ui.add(row, ui.createTableCell(email.getEmailSubject()));
+		ui.add(row, ui.createTableCell(email.getEmailContent()));
+
+		return row;
+	}
 	
 //> LISTENER EVENT METHODS
 	public synchronized void outgoingEmailEvent(EmailSender sender, Email email) {
@@ -269,12 +291,12 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 		if (index != -1) {
 			//Updating
 			ui.remove(ui.getItem(emailListComponent, index));
-			ui.add(emailListComponent, ui.getRow(email), index);
+			ui.add(emailListComponent, getRow(email), index);
 		} else {
 			int limit = this.emailListPager.getMaxItemsPerPage();
 			//Adding
 			if (ui.getItems(emailListComponent).length < limit && email.getStatus() == Email.Status.OUTBOX) {
-				ui.add(emailListComponent, ui.getRow(email));
+				ui.add(emailListComponent, getRow(email));
 			}
 		}
 	}
@@ -288,7 +310,7 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 			String newTabName = ((TabChangedNotification) notification).getNewTabName();
 			if (newTabName.equals(TAB_EMAIL_LOG)) {
 				this.refresh();
-				this.ui.setStatus(InternationalisationUtils.getI18NString(MESSAGE_EMAILS_LOADED));
+				this.ui.setStatus(InternationalisationUtils.getI18nString(MESSAGE_EMAILS_LOADED));
 			}
 		}
 	}

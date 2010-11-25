@@ -126,7 +126,7 @@ public class ReplyActionDialog extends BaseActionDialog {
 		}
 		if(end < start) {
 			log.debug("Start date is not before the end date");
-			ui.alert(InternationalisationUtils.getI18NString(MESSAGE_START_DATE_AFTER_END));
+			ui.alert(InternationalisationUtils.getI18nString(MESSAGE_START_DATE_AFTER_END));
 			log.trace("EXIT");
 			return;
 		}

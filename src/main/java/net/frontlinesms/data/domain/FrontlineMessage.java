@@ -28,7 +28,9 @@ import org.smslib.util.GsmAlphabet;
 import org.smslib.util.HexUtils;
 import org.smslib.util.TpduUtils;
 
+import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.data.EntityField;
+import net.frontlinesms.ui.i18n.Internationalised;
 
 /**
  * Object representing an SMS message in our data structure.
@@ -63,28 +65,33 @@ public class FrontlineMessage {
 		DELIVERY_REPORT;
 	}
 	
-	public enum Status {
+	public enum Status implements Internationalised {
 		/** Message status: DRAFT - nothing has been done with this message yet */
-		DRAFT,
+		DRAFT(FrontlineSMSConstants.COMMON_DRAFT),
 		/** messages of TYPE_RECEIVED should always be STATUS_RECEIVED */
-		RECEIVED,
+		RECEIVED(FrontlineSMSConstants.COMMON_RECEIVED),
 		/** outgoing message that is created, and will be sent to a phone as soon as one is available */
-		OUTBOX,
+		OUTBOX(FrontlineSMSConstants.COMMON_OUTBOX),
 		/** outgoing message given to a phone, which the phone is trying to send */
-		PENDING,
+		PENDING(FrontlineSMSConstants.COMMON_PENDING),
 		/** outgoing message successfully delivered to the GSM network*/
-		SENT,
+		SENT(FrontlineSMSConstants.COMMON_SENT),
 		/** outgoing message that has had delivery confirmed by the GSM network */
-		DELIVERED,
+		DELIVERED(FrontlineSMSConstants.COMMON_DELIVERED),
 		/** Outgoing message that had status KEEP TRYING returned by the GSM network */
-		KEEP_TRYING,
-		/** Outgoing message that had status ABORTED returned by the GSM network */
-		ABORTED,
-		/** Outgoing message that had status UNKNOWN returned by the GSM network */
-		UNKNOWN,
+		KEEP_TRYING(FrontlineSMSConstants.COMMON_RETRYING),
 		/** Outgoing message that had status FAILED returned by the GSM network */
-		FAILED;
+		FAILED(FrontlineSMSConstants.COMMON_FAILED);
 		
+		private final String i18nKey;
+		
+		private Status(String i18nKey) {
+			this.i18nKey = i18nKey;
+		}
+		
+		public String getI18nKey() {
+			return i18nKey;
+		}
 	}
 	
 	/** Number of times a failed message send is retried before status is set to STATUS_FAILED */

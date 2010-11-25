@@ -47,7 +47,7 @@ public final class AppProperties extends UserHomeFilePropertySet {
 	/** Property key (double) indicating the price per SMS received */
 	public static final String KEY_SMS_COST_RECEIVED_MESSAGES = "sms.cost.received.messages";
 	/** Property key (String) indicating the country the user is currently in */
-	public static final String KEY_CURRENT_COUNTRY = "current.country";
+	public static final String KEY_USER_COUNTRY = "user.country";
 
 //> DEFAULT VALUES
 	/** Default value for {@link #KEY_DATABASE_CONFIG_PATH} */
@@ -246,18 +246,19 @@ public final class AppProperties extends UserHomeFilePropertySet {
 		super.setProperty(KEY_SMS_COST_RECEIVED_MESSAGES, Double.toString(costPerSmsReceived));
 	}
 	
-	/** @return the current country the user is located in. */
-	public String getCurrentCountry() {
-		if (super.getProperty(KEY_CURRENT_COUNTRY) == null) {
+	/** @return the two-letter ISO-FIXME code for the country the user is located in. */
+	public String getUserCountry() {
+		String countryCode = super.getProperty(KEY_USER_COUNTRY);
+		if (countryCode == null) {
 			return InternationalisationUtils.getCurrentLocale().getCountry().toUpperCase();
 		} else {
-			return super.getProperty(KEY_CURRENT_COUNTRY);
+			return countryCode;
 		}
 	}
 	
 	/** @param the current country the user is located in. */
-	public void setCurrentCountry(String country) {
-		super.setProperty(KEY_CURRENT_COUNTRY, country);
+	public void setUserCountry(String country) {
+		super.setProperty(KEY_USER_COUNTRY, country);
 	}
 
 //> STATIC FACTORIES
