@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui.handler;
+package net.frontlinesms.ui.handler.importexport;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +46,7 @@ import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
 @TextResourceKeyOwner(prefix="MESSAGE_")
-public class ImportExportDialogHandler implements ThinletUiEventHandler {
+public abstract class ImportExportDialogHandler implements ThinletUiEventHandler {
 //> STATIC CONSTANTS
 	
 //> I18N KEYS
@@ -191,13 +191,11 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private Object confirmationDialog;
 
 	/** Marks whether we are importing or exporting.  <code>true</code> indicates export, <code>false</code> indicates import. */
-	private boolean export;
+	private final boolean export;
 	/** The type of object we are dealing with, one of {@link #TYPE_CONTACT}, {@link #TYPE_KEYWORD}, {@link #TYPE_MESSAGE}. */
-	private EntityType type;
+	private final EntityType type;
 	/** The objects we are exporting - a selection of thinlet components with attached {@link Contact}s, {@link Keyword}s or {@link FrontlineMessage}s */
 	private Object attachedObject;
-	/** The list of headers taken in the imported file */
-	private List<String> importedHeadersList;
 	
 	private CsvImporter importer;
 
@@ -206,7 +204,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	 * Create a new instance of this controller.
 	 * @param uiController 
 	 */
-	public ImportExportDialogHandler(UiGeneratorController uiController) {
+	public ImportExportDialogHandler(UiGeneratorController uiController, EntityType type, boolean export) {
 		this.uiController = uiController;
 		this.contactDao = uiController.getFrontlineController().getContactDao();
 		this.groupMembershipDao = uiController.getFrontlineController().getGroupMembershipDao();
@@ -214,7 +212,8 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		this.keywordDao = uiController.getFrontlineController().getKeywordDao();
 		this.groupDao = uiController.getFrontlineController().getGroupDao();
 		
-		this.importedHeadersList = new ArrayList<String>();
+		this.type = type;
+		this.export = export;
 	}
 	
 //> ACCESSORS
@@ -230,14 +229,14 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	 * @param list The list to get selected items from.
 	 * @param type The desired type ({@link #TYPE_CONTACT} for Contacts, {@link #TYPE_MESSAGE} for Messages and {@link #TYPE_KEYWORD} for Keywords)
 	 */
-	public void showWizard(boolean export, Object list, EntityType type){
+	public void showWizard(Object list){
 		Object[] selected = uiController.getSelectedItems(list);
 		if (selected.length == 0) {
 			// If there are no highlighted items to export, don't do anything
 			return;
 		}
 
-		init(export, type, selected);
+		init(selected);
 		_showWizard();
 	}
 	
@@ -246,8 +245,8 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	 * @param export 
 	 * @param type The desired type ({@link #TYPE_CONTACT} for Contacts, {@link #TYPE_MESSAGE} for Messages and {@link #TYPE_KEYWORD} for Keywords)
 	 */
-	public void showWizard(boolean export, EntityType type){
-		init(export, type, null);
+	public void showWizard(){
+		init(null);
 		_showWizard();
 	}
 	
@@ -257,9 +256,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	 * @param type value for {@link #type}
 	 * @param attachedObject value for {@link #attachedObject}
 	 */
-	private void init(boolean export, EntityType type, Object attachedObject) {
-		this.export = export;
-		this.type = type;
+	private void init(Object attachedObject) {
 		this.attachedObject = attachedObject;
 	}
 
@@ -698,7 +695,6 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 			int messageTypeIndex = -1;
 			
 			/** HEADER */
-			this.importedHeadersList.clear();
 			Object header = this.uiController.createTableHeader();
 
 			Object iconHeader = this.uiController.createColumn("", "");
@@ -714,7 +710,6 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 						messageTypeIndex = columnsNumber;
 					}
 
-					this.importedHeadersList.add(attributeName);
 					this.uiController.add(header, this.uiController.createColumn(attributeName, attributeName));
 					++columnsNumber;
 				}
