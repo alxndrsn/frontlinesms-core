@@ -85,14 +85,14 @@ public class CsvImporter {
 					// Ignore the first line of the CSV file as it should be the column titles
 					firstLine = false;
 				} else {
-					String name = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_NAME);
-					String number = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_PHONE);
-					String email = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_EMAIL);
-					String notes = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_NOTES);
-					String otherPhoneNumber = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_OTHER_PHONE);
-					String groups = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_GROUPS);
+					String name = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_NAME);
+					String number = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_PHONE);
+					String email = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_EMAIL);
+					String notes = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_NOTES);
+					String otherPhoneNumber = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_OTHER_PHONE);
+					String groups = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_GROUPS);
 					
-					String statusString = getString(lineValues, rowFormat, CsvUtils.MARKER_CONTACT_STATUS).toLowerCase();
+					String statusString = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_STATUS).toLowerCase();
 					boolean active = !"false".equals(statusString) && !"dormant".equals(statusString);
 					
 					Contact c = new Contact(name, number, otherPhoneNumber, email, notes, active);						
@@ -150,12 +150,12 @@ public class CsvImporter {
 					// Ignore the first line of the CSV file as it should be the column titles
 					firstLine = false;
 				} else {
-					String typeString = getString(lineValues, rowFormat, CsvUtils.MARKER_MESSAGE_TYPE);
-					String status = getString(lineValues, rowFormat, CsvUtils.MARKER_MESSAGE_STATUS);
-					String sender = getString(lineValues, rowFormat, CsvUtils.MARKER_SENDER_NUMBER);
-					String recipient = getString(lineValues, rowFormat, CsvUtils.MARKER_RECIPIENT_NUMBER);
-					String dateString = getString(lineValues, rowFormat, CsvUtils.MARKER_MESSAGE_DATE);
-					String content = getString(lineValues, rowFormat, CsvUtils.MARKER_MESSAGE_CONTENT);
+					String typeString = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_MESSAGE_TYPE);
+					String status = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_MESSAGE_STATUS);
+					String sender = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_SENDER_NUMBER);
+					String recipient = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_RECIPIENT_NUMBER);
+					String dateString = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_MESSAGE_DATE);
+					String content = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_MESSAGE_CONTENT);
 					
 					long date;
 					try {
@@ -163,7 +163,7 @@ public class CsvImporter {
 						ParsePosition pos = new ParsePosition(0);
 						date = formatter.parse(dateString, pos).getTime();
 					} catch (Exception e) {
-						date = System.currentTimeMillis();
+						date = System.currentTimeMillis(); // TODO is this really what we want to do with an ill-formatted date?
 					}
 					
 					FrontlineMessage message;
@@ -175,7 +175,7 @@ public class CsvImporter {
 					Type type = getTypeFromString(typeString, usedLanguageBundle);
 					//Status status = getStatusFromString(statusString);
 					
-					if (content.contains("File:")) {
+					if (FrontlineMultimediaMessage.appearsToBeToString(content)) {
 						// Then it's a multimedia message
 						message = FrontlineMultimediaMessage.createMessageFromContentString(content, false);
 						message.setDate(date);
@@ -257,34 +257,7 @@ public class CsvImporter {
 		return valuesList;
 	}
 
-//> STATIC HELPER METHODS	
-	/**
-	 * Gets the string from a particular index of an array.  If the array is not long
-	 * enough to contain that index, returns an empty string.
-	 * @param values
-	 * @param index
-	 * @return The value in the specified index of the array, or an empty string if the array index is out of bounds.
-	 */
-	private static String getString(String[] values, int index) {
-		assert(index >= 0) : "Supplied array index must be greater than or equal to zero.";
-		if(values.length > index) {
-			return values[index];
-		} else return "";
-	}
-	
-	/**
-	 * Gets an optional String from the supplied String array, returning "" if the string is not available.
-	 * @param values The values of the row of CSV
-	 * @param rowFormat The format of the row we are importing
-	 * @param marker The marker we are looking for in the row format
-	 * @return The value in the specified index of the array, or an empty string if the array index is out of bounds.
-	 */
-	private static String getString(String[] values, CsvRowFormat rowFormat, String marker) {
-		Integer index = rowFormat.getIndex(marker);
-		if(index == null) return "";
-		else return getString(values, index);
-	}
-
+//> STATIC HELPER METHODS
 	/**
 	 * Creates the group and all parent groups for a supplied path.
 	 * The behaviour of this method is undefined if a group is deleted externally while this method

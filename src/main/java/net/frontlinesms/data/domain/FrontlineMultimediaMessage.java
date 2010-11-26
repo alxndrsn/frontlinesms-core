@@ -24,6 +24,7 @@ public class FrontlineMultimediaMessage extends FrontlineMessage {
 	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
 	private List<FrontlineMultimediaMessagePart> multimediaParts;
 	
+//> CONSTRUCTORS
 	/** Empty constructor for Hibernate */
 	FrontlineMultimediaMessage() {}
 
@@ -49,8 +50,18 @@ public class FrontlineMultimediaMessage extends FrontlineMessage {
 		this.subject = subject;
 	}
 
+//> ACCESSORS
+	public String getSubject() {
+		return subject;
+	}
+	public void setSubject(String subject) {
+		this.subject = subject;
+	}
 	public List<FrontlineMultimediaMessagePart> getMultimediaParts() {
 		return Collections.unmodifiableList(this.multimediaParts);
+	}
+	public void setMultimediaParts(List<FrontlineMultimediaMessagePart> multimediaParts) {
+		this.multimediaParts = multimediaParts;
 	}
 	public boolean hasBinaryPart() {
 		for (FrontlineMultimediaMessagePart part : this.getMultimediaParts()) {
@@ -60,32 +71,6 @@ public class FrontlineMultimediaMessage extends FrontlineMessage {
 		}
 		
 		return false;
-	}
-	
-	public static FrontlineMultimediaMessage createMessageFromContentString(String messageContent, boolean truncate) {
-		FrontlineMultimediaMessage multimediaMessage = new FrontlineMultimediaMessage(Type.RECEIVED, "", "");
-		
-		List<FrontlineMultimediaMessagePart> multimediaParts = new ArrayList<FrontlineMultimediaMessagePart>();
-		
-		Pattern textPattern = Pattern.compile("\"(.*)\"");
-		Pattern binaryFilePattern = Pattern.compile("File: (.*)");
-		Pattern subjectPattern = Pattern.compile("Subject: (.*)");
-		Matcher matcher;
-		
-		for (String part : messageContent.split(";")) {
-			if ((matcher = subjectPattern.matcher(part.trim())).find()) {
-				multimediaMessage.setSubject(matcher.group(1));
-			} else if ((matcher = binaryFilePattern.matcher(part.trim())).find()) {
-				multimediaParts.add(FrontlineMultimediaMessagePart.createBinaryPart(matcher.group(1)));
-			} else if ((matcher = textPattern.matcher(part.trim())).find()) {
-				multimediaParts.add(FrontlineMultimediaMessagePart.createTextPart(matcher.group(1)));
-			}
-		}
-		
-		multimediaMessage.setMultimediaParts(multimediaParts);
-		multimediaMessage.setTextMessageContent(multimediaMessage.toString(truncate));
-		
-		return multimediaMessage;
 	}
 	
 	@Override
@@ -147,14 +132,34 @@ public class FrontlineMultimediaMessage extends FrontlineMessage {
 		return true;
 	}
 
-	public void setSubject(String subject) {
-		this.subject = subject;
+//> STATIC METHODS
+	public static boolean appearsToBeToString(String toString) {
+		return toString.contains("File:");
 	}
-	public String getSubject() {
-		return subject;
-	}
-
-	public void setMultimediaParts(List<FrontlineMultimediaMessagePart> multimediaParts) {
-		this.multimediaParts = multimediaParts;
+	
+	public static FrontlineMultimediaMessage createMessageFromContentString(String messageContent, boolean truncate) {
+		FrontlineMultimediaMessage multimediaMessage = new FrontlineMultimediaMessage(Type.RECEIVED, "", "");
+		
+		List<FrontlineMultimediaMessagePart> multimediaParts = new ArrayList<FrontlineMultimediaMessagePart>();
+		
+		Pattern textPattern = Pattern.compile("\"(.*)\"");
+		Pattern binaryFilePattern = Pattern.compile("File: (.*)");
+		Pattern subjectPattern = Pattern.compile("Subject: (.*)");
+		Matcher matcher;
+		
+		for (String part : messageContent.split(";")) {
+			if ((matcher = subjectPattern.matcher(part.trim())).find()) {
+				multimediaMessage.setSubject(matcher.group(1));
+			} else if ((matcher = binaryFilePattern.matcher(part.trim())).find()) {
+				multimediaParts.add(FrontlineMultimediaMessagePart.createBinaryPart(matcher.group(1)));
+			} else if ((matcher = textPattern.matcher(part.trim())).find()) {
+				multimediaParts.add(FrontlineMultimediaMessagePart.createTextPart(matcher.group(1)));
+			}
+		}
+		
+		multimediaMessage.setMultimediaParts(multimediaParts);
+		multimediaMessage.setTextMessageContent(multimediaMessage.toString(truncate));
+		
+		return multimediaMessage;
 	}
 }
