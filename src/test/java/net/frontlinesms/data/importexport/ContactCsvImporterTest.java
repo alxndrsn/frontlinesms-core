@@ -3,14 +3,11 @@
  */
 package net.frontlinesms.data.importexport;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.mockito.internal.verification.Times;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import net.frontlinesms.csv.CsvParseException;
@@ -70,7 +67,7 @@ public class ContactCsvImporterTest extends HibernateTestCase {
 		
 		new ContactCsvImporter(importFile).importContacts(contactDao, groupMembershipDao, groupDao, rowFormat);
 		
-		verify(contactDao, new Times(4)).saveContact(any(Contact.class));
+		verify(contactDao, times(4)).saveContact(any(Contact.class));
 		// TODO: check creation of groups
 	}
 
@@ -89,10 +86,10 @@ public class ContactCsvImporterTest extends HibernateTestCase {
 		Contact alex = new Contact("alex", "123456789", "", "", "dangerous", false);
 		Contact laura = new Contact("laura", "07788112233", "+44123456789", "lol@example.com", "", true);
 		
-		verify(contactDao, new Times(1)).saveContact(morgan);
-		verify(contactDao, new Times(1)).saveContact(testNumber);
-		verify(contactDao, new Times(1)).saveContact(alex);
-		verify(contactDao, new Times(1)).saveContact(laura);
+		verify(contactDao).saveContact(morgan);
+		verify(contactDao).saveContact(testNumber);
+		verify(contactDao).saveContact(alex);
+		verify(contactDao).saveContact(laura);
 	}
 	
 //> PRIVATE HELPER METHODS
