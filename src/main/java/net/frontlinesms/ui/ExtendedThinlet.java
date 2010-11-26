@@ -248,6 +248,10 @@ private static final String START = "start";
 		setIcon(component, ICON, getIcon(iconPath));
 	}
 	
+	public void setBold(Object component) {
+		setFont(component, FONT, super.getFont().deriveFont(Font.BOLD));
+	}
+	
 	/**
 	 * Sets whether a component has a border or not
 	 * @param component the component to add/remove border from
@@ -620,6 +624,20 @@ private static final String START = "start";
 	public final Object createLabel(String text) {
 		Object label = create(LABEL);
 		setString(label, TEXT, text);
+		return label;
+	}
+	
+	/**
+	 * Create's a Thinlet UI Component of type LABEL with the supplied TEXT.
+	 * @param text The text displayed for this label.
+	 * @return
+	 */
+	public final Object createLabel(String text, String icon) {
+		Object label = create(LABEL);
+		setString(label, TEXT, text);
+		if (icon != null) {
+			setIcon(label, icon);
+		}
 		return label;
 	}
 	

@@ -234,13 +234,14 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	}
 	
 	public void save () {
-		List<String> validationMessages = new ArrayList<String>();
+		List<Object> validationMessages = new ArrayList<Object>();
 		
 		for (UiSettingsSectionHandler settingsSectionHandler : this.handlersList) {
 			List<FrontlineValidationMessage> validation = settingsSectionHandler.validateFields();
 			if (validation != null && !validation.isEmpty()) {
 				for (FrontlineValidationMessage validationMessage : validation) {
-					validationMessages.add("[" + settingsSectionHandler.getTitle() + "] " + validationMessage.getLocalisedMessage());
+					//validationMessages.add("[" + settingsSectionHandler.getTitle() + "] " + validationMessage.getLocalisedMessage());
+					validationMessages.add(createValidationPanel(settingsSectionHandler, validationMessage));
 				}
 			}
 		}
@@ -248,8 +249,21 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		if (validationMessages.isEmpty()) {
 			this.doSave();
 		} else {
-			this.uiController.alert(validationMessages.toArray(new String[0]));
+			this.uiController.alert(validationMessages.toArray(new Object[0]));
 		}
+	}
+
+	private Object createValidationPanel(UiSettingsSectionHandler settingsSectionHandler, FrontlineValidationMessage validationMessage) {
+		Object panel = this.uiController.createPanel("Validation message");
+		this.uiController.setGap(panel, 5);
+		
+		Object sectionNameLabel = this.uiController.createLabel(settingsSectionHandler.getTitle(), validationMessage.getIcon());
+		this.uiController.setBold(sectionNameLabel);
+		
+		this.uiController.add(panel, sectionNameLabel);
+		this.uiController.add(panel, this.uiController.createLabel(validationMessage.getLocalisedMessage()));
+		
+		return panel;
 	}
 
 	private void doSave() {
