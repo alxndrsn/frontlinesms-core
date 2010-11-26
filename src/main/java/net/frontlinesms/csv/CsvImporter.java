@@ -39,6 +39,8 @@ import org.apache.log4j.Logger;
 public abstract class CsvImporter {
 	/** Logging object */
 	protected Logger log = FrontlineUtils.getLogger(this.getClass());
+	/** The first line of values as loaded from disk */
+	private String[] rawFirstLine;
 	/** Raw values as loaded from disk */
 	private List<String[]> rawValues;
 	
@@ -66,6 +68,7 @@ public abstract class CsvImporter {
 			while((lineValues = CsvUtils.readLine(reader)) != null) {
 				if(firstLine) {
 					firstLine = false;
+					this.rawFirstLine = lineValues;
 				} else {
 					valuesList.add(lineValues);
 				}

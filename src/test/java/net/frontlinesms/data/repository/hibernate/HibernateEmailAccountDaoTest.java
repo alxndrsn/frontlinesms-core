@@ -70,9 +70,7 @@ public class HibernateEmailAccountDaoTest extends HibernateTestCase {
 		emailAccountDao.saveEmailAccount(account);
 		EmailAccount duplicateAccount = new EmailAccount(accountName, accountServer, accountServerPort, accountPassword, useSsl, false, EmailUtils.SMTP);
 		try {
-			System.out.println("Preparing to save...");
 			emailAccountDao.saveEmailAccount(duplicateAccount);
-			System.out.println("Save passed!");
 			fail("Should have thrown DKE");
 		} catch(DuplicateKeyException ex) { /* expected */ }		
 	}

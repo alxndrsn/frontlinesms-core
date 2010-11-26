@@ -52,57 +52,51 @@ public class MessageCsvImporter extends CsvImporter {
 		LOG.trace("ENTER");
 		
 		int multimediaMessageCount = 0;
-		boolean firstLine = true;
 		LanguageBundle usedLanguageBundle = null;
 			
 		for(String[] lineValues : super.getRawValues()) {
-			if(firstLine) {
-				// Ignore the first line of the CSV file as it should be the column titles
-				firstLine = false;
-			} else {
-				String typeString = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_MESSAGE_TYPE);
-				String status = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_MESSAGE_STATUS);
-				String sender = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_SENDER_NUMBER);
-				String recipient = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_RECIPIENT_NUMBER);
-				String dateString = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_MESSAGE_DATE);
-				String content = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_MESSAGE_CONTENT);
-				
-				long date;
-				try {
-					SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					ParsePosition pos = new ParsePosition(0);
-					date = formatter.parse(dateString, pos).getTime();
-				} catch (Exception e) {
-					date = System.currentTimeMillis(); // TODO is this really what we want to do with an ill-formatted date?
-				}
-				
-				FrontlineMessage message;
-				
-				// To avoid checking the language bandle used everytime, we store it 
-				if (usedLanguageBundle == null) {
-					usedLanguageBundle = getUsedLanguageBundle(typeString);
-				}
-				Type type = getTypeFromString(typeString, usedLanguageBundle); // FIXME what if language bundle is still null??
-				//Status status = getStatusFromString(statusString);
-				
-				if (FrontlineMultimediaMessage.appearsToBeToString(content)) {
-					// Then it's a multimedia message
-					message = FrontlineMultimediaMessage.createMessageFromContentString(content, false);
-					message.setDate(date);
-					message.setSenderMsisdn(sender);
-					message.setRecipientMsisdn(recipient);
-					++multimediaMessageCount;
-				} else {
-					if (type.equals(Type.OUTBOUND)) {
-						message = FrontlineMessage.createOutgoingMessage(date, sender, recipient, content);
-					} else {
-						message = FrontlineMessage.createIncomingMessage(date, sender, recipient, content);
-					}
-				}
-				
-				message.setStatus(Status.valueOf(status.toUpperCase()));
-				messageDao.saveMessage(message);
+			String typeString = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_MESSAGE_TYPE);
+			String status = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_MESSAGE_STATUS);
+			String sender = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_SENDER_NUMBER);
+			String recipient = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_RECIPIENT_NUMBER);
+			String dateString = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_MESSAGE_DATE);
+			String content = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_MESSAGE_CONTENT);
+			
+			long date;
+			try {
+				SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				ParsePosition pos = new ParsePosition(0);
+				date = formatter.parse(dateString, pos).getTime();
+			} catch (Exception e) {
+				date = System.currentTimeMillis(); // TODO is this really what we want to do with an ill-formatted date?
 			}
+			
+			FrontlineMessage message;
+			
+			// To avoid checking the language bandle used everytime, we store it 
+			if (usedLanguageBundle == null) {
+				usedLanguageBundle = getUsedLanguageBundle(typeString);
+			}
+			Type type = getTypeFromString(typeString, usedLanguageBundle); // FIXME what if language bundle is still null??
+			//Status status = getStatusFromString(statusString);
+			
+			if (FrontlineMultimediaMessage.appearsToBeToString(content)) {
+				// Then it's a multimedia message
+				message = FrontlineMultimediaMessage.createMessageFromContentString(content, false);
+				message.setDate(date);
+				message.setSenderMsisdn(sender);
+				message.setRecipientMsisdn(recipient);
+				++multimediaMessageCount;
+			} else {
+				if (type.equals(Type.OUTBOUND)) {
+					message = FrontlineMessage.createOutgoingMessage(date, sender, recipient, content);
+				} else {
+					message = FrontlineMessage.createIncomingMessage(date, sender, recipient, content);
+				}
+			}
+			
+			message.setStatus(Status.valueOf(status.toUpperCase()));
+			messageDao.saveMessage(message);
 		}
 		
 		LOG.trace("EXIT");

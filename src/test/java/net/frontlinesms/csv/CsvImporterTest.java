@@ -87,7 +87,8 @@ public class CsvImporterTest extends BaseTestCase {
 		FrontlineMessage messageTwo = FrontlineMessage.createIncomingMessage(formatter.parse("2010-10-13 13:08:57").getTime(), "+15559999", "+33673586586", "Received this later...");
 		FrontlineMessage messageThree = FrontlineMessage.createOutgoingMessage(formatter.parse("2010-10-12 15:17:02").getTime(), "+447789654123", "+447762297258", "First message sent");
 		FrontlineMessage messageFour = FrontlineMessage.createIncomingMessage(formatter.parse("2010-12-13 10:29:02").getTime(), "+447762297258", "+447789654123", "First message received");
-		
+
+		verify(messageDao, times(8)).saveMessage(any(FrontlineMessage.class));
 		verify(messageDao, times(2)).saveMessage(messageOne);
 		verify(messageDao, times(2)).saveMessage(messageTwo);
 		verify(messageDao, times(2)).saveMessage(messageThree);
@@ -117,9 +118,10 @@ public class CsvImporterTest extends BaseTestCase {
 		((FrontlineMultimediaMessage)messageTwo).setMultimediaParts(multimediaPartsTwo);
 		messageTwo.setDate(formatter.parse("2010-07-20 17:57:04").getTime());
 		messageTwo.setSenderMsisdn("+254722707140");
-		
-		verify(messageDao, times(1)).saveMessage(messageOne);
-		verify(messageDao, times(1)).saveMessage(messageTwo);
+
+		verify(messageDao, times(2)).saveMessage(any(FrontlineMultimediaMessage.class));
+		verify(messageDao).saveMessage(messageOne);
+		verify(messageDao).saveMessage(messageTwo);
 	}
 	
 	private CsvRowFormat getRowFormatForMessages() {

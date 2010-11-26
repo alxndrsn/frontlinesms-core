@@ -49,44 +49,38 @@ public class ContactCsvImporter extends CsvImporter {
 	public CsvImportReport importContacts(ContactDao contactDao, GroupMembershipDao groupMembershipDao, GroupDao groupDao, CsvRowFormat rowFormat) {
 		log.trace("ENTER");
 		
-		boolean firstLine = true;
 		for(String[] lineValues : this.getRawValues()) {
-			if(firstLine) {
-				// Ignore the first line of the CSV file as it should be the column titles
-				firstLine = false;
-			} else {
-				String name = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_NAME);
-				String number = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_PHONE);
-				String email = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_EMAIL);
-				String notes = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_NOTES);
-				String otherPhoneNumber = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_OTHER_PHONE);
-				String groups = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_GROUPS);
+			String name = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_NAME);
+			String number = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_PHONE);
+			String email = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_EMAIL);
+			String notes = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_NOTES);
+			String otherPhoneNumber = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_OTHER_PHONE);
+			String groups = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_GROUPS);
+			
+			String statusString = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_STATUS).toLowerCase();
+			boolean active = !"false".equals(statusString) && !"dormant".equals(statusString);
+			
+			Contact c = new Contact(name, number, otherPhoneNumber, email, notes, active);						
+			try {
+				contactDao.saveContact(c);
+			} catch (DuplicateKeyException e) {
+				// FIXME should actually pass details of this back to the user.
+				log.debug("Contact already exist with this number [" + number + "]", e);
+				// If the contact already existed, let's reach the existing one to fill the groupMembership
+				c = contactDao.getFromMsisdn(number);
+			}
+			
+			// We make the contact joins its groups
+			String[] pathList = groups.split(GROUPS_DELIMITER);
+			for (String path : pathList) {
+				if (path.length() == 0) continue;
 				
-				String statusString = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_CONTACT_STATUS).toLowerCase();
-				boolean active = !"false".equals(statusString) && !"dormant".equals(statusString);
-				
-				Contact c = new Contact(name, number, otherPhoneNumber, email, notes, active);						
-				try {
-					contactDao.saveContact(c);
-				} catch (DuplicateKeyException e) {
-					// FIXME should actually pass details of this back to the user.
-					log.debug("Contact already exist with this number [" + number + "]", e);
-					// If the contact already existed, let's reach the existing one to fill the groupMembership
-					c = contactDao.getFromMsisdn(number);
+				if (!path.startsWith(String.valueOf(Group.PATH_SEPARATOR))) {
+					path = Group.PATH_SEPARATOR + path;
 				}
 				
-				// We make the contact joins its groups
-				String[] pathList = groups.split(GROUPS_DELIMITER);
-				for (String path : pathList) {
-					if (path.length() == 0) continue;
-					
-					if (!path.startsWith(String.valueOf(Group.PATH_SEPARATOR))) {
-						path = Group.PATH_SEPARATOR + path;
-					}
-					
-					Group group = createGroups(groupDao, path);
-					groupMembershipDao.addMember(group, c);
-				}
+				Group group = createGroups(groupDao, path);
+				groupMembershipDao.addMember(group, c);
 			}
 		}
 		
