@@ -94,43 +94,6 @@ public class FrontlineMultimediaMessage extends FrontlineMessage {
 
 		return textContent.toString();
 	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof FrontlineMultimediaMessage)) {
-			return false; 
-		}
-		
-		FrontlineMultimediaMessage multimediaMessage = (FrontlineMultimediaMessage) obj;
-		if ((this.subject != null && multimediaMessage.getSubject() == null) 
-				|| (this.subject == null && multimediaMessage.getSubject() != null)
-				|| (this.subject != null && multimediaMessage.getSubject() != null 
-						&& !this.subject.equals(multimediaMessage.getSubject()))) {
-			return false;
-		} else if (!sameMultimediaParts(multimediaMessage)) {
-			return false;
-		}
-		
-		// Finally, let the super comparator check if the basic fields
-		// (sender, recipient, ...) are equals.
-		return super.equals(obj);
-	}
-
-	private boolean sameMultimediaParts(FrontlineMultimediaMessage multimediaMessage) {
-		if (this.multimediaParts.size() != multimediaMessage.getMultimediaParts().size()) {
-			return false;
-		}
-		
-		// Clone the local multimedia parts to prevent loss
-		List<FrontlineMultimediaMessagePart> theseMultimediaParts = new ArrayList<FrontlineMultimediaMessagePart>(this.multimediaParts);
-		for (FrontlineMultimediaMessagePart part : multimediaMessage.getMultimediaParts()) {
-			if (!theseMultimediaParts.remove(part)) {
-				return false;
-			}
-		}
-		
-		return true;
-	}
 
 //> STATIC METHODS
 	public static boolean appearsToBeToString(String toString) {

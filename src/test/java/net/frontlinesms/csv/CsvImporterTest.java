@@ -3,9 +3,7 @@
  */
 package net.frontlinesms.csv;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -18,29 +16,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.frontlinesms.data.DuplicateKeyException;
-import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessagePart;
-import net.frontlinesms.data.domain.Group;
-import net.frontlinesms.data.repository.ContactDao;
-import net.frontlinesms.data.repository.GroupDao;
-import net.frontlinesms.data.repository.GroupMembershipDao;
+import net.frontlinesms.data.importexport.MessageCsvImporter;
 import net.frontlinesms.data.repository.MessageDao;
-import net.frontlinesms.junit.HibernateTestCase;
+import net.frontlinesms.junit.BaseTestCase;
 
 import org.apache.log4j.Logger;
-import org.mockito.internal.verification.Times;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Test class for {@link CsvImporter}.
  * @author Alex Anderson <alex@frontlinesms.com>
  * @author Morgan Belkadi <morgan@frontlinesms.com>
  */
-public class CsvImporterTest extends HibernateTestCase {
+public class CsvImporterTest extends BaseTestCase {
 	
 //> CONSTANTS
 	/** Path to the test resources folder.  TODO should probably get these relative to the current {@link ClassLoader}'s path. */
@@ -62,10 +53,6 @@ public class CsvImporterTest extends HibernateTestCase {
 //> INSTANCE VARIABLES
 	/** Logging object */
 	private final Logger log = Logger.getLogger(this.getClass());
-	
-	/** DAO for {@link Group}s; used in {@link #testCreateGroupIfAbsent()} */
-	@Autowired
-	private GroupDao groupDao;
 
 	private SimpleDateFormat formatter;
 	
@@ -86,41 +73,6 @@ public class CsvImporterTest extends HibernateTestCase {
 		}
 	}
 	
-	public void testImportContactsWithGroups () throws IOException, CsvParseException, DuplicateKeyException {
-		File importFile = new File(RESOURCE_PATH + "ImportWithGroups.csv");
-		CsvRowFormat rowFormat = getRowFormatForContacts();
-		
-		ContactDao contactDao = mock(ContactDao.class);
-		GroupDao groupDao = mock(GroupDao.class);
-		GroupMembershipDao groupMembershipDao = mock(GroupMembershipDao.class);
-		
-		CsvImporter.importContacts(importFile, contactDao, groupMembershipDao, groupDao, rowFormat);
-		
-		verify(contactDao, new Times(4)).saveContact(any(Contact.class));
-		// TODO: check creation of groups
-	}
-	
-	public void testImportContactStatus () throws IOException, CsvParseException, DuplicateKeyException {
-		File importFile = new File(RESOURCE_PATH + "ImportWithStatus.csv");
-		CsvRowFormat rowFormat = getRowFormatForContacts();
-		
-		ContactDao contactDao = mock(ContactDao.class);
-		GroupDao groupDao = mock(GroupDao.class);
-		GroupMembershipDao groupMembershipDao = mock(GroupMembershipDao.class);
-		
-		CsvImporter.importContacts(importFile, contactDao, groupMembershipDao, groupDao, rowFormat);
-		
-		Contact morgan = new Contact("Morgan", "07691321654", "", "", "dangerous", false);
-		Contact testNumber = new Contact("Test Number", "000", "", "", "dangerous", true);
-		Contact alex = new Contact("alex", "123456789", "", "", "dangerous", false);
-		Contact laura = new Contact("laura", "07788112233", "+44123456789", "lol@example.com", "", true);
-		
-		verify(contactDao, new Times(1)).saveContact(morgan);
-		verify(contactDao, new Times(1)).saveContact(testNumber);
-		verify(contactDao, new Times(1)).saveContact(alex);
-		verify(contactDao, new Times(1)).saveContact(laura);
-	}
-	
 	public void testImportMessages() throws IOException, CsvParseException, ParseException {
 		File importFile = new File(RESOURCE_PATH + "ImportMessages.csv");
 		File importFileInternationalised = new File(RESOURCE_PATH + "ImportMessagesFR.csv");
@@ -128,18 +80,18 @@ public class CsvImporterTest extends HibernateTestCase {
 		CsvRowFormat rowFormat = getRowFormatForMessages();
 		MessageDao messageDao = mock(MessageDao.class);
 		
-		CsvImporter.importMessages(importFile, messageDao, rowFormat);
-		CsvImporter.importMessages(importFileInternationalised, messageDao, rowFormat);
+		new MessageCsvImporter(importFile).importMessages(messageDao, rowFormat);
+		new MessageCsvImporter(importFileInternationalised).importMessages(messageDao, rowFormat);
 
 		FrontlineMessage messageOne = FrontlineMessage.createOutgoingMessage(formatter.parse("2010-10-13 14:28:57").getTime(), "+33673586586", "+15559999", "Message sent!");
 		FrontlineMessage messageTwo = FrontlineMessage.createIncomingMessage(formatter.parse("2010-10-13 13:08:57").getTime(), "+15559999", "+33673586586", "Received this later...");
 		FrontlineMessage messageThree = FrontlineMessage.createOutgoingMessage(formatter.parse("2010-10-12 15:17:02").getTime(), "+447789654123", "+447762297258", "First message sent");
 		FrontlineMessage messageFour = FrontlineMessage.createIncomingMessage(formatter.parse("2010-12-13 10:29:02").getTime(), "+447762297258", "+447789654123", "First message received");
 		
-		verify(messageDao, new Times(2)).saveMessage(messageOne);
-		verify(messageDao, new Times(2)).saveMessage(messageTwo);
-		verify(messageDao, new Times(2)).saveMessage(messageThree);
-		verify(messageDao, new Times(2)).saveMessage(messageFour);
+		verify(messageDao, times(2)).saveMessage(messageOne);
+		verify(messageDao, times(2)).saveMessage(messageTwo);
+		verify(messageDao, times(2)).saveMessage(messageThree);
+		verify(messageDao, times(2)).saveMessage(messageFour);
 	}
 	
 	public void testImportMultimediaMessages() throws IOException, CsvParseException, ParseException {
@@ -148,7 +100,7 @@ public class CsvImporterTest extends HibernateTestCase {
 		CsvRowFormat rowFormat = getRowFormatForMessages();
 		MessageDao messageDao = mock(MessageDao.class);
 		
-		CsvImporter.importMessages(importFile, messageDao, rowFormat);
+		new MessageCsvImporter(importFile).importMessages(messageDao, rowFormat);
 
 		FrontlineMessage messageOne = new FrontlineMultimediaMessage(Type.RECEIVED, "You have received a new message", "Subject: You have received a new message; File: 100MEDIA_IMAG0041.jpg; \"It's like Charles bloody dickens!\"");
 		List<FrontlineMultimediaMessagePart> multimediaPartsOne = new ArrayList<FrontlineMultimediaMessagePart>();
@@ -166,21 +118,8 @@ public class CsvImporterTest extends HibernateTestCase {
 		messageTwo.setDate(formatter.parse("2010-07-20 17:57:04").getTime());
 		messageTwo.setSenderMsisdn("+254722707140");
 		
-		verify(messageDao, new Times(1)).saveMessage(messageOne);
-		verify(messageDao, new Times(1)).saveMessage(messageTwo);
-	}
-	
-	private CsvRowFormat getRowFormatForContacts() {
-		CsvRowFormat rowFormat = new CsvRowFormat();
-		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_NAME);
-		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_PHONE);
-		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_OTHER_PHONE);
-		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_EMAIL);
-		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_STATUS);
-		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_NOTES);
-		rowFormat.addMarker(CsvUtils.MARKER_CONTACT_GROUPS);
-		
-		return rowFormat;
+		verify(messageDao, times(1)).saveMessage(messageOne);
+		verify(messageDao, times(1)).saveMessage(messageTwo);
 	}
 	
 	private CsvRowFormat getRowFormatForMessages() {
@@ -193,28 +132,6 @@ public class CsvImporterTest extends HibernateTestCase {
 		rowFormat.addMarker(CsvUtils.MARKER_RECIPIENT_NUMBER);
 		
 		return rowFormat;
-	}
-	
-	public void testCreateGroups() throws DuplicateKeyException {
-		CsvImporter.createGroups(groupDao, "/A");
-		CsvImporter.createGroups(groupDao, "B/2/a");
-		assertTrue(groupDao.getGroupByPath("/A") != null);
-		assertTrue(groupDao.getGroupByPath("/B") != null);
-		assertTrue(groupDao.getGroupByPath("/B/2") != null);
-		assertTrue(groupDao.getGroupByPath("/B/2/a") != null);
-		
-		// Test that method does not fail if asked to create already-existing groups
-		CsvImporter.createGroups(groupDao, "/A");
-		CsvImporter.createGroups(groupDao, "B/2/a");
-		
-		CsvImporter.createGroups(groupDao, "/B/2/c");		
-		assertTrue(groupDao.getGroupByPath("/B/2/a") != null);
-		assertTrue(groupDao.getGroupByPath("/B/2/c") != null);
-		
-		CsvImporter.createGroups(groupDao, "GroupB/Group2/Groupa");
-		assertTrue(groupDao.getGroupByPath("/GroupB") != null);
-		assertTrue(groupDao.getGroupByPath("/GroupB/Group2") != null);
-		assertTrue(groupDao.getGroupByPath("/GroupB/Group2/Groupa") != null);
 	}
 
 	/**

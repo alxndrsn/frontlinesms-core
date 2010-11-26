@@ -24,6 +24,8 @@ import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
+import net.frontlinesms.data.importexport.ContactCsvImporter;
+import net.frontlinesms.data.importexport.MessageCsvImporter;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
@@ -194,10 +196,10 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private EntityType type;
 	/** The objects we are exporting - a selection of thinlet components with attached {@link Contact}s, {@link Keyword}s or {@link FrontlineMessage}s */
 	private Object attachedObject;
-	/** The list of values taken in the imported file */
-	private List<String[]> importedValuesList;
 	/** The list of headers taken in the imported file */
 	private List<String> importedHeadersList;
+	
+	private CsvImporter importer;
 
 //> CONSTRUCTORS
 	/**
@@ -285,12 +287,12 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 			// Do the import
 			if (type == EntityType.CONTACTS) {
 				CsvRowFormat rowFormat = getRowFormatForContact();
-				CsvImporter.importContacts(new File(dataPath), this.contactDao, this.groupMembershipDao, this.groupDao, rowFormat);
+				((ContactCsvImporter) importer).importContacts(this.contactDao, this.groupMembershipDao, this.groupDao, rowFormat); // FIXME do something with the report
 				this.uiController.refreshContactsTab();
 				this.uiController.infoMessage(InternationalisationUtils.getI18nString(I18N_IMPORT_SUCCESSFUL));
 			} else if (type == EntityType.MESSAGES) {
 				CsvRowFormat rowFormat = getRowFormatForMessage();
-				int multimediaMessagesCount = CsvImporter.importMessages(new File(dataPath), this.messageDao, rowFormat);
+				int multimediaMessagesCount = ((MessageCsvImporter) importer).importMessages(this.messageDao, rowFormat).getMultimediaMessageCount(); // FIXME importer should be of known type depending on the handler we are in
 				
 				if (multimediaMessagesCount == 0) {
 					this.uiController.infoMessage(InternationalisationUtils.getI18nString(I18N_IMPORT_SUCCESSFUL));
@@ -302,7 +304,6 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 			}
 			uiController.setStatus(InternationalisationUtils.getI18nString(MESSAGE_IMPORT_TASK_SUCCESSFUL));
 			uiController.removeDialog(wizardDialog);
-		} catch(IOException ex) {
 		} catch(CsvParseException ex) {
 			log.debug(InternationalisationUtils.getI18nString(MESSAGE_IMPORT_TASK_FAILED), ex);
 			uiController.alert(InternationalisationUtils.getI18nString(MESSAGE_IMPORT_TASK_FAILED) + ": " + ex.getMessage());
@@ -666,11 +667,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	
 	private void loadCsvFile (String filename) {
 		try {
-			if (this.importedValuesList != null) {
-				this.importedValuesList.clear();
-			}
-			
-			this.importedValuesList = CsvImporter.getValuesFromCsvFile(filename);
+			importer = createImporter(filename);
 		} catch (Exception e) {
 			this.uiController.alert(InternationalisationUtils.getI18nString(I18N_FILE_NOT_PARSED));
 		}
@@ -681,7 +678,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	}
 
 	public void columnCheckboxChanged() {
-		if(this.importedValuesList != null) {
+		if(this.importer != null) {
 			refreshValuesTable();
 		}
 	}
@@ -725,9 +722,9 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 			this.uiController.add(valuesTable, header);
 			
 			/** Lines */
-			if (this.importedValuesList != null) {
+			if (this.importer != null) {
 				LanguageBundle usedLanguageBundle = null;
-				for (String[] lineValues : this.importedValuesList) {
+				for (String[] lineValues : this.importer.getRawValues()) {
 					Object row = this.uiController.createTableRow();
 					switch (this.type) {
 					case CONTACTS:
@@ -735,7 +732,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 						break;
 					case MESSAGES:
 						if (usedLanguageBundle == null && messageTypeIndex > -1) {
-							usedLanguageBundle = CsvImporter.getUsedLanguageBundle(lineValues[messageTypeIndex]);
+							usedLanguageBundle = MessageCsvImporter.getUsedLanguageBundle(lineValues[messageTypeIndex]);
 						}
 						
 						this.addMessageCells(row, lineValues, columnsNumber, messageTypeIndex, usedLanguageBundle);
@@ -794,7 +791,7 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		String rowIcon = Icon.SMS;
 		if (messageTypeIndex > -1) {
 			// The message type is present in the imported fields
-			switch (CsvImporter.getTypeFromString(lineValues[messageTypeIndex], usedLanguageBundle)) {
+			switch (MessageCsvImporter.getTypeFromString(lineValues[messageTypeIndex], usedLanguageBundle)) {
 				case OUTBOUND :
 					rowIcon = Icon.SMS_SEND;
 					break;
@@ -814,6 +811,19 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 		for (int i = 0 ; i < columnsNumber && i < lineValues.length ; ++i) {
 			cell =  this.uiController.createTableCell(lineValues[i]);
 			this.uiController.add(row, cell);
+		}
+	}
+	
+	private CsvImporter createImporter(String filename) throws IOException, CsvParseException {
+		File importFile = new File(filename);
+		switch(getType()) {
+			case CONTACTS:
+				return new ContactCsvImporter(importFile);
+			case MESSAGES:
+				return new MessageCsvImporter(importFile);
+			case KEYWORDS:
+			default:
+				throw new IllegalStateException("No import handling implemented for entity type: " + getType());
 		}
 	}
 

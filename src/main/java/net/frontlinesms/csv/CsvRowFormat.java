@@ -37,7 +37,7 @@ public final class CsvRowFormat {
 	
 	public String getValue(String[] values, String marker) {
 		Integer index = getIndex(marker);
-		if(index == null) return null;
+		if(index == null || index >= values.length) return null;
 		else return values[index];
 	}
 	
