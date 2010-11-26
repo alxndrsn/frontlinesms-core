@@ -600,15 +600,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	
 	/**
 	 * Shows the import wizard dialog, according to the supplied type.
-	 * @param list The list to get selected items from.
-	 * @param type The desired type
-	 */
-	public void showImportWizard(Object list, String typeName){
-		ImportDialogHandlerFactory.createHandler(this, typeName).showWizard(list);
-	}
-	
-	/**
-	 * Shows the import wizard dialog, according to the supplied type.
 	 * @param type The desired type (0 for Contacts, 1 for Messages and 2 for Keywords)
 	 */
 	public void showImportWizard(String typeName){
