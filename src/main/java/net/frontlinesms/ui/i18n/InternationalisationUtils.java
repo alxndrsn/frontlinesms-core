@@ -107,10 +107,7 @@ public class InternationalisationUtils {
 			} catch (MissingResourceException ex) {
 			}
 		}
-		String value = Thinlet.DEFAULT_ENGLISH_BUNDLE.get(key);
-		if(value == null) {
-			return key;
-		} else return value;
+		return Thinlet.DEFAULT_ENGLISH_BUNDLE.get(key);
 	}
 	
 	/**
