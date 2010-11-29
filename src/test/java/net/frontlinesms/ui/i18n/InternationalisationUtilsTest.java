@@ -159,6 +159,8 @@ public class InternationalisationUtilsTest extends BaseTestCase {
 		assertEquals(1.4, InternationalisationUtils.parseCurrency("1.4"));
 		assertEquals(1.4, InternationalisationUtils.parseCurrency("1,4"));
 		assertEquals(0.0, InternationalisationUtils.parseCurrency("0"));
+		assertEquals(0.0, InternationalisationUtils.parseCurrency("0."));
+		assertEquals(1.0, InternationalisationUtils.parseCurrency("1."));
 		assertEquals(0.5, InternationalisationUtils.parseCurrency("0.5"));
 		assertEquals(0.5, InternationalisationUtils.parseCurrency("0,5"));
 		assertEquals(0.5, InternationalisationUtils.parseCurrency("0.50"));
