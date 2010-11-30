@@ -15,6 +15,8 @@ public class SettingsDeviceSectionHandler extends BaseSectionHandler implements 
 	private static final String UI_SECTION_DEVICE = "/ui/core/settings/services/pnDeviceSettings.xml";
 	private static final String UI_FILE_PANEL_MODEM_SETTINGS = "/ui/core/phones/pnDeviceSettings.xml";
 	
+	private static final String UI_COMPONENT_TF_SMSC_NUMBER = "tfSmscNumber";
+	private static final String UI_COMPONENT_TF_SIM_PIN = "tfPin";
 	private static final String UI_COMPONENT_PHONE_SENDING = "cbSending";
 	private static final String UI_COMPONENT_PHONE_RECEIVING = "cbReceiving";
 	private static final String UI_COMPONENT_PHONE_DELETE = "cbDeleteMsgs";
@@ -23,6 +25,8 @@ public class SettingsDeviceSectionHandler extends BaseSectionHandler implements 
 	private static final String UI_COMPONENT_PN_PHONE_SETTINGS = "pnPhoneSettings";
 	private static final String UI_COMPONENT_RB_PHONE_DETAILS_ENABLE = "rbPhoneDetailsEnable";
 	
+	private static final String SECTION_ITEM_DEVICE_SMSC_NUMBER = "SERVICES_DEVICES_SMSC_NUMBER";
+	private static final String SECTION_ITEM_DEVICE_SIM_PIN = "SERVICES_DEVICES_PIN";
 	private static final String SECTION_ITEM_DEVICE_SETTINGS = "SERVICES_DEVICES_SETTINGS";
 	private static final String SECTION_ITEM_DEVICE_USE = "SERVICES_DEVICES_USE";
 	private static final String SECTION_ITEM_DEVICE_USE_FOR_SENDING = "SERVICES_DEVICES_USE_FOR_SENDING";
@@ -65,6 +69,9 @@ public class SettingsDeviceSectionHandler extends BaseSectionHandler implements 
 		boolean useDeliveryReports = this.getDeviceSettings().useDeliveryReports();
 		boolean deleteMessages = this.getDeviceSettings().deleteMessagesAfterReceiving();
 		
+		String smscNumber = this.getDeviceSettings().getSmscNumber();
+		String simPin = this.getDeviceSettings().getSimPin();
+		
 		if(useForSending || useForReceiving) {
 			this.uiController.setSelected(this.find(UI_COMPONENT_PHONE_SENDING), useForSending);
 			Object cbDeliveryReports = this.find(UI_COMPONENT_PHONE_DELIVERY_REPORTS);
@@ -90,7 +97,12 @@ public class SettingsDeviceSectionHandler extends BaseSectionHandler implements 
 			this.uiController.remove(find("lbReceiveNotSupported"));
 		}
 		
+		this.uiController.setText(find(UI_COMPONENT_TF_SMSC_NUMBER), smscNumber);
+		this.uiController.setText(find(UI_COMPONENT_TF_SIM_PIN), simPin);
+		
 		// Save the original values for this device
+		this.saveAndMarkUnchanged(SECTION_ITEM_DEVICE_SMSC_NUMBER, smscNumber);
+		this.saveAndMarkUnchanged(SECTION_ITEM_DEVICE_SIM_PIN, simPin);
 		this.saveAndMarkUnchanged(SECTION_ITEM_DEVICE_SETTINGS, this.getDeviceSettings());
 		this.saveAndMarkUnchanged(SECTION_ITEM_DEVICE_USE, useForReceiving || useForSending);
 		this.saveAndMarkUnchanged(SECTION_ITEM_DEVICE_USE_FOR_SENDING, useForSending);
@@ -138,6 +150,14 @@ public class SettingsDeviceSectionHandler extends BaseSectionHandler implements 
 		super.settingChanged(sectionItem, selected);
 	}
 	
+	public void smscNumberChanged(String smscNumber) {
+		settingChanged(SECTION_ITEM_DEVICE_SMSC_NUMBER, smscNumber);
+	}
+	
+	public void pinChanged(String simPin) {
+		settingChanged(SECTION_ITEM_DEVICE_SIM_PIN, simPin);
+	}
+	
 	public void showHelpPage(String page) {
 		this.uiController.showHelpPage(page);
 	}
@@ -171,6 +191,9 @@ public class SettingsDeviceSectionHandler extends BaseSectionHandler implements 
 			this.getDeviceSettings().setUseForReceiving(false);
 			this.getDeviceSettings().setDeleteMessagesAfterReceiving(false);
 		}
+		
+		this.getDeviceSettings().setSmscNumber(this.uiController.getText(find(UI_COMPONENT_TF_SMSC_NUMBER)));
+		this.getDeviceSettings().setSimPin(this.uiController.getText(find(UI_COMPONENT_TF_SIM_PIN)));
 		
 		this.smsModemSettingsDao.updateSmsModemSettings(this.getDeviceSettings());
 	}
