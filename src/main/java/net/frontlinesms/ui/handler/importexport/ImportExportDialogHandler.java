@@ -4,9 +4,6 @@
 package net.frontlinesms.ui.handler.importexport;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -19,7 +16,6 @@ import net.frontlinesms.csv.CsvUtils;
 import net.frontlinesms.data.domain.Contact;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.FrontlineMessage;
-import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
@@ -44,20 +40,6 @@ public abstract class ImportExportDialogHandler implements ThinletUiEventHandler
 //> I18N KEYS
 	/** I18n Text Key: TODO document */
 	protected static final String MESSAGE_NO_FILENAME = "message.filename.blank";
-	
-	/** I18n Text Key: TODO document */
-	private static final String MESSAGE_EXPORTING_SELECTED_CONTACTS = "message.exporting.selected.contacts";
-	/** I18n Text Key: TODO document */
-	private static final String MESSAGE_EXPORTING_SELECTED_KEYWORDS = "message.exporting.selected.keywords";
-	/** I18n Text Key: TODO document */
-	private static final String MESSAGE_EXPORTING_SELECTED_MESSAGES = "message.exporting.selected.messages";
-
-	/** I18n Text Key: TODO document */
-	private static final String MESSAGE_IMPORTING_SELECTED_CONTACTS = "message.importing.contacts.groups";
-	/** I18n Text Key: TODO document */
-	private static final String MESSAGE_IMPORTING_SELECTED_KEYWORDS = "message.importing.selected.keywords";
-	/** I18n Text Key: TODO document */
-	private static final String MESSAGE_IMPORTING_SELECTED_MESSAGES = "message.importing.messages";
 	
 //> THINLET LAYOUT DEFINITION FILES
 	/** UI XML File Path: TODO document */
@@ -96,26 +78,6 @@ public abstract class ImportExportDialogHandler implements ThinletUiEventHandler
 	private static final String COMPONENT_BT_DO_EXPORT = "btDoExport";
 	/** Thinlet component name: list displaying values from the CSV file */
 	private static final String COMPONENT_PN_DETAILS = "pnDetails";
-	
-//> STATIC CONSTANTS
-	public enum EntityType {
-		/** Export entity type: {@link Contact} */
-		CONTACTS,
-		/** Export entity type: {@link Message} */
-		MESSAGES,
-		/** Export entity type: {@link Keyword} */
-		KEYWORDS;
-		
-		/**  */
-		public static EntityType getFromString(String typeName) {
-			for(EntityType type : values()) {
-				if(type.name().toLowerCase().equals(typeName)) {
-					return type;
-				}
-			}
-			throw new IllegalStateException("Unrecognized type: " + typeName);
-		}
-	}
 
 //> INSTANCE PROPERTIES
 	/** Logging object */
@@ -136,39 +98,26 @@ public abstract class ImportExportDialogHandler implements ThinletUiEventHandler
 	/** Dialog for gathering details of the export or import */
 	protected Object wizardDialog;
 
-	/** Marks whether we are importing or exporting.  <code>true</code> indicates export, <code>false</code> indicates import. */
-	private final boolean export;
-	/** The type of object we are dealing with, one of {@link #TYPE_CONTACT}, {@link #TYPE_KEYWORD}, {@link #TYPE_MESSAGE}. */
-	protected final EntityType type;
-
 //> CONSTRUCTORS
 	/**
 	 * Create a new instance of this controller.
 	 * @param uiController 
 	 */
-	public ImportExportDialogHandler(UiGeneratorController uiController, EntityType type, boolean export) {
+	public ImportExportDialogHandler(UiGeneratorController uiController) {
 		this.uiController = uiController;
 		this.contactDao = uiController.getFrontlineController().getContactDao();
 		this.groupMembershipDao = uiController.getFrontlineController().getGroupMembershipDao();
 		this.messageDao = uiController.getFrontlineController().getMessageDao();
 		this.keywordDao = uiController.getFrontlineController().getKeywordDao();
 		this.groupDao = uiController.getFrontlineController().getGroupDao();
-		
-		this.type = type;
-		this.export = export;
 	}
 	
 //> ACCESSORS
-	/** @return The type of object we are dealing with, one of {@link #TYPE_CONTACT}, {@link #TYPE_KEYWORD}, {@link #TYPE_MESSAGE}. */
-	private EntityType getType() {
-		return this.type;
-	}
 
 //> UI SHOW METHODS
 	/**
 	 * Shows the export wizard dialog, according to the supplied type.
 	 * @param export 
-	 * @param type The desired type ({@link #TYPE_CONTACT} for Contacts, {@link #TYPE_MESSAGE} for Messages and {@link #TYPE_KEYWORD} for Keywords)
 	 */
 	public void showWizard(){
 		_showWizard();
@@ -186,26 +135,7 @@ public abstract class ImportExportDialogHandler implements ThinletUiEventHandler
 	 * Gets the title to use for the title of Export wizard
 	 * @return i18n key for fetching the title of the wizard
 	 */
-	private String getWizardTitleI18nKey() {
-		if(this.export) {
-			if (type == EntityType.CONTACTS) {
-				return MESSAGE_EXPORTING_SELECTED_CONTACTS;
-			} else if (type == EntityType.MESSAGES) {
-				return MESSAGE_EXPORTING_SELECTED_MESSAGES;
-			} else {
-				return MESSAGE_EXPORTING_SELECTED_KEYWORDS;
-			}
-		} else {
-			if (type == EntityType.CONTACTS) {
-				return MESSAGE_IMPORTING_SELECTED_CONTACTS;
-			} else if (type == EntityType.MESSAGES) {
-				return MESSAGE_IMPORTING_SELECTED_MESSAGES;
-			} else {
-				return MESSAGE_IMPORTING_SELECTED_KEYWORDS;
-			}
-		}
-	}
-	
+	abstract String getWizardTitleI18nKey();
 	abstract String getOptionsFilePath();
 	abstract String getDialogFile();
 	

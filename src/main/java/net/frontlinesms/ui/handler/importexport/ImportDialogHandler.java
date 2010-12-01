@@ -3,8 +3,6 @@
  */
 package net.frontlinesms.ui.handler.importexport;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,8 +10,8 @@ import java.util.List;
 import net.frontlinesms.csv.CsvExporter;
 import net.frontlinesms.csv.CsvImporter;
 import net.frontlinesms.csv.CsvParseException;
-import net.frontlinesms.csv.CsvRowFormat;
-import net.frontlinesms.data.importexport.ContactCsvImporter;
+import net.frontlinesms.data.domain.Contact;
+import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.importexport.MessageCsvImporter;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.UiGeneratorController;
@@ -32,8 +30,7 @@ public abstract class ImportDialogHandler extends ImportExportDialogHandler {
 	private static final String I18N_FILE_NOT_PARSED = "importexport.file.not.parsed";
 	/** i18n Text Key: "Active" */
 	private static final String I18N_COMMON_ACTIVE = "common.active";
-	private static final String I18N_IMPORT_SUCCESSFUL = "importexport.import.successful";
-	private static final String I18N_MULTIMEDIA_MESSAGES_IMPORT_SUCCESSFUL = "importexport.import.multimedia.messages.successful";
+	protected static final String I18N_IMPORT_SUCCESSFUL = "importexport.import.successful";
 	/** I18n Text Key: TODO document */
 	private static final String MESSAGE_IMPORT_TASK_FAILED = "message.import.failed";
 	/** I18n Text Key: TODO document */
@@ -44,12 +41,35 @@ public abstract class ImportDialogHandler extends ImportExportDialogHandler {
 	private static final String COMPONENT_PN_VALUES_TABLE = "pnValuesTable";
 	private static final String COMPONENT_PN_CHECKBOXES_2 = "pnInfo2";
 	
+//> STATIC CONSTANTS
+	public enum EntityType {
+		/** Export entity type: {@link Contact} */
+		CONTACTS,
+		/** Export entity type: {@link Message} */
+		MESSAGES,
+		/** Export entity type: {@link Keyword} */
+		KEYWORDS;
+		
+		/**  */
+		public static EntityType getFromString(String typeName) {
+			for(EntityType type : values()) {
+				if(type.name().toLowerCase().equals(typeName)) {
+					return type;
+				}
+			}
+			throw new IllegalStateException("Unrecognized type: " + typeName);
+		}
+	}
+
+	/** The type of object we are dealing with, one of {@link #TYPE_CONTACT}, {@link #TYPE_KEYWORD}, {@link #TYPE_MESSAGE}. */
+	protected final EntityType type;
+	
 //> PROPERTIES
-	private CsvImporter importer;
 	
 //> CONSTRUCTORS
 	public ImportDialogHandler(UiGeneratorController ui, EntityType type) {
-		super(ui, type, false);
+		super(ui);
+		this.type = type;
 	}
 	
 //> ACCESSORS
@@ -63,6 +83,8 @@ public abstract class ImportDialogHandler extends ImportExportDialogHandler {
 		this.uiController.setText(uiController.find(this.wizardDialog, "tfDirectory"), filePath);
 		this.loadCsvFile(filePath);
 	}
+	
+	abstract void doSpecialImport(String dataPath) throws CsvParseException;
 	
 	/**
 	 * Executes the import action.
@@ -79,24 +101,8 @@ public abstract class ImportDialogHandler extends ImportExportDialogHandler {
 		}
 		
 		try {
-			// Do the import
-			if (type == EntityType.CONTACTS) {
-				CsvRowFormat rowFormat = getRowFormatForContact();
-				((ContactCsvImporter) importer).importContacts(this.contactDao, this.groupMembershipDao, this.groupDao, rowFormat); // FIXME do something with the report
-				this.uiController.refreshContactsTab();
-				this.uiController.infoMessage(InternationalisationUtils.getI18nString(I18N_IMPORT_SUCCESSFUL));
-			} else if (type == EntityType.MESSAGES) {
-				CsvRowFormat rowFormat = getRowFormatForMessage();
-				int multimediaMessagesCount = ((MessageCsvImporter) importer).importMessages(this.messageDao, rowFormat).getMultimediaMessageCount(); // FIXME importer should be of known type depending on the handler we are in
-				
-				if (multimediaMessagesCount == 0) {
-					this.uiController.infoMessage(InternationalisationUtils.getI18nString(I18N_IMPORT_SUCCESSFUL));
-				} else {
-					this.uiController.infoMessage(InternationalisationUtils.getI18nStrings(I18N_MULTIMEDIA_MESSAGES_IMPORT_SUCCESSFUL, String.valueOf(multimediaMessagesCount)).toArray(new String[0]));
-				}
-			} else {
-				throw new IllegalStateException("Import is not supported for: " + this.type);
-			}
+			doSpecialImport(dataPath);
+			
 			uiController.setStatus(InternationalisationUtils.getI18nString(MESSAGE_IMPORT_TASK_SUCCESSFUL));
 			uiController.removeDialog(wizardDialog);
 		} catch(CsvParseException ex) {
@@ -109,8 +115,8 @@ public abstract class ImportDialogHandler extends ImportExportDialogHandler {
 //> INSTANCE HELPER METHODS
 	private void loadCsvFile (String filename) {
 		try {
-			importer = createImporter(filename);
-		} catch (Exception e) {
+			setImporter(filename);
+		} catch (CsvParseException e) {
 			this.uiController.alert(InternationalisationUtils.getI18nString(I18N_FILE_NOT_PARSED));
 		}
 		
@@ -154,18 +160,20 @@ public abstract class ImportDialogHandler extends ImportExportDialogHandler {
 				}
 			}
 			this.uiController.add(valuesTable, header);
-			
+
+			// FIXME move this stuff into relevant importers
+			CsvImporter importer = this.getImporter();
 			/** Lines */
-			if (this.importer != null) {
-				LanguageBundle usedLanguageBundle = null;
-				for (String[] lineValues : this.importer.getRawValues()) {
+			if (importer != null) {
+				for (String[] lineValues : importer.getRawValues()) {
 					Object row = this.uiController.createTableRow();
 					switch (this.type) {
 					case CONTACTS:
 						this.addContactCells(row, lineValues, columnsNumber);
 						break;
 					case MESSAGES:
-						if (usedLanguageBundle == null && messageTypeIndex > -1) {
+						LanguageBundle usedLanguageBundle = null;
+						if (messageTypeIndex > -1) {
 							usedLanguageBundle = MessageCsvImporter.getUsedLanguageBundle(lineValues[messageTypeIndex]);
 						}
 						
@@ -180,6 +188,7 @@ public abstract class ImportDialogHandler extends ImportExportDialogHandler {
 		}
 	}
 
+	// FIXME move this stuff into relevant importers
 	private void addContactCells(Object row, String[] lineValues, int columnsNumber) {
 		Object cell = this.uiController.createTableCell("");
 		this.uiController.setIcon(cell, Icon.CONTACT);
@@ -200,7 +209,8 @@ public abstract class ImportDialogHandler extends ImportExportDialogHandler {
 			this.uiController.add(row, cell);
 		}
 	}
-	
+
+	// FIXME move this stuff into relevant importers
 	private void addMessageCells(Object row, String[] lineValues, int columnsNumber, int messageTypeIndex, LanguageBundle usedLanguageBundle) {
 		String rowIcon = Icon.SMS;
 		if (messageTypeIndex > -1) {
@@ -228,19 +238,8 @@ public abstract class ImportDialogHandler extends ImportExportDialogHandler {
 		}
 	}
 	
-	private CsvImporter createImporter(String filename) throws IOException, CsvParseException {
-		File importFile = new File(filename);
-		switch(this.type) {
-			case CONTACTS:
-				return new ContactCsvImporter(importFile);
-			case MESSAGES:
-				return new MessageCsvImporter(importFile);
-			case KEYWORDS:
-			default:
-				throw new IllegalStateException("No import handling implemented for entity type: " + this.type);
-		}
-	}
-	
+	protected abstract CsvImporter getImporter();
+	protected abstract void setImporter(String filename) throws CsvParseException;
 	
 	/**
 	 * @return A {@link List} of checkboxes used to generate the preview.

@@ -17,10 +17,18 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * @author aga
  */
 public class ContactExportDialogHandler extends ExportDialogHandler<Contact> {
+	/** I18n Text Key: TODO document */
+	private static final String MESSAGE_EXPORTING_SELECTED_CONTACTS = "message.exporting.selected.contacts";
+	
 	public ContactExportDialogHandler(UiGeneratorController ui) {
-		super(Contact.class, ui, EntityType.CONTACTS);
+		super(Contact.class, ui);
 	}
 
+	@Override
+	String getWizardTitleI18nKey() {
+		return MESSAGE_EXPORTING_SELECTED_CONTACTS;
+	}
+	
 	@Override
 	String getOptionsFilePath() {
 		return UI_FILE_OPTIONS_PANEL_CONTACT;

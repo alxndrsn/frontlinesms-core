@@ -41,8 +41,8 @@ public abstract class ExportDialogHandler<T> extends ImportExportDialogHandler {
 	private Object confirmationDialog;
 	
 //> CONSTRUCTORS
-	public ExportDialogHandler(Class<T> exportClass, UiGeneratorController ui, EntityType type) {
-		super(ui, type, true);
+	public ExportDialogHandler(Class<T> exportClass, UiGeneratorController ui) {
+		super(ui);
 		this.exportClass = exportClass;
 	}
 
@@ -57,7 +57,6 @@ public abstract class ExportDialogHandler<T> extends ImportExportDialogHandler {
 	 * Shows the export wizard dialog, according to the supplied type.
 	 * @param export 
 	 * @param list The list to get selected items from.
-	 * @param type The desired type ({@link #TYPE_CONTACT} for Contacts, {@link #TYPE_MESSAGE} for Messages and {@link #TYPE_KEYWORD} for Keywords)
 	 */
 	public void showWizard(Object list){
 		Object[] selected = uiController.getSelectedItems(list);

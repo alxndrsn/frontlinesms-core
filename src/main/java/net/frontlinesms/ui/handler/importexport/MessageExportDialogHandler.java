@@ -17,8 +17,16 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * @author aga
  */
 public class MessageExportDialogHandler extends ExportDialogHandler<FrontlineMessage> {
+	/** I18n Text Key: TODO document */
+	private static final String MESSAGE_EXPORTING_SELECTED_MESSAGES = "message.exporting.selected.messages";
+	
 	public MessageExportDialogHandler(UiGeneratorController ui) {
-		super(FrontlineMessage.class, ui, EntityType.MESSAGES);
+		super(FrontlineMessage.class, ui);
+	}
+	
+	@Override
+	String getWizardTitleI18nKey() {
+		return MESSAGE_EXPORTING_SELECTED_MESSAGES;
 	}
 	
 	@Override
@@ -28,8 +36,7 @@ public class MessageExportDialogHandler extends ExportDialogHandler<FrontlineMes
 	
 	@Override
 	public void doSpecialExport(String dataPath) throws IOException {
-		// TODO Auto-generated method stub
-		
+		doSpecialExport(dataPath, messageDao.getAllMessages());
 	}
 
 	/**

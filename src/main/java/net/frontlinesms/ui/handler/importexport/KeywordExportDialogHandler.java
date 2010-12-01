@@ -20,6 +20,9 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
  * @author aga
  */
 public class KeywordExportDialogHandler extends ExportDialogHandler<Keyword> {
+	/** I18n Text Key: TODO document */
+	private static final String MESSAGE_EXPORTING_SELECTED_KEYWORDS = "message.exporting.selected.keywords";
+	
 	/** Thinlet Component Name: TODO document */
 	private static final String COMPONENT_CB_KEYWORD = "cbKeyword";
 	/** Thinlet Component Name: TODO document */
@@ -38,7 +41,12 @@ public class KeywordExportDialogHandler extends ExportDialogHandler<Keyword> {
 	private static final String COMPONENT_CB_SENT = "cbSent";
 	
 	public KeywordExportDialogHandler(UiGeneratorController ui) {
-		super(Keyword.class, ui, EntityType.KEYWORDS);
+		super(Keyword.class, ui);
+	}
+	
+	@Override
+	String getWizardTitleI18nKey() {
+		return MESSAGE_EXPORTING_SELECTED_KEYWORDS;
 	}
 
 	@Override
@@ -48,8 +56,7 @@ public class KeywordExportDialogHandler extends ExportDialogHandler<Keyword> {
 	
 	@Override
 	public void doSpecialExport(String dataPath) throws IOException {
-		// TODO Auto-generated method stub
-		
+		doSpecialExport(dataPath, keywordDao.getAllKeywords());
 	}
 
 	/**
