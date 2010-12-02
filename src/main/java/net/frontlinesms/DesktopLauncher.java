@@ -36,7 +36,6 @@ import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.LanguageBundle;
 
 import org.apache.log4j.Logger;
-import org.springframework.dao.DataAccessException;
 
 import thinlet.Thinlet;
 
@@ -136,12 +135,10 @@ public class DesktopLauncher {
 					frontline.initApplicationContext();
 					frontline.getContactDao().getContactByName("test");
 					connected = true;
-				} catch(DataAccessException ex) {
-					LOG.warn("Problem testing database connection.", ex);
+				} catch(RuntimeException ex) {
+					LOG.warn("Problem initialising application context.", ex);
 					frontline.deinitApplicationContext();
 					DatabaseConnectionFailedDialog.create(ex).acquireSettings();
-				} catch(Exception ex) {
-					throw new RuntimeException("Problem initialising application context.", ex);
 				}
 			}
 			
