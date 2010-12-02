@@ -126,7 +126,7 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 			PluginSettingsController pluginSettingsController = null;
 			
 			try {
-				PluginController pluginController = pluginClass.newInstance();
+				PluginController pluginController = this.uiController.getFrontlineController().getPluginManager().loadPluginController(pluginClass);
 				this.uiController.addPluginTextResources(pluginController);
 				pluginSettingsController = pluginController.getSettingsController(this.uiController);
 			
@@ -139,7 +139,7 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 					this.uiController.add(find(UI_COMPONENT_PLUGIN_TREE), pluginRootNode);
 				}
 			} catch (Throwable t) {
-				LOG.trace("Error when trying to load settings for Plugin " + pluginClass.getSimpleName());
+				LOG.warn("Error when trying to load settings for Plugin " + pluginClass.getSimpleName(), t);
 			}
 		}
 	}
