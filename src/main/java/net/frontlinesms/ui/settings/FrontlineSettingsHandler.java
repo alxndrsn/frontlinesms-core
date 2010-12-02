@@ -59,12 +59,6 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	
 	private List<String> changesList;
 
-	private Object selectedPluginItem;
-
-	private Object selectedCoreItem;
-
-	private List<Object> unselectableNodes;
-
 //> CONSTRUCTORS
 	/**
 	 * Creates a new instance of this UI.
@@ -75,7 +69,6 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		this.eventBus = controller.getFrontlineController().getEventBus();
 		this.handlersList = new ArrayList<UiSettingsSectionHandler>();
 		this.changesList = new ArrayList<String>();
-		this.unselectableNodes = new ArrayList<Object>();
 
 		this.init();
 	}
@@ -101,21 +94,28 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 		Object coreTree = find(UI_COMPONENT_CORE_TREE);
 
 		/** APPEARANCE **/
-		SettingsAppearanceSectionHandler appearanceSection = new SettingsAppearanceSectionHandler(this.uiController);
-		Object appearanceRootNode = appearanceSection.getSectionNode();
-		this.uiController.add(coreTree, appearanceRootNode);
-		this.uiController.setSelectedItem(coreTree, appearanceRootNode);
-		this.selectionChanged(coreTree);
+		this.loadCoreSection(coreTree, new SettingsAppearanceSectionHandler(this.uiController));
 		
 		/** GENERAL **/
-		SettingsGeneralSectionHandler generalSection = new SettingsGeneralSectionHandler(this.uiController);
-		Object generalRootNode = generalSection.getSectionNode();
-		this.uiController.add(coreTree, generalRootNode);
+		this.loadCoreSection(coreTree, new SettingsGeneralSectionHandler(this.uiController));
 		
 		/** SERVICES **/
-		SettingsServicesSectionHandler servicesSection = new SettingsServicesSectionHandler(this.uiController);
-		Object servicesRootNode = servicesSection.getSectionNode();
-		this.uiController.add(coreTree, servicesRootNode);
+		this.loadCoreSection(coreTree, new SettingsServicesSectionHandler(this.uiController));
+	}
+	
+	/**
+	 * Loads a section for the core settings.
+	 * @param coreTree
+	 * @param handler
+	 */
+	private void loadCoreSection(Object coreTree, UiSettingsSectionHandler handler) {
+		Object rootNode = handler.getSectionNode();
+		this.uiController.add(coreTree, rootNode);
+		
+		if (handler instanceof SettingsAppearanceSectionHandler) {
+			this.uiController.setSelectedItem(coreTree, rootNode);
+			this.selectionChanged(coreTree);
+		}
 	}
 
 	/**
@@ -139,7 +139,7 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 					this.uiController.add(find(UI_COMPONENT_PLUGIN_TREE), pluginRootNode);
 				}
 			} catch (Throwable t) {
-				// Prevents a plugin from messing the whole process up
+				LOG.trace("Error when trying to load settings for Plugin " + pluginClass.getSimpleName());
 			}
 		}
 	}
@@ -151,51 +151,13 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	public void selectionChanged(Object tree) {
 		Object selected = this.uiController.getSelectedItem(tree);
 		
-		if (selected == null || this.unselectableNodes.contains(selected)) {
-			this.reselectItem(tree);
-		} else {
-			// Save the current selected item to avoid a future unselection.
-			this.saveSelectedItem(selected, tree);
-			
-			this.uiController.removeAll(find(UI_COMPONENT_PN_DISPLAY_SETTINGS));
-		
-			Object attachedObject = this.uiController.getAttachedObject(selected);
-			this.displayPanel((UiSettingsSectionHandler) attachedObject);
-		}
-	}
-
-	/**
-	 * Saves the current selected item to avoid a future unselection.
-	 * @param selected
-	 * @param tree
-	 */
-	private void saveSelectedItem(Object selected, Object tree) {
-		if (tree.equals(find(UI_COMPONENT_PLUGIN_TREE))) {
-			this.selectedPluginItem = selected;
-			this.uiController.setSelectedItem(find(UI_COMPONENT_CORE_TREE), null);
-		} else {
-			this.selectedCoreItem = selected;
-			this.uiController.setSelectedItem(find(UI_COMPONENT_PLUGIN_TREE), null);
-		}
-	}
-	
-	/**
-	 * Reselect the previously selected item in case of an unselection in one of the trees.
-	 * @param tree
-	 */
-	private void reselectItem(Object tree) {
-		if (tree.equals(find(UI_COMPONENT_PLUGIN_TREE))) {
-			if (selectedPluginItem != null)
-				this.uiController.setSelectedItem(find(UI_COMPONENT_PLUGIN_TREE), selectedPluginItem);
-		} else {
-			if (selectedCoreItem != null)
-				this.uiController.setSelectedItem(find(UI_COMPONENT_CORE_TREE), selectedCoreItem);
-		}
+		Object attachedObject = this.uiController.getAttachedObject(selected);
+		this.displayPanel((UiSettingsSectionHandler) attachedObject);
 	}
 
 	/**
 	 * Handles the display in the dialog
-	 * @param panel
+	 * @param handler The {@link UiSettingsSectionHandler} responsible of the panel which should be displayed.
 	 */
 	private void displayPanel(UiSettingsSectionHandler handler) {
 		Object pnDisplaySettings = find(UI_COMPONENT_PN_DISPLAY_SETTINGS);

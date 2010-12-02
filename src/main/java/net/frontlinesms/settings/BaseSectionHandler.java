@@ -49,6 +49,10 @@ public abstract class BaseSectionHandler {
 	 */
 	abstract protected void init();
 	
+	public Object getSectionNode() {
+		return null;
+	}
+	
 	/**
 	 * Helps create a Thinlet node for a section
 	 * @param isRootNode
