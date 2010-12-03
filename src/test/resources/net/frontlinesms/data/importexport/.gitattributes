@@ -1,0 +1,4 @@
+# We need git to treat the CSV files as binary in order to preserve the linebreak characters
+# used inside.  If these are not preserved, the generated CSV files and test data embedded in
+# java will not match up with the values read from files.
+*.csv -crlf

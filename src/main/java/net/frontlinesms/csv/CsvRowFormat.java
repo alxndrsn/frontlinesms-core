@@ -35,6 +35,25 @@ public final class CsvRowFormat {
 		return index == -1 ? null : index;
 	}
 	
+	public String getValue(String[] values, String marker) {
+		Integer index = getIndex(marker);
+		if(index == null || index >= values.length) return null;
+		else return values[index];
+	}
+	
+	/**
+	 * Gets an optional String from the supplied String array, returning "" if the string is not available.
+	 * @param values The values of the row of CSV
+	 * @param rowFormat The format of the row we are importing
+	 * @param marker The marker we are looking for in the row format
+	 * @return The value in the specified index of the array, or an empty string if the array index is out of bounds.
+	 */	
+	public String getOptionalValue(String[] values, String marker) {
+		String value = getValue(values, marker);
+		if(value == null) return "";
+		else return value;
+	}
+	
 	/**
 	 * Check if this format has any markers yet
 	 * @return <code>true</code> if markers have been added; <code>false</code> otherwise

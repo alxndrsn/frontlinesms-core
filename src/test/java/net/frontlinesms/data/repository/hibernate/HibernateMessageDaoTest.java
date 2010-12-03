@@ -186,7 +186,6 @@ public class HibernateMessageDaoTest extends HibernateTestCase {
 				lastDate = m.getDate();
 			}
 		}
-		System.out.println();
 	}
 	
 	private void createMessagesWithParameters(String... keywords) {

@@ -46,7 +46,7 @@ import org.smslib.util.GsmAlphabet;
 public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSelecterDialogOwner {
 //> STATIC CONSTANTS
 	/** UI XML File Path: the panel containing the messaging controls */
-	protected static final String UI_FILE_MESSAGE_PANEL = "/ui/core/messages/pnComposeMessage.xml";
+	private static final String UI_FILE_MESSAGE_PANEL = "/ui/core/messages/pnComposeMessage.xml";
 	
 //> THINLET COMPONENTS
 	/** Thinlet component name: Button to send message */
@@ -82,14 +82,16 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 	private synchronized void init() {
 		assert(this.messagePanel == null) : "This has already been initialised.";
 		this.messagePanel = uiController.loadComponentFromFile(UI_FILE_MESSAGE_PANEL, this);
+		
 		Object pnRecipient = find(UiGeneratorControllerConstants.COMPONENT_PN_MESSAGE_RECIPIENT);
-		Object lbTooManyMessages = find(UiGeneratorControllerConstants.COMPONENT_LB_TOO_MANY_MESSAGES);
 		uiController.setVisible(pnRecipient, shouldDisplayRecipientField);
 		
+		Object lbTooManyMessages = find(UiGeneratorControllerConstants.COMPONENT_LB_TOO_MANY_MESSAGES);
 		if (lbTooManyMessages != null) {
 			uiController.setVisible(lbTooManyMessages, false);
 			uiController.setColor(lbTooManyMessages, "foreground", Color.RED);
 		}
+		
 		updateMessageDetails(find(COMPONENT_TF_RECIPIENT), "");
 	}
 
@@ -97,7 +99,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 		return this.uiController.find(this.messagePanel, component);
 	}
 
-	//> ACCESSORS
+//> ACCESSORS
 	/** @return {@link #messagePanel} */
 	public Object getPanel() {
 		return this.messagePanel;

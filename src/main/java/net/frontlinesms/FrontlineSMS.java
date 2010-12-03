@@ -65,7 +65,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.dao.DataAccessResourceFailureException;
 
 /**
  * 
@@ -152,7 +151,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 	private ConfigurableApplicationContext applicationContext;
 	
 	/** Initialise {@link #applicationContext}. */
-	public void initApplicationContext() throws DataAccessResourceFailureException {
+	public void initApplicationContext() {
 		// Load the data mode from the app.properties file
 		AppProperties appProperties = AppProperties.getInstance();
 		

@@ -18,10 +18,6 @@ public class MmsEmailTest extends BaseTestCase {
 		MmsMessage mmsMessage2 = mockMmsMessage("+79036600780", null, mockBinaryMmsMessagePart("Test_" + System.currentTimeMillis() + ".", "image/gif", 5231));
 		MmsMessage mmsMessage3 = mockMmsMessage("+79036600780", null, mockBinaryMmsMessagePart("Test_" + System.currentTimeMillis() + ".gif", "image/jpeg", 5231));
 
-		System.err.println("1 - " + ((BinaryMmsMessagePart) mmsMessage1.getParts().get(0)).getFilename());
-		System.err.println("2 - " + ((BinaryMmsMessagePart) mmsMessage2.getParts().get(0)).getFilename());
-		System.err.println("3 - " + ((BinaryMmsMessagePart) mmsMessage3.getParts().get(0)).getFilename());
-		
 		FrontlineMultimediaMessage mms1 = MmsUtils.create(mmsMessage1);
 		FrontlineMultimediaMessage mms2 = MmsUtils.create(mmsMessage2);
 		FrontlineMultimediaMessage mms3 = MmsUtils.create(mmsMessage3);
