@@ -140,8 +140,8 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 			useForReceiving = false;
 			deleteMessagesAfterReceiving = false;
 		}
-		String smscNumber = ui.getText(ui.find(COMPONENT_SMSC_NUMBER));
-		String simPin = ui.getText(ui.find(COMPONENT_SIM_PIN));
+		String smscNumber = ui.getText(find(COMPONENT_SMSC_NUMBER));
+		String simPin = ui.getText(find(COMPONENT_SIM_PIN));
 		
 		device.setUseForSending(useForSending);
 		device.setUseDeliveryReports(useDeliveryReports);
