@@ -20,6 +20,7 @@ import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMultimediaMessage;
 import net.frontlinesms.data.domain.FrontlineMessage.Status;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
+import net.frontlinesms.data.importexport.MessageCsvImportReport.MessageCsvImportReportState;
 import net.frontlinesms.data.repository.MessageDao;
 import net.frontlinesms.ui.i18n.FileLanguageBundle;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -57,6 +58,14 @@ public class MessageCsvImporter extends CsvImporter {
 		for(String[] lineValues : super.getRawValues()) {
 			String typeString = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_MESSAGE_TYPE);
 			String status = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_MESSAGE_STATUS);
+			
+			Status statusType;
+			try {
+				statusType = Status.valueOf(status.toUpperCase());
+			} catch (IllegalArgumentException ex) {
+				return new MessageCsvImportReport(MessageCsvImportReportState.FAILURE);
+			}
+			
 			String sender = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_SENDER_NUMBER);
 			String recipient = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_RECIPIENT_NUMBER);
 			String dateString = rowFormat.getOptionalValue(lineValues, CsvUtils.MARKER_MESSAGE_DATE);
@@ -95,7 +104,7 @@ public class MessageCsvImporter extends CsvImporter {
 				}
 			}
 			
-			message.setStatus(Status.valueOf(status.toUpperCase()));
+			message.setStatus(statusType);
 			messageDao.saveMessage(message);
 		}
 		

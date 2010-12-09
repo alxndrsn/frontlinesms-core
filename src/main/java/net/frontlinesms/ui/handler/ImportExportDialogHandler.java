@@ -25,6 +25,8 @@ import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.FrontlineMessage.Type;
 import net.frontlinesms.data.importexport.ContactCsvImporter;
+import net.frontlinesms.data.importexport.MessageCsvImportReport;
+import net.frontlinesms.data.importexport.MessageCsvImportReport.MessageCsvImportReportState;
 import net.frontlinesms.data.importexport.MessageCsvImporter;
 import net.frontlinesms.data.repository.ContactDao;
 import net.frontlinesms.data.repository.GroupDao;
@@ -146,6 +148,8 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 	private static final String COMPONENT_PN_VALUES_TABLE = "pnValuesTable";
 	private static final String COMPONENT_PN_DETAILS = "pnDetails";
 	private static final String COMPONENT_PN_CHECKBOXES_2 = "pnInfo2";
+	
+	private static final String I18N_IMPORT_BAD_CSV = "importexport.import.bad.csv";
 	private static final String I18N_IMPORT_SUCCESSFUL = "importexport.import.successful";
 	private static final String I18N_MULTIMEDIA_MESSAGES_IMPORT_SUCCESSFUL = "importexport.import.multimedia.messages.successful";
 	
@@ -292,12 +296,18 @@ public class ImportExportDialogHandler implements ThinletUiEventHandler {
 				this.uiController.infoMessage(InternationalisationUtils.getI18nString(I18N_IMPORT_SUCCESSFUL));
 			} else if (type == EntityType.MESSAGES) {
 				CsvRowFormat rowFormat = getRowFormatForMessage();
-				int multimediaMessagesCount = ((MessageCsvImporter) importer).importMessages(this.messageDao, rowFormat).getMultimediaMessageCount(); // FIXME importer should be of known type depending on the handler we are in
-				
-				if (multimediaMessagesCount == 0) {
-					this.uiController.infoMessage(InternationalisationUtils.getI18nString(I18N_IMPORT_SUCCESSFUL));
+				MessageCsvImportReport importMessages = ((MessageCsvImporter) importer).importMessages(this.messageDao, rowFormat);
+				if (!importMessages.getState().equals(MessageCsvImportReportState.FAILURE)) {
+					int multimediaMessagesCount = importMessages.getMultimediaMessageCount(); // FIXME importer should be of known type depending on the handler we are in
+					
+					if (multimediaMessagesCount == 0) {
+						this.uiController.infoMessage(InternationalisationUtils.getI18nString(I18N_IMPORT_SUCCESSFUL));
+					} else {
+						this.uiController.infoMessage(InternationalisationUtils.getI18nStrings(I18N_MULTIMEDIA_MESSAGES_IMPORT_SUCCESSFUL, String.valueOf(multimediaMessagesCount)).toArray(new String[0]));
+					}
 				} else {
-					this.uiController.infoMessage(InternationalisationUtils.getI18nStrings(I18N_MULTIMEDIA_MESSAGES_IMPORT_SUCCESSFUL, String.valueOf(multimediaMessagesCount)).toArray(new String[0]));
+					this.uiController.alert(InternationalisationUtils.getI18nString(I18N_IMPORT_BAD_CSV));
+					return;
 				}
 			} else {
 				throw new IllegalStateException("Import is not supported for: " + getType());
