@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tab text="i18n.connections.tab.name" icon="/icons/big_connection.png" name=":advancedPhoneManager">
 	<panel columns="4" top="9" bottom="9" left="9" right="9" gap="9">
-		<label rowspan="4" valign="top" icon="/icons/header/phoneManager.png"/>
+		<label rowspan="4" valign="top" icon="/icons/header/connectionManager.png"/>
 		<label icon="/icons/connection.png" text="i18n.connections.active.connections" colspan="3"/>
 		<table name="phoneManager_modemList" colspan="3" weightx="2" weighty="2" perform="showPhoneSettingsDialog(this)">
 			<header>
