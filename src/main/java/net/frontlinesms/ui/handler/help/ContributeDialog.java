@@ -80,8 +80,15 @@ public class ContributeDialog implements ThinletUiEventHandler {
 	 * @param emailAddress
 	 */
 	private void mailTo(String emailAddress, String subject, String body) {
+		if (subject.length() > 0) {
+			subject = "?subject=" + subject;
+		}
+		if (body.length() > 0) {
+			body = (subject.length() > 0 ? "&" : "?") + "body=" + body;
+		}
+		this.ui.alert(subject + body);
 		try {
-			FrontlineUtils.openDefaultMailClient(new URI("mailto", emailAddress, "?subject=" + subject + "&body=" + body));
+			FrontlineUtils.openDefaultMailClient(new URI("mailto", emailAddress, subject + body));
 		} catch (URISyntaxException e1) {}
 	}
 	
