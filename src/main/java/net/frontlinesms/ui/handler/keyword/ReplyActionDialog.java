@@ -59,6 +59,7 @@ public class ReplyActionDialog extends BaseActionDialog {
 		final int numberOfRecipients = 1;
 		
 		MessagePanelHandler messagePanelController = MessagePanelHandler.create(this.ui, shouldDisplayRecipientField, shouldCheckMaxMessageLength, numberOfRecipients);
+		messagePanelController.hideSendButton();
 		Object pnMessage = messagePanelController.getPanel();
 		Object pnBottom = ui.find(pnMessage, COMPONENT_PN_BOTTOM);
 		ui.remove(ui.getItem(pnBottom, 2));

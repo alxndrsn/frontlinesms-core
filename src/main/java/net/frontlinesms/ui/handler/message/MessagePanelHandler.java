@@ -350,6 +350,10 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 		this.updateCost();
 	}
 	
+	public void hideSendButton() {
+		this.uiController.setVisible(find(COMPONENT_BT_SEND), false);
+	}
+	
 	public void updateCost() {
 		LOG.trace("Updating message panel cost estimate");
 		
