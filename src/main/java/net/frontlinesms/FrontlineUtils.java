@@ -44,6 +44,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import net.frontlinesms.data.domain.*;
 import net.frontlinesms.email.EmailException;
@@ -315,7 +316,10 @@ public class FrontlineUtils {
 
 	/** prioritised guess of users' browser preference */
 	private static final String[] BROWSERS = {"epiphany", "firefox", "mozilla", "konqueror", "netscape", "opera", "links", "lynx"};
-
+	
+	/** Number of milliseconds in a day */
+	private static final long MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
+	
 	/**
 	 * <p>This method assumes that any URLs starting with something other than http:// are
 	 * links to the FrontlineSMS help manual.  On Linux and Windows machines, this is
@@ -572,5 +576,23 @@ public class FrontlineUtils {
 							  subject,
 							  textContent,
 							  new File(attachment));
+	}
+
+	/**
+	 * Used to calculate the exact last moment a date should 
+	 * @param date
+	 * @return
+	 */
+	public static Long getFirstMillisecondOfNextDay(Date date) {
+		return date.getTime() + MILLIS_PER_DAY;
+	}
+
+	public static boolean isSimpleFormat(Date date) {
+		Calendar cal = new GregorianCalendar();
+		cal.setTime(date);
+		
+		return cal.get(Calendar.HOUR_OF_DAY) == 0 
+			&& cal.get(Calendar.MINUTE) == 0
+			&& cal.get(Calendar.MILLISECOND) == 0;
 	}
 }

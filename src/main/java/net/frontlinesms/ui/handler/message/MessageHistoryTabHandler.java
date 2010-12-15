@@ -26,8 +26,11 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.TAB_MESSAGE_HIS
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -85,9 +88,6 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 	public static final String COMPONENT_MESSAGE_LIST = "messageList";
 	/** UI Component name: the list of groups.  This is a placeholder which is ultimately replaced. */
 	private static final String COMPONENT_GROUP_LIST = "groupListPlaceholder";
-	
-	/** Number of milliseconds in a day */
-	private static final long MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
 
 	private static final String COMPONENT_GROUP_PANEL = "pnGroups";
 	private static final String COMPONENT_CONTACT_LIST = "lsContacts";
@@ -496,7 +496,15 @@ public class MessageHistoryTabHandler extends BaseTabHandler implements PagedCom
 		} catch (ParseException ex) {}
 		Long newEnd = null;
 		try {
-			newEnd = InternationalisationUtils.parseDate(tfEndDateValue).getTime() + MILLIS_PER_DAY;
+			Date parsedDate = InternationalisationUtils.parseDate(tfEndDateValue);
+
+			if (!FrontlineUtils.isSimpleFormat(parsedDate)) {
+				// If a time in the day is specified, let's filter until this exact moment
+				newEnd = parsedDate.getTime();
+			} else {
+				// Otherwise, messages received until the end of the whole day should be displayed 
+				newEnd = FrontlineUtils.getFirstMillisecondOfNextDay(parsedDate);
+			}
 		} catch (ParseException ex) {}
 		
 		// We refresh the list once if one of the date fields changed to either a valid or an empty date 
