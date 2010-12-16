@@ -497,7 +497,7 @@ public class FrontlineUtils {
 	public static String urlDecode(String string) {
 		if(string == null) return null;
 		try {
-			string = URLDecoder.decode(string, "UTF-8");
+			string = URLDecoder.decode(string, "UTF-8").trim();
 		} catch (UnsupportedEncodingException e) { /* This will never happen - UTF-8 should always be supported by every JVM. */ }
 		return string;
 	}
