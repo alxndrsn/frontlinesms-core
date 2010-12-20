@@ -257,7 +257,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 		if (shouldDisplayRecipientField) {
 			if (recipients instanceof Group) {
 				shouldEnableSendButton &= this.numberToSend > 0;
-			} else {
+			} else if (recipients != null) {
 				shouldEnableSendButton &= !this.uiController.getText(recipients).isEmpty();
 			}
 		}
