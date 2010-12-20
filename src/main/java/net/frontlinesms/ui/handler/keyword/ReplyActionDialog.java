@@ -30,6 +30,7 @@ public class ReplyActionDialog extends BaseActionDialog {
 //> UI LAYOUT FILES
 	/** UI XML Layout file: Reply action edit dialog */
 	public static final String UI_FILE_NEW_KACTION_REPLY_FORM = "/ui/core/keyword/dgEditReplyAction.xml";
+	private MessagePanelHandler messagePanelHandler;
 	
 //> INSTANCE PROPERTIES
 	/** @return the path to the thinlet layout file for the reply action edit dialog */
@@ -58,9 +59,9 @@ public class ReplyActionDialog extends BaseActionDialog {
 		final boolean shouldCheckMaxMessageLength = false;
 		final int numberOfRecipients = 1;
 		
-		MessagePanelHandler messagePanelController = MessagePanelHandler.create(this.ui, shouldDisplayRecipientField, shouldCheckMaxMessageLength, numberOfRecipients);
-		messagePanelController.hideSendButton();
-		Object pnMessage = messagePanelController.getPanel();
+		messagePanelHandler = MessagePanelHandler.create(this.ui, shouldDisplayRecipientField, shouldCheckMaxMessageLength, numberOfRecipients);
+		messagePanelHandler.hideSendButton();
+		Object pnMessage = messagePanelHandler.getPanel();
 		Object pnBottom = ui.find(pnMessage, COMPONENT_PN_BOTTOM);
 		ui.remove(ui.getItem(pnBottom, 2));
 		ui.remove(ui.getItem(pnBottom, 0));
@@ -85,7 +86,7 @@ public class ReplyActionDialog extends BaseActionDialog {
 			Object tfMessage = find(COMPONENT_TF_MESSAGE);
 			// Set the initial value of the reply text
 			ui.setText(tfMessage, action.getUnformattedReplyText());
-			messagePanelController.updateMessageDetails(find(COMPONENT_TF_RECIPIENT), action.getUnformattedReplyText());
+			messagePanelHandler.updateMessageDetails(find(COMPONENT_TF_RECIPIENT), action.getUnformattedReplyText());
 			// Put the cursor (caret) at the end of the text area, so the click on a constant
 			// button inserts it at the end by default
 			ui.setCaretPosition(tfMessage, ui.getText(tfMessage).length());
@@ -102,6 +103,12 @@ public class ReplyActionDialog extends BaseActionDialog {
 	private void setIncludeAction(Object include, FormatterMarkerType markerType) {
 		ui.setAction(include, "addConstantToCommand(tfMessage.text, tfMessage, '" + markerType.toString() + "')", this.getDialogComponent(), this);
 	}
+	
+	@Override
+	public void textChanged (String text) {
+		this.messagePanelHandler.updateMessageDetails(null, text);
+	}
+
 
 	@Override
 	protected void handleRemoved() {
