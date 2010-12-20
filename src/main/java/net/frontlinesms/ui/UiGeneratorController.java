@@ -58,6 +58,8 @@ import net.frontlinesms.ui.handler.core.DatabaseSettingsPanel;
 import net.frontlinesms.ui.handler.email.*;
 import net.frontlinesms.ui.handler.help.AboutDialog;
 import net.frontlinesms.ui.handler.help.ContributeDialog;
+import net.frontlinesms.ui.handler.importexport.ExportDialogHandlerFactory;
+import net.frontlinesms.ui.handler.importexport.ImportDialogHandlerFactory;
 import net.frontlinesms.ui.handler.keyword.KeywordTabHandler;
 import net.frontlinesms.ui.handler.message.*;
 import net.frontlinesms.ui.handler.mms.MmsSettingsDialogHandler;
@@ -584,8 +586,8 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param typeName The desired type
 	 */
 	public void showExportWizard(Object list, String typeName){
-		ImportExportDialogHandler.EntityType type = ImportExportDialogHandler.EntityType.getFromString(typeName);
-		new ImportExportDialogHandler(this).showWizard(true, list, type);
+		ExportDialogHandlerFactory.createHandler(this, typeName).showWizard(list);
+		
 	}
 	
 	/**
@@ -593,18 +595,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param type The desired type
 	 */
 	public void showExportWizard(String typeName){
-		ImportExportDialogHandler.EntityType type = ImportExportDialogHandler.EntityType.getFromString(typeName);
-		new ImportExportDialogHandler(this).showWizard(true, type);
-	}
-	
-	/**
-	 * Shows the import wizard dialog, according to the supplied type.
-	 * @param list The list to get selected items from.
-	 * @param type The desired type
-	 */
-	public void showImportWizard(Object list, String typeName){
-		ImportExportDialogHandler.EntityType type = ImportExportDialogHandler.EntityType.getFromString(typeName);
-		new ImportExportDialogHandler(this).showWizard(false, list, type);
+		ExportDialogHandlerFactory.createHandler(this, typeName).showWizard();
 	}
 	
 	/**
@@ -612,8 +603,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 	 * @param type The desired type (0 for Contacts, 1 for Messages and 2 for Keywords)
 	 */
 	public void showImportWizard(String typeName){
-		ImportExportDialogHandler.EntityType type = ImportExportDialogHandler.EntityType.getFromString(typeName);
-		new ImportExportDialogHandler(this).showWizard(false, type);
+		ImportDialogHandlerFactory.createHandler(this, typeName).showWizard();
 	}
 
 	/**
