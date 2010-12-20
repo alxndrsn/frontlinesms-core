@@ -6,6 +6,7 @@ import net.frontlinesms.data.repository.SmsModemSettingsDao;
 import net.frontlinesms.messaging.sms.modem.SmsModem;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.handler.settings.SettingsDeviceSectionHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 
@@ -45,8 +46,6 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 //> INSTANCE PROPERTIES
 	/** I18n Text Key: TODO */
 	private static final String COMMON_SETTINGS_FOR_PHONE = "common.settings.for.phone";
-	/** FIXME comment please */
-	private static final String UI_COMPONENT_PN_DEVICE_SETTINGS = "pnDeviceSettings";
 	
 	/** Logger */
 	private Logger LOG = FrontlineUtils.getLogger(this.getClass());
@@ -141,8 +140,8 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 			useForReceiving = false;
 			deleteMessagesAfterReceiving = false;
 		}
-		String smscNumber = ui.getText(ui.find(COMPONENT_SMSC_NUMBER));
-		String simPin = ui.getText(ui.find(COMPONENT_SIM_PIN));
+		String smscNumber = ui.getText(find(COMPONENT_SMSC_NUMBER));
+		String simPin = ui.getText(find(COMPONENT_SIM_PIN));
 		
 		device.setUseForSending(useForSending);
 		device.setUseDeliveryReports(useDeliveryReports);
@@ -179,14 +178,20 @@ public class DeviceSettingsDialogHandler implements ThinletUiEventHandler {
 			smsModemSettingsDao.updateSmsModemSettings(settings);
 		}
 		
-		// TODO check if this value has changed iff there is any value to that
+		// TODO check if this value has changed if there is any value to that
 		device.setSmscNumber(smscNumber);
-		// TODO check if this value has changed iff there is any value to that
+		// TODO check if this value has changed if there is any value to that
 		// TODO how is the PIN change propagated?  Guessing that we will need to reconnect to the phone.
 		device.setSimPin(simPin);
 		
 		removeDialog();
 	}
+	
+	/** Used by the {@link SettingsDeviceSectionHandler} */
+	public void smscNumberChanged(String smscNumber) { }
+	
+	/** Used by the {@link SettingsDeviceSectionHandler} */
+	public void pinChanged(String pin) {}
 	
 	/** TODO someone please rename this method */
 	public void phoneManagerDetailsUse(Object radioButton) {

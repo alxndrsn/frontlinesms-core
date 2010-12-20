@@ -19,11 +19,12 @@ public class SettingsMmsSectionHandler extends SettingsAbstractEmailsSectionHand
 	private static final String UI_COMPONENT_PN_EMAIL_ACCOUNTS = "pnEmailAccounts";
 	private static final String UI_COMPONENT_TF_POLLING_FREQUENCY = "tfPollFrequency";
 	
+	private static final String SECTION_ICON = "/icons/mms.png";
 	private static final String SECTION_ITEM_POLLING_FREQUENCY = "SERVICES_MMS_POLLING_FREQUENCY";
 	
 	private static final String I18N_INVALID_POLLING_FREQUENCY = "settings.message.mms.invalid.polling.frequency";
 	private static final String I18N_SETTINGS_MENU_MMS = "settings.menu.mms";
-
+	
 	public SettingsMmsSectionHandler (UiGeneratorController ui) {
 		super(ui, true);
 	}
@@ -73,10 +74,10 @@ public class SettingsMmsSectionHandler extends SettingsAbstractEmailsSectionHand
 		
 		try {
 			if (pollFrequency == null || Integer.parseInt(pollFrequency) <= 0) {
-				validationMessages.add(new FrontlineValidationMessage(I18N_INVALID_POLLING_FREQUENCY, null));
+				validationMessages.add(new FrontlineValidationMessage(I18N_INVALID_POLLING_FREQUENCY, null, getIcon()));
 			}
 		} catch (NumberFormatException e) {
-			validationMessages.add(new FrontlineValidationMessage(I18N_INVALID_POLLING_FREQUENCY, null));
+			validationMessages.add(new FrontlineValidationMessage(I18N_INVALID_POLLING_FREQUENCY, null, getIcon()));
 		}
 		
 		return validationMessages;
@@ -85,9 +86,13 @@ public class SettingsMmsSectionHandler extends SettingsAbstractEmailsSectionHand
 	public String getTitle() {
 		return InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_MMS);
 	}
+	
+	private String getIcon() {
+		return SECTION_ICON;
+	}
 //> UI EVENT METHODS
 
 	public Object getSectionNode() {
-		return createSectionNode(InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_MMS), this, "/icons/mms.png");
+		return createSectionNode(InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_MMS), this, getIcon());
 	}
 }

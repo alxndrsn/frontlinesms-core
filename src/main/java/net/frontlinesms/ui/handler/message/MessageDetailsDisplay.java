@@ -107,7 +107,7 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 			ui.setColumns(panel, 1);
 
 			File mediaFile = MmsUtils.getFile(part);
-			String openAction = "openMultimediaPart('" + mediaFile.getPath() + "')";
+			String openAction = "openMultimediaPart('" + part.getFilename() + "')";
 			
 			Image thumb = null;
 			try {
@@ -141,7 +141,7 @@ public class MessageDetailsDisplay implements ThinletUiEventHandler {
 	}
 
 	public void openMultimediaPart(String filename) {
-		FrontlineUtils.openExternalBrowser(filename);
+		FrontlineUtils.openExternalBrowser(MmsUtils.getAbsolutePath(filename));
 	}
 
 	/**

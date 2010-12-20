@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <panel name="pnGeneral" gap="5" weightx="2" columns="1">
 	<panel icon="/icons/hits.png" text="i18n.stats.dialog.statistics" weightx="1" border="true" columns="1" gap="7" top="5" left="5" bottom="5" right="5">
-        <checkbox action="promptStatsChanged" name="cbPromptStats" text="Prompt the statistics dialog every month?"/>
-        <checkbox action="authorizeStatsChanged" name="cbAuthorizeStats" text="Authorize statistics sending automatically?"/>
+        <checkbox action="promptStatsChanged" name="cbPromptStats" text="i18n.settings.general.prompt.statistics"/>
+        <checkbox action="authorizeStatsChanged" name="cbAuthorizeStats" text="i18n.settings.general.authorize.statistics"/>
 	</panel>
 	<panel icon="/icons/money.png" text="i18n.common.cost.estimator" weightx="1" border="true" columns="1" gap="7" top="5" left="5" bottom="5" right="5">
         <panel gap="5">
@@ -23,8 +23,8 @@
   		    <button type="link" icon="/icons/about.png" action="openBrowser('http://download.oracle.com/javase/tutorial/i18n/format/decimalFormat.html')"/>
         </panel>
 	</panel>
-	<panel icon="/icons/flags/gb.png" text="Country" weightx="1" border="true" columns="2" gap="7" top="5" left="5" bottom="5" right="5">
-        <label text="Please select the country you're located in:"/>
+	<panel icon="/icons/flags/gb.png" text="i18n.common.country" weightx="1" border="true" columns="2" gap="7" top="5" left="5" bottom="5" right="5">
+        <label text="i18n.settings.general.select.country"/>
         <combobox action="countryChanged(this)" name="cbCountries" editable="false" width="150" height="20"/>
 	</panel>
 </panel>

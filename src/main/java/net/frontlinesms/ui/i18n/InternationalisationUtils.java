@@ -107,10 +107,7 @@ public class InternationalisationUtils {
 			} catch (MissingResourceException ex) {
 			}
 		}
-		String value = Thinlet.DEFAULT_ENGLISH_BUNDLE.get(key);
-		if(value == null) {
-			return key;
-		} else return value;
+		return Thinlet.DEFAULT_ENGLISH_BUNDLE.get(key);
 	}
 	
 	/**
@@ -233,6 +230,7 @@ public class InternationalisationUtils {
 		String regexPattern = "\\D";
 		Pattern pattern = Pattern.compile(regexPattern);
 		Matcher matcher = pattern.matcher(currencyString);
+		
 
 		//Execute if currencyString has the specified pattern
 		if (matcher.find()) {
@@ -241,6 +239,8 @@ public class InternationalisationUtils {
 			
 			if (splitValues.length == 0) {
 				throw new NumberFormatException();
+			} else if (splitValues.length == 1) {
+				currencyString = splitValues[0];
 			} else if (splitValues.length == 2) {
 				// Only one separator - assume its for decimal places
 				currencyString = splitValues[0] + "." + splitValues[1];

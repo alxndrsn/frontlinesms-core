@@ -49,6 +49,8 @@ public class SettingsAppearanceSectionHandler extends BaseSectionHandler impleme
 	private static final String I18N_SETTINGS_MESSAGE_EMPTY_CUSTOM_LOGO = "settings.message.empty.custom.logo";
 	private static final String I18N_SETTINGS_MENU_APPEARANCE = "settings.menu.appearance";
 
+	private static final String SECTION_ICON = "/icons/display.png";
+
 	public SettingsAppearanceSectionHandler (UiGeneratorController uiController) {
 		super(uiController);
 		this.uiController = uiController;
@@ -164,7 +166,7 @@ public class SettingsAppearanceSectionHandler extends BaseSectionHandler impleme
 		// Home tab logo
 		if (this.uiController.isSelected(find(COMPONENT_CB_HOME_TAB_USE_CUSTOM_LOGO))
 				&& this.uiController.getText(find(COMPONENT_TF_IMAGE_SOURCE)).isEmpty()) {
-			validationMessages.add(new FrontlineValidationMessage (I18N_SETTINGS_MESSAGE_EMPTY_CUSTOM_LOGO, null));
+			validationMessages.add(new FrontlineValidationMessage (I18N_SETTINGS_MESSAGE_EMPTY_CUSTOM_LOGO, null, getIcon()));
 		}
 		
 		return validationMessages;
@@ -230,6 +232,10 @@ public class SettingsAppearanceSectionHandler extends BaseSectionHandler impleme
 	}
 	
 	public Object getSectionNode() {
-		return createSectionNode(InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_APPEARANCE), this, "/icons/display.png");
+		return createSectionNode(InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_APPEARANCE), this, this.getIcon());
+	}
+
+	private String getIcon() {
+		return SECTION_ICON;
 	}
 }

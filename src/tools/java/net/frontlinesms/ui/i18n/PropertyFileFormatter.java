@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
+import javax.naming.spi.DirectoryManager;
+
 import net.frontlinesms.resources.FilePropertySet;
 
 /**
@@ -57,35 +59,59 @@ public class PropertyFileFormatter {
 			printUsage();
 		}
 		
-		String baseFile = args[0];
+		String baseFilename = args[0];
 		
-		info("Creating new base file from: " + baseFile);
-		PropertyFileFormatter formatter = new PropertyFileFormatter(VerbatimPropertiesFile.create(new File(baseFile)));
-
-		String targetDirPath = args[1];
-		info("New files will be output to: " + targetDirPath);
-		File targetDir = new File(targetDirPath);
-		
-		String[] processFileNames;
-		if(argOptionalPresent(args, 'd')) {
-			File[] processFiles = new File(getOptionalArg(args, 'd')).listFiles(PROPERTIES_FILENAME_FILTER);
-			processFileNames = new String[processFiles.length];
-			for (int i = 0; i < processFiles.length; i++) {
-				File file = processFiles[i];
-				processFileNames[i] = file.getAbsolutePath();
-			}
-		} else {
-			// A list of filenames should be provided
-			int processFileCount = args.length - 2;
+		info("Creating new base file from: " + baseFilename);
+		File baseFile = checkFile(baseFilename);
+		if (baseFile != null) {
+			PropertyFileFormatter formatter = new PropertyFileFormatter(VerbatimPropertiesFile.create(baseFile));
+	
+			String targetDirPath = args[1];
+			info("New files will be output to: " + targetDirPath);
+			File targetDir = new File(targetDirPath);
 			
-			if(processFileCount <= 0){
-				throw new RuntimeException("No files listed for processing");
+			if (!targetDir.exists()) {
+				info("The directory \"" + targetDirPath + "\" couldn't be found. Creating...");
+				
+				if (targetDir.mkdirs()) {
+					info("The directory \"" + targetDirPath + "\" has been created. Processing...");
+				} else {
+					warn("The directory \"" + targetDirPath + "\" couldn't be created. Aborting...");
+					return;
+				}
 			}
 			
-			processFileNames = new String[processFileCount];
-			System.arraycopy(args, 2, processFileNames, 0, processFileNames.length);
+			String[] processFileNames;
+			if(argOptionalPresent(args, 'd')) {
+				File[] processFiles = new File(getOptionalArg(args, 'd')).listFiles(PROPERTIES_FILENAME_FILTER);
+				processFileNames = new String[processFiles.length];
+				for (int i = 0; i < processFiles.length; i++) {
+					File file = processFiles[i];
+					processFileNames[i] = file.getAbsolutePath();
+				}
+			} else {
+				// A list of filenames should be provided
+				int processFileCount = args.length - 2;
+				
+				if(processFileCount <= 0){
+					throw new RuntimeException("No files listed for processing");
+				}
+				
+				processFileNames = new String[processFileCount];
+				System.arraycopy(args, 2, processFileNames, 0, processFileNames.length);
+			}
+			process(formatter, targetDir, processFileNames);
 		}
-		process(formatter, targetDir, processFileNames);
+	}
+	
+	private static File checkFile(String filename) {
+		File file;
+		if (!(file = new File(filename)).exists()) {
+			warn("The file " + filename + " does not exist. Aborting.");
+			return null;
+		}
+		
+		return file;
 	}
 
 	private static void printUsage() {
@@ -98,18 +124,20 @@ public class PropertyFileFormatter {
 
 	private static void process(PropertyFileFormatter formatter, File targetDir, String... filenames) throws IOException {
 		for (String toFormat : filenames) {
-			File inFile = new File(toFormat);
-			if(!inFile.exists()) {
-				warn("Input file does not exist: " + inFile);
+//			File inFile = new File(toFormat);
+//			if(!inFile.exists()) {
+//				warn("Input file does not exist: " + inFile);
+//			}
+			File inFile = checkFile(toFormat);
+			if (inFile != null) {
+				File outFile = new File(targetDir, inFile.getName());
+				info("Processing file " + inFile + " -> " + outFile);
+				
+				FilePropertySet fps = FilePropertySet.load(inFile);
+				VerbatimPropertiesFile formattedPropertiesFile = formatter.format(fps.getProperties());
+				
+				VerbatimPropertiesFile.saveToFile(outFile, formattedPropertiesFile);
 			}
-			
-			File outFile = new File(targetDir, inFile.getName());
-			info("Processing file " + inFile + " -> " + outFile);
-			
-			FilePropertySet fps = FilePropertySet.load(inFile);
-			VerbatimPropertiesFile formattedPropertiesFile = formatter.format(fps.getProperties());
-			
-			VerbatimPropertiesFile.saveToFile(outFile, formattedPropertiesFile);
 		}		
 	}
 

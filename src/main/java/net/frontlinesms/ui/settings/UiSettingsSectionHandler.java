@@ -28,4 +28,6 @@ public interface UiSettingsSectionHandler {
 	   * @return The title of the section
 	   */
 	  public String getTitle();
+	  
+	  public Object getSectionNode();
 }

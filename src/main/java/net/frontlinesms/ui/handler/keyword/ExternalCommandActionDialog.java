@@ -10,6 +10,8 @@ import static net.frontlinesms.ui.UiGeneratorControllerConstants.COMPONENT_TF_ME
 
 import java.util.List;
 
+import net.frontlinesms.FrontlineSMSConstants;
+import net.frontlinesms.data.domain.FrontlineMessage;
 import net.frontlinesms.data.domain.Group;
 import net.frontlinesms.data.domain.Keyword;
 import net.frontlinesms.data.domain.KeywordAction;
@@ -38,6 +40,9 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 	private static final String COMPONENT_RB_TYPE_HTTP = "rbTypeHTTP";
 	private static final String COMPONENT_TF_COMMAND = "tfCommand";
 	private static final String COMPONENT_CB_FORWARD = "cbForward";
+	
+	private static final String I18N_EXTERNAL_COMMAND_TOO_LONG = "action.external.command.too.long";
+	private static final String I18N_MESSAGE_TOO_LONG = "message.too.long";
 	
 	/** DAO for {@link Group}s */
 	private final GroupDao groupDao;
@@ -165,6 +170,15 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 		
 		ExternalCommandType commandType = ui.isSelected(find(COMPONENT_RB_TYPE_HTTP)) ? KeywordAction.ExternalCommandType.HTTP_REQUEST : KeywordAction.ExternalCommandType.COMMAND_LINE;
 		String commandLine = ui.getText(find(COMPONENT_TF_COMMAND));
+		
+		if (commandLine.length() > FrontlineSMSConstants.EXTERNAL_COMMAND_MAX_LENGTH) {
+			log.debug("External command string is too long");
+			this.ui.alert(InternationalisationUtils.getI18nString(I18N_EXTERNAL_COMMAND_TOO_LONG, FrontlineSMSConstants.EXTERNAL_COMMAND_MAX_LENGTH));
+			log.trace("EXIT");
+			return;
+		}
+		
+		
 		ExternalCommandResponseType responseType = ExternalCommandResponseType.DONT_WAIT;
 		if (ui.isSelected(find(COMPONENT_RB_PLAIN_TEXT))) {
 			responseType = ExternalCommandResponseType.PLAIN_TEXT;
@@ -196,7 +210,14 @@ public class ExternalCommandActionDialog extends BaseActionDialog {
 					|| responseActionType == KeywordAction.ExternalCommandResponseActionType.REPLY_AND_FORWARD) {
 				message = ui.getText(find(COMPONENT_TF_MESSAGE));
 				log.debug("Message [" + message + "]");
+				if (message.length() > FrontlineMessage.SMS_MAX_CHARACTERS) {
+					// TODO: have a lower limit to anticipate variables substitutions?
+					this.ui.alert(InternationalisationUtils.getI18nString(I18N_MESSAGE_TOO_LONG));
+					return;
+				}
 			}
+			
+			
 			if (responseActionType == KeywordAction.ExternalCommandResponseActionType.FORWARD 
 					|| responseActionType == KeywordAction.ExternalCommandResponseActionType.REPLY_AND_FORWARD) {
 				group = ui.getGroup(ui.getSelectedItem(find(COMPONENT_EXTERNAL_COMMAND_GROUP_LIST)));

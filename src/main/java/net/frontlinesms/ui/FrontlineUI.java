@@ -149,6 +149,21 @@ public abstract class FrontlineUI extends ExtendedThinlet implements ThinletUiEv
 	}
 	
 	/**
+	 * Popup an alert to the user with the supplied messages.
+	 * @param alertMessages
+	 */
+	public void alert(Object[] alertItems) {
+		Object alertDialog = loadComponentFromFile(UI_FILE_ALERT);
+		Object pnAlerts = find(alertDialog, COMPONENT_PN_ALERTS);
+
+		for (Object alertItem : alertItems) {
+			add(pnAlerts, alertItem);
+		}
+		
+		add(alertDialog);
+	}
+	
+	/**
 	 * Popup an alert to the user with the supplied message.
 	 * @param alertMessage
 	 */

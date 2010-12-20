@@ -40,6 +40,8 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 	private static final String SECTION_ITEM_CURRENCY_FORMAT_IS_CUSTOM = "GENERAL_CURRENCY_IS_CUSTOM";
 	private static final String SECTION_ITEM_PROMPT_STATS = "GENERAL_STATS_PROMPT_DIALOG";
 
+	private static final String SECTION_ICON = "/icons/cog.png";
+
 	public SettingsGeneralSectionHandler (UiGeneratorController ui) {
 		super(ui);
 		this.uiController = ui;
@@ -224,19 +226,19 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 		try {
 			double costPerSmsSent = InternationalisationUtils.parseCurrency(this.uiController.getText(find(UI_COMPONENT_TF_COST_PER_SMS_SENT)));
 			if (costPerSmsSent < 0) {
-				validationMessages.add(new FrontlineValidationMessage(I18N_SETTINGS_INVALID_COST_PER_MESSAGE_SENT, null));
+				validationMessages.add(new FrontlineValidationMessage(I18N_SETTINGS_INVALID_COST_PER_MESSAGE_SENT, null, getIcon()));
 			}
 		} catch (NumberFormatException exc) {
-			validationMessages.add(new FrontlineValidationMessage(I18N_SETTINGS_INVALID_COST_PER_MESSAGE_SENT, null));
+			validationMessages.add(new FrontlineValidationMessage(I18N_SETTINGS_INVALID_COST_PER_MESSAGE_SENT, null, getIcon()));
 		}
 		
 		try {
 			double costPerSmsReceived = InternationalisationUtils.parseCurrency(this.uiController.getText(find(UI_COMPONENT_TF_COST_PER_SMS_RECEIVED)));
 			if (costPerSmsReceived < 0) {
-				validationMessages.add(new FrontlineValidationMessage(I18N_SETTINGS_INVALID_COST_PER_MESSAGE_RECEIVED, null));
+				validationMessages.add(new FrontlineValidationMessage(I18N_SETTINGS_INVALID_COST_PER_MESSAGE_RECEIVED, null, getIcon()));
 			}
 		} catch (NumberFormatException exc) {
-			validationMessages.add(new FrontlineValidationMessage(I18N_SETTINGS_INVALID_COST_PER_MESSAGE_RECEIVED, null));
+			validationMessages.add(new FrontlineValidationMessage(I18N_SETTINGS_INVALID_COST_PER_MESSAGE_RECEIVED, null, getIcon()));
 		}
 		
 		return validationMessages;
@@ -245,9 +247,13 @@ public class SettingsGeneralSectionHandler extends BaseSectionHandler implements
 	public String getTitle() {
 		return InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_GENERAL);
 	}
+
+	private String getIcon() {
+		return SECTION_ICON;
+	}
 	
 	public Object getSectionNode() {
-		Object generalRootNode = createSectionNode(InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_GENERAL), this, "/icons/cog.png");
+		Object generalRootNode = createSectionNode(InternationalisationUtils.getI18nString(I18N_SETTINGS_MENU_GENERAL), this, getIcon());
 		
 		SettingsDatabaseSectionHandler databaseHandler = new SettingsDatabaseSectionHandler(uiController);
 		uiController.add(generalRootNode, databaseHandler.getSectionNode());

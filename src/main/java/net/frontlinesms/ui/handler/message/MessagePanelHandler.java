@@ -257,7 +257,7 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 		if (shouldDisplayRecipientField) {
 			if (recipients instanceof Group) {
 				shouldEnableSendButton &= this.numberToSend > 0;
-			} else {
+			} else if (recipients != null) {
 				shouldEnableSendButton &= !this.uiController.getText(recipients).isEmpty();
 			}
 		}
@@ -348,6 +348,10 @@ public class MessagePanelHandler implements ThinletUiEventHandler, SingleGroupSe
 		uiController.remove(dialog);
 		this.numberToSend = 1;
 		this.updateCost();
+	}
+	
+	public void hideSendButton() {
+		this.uiController.setVisible(find(COMPONENT_BT_SEND), false);
 	}
 	
 	public void updateCost() {

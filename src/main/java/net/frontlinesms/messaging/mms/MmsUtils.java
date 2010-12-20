@@ -35,6 +35,7 @@ import org.apache.log4j.Logger;
 
 public class MmsUtils {
 	
+	private static final String MMS_DATA_DIRECTORY = "data/mms/";
 	private static final Logger log = FrontlineUtils.getLogger(MmsUtils.class);
 	
 	
@@ -140,7 +141,15 @@ public class MmsUtils {
 	}
 	
 	public static File getFile(FrontlineMultimediaMessagePart part) {
-		return new File(new File(ResourceUtils.getConfigDirectoryPath(), "data/mms"), part.getFilename());
+		return new File(getMmsPartsDirectory(), part.getFilename().replaceAll(" ", "_"));
+	}
+	
+	public static String getAbsolutePath(String filename) {
+		return new File(getMmsPartsDirectory(), filename).getPath();
+	}
+	
+	public static File getMmsPartsDirectory() {
+		return new File(ResourceUtils.getConfigDirectoryPath(), MMS_DATA_DIRECTORY);
 	}
 	
 	public static List<EmailMmsParser> getAllEmailMmsParsers () {

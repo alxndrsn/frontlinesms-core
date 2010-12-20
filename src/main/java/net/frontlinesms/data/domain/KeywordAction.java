@@ -142,6 +142,7 @@ public class KeywordAction {
 	private String emailRecipients;
 	private String emailSubject;
 	private ExternalCommandType externalCommandType;
+	@Column(length=FrontlineSMSConstants.EXTERNAL_COMMAND_MAX_LENGTH)
 	private String externalCommand;
 	private ExternalCommandResponseType externalCommandResponseType;
 	private ExternalCommandResponseActionType externalCommandResponseActionType;

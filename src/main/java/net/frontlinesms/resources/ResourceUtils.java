@@ -99,7 +99,7 @@ public class ResourceUtils {
 			if(!entry.isDirectory()) {
 				boolean remove = false;
 				File outputFile = new File(outputDirectory, entry.getName());
-				createDirectoryTree(outputFile);
+				outputFile.getParentFile().mkdirs();
 				if (outputFile.exists() && overwriteOverwriteables && isOverwriteable(outputFile)) {
 					File graveyard = new File(outputFile.getParentFile(), graveyardName);
 					graveyard.mkdir();
@@ -144,20 +144,6 @@ public class ResourceUtils {
 		// upgrade procedures we might have to go through
 		// TODO this should be made less indiscriminate - it would actually be very useful to keep a lot of config files
 		return true;
-	}
-
-	/**
-	 * Creates a directory and all directories above it.  This method calls itself recursively
-	 * in order to create the directory at the top of a tree first.
-	 * @param file
-	 */
-	public static void createDirectoryTree(File file) {
-		file = file.getParentFile();
-		if((!file.exists() || !file.isDirectory())) {
-			createDirectoryTree(file);
-			boolean success = file.mkdir();
-			if(!success) LOG.warn("Failed to create directory: " + file.getAbsolutePath());
-		}
 	}
 	
 	/**
