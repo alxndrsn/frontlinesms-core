@@ -294,7 +294,7 @@ public final class FrontlineSMSConstants {
 	public static final int KEYWORD_MAX_DESCRIPTION_LENGTH = 255;
 	
 	/** Maximum length of an external command **/
-	public static final int EXTERNAL_COMMAND_MAX_LENGTH = 255;
+	public static final int EXTERNAL_COMMAND_MAX_LENGTH = 1024;
 
 //> DATE FORMATS
 	/** [i18n key to Date format] years, months and days.
