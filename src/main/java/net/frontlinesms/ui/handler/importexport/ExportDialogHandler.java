@@ -131,7 +131,7 @@ public abstract class ExportDialogHandler<T> extends ImportExportDialogHandler {
 	protected abstract void doSpecialExport(String dataPath) throws IOException;
 	protected abstract void doSpecialExport(String dataPath, List<T> selected) throws IOException;
 	
-/**
+	/**
 	 * Gets the objects attached to the selected Thinlet components.
 	 * @param <T> Class of the selected objects
 	 * @param selectedClass Class of the selected Objects
