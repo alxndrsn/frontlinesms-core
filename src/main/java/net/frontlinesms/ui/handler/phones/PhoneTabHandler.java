@@ -37,6 +37,7 @@ import net.frontlinesms.messaging.sms.modem.SmsModemStatus;
 import net.frontlinesms.ui.Event;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
+import net.frontlinesms.ui.UiDestroyEvent;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.events.FrontlineUiUpateJob;
 import net.frontlinesms.ui.events.TabChangedNotification;
@@ -515,6 +516,10 @@ public class PhoneTabHandler extends BaseTabHandler implements FrontlineMessagin
 					|| entity instanceof SmsInternetServiceSettings) {
 				// If there is any change in the E-Mail accounts, we refresh the list of Messaging Services
 				refresh();
+			}
+		} else if (notification instanceof UiDestroyEvent) {
+			if(((UiDestroyEvent) notification).isFor(this.ui)) {
+				this.ui.getFrontlineController().getEventBus().unregisterObserver(this);
 			}
 		}
 	}

@@ -19,6 +19,7 @@ import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.ui.Icon;
 import net.frontlinesms.ui.ThinletUiEventHandler;
+import net.frontlinesms.ui.UiDestroyEvent;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
@@ -198,6 +199,10 @@ public class EmailAccountDialogHandler implements ThinletUiEventHandler, EventOb
 		if(event instanceof DatabaseEntityNotification<?>) {
 			if(((DatabaseEntityNotification<?>)event).getDatabaseEntity() instanceof EmailAccount) {
 				this.refresh();
+			}
+		} else if (event instanceof UiDestroyEvent) {
+			if(((UiDestroyEvent) event).isFor(this.ui)) {
+				this.ui.getFrontlineController().getEventBus().unregisterObserver(this);
 			}
 		}
 	}

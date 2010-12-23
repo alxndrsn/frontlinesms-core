@@ -14,6 +14,7 @@ import net.frontlinesms.plugins.PluginProperties;
 import net.frontlinesms.plugins.PluginSettingsController;
 import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.ui.ThinletUiEventHandler;
+import net.frontlinesms.ui.UiDestroyEvent;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.handler.settings.SettingsAppearanceSectionHandler;
@@ -259,6 +260,10 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 			}
 			
 			this.handleSaveButton(!this.changesList.isEmpty());
+		} else if (notification instanceof UiDestroyEvent) {
+			if(((UiDestroyEvent) notification).isFor(this.uiController)) {
+				this.uiController.getFrontlineController().getEventBus().unregisterObserver(this);
+			}
 		}
 	}
 

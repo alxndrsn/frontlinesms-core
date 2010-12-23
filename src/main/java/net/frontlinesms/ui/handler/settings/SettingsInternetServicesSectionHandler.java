@@ -11,6 +11,7 @@ import net.frontlinesms.settings.BaseSectionHandler;
 import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
 import net.frontlinesms.ui.ThinletUiEventHandler;
+import net.frontlinesms.ui.UiDestroyEvent;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.events.FrontlineUiUpateJob;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
@@ -129,6 +130,10 @@ public class SettingsInternetServicesSectionHandler extends BaseSectionHandler i
 	public void notify(FrontlineEventNotification notification) {
 		if (notification instanceof InternetServiceEventNotification) {
 			this.refresh();
+		} else if (notification instanceof UiDestroyEvent) {
+			if(((UiDestroyEvent) notification).isFor(this.uiController)) {
+				this.uiController.getFrontlineController().getEventBus().unregisterObserver(this);
+			}
 		}
 	}
 	

@@ -39,6 +39,7 @@ import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.ui.Icon;
+import net.frontlinesms.ui.UiDestroyEvent;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.BaseTabHandler;
@@ -637,6 +638,10 @@ public class ContactsTabHandler extends BaseTabHandler implements PagedComponent
 			if (newTabName.equals(TAB_CONTACT_MANAGER)) {
 				this.refresh();
 				this.ui.setStatus(InternationalisationUtils.getI18nString(MESSAGE_CONTACT_MANAGER_LOADED));
+			}
+		} else if (notification instanceof UiDestroyEvent) {
+			if(((UiDestroyEvent) notification).isFor(this.ui)) {
+				this.ui.getFrontlineController().getEventBus().unregisterObserver(this);
 			}
 		}
 	}

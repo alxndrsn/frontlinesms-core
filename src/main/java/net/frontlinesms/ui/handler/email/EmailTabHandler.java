@@ -28,6 +28,7 @@ import net.frontlinesms.data.domain.Email.Field;
 import net.frontlinesms.data.repository.EmailDao;
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
+import net.frontlinesms.ui.UiDestroyEvent;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.BaseTabHandler;
@@ -311,6 +312,10 @@ public class EmailTabHandler extends BaseTabHandler implements PagedComponentIte
 			if (newTabName.equals(TAB_EMAIL_LOG)) {
 				this.refresh();
 				this.ui.setStatus(InternationalisationUtils.getI18nString(MESSAGE_EMAILS_LOADED));
+			}
+		} else if (notification instanceof UiDestroyEvent) {
+			if(((UiDestroyEvent) notification).isFor(this.ui)) {
+				this.ui.getFrontlineController().getEventBus().unregisterObserver(this);
 			}
 		}
 	}

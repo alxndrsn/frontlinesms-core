@@ -1604,6 +1604,17 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 		}
 	}
 	
+	@Override
+	public boolean destroy() {
+		final boolean destroy = super.destroy();
+		if(destroy) {
+			EventBus bus = this.frontlineController.getEventBus();
+			bus.unregisterObserver(this);
+			bus.notifyObservers(new UiDestroyEvent(this));
+		}
+		return destroy;
+	}
+	
 
 	
 	/**

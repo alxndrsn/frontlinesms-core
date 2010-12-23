@@ -21,6 +21,7 @@ import net.frontlinesms.ui.Event;
 import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.FrontlineUiUtils;
 import net.frontlinesms.ui.Icon;
+import net.frontlinesms.ui.UiDestroyEvent;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.UiProperties;
@@ -332,6 +333,10 @@ public class HomeTabHandler extends BaseTabHandler implements EventObserver {
 					|| property.equals(UiProperties.CURRENCY_FORMAT)
 					|| property.equals(UiProperties.CURRENCY_FORMAT_IS_CUSTOM)) {
 				this.messagePanel.updateCost();
+			}
+		} else if (notification instanceof UiDestroyEvent) {
+			if(((UiDestroyEvent) notification).isFor(this.ui)) {
+				this.ui.getFrontlineController().getEventBus().unregisterObserver(this);
 			}
 		}
 	}

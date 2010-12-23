@@ -13,6 +13,7 @@ import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
 import net.frontlinesms.settings.BaseSectionHandler;
 import net.frontlinesms.ui.ThinletUiEventHandler;
+import net.frontlinesms.ui.UiDestroyEvent;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.events.FrontlineUiUpateJob;
 import net.frontlinesms.ui.handler.email.EmailAccountSettingsDialogHandler;
@@ -177,6 +178,10 @@ public abstract class SettingsAbstractEmailsSectionHandler extends BaseSectionHa
 						refresh();
 					}
 				}.execute();
+			}
+		} else if (event instanceof UiDestroyEvent) {
+			if(((UiDestroyEvent) event).isFor(this.uiController)) {
+				this.eventBus.unregisterObserver(this);
 			}
 		}
 	}

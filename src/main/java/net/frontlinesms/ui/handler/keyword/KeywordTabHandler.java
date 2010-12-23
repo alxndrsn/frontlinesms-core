@@ -39,6 +39,7 @@ import net.frontlinesms.data.repository.KeywordActionDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.events.EventObserver;
 import net.frontlinesms.events.FrontlineEventNotification;
+import net.frontlinesms.ui.UiDestroyEvent;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.events.FrontlineUiUpateJob;
 import net.frontlinesms.ui.events.TabChangedNotification;
@@ -840,6 +841,10 @@ public class KeywordTabHandler extends BaseTabHandler implements PagedComponentI
 			if (newTabName.equals(TAB_KEYWORD_MANAGER)) {
 				this.refresh();
 				this.ui.setStatus(InternationalisationUtils.getI18nString(MESSAGE_KEYWORDS_LOADED));
+			}
+		} else if (notification instanceof UiDestroyEvent) {
+			if(((UiDestroyEvent) notification).isFor(this.ui)) {
+				this.ui.getFrontlineController().getEventBus().unregisterObserver(this);
 			}
 		}
 	}

@@ -80,8 +80,7 @@ public class PluginProperties extends UserHomeFilePropertySet {
 			Class<PluginController> pluginClass = (Class<PluginController>) Class.forName(className);
 			return pluginClass;
 		} catch (Exception ex) {
-			// TODO should probably log the missing class
-			ex.printStackTrace();
+			LOG.warn("Could not load plugin class.", ex);
 			return null;
 		}
 	}
