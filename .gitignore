@@ -8,6 +8,7 @@ bin/
 .classpath
 .project
 .settings/
+.tmp/
 
 # FrontlineSMS resources bundle - this should be generated at build-time
 src/main/resources/resources.zip
@@ -28,13 +29,11 @@ test_temp/
 /.classpath
 /.project
 /.classpath
+/.tmp
 
 # FrontlineSMS ini file for applying local settings
 frontlinesms.ini
-<<<<<<< HEAD
 .bak/
-=======
 
 # OSX files
 .DS_Store
->>>>>>> goncalo-github/master
