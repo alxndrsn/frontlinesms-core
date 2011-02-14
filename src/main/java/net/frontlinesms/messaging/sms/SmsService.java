@@ -36,9 +36,6 @@ public interface SmsService extends FrontlineMessagingService {
 	/** Adds the supplied message to the outbox. */
 	public void sendSMS(FrontlineMessage outgoingMessage);
 	
-	/** Sets the {@link SmsListener} attached to this {@link SmsService}. */
-	public void setSmsListener(SmsListener smsListener);
-	
 	/** Check whether this device actually supports sending binary sms. */
 	public boolean isBinarySendingSupported();
 

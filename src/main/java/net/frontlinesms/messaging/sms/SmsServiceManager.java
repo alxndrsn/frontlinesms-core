@@ -500,7 +500,7 @@ public class SmsServiceManager extends Thread implements SmsListener  {
 	}
 
 	public void addSmsInternetService(SmsInternetService smsInternetService) {
-		smsInternetService.setSmsListener((SmsListener)smsListener);
+		smsInternetService.setSmsListener(smsListener);
 		if (smsInternetServices.contains(smsInternetService)) {
 			smsInternetService.restartThisThing();
 		} else {

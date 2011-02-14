@@ -47,9 +47,7 @@ import org.smslib.CService.MessageClass;
 public class SmsModem extends Thread implements SmsService {
 	
 //> CONSTANTS
-	private static final boolean SEND_BULK = true;
 	private static final int SMS_BULK_LIMIT = 10;
-
 
 	/** The time, in millis, that this phone handler must have been unresponsive for before it is deemed TIMED OUT
 	 * As far as I know there is no basis for the time chosen for this timeout. */
@@ -69,7 +67,7 @@ public class SmsModem extends Thread implements SmsService {
 	};
 
 	/** Logging object */
-	private static Logger LOG = FrontlineUtils.getLogger(SmsModem.class);
+	private final Logger LOG = FrontlineUtils.getLogger(this.getClass());
 		
 //> PROPERTIES
 	
@@ -78,13 +76,13 @@ public class SmsModem extends Thread implements SmsService {
 	 */
 	private long timeOfLastResponseFromPhone;
 
-	private final LinkedList<CIncomingMessage> inbox = new LinkedList<CIncomingMessage>();
+	private final ConcurrentLinkedQueue<CIncomingMessage> inbox = new ConcurrentLinkedQueue<CIncomingMessage>();
 	private final ConcurrentLinkedQueue<FrontlineMessage> outbox = new ConcurrentLinkedQueue<FrontlineMessage>();
 	/** The SmsListener to which this phone handler should report SMS Message events. */
-	private SmsListener smsListener;
+	private final SmsListener smsListener;
 
 	/** The name of the COM port that this PhoneHandler controls. */
-	private String portName;
+	private final String portName;
 	/**
 	 * Indicates whether this PhoneHandler's serial communication
 	 * thread is running.  This should *only* be set false in run()
@@ -155,6 +153,7 @@ public class SmsModem extends Thread implements SmsService {
 		 */	
 		super.setDaemon(true);
 
+		assert(smsListener != null);
 		this.smsListener = smsListener;
 		this.portName = portName;
 
@@ -195,9 +194,7 @@ public class SmsModem extends Thread implements SmsService {
 				+ (detail == null?"":": "+detail)
 				+ "]");
 		
-		if (smsListener != null) {
-			smsListener.smsDeviceEvent(this, this.status);
-		}
+		smsListener.smsDeviceEvent(this, this.status);
 	}
 	
 	/** @return {@link #statusDetail} */
@@ -389,17 +386,6 @@ public class SmsModem extends Thread implements SmsService {
 				// If we don't have a PIN, then don't set it!
 			}
 
-//			// If the GSM device is PIN protected, enter the PIN here.
-//			// PIN information will be used only when the GSM device reports
-//			// that it needs a PIN in order to continue.
-//			// If we have a simPin set in this class, use it now.  Otherwise we set a PIN of 0000 for legacy reasons.
-//			// TODO looking at this code, it may be foolish to assume a PIN of 0000 when we don't actually know what it is
-//			if(this.simPin != null) {
-//				cService.setSimPin(this.simPin);
-//			} else {
-//				cService.setSimPin("0000");
-//			}
-
 			// Some modems may require a SIM PIN 2 to unlock their full functionality.
 			// Like the Vodafone 3G/GPRS PCMCIA card.
 			// If you have such a modem, you should also define the SIM PIN 2.
@@ -457,12 +443,6 @@ public class SmsModem extends Thread implements SmsService {
 			LOG.debug("Connection successful!");
 			LOG.trace("EXIT");
 			return true;
-//		} catch (BadModemCredentialException ex) {
-//			String detail = ex.getClass().getSimpleName();
-//			if(ex.getMessage() != null) {
-//				detail += ": " + ex.getMessage();
-//			}
-//			this.setStatus(SmsModemStatus.BAD_CREDENTIAL, detail);
 		} catch (GsmNetworkRegistrationException e) {
 			this.setStatus(SmsModemStatus.GSM_REG_FAILED, null);
 		} catch (PortInUseException ex) {
@@ -527,25 +507,20 @@ public class SmsModem extends Thread implements SmsService {
 					}
 					// If there are any messages waiting to be sent, send them now.
 					if (useForSending) {
-						LOG.debug("Sending some pending messages. Outbox size is [" + outbox.size() + "]");
+						if(LOG.isDebugEnabled()) LOG.debug("Sending some pending messages. Outbox size is [" + outbox.size() + "]");
 						resetWatchdog();
 						long startTime = System.currentTimeMillis();
-						if(SEND_BULK) {
-							//create SMS list
-							LinkedList<FrontlineMessage> messageList = new LinkedList<FrontlineMessage>();
-							FrontlineMessage m;
-							while(messageList.size() < SMS_BULK_LIMIT && (m = outbox.poll()) != null) messageList.add(m);
-							if(messageList.size() > 0) {
-								LOG.debug("Sending bulk of [" + messageList.size() + "] message(s)");
-								sendSmsListDirect(messageList);
-							}
-						} else {
-							FrontlineMessage m = outbox.poll();
-							if(m != null) {
-								LOG.debug("Sending message [" + m.toString() + "]");
-								sendSmsDirect(m);
-								noActivity = false;
-							}
+
+						//create SMS list
+						LinkedList<FrontlineMessage> messageList = new LinkedList<FrontlineMessage>();
+						FrontlineMessage m;
+						while(messageList.size() < SMS_BULK_LIMIT
+								&& (m = outbox.poll()) != null) {
+							messageList.add(m);
+						}
+						if(messageList.size() > 0) {
+							LOG.debug("Sending bulk of [" + messageList.size() + "] message(s)");
+							sendSmsListDirect(messageList);
 						}
 						LOG.debug("Send messages took [" + (System.currentTimeMillis() - startTime) + "]");
 						resetWatchdog();
@@ -759,60 +734,56 @@ public class SmsModem extends Thread implements SmsService {
 	 * @return The number of new messages retrieved
 	 * @throws SMSLibDeviceException 
 	 */
-	@SuppressWarnings("unchecked")
-	public int checkForMessages() throws IOException, SMSLibDeviceException {	
+	private int checkForMessages() throws IOException, SMSLibDeviceException {	
 		LOG.trace("ENTER");
-		LinkedList messageList = new LinkedList();
 		resetWatchdog();
-		cService.readMessages(messageList, MessageClass.UNREAD); 
+		LinkedList<CIncomingMessage> messageList = new LinkedList<CIncomingMessage>();
+		cService.readMessages(messageList, MessageClass.UNREAD); // TODO make this changeable in settings - UNREAD vs ALL
 		resetWatchdog();
 
-		int messagesRead = messageList.size();
-
-		LOG.debug("[" + messagesRead + "] message(s) received.");
-		while (messageList.size() > 0) {
+		LOG.debug("[" + messageList.size() + "] message(s) received.");
+		for(CIncomingMessage msg : messageList) {
 			resetWatchdog();
-			CIncomingMessage msg = (CIncomingMessage) messageList.removeFirst();
+			log(msg);
+			setId(msg);
 
-			LOG.debug("- From [" + msg.getOriginator() + "]"
-					+ "\n -Message [" + msg.getText() + "]"
-					+ "\n -ID [" + msg.getId() + "]"
-					+ "\n -Mem Index [" + msg.getMemIndex() + "]"
-					+ "\n -Mem Location [" + msg.getMemLocation() + "]"
-					+ "\n -Message Encoding [" + msg.getMessageEncoding() + "]"
-					+ "\n -Protocol ID [" + msg.getPid() + "]"
-					+ "\n -Reference Number [" + msg.getRefNo() + "]"
-					+ "\n -Type [" + msg.getType() + "]"
-					+ "\n -Date [" + msg.getDate() + "]");
-
-			if (msisdn != null && msisdn.length() != 0) {
-				msg.setId(msisdn);
-			} else if (serialNumber != null && serialNumber.length() != 0) {
-				msg.setId(serialNumber);
-			} else if (imsiNumber != null) {
-				msg.setId(imsiNumber);
-			}
-			LOG.debug("Changed ID [" + msg.getId() + "]");
-
-			if (smsListener != null) {
-				if (useDeliveryReports || msg.getType() != CIncomingMessage.MessageType.StatusReport) {
-					smsListener.incomingMessageEvent(this, msg);
-				}
-			} else inbox.add(msg);
-
-			if (isDeleteMessagesAfterReceiving() || msg.getType() == CIncomingMessage.MessageType.StatusReport) {
-				//delete msg if is supposed to do it, or if it is a delivery report.
-				LOG.debug("Removing message [" + msg.getId() + "] from phone.");
-				cService.deleteMessage(msg);
-			}
-			
+			addToInboxIfAppropriate(msg);
+			deleteIfAppropriate(msg);
 			resetWatchdog();
 		}
 
 		LOG.trace("EXIT");
-		return messagesRead;
+		return messageList.size();
 	}
 
+	private void addToInboxIfAppropriate(CIncomingMessage msg) {
+		if (useDeliveryReports
+				|| msg.getType() != CIncomingMessage.MessageType.StatusReport) {
+			inbox.add(msg);
+		}
+	}
+
+	private void deleteIfAppropriate(CIncomingMessage msg) throws NotConnectedException, IOException {
+		if (isDeleteMessagesAfterReceiving()
+				|| msg.getType() == CIncomingMessage.MessageType.StatusReport) {
+			//delete msg if is supposed to do it, or if it is a delivery report.
+			LOG.debug("Removing message [" + msg.getId() + "] from phone.");
+			cService.deleteMessage(msg);
+		}
+	}
+
+	private void setId(CIncomingMessage msg) {
+		if (msisdn != null && msisdn.length() != 0) {
+			msg.setId(msisdn);
+		} else if (serialNumber != null && serialNumber.length() != 0) {
+			msg.setId(serialNumber);
+		} else if (imsiNumber != null) {
+			msg.setId(imsiNumber);
+		}
+		if(LOG.isDebugEnabled()) {
+			LOG.debug("Changed ID [" + msg.getId() + "]");
+		}
+	}
 
 	/** @see SmsService#sendSMS(net.frontlinesms.data.FrontlineMessage) */
 	public void sendSMS(FrontlineMessage outgoingMessage) {
@@ -826,48 +797,10 @@ public class SmsModem extends Thread implements SmsService {
 		} // Otherwise it will go with blank sender.
 
 		outbox.add(outgoingMessage);
-		if (smsListener != null) {
-			smsListener.outgoingMessageEvent(this, outgoingMessage);
-		}
+		smsListener.outgoingMessageEvent(this, outgoingMessage);
 		LOG.debug("Message added to outbox. Size is [" + outbox.size() + "]");
 
 		LOG.trace("EXIT");
-	}
-
-	/**
-	 * Send an SMS message using this phone handler.
-	 * @param message The message to be sent.
-	 */
-	private void sendSmsDirect(FrontlineMessage message) throws IOException {
-		LOG.trace("ENTER");
-		LOG.debug("Sending [" + message.getTextContent() + "] to [" + message.getRecipientMsisdn() + "]");
-		COutgoingMessage cMessage = new COutgoingMessage(message.getRecipientMsisdn(), message.getTextContent());
-
-		// Do we require a Delivery Status Report?
-		cMessage.setStatusReport(this.useDeliveryReports);
-
-		// Ok, finished with the message parameters, now send it!
-		try {
-			cService.sendMessage(cMessage);
-			if (cMessage.getRefNo() != -1) {
-				message.setSmscReference(cMessage.getRefNo());
-				message.setStatus(Status.SENT);
-				if(LOG.isDebugEnabled()) LOG.debug("Message [" + message.getTextContent() + "] was sent to [" + message.getRecipientMsisdn() + "]");
-			} else {
-				//message not sent
-				//failed to send
-				message.setStatus(Status.FAILED);
-				if(LOG.isDebugEnabled()) LOG.debug("Message [" + message + "] failed to send to [" + message.getRecipientMsisdn() + "]");
-			}
-		} catch(Exception ex) {
-			message.setStatus(Status.FAILED);
-			if(LOG.isInfoEnabled()) LOG.info("Message [" + message + "] failed to send to [" + message.getRecipientMsisdn() + "]", ex);
-			throw new IOException();
-		} finally {
-			if (smsListener != null) {
-				smsListener.outgoingMessageEvent(this, message);
-			}
-		}
 	}
 
 	/** @param msisdn new value for {@link #msisdn} */
@@ -914,11 +847,6 @@ public class SmsModem extends Thread implements SmsService {
 	 */
 	public void setBaudRate(int baudRate) {
 		this.baudRate = baudRate;
-	}
-
-	/** @see SmsService#setSmsListener(SmsListener) */
-	public void setSmsListener(SmsListener smsListener) {
-		this.smsListener = smsListener;
 	}
 
 	/** @see SmsService#isBinarySendingSupported() */
@@ -993,7 +921,7 @@ public class SmsModem extends Thread implements SmsService {
 		
 		for (FrontlineMessage m : outbox) {
 			m.setStatus(Status.FAILED);
-			if (smsListener != null) smsListener.outgoingMessageEvent(this, m);
+			smsListener.outgoingMessageEvent(this, m);
 		}
 		LOG.trace("EXIT");
 	}
@@ -1042,9 +970,7 @@ public class SmsModem extends Thread implements SmsService {
 					message.setStatus(Status.FAILED);
 					if(LOG.isInfoEnabled()) LOG.info("Message [" + message + "] failed to send to [" + message.getRecipientMsisdn() + "]", ex);
 				} finally {
-					if (smsListener != null) {
-						smsListener.outgoingMessageEvent(this, message);
-					}
+					smsListener.outgoingMessageEvent(this, message);
 				}
 			}
 		} finally {
@@ -1064,7 +990,21 @@ public class SmsModem extends Thread implements SmsService {
 	public String getDisplayPort() {
 		return this.getPort();
 	}
-	
+
+	private void log(CIncomingMessage msg) {
+		if(LOG.isDebugEnabled()) {
+			LOG.debug("- From [" + msg.getOriginator() + "]"
+					+ "\n -Message [" + msg.getText() + "]"
+					+ "\n -ID [" + msg.getId() + "]"
+					+ "\n -Mem Index [" + msg.getMemIndex() + "]"
+					+ "\n -Mem Location [" + msg.getMemLocation() + "]"
+					+ "\n -Message Encoding [" + msg.getMessageEncoding() + "]"
+					+ "\n -Protocol ID [" + msg.getPid() + "]"
+					+ "\n -Reference Number [" + msg.getRefNo() + "]"
+					+ "\n -Type [" + msg.getType() + "]"
+					+ "\n -Date [" + msg.getDate() + "]");
+		}
+	}
 //> STATIC HELPER METHODS
 	
 

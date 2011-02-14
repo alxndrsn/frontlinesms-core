@@ -6,6 +6,7 @@ package net.frontlinesms.messaging.sms.internet;
 import java.util.Map;
 
 import net.frontlinesms.data.domain.SmsInternetServiceSettings;
+import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.messaging.sms.SmsService;
 
 /**
@@ -29,6 +30,9 @@ public interface SmsInternetService extends SmsService {
 	 * @param settings
 	 */
 	public void setSettings(SmsInternetServiceSettings settings);
+	
+	/** Sets the {@link SmsListener} attached to this {@link SmsInternetService}. */
+	public void setSmsListener(SmsListener smsListener);
 	
 	/**
 	 * Checks if the service is currently connected.
