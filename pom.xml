@@ -212,51 +212,43 @@
 			<groupId>javax.activation</groupId>
 			<artifactId>activation</artifactId>
 			<version>1.1</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.rxtx</groupId>
 			<artifactId>rxtx</artifactId>
 			<version>2.1.7</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>javax.comm</groupId>
 			<artifactId>comm</artifactId>
 			<version>2.0.3</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.jdom</groupId>
 			<artifactId>jdom</artifactId>
 			<version>1.1</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<!-- Requires fix found at http://www.slingingsemicolons.com/blogs/dave/maven-and-log4j -->
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.15</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
 			<version>1.4.3</version>
-			<scope>compile</scope>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-annotations</artifactId>
 			<version>3.4.0.GA</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 			<version>3.3.1.GA</version>
-			<scope>compile</scope>
 		</dependency>
 		<!-- this is required by hibernate for reflection.  cglib can be used as an alternative by setting
 			hibernate.bytecode.provider=cglib in hibernate.properties on the classpath -->
@@ -264,44 +256,43 @@
 			<groupId>javassist</groupId>
 			<artifactId>javassist</artifactId>
 			<version>3.8.0.GA</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-orm</artifactId>
 			<version>2.5.6</version>
-			<scope>compile</scope>
 		</dependency>
 	
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
 			<version>2.5.6</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aop</artifactId>
 			<version>2.5.6</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 		    <groupId>org.slf4j</groupId>
 		    <artifactId>slf4j-log4j12</artifactId>
 		    <version>1.5.2</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.6</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<version>1.2.127</version>
-			<scope>compile</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.skebby.gateways</groupId>
+			<artifactId>skebby-frontlinesms</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 		
 		<!-- Test Dependencies -->
