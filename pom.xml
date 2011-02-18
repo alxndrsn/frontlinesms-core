@@ -3,66 +3,19 @@
 	<groupId>net.frontlinesms.core</groupId>
 	<artifactId>frontlinesms</artifactId>
 	<name>frontlinesms</name>
-	<version>1.7.00-beta-4-SNAPSHOT</version>
 	<description>FrontlineSMS core application</description>
-	<licenses>
-		<license>
-			<name>GNU Lesser General Public License v3 or later</name>
-			<url>http://www.gnu.org/copyleft/lesser.html</url>
-			<distribution>manual</distribution>
-			<comments>
-				FrontlineSMS - http://www.frontlinesms.com
-				Copyright 2007, 2008 kiwanja
-				
-				This file is part of FrontlineSMS.
-				
-				FrontlineSMS is free software: you can redistribute it and/or modify it
-				under the terms of the GNU Lesser General Public License as published by
-				the Free Software Foundation, either version 3 of the License, or (at
-				your option) any later version.
-				
-				FrontlineSMS is distributed in the hope that it will be useful, but
-				WITHOUT ANY WARRANTY; without even the implied warranty of
-				MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
-				General Public License for more details.
-				
-				You should have received a copy of the GNU Lesser General Public License
-				along with FrontlineSMS. If not, see http://www.gnu.org/licenses/.
-			</comments>
-		</license>
-	</licenses>
+	<parent>
+		<groupId>net.frontlinesms.core</groupId>
+		<artifactId>parent-pom</artifactId>
+		<version>1.7.00-beta-4-SNAPSHOT</version>
+		<relativePath>../parent-pom</relativePath>
+	</parent>
 	
 	<scm>
 		<connection>scm:git://frontlinesms.git.sourceforge.net/gitroot/frontlinesms/frontlinesms.git</connection>
 		<developerConnection>scm:git:ssh://${sourceforge.username}@frontlinesms.git.sourceforge.net/gitroot/frontlinesms/frontlinesms</developerConnection>
 	</scm>
-	
-	<repositories>
-		<repository>
-			<id>frontlinesms.repo</id>
-			<name>FrontlineSMS Maven repository</name>
-			<url>http://dev.frontlinesms.com/m2repo</url>
-		</repository>
-		<repository>
-			<id>maven-repository.dev.java.net</id>
-			<url>http://download.java.net/maven/2/</url>
-		</repository>
-	</repositories>
-	
-	<distributionManagement>
-		<repository>
-			<id>frontlinesms.repo</id>
-			<name>FrontlineSMS Maven repository</name>
-			<url>ftp://dev.frontlinesms.com</url>
-		</repository>
-	</distributionManagement>
   
-	<properties>
-		<!-- Force Maven to use UTF-8 encoding when copying resources, rather than using the 
-			platform default. -->
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
-
 	<build>
 		<filters>
 			<filter>src/main/filters/filter.properties</filter>
@@ -81,41 +34,8 @@
 	
 		<plugins>
 			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.0</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<argLine>-enableassertions</argLine>
-					<forkMode>always</forkMode>
-				</configuration>
-			</plugin>
-			
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.2</version>
 				<configuration>
 					<archive>
 						<manifest>
@@ -149,64 +69,28 @@
 				</executions>
 			</plugin>
 		</plugins>
-		
-		<extensions>
-			<extension>
-				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-ftp</artifactId>
-				<version>1.0-beta-6</version>
-			</extension>
-		</extensions>
 	</build>
 
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>findbugs-maven-plugin</artifactId>
-				<version>2.3</version>
-				<configuration>
-					<xmlOutput>true</xmlOutput>
-					<findbugsXmlOutput>true</findbugsXmlOutput>
-					<findbugsXmlWithMessages>true</findbugsXmlWithMessages>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>2.4</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-pmd-plugin</artifactId>
-				<version>2.5</version>
-				<configuration>
-					<targetJdk>1.5</targetJdk>
-				</configuration>
-			</plugin>
-		</plugins>
-	</reporting>
-	
 	<dependencies>
 		<dependency>
 			<groupId>net.frontlinesms.core</groupId>
 			<artifactId>thinlet</artifactId>
-			<version>1.00.04</version>
+			<version>${thinlet.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.frontlinesms.core</groupId>
 			<artifactId>smslib</artifactId>
-			<version>1.0.3</version>
+			<version>${smslib.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.frontlinesms.core</groupId>
 			<artifactId>frontlinesms-email</artifactId>
-			<version>0.00.05</version>
+			<version>${f.email.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.frontlinesms.core.mms</groupId>
   			<artifactId>mmsgateway</artifactId>
-  			<version>0.00.09</version>
+  			<version>${f.mms.version}</version>
   		</dependency>
 		<dependency>
 			<groupId>javax.activation</groupId>
@@ -232,7 +116,7 @@
 			<!-- Requires fix found at http://www.slingingsemicolons.com/blogs/dave/maven-and-log4j -->
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>1.2.15</version>
+			<version>${log4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.mail</groupId>
@@ -293,27 +177,6 @@
 			<groupId>com.skebby.gateways</groupId>
 			<artifactId>skebby-frontlinesms</artifactId>
 			<version>1.0.0</version>
-		</dependency>
-		
-		<!-- Test Dependencies -->
-		<dependency>
-			<groupId>net.frontlinesms.core</groupId>
-			<artifactId>frontlinesms-test</artifactId>
-			<version>0.01.01</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<version>2.5.6</version>
-			<type>jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-			<version>1.8.2</version>
-			<scope>test</scope> 
 		</dependency>
 	</dependencies>
 </project>
