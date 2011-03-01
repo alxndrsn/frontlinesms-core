@@ -10,6 +10,7 @@
 		<version>1.7.00-beta-4</version>
 		<relativePath>../pom-parent</relativePath>
 	</parent>
+	<version>1.7.00-beta-4-SNAPSHOT</version>
 
 	<properties>
 		<github.projectName>frontlinesms-core</github.projectName>
