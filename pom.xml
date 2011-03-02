@@ -11,6 +11,11 @@
 		<relativePath>../pom-parent</relativePath>
 	</parent>
 	<version>1.7.00-beta-4-SNAPSHOT</version>
+	
+	<scm>
+		<connection>scm:git://github.com/frontlinesms/frontlinesms-core.git</connection>
+		<developerConnection>scm:git:git@github.com:frontlinesms/frontlinesms-core.git</developerConnection>
+	</scm>
 
 	<properties>
 		<github.projectName>frontlinesms-core</github.projectName>
