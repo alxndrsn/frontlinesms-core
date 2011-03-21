@@ -372,8 +372,7 @@ public class KeywordAction {
 	public static class KeywordUtils {
 		public static final String personaliseMessage(Contact contact, String messageText) {
 			// Replace any user-defined variables they might have been included
-			messageText = messageText.replace(FrontlineSMSConstants.USER_MARKER_TO_NAME, contact.getName());
-			return messageText;
+			return messageText.replace(CsvUtils.MARKER_CONTACT_NAME, contact.getName());
 		}
 		
 		/**

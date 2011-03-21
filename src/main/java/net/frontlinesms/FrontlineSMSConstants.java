@@ -65,8 +65,6 @@ public final class FrontlineSMSConstants {
 	public static final String DEFAULT_DATABASE_NAME = "frontline_database";
 	
 	public static final String PROPERTIES_SMS_INTERNET_ICONS = "sms.internet.icons";
-	
-	public static final String USER_MARKER_TO_NAME = "$to";
 
 	public static final int RESULTS_PER_PAGE_DEFAULT = 100;
 
