@@ -177,11 +177,5 @@
 			<artifactId>h2</artifactId>
 			<version>1.2.127</version>
 		</dependency>
-		
-		<dependency>
-			<groupId>com.skebby.gateways</groupId>
-			<artifactId>skebby-frontlinesms</artifactId>
-			<version>1.0.0</version>
-		</dependency>
 	</dependencies>
 </project>
