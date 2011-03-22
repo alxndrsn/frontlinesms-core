@@ -10,12 +10,12 @@ import net.frontlinesms.events.EventBus;
 import net.frontlinesms.messaging.Provider;
 import net.frontlinesms.messaging.sms.events.InternetServiceEventNotification;
 import net.frontlinesms.messaging.sms.internet.SmsInternetService;
+import net.frontlinesms.messaging.sms.internet.SmsInternetServiceLoader;
 import net.frontlinesms.messaging.sms.properties.OptionalRadioSection;
 import net.frontlinesms.messaging.sms.properties.OptionalSection;
 import net.frontlinesms.messaging.sms.properties.PasswordString;
 import net.frontlinesms.messaging.sms.properties.PhoneSection;
 import net.frontlinesms.resources.UserHomeFilePropertySet;
-import net.frontlinesms.resources.ResourceUtils;
 import net.frontlinesms.ui.handler.contacts.ContactSelecter;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
@@ -39,9 +39,6 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 	
 	private static final String UI_COMPONENT_LS_ACCOUNTS = "lsSmsInternetServices";
 	private static final String UI_COMPONENT_PN_BUTTONS = "pnButtons";
-	
-	/** Path of the file containing the list of SMS internet services. */
-	private static final String FILE_SMS_INTERNET_SERVICE_LIST = "conf/SmsInternetServices.txt";
 	
 	/** Logging object */
 	private static final Logger LOG = FrontlineUtils.getLogger(SmsInternetServiceSettingsHandler.class);
@@ -73,37 +70,7 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 		
 		iconProperties = new IconMap(FrontlineSMSConstants.PROPERTIES_SMS_INTERNET_ICONS);
 
-		this.internetServiceProviders = getInternetServiceProviders();
-	}
-
-	/**
-	 * Loads the list of available {@link SmsInternetService}s from app.properties.
-	 * TODO Not sure this class should be accessing app.properties - might be neater for {@link UiGeneratorController} or {@link FrontlineSMS} to load this list. 
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	private static final List<Class<? extends SmsInternetService>> getInternetServiceProviders() {
-		LOG.trace("ENTER");
-
-		List<Class<? extends SmsInternetService>> internetServiceProviders = new ArrayList<Class<? extends SmsInternetService>>();
-		// Load the list of available internet services from the conf file
-		String[] services = ResourceUtils.getUsefulLines(ResourceUtils.getConfigDirectoryPath() + FILE_SMS_INTERNET_SERVICE_LIST);
-		if (services.length > 0) {
-			for (String service : services) {
-				try {
-					Class<?> clazz = Class.forName(service);
-					LOG.debug("Found service [" + clazz.getCanonicalName() + "]");
-					internetServiceProviders.add((Class<? extends SmsInternetService>)clazz);
-				} catch (ClassNotFoundException e) {
-					LOG.error("Could not find class [" + service + "]. Ignoring it.", e);
-				}
-			}
-		} else {
-			LOG.warn("No SMS Internet Service Providers could be found.");
-		}
- 		LOG.trace("EXIT");
- 		Collections.sort(internetServiceProviders, new InternetServiceSorter());
-		return internetServiceProviders;
+		this.internetServiceProviders = new SmsInternetServiceLoader().getAllServices();
 	}
 
 	/** Clears the desktop of all dialogs that this controls. */
@@ -699,19 +666,4 @@ final class IconMap extends UserHomeFilePropertySet {
 //> STATIC FACTORIES
 
 //> STATIC HELPER METHODS
-}
-
-/** Sort {@link SmsInternetService}s alphabetically by name. */
-class InternetServiceSorter implements Comparator<Class<? extends SmsInternetService>> {
-	public int compare(Class<? extends SmsInternetService> o1, Class<? extends SmsInternetService> o2) {
-		if(o1 == null) return -1;
-		else if(o2 == null) return 1;
-		else {
-			Provider a1 = o1.getAnnotation(Provider.class);
-			Provider a2 = o2.getAnnotation(Provider.class);
-			if(a1 == null) return -1;
-			else if(a2 == null) return 1;
-			else return a1.name().compareTo(a2.name());
-		}
-	}
 }
