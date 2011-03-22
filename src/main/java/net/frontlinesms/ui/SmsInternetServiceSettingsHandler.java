@@ -82,7 +82,7 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	private static final Collection<Class<? extends SmsInternetService>> getInternetServiceProviders() {
+	private static final List<Class<? extends SmsInternetService>> getInternetServiceProviders() {
 		LOG.trace("ENTER");
 
 		List<Class<? extends SmsInternetService>> internetServiceProviders = new ArrayList<Class<? extends SmsInternetService>>();
@@ -102,12 +102,12 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 			LOG.warn("No SMS Internet Service Providers could be found.");
 		}
  		LOG.trace("EXIT");
+ 		Collections.sort(internetServiceProviders, new InternetServiceSorter());
 		return internetServiceProviders;
 	}
 
 	/** Clears the desktop of all dialogs that this controls. */
 	private void clearDesktop() {
-		//if(settingsDialog != null) removeDialog(settingsDialog);
 		if(newServiceWizard != null) removeDialog(newServiceWizard);
 	}
 
@@ -162,7 +162,6 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 
 		selectionChanged(providerList, controller.find(newServiceWizard, "pnButtons"));
 		controller.add(newServiceWizard);
-		//if(settingsDialog != null) removeDialog(settingsDialog);
 	}
 
 	/**
@@ -472,8 +471,6 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 			} catch (Throwable t) {
 				LOG.error("Could not get values from enum [" + valueObj.getClass() + "]", t);
 			}
-			//controller.setMethod(checkbox, Thinlet.ATTRIBUTE_ACTION, "enableFields(this.selected, " + controller.getName(panel) + ")", panel, this);
-			//enableFields(controller.isSelected(checkbox), panel);
 			components = new Object[] {panel};
 		} else if (valueObj instanceof Enum<?>) {
 			components = new Object[1];
@@ -597,12 +594,6 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 		removeDialog(pnSmsInternetServiceConfigure);
 		
 		this.eventBus.notifyObservers(new InternetServiceEventNotification(InternetServiceEventNotification.EventType.ADD, service));
-		
-		//Remove the settings dialog
-		Object attached = controller.getAttachedObject(btSave);
-//		if (attached != null) {
-//			//showSettingsDialog();
-//		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -708,4 +699,19 @@ final class IconMap extends UserHomeFilePropertySet {
 //> STATIC FACTORIES
 
 //> STATIC HELPER METHODS
+}
+
+/** Sort {@link SmsInternetService}s alphabetically by name. */
+class InternetServiceSorter implements Comparator<Class<? extends SmsInternetService>> {
+	public int compare(Class<? extends SmsInternetService> o1, Class<? extends SmsInternetService> o2) {
+		if(o1 == null) return -1;
+		else if(o2 == null) return 1;
+		else {
+			Provider a1 = o1.getAnnotation(Provider.class);
+			Provider a2 = o2.getAnnotation(Provider.class);
+			if(a1 == null) return -1;
+			else if(a2 == null) return 1;
+			else return a1.name().compareTo(a2.name());
+		}
+	}
 }

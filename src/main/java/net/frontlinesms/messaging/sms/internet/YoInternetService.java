@@ -48,7 +48,7 @@ import yo.sms.service.XmlEntityBuilder;
  * @author Eric <elwanga@yo.co.ug>
  *
  */
-@Provider(name = "Yo!", icon = "/icons/sms_http.png")
+@Provider(name = "Yo! (beta)", icon = "/icons/sms_http.png")
 public class YoInternetService extends AbstractSmsInternetService {
     /**
      * Prefix attached to every property name. Used in application internet

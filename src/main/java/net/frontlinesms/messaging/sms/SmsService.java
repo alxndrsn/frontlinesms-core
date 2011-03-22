@@ -20,7 +20,6 @@
 package net.frontlinesms.messaging.sms;
 
 import net.frontlinesms.data.domain.FrontlineMessage;
-import net.frontlinesms.listener.SmsListener;
 import net.frontlinesms.messaging.FrontlineMessagingService;
 
 public interface SmsService extends FrontlineMessagingService {
