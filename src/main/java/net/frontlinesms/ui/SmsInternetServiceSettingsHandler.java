@@ -70,7 +70,7 @@ public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler 
 		
 		iconProperties = new IconMap(FrontlineSMSConstants.PROPERTIES_SMS_INTERNET_ICONS);
 
-		this.internetServiceProviders = new SmsInternetServiceLoader().getAllServices();
+		this.internetServiceProviders = new SmsInternetServiceLoader().getAll();
 	}
 
 	/** Clears the desktop of all dialogs that this controls. */
