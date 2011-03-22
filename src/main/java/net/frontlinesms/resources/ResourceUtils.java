@@ -20,9 +20,11 @@
 package net.frontlinesms.resources;
 
 import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.zip.*;
 
 import net.frontlinesms.FrontlineUtils;
@@ -249,6 +251,36 @@ public class ResourceUtils {
 			if (fis != null) try { fis.close(); } catch(IOException ex) {}
 		}
 		return lines.toArray(new String[lines.size()]);
+	}
+	
+	public static final List<String> getUsefulLines(URL resourceUrl) {
+		InputStream fis = null;
+		InputStreamReader isr = null;
+		BufferedReader br = null;
+
+		ArrayList<String> lines = new ArrayList<String>();
+		try {
+			fis = resourceUrl.openConnection().getInputStream();
+			isr = new InputStreamReader(fis);
+			br = new BufferedReader(isr);
+
+			String line;
+			while((line = br.readLine()) != null) {
+				line = line.trim();
+				// Don't forget to ignore empty lines and comments
+				if (line.length() > 0 && line.charAt(0) != '#') {
+					lines.add(line);
+				}
+			}
+		} catch (IOException ex) {
+			LOG.debug("Error reading url '" + resourceUrl + "'", ex);
+		} finally {
+			// close any streans, readers etc.
+			if (br != null) try { br.close(); } catch(IOException ex) {}
+			if (isr != null) try { isr.close(); } catch(IOException ex) {}
+			if (fis != null) try { fis.close(); } catch(IOException ex) {}
+		}
+		return lines;
 	}
 	
 	/** Gets the directory containing the properties files. */

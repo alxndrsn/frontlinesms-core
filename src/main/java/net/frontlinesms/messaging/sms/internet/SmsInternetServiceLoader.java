@@ -1,28 +1,61 @@
 package net.frontlinesms.messaging.sms.internet;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.ServiceLoader;
+import java.util.Set;
 
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.messaging.Provider;
+import net.frontlinesms.resources.ResourceUtils;
 
 import org.apache.log4j.Logger;
 
 public class SmsInternetServiceLoader {
-
 	private final Logger log = FrontlineUtils.getLogger(this.getClass());
 	
 	public List<Class<? extends SmsInternetService>> getAllServices() {
-		if(log.isInfoEnabled()) log.info("Loading SMS internet service providers...");
-		List<Class<? extends SmsInternetService>> internetServiceProviders = new ArrayList<Class<? extends SmsInternetService>>();
-		for(SmsInternetServiceProvider p : ServiceLoader.load(SmsInternetServiceProvider.class)) {
-			if(log.isInfoEnabled()) log.info("Loading services from " + p.getClass().getName());
-			internetServiceProviders.addAll(p.getServiceClasses());
+		ArrayList<Class<? extends SmsInternetService>> services = new ArrayList<Class<? extends SmsInternetService>>(loadClasses(SmsInternetService.class));
+		Collections.sort(services, new InternetServiceSorter());
+		return services;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private <T> Set<Class<? extends T>> loadClasses(Class<T> clazz) {
+		assert(clazz != null);
+		Set<Class<? extends T>> providers = new HashSet<Class<? extends T>>();
+		for(String name : getNames(clazz)) {
+			try {
+				providers.add((Class<? extends T>) Class.forName(name));
+			} catch(Exception ex) {
+				log.warn("Could not load " + name + " as " + clazz.getName(), ex);
+			}
 		}
-		if(log.isInfoEnabled()) log.info("Loaded " + internetServiceProviders.size() + " services.");
-		return internetServiceProviders;
+		return providers;
+	}
+	
+	private Set<String> getNames(Class<?> clazz) {
+		Enumeration<URL> resources;
+		String resourceLocation = "META-INF/frontlinesms/" + clazz.getSimpleName() + "s";
+		try {
+			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+			resources = classLoader.getResources(resourceLocation);
+		} catch (IOException e) {
+			log.warn("Resource(s) not found at " + resourceLocation, e);
+			return Collections.emptySet();
+		}
+		
+		HashSet<String> names = new HashSet<String>();
+		for(URL resourceUrl : new IterableEnumeration<URL>(resources)) {
+			names.addAll(ResourceUtils.getUsefulLines(resourceUrl));
+		}
+		return names;
 	}
 }
 
@@ -38,5 +71,25 @@ class InternetServiceSorter implements Comparator<Class<? extends SmsInternetSer
 			else if(a2 == null) return 1;
 			else return a1.name().compareTo(a2.name());
 		}
+	}
+}
+
+class IterableEnumeration<E> implements Iterable<E> {
+	private final Enumeration<E> e;
+	public IterableEnumeration(Enumeration<E> e) {
+		this.e = e;
+	}
+	public Iterator<E> iterator() {
+		return new Iterator<E>() {
+			public boolean hasNext() {
+				return e.hasMoreElements();
+			}
+			public E next() {
+				return e.nextElement();
+			}
+			public void remove() {
+				throw new IllegalStateException();
+			}
+		};
 	}
 }

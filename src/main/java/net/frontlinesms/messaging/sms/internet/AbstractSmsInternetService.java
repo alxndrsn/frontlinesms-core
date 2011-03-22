@@ -40,7 +40,7 @@ import org.apache.log4j.Logger;
  * @author Carlos Eduardo Endler Genz
  * @date 26/01/2009
  */
-abstract class AbstractSmsInternetService implements SmsInternetService {
+public abstract class AbstractSmsInternetService implements SmsInternetService {
 	
 //> CONSTANTS
 	/** Logging object */

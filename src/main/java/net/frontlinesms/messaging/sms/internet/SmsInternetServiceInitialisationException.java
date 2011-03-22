@@ -9,7 +9,7 @@ package net.frontlinesms.messaging.sms.internet;
  * @author Alex
  */
 @SuppressWarnings("serial")
-class SmsInternetServiceInitialisationException extends Exception {
+public class SmsInternetServiceInitialisationException extends Exception {
 	public SmsInternetServiceInitialisationException(Throwable cause) {
 		super(cause);
 	}

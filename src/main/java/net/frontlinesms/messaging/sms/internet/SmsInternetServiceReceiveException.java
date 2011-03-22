@@ -26,7 +26,7 @@ package net.frontlinesms.messaging.sms.internet;
  * @date 19/02/2009
  */
 @SuppressWarnings("serial")
-class SmsInternetServiceReceiveException extends Exception {
+public class SmsInternetServiceReceiveException extends Exception {
 	public SmsInternetServiceReceiveException(String message, Throwable cause) {
 		super(message, cause);
 	}
