@@ -74,10 +74,15 @@ public class PluginManager {
 	 * @throws IllegalAccessException 
 	 * @throws InstantiationException 
 	 */
-	public PluginController loadPluginController(Class<? extends PluginController> pluginClass) throws InstantiationException, IllegalAccessException {
-		PluginController newInstance = pluginClass.newInstance();
-		this.pluginControllers.add(newInstance);
-		return newInstance;
+	public PluginController loadPluginController(Class<? extends PluginController> pluginClass) {
+		try {
+			PluginController newInstance = pluginClass.newInstance();
+			this.pluginControllers.add(newInstance);
+			return newInstance;
+		} catch(Exception ex) {
+			log.warn("Problem loading plugin controller for class: " + pluginClass.getName(), ex);
+			return null;
+		}
 	}
 
 	/**
@@ -88,12 +93,12 @@ public class PluginManager {
 	private void loadPluginControllers() {
 		log.info("Loading plugin controllers....");
 		PluginProperties pluginProperties = PluginProperties.getInstance();
-		for(String pluginClassName : pluginProperties.getPluginClassNames()) {
-				boolean loadClass = pluginProperties.isPluginEnabled(pluginClassName);
+		for(Class<? extends PluginController> pluginClass : pluginProperties.getPluginClasses()) {
+				boolean loadClass = pluginProperties.isPluginEnabled(pluginClass);
 				if(loadClass) {
-					this.loadPluginController(pluginClassName);
+					this.loadPluginController(pluginClass);
 				} else {
-					log.info("Not loading plugin of class: " + pluginClassName);
+					log.info("Not loading plugin of class: " + pluginClass.getName());
 				}
 		}
 		log.info("Plugin controllers loaded.");

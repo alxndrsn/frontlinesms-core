@@ -3,9 +3,12 @@
  */
 package net.frontlinesms.plugins;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Comparator;
+import java.util.List;
 
+import net.frontlinesms.resources.JavaImplementationLoader;
 import net.frontlinesms.resources.UserHomeFilePropertySet;
 
 /**
@@ -31,16 +34,15 @@ public class PluginProperties extends UserHomeFilePropertySet {
 	 * @return <code>true</code> if the plugin is explicitly enabled; <code>false</code> otherwise.
 	 */
 	public boolean isPluginEnabled(String className) {
-		Class<PluginController> pluginClass = getPluginClass(className);
-		return pluginClass == null || isPluginEnabled(pluginClass);
+		return super.getPropertyAsBoolean(className, false);
 	}
 
 	/**
 	 * @param pluginClass The class of the plugin.
 	 * @return <code>true</code> if the plugin is explicitly enabled; <code>false</code> otherwise.
 	 */
-	public boolean isPluginEnabled(Class<PluginController> pluginClass) {
-		return super.getPropertyAsBoolean(pluginClass.getName(), false);
+	public boolean isPluginEnabled(Class<? extends PluginController> pluginClass) {
+		return isPluginEnabled(pluginClass.getName());
 	}
 	
 	/**
@@ -55,34 +57,19 @@ public class PluginProperties extends UserHomeFilePropertySet {
 
 	/** @return get the class names of all plugins available */
 	public Collection<String> getPluginClassNames() {
-		return super.getPropertyKeys();
-	}
-	
-	/** @return the available plugin classes */
-	public Collection<Class<PluginController>> getPluginClasses() {
-		HashSet<Class<PluginController>> classes = new HashSet<Class<PluginController>>();
-		for(String className : getPluginClassNames()) {
-			Class<PluginController> forName = getPluginClass(className);
-			if(forName != null) {
-				classes.add(forName);
-			}
+		List<String> names = new ArrayList<String>();
+		for(Class<? extends PluginController> pc : getPluginClasses()) {
+			names.add(pc.getName());
 		}
-		return classes;
+		return names;
 	}
 	
 	/**
 	 * @param className Fully-qualified name of the plugin class
 	 * @return the class for the given plugin, or <code>null</code> if the plugin class could not be loaded
 	 */
-	@SuppressWarnings("unchecked")
-	public Class<PluginController> getPluginClass(String className) {
-		try {
-			Class<PluginController> pluginClass = (Class<PluginController>) Class.forName(className);
-			return pluginClass;
-		} catch (Exception ex) {
-			LOG.warn("Could not load plugin class.", ex);
-			return null;
-		}
+	public List<Class<? extends PluginController>> getPluginClasses() {
+		return new PluginImplementationLoader().getAll();
 	}
 
 //> INSTANCE HELPER METHODS
@@ -100,4 +87,32 @@ public class PluginProperties extends UserHomeFilePropertySet {
 	}
 
 //> STATIC HELPER METHODS
+}
+
+class PluginImplementationLoader extends JavaImplementationLoader<PluginController> {
+	@Override
+	protected Class<PluginController> getEntityClass() {
+		return PluginController.class;
+	}
+
+	@Override
+	protected Comparator<Class<? extends PluginController>> getSorter() {
+		return new Comparator<Class<? extends PluginController>>() {
+			public int compare(Class<? extends PluginController> c0,
+					Class<? extends PluginController> c1) {
+				if(c0 == c1) return 0;
+				if(c0 == null) return -1;
+				if(c1 == null) return 1;
+				
+				PluginControllerProperties p0 = c0.getAnnotation(PluginControllerProperties.class);
+				PluginControllerProperties p1 = c1.getAnnotation(PluginControllerProperties.class);
+				if(p0 == p1) return 0;
+				if(p0 == null) return -1;
+				if(p1 == null) return 1;
+				
+				return p0.name().compareTo(p1.name());
+			}
+		};
+	}
+	
 }

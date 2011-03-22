@@ -278,7 +278,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			Object pluginMenu = find("menu_tabs");
 
 			Locale locale = InternationalisationUtils.getCurrentLocale();
-			for(Class<PluginController> pluginClass : PluginProperties.getInstance().getPluginClasses()) {
+			for(Class<? extends PluginController> pluginClass : PluginProperties.getInstance().getPluginClasses()) {
 				// Try to get an icon from the classpath
 				String pluginName = pluginClass.newInstance().getName(locale);
 				String iconPath;
@@ -365,8 +365,6 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 			LOG.trace("\tenabled : " + enabled);
 		}
 
-		Class<PluginController> pluginClass = PluginProperties.getInstance().getPluginClass(pluginClassName);
-		
 		// 1st, check if the plugin is already in the state the user is trying to put it in
 		if(enabled == PluginProperties.getInstance().isPluginEnabled(pluginClassName)) {
 			// The plugin is already in the expected state, so we should do nothing
@@ -392,7 +390,7 @@ public class UiGeneratorController extends FrontlineUI implements EmailListener,
 				// Get the instance of the controller
 				PluginController controller = null;
 				for(PluginController c : this.pluginManager.getPluginControllers()) {
-					if(pluginClass.isInstance(c)) {
+					if(c.getClass().getName().equals(pluginClassName)) {
 						controller = c;
 						break;
 					}

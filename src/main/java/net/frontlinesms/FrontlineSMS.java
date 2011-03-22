@@ -345,7 +345,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 		// Add main hibernate config location
 		hibernateConfigList.add("classpath:frontlinesms.hibernate.cfg.xml");
 		// Add hibernate config locations for plugins
-		for(Class<PluginController> pluginClass : PluginProperties.getInstance().getPluginClasses()) {
+		for(Class<? extends PluginController> pluginClass : PluginProperties.getInstance().getPluginClasses()) {
 			LOG.info("Processing plugin class: " + pluginClass.getName());
 			if(pluginClass.isAnnotationPresent(PluginControllerProperties.class)) {
 				PluginControllerProperties properties = pluginClass.getAnnotation(PluginControllerProperties.class);
@@ -384,7 +384,7 @@ public class FrontlineSMS implements SmsSender, SmsListener, EmailListener, Even
 		configLocations.add("classpath:frontlinesms-spring-hibernate.xml");
 		
 		// Add config locations for plugins
-		for(Class<PluginController> pluginControllerClass : PluginProperties.getInstance().getPluginClasses()) {
+		for(Class<? extends PluginController> pluginControllerClass : PluginProperties.getInstance().getPluginClasses()) {
 			if(pluginControllerClass.isAnnotationPresent(PluginControllerProperties.class)) {
 				PluginControllerProperties properties = pluginControllerClass.getAnnotation(PluginControllerProperties.class);
 				String pluginConfigLocation = properties.springConfigLocation();

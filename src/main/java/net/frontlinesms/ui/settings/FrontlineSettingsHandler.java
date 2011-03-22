@@ -123,11 +123,11 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	 * Loads the different plugins into the plugins tree
 	 */
 	private void loadPluginSettings() {
-		for(Class<PluginController> pluginClass : PluginProperties.getInstance().getPluginClasses()) {
+		for(Class<? extends PluginController> pluginClass : PluginProperties.getInstance().getPluginClasses()) {
 			PluginSettingsController pluginSettingsController = null;
 			
 			try {
-				PluginController pluginController = this.uiController.getFrontlineController().getPluginManager().loadPluginController(pluginClass);
+				PluginController pluginController = this.uiController.getFrontlineController().getPluginManager().loadPluginController(pluginClass.getName());
 				this.uiController.addPluginTextResources(pluginController);
 				pluginSettingsController = pluginController.getSettingsController(this.uiController);
 			
