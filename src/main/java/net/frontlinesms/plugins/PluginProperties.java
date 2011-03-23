@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
-import net.frontlinesms.resources.JavaImplementationLoader;
+import net.frontlinesms.resources.ImplementationLoader;
 import net.frontlinesms.resources.UserHomeFilePropertySet;
 
 /**
@@ -89,7 +89,7 @@ public class PluginProperties extends UserHomeFilePropertySet {
 //> STATIC HELPER METHODS
 }
 
-class PluginImplementationLoader extends JavaImplementationLoader<PluginController> {
+class PluginImplementationLoader extends ImplementationLoader<PluginController> {
 	@Override
 	protected Class<PluginController> getEntityClass() {
 		return PluginController.class;

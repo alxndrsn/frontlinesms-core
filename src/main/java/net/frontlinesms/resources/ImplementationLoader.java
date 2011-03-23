@@ -21,7 +21,7 @@ import net.frontlinesms.FrontlineUtils;
  *
  * @param <E>
  */
-public abstract class JavaImplementationLoader<E> {
+public abstract class ImplementationLoader<E> {
 	private Logger log = FrontlineUtils.getLogger(getClass());
 	
 	protected abstract Class<E> getEntityClass();

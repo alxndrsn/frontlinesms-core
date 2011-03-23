@@ -1,0 +1,4 @@
+net.frontlinesms.messaging.sms.internet.ClickatellInternetService
+net.frontlinesms.messaging.sms.internet.IntelliSmsInternetService
+net.frontlinesms.messaging.sms.internet.TheHiveProjectsInternetService
+net.frontlinesms.messaging.sms.internet.YoInternetService

@@ -3,9 +3,9 @@ package net.frontlinesms.messaging.sms.internet;
 import java.util.Comparator;
 
 import net.frontlinesms.messaging.Provider;
-import net.frontlinesms.resources.JavaImplementationLoader;
+import net.frontlinesms.resources.ImplementationLoader;
 
-public class SmsInternetServiceLoader extends JavaImplementationLoader<SmsInternetService> {
+public class SmsInternetServiceLoader extends ImplementationLoader<SmsInternetService> {
 	@Override
 	protected Class<SmsInternetService> getEntityClass() {
 		return SmsInternetService.class;
