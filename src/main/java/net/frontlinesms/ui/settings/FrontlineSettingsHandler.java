@@ -3,6 +3,7 @@ package net.frontlinesms.ui.settings;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.frontlinesms.FrontlineSMSConstants;
 import net.frontlinesms.FrontlineUtils;
 import net.frontlinesms.data.domain.SmsInternetServiceSettings;
 import net.frontlinesms.events.EventBus;
@@ -16,7 +17,6 @@ import net.frontlinesms.settings.FrontlineValidationMessage;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiDestroyEvent;
 import net.frontlinesms.ui.UiGeneratorController;
-import net.frontlinesms.ui.UiGeneratorControllerConstants;
 import net.frontlinesms.ui.handler.settings.SettingsAppearanceSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsGeneralSectionHandler;
 import net.frontlinesms.ui.handler.settings.SettingsServicesSectionHandler;
@@ -41,6 +41,8 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 	private static final String UI_COMPONENT_CORE_TREE = "generalTree";
 	private static final String UI_COMPONENT_PLUGIN_TREE = "pluginTree";
 	private static final String UI_COMPONENT_PN_DISPLAY_SETTINGS = "pnDisplaySettings";
+	private static final String UI_COMPONENT_BT_SAVE = "btSave";
+	private static final String UI_COMPONENT_BT_CLOSE = "btClose";
 
 	private static final String I18N_MESSAGE_CONFIRM_CLOSE_SETTINGS = "message.confirm.close.settings";
 	private static final String I18N_SETTINGS_SAVED = "settings.saved";
@@ -259,17 +261,25 @@ public class FrontlineSettingsHandler implements ThinletUiEventHandler, EventObs
 				}
 			}
 			
-			this.handleSaveButton(!this.changesList.isEmpty());
+			boolean changesToSave = !this.changesList.isEmpty();
+			this.handleCloseButton(changesToSave);
+			this.handleSaveButton(changesToSave);
 		} else if (notification instanceof UiDestroyEvent) {
 			if(((UiDestroyEvent) notification).isFor(this.uiController)) {
 				this.uiController.getFrontlineController().getEventBus().unregisterObserver(this);
 			}
 		}
 	}
+	
+	private void handleCloseButton(boolean changesToSave) {
+		Object btClose = find(UI_COMPONENT_BT_CLOSE);
+		uiController.setText(btClose, InternationalisationUtils.getI18nString(
+				changesToSave ? FrontlineSMSConstants.ACTION_CANCEL : FrontlineSMSConstants.ACTION_CLOSE));
+	}
 
 	private void handleSaveButton(boolean shouldEnableSaveButton) {
 		// If our list of changes is empty, this means we went back to the original configuration
-		Object btSave = find(UiGeneratorControllerConstants.COMPONENT_BT_SAVE);
+		Object btSave = find(UI_COMPONENT_BT_SAVE);
 		this.uiController.setEnabled(btSave, shouldEnableSaveButton);
 		
 		String tooltip;
