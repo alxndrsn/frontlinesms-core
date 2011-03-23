@@ -9,7 +9,6 @@ import net.frontlinesms.messaging.sms.events.InternetServiceEventNotification;
 import net.frontlinesms.messaging.sms.internet.SmsInternetService;
 import net.frontlinesms.settings.BaseSectionHandler;
 import net.frontlinesms.settings.FrontlineValidationMessage;
-import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiDestroyEvent;
 import net.frontlinesms.ui.UiGeneratorController;

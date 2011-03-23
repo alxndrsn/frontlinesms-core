@@ -23,6 +23,7 @@ import java.awt.Image;
 
 import net.frontlinesms.ErrorUtils;
 import net.frontlinesms.FrontlineUtils;
+import net.frontlinesms.ui.handler.core.FileChooser;
 import net.frontlinesms.ui.i18n.LanguageBundle;
 
 import org.apache.log4j.Logger;

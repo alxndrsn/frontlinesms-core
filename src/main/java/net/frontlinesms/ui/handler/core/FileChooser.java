@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.frontlinesms.ui;
+package net.frontlinesms.ui.handler.core;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -14,6 +14,8 @@ import javax.swing.filechooser.FileFilter;
 import org.apache.log4j.Logger;
 
 import net.frontlinesms.FrontlineUtils;
+import net.frontlinesms.ui.FrontlineUI;
+import net.frontlinesms.ui.ThinletUiEventHandler;
 
 /**
  * @author kadu <kadu@masabi.com>

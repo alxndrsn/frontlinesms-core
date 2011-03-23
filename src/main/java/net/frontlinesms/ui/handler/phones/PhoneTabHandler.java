@@ -36,13 +36,13 @@ import net.frontlinesms.messaging.sms.modem.SmsModem;
 import net.frontlinesms.messaging.sms.modem.SmsModemStatus;
 import net.frontlinesms.ui.Event;
 import net.frontlinesms.ui.Icon;
-import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
 import net.frontlinesms.ui.UiDestroyEvent;
 import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.events.FrontlineUiUpateJob;
 import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.BaseTabHandler;
 import net.frontlinesms.ui.handler.email.EmailAccountSettingsDialogHandler;
+import net.frontlinesms.ui.handler.settings.SmsInternetServiceSettingsHandler;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 

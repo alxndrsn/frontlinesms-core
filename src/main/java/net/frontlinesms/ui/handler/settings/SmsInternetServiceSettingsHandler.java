@@ -1,4 +1,4 @@
-package net.frontlinesms.ui;
+package net.frontlinesms.ui.handler.settings;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -16,6 +16,8 @@ import net.frontlinesms.messaging.sms.properties.OptionalSection;
 import net.frontlinesms.messaging.sms.properties.PasswordString;
 import net.frontlinesms.messaging.sms.properties.PhoneSection;
 import net.frontlinesms.resources.UserHomeFilePropertySet;
+import net.frontlinesms.ui.ThinletUiEventHandler;
+import net.frontlinesms.ui.UiGeneratorController;
 import net.frontlinesms.ui.handler.contacts.ContactSelecter;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 
@@ -31,11 +33,11 @@ import thinlet.Thinlet;
 public class SmsInternetServiceSettingsHandler implements ThinletUiEventHandler {
 //> CONSTANTS
 	/** Path to XML for UI layout for settings screen, {@link #settingsDialog} */
-	private static final String UI_SETTINGS = "/ui/smsdevice/internet/settings.xml";
+	private static final String UI_SETTINGS = "/ui/core/services/internet/settings.xml";
 	/** Path to XML for UI layout for provider choosing screen, {@link #newServiceWizard} */
-	private static final String UI_CHOOSE_PROVIDER = "/ui/smsdevice/internet/chooseProvider.xml";
+	private static final String UI_CHOOSE_PROVIDER = "/ui/core/services/internet/chooseProvider.xml";
 	/** Path to XML for UI layout for configuration screen, {@link #configurator} */
-	private static final String UI_CONFIGURE = "/ui/smsdevice/internet/configure.xml";
+	private static final String UI_CONFIGURE = "/ui/core/services/internet/configure.xml";
 	
 	private static final String UI_COMPONENT_LS_ACCOUNTS = "lsSmsInternetServices";
 	private static final String UI_COMPONENT_PN_BUTTONS = "pnButtons";

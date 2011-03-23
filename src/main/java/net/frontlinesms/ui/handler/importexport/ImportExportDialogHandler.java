@@ -21,10 +21,10 @@ import net.frontlinesms.data.repository.GroupDao;
 import net.frontlinesms.data.repository.GroupMembershipDao;
 import net.frontlinesms.data.repository.KeywordDao;
 import net.frontlinesms.data.repository.MessageDao;
-import net.frontlinesms.ui.FileChooser;
 import net.frontlinesms.ui.FrontlineUI;
 import net.frontlinesms.ui.ThinletUiEventHandler;
 import net.frontlinesms.ui.UiGeneratorController;
+import net.frontlinesms.ui.handler.core.FileChooser;
 import net.frontlinesms.ui.i18n.InternationalisationUtils;
 import net.frontlinesms.ui.i18n.TextResourceKeyOwner;
 

@@ -55,6 +55,7 @@ import net.frontlinesms.ui.events.TabChangedNotification;
 import net.frontlinesms.ui.handler.*;
 import net.frontlinesms.ui.handler.contacts.*;
 import net.frontlinesms.ui.handler.core.DatabaseSettingsPanel;
+import net.frontlinesms.ui.handler.core.DateSelecter;
 import net.frontlinesms.ui.handler.email.*;
 import net.frontlinesms.ui.handler.help.AboutDialog;
 import net.frontlinesms.ui.handler.help.ContributeDialog;
@@ -65,6 +66,7 @@ import net.frontlinesms.ui.handler.message.*;
 import net.frontlinesms.ui.handler.mms.MmsSettingsDialogHandler;
 import net.frontlinesms.ui.handler.phones.NoPhonesDetectedDialogHandler;
 import net.frontlinesms.ui.handler.phones.PhoneTabHandler;
+import net.frontlinesms.ui.handler.settings.SmsInternetServiceSettingsHandler;
 import net.frontlinesms.ui.i18n.*;
 import net.frontlinesms.ui.settings.FrontlineSettingsHandler;
 

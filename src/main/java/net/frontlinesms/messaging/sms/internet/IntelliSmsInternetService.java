@@ -29,7 +29,7 @@ import net.frontlinesms.messaging.Provider;
 import net.frontlinesms.messaging.sms.properties.OptionalSection;
 import net.frontlinesms.messaging.sms.properties.PasswordString;
 import net.frontlinesms.messaging.sms.properties.PhoneSection;
-import net.frontlinesms.ui.SmsInternetServiceSettingsHandler;
+import net.frontlinesms.ui.handler.settings.SmsInternetServiceSettingsHandler;
 
 import org.apache.log4j.Logger;
 import org.smslib.CIncomingMessage;
