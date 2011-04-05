@@ -17,6 +17,14 @@
 		<developerConnection>scm:git:git@github.com:frontlinesms/frontlinesms-core.git</developerConnection>
 	</scm>
 
+	<repositories>
+		<repository>
+			<id>frontlinesms.repo</id>
+			<name>FrontlineSMS Maven repository</name>
+			<url>http://dev.frontlinesms.com/m2repo</url>
+		</repository>
+	</repositories>
+
 	<properties>
 		<github.projectName>frontlinesms-core</github.projectName>
 	</properties>
